@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.basic
@@ -222,8 +222,10 @@ private fun createTextWithLinkStyles(
         when {
             link is LinkAnnotation.Url && link.styles == null ->
                 (range as Range<LinkAnnotation.Url>).copy(link.copy(styles = linkStyles))
+
             link is LinkAnnotation.Clickable && link.styles == null ->
                 (range as Range<LinkAnnotation.Clickable>).copy(link.copy(styles = linkStyles))
+
             else -> range
         }
     }

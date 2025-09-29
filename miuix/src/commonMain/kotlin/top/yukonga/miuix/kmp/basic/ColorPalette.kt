@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.basic
@@ -158,7 +158,8 @@ fun ColorPalette(
             onAlphaChanged = {
                 alpha = it
                 val newColor = base.copy(alpha = it)
-                lastAcceptedHSV = base.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                lastAcceptedHSV =
+                    base.toHsv().let { it -> Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             }

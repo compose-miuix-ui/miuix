@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedContent
@@ -104,7 +104,7 @@ private object UIConstants {
     const val DROPDOWN_PAGE_INDEX = 1
     const val COLOR_PAGE_INDEX = 2
     const val PAGE_COUNT = 4
-    const val GITHUB_URL = "https://github.com/miuix-kotlin-multiplatform/miuix"
+    const val GITHUB_URL = "https://github.com/compose-miuix-ui/miuix"
 
     val PAGE_TITLES = listOf("HomePage", "DropDown", "Colors", "Settings")
 }

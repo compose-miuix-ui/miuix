@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedVisibility
@@ -239,7 +239,7 @@ fun Dialog(showDialog: MutableState<Boolean>) {
                     title = "View Source",
                     rightText = "GitHub",
                     onClick = {
-                        uriHandler.openUri("https://github.com/miuix-kotlin-multiplatform/miuix")
+                        uriHandler.openUri("https://github.com/compose-miuix-ui/miuix")
                     }
 
                 )

@@ -6,7 +6,7 @@ Now Supported: **Android** / **Desktop(JVM)** / **iOS** / **WasmJs** / **Js** / 
 
 > This library is experimental, any API would be changed in the future without any notification.
 
-[![License](https://img.shields.io/github/license/miuix-kotlin-multiplatform/miuix)](LICENSE)
+[![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 
 ### Start
@@ -51,4 +51,4 @@ fun App() {
 
 ### Screenshot
 
-[![screenshot](https://github.com/miuix-kotlin-multiplatform/miuix/blob/main/assets/screenshot.webp?raw=true)]()
+[![screenshot](https://github.com/compose-miuix-ui/miuix/blob/main/assets/screenshot.webp?raw=true)]()

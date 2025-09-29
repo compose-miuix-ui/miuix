@@ -7,17 +7,17 @@ export default defineConfig({
     themeConfig: {
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/YuKongA/miuix-kotlin-multiplatform' }
+            { icon: 'github', link: 'https://github.com/YuKongA/compose-miuix-ui' }
         ],
 
         editLink: {
-            pattern: 'https://github.com/miuix-kotlin-multiplatform/miuix/edit/main/docs/:path',
+            pattern: 'https://github.com/compose-miuix-ui/miuix/edit/main/docs/:path',
             text: 'Edit this page on GitHub'
         },
 
         footer: {
             message: 'Released under the Apache-2.0 License',
-            copyright: `Copyright © 2024-${new Date().getFullYear()} miuix-kotlin-multiplatform`
+            copyright: `Copyright © 2024-${new Date().getFullYear()} compose-miuix-ui`
         },
 
         nav: [

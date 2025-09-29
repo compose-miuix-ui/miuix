@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.basic
@@ -157,7 +157,8 @@ private fun ScaffoldLayout(
     val popupContent: @Composable () -> Unit = remember(popup) { { Box { popup() } } }
     val topBarContent: @Composable () -> Unit = remember(topBar) { { Box { topBar() } } }
     val snackbarContent: @Composable () -> Unit = remember(snackbar) { { Box { snackbar() } } }
-    val floatingActionButtonContent: @Composable () -> Unit = remember(floatingActionButton) { { Box { floatingActionButton() } } }
+    val floatingActionButtonContent: @Composable () -> Unit =
+        remember(floatingActionButton) { { Box { floatingActionButton() } } }
     val floatingToolbarContent: @Composable () -> Unit = remember(floatingToolbar) { { Box { floatingToolbar() } } }
     val bodyContent: @Composable () -> Unit = remember(content, contentPadding) { { Box { content(contentPadding) } } }
     val bottomBarContent: @Composable () -> Unit = remember(bottomBar) { { Box { bottomBar() } } }

@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.utils
@@ -51,7 +51,8 @@ import kotlin.math.sqrt
 @Stable
 fun parabolaScrollEasing(currentOffset: Float, newOffset: Float, p: Float = 50f, density: Float): Float {
     val realP = p * density
-    val ratio = (realP / (sqrt(realP * abs(currentOffset + newOffset / 2).coerceAtLeast(Float.MIN_VALUE)))).coerceIn(Float.MIN_VALUE, 1f)
+    val ratio =
+        (realP / (sqrt(realP * abs(currentOffset + newOffset / 2).coerceAtLeast(Float.MIN_VALUE)))).coerceIn(Float.MIN_VALUE, 1f)
     return if (sign(currentOffset) == sign(newOffset)) {
         currentOffset + newOffset * ratio
     } else {

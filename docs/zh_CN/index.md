@@ -18,7 +18,7 @@ hero:
       link: /zh_CN/components/index
     - theme: alt
       text: GitHub
-      link: https://github.com/YuKongA/miuix-kotlin-multiplatform
+      link: https://github.com/YuKongA/compose-miuix-ui
 
 features:
   - icon: 🚀

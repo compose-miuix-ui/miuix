@@ -6,7 +6,7 @@
 该组件只适用于支持触控的场景，并且在网页构建目标中工作不佳!
 :::
 
-如需演示，请查看 <a href="https://miuix-kotlin-multiplatform.github.io/miuix-jsCanvas/" target="_blank">Miuix Example</a> 的 DropDown 页。
+如需演示，请查看 <a href="https://compose-miuix-ui.github.io/miuix-jsCanvas/" target="_blank">Miuix Example</a> 的 DropDown 页。
 
 ## 引入
 

@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import java.io.FileInputStream
@@ -14,7 +14,7 @@ val javadocJar by tasks.registering(Jar::class) {
 }
 
 val githubUrl = "https://github.com"
-val projectUrl = "$githubUrl/miuix-kotlin-multiplatform/miuix"
+val projectUrl = "$githubUrl/compose-miuix-ui/miuix"
 
 publishing {
     // Configure the publication repository

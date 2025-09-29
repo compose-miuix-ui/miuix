@@ -1,4 +1,4 @@
-// Copyright 2025, miuix-kotlin-multiplatform contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.utils
@@ -153,25 +153,25 @@ internal inline fun Modifier.pressableWithIndicationIfNeeded(
 ): Modifier {
     return this.then(
         when {
-        // Fast path - indication is managed internally
-        indication is IndicationNodeFactory -> createPressable(
-            interactionSource, indication
-        )
-        // Fast path - no need for indication
-        indication == null -> createPressable(interactionSource, null)
-        // Non-null Indication (not IndicationNodeFactory) with a non-null InteractionSource
-        interactionSource != null -> Modifier.indication(interactionSource, indication)
-            .then(createPressable(interactionSource, null))
-        // Non-null Indication (not IndicationNodeFactory) with a null InteractionSource, so we
-        // need
-        // to use composed to create an InteractionSource that can be shared. This should be a
-        // rare
-        // code path and can only be hit from new callers.
-        else -> Modifier.composed {
-            val newInteractionSource = remember { MutableInteractionSource() }
-            Modifier.indication(newInteractionSource, indication).then(createPressable(newInteractionSource, null))
-        }
-    })
+            // Fast path - indication is managed internally
+            indication is IndicationNodeFactory -> createPressable(
+                interactionSource, indication
+            )
+            // Fast path - no need for indication
+            indication == null -> createPressable(interactionSource, null)
+            // Non-null Indication (not IndicationNodeFactory) with a non-null InteractionSource
+            interactionSource != null -> Modifier.indication(interactionSource, indication)
+                .then(createPressable(interactionSource, null))
+            // Non-null Indication (not IndicationNodeFactory) with a null InteractionSource, so we
+            // need
+            // to use composed to create an InteractionSource that can be shared. This should be a
+            // rare
+            // code path and can only be hit from new callers.
+            else -> Modifier.composed {
+                val newInteractionSource = remember { MutableInteractionSource() }
+                Modifier.indication(newInteractionSource, indication).then(createPressable(newInteractionSource, null))
+            }
+        })
 }
 
 /**
