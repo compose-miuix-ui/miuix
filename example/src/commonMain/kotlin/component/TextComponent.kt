@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -44,6 +43,7 @@ import top.yukonga.miuix.kmp.extra.DropDownMode
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperCheckbox
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
@@ -57,9 +57,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun TextComponent(
     showDialog: MutableState<Boolean>,
     dialogTextFieldValue: MutableState<String>,
-    showDialog2: MutableState<Boolean>,
-    dialog2dropdownSelectedOption: MutableState<Int>,
-    dialog2SuperSwitchState: MutableState<Boolean>,
+    showBottomSheet: MutableState<Boolean>,
+    bottomSheetDropdownSelectedOption: MutableState<Int>,
+    bottomSheetSuperSwitchState: MutableState<Boolean>,
     checkbox: MutableState<Boolean>,
     checkboxTrue: MutableState<Boolean>,
     switch: MutableState<Boolean>,
@@ -141,7 +141,7 @@ fun TextComponent(
         )
     }
 
-    SmallTitle(text = "Arrow & Dialog")
+    SmallTitle(text = "Arrow & Dialog & BottomSheet")
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
@@ -161,7 +161,7 @@ fun TextComponent(
                 }
             },
             title = "Arrow",
-            summary = "Click to show Dialog 1",
+            summary = "Click to show a Dialog",
             onClick = {
                 showDialog.value = true
             },
@@ -170,11 +170,11 @@ fun TextComponent(
 
         SuperArrow(
             title = "Arrow",
-            summary = "Click to show Dialog 2",
+            summary = "Click to show a BottomSheet",
             onClick = {
-                showDialog2.value = true
+                showBottomSheet.value = true
             },
-            holdDownState = showDialog2.value
+            holdDownState = showBottomSheet.value
         )
 
         SuperArrow(
@@ -399,7 +399,7 @@ fun TextComponent(
         )
     }
     Dialog(showDialog, dialogTextFieldValue)
-    Dialog2(showDialog2, dialog2dropdownSelectedOption, dialog2SuperSwitchState)
+    BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
 
 @Composable
@@ -408,7 +408,7 @@ fun Dialog(
     dialogTextFieldValue: MutableState<String>
 ) {
     SuperDialog(
-        title = "Dialog 1",
+        title = "Dialog",
         summary = "Summary",
         show = showDialog,
         onDismissRequest = {
@@ -445,20 +445,21 @@ fun Dialog(
 }
 
 @Composable
-fun Dialog2(
-    showDialog: MutableState<Boolean>,
-    dialog2dropdownSelectedOption: MutableState<Int>,
-    dialog2SuperSwitchState: MutableState<Boolean>
+fun BottomSheet(
+    showBottomSheet: MutableState<Boolean>,
+    bottomSheetDropdownSelectedOption: MutableState<Int>,
+    bottomSheetSuperSwitchState: MutableState<Boolean>
 ) {
     val dropdownOptions = listOf("Option 1", "Option 2")
-    SuperDialog(
-        title = "Dialog 2",
-        show = showDialog,
+    SuperBottomSheet(
+        title = "BottomSheet",
+        show = showBottomSheet,
         onDismissRequest = {
-            showDialog.value = false
+            showBottomSheet.value = false
         }
     ) {
         Card(
+            modifier = Modifier.padding(bottom = 12.dp),
             colors = CardDefaults.defaultColors(
                 color = MiuixTheme.colorScheme.secondaryContainer,
             )
@@ -466,25 +467,24 @@ fun Dialog2(
             SuperDropdown(
                 title = "Dropdown",
                 items = dropdownOptions,
-                selectedIndex = dialog2dropdownSelectedOption.value,
-                onSelectedIndexChange = { newOption -> dialog2dropdownSelectedOption.value = newOption }
+                selectedIndex = bottomSheetDropdownSelectedOption.value,
+                onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
             )
             SuperSwitch(
                 title = "Switch",
-                checked = dialog2SuperSwitchState.value,
+                checked = bottomSheetSuperSwitchState.value,
                 onCheckedChange = {
-                    dialog2SuperSwitchState.value = it
+                    bottomSheetSuperSwitchState.value = it
                 }
             )
         }
-        Spacer(Modifier.height(12.dp))
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TextButton(
                 text = "Cancel",
                 onClick = {
-                    showDialog.value = false
+                    showBottomSheet.value = false
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -492,7 +492,7 @@ fun Dialog2(
             TextButton(
                 text = "Confirm",
                 onClick = {
-                    showDialog.value = false
+                    showBottomSheet.value = false
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()

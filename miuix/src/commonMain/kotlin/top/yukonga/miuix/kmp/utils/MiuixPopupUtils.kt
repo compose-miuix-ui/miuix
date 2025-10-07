@@ -70,6 +70,7 @@ class MiuixPopupUtils {
         var enableWindowDim by mutableStateOf(true)
         var dimEnterTransition by mutableStateOf<EnterTransition?>(null)
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
+        var enableAutoLargeScreen by mutableStateOf(true)
         var content by mutableStateOf<@Composable () -> Unit>({})
     }
 
@@ -149,6 +150,7 @@ class MiuixPopupUtils {
          * @param enterTransition Optional, custom enter animation for dialog content.
          * @param exitTransition Optional, custom exit animation for dialog content.
          * @param enableWindowDim Whether to dim the window behind the dialog.
+         * @param enableAutoLargeScreen Whether to automatically detect large screen and adjust animations.
          * @param dimEnterTransition Optional, custom enter animation for dim layer.
          * @param dimExitTransition Optional, custom exit animation for dim layer.
          * @param content The [Composable] content of the dialog.
@@ -159,6 +161,7 @@ class MiuixPopupUtils {
             enterTransition: EnterTransition? = null,
             exitTransition: ExitTransition? = null,
             enableWindowDim: Boolean = true,
+            enableAutoLargeScreen: Boolean = true,
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
             content: (@Composable () -> Unit)? = null,
@@ -177,6 +180,7 @@ class MiuixPopupUtils {
             val latestEnter by rememberUpdatedState(enterTransition)
             val latestExit by rememberUpdatedState(exitTransition)
             val latestEnableDim by rememberUpdatedState(enableWindowDim)
+            val latestEnableAutoLargeScreen by rememberUpdatedState(enableAutoLargeScreen)
             val latestDimEnter by rememberUpdatedState(dimEnterTransition)
             val latestDimExit by rememberUpdatedState(dimExitTransition)
             val latestContent by rememberUpdatedState(content)
@@ -185,6 +189,7 @@ class MiuixPopupUtils {
                 state.enterTransition = latestEnter
                 state.exitTransition = latestExit
                 state.enableWindowDim = latestEnableDim
+                state.enableAutoLargeScreen = latestEnableAutoLargeScreen
                 state.dimEnterTransition = latestDimEnter
                 state.dimExitTransition = latestDimExit
                 state.content = latestContent
@@ -276,6 +281,8 @@ class MiuixPopupUtils {
             LaunchedEffect(dialogState.showState.value) { internalVisible = dialogState.showState.value }
             val dialogStates = LocalDialogStates.current
 
+            val effectiveLargeScreen = largeScreen && dialogState.enableAutoLargeScreen
+
             if (dialogState.enableWindowDim) {
                 AnimatedVisibility(
                     visible = internalVisible,
@@ -294,8 +301,8 @@ class MiuixPopupUtils {
             AnimatedVisibility(
                 visible = internalVisible,
                 modifier = Modifier.zIndex(dialogState.zIndex),
-                enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(largeScreen),
-                exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(largeScreen)
+                enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(effectiveLargeScreen),
+                exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen)
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     dialogState.content()

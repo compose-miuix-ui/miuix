@@ -122,6 +122,7 @@ export default defineConfig({
                         { text: 'SuperDropdown', link: '/zh_CN/components/superdropdown' },
                         { text: 'SuperSpinner', link: '/zh_CN/components/superspinner' },
                         { text: 'SuperDialog', link: '/zh_CN/components/superdialog' },
+                        { text: 'SuperBottomSheet', link: '/zh_CN/components/superbottomsheet' },
                     ]
                 },
             ]

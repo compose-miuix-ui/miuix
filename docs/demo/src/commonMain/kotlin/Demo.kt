@@ -72,6 +72,7 @@ private val availableComponents = listOf(
     AvailableComponent("SuperDropdown", "superDropdown") { SuperDropdownDemo() },
     AvailableComponent("SuperSpinner", "superSpinner") { SuperSpinnerDemo() },
     AvailableComponent("SuperDialog", "superDialog") { SuperDialogDemo() },
+    AvailableComponent("SuperBottomSheet", "superBottomSheet") { SuperBottomSheetDemo() },
 )
 
 @Composable

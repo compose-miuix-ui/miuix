@@ -50,3 +50,4 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [SuperDropdown](../components/superdropdown) | 基于 BasicComponent 的下拉菜单组件 | 选项选择、功能列表     |
 | [SuperSpinner](../components/superspinner)   | 基于 BasicComponent 的高级菜单组件 | 进阶选项选择、功能列表 |
 | [SuperDialog](../components/superdialog)     | 基于 BasicComponent 的对话弹窗组件 | 提示、确认操作         |
+| [SuperBottomSheet](../components/superbottomsheet) | 基于 BasicComponent 的底部抽屉组件 | 底部抽屉、附加选项     |

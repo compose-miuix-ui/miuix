@@ -50,3 +50,4 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [SuperDropdown](../components/superdropdown) | Dropdown menu based on BasicComponent      | Option selection, feature list         |
 | [SuperSpinner](../components/superspinner)   | Advanced menu based on BasicComponent      | Advanced options, feature list         |
 | [SuperDialog](../components/superdialog)     | Dialog window based on BasicComponent      | Prompts, action confirmation           |
+| [SuperBottomSheet](../components/superbottomsheet) | Bottom sheet based on BasicComponent       | Bottom drawer, additional options      |
