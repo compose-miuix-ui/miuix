@@ -1,6 +1,6 @@
 # SuperBottomSheet
 
-`SuperBottomSheet` 是 Miuix 中的底部抽屉组件,从屏幕底部滑入显示。高度自动适应内容大小,但不会覆盖到状态栏区域。支持拖拽手势关闭和自定义样式。
+`SuperBottomSheet` 是 Miuix 中的底部抽屉组件，从屏幕底部滑入显示。持拖拽手势关闭和自定义样式。
 
 <div style="position: relative; max-width: 700px; height: 210px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=superBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>

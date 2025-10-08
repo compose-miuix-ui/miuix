@@ -3,9 +3,13 @@
 
 plugins { kotlin("jvm") }
 
-java { toolchain.languageVersion = JavaLanguageVersion.of(21) }
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
 
-dependencies { implementation(project(":miuix")) }
+dependencies {
+    implementation(project(":miuix"))
+}
 
 val iconsSourceDir = rootProject.layout.projectDirectory.dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile
 val outputDir = layout.buildDirectory.dir("generated-svg")
