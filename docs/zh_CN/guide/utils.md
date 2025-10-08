@@ -8,40 +8,42 @@ Miuix 提供了一系列工具函数，帮助您更高效地开发应用程序�
 
 如果你使用多个 Scaffold，则需要将下属 `Scaffold` 中的 `popupHost` 参数设为 `null`。
 
-### 对话框布局
+### 对话框布局 (DialogLayout)
 
 ```kotlin
 // 需要一个 MutableState<Boolean> 来控制显示状态
 val showDialogState = remember { mutableStateOf(false) }
 
 DialogLayout(
-    visible = showDialogState,          // 控制对话框显示状态
-    enterTransition = fadeIn(),         // 可选，自定义对话框进入动画
-    exitTransition = fadeOut(),         // 可选，自定义对话框对话框退出动画
-    enableWindowDim = true,             // 可选，是否启用遮罩层
-    dimEnterTransition = fadeIn(),      // 可选，自定义遮罩层进入动画
-    dimExitTransition = fadeOut()       // 可选，自定义遮罩层退出动画
+    visible = showDialogState,          // MutableState<Boolean> 用于控制对话框的可见性
+    enterTransition = fadeIn(),         // 可选，对话框内容的自定义进入动画
+    exitTransition = fadeOut(),         // 可选，对话框内容的自定义退出动画
+    enableWindowDim = true,             // 可选，是否启用遮罩层, 默认为 true
+    enableAutoLargeScreen = true,       // 可选，是否自动检测大屏幕并调整动画
+    dimEnterTransition = fadeIn(),      // 可选，遮罩层的自定义进入动画
+    dimExitTransition = fadeOut(),      // 可选，遮罩层的自定义退出动画
+    dimAlpha = null                     // 可选，MutableState<Float> 用于动态控制遮罩层透明度 (0f-1f)
 ) {
     // 对话框内容
 }
 ```
 
-正常情况下无需主动使用。详见 [SuperDialog](../components/superdialog.md) 文档。
+正常情况下无需主动使用。详见 [SuperDialog](../components/superdialog.md) 或 [SuperBottomSheet](../components//basiccomponent.md) 文档。
 
-### 弹出窗口布局
+### 弹出窗口布局 (PopupLayout)
 
 ```kotlin
 // 需要一个 MutableState<Boolean> 来控制显示状态
 val showPopupState = remember { mutableStateOf(false) }
 
 PopupLayout(
-    visible = showPopupState,           // 控制弹出窗口显示状态
-    enterTransition = fadeIn(),         // 可选，自定义对话框进入动画
-    exitTransition = fadeOut(),         // 可选，自定义对话框对话框退出动画
-    enableWindowDim = true,             // 可选，是否启用遮罩层
-    dimEnterTransition = fadeIn(),      // 可选，自定义遮罩层进入动画
-    dimExitTransition = fadeOut(),      // 可选，自定义遮罩层退出动画
-    transformOrigin = { TransformOrigin.Center }, // 弹出窗口的起始位置
+    visible = showPopupState,                         // MutableState<Boolean> 用于控制弹出窗口的可见性
+    enterTransition = fadeIn(),                       // 可选，弹出窗口内容的自定义进入动画
+    exitTransition = fadeOut(),                       // 可选，弹出窗口内容的自定义退出动画
+    enableWindowDim = true,                           // 可选，是否启用遮罩层, 默认为 true
+    dimEnterTransition = fadeIn(),                    // 可选，遮罩层的自定义进入动画
+    dimExitTransition = fadeOut(),                    // 可选，遮罩层的自定义退出动画
+    transformOrigin = { TransformOrigin.Center }      // 用于缩放变换的变换原点, 默认为 TransformOrigin.Center
 ) {
     // 弹出窗口内容
 }

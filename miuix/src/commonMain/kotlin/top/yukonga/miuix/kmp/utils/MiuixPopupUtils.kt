@@ -68,9 +68,10 @@ class MiuixPopupUtils {
         var enterTransition by mutableStateOf<EnterTransition?>(null)
         var exitTransition by mutableStateOf<ExitTransition?>(null)
         var enableWindowDim by mutableStateOf(true)
+        var enableAutoLargeScreen by mutableStateOf(true)
         var dimEnterTransition by mutableStateOf<EnterTransition?>(null)
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
-        var enableAutoLargeScreen by mutableStateOf(true)
+        var dimAlpha by mutableStateOf<MutableState<Float>?>(null)
         var content by mutableStateOf<@Composable () -> Unit>({})
     }
 
@@ -153,6 +154,8 @@ class MiuixPopupUtils {
          * @param enableAutoLargeScreen Whether to automatically detect large screen and adjust animations.
          * @param dimEnterTransition Optional, custom enter animation for dim layer.
          * @param dimExitTransition Optional, custom exit animation for dim layer.
+         * @param dimAlpha Optional, a mutable state to dynamically control the dim layer alpha (0f-1f).
+         *   When provided, the dim layer will use this alpha value instead of default animations.
          * @param content The [Composable] content of the dialog.
          */
         @Composable
@@ -164,6 +167,7 @@ class MiuixPopupUtils {
             enableAutoLargeScreen: Boolean = true,
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
+            dimAlpha: MutableState<Float>? = null,
             content: (@Composable () -> Unit)? = null,
         ) {
             if (content == null) {
@@ -183,6 +187,7 @@ class MiuixPopupUtils {
             val latestEnableAutoLargeScreen by rememberUpdatedState(enableAutoLargeScreen)
             val latestDimEnter by rememberUpdatedState(dimEnterTransition)
             val latestDimExit by rememberUpdatedState(dimExitTransition)
+            val latestDimAlpha by rememberUpdatedState(dimAlpha)
             val latestContent by rememberUpdatedState(content)
 
             SideEffect {
@@ -192,6 +197,7 @@ class MiuixPopupUtils {
                 state.enableAutoLargeScreen = latestEnableAutoLargeScreen
                 state.dimEnterTransition = latestDimEnter
                 state.dimExitTransition = latestDimExit
+                state.dimAlpha = latestDimAlpha
                 state.content = latestContent
             }
 
@@ -290,10 +296,16 @@ class MiuixPopupUtils {
                     enter = dialogState.dimEnterTransition ?: DialogDimEnter,
                     exit = dialogState.dimExitTransition ?: DialogDimExit
                 ) {
+                    val baseColor = MiuixTheme.colorScheme.windowDimming
+                    val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
+                        // Multiply the original alpha with the multiplier to preserve the base dimming level
+                        baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
+                    } ?: baseColor
+                    
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MiuixTheme.colorScheme.windowDimming)
+                            .background(dimColor)
                     )
                 }
             }

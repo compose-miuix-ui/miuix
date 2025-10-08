@@ -48,6 +48,8 @@ Scaffold {
 | show                       | MutableState\<Boolean>             | State object to control bottom sheet visibility | -                                        | Yes      |
 | modifier                   | Modifier                           | Modifier applied to the bottom sheet         | Modifier                                    | No       |
 | title                      | String?                            | Bottom sheet title                           | null                                        | No       |
+| leftAction                 | @Composable (() -> Unit?)?         | Optional composable for left action (e.g., close button) | null                           | No       |
+| rightAction                | @Composable (() -> Unit?)?         | Optional composable for right action (e.g., submit button) | null                         | No       |
 | backgroundColor            | Color                              | Bottom sheet background color                | SuperBottomSheetDefaults.backgroundColor()  | No       |
 | enableWindowDim            | Boolean                            | Whether to enable dimming layer              | true                                        | No       |
 | onDismissRequest           | (() -> Unit)?                      | Callback when bottom sheet is closed         | null                                        | No       |
@@ -55,7 +57,7 @@ Scaffold {
 | insideMargin               | DpSize                             | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
 | defaultWindowInsetsPadding | Boolean                            | Whether to apply default window insets padding | true                                      | No       |
 | dragHandleColor            | Color                              | Drag indicator color                         | SuperBottomSheetDefaults.dragHandleColor()  | No       |
-| content                    | @Composable ColumnScope.() -> Unit | Bottom sheet content                         | -                                           | Yes      |
+| content                    | @Composable () -> Unit             | Bottom sheet content                         | -                                           | Yes      |
 
 ### SuperBottomSheetDefaults Object
 
@@ -173,6 +175,45 @@ Scaffold {
             onClick = { showBottomSheet.value = false },
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+```
+
+### Bottom Sheet with Action Buttons
+
+```kotlin
+var showBottomSheet = remember { mutableStateOf(false) }
+
+Scaffold {
+    TextButton(
+        text = "Show Bottom Sheet with Actions",
+        onClick = { showBottomSheet.value = true }
+    )
+
+    SuperBottomSheet(
+        show = showBottomSheet,
+        title = "Action Sheet",
+        leftAction = {
+            TextButton(
+                text = "Cancel",
+                onClick = { showBottomSheet.value = false }
+            )
+        },
+        rightAction = {
+            TextButton(
+                text = "Confirm",
+                onClick = { 
+                    // Handle confirm action
+                    showBottomSheet.value = false 
+                },
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        },
+        onDismissRequest = { showBottomSheet.value = false }
+    ) {
+        Text("Content with custom header actions")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Left and right action buttons are displayed in the header")
     }
 }
 ```

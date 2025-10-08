@@ -4,7 +4,7 @@ Miuix provides a series of utility functions to help you develop applications mo
 
 ## Popup Utilities (MiuixPopupUtils)
 
-`MiuixPopupUtils` is a utility class for displaying popup layout and dialog layout. This class is already integrated into the `Scaffold` component and can be used directly.
+`MiuixPopupUtils` is a utility class for displaying dialog layout and popup layout. This class is already integrated into the `Scaffold` component and can be used directly.
 
 If you use multiple Scaffolds, you need to set the `popupHost` parameter in the subordinate `Scaffold` to `null`.
 
@@ -15,17 +15,20 @@ If you use multiple Scaffolds, you need to set the `popupHost` parameter in the 
 val showDialogState = remember { mutableStateOf(false) }
 
 DialogLayout(
-    visible = showDialogState,     // MutableState<Boolean> to control dialog visibility
-    enterTransition = fadeIn(),    // Optional, custom enter animation for dialog content
-    exitTransition = fadeOut(),    // Optional, custom exit animation for dialog content
-    enableWindowDim = true,        // Optional, whether to enable dimming layer
-    dimEnterTransition = fadeIn(), // Optional, custom enter animation for dim layer
-    dimExitTransition = fadeOut()  // Optional, custom exit animation for dim layer
+    visible = showDialogState,          // MutableState<Boolean> to control dialog visibility
+    enterTransition = fadeIn(),         // Optional, custom enter animation for dialog content
+    exitTransition = fadeOut(),         // Optional, custom exit animation for dialog content
+    enableWindowDim = true,             // Optional, whether to enable dimming layer, defaults to true
+    enableAutoLargeScreen = true,       // Optional, whether to auto-detect large screen and adjust animations
+    dimEnterTransition = fadeIn(),      // Optional, custom enter animation for dim layer
+    dimExitTransition = fadeOut(),      // Optional, custom exit animation for dim layer
+    dimAlpha = null                     // Optional, MutableState<Float> to dynamically control dim layer alph (0f-1f)
 ) {
     // Dialog content
 }
 ```
-Normally, you don't need to use it actively. See the [SuperDialog](../components/superdialog.md) documentation for details.
+
+Normally, you don't need to use it actively. See the [SuperDialog](../components/superdialog.md) or [SuperBottomSheet](../components/basiccomponent.md) documentation for details.
 
 ### PopupLayout
 
@@ -34,13 +37,13 @@ Normally, you don't need to use it actively. See the [SuperDialog](../components
 val showPopupState = remember { mutableStateOf(false) }
 
 PopupLayout(
-    visible = showPopupState,      // MutableState<Boolean> to control popup visibility
-    enterTransition = fadeIn(),    // Optional, custom enter animation for dialog content
-    exitTransition = fadeOut(),    // Optional, custom exit animation for dialog content
-    enableWindowDim = true,        // Optional, whether to enable dimming layer
-    dimEnterTransition = fadeIn(), // Optional, custom enter animation for dim layer
-    dimExitTransition = fadeOut(), // Optional, custom exit animation for dim layer
-    transformOrigin = { TransformOrigin.Center }, // Transform origin for the popup
+    visible = showPopupState,                         // MutableState<Boolean> to control popup visibility
+    enterTransition = fadeIn(),                       // Optional, custom enter animation for popup content
+    exitTransition = fadeOut(),                       // Optional, custom exit animation for popup content
+    enableWindowDim = true,                           // Optional, whether to enable dimming layer, defaults to true
+    dimEnterTransition = fadeIn(),                    // Optional, custom enter animation for dim layer
+    dimExitTransition = fadeOut(),                    // Optional, custom exit animation for dim layer
+    transformOrigin = { TransformOrigin.Center }      // Transform origin for scale transformations, defaults to TransformOrigin.Center
 ) {
     // Popup content
 }

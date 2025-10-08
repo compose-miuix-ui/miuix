@@ -33,6 +33,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
@@ -50,6 +51,8 @@ import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
+import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
 import top.yukonga.miuix.kmp.icon.icons.useful.Personal
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -86,10 +89,26 @@ fun TextComponent(
     }
     val spinnerOptions = remember {
         listOf(
-            SpinnerEntry(icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) }, "Option 1", "Red"),
-            SpinnerEntry(icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) }, "Option 2", "Green"),
-            SpinnerEntry(icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) }, "Option 3", "Blue"),
-            SpinnerEntry(icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) }, "Option 4", "Yellow"),
+            SpinnerEntry(
+                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
+                "Option 1",
+                "Red"
+            ),
+            SpinnerEntry(
+                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
+                "Option 2",
+                "Green"
+            ),
+            SpinnerEntry(
+                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
+                "Option 3",
+                "Blue"
+            ),
+            SpinnerEntry(
+                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
+                "Option 4",
+                "Yellow"
+            ),
         )
     }
 
@@ -456,6 +475,28 @@ fun BottomSheet(
         show = showBottomSheet,
         onDismissRequest = {
             showBottomSheet.value = false
+        },
+        leftAction = {
+            IconButton(
+                onClick = { showBottomSheet.value = false },
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Useful.Cancel,
+                    contentDescription = "Cancel",
+                    tint = MiuixTheme.colorScheme.onBackground
+                )
+            }
+        },
+        rightAction = {
+            IconButton(
+                onClick = { showBottomSheet.value = false },
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Useful.Confirm,
+                    contentDescription = "Confirm",
+                    tint = MiuixTheme.colorScheme.onBackground
+                )
+            }
         }
     ) {
         Card(
@@ -476,26 +517,6 @@ fun BottomSheet(
                 onCheckedChange = {
                     bottomSheetSuperSwitchState.value = it
                 }
-            )
-        }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TextButton(
-                text = "Cancel",
-                onClick = {
-                    showBottomSheet.value = false
-                },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(20.dp))
-            TextButton(
-                text = "Confirm",
-                onClick = {
-                    showBottomSheet.value = false
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
             )
         }
     }

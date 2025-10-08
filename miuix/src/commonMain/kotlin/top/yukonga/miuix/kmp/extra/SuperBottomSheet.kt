@@ -10,14 +10,12 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -28,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +72,8 @@ fun SuperBottomSheet(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     title: String? = null,
+    leftAction: @Composable (() -> Unit?)? = null,
+    rightAction: @Composable (() -> Unit?)? = null,
     backgroundColor: Color = SuperBottomSheetDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
@@ -78,23 +81,29 @@ fun SuperBottomSheet(
     insideMargin: DpSize = SuperBottomSheetDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = SuperBottomSheetDefaults.dragHandleColor(),
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     if (!show.value) return
+
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
 
     DialogLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
         enableAutoLargeScreen = false,
+        dimAlpha = dimAlpha
     ) {
         SuperBottomSheetContent(
             modifier = modifier,
             title = title,
+            leftAction = leftAction,
+            rightAction = rightAction,
             backgroundColor = backgroundColor,
             outsideMargin = outsideMargin,
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             dragHandleColor = dragHandleColor,
+            dimAlpha = dimAlpha,
             onDismissRequest = onDismissRequest,
             content = content
         )
@@ -109,13 +118,16 @@ fun SuperBottomSheet(
 private fun SuperBottomSheetContent(
     modifier: Modifier,
     title: String?,
+    leftAction: @Composable (() -> Unit?)? = null,
+    rightAction: @Composable (() -> Unit?)? = null,
     backgroundColor: Color,
     outsideMargin: DpSize,
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
     dragHandleColor: Color,
+    dimAlpha: MutableState<Float>,
     onDismissRequest: (() -> Unit)?,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
     val windowSize by rememberUpdatedState(getWindowSize())
@@ -127,9 +139,7 @@ private fun SuperBottomSheetContent(
         WindowInsets.statusBars.getTop(density).toDp()
     }
 
-    val navigationBarHeight = with(density) {
-        WindowInsets.navigationBars.getBottom(density).toDp()
-    }
+    val sheetHeightPx = remember { mutableStateOf(0) }
 
     val dragOffsetY = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
@@ -152,6 +162,9 @@ private fun SuperBottomSheetContent(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - statusBarHeight)
+                .onGloballyPositioned { coordinates ->
+                    sheetHeightPx.value = coordinates.size.height
+                }
                 .offset { IntOffset(0, dragOffsetY.value.roundToInt()) }
                 .then(
                     if (defaultWindowInsetsPadding)
@@ -163,7 +176,7 @@ private fun SuperBottomSheetContent(
                 .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
-                .padding(bottom = insideMargin.height + navigationBarHeight)
+                .padding(bottom = insideMargin.height)
         ) {
             // Drag handle area
             Box(
@@ -183,15 +196,17 @@ private fun SuperBottomSheetContent(
                                         // Dragged down significantly -> dismiss with animation
                                         dragOffsetY.value > 150f -> {
                                             // Animate to bottom of screen
+                                            onDismissRequest?.invoke()
                                             dragOffsetY.animateTo(
                                                 targetValue = windowHeight.value * density.density,
                                                 animationSpec = tween(durationMillis = 250)
                                             )
-                                            onDismissRequest?.invoke()
                                         }
                                         // Reset position if no action triggered
                                         else -> {
                                             dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+                                            // Reset dim alpha
+                                            dimAlpha.value = 1f
                                         }
                                     }
                                 }
@@ -201,6 +216,11 @@ private fun SuperBottomSheetContent(
                                     // Only allow dragging down (positive offset)
                                     val newOffset = (dragOffsetY.value + dragAmount).coerceAtLeast(0f)
                                     dragOffsetY.snapTo(newOffset)
+
+                                    // Update dim alpha based on sheet height
+                                    val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
+                                    val alpha = 1f - (newOffset / thresholdPx).coerceIn(0f, 1f)
+                                    dimAlpha.value = alpha
                                 }
                             }
                         )
@@ -210,25 +230,39 @@ private fun SuperBottomSheetContent(
                 // Drag handle indicator
                 Box(
                     modifier = Modifier
-                        .width(48.dp)
+                        .width(45.dp)
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp))
                         .background(dragHandleColor)
                 )
             }
 
-            // Title if provided
-            title?.let {
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    fontSize = MiuixTheme.textStyles.title4.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    color = MiuixTheme.colorScheme.onSurface
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp, bottom = 12.dp)
+            ) {
+                // left action (e.g. close button)
+                Box(modifier = Modifier.align(Alignment.CenterStart)) {
+                    leftAction?.invoke()
+                }
+
+                // title text
+                title?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier.align(Alignment.Center),
+                        fontSize = MiuixTheme.textStyles.title4.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                }
+
+                // right action (e.g. submit button)
+                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    rightAction?.invoke()
+                }
             }
 
             // Content
@@ -249,7 +283,7 @@ object SuperBottomSheetDefaults {
      * The default color of the drag handle.
      */
     @Composable
-    fun dragHandleColor() = MiuixTheme.colorScheme.onSurfaceVariantActions
+    fun dragHandleColor() = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f)
 
     /**
      * The default margin outside the [SuperBottomSheet].

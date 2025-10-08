@@ -48,6 +48,8 @@ Scaffold {
 | show                       | MutableState\<Boolean>          | 控制底部抽屉显示状态的状态对象 | -                                           | 是       |
 | modifier                   | Modifier                        | 应用于底部抽屉的修饰符       | Modifier                                    | 否       |
 | title                      | String?                         | 底部抽屉的标题               | null                                        | 否       |
+| leftAction                 | @Composable (() -> Unit?)?      | 可选的左侧操作按钮(例如关闭按钮) | null                                     | 否       |
+| rightAction                | @Composable (() -> Unit?)?      | 可选的右侧操作按钮(例如提交按钮) | null                                     | 否       |
 | backgroundColor            | Color                           | 底部抽屉背景色               | SuperBottomSheetDefaults.backgroundColor()  | 否       |
 | enableWindowDim            | Boolean                         | 是否启用遮罩层               | true                                        | 否       |
 | onDismissRequest           | (() -> Unit)?                   | 底部抽屉关闭时的回调函数     | null                                        | 否       |
@@ -55,7 +57,7 @@ Scaffold {
 | insideMargin               | DpSize                          | 底部抽屉内部内容的边距       | SuperBottomSheetDefaults.insideMargin       | 否       |
 | defaultWindowInsetsPadding | Boolean                         | 是否应用默认窗口插入内边距   | true                                        | 否       |
 | dragHandleColor            | Color                           | 拖拽指示器的颜色             | SuperBottomSheetDefaults.dragHandleColor()  | 否       |
-| content                    | @Composable ColumnScope.() -> Unit | 底部抽屉的内容            | -                                           | 是       |
+| content                    | @Composable () -> Unit          | 底部抽屉的内容               | -                                           | 是       |
 
 ### SuperBottomSheetDefaults 对象
 
@@ -173,6 +175,45 @@ Scaffold {
             onClick = { showBottomSheet.value = false },
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+```
+
+### 带操作按钮的底部抽屉
+
+```kotlin
+var showBottomSheet = remember { mutableStateOf(false) }
+
+Scaffold {
+    TextButton(
+        text = "显示带操作按钮的底部抽屉",
+        onClick = { showBottomSheet.value = true }
+    )
+
+    SuperBottomSheet(
+        show = showBottomSheet,
+        title = "操作面板",
+        leftAction = {
+            TextButton(
+                text = "取消",
+                onClick = { showBottomSheet.value = false }
+            )
+        },
+        rightAction = {
+            TextButton(
+                text = "确认",
+                onClick = { 
+                    // 处理确认操作
+                    showBottomSheet.value = false 
+                },
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        },
+        onDismissRequest = { showBottomSheet.value = false }
+    ) {
+        Text("带有自定义标题栏操作按钮的内容")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("左右两侧的操作按钮显示在标题栏中")
     }
 }
 ```
