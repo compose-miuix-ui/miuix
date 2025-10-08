@@ -52,7 +52,8 @@ Scaffold {
 | rightAction                | @Composable (() -> Unit?)?         | Optional composable for right action (e.g., submit button) | null                         | No       |
 | backgroundColor            | Color                              | Bottom sheet background color                | SuperBottomSheetDefaults.backgroundColor()  | No       |
 | enableWindowDim            | Boolean                            | Whether to enable dimming layer              | true                                        | No       |
-| onDismissRequest           | (() -> Unit)?                      | Callback when bottom sheet is closed         | null                                        | No       |
+| cornerRadius               | Dp                                 | Corner radius of the top corners             | SuperBottomSheetDefaults.cornerRadius       | No       |
+| onDismissRequest           | (() -> Unit)?                      | Callback when bottom sheet is dismissed      | null                                        | No       |
 | outsideMargin              | DpSize                             | Bottom sheet external margin                 | SuperBottomSheetDefaults.outsideMargin      | No       |
 | insideMargin               | DpSize                             | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
 | defaultWindowInsetsPadding | Boolean                            | Whether to apply default window insets padding | true                                      | No       |
@@ -65,10 +66,11 @@ The SuperBottomSheetDefaults object provides default settings for the SuperBotto
 
 #### Properties
 
-| Property Name | Type   | Description                            |
-| ------------- | ------ | -------------------------------------- |
-| outsideMargin | DpSize | Default bottom sheet external margin   |
-| insideMargin  | DpSize | Default bottom sheet internal margin   |
+| Property Name  | Type   | Description                            |
+| -------------- | ------ | -------------------------------------- |
+| cornerRadius   | Dp     | Default corner radius (28.dp)          |
+| outsideMargin  | DpSize | Default bottom sheet external margin   |
+| insideMargin   | DpSize | Default bottom sheet internal margin   |
 
 #### Functions
 

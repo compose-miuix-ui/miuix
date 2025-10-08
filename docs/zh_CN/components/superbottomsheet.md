@@ -52,6 +52,7 @@ Scaffold {
 | rightAction                | @Composable (() -> Unit?)?      | 可选的右侧操作按钮(例如提交按钮) | null                                     | 否       |
 | backgroundColor            | Color                           | 底部抽屉背景色               | SuperBottomSheetDefaults.backgroundColor()  | 否       |
 | enableWindowDim            | Boolean                         | 是否启用遮罩层               | true                                        | 否       |
+| cornerRadius               | Dp                              | 顶部圆角半径                 | SuperBottomSheetDefaults.cornerRadius       | 否       |
 | onDismissRequest           | (() -> Unit)?                   | 底部抽屉关闭时的回调函数     | null                                        | 否       |
 | outsideMargin              | DpSize                          | 底部抽屉外部边距             | SuperBottomSheetDefaults.outsideMargin      | 否       |
 | insideMargin               | DpSize                          | 底部抽屉内部内容的边距       | SuperBottomSheetDefaults.insideMargin       | 否       |
@@ -65,10 +66,11 @@ SuperBottomSheetDefaults 对象提供了 SuperBottomSheet 组件的默认设置�
 
 #### 属性
 
-| 属性名        | 类型   | 说明                   |
-| ------------- | ------ | ---------------------- |
-| outsideMargin | DpSize | 底部抽屉外部默认边距   |
-| insideMargin  | DpSize | 底部抽屉内部默认边距   |
+| 属性名        | 类型   | 说明                        |
+| ------------- | ------ | --------------------------- |
+| cornerRadius  | Dp     | 默认圆角半径 (28.dp)        |
+| outsideMargin | DpSize | 底部抽屉外部默认边距        |
+| insideMargin  | DpSize | 底部抽屉内部默认边距        |
 
 #### 函数
 
