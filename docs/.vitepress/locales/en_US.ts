@@ -102,7 +102,7 @@ export default defineConfig({
                         { text: 'SuperDropdown', link: '/components/superdropdown' },
                         { text: 'SuperSpinner', link: '/components/superspinner' },
                         { text: 'SuperDialog', link: '/components/superdialog' },
-                        { text: 'SuperBottomSheet', link: '/components/superbottomsheet'
+                        { text: 'SuperBottomSheet', link: '/components/superbottomsheet' },
                     ]
                 },
             ]
