@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -62,6 +63,7 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param backgroundColor The background color of the [SuperBottomSheet].
  * @param enableWindowDim Whether to dim the window behind the [SuperBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [SuperBottomSheet].
+ * @param sheetMaxWidth The maximum width of the [SuperBottomSheet].
  * @param onDismissRequest The callback when the [SuperBottomSheet] is dismissed.
  * @param outsideMargin The margin outside the [SuperBottomSheet].
  * @param insideMargin The margin inside the [SuperBottomSheet].
@@ -79,6 +81,7 @@ fun SuperBottomSheet(
     backgroundColor: Color = SuperBottomSheetDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
     cornerRadius: Dp = SuperBottomSheetDefaults.cornerRadius,
+    sheetMaxWidth: Dp = SuperBottomSheetDefaults.maxWidth,
     onDismissRequest: (() -> Unit)? = null,
     outsideMargin: DpSize = SuperBottomSheetDefaults.outsideMargin,
     insideMargin: DpSize = SuperBottomSheetDefaults.insideMargin,
@@ -107,6 +110,7 @@ fun SuperBottomSheet(
             rightAction = rightAction,
             backgroundColor = backgroundColor,
             cornerRadius = cornerRadius,
+            sheetMaxWidth = sheetMaxWidth,
             outsideMargin = outsideMargin,
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
@@ -131,7 +135,7 @@ fun SuperBottomSheet(
                 }
                 val offset = event.progress * maxOffset
                 dragOffsetY.snapTo(offset)
-                
+
                 // Update dim alpha
                 dimAlpha.value = 1f - event.progress
             }
@@ -157,6 +161,7 @@ private fun SuperBottomSheetContent(
     rightAction: @Composable (() -> Unit?)? = null,
     backgroundColor: Color,
     cornerRadius: Dp,
+    sheetMaxWidth: Dp,
     outsideMargin: DpSize,
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
@@ -195,6 +200,7 @@ private fun SuperBottomSheetContent(
             rightAction = rightAction,
             backgroundColor = backgroundColor,
             cornerRadius = cornerRadius,
+            sheetMaxWidth = sheetMaxWidth,
             outsideMargin = outsideMargin,
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
@@ -219,6 +225,7 @@ private fun SuperBottomSheetColumn(
     rightAction: @Composable (() -> Unit?)?,
     backgroundColor: Color,
     cornerRadius: Dp,
+    sheetMaxWidth: Dp,
     outsideMargin: DpSize,
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
@@ -243,6 +250,7 @@ private fun SuperBottomSheetColumn(
                 .pointerInput(Unit) {
                     detectTapGestures { /* Consume click to prevent dismissal */ }
                 }
+                .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - statusBarHeight)
@@ -412,6 +420,11 @@ object SuperBottomSheetDefaults {
      * The default corner radius of the [SuperBottomSheet].
      */
     val cornerRadius = 28.dp
+
+    /**
+     * The default maximum width of the [SuperBottomSheet].
+     */
+    val maxWidth = 640.dp
 
     /**
      * The default margin outside the [SuperBottomSheet].

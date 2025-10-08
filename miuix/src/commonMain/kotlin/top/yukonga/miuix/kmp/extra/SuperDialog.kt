@@ -195,15 +195,14 @@ private fun SuperDialogContent(
         .then(
             // Apply predictive back animation
             if (isLargeScreen) {
-                // Large screen: scale and fade out
+                // Large screen
                 Modifier.graphicsLayer {
                     val scale = 1f - (backProgress * 0.2f)
                     scaleX = scale
                     scaleY = scale
-                    alpha = 1f - (backProgress * 0.5f)
                 }
             } else {
-                // Small screen: slide down
+                // Small screen
                 Modifier.graphicsLayer {
                     translationY = backProgress * 800f
                 }
