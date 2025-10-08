@@ -40,3 +40,15 @@ actual fun BackHandler(
 ) {
     androidx.compose.ui.backhandler.BackHandler(enabled = enabled, onBack = onBack)
 }
+
+@Composable
+actual fun PredictiveBackHandler(
+    enabled: Boolean,
+    onBackStarted: ((BackEventCompat) -> Unit)?,
+    onBackProgressed: ((BackEventCompat) -> Unit)?,
+    onBackCancelled: (() -> Unit)?,
+    onBack: () -> Unit
+) {
+    // Desktop doesn't support predictive back gesture, fallback to simple BackHandler
+    BackHandler(enabled = enabled, onBack = onBack)
+}

@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.BackHandler
 import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
+import top.yukonga.miuix.kmp.utils.PredictiveBackHandler
 import top.yukonga.miuix.kmp.utils.getWindowSize
 
 /**
@@ -90,6 +90,9 @@ fun SuperBottomSheet(
 
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    val sheetHeightPx = remember { mutableIntStateOf(0) }
+    val dragOffsetY = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
 
     DialogLayout(
         visible = show,
@@ -109,14 +112,41 @@ fun SuperBottomSheet(
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             dragHandleColor = dragHandleColor,
             dimAlpha = dimAlpha,
+            sheetHeightPx = sheetHeightPx,
+            dragOffsetY = dragOffsetY,
             onDismissRequest = currentOnDismissRequest,
             content = content
         )
     }
 
-    BackHandler(enabled = show.value) {
-        currentOnDismissRequest?.invoke()
-    }
+    PredictiveBackHandler(
+        enabled = show.value,
+        onBackProgressed = { event ->
+            coroutineScope.launch {
+                // Calculate offset based on back progress
+                val maxOffset = if (sheetHeightPx.value > 0) {
+                    sheetHeightPx.value.toFloat()
+                } else {
+                    500f
+                }
+                val offset = event.progress * maxOffset
+                dragOffsetY.snapTo(offset)
+                
+                // Update dim alpha
+                dimAlpha.value = 1f - event.progress
+            }
+        },
+        onBackCancelled = {
+            coroutineScope.launch {
+                // Reset to original position
+                dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+                dimAlpha.value = 1f
+            }
+        },
+        onBack = {
+            currentOnDismissRequest?.invoke()
+        }
+    )
 }
 
 @Composable
@@ -132,6 +162,8 @@ private fun SuperBottomSheetContent(
     defaultWindowInsetsPadding: Boolean,
     dragHandleColor: Color,
     dimAlpha: MutableState<Float>,
+    sheetHeightPx: MutableState<Int>,
+    dragOffsetY: Animatable<Float, *>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -144,9 +176,6 @@ private fun SuperBottomSheetContent(
     val statusBarHeight = with(density) {
         WindowInsets.statusBars.getTop(density).toDp()
     }
-
-    val sheetHeightPx = remember { mutableIntStateOf(0) }
-    val dragOffsetY = remember { Animatable(0f) }
 
     val rootBoxModifier = remember(onDismissRequest) {
         Modifier

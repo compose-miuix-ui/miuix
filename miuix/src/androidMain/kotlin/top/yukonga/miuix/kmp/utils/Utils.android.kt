@@ -7,10 +7,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.RoundedCorner
+import androidx.activity.BackEventCompat as AndroidBackEventCompat
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -84,4 +89,66 @@ actual fun BackHandler(
     onBack: () -> Unit
 ) {
     androidx.compose.ui.backhandler.BackHandler(enabled = enabled, onBack = onBack)
+}
+
+@Composable
+actual fun PredictiveBackHandler(
+    enabled: Boolean,
+    onBackStarted: ((BackEventCompat) -> Unit)?,
+    onBackProgressed: ((BackEventCompat) -> Unit)?,
+    onBackCancelled: (() -> Unit)?,
+    onBack: () -> Unit
+) {
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    
+    val currentOnBackStarted by rememberUpdatedState(onBackStarted)
+    val currentOnBackProgressed by rememberUpdatedState(onBackProgressed)
+    val currentOnBackCancelled by rememberUpdatedState(onBackCancelled)
+    val currentOnBack by rememberUpdatedState(onBack)
+    val currentEnabled by rememberUpdatedState(enabled)
+    
+    DisposableEffect(backDispatcher) {
+        val callback = object : OnBackPressedCallback(currentEnabled) {
+            override fun handleOnBackStarted(backEvent: AndroidBackEventCompat) {
+                currentOnBackStarted?.invoke(
+                    BackEventCompat(
+                        progress = backEvent.progress,
+                        swipeEdge = backEvent.swipeEdge,
+                        touchX = backEvent.touchX,
+                        touchY = backEvent.touchY
+                    )
+                )
+            }
+            
+            override fun handleOnBackProgressed(backEvent: AndroidBackEventCompat) {
+                currentOnBackProgressed?.invoke(
+                    BackEventCompat(
+                        progress = backEvent.progress,
+                        swipeEdge = backEvent.swipeEdge,
+                        touchX = backEvent.touchX,
+                        touchY = backEvent.touchY
+                    )
+                )
+            }
+            
+            override fun handleOnBackCancelled() {
+                currentOnBackCancelled?.invoke()
+            }
+            
+            override fun handleOnBackPressed() {
+                currentOnBack()
+            }
+        }
+        
+        backDispatcher?.addCallback(callback)
+        
+        onDispose {
+            callback.remove()
+        }
+    }
+    
+    // Update enabled state when it changes
+    DisposableEffect(enabled) {
+        onDispose { }
+    }
 }

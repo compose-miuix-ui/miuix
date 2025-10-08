@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -32,8 +35,10 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
+import top.yukonga.miuix.kmp.basic.ColorPalette
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
@@ -499,6 +504,13 @@ fun BottomSheet(
             }
         }
     ) {
+        var progress by remember { mutableStateOf(0.5f) }
+        Slider(
+            progress = progress,
+            onProgressChange = { newProgress -> progress = newProgress },
+            decimalPlaces = 3,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
         Card(
             modifier = Modifier.padding(bottom = 12.dp),
             colors = CardDefaults.defaultColors(
@@ -519,6 +531,13 @@ fun BottomSheet(
                 }
             )
         }
+        val miuixColor = MiuixTheme.colorScheme.primary
+        var selectedColor by remember { mutableStateOf(miuixColor) }
+        ColorPalette(
+            initialColor = selectedColor,
+            onColorChanged = { selectedColor = it },
+            showPreview = false
+        )
     }
 }
 

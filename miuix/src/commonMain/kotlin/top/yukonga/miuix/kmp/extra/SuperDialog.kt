@@ -17,23 +17,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.BackHandler
 import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
+import top.yukonga.miuix.kmp.utils.PredictiveBackHandler
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
 import top.yukonga.miuix.kmp.utils.getWindowSize
 
@@ -71,9 +78,16 @@ fun SuperDialog(
 ) {
     if (!show.value) return
 
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
+    val dialogHeightPx = remember { mutableIntStateOf(0) }
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    val coroutineScope = rememberCoroutineScope()
+
     DialogLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
+        dimAlpha = dimAlpha
     ) {
         SuperDialogContent(
             modifier = modifier,
@@ -85,14 +99,31 @@ fun SuperDialog(
             outsideMargin = outsideMargin,
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            onDismissRequest = onDismissRequest,
+            backProgress = backProgress,
+            dialogHeightPx = dialogHeightPx,
+            onDismissRequest = currentOnDismissRequest,
             content = content
         )
     }
 
-    BackHandler(enabled = show.value) {
-        onDismissRequest?.invoke()
-    }
+    PredictiveBackHandler(
+        enabled = show.value,
+        onBackProgressed = { event ->
+            coroutineScope.launch {
+                backProgress = event.progress
+                dimAlpha.floatValue = 1f - event.progress
+            }
+        },
+        onBackCancelled = {
+            coroutineScope.launch {
+                backProgress = 0f
+                dimAlpha.floatValue = 1f
+            }
+        },
+        onBack = {
+            currentOnDismissRequest?.invoke()
+        }
+    )
 }
 
 @Composable
@@ -106,6 +137,8 @@ private fun SuperDialogContent(
     outsideMargin: DpSize,
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
+    backProgress: Float,
+    dialogHeightPx: MutableState<Int>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -136,6 +169,8 @@ private fun SuperDialogContent(
         }
     }
 
+    val isLargeScreen = windowHeight >= 480.dp && windowWidth >= 840.dp
+
     val rootBoxModifier = Modifier
         .then(
             if (defaultWindowInsetsPadding)
@@ -154,6 +189,26 @@ private fun SuperDialogContent(
 
     val columnModifier = modifier
         .widthIn(max = 420.dp)
+        .onGloballyPositioned { coordinates ->
+            dialogHeightPx.value = coordinates.size.height
+        }
+        .then(
+            // Apply predictive back animation
+            if (isLargeScreen) {
+                // Large screen: scale and fade out
+                Modifier.graphicsLayer {
+                    val scale = 1f - (backProgress * 0.2f)
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = 1f - (backProgress * 0.5f)
+                }
+            } else {
+                // Small screen: slide down
+                Modifier.graphicsLayer {
+                    translationY = backProgress * 800f
+                }
+            }
+        )
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click to prevent dismissal */ }
         }

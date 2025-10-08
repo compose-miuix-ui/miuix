@@ -49,3 +49,15 @@ actual fun BackHandler(
         }
     }
 }
+
+@Composable
+actual fun PredictiveBackHandler(
+    enabled: Boolean,
+    onBackStarted: ((BackEventCompat) -> Unit)?,
+    onBackProgressed: ((BackEventCompat) -> Unit)?,
+    onBackCancelled: (() -> Unit)?,
+    onBack: () -> Unit
+) {
+    // WasmJs doesn't support predictive back gesture, fallback to simple BackHandler
+    BackHandler(enabled = enabled, onBack = onBack)
+}

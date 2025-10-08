@@ -49,3 +49,15 @@ actual fun BackHandler(
         window.addEventListener("keydown", onKeyDown)
     }
 }
+
+@Composable
+actual fun PredictiveBackHandler(
+    enabled: Boolean,
+    onBackStarted: ((BackEventCompat) -> Unit)?,
+    onBackProgressed: ((BackEventCompat) -> Unit)?,
+    onBackCancelled: (() -> Unit)?,
+    onBack: () -> Unit
+) {
+    // Js doesn't support predictive back gesture, fallback to simple BackHandler
+    BackHandler(enabled = enabled, onBack = onBack)
+}
