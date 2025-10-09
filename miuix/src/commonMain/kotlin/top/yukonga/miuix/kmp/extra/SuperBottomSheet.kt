@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -182,15 +183,15 @@ private fun SuperBottomSheetContent(
         WindowInsets.statusBars.getTop(density).toDp()
     }
 
-    val rootBoxModifier = remember(onDismissRequest) {
-        Modifier
-            .pointerInput(onDismissRequest) {
-                detectTapGestures(
-                    onTap = { onDismissRequest?.invoke() }
-                )
-            }
-            .fillMaxSize()
-    }
+    val rootBoxModifier = Modifier
+        .pointerInput(onDismissRequest) {
+            detectTapGestures(
+                onTap = {
+                    onDismissRequest?.invoke()
+                }
+            )
+        }
+        .fillMaxSize()
 
     Box(modifier = rootBoxModifier) {
         SuperBottomSheetColumn(
@@ -241,10 +242,31 @@ private fun SuperBottomSheetColumn(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
+    // Calculate the overscroll offset for background fill
+    val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
+    val overscrollOffsetPx by remember {
+        derivedStateOf {
+            (-dragOffsetYValue).coerceAtLeast(0f)
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
+        // Background fill for the area revealed when dragging up (overscroll effect)
+        if (overscrollOffsetPx > 0f) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .widthIn(max = sheetMaxWidth)
+                    .fillMaxWidth()
+                    .height(with(density) { overscrollOffsetPx.toDp() })
+                    .padding(horizontal = outsideMargin.width)
+                    .background(backgroundColor)
+            )
+        }
+
         Column(
             modifier = modifier
                 .pointerInput(Unit) {
@@ -308,6 +330,11 @@ private fun DragHandleArea(
     coroutineScope: kotlinx.coroutines.CoroutineScope,
     onDismissRequest: (() -> Unit)?
 ) {
+    val dragStartOffset = remember { mutableFloatStateOf(0f) }
+    val isPressing = remember { mutableFloatStateOf(0f) }
+    val pressScale = remember { Animatable(1f) }
+    val pressWidth = remember { Animatable(45f) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -316,25 +343,60 @@ private fun DragHandleArea(
                 detectVerticalDragGestures(
                     onDragStart = {
                         coroutineScope.launch {
+                            dragStartOffset.floatValue = dragOffsetY.value
                             dragOffsetY.snapTo(dragOffsetY.value)
+                            // Animate press effect
+                            isPressing.floatValue = 1f
+                            launch {
+                                pressScale.animateTo(
+                                    targetValue = 1.15f,
+                                    animationSpec = tween(durationMillis = 100)
+                                )
+                            }
+                            launch {
+                                pressWidth.animateTo(
+                                    targetValue = 55f,
+                                    animationSpec = tween(durationMillis = 100)
+                                )
+                            }
                         }
                     },
                     onDragEnd = {
                         coroutineScope.launch {
+                            // Reset press effect
+                            isPressing.floatValue = 0f
+                            launch {
+                                pressScale.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(durationMillis = 150)
+                                )
+                            }
+                            launch {
+                                pressWidth.animateTo(
+                                    targetValue = 45f,
+                                    animationSpec = tween(durationMillis = 150)
+                                )
+                            }
+
+                            val currentOffset = dragOffsetY.value
+                            val dragDelta = currentOffset - dragStartOffset.floatValue
+
                             when {
-                                // Dragged down significantly -> dismiss with animation
-                                dragOffsetY.value > 150f -> {
-                                    // Animate to bottom of screen
+                                // Dragged down significantly -> dismiss
+                                dragDelta > 150f -> {
                                     onDismissRequest?.invoke()
+                                    val windowHeightPx = windowHeight.value * density.density
                                     dragOffsetY.animateTo(
-                                        targetValue = windowHeight.value * density.density,
+                                        targetValue = windowHeightPx,
                                         animationSpec = tween(durationMillis = 250)
                                     )
                                 }
-                                // Reset position if no action triggered
+                                // Reset to original position (including overscroll bounce back)
                                 else -> {
-                                    dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                                    // Reset dim alpha
+                                    dragOffsetY.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(durationMillis = 250)
+                                    )
                                     dimAlpha.value = 1f
                                 }
                             }
@@ -342,13 +404,30 @@ private fun DragHandleArea(
                     },
                     onVerticalDrag = { _, dragAmount ->
                         coroutineScope.launch {
-                            // Only allow dragging down (positive offset)
-                            val newOffset = (dragOffsetY.value + dragAmount).coerceAtLeast(0f)
-                            dragOffsetY.snapTo(newOffset)
+                            val newOffset = dragOffsetY.value + dragAmount
 
-                            // Update dim alpha based on sheet height
+                            // Apply damping effect when dragging upward (negative offset)
+                            val finalOffset = if (newOffset < 0) {
+                                // Overscroll effect: reduce drag amount with damping
+                                val dampingFactor = 0.1f // Adjust this value for more/less resistance
+                                val dampedAmount = dragAmount * dampingFactor
+                                (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                            } else {
+                                // Normal drag downward
+                                newOffset
+                            }
+
+                            dragOffsetY.snapTo(finalOffset)
+
+                            // Update dim alpha based on downward drag only
                             val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
-                            val alpha = 1f - (newOffset / thresholdPx).coerceIn(0f, 1f)
+                            val alpha = if (finalOffset >= 0) {
+                                // Dragging down - reduce alpha
+                                1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
+                            } else {
+                                // Dragging up or at base position - keep alpha at 1
+                                1f
+                            }
                             dimAlpha.value = alpha
                         }
                     }
@@ -357,12 +436,17 @@ private fun DragHandleArea(
         contentAlignment = Alignment.Center
     ) {
         // Drag handle indicator
+        val handleAlpha = lerp(0.2f, 0.35f, isPressing.floatValue)
+
         Box(
             modifier = Modifier
-                .width(45.dp)
+                .width(pressWidth.value.dp)
                 .height(4.dp)
+                .graphicsLayer {
+                    scaleY = pressScale.value
+                }
                 .clip(G2RoundedCornerShape(2.dp))
-                .background(dragHandleColor)
+                .background(dragHandleColor.copy(alpha = handleAlpha))
         )
     }
 }
@@ -434,5 +518,5 @@ object SuperBottomSheetDefaults {
     /**
      * The default margin inside the [SuperBottomSheet].
      */
-    val insideMargin = DpSize(24.dp, 24.dp)
+    val insideMargin = DpSize(24.dp, 0.dp)
 }

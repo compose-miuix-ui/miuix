@@ -85,9 +85,9 @@ fun MainPage(
     var expanded by remember { mutableStateOf(false) }
     val showDialog = remember { mutableStateOf(false) }
     val dialogTextFieldValue = remember { mutableStateOf("") }
-    val showDialog2 = remember { mutableStateOf(false) }
-    val dialog2dropdownSelectedOption = remember { mutableStateOf(0) }
-    val dialog2SuperSwitchState = remember { mutableStateOf(false) }
+    val showBottomSheet = remember { mutableStateOf(false) }
+    val bottomSheetDropdownSelectedOption = remember { mutableStateOf(0) }
+    val bottomSheetSuperSwitchState = remember { mutableStateOf(true) }
     val checkbox = remember { mutableStateOf(false) }
     val checkboxTrue = remember { mutableStateOf(true) }
     val switch = remember { mutableStateOf(false) }
@@ -111,9 +111,9 @@ fun MainPage(
         TextComponent(
             showDialog,
             dialogTextFieldValue,
-            showDialog2,
-            dialog2dropdownSelectedOption,
-            dialog2SuperSwitchState,
+            showBottomSheet = showBottomSheet,
+            bottomSheetDropdownSelectedOption,
+            bottomSheetSuperSwitchState,
             checkbox,
             checkboxTrue,
             switch,

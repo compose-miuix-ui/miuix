@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -531,13 +534,21 @@ fun BottomSheet(
                 }
             )
         }
-        val miuixColor = MiuixTheme.colorScheme.primary
-        var selectedColor by remember { mutableStateOf(miuixColor) }
-        ColorPalette(
-            initialColor = selectedColor,
-            onColorChanged = { selectedColor = it },
-            showPreview = false
-        )
+        AnimatedVisibility(
+            visible = bottomSheetSuperSwitchState.value,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            val miuixColor = MiuixTheme.colorScheme.primary
+            var selectedColor by remember { mutableStateOf(miuixColor) }
+            ColorPalette(
+                modifier = Modifier.padding(bottom = 12.dp),
+                initialColor = selectedColor,
+                onColorChanged = { selectedColor = it },
+                showPreview = false
+            )
+        }
+        Spacer(Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
     }
 }
 
