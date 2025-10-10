@@ -174,7 +174,9 @@ private fun SuperDialogContent(
     val rootBoxModifier = Modifier
         .then(
             if (defaultWindowInsetsPadding)
-                Modifier.imePadding().navigationBarsPadding()
+                Modifier
+                    .imePadding()
+                    .navigationBarsPadding()
             else
                 Modifier
         )

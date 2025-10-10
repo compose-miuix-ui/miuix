@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -507,48 +508,52 @@ fun BottomSheet(
             }
         }
     ) {
-        var progress by remember { mutableStateOf(0.5f) }
-        Slider(
-            progress = progress,
-            onProgressChange = { newProgress -> progress = newProgress },
-            decimalPlaces = 3,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-        Card(
-            modifier = Modifier.padding(bottom = 12.dp),
-            colors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.secondaryContainer,
-            )
-        ) {
-            SuperDropdown(
-                title = "Dropdown",
-                items = dropdownOptions,
-                selectedIndex = bottomSheetDropdownSelectedOption.value,
-                onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
-            )
-            SuperSwitch(
-                title = "Switch",
-                checked = bottomSheetSuperSwitchState.value,
-                onCheckedChange = {
-                    bottomSheetSuperSwitchState.value = it
+        LazyColumn {
+            item {
+                var progress by remember { mutableStateOf(0.5f) }
+                Slider(
+                    progress = progress,
+                    onProgressChange = { newProgress -> progress = newProgress },
+                    decimalPlaces = 3,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                Card(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.secondaryContainer,
+                    )
+                ) {
+                    SuperDropdown(
+                        title = "Dropdown",
+                        items = dropdownOptions,
+                        selectedIndex = bottomSheetDropdownSelectedOption.value,
+                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
+                    )
+                    SuperSwitch(
+                        title = "Switch",
+                        checked = bottomSheetSuperSwitchState.value,
+                        onCheckedChange = {
+                            bottomSheetSuperSwitchState.value = it
+                        }
+                    )
                 }
-            )
+                AnimatedVisibility(
+                    visible = bottomSheetSuperSwitchState.value,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    val miuixColor = MiuixTheme.colorScheme.primary
+                    var selectedColor by remember { mutableStateOf(miuixColor) }
+                    ColorPalette(
+                        modifier = Modifier.padding(bottom = 12.dp),
+                        initialColor = selectedColor,
+                        onColorChanged = { selectedColor = it },
+                        showPreview = false
+                    )
+                }
+                Spacer(Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+            }
         }
-        AnimatedVisibility(
-            visible = bottomSheetSuperSwitchState.value,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            val miuixColor = MiuixTheme.colorScheme.primary
-            var selectedColor by remember { mutableStateOf(miuixColor) }
-            ColorPalette(
-                modifier = Modifier.padding(bottom = 12.dp),
-                initialColor = selectedColor,
-                onColorChanged = { selectedColor = it },
-                showPreview = false
-            )
-        }
-        Spacer(Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
     }
 }
 

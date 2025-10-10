@@ -11,6 +11,9 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -179,9 +182,10 @@ private fun SuperBottomSheetContent(
         derivedStateOf { windowSize.height.dp / density.density }
     }
 
-    val statusBarHeight = with(density) {
-        WindowInsets.statusBars.getTop(density).toDp()
-    }
+    val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+    val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
     val rootBoxModifier = Modifier
         .pointerInput(onDismissRequest) {
@@ -261,7 +265,7 @@ private fun SuperBottomSheetColumn(
                     .align(Alignment.BottomCenter)
                     .widthIn(max = sheetMaxWidth)
                     .fillMaxWidth()
-                    .height(with(density) { overscrollOffsetPx.toDp() })
+                    .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
                     .padding(horizontal = outsideMargin.width)
                     .background(backgroundColor)
             )
