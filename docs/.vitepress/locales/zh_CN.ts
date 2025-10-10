@@ -27,7 +27,7 @@ export default defineConfig({
         skipToContentLabel: '跳转到内容',
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/YuKongA/compose-miuix-ui' }
+            { icon: 'github', link: 'https://github.com/compose-miuix-ui/miuix' }
         ],
 
         editLink: {

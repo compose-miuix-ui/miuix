@@ -7,7 +7,7 @@ export default defineConfig({
     themeConfig: {
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/YuKongA/compose-miuix-ui' }
+            { icon: 'github', link: 'https://github.com/compose-miuix-ui/miuix' }
         ],
 
         editLink: {
