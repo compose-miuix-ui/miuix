@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -338,6 +339,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
+    val velocityTracker = remember { VelocityTracker() }
 
     Box(
         modifier = Modifier
@@ -349,6 +351,7 @@ private fun DragHandleArea(
                         coroutineScope.launch {
                             dragStartOffset.floatValue = dragOffsetY.value
                             dragOffsetY.snapTo(dragOffsetY.value)
+                            velocityTracker.resetTracking()
                             // Animate press effect
                             isPressing.floatValue = 1f
                             launch {
@@ -384,10 +387,13 @@ private fun DragHandleArea(
 
                             val currentOffset = dragOffsetY.value
                             val dragDelta = currentOffset - dragStartOffset.floatValue
+                            val velocity = velocityTracker.calculateVelocity().y
+                            val velocityThreshold = 500f
+                            val dismissThresholdPx = with(density) { 150.dp.toPx() }
 
                             when {
-                                // Dragged down significantly -> dismiss
-                                dragDelta > 150f -> {
+                                // Dragged far enough down or has strong downward velocity -> dismiss
+                                dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0) -> {
                                     onDismissRequest?.invoke()
                                     val windowHeightPx = windowHeight.value * density.density
                                     dragOffsetY.animateTo(
@@ -395,7 +401,15 @@ private fun DragHandleArea(
                                         animationSpec = tween(durationMillis = 250)
                                     )
                                 }
-                                // Reset to original position (including overscroll bounce back)
+                                // Has strong upward velocity -> continue to expand
+                                velocity > velocityThreshold -> {
+                                    dragOffsetY.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(durationMillis = 250)
+                                    )
+                                    dimAlpha.value = 1f
+                                }
+                                // Not dragged far enough -> reset to original position
                                 else -> {
                                     dragOffsetY.animateTo(
                                         targetValue = 0f,
@@ -406,34 +420,30 @@ private fun DragHandleArea(
                             }
                         }
                     },
-                    onVerticalDrag = { _, dragAmount ->
-                        coroutineScope.launch {
-                            val newOffset = dragOffsetY.value + dragAmount
+                    onVerticalDrag = { change, dragAmount ->
+                        velocityTracker.addPosition(change.uptimeMillis, change.position)
 
-                            // Apply damping effect when dragging upward (negative offset)
-                            val finalOffset = if (newOffset < 0) {
-                                // Overscroll effect: reduce drag amount with damping
-                                val dampingFactor = 0.1f // Adjust this value for more/less resistance
-                                val dampedAmount = dragAmount * dampingFactor
-                                (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
-                            } else {
-                                // Normal drag downward
-                                newOffset
-                            }
+                        val newOffset = dragOffsetY.value + dragAmount
 
-                            dragOffsetY.snapTo(finalOffset)
-
-                            // Update dim alpha based on downward drag only
-                            val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
-                            val alpha = if (finalOffset >= 0) {
-                                // Dragging down - reduce alpha
-                                1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
-                            } else {
-                                // Dragging up or at base position - keep alpha at 1
-                                1f
-                            }
-                            dimAlpha.value = alpha
+                        val finalOffset = if (newOffset < 0) {
+                            val dampingFactor = 0.1f
+                            val dampedAmount = dragAmount * dampingFactor
+                            (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                        } else {
+                            newOffset
                         }
+
+                        coroutineScope.launch {
+                            dragOffsetY.snapTo(finalOffset)
+                        }
+
+                        val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
+                        val alpha = if (finalOffset >= 0) {
+                            1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
+                        } else {
+                            1f
+                        }
+                        dimAlpha.value = alpha
                     }
                 )
             },
