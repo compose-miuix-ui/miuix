@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.RangeSlider
 import top.yukonga.miuix.kmp.basic.Slider
 
 @Composable
@@ -39,14 +40,19 @@ fun SliderDemo() {
         ) {
             var slider1 by remember { mutableStateOf(0.5f) }
             var slider2 by remember { mutableStateOf(0.7f) }
+            var slider3 by remember { mutableStateOf(0.2f..0.8f) }
             Slider(
-                progress = slider1,
-                onProgressChange = { slider1 = it }
+                value = slider1,
+                onValueChange = { slider1 = it }
             )
             Slider(
-                progress = slider2,
-                onProgressChange = { slider2 = it },
+                value = slider2,
+                onValueChange = { slider2 = it },
                 enabled = false
+            )
+            RangeSlider(
+                value = slider3,
+                onValueChange = { slider3 = it }
             )
         }
     }

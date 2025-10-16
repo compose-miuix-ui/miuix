@@ -868,7 +868,7 @@ private fun ColorSlider(
                             size.width.toFloat(),
                             with(density) { sliderHeightDp.toPx() }).coerceIn(0f, 1f)
                         onValueChangedState.value(newValue)
-                        hapticState.handleHapticFeedback(newValue, hapticEffect, hapticFeedback)
+                        hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
                     }
                 )
             }

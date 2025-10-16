@@ -510,11 +510,10 @@ fun BottomSheet(
     ) {
         LazyColumn {
             item {
-                var progress by remember { mutableStateOf(0.5f) }
+                var sliderValue by remember { mutableStateOf(0.5f) }
                 Slider(
-                    progress = progress,
-                    onProgressChange = { newProgress -> progress = newProgress },
-                    decimalPlaces = 3,
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 Card(
