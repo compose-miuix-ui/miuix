@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -211,7 +212,7 @@ private fun SuperBottomSheetContent(
     val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
     val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val statusBarHeight = remember { with(density) { maxOf(statusBars, captionBar, displayCutout) } }
+    val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
     val rootBoxModifier = Modifier
         .pointerInput(onDismissRequest) {
@@ -293,7 +294,7 @@ private fun SuperBottomSheetColumn(
                     .align(Alignment.BottomCenter)
                     .widthIn(max = sheetMaxWidth)
                     .fillMaxWidth()
-                    .height(with(density) { overscrollOffsetPx.toDp() })
+                    .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
                     .padding(horizontal = outsideMargin.width)
                     .background(backgroundColor)
             )
@@ -368,6 +369,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
+    val velocityTracker = remember { VelocityTracker() }
 
     Box(
         modifier = Modifier
@@ -379,6 +381,7 @@ private fun DragHandleArea(
                         coroutineScope.launch {
                             dragStartOffset.floatValue = dragOffsetY.value
                             dragOffsetY.snapTo(dragOffsetY.value)
+                            velocityTracker.resetTracking()
                             // Animate press effect
                             isPressing.floatValue = 1f
                             launch {
@@ -414,57 +417,66 @@ private fun DragHandleArea(
 
                             val currentOffset = dragOffsetY.value
                             val dragDelta = currentOffset - dragStartOffset.floatValue
+                            val velocity = velocityTracker.calculateVelocity().y
+                            val velocityThreshold = 500f
+                            val dismissThresholdPx = with(density) { 150.dp.toPx() }
 
-                            // Only dismiss if enabled and dragged far enough
-                            if (allowDismiss && dragDelta > 150f) {
-                                onDismissRequest?.invoke()
-                                val windowHeightPx = windowHeight.value * density.density
-                                dragOffsetY.animateTo(
-                                    targetValue = windowHeightPx,
-                                    animationSpec = tween(durationMillis = 250)
-                                )
-                            } else {
-                                // Otherwise, always snap back to 0
-                                dragOffsetY.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 250)
-                                )
-                                dimAlpha.value = 1f
+                            when {
+                                // Dragged far enough down or has strong downward velocity -> dismiss
+                                allowDismiss && (dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0)) -> {
+                                    onDismissRequest?.invoke()
+                                    val windowHeightPx = windowHeight.value * density.density
+                                    dragOffsetY.animateTo(
+                                        targetValue = windowHeightPx,
+                                        animationSpec = tween(durationMillis = 250)
+                                    )
+                                }
+                                // Has strong upward velocity -> continue to expand
+                                velocity > velocityThreshold -> {
+                                    dragOffsetY.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(durationMillis = 250)
+                                    )
+                                    dimAlpha.value = 1f
+                                }
+                                // Not dragged far enough -> reset to original position
+                                else -> {
+                                    dragOffsetY.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(durationMillis = 250)
+                                    )
+                                    dimAlpha.value = 1f
+                                }
                             }
                         }
                     },
-                    onVerticalDrag = { _, dragAmount ->
+                    onVerticalDrag = { change, dragAmount ->
+                        velocityTracker.addPosition(change.uptimeMillis, change.position)
+
                         coroutineScope.launch {
                             val newOffset = dragOffsetY.value + dragAmount
 
                             val finalOffset = if (newOffset < 0) {
                                 // Dragging UP (Overscroll)
-                                // Overscroll effect: reduce drag amount with damping
-                                val dampingFactor = 0.1f // Adjust this value for more/less resistance
+                                val dampingFactor = 0.1f
                                 val dampedAmount = dragAmount * dampingFactor
                                 (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
                             } else if (newOffset >= 0 && !allowDismiss) {
                                 // Dragging DOWN (Overscroll, dismiss disabled)
-                                // Apply damping to downward movement
                                 val dampingFactor = 0.1f
-                                // Only damp positive (downward) dragAmount.
-                                // Negative dragAmount means dragging back *up* from the bounced state.
                                 val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
                                 (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
                             } else {
-                                // --- Dragging DOWN (Normal, dismiss enabled) ---
+                                // Dragging DOWN (Normal, dismiss enabled)
                                 newOffset
                             }
 
                             dragOffsetY.snapTo(finalOffset)
 
-                            // Update dim alpha only if dismiss is enabled
                             val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
                             val alpha = if (finalOffset >= 0 && allowDismiss) {
-                                // Dragging down and dismiss is allowed: reduce alpha
                                 1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
                             } else {
-                                // Dragging up, at base, or dismiss disabled: keep alpha at 1
                                 1f
                             }
                             dimAlpha.value = alpha
