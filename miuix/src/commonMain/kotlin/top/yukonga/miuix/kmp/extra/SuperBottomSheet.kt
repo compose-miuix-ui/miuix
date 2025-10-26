@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -44,10 +47,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -74,6 +80,7 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param insideMargin The margin inside the [SuperBottomSheet].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
+ * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param content The [Composable] content of the [SuperBottomSheet].
  */
 @Composable
@@ -92,15 +99,23 @@ fun SuperBottomSheet(
     insideMargin: DpSize = SuperBottomSheetDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = SuperBottomSheetDefaults.dragHandleColor(),
+    allowDismiss: Boolean = true,
     content: @Composable () -> Unit
 ) {
     if (!show.value) return
 
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dragOffsetY = remember { Animatable(0f) }
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val coroutineScope = rememberCoroutineScope()
+    val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
+
+    LaunchedEffect(dragOffsetY) {
+        for (target in dragSnapChannel) {
+            dragOffsetY.snapTo(target)
+        }
+    }
 
     DialogLayout(
         visible = show,
@@ -120,9 +135,11 @@ fun SuperBottomSheet(
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             dragHandleColor = dragHandleColor,
-            dimAlpha = dimAlpha,
+            allowDismiss = allowDismiss,
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
+            dimAlpha = dimAlpha,
+            dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
             content = content
         )
@@ -131,29 +148,46 @@ fun SuperBottomSheet(
     PredictiveBackHandler(
         enabled = show.value,
         onBackProgressed = { event ->
-            coroutineScope.launch {
-                // Calculate offset based on back progress
-                val maxOffset = if (sheetHeightPx.value > 0) {
-                    sheetHeightPx.value.toFloat()
-                } else {
-                    500f
-                }
-                val offset = event.progress * maxOffset
-                dragOffsetY.snapTo(offset)
+            // Calculate the offset based on progress
+            val maxOffset = if (sheetHeightPx.intValue > 0) {
+                sheetHeightPx.intValue.toFloat()
+            } else {
+                500f
+            }
+            val offset = event.progress * maxOffset
 
-                // Update dim alpha
-                dimAlpha.value = 1f - event.progress
+            // Apply damping if dismiss is not allowed
+            val finalOffset = if (!allowDismiss) {
+                offset * 0.1f
+            } else {
+                offset
+            }
+            // Send target to snap channel
+            dragSnapChannel.trySend(finalOffset)
+
+            // Update dim alpha
+            if (allowDismiss) {
+                dimAlpha.floatValue = 1f - event.progress
             }
         },
         onBackCancelled = {
             coroutineScope.launch {
                 // Reset to original position
                 dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                dimAlpha.value = 1f
+                dimAlpha.floatValue = 1f
             }
         },
         onBack = {
-            currentOnDismissRequest?.invoke()
+            if (allowDismiss) {
+                // Invoke dismiss callback
+                currentOnDismissRequest?.invoke()
+            } else {
+                // Reset to original position
+                coroutineScope.launch {
+                    dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+                    dimAlpha.floatValue = 1f
+                }
+            }
         }
     )
 }
@@ -171,9 +205,11 @@ private fun SuperBottomSheetContent(
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
     dragHandleColor: Color,
-    dimAlpha: MutableState<Float>,
-    sheetHeightPx: MutableState<Int>,
+    allowDismiss: Boolean,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
+    dimAlpha: MutableFloatState,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -211,12 +247,14 @@ private fun SuperBottomSheetContent(
             insideMargin = insideMargin,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             dragHandleColor = dragHandleColor,
+            allowDismiss = allowDismiss,
             windowHeight = windowHeight,
             statusBarHeight = statusBarHeight,
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
             density = density,
+            dragSnapChannel = dragSnapChannel,
             onDismissRequest = onDismissRequest,
             content = content
         )
@@ -236,12 +274,14 @@ private fun SuperBottomSheetColumn(
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
     dragHandleColor: Color,
+    allowDismiss: Boolean,
     windowHeight: Dp,
     statusBarHeight: Dp,
-    sheetHeightPx: MutableState<Int>,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableState<Float>,
-    density: androidx.compose.ui.unit.Density,
+    dimAlpha: MutableFloatState,
+    density: Density,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -282,7 +322,7 @@ private fun SuperBottomSheetColumn(
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - statusBarHeight)
                 .onGloballyPositioned { coordinates ->
-                    sheetHeightPx.value = coordinates.size.height
+                    sheetHeightPx.intValue = coordinates.size.height
                 }
                 .graphicsLayer {
                     translationY = dragOffsetY.value
@@ -302,12 +342,14 @@ private fun SuperBottomSheetColumn(
             // Drag handle area
             DragHandleArea(
                 dragHandleColor = dragHandleColor,
+                allowDismiss = allowDismiss,
                 windowHeight = windowHeight,
                 sheetHeightPx = sheetHeightPx,
                 dragOffsetY = dragOffsetY,
                 dimAlpha = dimAlpha,
                 density = density,
                 coroutineScope = coroutineScope,
+                dragSnapChannel = dragSnapChannel,
                 onDismissRequest = onDismissRequest
             )
 
@@ -327,12 +369,14 @@ private fun SuperBottomSheetColumn(
 @Composable
 private fun DragHandleArea(
     dragHandleColor: Color,
+    allowDismiss: Boolean,
     windowHeight: Dp,
-    sheetHeightPx: MutableState<Int>,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableState<Float>,
-    density: androidx.compose.ui.unit.Density,
-    coroutineScope: kotlinx.coroutines.CoroutineScope,
+    dimAlpha: MutableFloatState,
+    density: Density,
+    coroutineScope: CoroutineScope,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?
 ) {
     val dragStartOffset = remember { mutableFloatStateOf(0f) }
@@ -345,12 +389,12 @@ private fun DragHandleArea(
         modifier = Modifier
             .fillMaxWidth()
             .height(24.dp)
-            .pointerInput(Unit) {
+            .pointerInput(allowDismiss) {
                 detectVerticalDragGestures(
                     onDragStart = {
                         coroutineScope.launch {
                             dragStartOffset.floatValue = dragOffsetY.value
-                            dragOffsetY.snapTo(dragOffsetY.value)
+                            // No need to snap; just ensure we cancel any running animations implicitly
                             velocityTracker.resetTracking()
                             // Animate press effect
                             isPressing.floatValue = 1f
@@ -393,7 +437,7 @@ private fun DragHandleArea(
 
                             when {
                                 // Dragged far enough down or has strong downward velocity -> dismiss
-                                dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0) -> {
+                                allowDismiss && (dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0)) -> {
                                     onDismissRequest?.invoke()
                                     val windowHeightPx = windowHeight.value * density.density
                                     dragOffsetY.animateTo(
@@ -407,7 +451,7 @@ private fun DragHandleArea(
                                         targetValue = 0f,
                                         animationSpec = tween(durationMillis = 250)
                                     )
-                                    dimAlpha.value = 1f
+                                    dimAlpha.floatValue = 1f
                                 }
                                 // Not dragged far enough -> reset to original position
                                 else -> {
@@ -415,35 +459,41 @@ private fun DragHandleArea(
                                         targetValue = 0f,
                                         animationSpec = tween(durationMillis = 250)
                                     )
-                                    dimAlpha.value = 1f
+                                    dimAlpha.floatValue = 1f
                                 }
                             }
                         }
                     },
                     onVerticalDrag = { change, dragAmount ->
                         velocityTracker.addPosition(change.uptimeMillis, change.position)
-
+                        // Update drag offset with damping
                         val newOffset = dragOffsetY.value + dragAmount
 
                         val finalOffset = if (newOffset < 0) {
+                            // Dragging UP
                             val dampingFactor = 0.1f
                             val dampedAmount = dragAmount * dampingFactor
                             (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                        } else if (newOffset >= 0 && !allowDismiss) {
+                            // Dragging DOWN but dismiss not allowed
+                            val dampingFactor = 0.1f
+                            val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
+                            (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
                         } else {
+                            // Normal dragging
                             newOffset
                         }
 
-                        coroutineScope.launch {
-                            dragOffsetY.snapTo(finalOffset)
-                        }
+                        // Send target to snap channel
+                        dragSnapChannel.trySend(finalOffset)
 
-                        val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
-                        val alpha = if (finalOffset >= 0) {
+                        val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
+                        val alpha = if (finalOffset >= 0 && allowDismiss) {
                             1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
                         } else {
                             1f
                         }
-                        dimAlpha.value = alpha
+                        dimAlpha.floatValue = alpha
                     }
                 )
             },

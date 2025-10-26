@@ -59,6 +59,7 @@ Scaffold {
 | insideMargin               | DpSize                          | 底部抽屉内部内容的边距       | SuperBottomSheetDefaults.insideMargin       | 否       |
 | defaultWindowInsetsPadding | Boolean                         | 是否应用默认窗口插入内边距   | true                                        | 否       |
 | dragHandleColor            | Color                           | 拖拽指示器的颜色             | SuperBottomSheetDefaults.dragHandleColor()  | 否       |
+| allowDismiss               | Boolean                         | 是否允许通过拖拽或返回手势关闭抽屉 | true                                  | 否       |
 | content                    | @Composable () -> Unit          | 底部抽屉的内容               | -                                           | 是       |
 
 ### SuperBottomSheetDefaults 对象
@@ -302,6 +303,38 @@ Scaffold {
             Text("可以添加任意多的内容")
             Spacer(modifier = Modifier.height(16.dp))
             Text("但不会覆盖到状态栏区域")
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(
+                text = "关闭",
+                onClick = { showBottomSheet.value = false },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+```
+
+### 禁止关闭的底部抽屉
+
+```kotlin
+var showBottomSheet = remember { mutableStateOf(false) }
+
+Scaffold {
+    TextButton(
+        text = "显示禁止关闭的底部抽屉",
+        onClick = { showBottomSheet.value = true }
+    )
+
+    SuperBottomSheet(
+        show = showBottomSheet,
+        title = "禁止关闭",
+        allowDismiss = false,
+        onDismissRequest = { showBottomSheet.value = false }
+    ) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
+            Text("这个底部抽屉无法通过拖拽或返回手势关闭")
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("您必须通过下面的按钮显式关闭它")
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(
                 text = "关闭",
