@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -107,6 +109,13 @@ fun SuperBottomSheet(
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val coroutineScope = rememberCoroutineScope()
+    val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
+
+    LaunchedEffect(dragOffsetY) {
+        for (target in dragSnapChannel) {
+            dragOffsetY.snapTo(target)
+        }
+    }
 
     DialogLayout(
         visible = show,
@@ -130,6 +139,7 @@ fun SuperBottomSheet(
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
+            dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
             content = content
         )
@@ -138,27 +148,26 @@ fun SuperBottomSheet(
     PredictiveBackHandler(
         enabled = show.value,
         onBackProgressed = { event ->
-            coroutineScope.launch {
-                // Calculate offset based on back progress
-                val maxOffset = if (sheetHeightPx.intValue > 0) {
-                    sheetHeightPx.intValue.toFloat()
-                } else {
-                    500f
-                }
-                val offset = event.progress * maxOffset
+            // Calculate the offset based on progress
+            val maxOffset = if (sheetHeightPx.intValue > 0) {
+                sheetHeightPx.intValue.toFloat()
+            } else {
+                500f
+            }
+            val offset = event.progress * maxOffset
 
-                // Apply damping if dismiss is disabled
-                val finalOffset = if (!allowDismiss) {
-                    offset * 0.1f // Apply same damping as drag
-                } else {
-                    offset
-                }
-                dragOffsetY.snapTo(finalOffset)
+            // Apply damping if dismiss is not allowed
+            val finalOffset = if (!allowDismiss) {
+                offset * 0.1f
+            } else {
+                offset
+            }
+            // Send target to snap channel
+            dragSnapChannel.trySend(finalOffset)
 
-                // Update dim alpha
-                if (allowDismiss) {
-                    dimAlpha.floatValue = 1f - event.progress
-                }
+            // Update dim alpha
+            if (allowDismiss) {
+                dimAlpha.floatValue = 1f - event.progress
             }
         },
         onBackCancelled = {
@@ -170,12 +179,10 @@ fun SuperBottomSheet(
         },
         onBack = {
             if (allowDismiss) {
-                // If dismiss is allowed, call the request.
-                // The request will set show.value = false.
+                // Invoke dismiss callback
                 currentOnDismissRequest?.invoke()
             } else {
-                // If dismiss is not allowed, manually animate back,
-                // just like onBackCancelled.
+                // Reset to original position
                 coroutineScope.launch {
                     dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
                     dimAlpha.floatValue = 1f
@@ -202,6 +209,7 @@ private fun SuperBottomSheetContent(
     sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -246,6 +254,7 @@ private fun SuperBottomSheetContent(
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
             density = density,
+            dragSnapChannel = dragSnapChannel,
             onDismissRequest = onDismissRequest,
             content = content
         )
@@ -272,6 +281,7 @@ private fun SuperBottomSheetColumn(
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
     density: Density,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -339,6 +349,7 @@ private fun SuperBottomSheetColumn(
                 dimAlpha = dimAlpha,
                 density = density,
                 coroutineScope = coroutineScope,
+                dragSnapChannel = dragSnapChannel,
                 onDismissRequest = onDismissRequest
             )
 
@@ -365,6 +376,7 @@ private fun DragHandleArea(
     dimAlpha: MutableFloatState,
     density: Density,
     coroutineScope: CoroutineScope,
+    dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?
 ) {
     val dragStartOffset = remember { mutableFloatStateOf(0f) }
@@ -382,7 +394,7 @@ private fun DragHandleArea(
                     onDragStart = {
                         coroutineScope.launch {
                             dragStartOffset.floatValue = dragOffsetY.value
-                            dragOffsetY.snapTo(dragOffsetY.value)
+                            // No need to snap; just ensure we cancel any running animations implicitly
                             velocityTracker.resetTracking()
                             // Animate press effect
                             isPressing.floatValue = 1f
@@ -454,35 +466,34 @@ private fun DragHandleArea(
                     },
                     onVerticalDrag = { change, dragAmount ->
                         velocityTracker.addPosition(change.uptimeMillis, change.position)
+                        // Update drag offset with damping
+                        val newOffset = dragOffsetY.value + dragAmount
 
-                        coroutineScope.launch {
-                            val newOffset = dragOffsetY.value + dragAmount
-
-                            val finalOffset = if (newOffset < 0) {
-                                // Dragging UP (Overscroll)
-                                val dampingFactor = 0.1f
-                                val dampedAmount = dragAmount * dampingFactor
-                                (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
-                            } else if (newOffset >= 0 && !allowDismiss) {
-                                // Dragging DOWN (Overscroll, dismiss disabled)
-                                val dampingFactor = 0.1f
-                                val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
-                                (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
-                            } else {
-                                // Dragging DOWN (Normal, dismiss enabled)
-                                newOffset
-                            }
-
-                            dragOffsetY.snapTo(finalOffset)
-
-                            val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
-                            val alpha = if (finalOffset >= 0 && allowDismiss) {
-                                1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
-                            } else {
-                                1f
-                            }
-                            dimAlpha.floatValue = alpha
+                        val finalOffset = if (newOffset < 0) {
+                            // Dragging UP
+                            val dampingFactor = 0.1f
+                            val dampedAmount = dragAmount * dampingFactor
+                            (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                        } else if (newOffset >= 0 && !allowDismiss) {
+                            // Dragging DOWN but dismiss not allowed
+                            val dampingFactor = 0.1f
+                            val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
+                            (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
+                        } else {
+                            // Normal dragging
+                            newOffset
                         }
+
+                        // Send target to snap channel
+                        dragSnapChannel.trySend(finalOffset)
+
+                        val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
+                        val alpha = if (finalOffset >= 0 && allowDismiss) {
+                            1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
+                        } else {
+                            1f
+                        }
+                        dimAlpha.floatValue = alpha
                     }
                 )
             },
