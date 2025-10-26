@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -76,7 +78,7 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param insideMargin The margin inside the [SuperBottomSheet].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
- * @param allowDismiss Whether to allow dismissing the sheet by dragging the handle or back gesture.
+ * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param content The [Composable] content of the [SuperBottomSheet].
  */
 @Composable
@@ -100,10 +102,10 @@ fun SuperBottomSheet(
 ) {
     if (!show.value) return
 
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dragOffsetY = remember { Animatable(0f) }
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val coroutineScope = rememberCoroutineScope()
 
     DialogLayout(
@@ -125,9 +127,9 @@ fun SuperBottomSheet(
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             dragHandleColor = dragHandleColor,
             allowDismiss = allowDismiss,
-            dimAlpha = dimAlpha,
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
+            dimAlpha = dimAlpha,
             onDismissRequest = currentOnDismissRequest,
             content = content
         )
@@ -197,9 +199,9 @@ private fun SuperBottomSheetContent(
     defaultWindowInsetsPadding: Boolean,
     dragHandleColor: Color,
     allowDismiss: Boolean,
-    dimAlpha: MutableState<Float>,
-    sheetHeightPx: MutableState<Int>,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
+    dimAlpha: MutableFloatState,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
 ) {
@@ -266,9 +268,9 @@ private fun SuperBottomSheetColumn(
     allowDismiss: Boolean,
     windowHeight: Dp,
     statusBarHeight: Dp,
-    sheetHeightPx: MutableState<Int>,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableState<Float>,
+    dimAlpha: MutableFloatState,
     density: Density,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
@@ -310,7 +312,7 @@ private fun SuperBottomSheetColumn(
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - statusBarHeight)
                 .onGloballyPositioned { coordinates ->
-                    sheetHeightPx.value = coordinates.size.height
+                    sheetHeightPx.intValue = coordinates.size.height
                 }
                 .graphicsLayer {
                     translationY = dragOffsetY.value
@@ -358,9 +360,9 @@ private fun DragHandleArea(
     dragHandleColor: Color,
     allowDismiss: Boolean,
     windowHeight: Dp,
-    sheetHeightPx: MutableState<Int>,
+    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableState<Float>,
+    dimAlpha: MutableFloatState,
     density: Density,
     coroutineScope: CoroutineScope,
     onDismissRequest: (() -> Unit)?
@@ -437,7 +439,7 @@ private fun DragHandleArea(
                                         targetValue = 0f,
                                         animationSpec = tween(durationMillis = 250)
                                     )
-                                    dimAlpha.value = 1f
+                                    dimAlpha.floatValue = 1f
                                 }
                                 // Not dragged far enough -> reset to original position
                                 else -> {
@@ -445,7 +447,7 @@ private fun DragHandleArea(
                                         targetValue = 0f,
                                         animationSpec = tween(durationMillis = 250)
                                     )
-                                    dimAlpha.value = 1f
+                                    dimAlpha.floatValue = 1f
                                 }
                             }
                         }
@@ -473,13 +475,13 @@ private fun DragHandleArea(
 
                             dragOffsetY.snapTo(finalOffset)
 
-                            val thresholdPx = if (sheetHeightPx.value > 0) sheetHeightPx.value.toFloat() else 500f
+                            val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
                             val alpha = if (finalOffset >= 0 && allowDismiss) {
                                 1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
                             } else {
                                 1f
                             }
-                            dimAlpha.value = alpha
+                            dimAlpha.floatValue = alpha
                         }
                     }
                 )

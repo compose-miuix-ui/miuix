@@ -59,6 +59,7 @@ Scaffold {
 | insideMargin               | DpSize                             | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
 | defaultWindowInsetsPadding | Boolean                            | Whether to apply default window insets padding | true                                      | No       |
 | dragHandleColor            | Color                              | Drag indicator color                         | SuperBottomSheetDefaults.dragHandleColor()  | No       |
+| allowDismiss               | Boolean                            | Whether to allow dismissing the sheet via drag or back gesture | true                            | No       |
 | content                    | @Composable () -> Unit             | Bottom sheet content                         | -                                           | Yes      |
 
 ### SuperBottomSheetDefaults Object
@@ -302,6 +303,38 @@ Scaffold {
             Text("Add as much content as needed")
             Spacer(modifier = Modifier.height(16.dp))
             Text("But will not cover the status bar area")
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(
+                text = "Close",
+                onClick = { showBottomSheet.value = false },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+```
+
+### Non-Dismissible Bottom Sheet
+
+```kotlin
+var showBottomSheet = remember { mutableStateOf(false) }
+
+Scaffold {
+    TextButton(
+        text = "Show Non-Dismissible Bottom Sheet",
+        onClick = { showBottomSheet.value = true }
+    )
+
+    SuperBottomSheet(
+        show = showBottomSheet,
+        title = "Non-Dismissible",
+        allowDismiss = false,
+        onDismissRequest = { showBottomSheet.value = false }
+    ) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
+            Text("This bottom sheet cannot be dismissed by dragging or back gesture")
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("You must explicitly close it using the button below")
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(
                 text = "Close",
