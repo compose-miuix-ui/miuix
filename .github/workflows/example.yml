@@ -71,14 +71,14 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Miuix ${{ matrix.platform }} artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
 
       - name: Upload Miuix ${{ matrix.platformEx }} artifact
         if: matrix.platformEx == 'android aarch64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact-nameEx }}
           path: ${{ matrix.artifact-pathEx }}
