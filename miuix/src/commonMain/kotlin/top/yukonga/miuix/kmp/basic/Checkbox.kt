@@ -35,9 +35,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.CapsuleShape
 import top.yukonga.miuix.kmp.utils.pressable
 
 /**
@@ -94,7 +94,7 @@ fun Checkbox(
             .wrapContentSize(Alignment.Center)
             .requiredSize(25.5.dp)
             .pressable(enabled = enabled, delay = null)
-            .clip(CapsuleShape)
+            .clip(ContinuousCapsule)
             .drawBehind {
                 drawCircle(backgroundColor)
             }

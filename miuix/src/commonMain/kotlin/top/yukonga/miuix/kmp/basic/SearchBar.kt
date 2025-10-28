@@ -44,13 +44,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mocharealm.gaze.capsule.ContinuousCapsule
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.Search
 import top.yukonga.miuix.kmp.icon.icons.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.BackHandler
-import top.yukonga.miuix.kmp.utils.CapsuleShape
 
 /**
  * A [SearchBar] component with Miuix style.
@@ -170,7 +170,7 @@ fun InputField(
             ) {
                 Icon(
                     modifier = Modifier
-                        .clip(CapsuleShape())
+                        .clip(ContinuousCapsule)
                         .clickable { onQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
@@ -211,7 +211,7 @@ fun InputField(
                 modifier = Modifier
                     .background(
                         color = MiuixTheme.colorScheme.surfaceContainerHigh,
-                        shape = CapsuleShape()
+                        shape = ContinuousCapsule
                     ),
                 contentAlignment = Alignment.CenterStart
             ) {

@@ -39,9 +39,9 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.BackHandler
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import kotlin.math.min
@@ -144,7 +144,7 @@ fun ListPopup(
         enableWindowDim = enableWindowDim,
         transformOrigin = { transformOrigin },
     ) {
-        val shape = remember { G2RoundedCornerShape(16.dp) }
+        val shape = remember { ContinuousRoundedRectangle(16.dp) }
         val elevationPx = with(density) { shadowElevation.toPx() }
 
         Box(

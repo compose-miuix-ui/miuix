@@ -2,6 +2,7 @@
 android-gradle-plugin = "8.13.0"
 androidx-activity = "1.11.0"
 androidx-window = "1.5.0"
+capsule = "2.1.1-patch2"
 jetbrains-compose = "1.9.1"
 jetbrains-compose-hotReload = "1.0.0-rc02"
 jetbrains-androidx-navigation = "2.9.1"
@@ -16,6 +17,7 @@ androidx-window = { group = "androidx.window", name = "window", version.ref = "a
 jetbrains-androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrains-androidx-navigation" }
 jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
+gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "capsule" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
