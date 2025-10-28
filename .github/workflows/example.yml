@@ -21,13 +21,13 @@ jobs:
             artifact-name: Miuix-darwin-arm64-dmg
           - os: ubuntu-latest
             platform: linux x64
-            platformEx: android aarch64
+            platformEx: android universal
             build-command: ./gradlew createReleaseDistributable
             build-commandEx: ./gradlew assembleDebug && ./gradlew assembleRelease
             artifact-path: example/build/compose/binaries/main-release/app/Miuix
             artifact-pathEx: example/build/outputs/apk/release
             artifact-name: Miuix-linux-x64-bin
-            artifact-nameEx: Miuix-android-aarch64-apk
+            artifact-nameEx: Miuix-android-universal-apk
           - os: ubuntu-24.04-arm
             platform: linux arm64
             build-command: ./gradlew createReleaseDistributable
@@ -55,14 +55,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Decode android signing key
-        if: matrix.platformEx == 'android aarch64'
+        if: matrix.platformEx == 'android universal'
         run: echo ${{ secrets.SIGNING_KEY }} | base64 -d > keystore.jks
 
       - name: Build ${{ matrix.platform }} platform
         run: ${{ matrix.build-command }}
 
       - name: Build ${{ matrix.platformEx }} platform
-        if: matrix.platformEx == 'android aarch64'
+        if: matrix.platformEx == 'android universal'
         run: ${{ matrix.build-commandEx }}
         env:
           KEYSTORE_PATH: "../keystore.jks"
@@ -77,14 +77,14 @@ jobs:
           path: ${{ matrix.artifact-path }}
 
       - name: Upload Miuix ${{ matrix.platformEx }} artifact
-        if: matrix.platformEx == 'android aarch64'
+        if: matrix.platformEx == 'android universal'
         uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact-nameEx }}
           path: ${{ matrix.artifact-pathEx }}
 
       - name: Post to Telegram ci channel
-        if: ${{ success() && matrix.platformEx == 'android aarch64' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
+        if: ${{ success() && matrix.platformEx == 'android universal' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
         env:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
