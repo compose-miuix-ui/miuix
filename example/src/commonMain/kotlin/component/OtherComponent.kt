@@ -438,13 +438,13 @@ fun LazyListScope.otherComponent(
                     VerticalSlider(
                         value = verticalValue2,
                         onValueChange = { verticalValue2 = it },
-                        valueRange = 0f..8f,
-                        steps = 7,
+                        valueRange = 0f..6f,
+                        steps = 5,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                         modifier = Modifier.size(25.dp, 160.dp)
                     )
                     Text(
-                        text = "Steps\n${verticalValue2.toInt()}/8",
+                        text = "Steps\n${verticalValue2.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -458,14 +458,14 @@ fun LazyListScope.otherComponent(
                     VerticalSlider(
                         value = verticalValue3,
                         onValueChange = { verticalValue3 = it },
-                        valueRange = 0f..8f,
-                        steps = 7,
+                        valueRange = 0f..6f,
+                        steps = 5,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                         showKeyPoints = true,
                         modifier = Modifier.size(25.dp, 160.dp)
                     )
                     Text(
-                        text = "Points\n${verticalValue3.toInt()}/8",
+                        text = "Points\n${verticalValue3.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
