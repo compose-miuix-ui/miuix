@@ -35,7 +35,6 @@ kotlin {
     androidTarget()
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach {
@@ -49,7 +48,6 @@ kotlin {
     }
 
     listOf(
-        macosX64(),
         macosArm64(),
     ).forEach {
         it.compilerOptions {
@@ -192,7 +190,7 @@ compose.desktop {
         }
     }
     nativeApplication {
-        targets(kotlin.targets.getByName("macosArm64"), kotlin.targets.getByName("macosX64"))
+        targets(kotlin.targets.getByName("macosArm64"))
         distributions {
             targetFormats(TargetFormat.Dmg)
             packageName = appName
