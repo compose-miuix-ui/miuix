@@ -53,7 +53,7 @@ Normally, you don't need to use it actively. See the [ListPopup](../components/l
 
 ## Overscroll Effects
 
-Miuix provides easy-to-use overscroll effects modifier for smoother and more natural scrolling experiences.
+Miuix provides easy-to-use overscroll effect modifiers for smoother and more natural scrolling experiences.
 
 ### Vertical Overscroll
 
@@ -81,19 +81,19 @@ LazyRow(
 
 ### Custom Overscroll Parameters
 
-You can customize the parameters of the overscroll effect to meet specific requirements.
+You can customize the overscroll effect parameters as needed:
 
 ```kotlin
 LazyColumn(
     modifier = Modifier.overScrollVertical(
-        nestedScrollToParent = true, // Whether to dispatch nested scroll events to the parent, default is true
-        scrollEasing = { currentOffset, newOffset -> // Custom scroll easing function
-            parabolaScrollEasing(currentOffset, newOffset, p = 25f, density = LocalDensity.current.density)
+        nestedScrollToParent = true, // Dispatch nested scroll events to parent, default true
+        scrollEasing = { distance, range -> // Custom easing, default effect is similar to HyperOS feel
+            // Example: DefaultParabolaScrollEasing(distance, range)
         },
-        springStiff = 200f, // Spring stiffness for the rebound animation, default is 200f
-        springDamp = 1f,  // Spring damping for the rebound animation, default is 1f
-        isEnabled = { platform() == Platform.Android || platform() == Platform.IOS } // Whether to enable the overscroll effect, enabled by default on Android and iOS
-        ),
+        springStiff = 280f, // Spring stiffness, default 280f
+        springDamp = 1f,    // Spring damping, default 1f
+        isEnabled = { platform() == Platform.Android || platform() == Platform.IOS } // Enable only on Android/iOS by default
+    ),
     overscrollEffect = null // It is recommended to set this parameter to null to disable the default effect
 ) {
     // List content
@@ -102,11 +102,11 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-*   `nestedScrollToParent`: Boolean, controls whether nested scroll events (e.g., from parent scroll containers) are dispatched to the parent. Defaults to `true`.
-*   `scrollEasing`: A function that defines the easing effect when scrolling beyond the bounds. It takes the current offset (`currentOffset`) and the new offset delta (`newOffset`) as parameters and returns the calculated new offset. By default, it uses `parabolaScrollEasing`, providing an iOS-like damping effect.
-*   `springStiff`: Float, defines the spring stiffness for the rebound animation. Higher values result in a faster and stiffer rebound. Defaults to `200f`.
-*   `springDamp`: Float, defines the spring damping for the rebound animation. Higher values result in less oscillation. Defaults to `1f`.
-*   `isEnabled`: A lambda expression returning a Boolean, used to dynamically control whether the overscroll effect is enabled. By default, it is enabled only on Android and iOS platforms.
+*   `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+*   `scrollEasing`: Function `(distance: Float, range: Int) -> Float`, custom easing， default effect is similar to HyperOS feel.
+*   `springStiff`: Float, spring stiffness for rebound. Default: `280f`.
+*   `springDamp`: Float, spring damping for rebound. Default: `1f`.
+*   `isEnabled`: Lambda, whether to enable overscroll. Default: only Android/iOS.
 
 ## Scroll End Haptic Feedback (Modifier.scrollEndHaptic())
 

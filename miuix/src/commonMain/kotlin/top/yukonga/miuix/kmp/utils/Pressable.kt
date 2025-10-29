@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -70,6 +71,7 @@ import kotlinx.coroutines.sync.Mutex
  * @param delay how long to wait before appearing 'pressed' (emitting [PressInteraction.Press]).
  *   If `null`, even if the animation is subsequently scrolled or consumed, a "pressed" appears directly.
  */
+@Stable
 fun Modifier.pressable(
     enabled: Boolean = true,
     role: Role? = null,
@@ -123,6 +125,7 @@ fun Modifier.pressable(
  * @param delay how long to wait before appearing 'pressed' (emitting [PressInteraction.Press]).
  *   If `null`, even if the animation is subsequently scrolled or consumed, a "pressed" appears directly.
  */
+@Stable
 fun Modifier.pressable(
     interactionSource: MutableInteractionSource?,
     indication: Indication? = null,
@@ -146,6 +149,7 @@ fun Modifier.pressable(
  * [createPressable] is the lambda that creates the actual clickable element, which will be chained
  * with [Modifier.indication] if needed.
  */
+@Stable
 internal inline fun Modifier.pressableWithIndicationIfNeeded(
     interactionSource: MutableInteractionSource?,
     indication: Indication?,
