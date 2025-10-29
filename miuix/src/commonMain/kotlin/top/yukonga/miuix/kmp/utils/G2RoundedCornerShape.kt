@@ -3,7 +3,7 @@
 
 package top.yukonga.miuix.kmp.utils
 
-// Form https://github.com/Kyant0/Capsule
+// Based on https://github.com/Kyant0/Capsule
 
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
