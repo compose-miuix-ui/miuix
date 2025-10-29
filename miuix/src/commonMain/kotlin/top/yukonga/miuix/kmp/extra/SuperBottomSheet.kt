@@ -52,12 +52,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 import top.yukonga.miuix.kmp.utils.PredictiveBackHandler
 import top.yukonga.miuix.kmp.utils.getWindowSize
@@ -334,7 +334,7 @@ private fun SuperBottomSheetColumn(
                         Modifier
                 )
                 .padding(horizontal = outsideMargin.width)
-                .clip(G2RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
+                .clip(ContinuousRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height)
@@ -509,7 +509,7 @@ private fun DragHandleArea(
                 .graphicsLayer {
                     scaleY = pressScale.value
                 }
-                .clip(G2RoundedCornerShape(2.dp))
+                .clip(ContinuousRoundedRectangle(2.dp))
                 .background(dragHandleColor.copy(alpha = handleAlpha))
         )
     }

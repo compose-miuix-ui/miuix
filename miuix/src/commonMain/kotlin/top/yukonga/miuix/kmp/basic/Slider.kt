@@ -41,8 +41,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import kotlin.math.abs
 
 /**
@@ -96,7 +96,7 @@ fun Slider(
     var isDragging by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(height) { G2RoundedCornerShape(height) }
+    val shape = remember(height) { ContinuousRoundedRectangle(height) }
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
@@ -141,7 +141,10 @@ fun Slider(
                                     val thumbRadius = size.height / 2f
                                     val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
                                     val visualFraction =
-                                        if (availableWidth == 0f) 0f else ((offset.x - thumbRadius) / availableWidth).coerceIn(0f, 1f)
+                                        if (availableWidth == 0f) 0f else ((offset.x - thumbRadius) / availableWidth).coerceIn(
+                                            0f,
+                                            1f
+                                        )
                                     val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChange(calculatedValue)
@@ -153,7 +156,10 @@ fun Slider(
                                     val thumbRadius = size.height / 2f
                                     val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
                                     val visualFraction =
-                                        if (availableWidth == 0f) 0f else ((dragOffset - thumbRadius) / availableWidth).coerceIn(0f, 1f)
+                                        if (availableWidth == 0f) 0f else ((dragOffset - thumbRadius) / availableWidth).coerceIn(
+                                            0f,
+                                            1f
+                                        )
                                     val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChange(calculatedValue)
@@ -242,7 +248,7 @@ fun VerticalSlider(
     var isDragging by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(width) { G2RoundedCornerShape(width) }
+    val shape = remember(width) { ContinuousRoundedRectangle(width) }
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
@@ -285,7 +291,10 @@ fun VerticalSlider(
                                 val thumbRadius = size.width / 2f
                                 val availableHeight = (size.height - 2f * thumbRadius).coerceAtLeast(0f)
                                 val visualFraction =
-                                    if (availableHeight == 0f) 0f else ((offset.y - thumbRadius) / availableHeight).coerceIn(0f, 1f)
+                                    if (availableHeight == 0f) 0f else ((offset.y - thumbRadius) / availableHeight).coerceIn(
+                                        0f,
+                                        1f
+                                    )
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChange(calculatedValue)
@@ -296,7 +305,10 @@ fun VerticalSlider(
                                 val thumbRadius = size.width / 2f
                                 val availableHeight = (size.height - 2f * thumbRadius).coerceAtLeast(0f)
                                 val visualFraction =
-                                    if (availableHeight == 0f) 0f else ((dragOffset - thumbRadius) / availableHeight).coerceIn(0f, 1f)
+                                    if (availableHeight == 0f) 0f else ((dragOffset - thumbRadius) / availableHeight).coerceIn(
+                                        0f,
+                                        1f
+                                    )
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChange(calculatedValue)
@@ -389,7 +401,7 @@ fun RangeSlider(
     val isDragging = isDraggingStart || isDraggingEnd
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(height) { G2RoundedCornerShape(height) }
+    val shape = remember(height) { ContinuousRoundedRectangle(height) }
 
     var currentStartValue by remember { mutableFloatStateOf(value.start) }
     var currentEndValue by remember { mutableFloatStateOf(value.endInclusive) }
@@ -602,7 +614,7 @@ fun RangeSlider(
 @Composable
 private fun SliderTrack(
     modifier: Modifier,
-    shape: G2RoundedCornerShape,
+    shape: ContinuousRoundedRectangle,
     backgroundColor: Color,
     foregroundColor: Color,
     effect: Boolean,
@@ -719,7 +731,7 @@ private fun SliderTrack(
 @Composable
 private fun RangeSliderTrack(
     modifier: Modifier,
-    shape: G2RoundedCornerShape,
+    shape: ContinuousRoundedRectangle,
     backgroundColor: Color,
     foregroundColor: Color,
     effect: Boolean,

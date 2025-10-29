@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 
 /**
  * A [IconButton] component with Miuix style.
@@ -51,7 +51,7 @@ fun IconButton(
     minWidth: Dp = IconButtonDefaults.MinWidth,
     content: @Composable () -> Unit
 ) {
-    val shape = remember(cornerRadius) { G2RoundedCornerShape(cornerRadius) }
+    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val interactionSource = remember { MutableInteractionSource() }
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
 

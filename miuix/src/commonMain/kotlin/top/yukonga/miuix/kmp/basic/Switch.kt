@@ -44,8 +44,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousCapsule
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.CapsuleShape
 import kotlin.math.absoluteValue
 
 /**
@@ -128,7 +128,7 @@ fun Switch(
             .wrapContentSize(Alignment.Center)
             .size(50.dp, 28.5.dp)
             .requiredSize(50.dp, 28.5.dp)
-            .clip(CapsuleShape())
+            .clip(ContinuousCapsule)
             .drawBehind {
                 drawRect(backgroundColor)
             }

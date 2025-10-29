@@ -47,8 +47,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.platform
 
@@ -239,7 +239,7 @@ fun FloatingNavigationBar(
                         Modifier
                             .background(
                                 color = MiuixTheme.colorScheme.dividerLine,
-                                shape = G2RoundedCornerShape(cornerRadius)
+                                shape = ContinuousRoundedRectangle(cornerRadius)
                             )
                             .padding(0.75.dp)
                     } else Modifier
@@ -248,11 +248,11 @@ fun FloatingNavigationBar(
                     if (shadowElevation > 0.dp) {
                         Modifier.graphicsLayer(
                             shadowElevation = with(density) { shadowElevation.toPx() },
-                            shape = G2RoundedCornerShape(cornerRadius),
+                            shape = ContinuousRoundedRectangle(cornerRadius),
                             clip = cornerRadius > 0.dp
                         )
                     } else if (cornerRadius > 0.dp) {
-                        Modifier.clip(G2RoundedCornerShape(cornerRadius))
+                        Modifier.clip(ContinuousRoundedRectangle(cornerRadius))
                     } else {
                         Modifier
                     }

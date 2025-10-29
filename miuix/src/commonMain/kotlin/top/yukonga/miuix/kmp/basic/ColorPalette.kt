@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import top.yukonga.miuix.kmp.utils.CapsuleShape
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
+import com.mocharealm.gaze.capsule.ContinuousCapsule
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.utils.Hsv
 import top.yukonga.miuix.kmp.utils.toHsv
 import kotlin.math.abs
@@ -120,7 +120,7 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(CapsuleShape())
+                    .clip(ContinuousCapsule)
                     .background(lastEmittedColor ?: initialColor)
             )
         }
@@ -159,7 +159,7 @@ fun ColorPalette(
                 alpha = it
                 val newColor = base.copy(alpha = it)
                 lastAcceptedHSV =
-                    base.toHsv().let { it -> Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                    base.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             }
@@ -182,7 +182,7 @@ private fun PaletteCanvas(
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
     val rowSV = remember(rows) { buildRowSV(rows) }
     val grayV = remember(rows) { buildGrayV(rows) }
-    val shape = G2RoundedCornerShape(cornerRadius)
+    val shape = ContinuousRoundedRectangle(cornerRadius)
 
     var sizePx by remember { mutableStateOf(IntSize.Zero) }
 
@@ -253,9 +253,9 @@ private fun PaletteCanvas(
                         y = with(density) { cyPx.toDp() - indicatorSize / 2 }
                     )
                     .size(indicatorSize)
-                    .clip(CapsuleShape())
-                    .border(6.dp, Color.White, CapsuleShape())
-                    .background(Color.Transparent, CapsuleShape())
+                    .clip(ContinuousCapsule)
+                    .border(6.dp, Color.White, ContinuousCapsule)
+                    .background(Color.Transparent, ContinuousCapsule)
             )
         }
     }

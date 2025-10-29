@@ -35,10 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 import top.yukonga.miuix.kmp.utils.PredictiveBackHandler
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
@@ -213,7 +213,7 @@ private fun SuperDialogContent(
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click to prevent dismissal */ }
         }
-        .clip(G2RoundedCornerShape(bottomCornerRadius))
+        .clip(ContinuousRoundedRectangle(bottomCornerRadius))
         .background(backgroundColor)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 

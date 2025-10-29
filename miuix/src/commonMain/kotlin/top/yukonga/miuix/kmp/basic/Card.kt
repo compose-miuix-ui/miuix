@@ -24,10 +24,10 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.mocharealm.gaze.capsule.continuities.G1Continuity
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.CornerSmoothness
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.TiltFeedback
@@ -141,8 +141,8 @@ private fun BasicCard(
     cornerRadius: Dp = CardDefaults.CornerRadius,
     content: @Composable () -> Unit,
 ) {
-    val shape = remember(cornerRadius) { G2RoundedCornerShape(cornerRadius) }
-    val clipShape = remember(cornerRadius) { G2RoundedCornerShape(cornerRadius, CornerSmoothness.None) }
+    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val clipShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius, G1Continuity) }
 
     CompositionLocalProvider(
         LocalContentColor provides colors.contentColor,
@@ -152,7 +152,7 @@ private fun BasicCard(
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 }
-                .clip(clipShape)  // For touch feedback, there is a problem when using G2RoundedCornerShape.
+                .clip(clipShape)  // For touch feedback, there is a problem when using G2Continuity.
                 .background(color = colors.color, shape = shape),
             propagateMinConstraints = true,
         ) {

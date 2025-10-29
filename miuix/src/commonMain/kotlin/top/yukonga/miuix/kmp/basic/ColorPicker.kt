@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.utils.CapsuleShape
+import com.mocharealm.gaze.capsule.ContinuousCapsule
 import top.yukonga.miuix.kmp.utils.ColorUtils
 import top.yukonga.miuix.kmp.utils.Hsv
 import top.yukonga.miuix.kmp.utils.OkLab
@@ -154,7 +154,7 @@ fun HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(CapsuleShape())
+                    .clip(ContinuousCapsule)
                     .background(selectedColor)
             )
         }
@@ -371,7 +371,7 @@ fun OkHsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(CapsuleShape())
+                    .clip(ContinuousCapsule)
                     .background(selectedColor)
             )
         }
@@ -596,7 +596,7 @@ fun OkLabColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(CapsuleShape())
+                    .clip(ContinuousCapsule)
                     .background(selectedColor)
             )
         }
@@ -840,7 +840,7 @@ private fun ColorSlider(
 
     Box(
         modifier = Modifier
-            .clip(CapsuleShape())
+            .clip(ContinuousCapsule)
             .then(modifier)
             .height(sliderHeightDp)
             .onGloballyPositioned { coordinates ->
@@ -903,8 +903,8 @@ private fun SliderIndicator(
         modifier = modifier
             .offset(x = indicatorOffsetXDp)
             .size(indicatorSize)
-            .border(6.dp, Color.White, CapsuleShape())
-            .background(Color.Transparent, CapsuleShape())
+            .border(6.dp, Color.White, ContinuousCapsule)
+            .background(Color.Transparent, ContinuousCapsule)
     )
 }
 

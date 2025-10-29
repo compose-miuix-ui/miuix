@@ -35,8 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
 
 /**
@@ -139,7 +139,7 @@ fun TabRowWithContour(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(G2RoundedCornerShape(cornerRadius + contourPadding))
+                .clip(ContinuousRoundedRectangle(cornerRadius + contourPadding))
                 .background(color = colors.backgroundColor(false))
                 .padding(contourPadding)
         ) {
@@ -148,7 +148,7 @@ fun TabRowWithContour(
                 modifier = Modifier
                     .fillMaxSize()
                     .overScrollHorizontal()
-                    .clip(G2RoundedCornerShape(cornerRadius)),
+                    .clip(ContinuousRoundedRectangle(cornerRadius)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(contourPadding),
                 overscrollEffect = null
@@ -176,7 +176,7 @@ private fun TabItem(
     onClick: () -> Unit,
     enabled: Boolean,
     colors: TabRowColors,
-    shape: G2RoundedCornerShape,
+    shape: ContinuousRoundedRectangle,
     width: Dp
 ) {
     Surface(
@@ -211,7 +211,7 @@ private fun TabItemWithContour(
     onClick: () -> Unit,
     enabled: Boolean,
     colors: TabRowColors,
-    shape: G2RoundedCornerShape,
+    shape: ContinuousRoundedRectangle,
     width: Dp
 ) {
     Box(
@@ -239,7 +239,7 @@ private fun TabItemWithContour(
  */
 private data class TabRowConfig(
     val tabWidth: Dp,
-    val shape: G2RoundedCornerShape,
+    val shape: ContinuousRoundedRectangle,
     val listState: androidx.compose.foundation.lazy.LazyListState
 )
 
@@ -260,7 +260,7 @@ private fun rememberTabRowConfig(
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
-    val shape = remember(cornerRadius) { G2RoundedCornerShape(cornerRadius) }
+    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
 
     return TabRowConfig(tabWidth, shape, listState)
 }
