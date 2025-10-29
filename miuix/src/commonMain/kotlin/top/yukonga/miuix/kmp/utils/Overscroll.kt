@@ -31,7 +31,6 @@ import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
 import top.yukonga.miuix.kmp.basic.RefreshState
 import kotlin.math.abs
 import kotlin.math.sign
-import kotlin.math.sqrt
 
 @Stable
 private fun obtainScrollDistance(distance: Float, range: Int): Float {
@@ -48,7 +47,7 @@ private fun obtainDampingDistance(normalizedValue: Float, range: Int): Float {
 internal val DefaultParabolaScrollEasing: (distance: Float, isVertical: Boolean) -> Float
     @Composable
     get() {
-        val windowSize = getWindowSize()
+        val windowSize by rememberUpdatedState(getWindowSize())
         return { distance, isVertical ->
             obtainScrollDistance(distance, if (isVertical) windowSize.height else windowSize.width)
         }
@@ -116,9 +115,9 @@ fun Modifier.overScrollOutOfBound(
     val currentSpringStiff by rememberUpdatedState(springStiff)
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
+    val currentWindowSize by rememberUpdatedState(getWindowSize())
     val dispatcher = remember { NestedScrollDispatcher() }
     var offset by remember { mutableFloatStateOf(0f) }
-    val windowSize = getWindowSize()
 
     val nestedConnection = remember {
         object : NestedScrollConnection {
@@ -141,7 +140,7 @@ fun Modifier.overScrollOutOfBound(
             }
 
             private fun addTouchDelta(deltaTouch: Float): Float {
-                val maxTouch = (if (currentIsVertical) windowSize.height else windowSize.width).toFloat()
+                val maxTouch = (if (currentIsVertical) currentWindowSize.height else currentWindowSize.width).toFloat()
                 val target = currentTouch + deltaTouch
                 val overflow =
                     when {

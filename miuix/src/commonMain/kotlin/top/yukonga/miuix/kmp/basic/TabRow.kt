@@ -78,7 +78,7 @@ fun TabRow(
             state = config.listState,
             modifier = Modifier
                 .fillMaxSize()
-                .overScrollHorizontal()
+                .overScrollHorizontal(false)
                 .clip(config.shape),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -147,7 +147,7 @@ fun TabRowWithContour(
                 state = config.listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .overScrollHorizontal()
+                    .overScrollHorizontal(false)
                     .clip(G2RoundedCornerShape(cornerRadius)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(contourPadding),
