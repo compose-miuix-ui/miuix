@@ -173,7 +173,8 @@ SliderDefaults 对象提供了 Slider 组件的默认配置。
 | foregroundColor         | Color | 滑块的前景颜色           |
 | disabledForegroundColor | Color | 禁用状态时滑块的前景颜色 |
 | backgroundColor         | Color | 滑块的背景颜色           |
-| keyPointColor           | Color | 关键点指示器的颜色       |
+| keyPointColor           | Color | 背景中关键点指示器的颜色   |
+| keyPointForegroundColor | Color | 前景中关键点指示器的颜色   |
 
 ## 进阶用法
 

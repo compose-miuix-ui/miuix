@@ -173,7 +173,8 @@ The SliderDefaults object provides default configurations for the Slider compone
 | foregroundColor         | Color | Foreground color of the slider    |
 | disabledForegroundColor | Color | Foreground color when disabled    |
 | backgroundColor         | Color | Background color of the slider    |
-| keyPointColor           | Color | Color of the key point indicators |
+| keyPointColor           | Color | Color of key point indicators in background |
+| keyPointForegroundColor | Color | Color of key point indicators in foreground |
 
 ## Advanced Usage
 
