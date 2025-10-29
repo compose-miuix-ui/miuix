@@ -5,9 +5,7 @@ package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.Spring.StiffnessMediumLow
 import androidx.compose.animation.core.spring
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -34,26 +32,14 @@ import top.yukonga.miuix.kmp.basic.RefreshState
 import kotlin.math.abs
 import kotlin.math.sign
 
-@Stable
-private fun obtainScrollDistance(distance: Float, range: Int): Float {
-    return obtainDampingDistance((abs(distance) / range).coerceIn(0.0f, 1.0f), range) * sign(distance)
-}
+// Based on https://github.com/Cormor/ComposeOverscroll
 
 @Stable
-private fun obtainDampingDistance(normalizedValue: Float, range: Int): Float {
-    val x = normalizedValue.toDouble().coerceIn(0.0, 1.0)
-    val dampedFactor = x - x * x + (x * x * x / 3.0)
-    return (dampedFactor * range).toFloat()
+internal val DefaultParabolaScrollEasing: (distance: Float, range: Int) -> Float = { distance, range ->
+    val x = (abs(distance) / range).coerceIn(0.0f, 1.0f)
+    val dampedFactor = x - x * x + (x * x * x / 3.0f)
+    dampedFactor * range * sign(distance)
 }
-
-internal val DefaultParabolaScrollEasing: (distance: Float, isVertical: Boolean) -> Float
-    @Composable
-    get() {
-        val windowSize by rememberUpdatedState(getWindowSize())
-        return { distance, isVertical ->
-            obtainScrollDistance(distance, if (isVertical) windowSize.height else windowSize.width)
-        }
-    }
 
 internal const val OutBoundSpringStiff = 280f
 internal const val OutBoundSpringDamp = 1f
@@ -64,7 +50,7 @@ internal const val OutBoundSpringDamp = 1f
 @Stable
 fun Modifier.overScrollVertical(
     nestedScrollToParent: Boolean = true,
-    scrollEasing: ((distance: Float, isVertical: Boolean) -> Float)? = null,
+    scrollEasing: ((distance: Float, range: Int) -> Float)? = null,
     springStiff: Float = OutBoundSpringStiff,
     springDamp: Float = OutBoundSpringDamp,
     isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
@@ -76,34 +62,28 @@ fun Modifier.overScrollVertical(
 @Stable
 fun Modifier.overScrollHorizontal(
     nestedScrollToParent: Boolean = true,
-    scrollEasing: ((distance: Float, isVertical: Boolean) -> Float)? = null,
+    scrollEasing: ((distance: Float, range: Int) -> Float)? = null,
     springStiff: Float = OutBoundSpringStiff,
     springDamp: Float = OutBoundSpringDamp,
     isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
 ): Modifier = overScrollOutOfBound(isVertical = false, nestedScrollToParent, scrollEasing, springStiff, springDamp, isEnabled)
 
 /**
- * OverScroll effect for scrollable Composable.
+ * Overscroll effect when scrolling to the boundary.
  *
- * form https://github.com/Cormor/ComposeOverscroll
- * @Author: cormor
- * @Email: cangtiansuo@gmail.com
- * @param isVertical is vertical, or horizontal?
+ * @param isVertical Whether the overscroll effect is vertical or horizontal.
  * @param nestedScrollToParent Whether to dispatch nested scroll events to parent.
- * @param scrollEasing u can refer to [DefaultParabolaScrollEasing], The incoming values are the currently existing overscroll Offset
- * and the new offset from the gesture.
- * modify it to cooperate with [springStiff] to customize the sliding damping effect.
- * The current default easing comes from iOS, you don't need to modify it!
- * @param springStiff springStiff for overscroll effect，For better user experience, the new value is not recommended to be higher than [StiffnessMediumLow].
+ * @param scrollEasing Easing function for overscroll effect, default is a parabolic easing.
+ * @param springStiff springStiff for overscroll effect，generally do not need to set.
  * @param springDamp springDamp for overscroll effect，generally do not need to set.
- * @param isEnabled Whether to enable the overscroll effect, default is enabled on Android and iOS.
+ * @param isEnabled Whether the overscroll effect is enabled. Default is enabled on Android and iOS only.
  */
 @Stable
 @Suppress("NAME_SHADOWING")
 fun Modifier.overScrollOutOfBound(
     isVertical: Boolean = true,
     nestedScrollToParent: Boolean = true,
-    scrollEasing: ((distance: Float, isVertical: Boolean) -> Float)?,
+    scrollEasing: ((distance: Float, range: Int) -> Float)?,
     springStiff: Float = OutBoundSpringStiff,
     springDamp: Float = OutBoundSpringDamp,
     isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
@@ -113,11 +93,11 @@ fun Modifier.overScrollOutOfBound(
     val overScrollState = LocalOverScrollState.current
     val pullToRefreshState = LocalPullToRefreshState.current
     val currentNestedScrollToParent by rememberUpdatedState(nestedScrollToParent)
+    val currentWindowSize by rememberUpdatedState(getWindowSize())
     val currentScrollEasing by rememberUpdatedState(scrollEasing ?: DefaultParabolaScrollEasing)
     val currentSpringStiff by rememberUpdatedState(springStiff)
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
-    val currentWindowSize by rememberUpdatedState(getWindowSize())
     val dispatcher = remember { NestedScrollDispatcher() }
     val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
@@ -140,7 +120,8 @@ fun Modifier.overScrollOutOfBound(
             }
 
             private fun touchToDamped(distance: Float): Float {
-                return currentScrollEasing(distance, currentIsVertical)
+                val range = if (currentIsVertical) currentWindowSize.height else currentWindowSize.width
+                return currentScrollEasing(distance, range)
             }
 
             private fun addTouchDelta(deltaTouch: Float): Float {
@@ -322,7 +303,6 @@ fun Modifier.overScrollOutOfBound(
  *
  * @param isOverScrollActive Whether the overscroll effect is active.
  */
-@Stable
 class OverScrollState {
     var isOverScrollActive by mutableStateOf(false)
         internal set
