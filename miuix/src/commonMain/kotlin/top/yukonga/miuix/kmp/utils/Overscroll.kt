@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
 import top.yukonga.miuix.kmp.basic.RefreshState
@@ -117,6 +119,7 @@ fun Modifier.overScrollOutOfBound(
     val currentIsVertical by rememberUpdatedState(isVertical)
     val currentWindowSize by rememberUpdatedState(getWindowSize())
     val dispatcher = remember { NestedScrollDispatcher() }
+    val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
 
     val nestedConnection = remember {
@@ -127,6 +130,7 @@ fun Modifier.overScrollOutOfBound(
             val visibilityThreshold = 1f
             var currentTouch by mutableStateOf(0f)
             lateinit var lastFlingAnimator: Animatable<Float, AnimationVector1D>
+            var stopJob: Job? = null
 
             private fun shouldBypassForPullToRefresh(availableY: Float): Boolean {
                 return pullToRefreshState != null &&
@@ -155,7 +159,8 @@ fun Modifier.overScrollOutOfBound(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // println("Overscroll !!!onPreScroll!!! available >> $available source >> $source")
                 // Check if overScroll should be disabled for drop-down direction
-                overScrollState.isOverScrollActive = abs(offset) > visibilityThreshold
+                val newActivePreScroll = abs(offset) > visibilityThreshold
+                overScrollState.isOverScrollActive = newActivePreScroll
                 if (shouldBypassForPullToRefresh(available.y)) {
                     return dispatcher.dispatchPreScroll(available, source)
                 }
@@ -164,8 +169,10 @@ fun Modifier.overScrollOutOfBound(
                     return dispatcher.dispatchPreScroll(available, source)
                 }
                 if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    dispatcher.coroutineScope.launch {
-                        lastFlingAnimator.stop()
+                    if (stopJob?.isActive != true) {
+                        stopJob = coroutineScope.launch {
+                            lastFlingAnimator.stop()
+                        }
                     }
                 }
                 val realAvailable = when {
@@ -197,7 +204,8 @@ fun Modifier.overScrollOutOfBound(
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
                 // println("Overscroll !!!onPostScroll!!! consumed >> $consumed available >> $available source >>> $source")
                 // Check if overScroll should be disabled for drop-down direction
-                overScrollState.isOverScrollActive = abs(offset) > visibilityThreshold
+                val newActivePostScroll = abs(offset) > visibilityThreshold
+                overScrollState.isOverScrollActive = newActivePostScroll
                 if (shouldBypassForPullToRefresh(available.y)) {
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
@@ -206,8 +214,10 @@ fun Modifier.overScrollOutOfBound(
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
                 if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    dispatcher.coroutineScope.launch {
-                        lastFlingAnimator.stop()
+                    if (stopJob?.isActive != true) {
+                        stopJob = coroutineScope.launch {
+                            lastFlingAnimator.stop()
+                        }
                     }
                 }
                 val realAvailable = when {
@@ -227,7 +237,8 @@ fun Modifier.overScrollOutOfBound(
             override suspend fun onPreFling(available: Velocity): Velocity {
                 // println("Overscroll !!!onPreFling!!! available >> $available")
                 // Check if overScroll should be disabled for drop-down direction
-                overScrollState.isOverScrollActive = abs(offset) > visibilityThreshold
+                val newActivePreFling = abs(offset) > visibilityThreshold
+                overScrollState.isOverScrollActive = newActivePreFling
                 if (shouldBypassForPullToRefresh(available.y)) {
                     return dispatcher.dispatchPreFling(available)
                 }
@@ -268,7 +279,8 @@ fun Modifier.overScrollOutOfBound(
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
                 // println("Overscroll !!!onPostFling!!! consumed >> $consumed available >> $available")
                 // Check if overScroll should be disabled for drop-down direction
-                overScrollState.isOverScrollActive = abs(offset) > visibilityThreshold
+                val newActivePostFling = abs(offset) > visibilityThreshold
+                overScrollState.isOverScrollActive = newActivePostFling
                 if (shouldBypassForPullToRefresh(available.y)) {
                     return dispatcher.dispatchPostFling(consumed, available)
                 }
