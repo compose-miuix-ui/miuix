@@ -33,33 +33,6 @@ import kotlin.math.abs
 import kotlin.math.sign
 import kotlin.math.sqrt
 
-/**
- * A parabolic rolling easing curve.
- *
- * When rolling in the same direction, the farther away from 0, the greater the "resistance"; the closer to 0, the smaller the "resistance";
- *
- * No drag effect is applied when the scrolling direction is opposite to the currently existing overscroll offset
- *
- * Note: when [p] = 50f, its performance should be consistent with iOS
- * @param currentOffset Offset value currently out of bounds
- * @param newOffset The offset of the new scroll
- * @param p Key parameters for parabolic curve calculation
- * @param density Without this param, the unit of offset is pixels,
- * so we need this variable to have the same expectations on different devices.
- */
-@Stable
-@Deprecated(message = "Unused")
-fun parabolaScrollEasing(currentOffset: Float, newOffset: Float, p: Float = 50f, density: Float): Float {
-    val realP = p * density
-    val ratio =
-        (realP / (sqrt(realP * abs(currentOffset + newOffset / 2).coerceAtLeast(Float.MIN_VALUE)))).coerceIn(Float.MIN_VALUE, 1f)
-    return if (sign(currentOffset) == sign(newOffset)) {
-        currentOffset + newOffset * ratio
-    } else {
-        currentOffset + newOffset
-    }
-}
-
 @Stable
 private fun obtainScrollDistance(distance: Float, range: Int): Float {
     return obtainDampingDistance((abs(distance) / range).coerceIn(0.0f, 1.0f), range) * sign(distance)
