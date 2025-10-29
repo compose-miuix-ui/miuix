@@ -188,9 +188,9 @@ fun Modifier.overScrollOutOfBound(
                     offset = offsetAtLast
                 }
                 return if (currentIsVertical) {
-                    Offset(realAvailable.x, realAvailable.y - overflow)
+                    Offset(available.x - realAvailable.x, available.y - realAvailable.y - overflow)
                 } else {
-                    Offset(realAvailable.x - overflow, realAvailable.y)
+                    Offset(available.x - realAvailable.x - overflow, available.y - realAvailable.y)
                 }
             }
 
@@ -218,9 +218,9 @@ fun Modifier.overScrollOutOfBound(
                 val overflow = addTouchDelta(realOffset)
                 offset = touchToDamped(currentTouch)
                 return if (currentIsVertical) {
-                    Offset(realAvailable.x, realAvailable.y - overflow)
+                    Offset(available.x - realAvailable.x, available.y - realAvailable.y - overflow)
                 } else {
-                    Offset(realAvailable.x - overflow, realAvailable.y)
+                    Offset(available.x - realAvailable.x - overflow, available.y - realAvailable.y)
                 }
             }
 
@@ -291,7 +291,7 @@ fun Modifier.overScrollOutOfBound(
                     offset = touchToDamped(currentTouch)
                 }
 
-                return realAvailable
+                return available
             }
         }
     }
