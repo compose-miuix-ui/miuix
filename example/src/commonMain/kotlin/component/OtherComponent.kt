@@ -107,7 +107,7 @@ fun LazyListScope.otherComponent(
         Row(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TextButton(
@@ -157,7 +157,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             CircularProgressIndicator(
@@ -218,7 +218,7 @@ fun LazyListScope.otherComponent(
             singleLine = true,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
         )
@@ -229,7 +229,7 @@ fun LazyListScope.otherComponent(
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp)
+                .padding(bottom = 12.dp)
         ) {
             var sliderValue by remember { mutableStateOf(0.3f) }
             Text(
@@ -252,7 +252,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             Slider(
                 value = stepsValue,
@@ -270,7 +270,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             Slider(
                 value = stepsWithKeyPointsValue,
@@ -289,7 +289,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             Slider(
                 value = customKeyPointsValue,
@@ -308,7 +308,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             Slider(
                 value = disabledValue,
@@ -325,7 +325,7 @@ fun LazyListScope.otherComponent(
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp)
+                .padding(bottom = 12.dp)
         ) {
             var rangeValue by remember { mutableStateOf(0.2f..0.8f) }
             Text(
@@ -348,7 +348,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             RangeSlider(
                 value = rangeStepsValue,
@@ -367,7 +367,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             RangeSlider(
                 value = customRangeValue,
@@ -386,7 +386,7 @@ fun LazyListScope.otherComponent(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(bottom = 4.dp)
             )
             RangeSlider(
                 value = disabledRangeValue,
@@ -403,7 +403,7 @@ fun LazyListScope.otherComponent(
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp)
+                .padding(bottom = 12.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -533,7 +533,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
             TabRowWithContour(
@@ -558,7 +558,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
             FlowRow {
@@ -583,7 +583,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
             Row(
@@ -621,7 +621,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
 
             insideMargin = PaddingValues(16.dp)
         ) {
@@ -661,7 +661,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
             Row(
@@ -700,7 +700,7 @@ fun LazyListScope.otherComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 6.dp),
+                .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
             Row(

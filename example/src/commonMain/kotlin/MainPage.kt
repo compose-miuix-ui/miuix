@@ -195,6 +195,7 @@ fun MainPage(
         item(key = "searchbar") {
             SmallTitle(text = "SearchBar")
             SearchBar(
+                modifier = Modifier.padding(bottom = 12.dp),
                 inputField = {
                     InputField(
                         query = searchValue,

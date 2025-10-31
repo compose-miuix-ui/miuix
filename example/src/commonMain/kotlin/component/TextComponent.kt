@@ -126,7 +126,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         BasicComponent(
             title = "Title",
@@ -174,7 +174,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         SuperArrow(
             leftAction = {
@@ -217,7 +217,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         Row(
             modifier = Modifier
@@ -287,7 +287,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         Row(
             modifier = Modifier
@@ -361,7 +361,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         SuperDropdown(
             title = "Dropdown",
@@ -394,7 +394,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(bottom = 12.dp)
     ) {
         SuperSpinner(
             title = "Spinner",
