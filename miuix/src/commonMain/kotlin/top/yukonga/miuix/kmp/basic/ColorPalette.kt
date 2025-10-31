@@ -182,7 +182,7 @@ private fun PaletteCanvas(
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
     val rowSV = remember(rows) { buildRowSV(rows) }
     val grayV = remember(rows) { buildGrayV(rows) }
-    val shape = ContinuousRoundedRectangle(cornerRadius)
+    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
 
     var sizePx by remember { mutableStateOf(IntSize.Zero) }
 

@@ -20,14 +20,19 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlendModeColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
@@ -87,7 +92,7 @@ fun SuperSpinner(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
     val itemsNotEmpty = items.isNotEmpty()
@@ -127,6 +132,7 @@ fun SuperSpinner(
                     onSelectedIndexChange = onSelectedIndexChange
                 )
                 leftAction?.invoke()
+                Unit
             }
         } else leftAction,
         rightActions = {
@@ -148,11 +154,12 @@ fun SuperSpinner(
 private fun SuperSpinnerPopup(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
-    isDropdownExpanded: androidx.compose.runtime.MutableState<Boolean>,
+    isDropdownExpanded: MutableState<Boolean>,
     maxHeight: Dp?,
-    hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback,
+    hapticFeedback: HapticFeedback,
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
+    val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     ListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.Right,
@@ -163,16 +170,18 @@ private fun SuperSpinnerPopup(
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
-                SpinnerItemImpl(
-                    entry = spinnerEntry,
-                    entryCount = items.size,
-                    isSelected = selectedIndex == index,
-                    index = index,
-                    dialogMode = false
-                ) { selectedIdx ->
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                    onSelectedIndexChange?.invoke(selectedIdx)
-                    isDropdownExpanded.value = false
+                key(index) {
+                    SpinnerItemImpl(
+                        entry = spinnerEntry,
+                        entryCount = items.size,
+                        isSelected = selectedIndex == index,
+                        index = index,
+                        dialogMode = false
+                    ) { selectedIdx ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onSelectState.value?.invoke(selectedIdx)
+                        isDropdownExpanded.value = false
+                    }
                 }
             }
         }
@@ -247,7 +256,7 @@ fun SuperSpinner(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
     val itemsNotEmpty = items.isNotEmpty()
@@ -313,8 +322,8 @@ private fun SuperSpinnerDialog(
     title: String,
     dialogButtonString: String,
     popupModifier: Modifier,
-    isDropdownExpanded: androidx.compose.runtime.MutableState<Boolean>,
-    hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback,
+    isDropdownExpanded: MutableState<Boolean>,
+    hapticFeedback: HapticFeedback,
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
     SuperDialog(

@@ -4,10 +4,11 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
@@ -39,14 +40,18 @@ actual fun BackHandler(
     enabled: Boolean,
     onBack: () -> Unit
 ) {
-    if (!enabled) return
-    LaunchedEffect(Unit) {
+    val currentOnBack by rememberUpdatedState(onBack)
+    DisposableEffect(enabled) {
+        if (!enabled) return@DisposableEffect onDispose { }
         val onKeyDown: (dynamic) -> Unit = { event ->
             if (event.key == "Escape") {
-                onBack()
+                currentOnBack()
             }
         }
         window.addEventListener("keydown", onKeyDown)
+        onDispose {
+            window.removeEventListener("keydown", onKeyDown)
+        }
     }
 }
 

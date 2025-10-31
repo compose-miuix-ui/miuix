@@ -7,6 +7,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -22,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
@@ -50,7 +50,7 @@ fun BasicComponent(
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    leftAction: @Composable (() -> Unit?)? = null,
+    leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
@@ -77,7 +77,7 @@ fun BasicComponent(
         }
     }
 
-    val clickableModifier = remember(onClick, enabled, interactionSource) {
+    val clickableModifier = remember(onClick, enabled, interactionSource, indication) {
         if (onClick != null && enabled) {
             Modifier.clickable(
                 indication = indication,
@@ -87,85 +87,41 @@ fun BasicComponent(
         } else Modifier
     }
 
-    val titleContent: (@Composable () -> Unit)? = remember(title, enabled, titleColor) {
-        title?.let { text ->
-            {
+    Row(
+        modifier = modifier
+            .heightIn(min = 56.dp)
+            .fillMaxWidth()
+            .then(clickableModifier)
+            .padding(insideMargin),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left action (optional)
+        leftAction?.let { it() }
+
+        // Content
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (title != null) {
                 Text(
-                    text = text,
+                    text = title,
                     fontSize = MiuixTheme.textStyles.headline1.fontSize,
                     fontWeight = FontWeight.Medium,
                     color = titleColor.color(enabled)
                 )
             }
-        }
-    }
-
-    val summaryContent: (@Composable () -> Unit)? = remember(summary, enabled, summaryColor) {
-        summary?.let { text ->
-            {
+            if (summary != null) {
                 Text(
-                    text = text,
+                    text = summary,
                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                     color = summaryColor.color(enabled)
                 )
             }
         }
-    }
 
-    SubcomposeLayout(
-        modifier = modifier
-            .heightIn(min = 56.dp)
-            .fillMaxWidth()
-            .then(clickableModifier)
-            .padding(insideMargin)
-    ) { constraints ->
-        val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-        // 1. leftAction
-        val leftPlaceables = leftAction?.let {
-            subcompose("leftAction") { it() }.map { it -> it.measure(looseConstraints) }
-        } ?: emptyList()
-        val leftWidth = leftPlaceables.maxOfOrNull { it.width } ?: 0
-        val leftHeight = leftPlaceables.maxOfOrNull { it.height } ?: 0
-        // 2. rightActions
-        val rightPlaceables = subcompose("rightActions") {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-                content = rightActions
-            )
-        }.map { it.measure(looseConstraints) }
-        val rightWidth = rightPlaceables.maxOfOrNull { it.width } ?: 0
-        val rightHeight = rightPlaceables.maxOfOrNull { it.height } ?: 0
-        // 3. content
-        val contentMaxWidth = maxOf(0, constraints.maxWidth - leftWidth - rightWidth - 16.dp.roundToPx())
-        val titlePlaceable = titleContent
-            ?.let { subcompose("title", it).first() }
-            ?.measure(looseConstraints.copy(maxWidth = contentMaxWidth))
-        val summaryPlaceable = summaryContent
-            ?.let { subcompose("summary", it).first() }
-            ?.measure(looseConstraints.copy(maxWidth = contentMaxWidth))
-        val contentHeight = (titlePlaceable?.height ?: 0) + (summaryPlaceable?.height ?: 0)
-        val layoutHeight = maxOf(leftHeight, rightHeight, contentHeight)
-        layout(constraints.maxWidth, layoutHeight) {
-            var x = 0
-            // leftAction
-            leftPlaceables.forEach {
-                it.placeRelative(x, (layoutHeight - it.height) / 2)
-                x += it.width
-            }
-            // content
-            var contentY = (layoutHeight - contentHeight) / 2
-            titlePlaceable?.let {
-                it.placeRelative(x, contentY)
-                contentY += it.height
-            }
-            summaryPlaceable?.placeRelative(x, contentY)
-            // rightActions
-            val rightX = constraints.maxWidth - rightWidth
-            rightPlaceables.forEach {
-                it.placeRelative(rightX, (layoutHeight - it.height) / 2)
-            }
-        }
+        // Right actions (optional)
+        rightActions()
     }
 }
 

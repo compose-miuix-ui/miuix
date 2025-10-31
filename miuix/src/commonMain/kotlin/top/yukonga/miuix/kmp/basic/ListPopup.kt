@@ -17,10 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -75,7 +76,7 @@ fun ListPopup(
 ) {
     if (!show.value) return
 
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
 
     Layout(
@@ -101,50 +102,111 @@ fun ListPopup(
     val navigationBars = WindowInsets.navigationBars.asPaddingValues()
     val captionBar = WindowInsets.captionBar.asPaddingValues()
 
-    val popupMargin = remember(windowSize, density) {
-        with(density) {
-            IntRect(
-                left = popupPositionProvider.getMargins().calculateLeftPadding(layoutDirection).roundToPx(),
-                top = popupPositionProvider.getMargins().calculateTopPadding().roundToPx(),
-                right = popupPositionProvider.getMargins().calculateRightPadding(layoutDirection).roundToPx(),
-                bottom = popupPositionProvider.getMargins().calculateBottomPadding().roundToPx()
+    val popupMargin by remember(windowSize, layoutDirection, density) {
+        derivedStateOf {
+            with(density) {
+                IntRect(
+                    left = popupPositionProvider.getMargins().calculateLeftPadding(layoutDirection).roundToPx(),
+                    top = popupPositionProvider.getMargins().calculateTopPadding().roundToPx(),
+                    right = popupPositionProvider.getMargins().calculateRightPadding(layoutDirection).roundToPx(),
+                    bottom = popupPositionProvider.getMargins().calculateBottomPadding().roundToPx()
+                )
+            }
+        }
+    }
+
+    val windowBounds by remember(windowSize, layoutDirection, displayCutout, statusBars, navigationBars, captionBar, density) {
+        derivedStateOf {
+            with(density) {
+                IntRect(
+                    left = displayCutout.calculateLeftPadding(layoutDirection).roundToPx(),
+                    top = statusBars.calculateTopPadding().roundToPx(),
+                    right = windowSize.width - displayCutout.calculateRightPadding(layoutDirection).roundToPx(),
+                    bottom = windowSize.height - navigationBars.calculateBottomPadding().roundToPx()
+                            - captionBar.calculateBottomPadding().roundToPx()
+                )
+            }
+        }
+    }
+
+    val predictedTransformOrigin by remember(windowSize, alignment, popupMargin, parentBounds) {
+        derivedStateOf {
+            val xInWindow = when (alignment) {
+                PopupPositionProvider.Align.Right,
+                PopupPositionProvider.Align.TopRight,
+                PopupPositionProvider.Align.BottomRight -> parentBounds.right - popupMargin.right
+
+                else -> parentBounds.left + popupMargin.left
+            }
+            val yInWindow = when (alignment) {
+                PopupPositionProvider.Align.BottomRight, PopupPositionProvider.Align.BottomLeft ->
+                    parentBounds.top - popupMargin.bottom
+
+                else ->
+                    parentBounds.bottom + popupMargin.bottom
+            }
+            safeTransformOrigin(
+                xInWindow / windowSize.width.toFloat(),
+                yInWindow / windowSize.height.toFloat()
             )
         }
     }
 
-    val windowBounds = remember(windowSize, density) {
-        with(density) {
-            IntRect(
-                left = displayCutout.calculateLeftPadding(layoutDirection).roundToPx(),
-                top = statusBars.calculateTopPadding().roundToPx(),
-                right = windowSize.width - displayCutout.calculateRightPadding(layoutDirection).roundToPx(),
-                bottom = windowSize.height - navigationBars.calculateBottomPadding()
-                    .roundToPx() - captionBar.calculateBottomPadding().roundToPx()
-            )
+    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
+    val effectiveTransformOrigin by remember(
+        popupContentSize,
+        windowSize,
+        alignment,
+        layoutDirection,
+        popupMargin,
+        parentBounds,
+        windowBounds,
+        popupPositionProvider
+    ) {
+        derivedStateOf {
+            if (popupContentSize == IntSize.Zero) {
+                predictedTransformOrigin
+            } else {
+                val calculatedOffset = popupPositionProvider.calculatePosition(
+                    parentBounds,
+                    windowBounds,
+                    layoutDirection,
+                    popupContentSize,
+                    popupMargin,
+                    alignment
+                )
+
+                val isRightAligned = when (alignment) {
+                    PopupPositionProvider.Align.Right,
+                    PopupPositionProvider.Align.TopRight,
+                    PopupPositionProvider.Align.BottomRight -> true
+
+                    else -> false
+                }
+                val cornerX = if (isRightAligned) {
+                    (calculatedOffset.x + popupContentSize.width).toFloat()
+                } else {
+                    calculatedOffset.x.toFloat()
+                }
+
+                val showBelow = (windowBounds.bottom - parentBounds.bottom) > popupContentSize.height
+                val showAbove = (parentBounds.top - windowBounds.top) > popupContentSize.height
+                val showMiddle = !showBelow && !showAbove
+                val topLeftY = calculatedOffset.y
+                val cornerY = when {
+                    showMiddle -> (topLeftY + popupContentSize.height / 2f)
+                    showBelow -> topLeftY.toFloat()
+                    showAbove -> (topLeftY + popupContentSize.height).toFloat()
+                    else -> topLeftY.toFloat()
+                }
+
+                safeTransformOrigin(
+                    cornerX / windowSize.width.toFloat(),
+                    cornerY / windowSize.height.toFloat()
+                )
+            }
         }
     }
-
-    val predictedTransformOrigin = run {
-        val xInWindow = when (alignment) {
-            PopupPositionProvider.Align.Right,
-            PopupPositionProvider.Align.TopRight,
-            PopupPositionProvider.Align.BottomRight -> parentBounds.right - popupMargin.right
-
-            else -> parentBounds.left + popupMargin.left
-        }
-        val yInWindow = when (alignment) {
-            PopupPositionProvider.Align.BottomRight, PopupPositionProvider.Align.BottomLeft ->
-                parentBounds.top - popupMargin.bottom
-
-            else ->
-                parentBounds.bottom + popupMargin.bottom
-        }
-        safeTransformOrigin(
-            xInWindow / windowSize.width.toFloat(),
-            yInWindow / windowSize.height.toFloat()
-        )
-    }
-    var effectiveTransformOrigin by remember { mutableStateOf(predictedTransformOrigin) }
 
     PopupLayout(
         visible = show,
@@ -152,11 +214,13 @@ fun ListPopup(
         transformOrigin = { effectiveTransformOrigin },
     ) {
         val shape = remember { ContinuousRoundedRectangle(16.dp) }
-        val elevationPx = with(density) { shadowElevation.toPx() }
+        val elevationPx by remember(shadowElevation, density) {
+            derivedStateOf { with(density) { shadowElevation.toPx() } }
+        }
 
         Box(
             modifier = popupModifier
-                .pointerInput(onDismissRequest) {
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { onDismissRequest?.invoke() }
                     )
@@ -184,49 +248,6 @@ fun ListPopup(
                         alignment
                     )
 
-                    // 根据 alignment 选择左/右关键轴：
-                    // - 上/下显示：左上角/左下角 或 右上角/右下角
-                    // - 居中显示：左侧中心 或 右侧中心
-                    run {
-                        val topLeftX = calculatedOffset.x
-                        val topLeftY = calculatedOffset.y
-                        val popupWidth = measuredSize.width
-                        val popupHeight = measuredSize.height
-
-                        // 基于 alignment 选择 X 轴关键边：左侧或右侧
-                        val isRightAligned = when (alignment) {
-                            PopupPositionProvider.Align.Right,
-                            PopupPositionProvider.Align.TopRight,
-                            PopupPositionProvider.Align.BottomRight -> true
-                            else -> false
-                        }
-                        val cornerX = if (isRightAligned) {
-                            (topLeftX + popupWidth).toFloat() // 右侧边缘
-                        } else {
-                            topLeftX.toFloat() // 左侧边缘
-                        }
-
-                        // 窗口空间不足时居中显示
-                        val showBelow = (windowBounds.bottom - parentBounds.bottom) > popupHeight
-                        val showAbove = (parentBounds.top - windowBounds.top) > popupHeight
-                        val showMiddle = !showBelow && !showAbove
-
-                        val cornerY = when {
-                            showMiddle -> (topLeftY + popupHeight / 2f)            // 居中：侧边中心（随 alignment 左/右）
-                            showBelow -> topLeftY.toFloat()                        // 下方：上边缘（随 alignment 左/右）
-                            showAbove -> (topLeftY + popupHeight).toFloat()        // 上方：下边缘（随 alignment 左/右）
-                            else -> topLeftY.toFloat()                             // 默认使用上边缘
-                        }
-
-                        val newOrigin = safeTransformOrigin(
-                            cornerX / windowSize.width.toFloat(),
-                            cornerY / windowSize.height.toFloat()
-                        )
-                        if (effectiveTransformOrigin != newOrigin) {
-                            effectiveTransformOrigin = newOrigin
-                        }
-                    }
-
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         placeable.place(calculatedOffset)
                     }
@@ -234,6 +255,10 @@ fun ListPopup(
         ) {
             Box(
                 modifier = Modifier
+                    .onGloballyPositioned { coordinates ->
+                        val size = coordinates.size
+                        if (popupContentSize != size) popupContentSize = size
+                    }
                     .graphicsLayer(
                         clip = true,
                         shape = shape,
@@ -262,7 +287,6 @@ fun ListPopupColumn(
     content: @Composable () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val currentContent by rememberUpdatedState(content)
 
     SubcomposeLayout(
         modifier = Modifier.verticalScroll(scrollState)
@@ -271,14 +295,14 @@ fun ListPopupColumn(
         val tempConstraints = constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
 
         // Measure pass to find the widest item
-        val listWidth = subcompose("miuixPopupListFake", currentContent).map {
+        val listWidth = subcompose("miuixPopupListFake", content).map {
             it.measure(tempConstraints)
         }.maxOfOrNull { it.width }?.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx()) ?: 200.dp.roundToPx()
 
         val childConstraints = constraints.copy(minWidth = listWidth, maxWidth = listWidth, minHeight = 0)
 
         // Actual measure and layout pass
-        val placeables = subcompose("miuixPopupListReal", currentContent).map {
+        val placeables = subcompose("miuixPopupListReal", content).map {
             val placeable = it.measure(childConstraints)
             listHeight += placeable.height
             placeable
@@ -293,6 +317,7 @@ fun ListPopupColumn(
     }
 }
 
+@Stable
 interface PopupPositionProvider {
     /**
      * Calculate the position (offset) of Popup

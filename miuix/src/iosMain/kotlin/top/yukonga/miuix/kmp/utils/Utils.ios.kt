@@ -54,5 +54,5 @@ actual fun PredictiveBackHandler(
     onBack: () -> Unit
 ) {
     // iOS doesn't support predictive back gesture, fallback to simple BackHandler
-    BackHandler(enabled = enabled, onBack = onBack)
+    PredictiveBackHandler(enabled = enabled, onBack = onBack)
 }

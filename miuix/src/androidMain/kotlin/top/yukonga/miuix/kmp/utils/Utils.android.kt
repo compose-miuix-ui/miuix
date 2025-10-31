@@ -16,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -100,15 +101,14 @@ actual fun PredictiveBackHandler(
     onBack: () -> Unit
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    
+
     val currentOnBackStarted by rememberUpdatedState(onBackStarted)
     val currentOnBackProgressed by rememberUpdatedState(onBackProgressed)
     val currentOnBackCancelled by rememberUpdatedState(onBackCancelled)
     val currentOnBack by rememberUpdatedState(onBack)
-    val currentEnabled by rememberUpdatedState(enabled)
-    
-    DisposableEffect(backDispatcher) {
-        val callback = object : OnBackPressedCallback(currentEnabled) {
+
+    val callback = remember {
+        object : OnBackPressedCallback(false) {
             override fun handleOnBackStarted(backEvent: AndroidBackEventCompat) {
                 currentOnBackStarted?.invoke(
                     BackEventCompat(
@@ -119,7 +119,7 @@ actual fun PredictiveBackHandler(
                     )
                 )
             }
-            
+
             override fun handleOnBackProgressed(backEvent: AndroidBackEventCompat) {
                 currentOnBackProgressed?.invoke(
                     BackEventCompat(
@@ -130,25 +130,25 @@ actual fun PredictiveBackHandler(
                     )
                 )
             }
-            
+
             override fun handleOnBackCancelled() {
                 currentOnBackCancelled?.invoke()
             }
-            
+
             override fun handleOnBackPressed() {
                 currentOnBack()
             }
         }
-        
+    }
+
+    SideEffect {
+        callback.isEnabled = enabled
+    }
+
+    DisposableEffect(backDispatcher) {
         backDispatcher?.addCallback(callback)
-        
         onDispose {
             callback.remove()
         }
-    }
-    
-    // Update enabled state when it changes
-    DisposableEffect(enabled) {
-        onDispose { }
     }
 }

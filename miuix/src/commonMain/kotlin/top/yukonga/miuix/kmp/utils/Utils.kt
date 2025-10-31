@@ -4,11 +4,13 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 
 /**
  * Window size data class.
  */
+@Immutable
 data class WindowSize(val width: Int, val height: Int)
 
 /**
@@ -57,6 +59,7 @@ expect fun BackHandler(
  * @param touchX The horizontal position of the touch event.
  * @param touchY The vertical position of the touch event.
  */
+@Immutable
 data class BackEventCompat(
     val progress: Float,
     val swipeEdge: Int = 0,

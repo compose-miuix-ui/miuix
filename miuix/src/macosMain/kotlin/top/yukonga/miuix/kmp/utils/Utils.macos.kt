@@ -8,6 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
@@ -40,11 +41,12 @@ actual fun BackHandler(
     enabled: Boolean,
     onBack: () -> Unit
 ) {
-    if (!enabled) return
-    DisposableEffect(Unit) {
+    val currentOnBack by rememberUpdatedState(onBack)
+    DisposableEffect(enabled) {
+        if (!enabled) return@DisposableEffect onDispose { }
         val monitor = NSEvent.addLocalMonitorForEventsMatchingMask(NSEventMaskKeyDown) { event ->
             if (event?.keyCode == 53.toUShort()) {
-                onBack()
+                currentOnBack()
                 null
             } else {
                 event

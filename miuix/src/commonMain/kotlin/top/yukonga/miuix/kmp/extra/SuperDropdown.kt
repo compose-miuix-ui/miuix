@@ -17,8 +17,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -148,6 +151,7 @@ private fun SuperDropdownPopup(
     hapticFeedback: HapticFeedback,
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
+    val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     ListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.Right,
@@ -158,18 +162,20 @@ private fun SuperDropdownPopup(
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, string ->
-                DropdownImpl(
-                    text = string,
-                    optionSize = items.size,
-                    isSelected = selectedIndex == index,
-                    dropdownColors = dropdownColors,
-                    onSelectedIndexChange = { selectedIdx ->
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onSelectedIndexChange?.invoke(selectedIdx)
-                        isDropdownExpanded.value = false
-                    },
-                    index = index
-                )
+                key(index) {
+                    DropdownImpl(
+                        text = string,
+                        optionSize = items.size,
+                        isSelected = selectedIndex == index,
+                        dropdownColors = dropdownColors,
+                        onSelectedIndexChange = { selectedIdx ->
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onSelectState.value?.invoke(selectedIdx)
+                            isDropdownExpanded.value = false
+                        },
+                        index = index
+                    )
+                }
             }
         }
     }

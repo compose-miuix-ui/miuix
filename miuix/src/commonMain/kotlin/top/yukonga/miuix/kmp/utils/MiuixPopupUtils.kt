@@ -300,7 +300,28 @@ class MiuixPopupUtils {
             largeScreen: Boolean
         ) {
             val visibleState = remember { MutableTransitionState(false) }
-            visibleState.targetState = dialogState.showState.value
+            var pendingOpen by remember { mutableStateOf(false) }
+            var lastTarget by remember { mutableStateOf(false) }
+            LaunchedEffect(dialogState.showState.value) {
+                val newTarget = dialogState.showState.value
+                if (newTarget) {
+                    if (!visibleState.isIdle && !lastTarget) {
+                        pendingOpen = true
+                    } else {
+                        visibleState.targetState = true
+                    }
+                } else {
+                    pendingOpen = false
+                    visibleState.targetState = false
+                }
+                lastTarget = newTarget
+            }
+            LaunchedEffect(visibleState.isIdle, pendingOpen) {
+                if (pendingOpen && visibleState.isIdle) {
+                    pendingOpen = false
+                    visibleState.targetState = true
+                }
+            }
             val dialogStates = LocalDialogStates.current
 
             val effectiveLargeScreen = largeScreen && dialogState.enableAutoLargeScreen
@@ -314,7 +335,6 @@ class MiuixPopupUtils {
                 ) {
                     val baseColor = MiuixTheme.colorScheme.windowDimming
                     val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
-                        // Multiply the original alpha with the multiplier to preserve the base dimming level
                         baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
                     } ?: baseColor
 
@@ -350,7 +370,28 @@ class MiuixPopupUtils {
             popupState: PopupState,
         ) {
             val visibleState = remember { MutableTransitionState(false) }
-            visibleState.targetState = popupState.showState.value
+            var pendingOpen by remember { mutableStateOf(false) }
+            var lastTarget by remember { mutableStateOf(false) }
+            LaunchedEffect(popupState.showState.value) {
+                val newTarget = popupState.showState.value
+                if (newTarget) {
+                    if (!visibleState.isIdle && !lastTarget) {
+                        pendingOpen = true
+                    } else {
+                        visibleState.targetState = true
+                    }
+                } else {
+                    pendingOpen = false
+                    visibleState.targetState = false
+                }
+                lastTarget = newTarget
+            }
+            LaunchedEffect(visibleState.isIdle, pendingOpen) {
+                if (pendingOpen && visibleState.isIdle) {
+                    pendingOpen = false
+                    visibleState.targetState = true
+                }
+            }
             val popupStates = LocalPopupStates.current
 
             if (popupState.enableWindowDim) {
