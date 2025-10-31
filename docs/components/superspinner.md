@@ -2,7 +2,7 @@
 
 `SuperSpinner` is a dropdown selector component in Miuix that provides titles, summaries, and a list of options with icons and text. It supports click interaction and various display modes, commonly used in option settings with visual aids. This component is similar to `SuperDropdown` but offers richer functionality and interaction experience.
 
-<div style="position: relative; max-width: 700px; height: 282px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; max-width: 700px; height: 262px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superSpinner" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
@@ -15,7 +15,6 @@
 ```kotlin
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 ```
 
 ## Basic Usage
@@ -108,51 +107,7 @@ SuperSpinner(
 )
 ```
 
-## Display Modes
-
-SuperSpinner supports different display modes:
-
-### Normal Mode (Adaptive to Click Position)
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "Normal Mode",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = SpinnerMode.Normal // Default value
-    )
-}
-```
-
-### Always on Right Mode
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "Always on Right Mode",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = SpinnerMode.AlwaysOnRight // Always on right mode
-    )
-}
-```
+## Dialog Mode
 
 ### Display Dropdown Menu in Dialog
 
@@ -188,7 +143,6 @@ Scaffold {
 | summary               | String?                   | Selector description        | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config   | BasicComponentDefaults.summaryColor() | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content         | null                                  | No       |
-| mode                  | SpinnerMode               | Display mode                | SpinnerMode.Normal                    | No       |
 | modifier              | Modifier                  | Component modifier          | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding    | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum dropdown height     | null                                  | No       |

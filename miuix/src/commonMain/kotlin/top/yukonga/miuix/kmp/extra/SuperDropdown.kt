@@ -17,11 +17,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -30,8 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,7 +55,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperDropdown].
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
- * @param mode The dropdown show mode of the [SuperDropdown].
  * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param insideMargin The margin inside the [SuperDropdown].
  * @param maxHeight The maximum height of the [ListPopup].
@@ -78,7 +72,6 @@ fun SuperDropdown(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    mode: DropDownMode = DropDownMode.Normal,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -100,23 +93,6 @@ fun SuperDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    var alignLeft by rememberSaveable { mutableStateOf(true) }
-
-    val componentModifier = modifier.pointerInput(actualEnabled) {
-        if (!actualEnabled) return@pointerInput
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent()
-                if (event.type != PointerEventType.Move) {
-                    val eventChange = event.changes.first()
-                    if (eventChange.pressed) {
-                        alignLeft = eventChange.position.x < (size.width / 2)
-                    }
-                }
-            }
-        }
-    }
-
     val handleClick: () -> Unit = {
         if (actualEnabled) {
             onClick?.invoke()
@@ -128,7 +104,6 @@ fun SuperDropdown(
     }
 
     BasicComponent(
-        modifier = componentModifier,
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -141,8 +116,6 @@ fun SuperDropdown(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded,
-                    mode = mode,
-                    alignLeft = alignLeft,
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
@@ -170,8 +143,6 @@ private fun SuperDropdownPopup(
     items: List<String>,
     selectedIndex: Int,
     isDropdownExpanded: MutableState<Boolean>,
-    mode: DropDownMode,
-    alignLeft: Boolean,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
@@ -179,11 +150,7 @@ private fun SuperDropdownPopup(
 ) {
     ListPopup(
         show = isDropdownExpanded,
-        alignment = if (mode == DropDownMode.AlwaysOnRight || !alignLeft) {
-            PopupPositionProvider.Align.Right
-        } else {
-            PopupPositionProvider.Align.Left
-        },
+        alignment = PopupPositionProvider.Align.Right,
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
@@ -327,12 +294,4 @@ object DropdownDefaults {
             selectedContainerColor = selectedContainerColor
         )
     }
-}
-
-/**
- * The dropdown show mode.
- */
-enum class DropDownMode {
-    Normal,
-    AlwaysOnRight
 }

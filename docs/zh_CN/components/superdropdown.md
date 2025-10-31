@@ -14,7 +14,6 @@
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.DropDownMode
 ```
 
 ## 基本用法
@@ -67,43 +66,7 @@ SuperDropdown(
 )
 ```
 
-## 下拉菜单位置
 
-SuperDropdown 支持不同的下拉位置模式：
-
-### 普通模式（根据点击位置自适应）
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf("选项 1", "选项 2", "选项 3")
-
-Scaffold {
-    SuperDropdown(
-        title = "普通模式",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = DropDownMode.Normal // 默认值
-    )
-}
-```
-
-### 总是在右侧模式
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf("选项 1", "选项 2", "选项 3")
-
-Scaffold {
-    SuperDropdown(
-        title = "总是在右侧模式",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = DropDownMode.AlwaysOnRight
-    )
-}
-```
 
 ## 属性
 
@@ -118,7 +81,6 @@ Scaffold {
 | summary               | String?              | 下拉菜单的摘要说明       | null                                  | 否       |
 | summaryColor          | BasicComponentColors | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
 | dropdownColors        | DropdownColors       | 下拉菜单的颜色配置       | DropdownDefaults.dropdownColors()     | 否       |
-| mode                  | DropDownMode         | 下拉菜单的显示模式       | DropDownMode.Normal                   | 否       |
 | modifier              | Modifier             | 应用于组件的修饰符       | Modifier                              | 否       |
 | insideMargin          | PaddingValues        | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
 | maxHeight             | Dp?                  | 下拉菜单的最大高度       | null                                  | 否       |

@@ -2,7 +2,7 @@
 
 `SuperDropdown` is a dropdown menu component in Miuix that provides a title, summary, and a list of dropdown options. It supports click interaction and is commonly used in option settings and list selections.
 
-<div style="position: relative; max-width: 700px; height: 285px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; max-width: 700px; height: 262px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superDropdown" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
@@ -14,7 +14,6 @@
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.DropDownMode
 ```
 
 ## Basic Usage
@@ -67,43 +66,7 @@ SuperDropdown(
 )
 ```
 
-## Dropdown Position
 
-SuperDropdown supports different dropdown position modes:
-
-### Normal Mode (Auto-adaptive based on click position)
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf("Option 1", "Option 2", "Option 3")
-
-Scaffold {
-    SuperDropdown(
-        title = "Normal Mode",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = DropDownMode.Normal // Default value
-    )
-}
-```
-
-### Always on Right Mode
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf("Option 1", "Option 2", "Option 3")
-
-Scaffold {
-    SuperDropdown(
-        title = "Always on Right Mode",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = DropDownMode.AlwaysOnRight
-    )
-}
-```
 
 ## Properties
 
@@ -118,7 +81,6 @@ Scaffold {
 | summary               | String?              | Summary description of dropdown   | null                                  | No       |
 | summaryColor          | BasicComponentColors | Summary text color configuration  | BasicComponentDefaults.summaryColor() | No       |
 | dropdownColors        | DropdownColors       | Color configuration for dropdown  | DropdownDefaults.dropdownColors()     | No       |
-| mode                  | DropDownMode         | Display mode of dropdown menu     | DropDownMode.Normal                   | No       |
 | modifier              | Modifier             | Modifier applied to the component | Modifier                              | No       |
 | insideMargin          | PaddingValues        | Internal content padding          | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                  | Maximum height of dropdown menu   | null                                  | No       |

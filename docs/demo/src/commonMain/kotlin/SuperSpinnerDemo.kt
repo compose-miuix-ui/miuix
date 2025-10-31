@@ -28,7 +28,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 
 @Composable
@@ -77,12 +76,6 @@ fun SuperSpinnerDemo() {
                         summary = "Bright yellow"
                     )
                 )
-                var selectedIndex3 by remember { mutableStateOf(0) }
-                val options3 = listOf(
-                    SpinnerEntry(title = "Option 1"),
-                    SpinnerEntry(title = "Option 2"),
-                    SpinnerEntry(title = "Option 3")
-                )
 
                 Card {
                     SuperSpinner(
@@ -97,13 +90,6 @@ fun SuperSpinnerDemo() {
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it }
-                    )
-                    SuperSpinner(
-                        title = "Always on Right Mode",
-                        items = options3,
-                        selectedIndex = selectedIndex3,
-                        onSelectedIndexChange = { selectedIndex3 = it },
-                        mode = SpinnerMode.AlwaysOnRight // Always on right mode
                     )
                     SuperSpinner(
                         title = "Disabled Selector",

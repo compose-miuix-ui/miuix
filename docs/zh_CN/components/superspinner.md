@@ -15,7 +15,6 @@
 ```kotlin
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 ```
 
 ## 基本用法
@@ -108,51 +107,7 @@ SuperSpinner(
 )
 ```
 
-## 显示模式
-
-SuperSpinner 支持不同的显示模式：
-
-### 普通模式（根据点击位置自适应）
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "选项 1"),
-    SpinnerEntry(title = "选项 2"),
-    SpinnerEntry(title = "选项 3")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "普通模式",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = SpinnerMode.Normal // 默认值
-    )
-}
-```
-
-### 总是在右侧模式
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "选项 1"),
-    SpinnerEntry(title = "选项 2"),
-    SpinnerEntry(title = "选项 3")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "总是在右侧模式",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        mode = SpinnerMode.AlwaysOnRight // 总是在右侧模式
-    )
-}
-```
+## 对话框模式
 
 ### 将下拉菜单显示在对话框中
 
@@ -188,7 +143,6 @@ Scaffold {
 | summary               | String?                   | 选择器的摘要说明       | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置     | BasicComponentDefaults.summaryColor() | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容   | null                                  | 否       |
-| mode                  | SpinnerMode               | 选择器的显示模式       | SpinnerMode.Normal                    | 否       |
 | modifier              | Modifier                  | 应用于组件的修饰符     | Modifier                              | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距     | BasicComponentDefaults.InsideMargin   | 否       |
 | maxHeight             | Dp?                       | 下拉菜单的最大高度     | null                                  | 否       |

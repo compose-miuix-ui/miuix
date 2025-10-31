@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.DropDownMode
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 
 @Composable
@@ -45,8 +44,6 @@ fun SuperDropdownDemo() {
                 val options1 = listOf("Option 1", "Option 2", "Option 3")
                 var selectedIndex2 by remember { mutableStateOf(0) }
                 val options2 = listOf("Chinese", "English", "Japanese")
-                var selectedIndex3 by remember { mutableStateOf(0) }
-                val options3 = listOf("Option 1", "Option 2", "Option 3")
 
                 Card {
                     SuperDropdown(
@@ -61,13 +58,6 @@ fun SuperDropdownDemo() {
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it }
-                    )
-                    SuperDropdown(
-                        title = "Always on Right Mode",
-                        items = options3,
-                        selectedIndex = selectedIndex3,
-                        onSelectedIndexChange = { selectedIndex3 = it },
-                        mode = DropDownMode.AlwaysOnRight
                     )
                     SuperDropdown(
                         title = "Disabled Dropdown",

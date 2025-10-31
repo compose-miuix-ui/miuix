@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.utils
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import top.yukonga.miuix.kmp.anim.AccelerateEasing
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -92,8 +94,12 @@ class MiuixPopupUtils {
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
             return remember(largeScreen) {
                 if (largeScreen) {
-                    fadeIn(animationSpec = spring(dampingRatio = 0.9f, stiffness = 900f)) +
-                            scaleIn(initialScale = 0.8f, animationSpec = spring(0.73f, 900f))
+                    fadeIn(
+                        animationSpec = spring(dampingRatio = 0.9f, stiffness = 900f)
+                    ) + scaleIn(
+                        initialScale = 0.8f,
+                        animationSpec = spring(0.73f, 900f)
+                    )
                 } else {
                     slideInVertically(
                         initialOffsetY = { fullHeight -> fullHeight },
@@ -107,8 +113,12 @@ class MiuixPopupUtils {
         private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition {
             return remember(largeScreen) {
                 if (largeScreen) {
-                    fadeOut(animationSpec = tween(200, easing = DecelerateEasing(1.5f))) +
-                            scaleOut(targetScale = 0.8f, animationSpec = tween(200, easing = DecelerateEasing(1.5f)))
+                    fadeOut(
+                        animationSpec = tween(200, easing = DecelerateEasing(1.5f))
+                    ) + scaleOut(
+                        targetScale = 0.8f,
+                        animationSpec = tween(200, easing = DecelerateEasing(1.5f))
+                    )
                 } else {
                     slideOutVertically(
                         targetOffsetY = { fullHeight -> fullHeight },
@@ -120,27 +130,33 @@ class MiuixPopupUtils {
 
         @Composable
         private fun rememberDefaultPopupEnterTransition(transformOrigin: () -> TransformOrigin): EnterTransition {
-            val origin = remember(transformOrigin()) { transformOrigin() }
-            return remember(origin) {
-                fadeIn(animationSpec = tween(150, easing = DecelerateEasing(1.5f))) +
-                        scaleIn(
-                            initialScale = 0.8f,
-                            animationSpec = tween(150, easing = DecelerateEasing(1.5f)),
-                            transformOrigin = origin
-                        )
+            return remember(transformOrigin()) {
+                fadeIn(
+                    animationSpec = tween(durationMillis = 120, easing = DecelerateEasing(1.5f))
+                ) + scaleIn(
+                    animationSpec = spring(
+                        dampingRatio = 0.82f,
+                        stiffness = 500f,
+                        visibilityThreshold = 0.001f
+                    ),
+                    transformOrigin = transformOrigin()
+                )
             }
         }
 
         @Composable
         private fun rememberDefaultPopupExitTransition(transformOrigin: () -> TransformOrigin): ExitTransition {
-            val origin = remember(transformOrigin()) { transformOrigin() }
-            return remember(origin) {
-                fadeOut(animationSpec = tween(150, easing = DecelerateEasing(1.5f))) +
-                        scaleOut(
-                            targetScale = 0.8f,
-                            animationSpec = tween(150, easing = DecelerateEasing(1.5f)),
-                            transformOrigin = origin
-                        )
+            return remember(transformOrigin()) {
+                fadeOut(
+                    animationSpec = tween(durationMillis = 120, easing = AccelerateEasing(1.5f))
+                ) + scaleOut(
+                    animationSpec = spring(
+                        dampingRatio = 0.82f,
+                        stiffness = 500f,
+                        visibilityThreshold = 0.001f
+                    ),
+                    transformOrigin = transformOrigin()
+                )
             }
         }
 
@@ -283,15 +299,15 @@ class MiuixPopupUtils {
             dialogState: DialogState,
             largeScreen: Boolean
         ) {
-            var internalVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(dialogState.showState.value) { internalVisible = dialogState.showState.value }
+            val visibleState = remember { MutableTransitionState(false) }
+            visibleState.targetState = dialogState.showState.value
             val dialogStates = LocalDialogStates.current
 
             val effectiveLargeScreen = largeScreen && dialogState.enableAutoLargeScreen
 
             if (dialogState.enableWindowDim) {
                 AnimatedVisibility(
-                    visible = internalVisible,
+                    visibleState = visibleState,
                     modifier = Modifier.zIndex(dialogState.zIndex - 0.001f),
                     enter = dialogState.dimEnterTransition ?: DialogDimEnter,
                     exit = dialogState.dimExitTransition ?: DialogDimExit
@@ -301,7 +317,7 @@ class MiuixPopupUtils {
                         // Multiply the original alpha with the multiplier to preserve the base dimming level
                         baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
                     } ?: baseColor
-                    
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -311,7 +327,7 @@ class MiuixPopupUtils {
             }
 
             AnimatedVisibility(
-                visible = internalVisible,
+                visibleState = visibleState,
                 modifier = Modifier.zIndex(dialogState.zIndex),
                 enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(effectiveLargeScreen),
                 exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen)
@@ -333,13 +349,13 @@ class MiuixPopupUtils {
         private fun PopupEntry(
             popupState: PopupState,
         ) {
-            var internalVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(popupState.showState.value) { internalVisible = popupState.showState.value }
+            val visibleState = remember { MutableTransitionState(false) }
+            visibleState.targetState = popupState.showState.value
             val popupStates = LocalPopupStates.current
 
             if (popupState.enableWindowDim) {
                 AnimatedVisibility(
-                    visible = internalVisible,
+                    visibleState = visibleState,
                     modifier = Modifier.zIndex(popupState.zIndex - 0.001f),
                     enter = popupState.dimEnterTransition ?: PopupDimEnter,
                     exit = popupState.dimExitTransition ?: PopupDimExit
@@ -353,7 +369,7 @@ class MiuixPopupUtils {
             }
 
             AnimatedVisibility(
-                visible = internalVisible,
+                visibleState = visibleState,
                 modifier = Modifier.zIndex(popupState.zIndex),
                 enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(popupState.transformOrigin),
                 exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition(popupState.transformOrigin)

@@ -124,25 +124,32 @@ fun ListPopup(
         }
     }
 
-    val transformOrigin = remember(windowSize, alignment, density) {
+    val predictedTransformOrigin = run {
         val xInWindow = when (alignment) {
             PopupPositionProvider.Align.Right,
             PopupPositionProvider.Align.TopRight,
-            PopupPositionProvider.Align.BottomRight -> parentBounds.right - popupMargin.right - with(density) { 64.dp.roundToPx() }
+            PopupPositionProvider.Align.BottomRight -> parentBounds.right - popupMargin.right
 
-            else -> parentBounds.left + popupMargin.left + with(density) { 64.dp.roundToPx() }
+            else -> parentBounds.left + popupMargin.left
         }
-        val yInWindow = parentBounds.top + parentBounds.height / 2 - with(density) { 56.dp.roundToPx() }
+        val yInWindow = when (alignment) {
+            PopupPositionProvider.Align.BottomRight, PopupPositionProvider.Align.BottomLeft ->
+                parentBounds.top - popupMargin.bottom
+
+            else ->
+                parentBounds.bottom + popupMargin.bottom
+        }
         safeTransformOrigin(
             xInWindow / windowSize.width.toFloat(),
             yInWindow / windowSize.height.toFloat()
         )
     }
+    var effectiveTransformOrigin by remember { mutableStateOf(predictedTransformOrigin) }
 
     PopupLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
-        transformOrigin = { transformOrigin },
+        transformOrigin = { effectiveTransformOrigin },
     ) {
         val shape = remember { ContinuousRoundedRectangle(16.dp) }
         val elevationPx = with(density) { shadowElevation.toPx() }
@@ -176,6 +183,49 @@ fun ListPopup(
                         popupMargin,
                         alignment
                     )
+
+                    // 根据 alignment 选择左/右关键轴：
+                    // - 上/下显示：左上角/左下角 或 右上角/右下角
+                    // - 居中显示：左侧中心 或 右侧中心
+                    run {
+                        val topLeftX = calculatedOffset.x
+                        val topLeftY = calculatedOffset.y
+                        val popupWidth = measuredSize.width
+                        val popupHeight = measuredSize.height
+
+                        // 基于 alignment 选择 X 轴关键边：左侧或右侧
+                        val isRightAligned = when (alignment) {
+                            PopupPositionProvider.Align.Right,
+                            PopupPositionProvider.Align.TopRight,
+                            PopupPositionProvider.Align.BottomRight -> true
+                            else -> false
+                        }
+                        val cornerX = if (isRightAligned) {
+                            (topLeftX + popupWidth).toFloat() // 右侧边缘
+                        } else {
+                            topLeftX.toFloat() // 左侧边缘
+                        }
+
+                        // 窗口空间不足时居中显示
+                        val showBelow = (windowBounds.bottom - parentBounds.bottom) > popupHeight
+                        val showAbove = (parentBounds.top - windowBounds.top) > popupHeight
+                        val showMiddle = !showBelow && !showAbove
+
+                        val cornerY = when {
+                            showMiddle -> (topLeftY + popupHeight / 2f)            // 居中：侧边中心（随 alignment 左/右）
+                            showBelow -> topLeftY.toFloat()                        // 下方：上边缘（随 alignment 左/右）
+                            showAbove -> (topLeftY + popupHeight).toFloat()        // 上方：下边缘（随 alignment 左/右）
+                            else -> topLeftY.toFloat()                             // 默认使用上边缘
+                        }
+
+                        val newOrigin = safeTransformOrigin(
+                            cornerX / windowSize.width.toFloat(),
+                            cornerY / windowSize.height.toFloat()
+                        )
+                        if (effectiveTransformOrigin != newOrigin) {
+                            effectiveTransformOrigin = newOrigin
+                        }
+                    }
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         placeable.place(calculatedOffset)

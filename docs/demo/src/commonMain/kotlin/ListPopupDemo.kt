@@ -46,7 +46,7 @@ fun ListPopupDemo() {
                     )
                     ListPopup(
                         show = showPopup,
-                        alignment = PopupPositionProvider.Align.Left,
+                        alignment = PopupPositionProvider.Align.TopLeft,
                         onDismissRequest = { showPopup.value = false } // Close the popup menu
                     ) {
                         ListPopupColumn {

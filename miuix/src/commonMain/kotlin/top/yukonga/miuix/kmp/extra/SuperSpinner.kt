@@ -20,11 +20,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -32,7 +29,6 @@ import androidx.compose.ui.graphics.BlendModeColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -65,7 +61,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperSpinner].
  * @param summaryColor The color of the summary of the [SuperSpinner].
  * @param leftAction The action to be shown at the left side of the [SuperSpinner].
- * @param mode The mode of the [SuperSpinner].
  * @param modifier The [Modifier] to be applied to the [SuperSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
  * @param maxHeight The maximum height of the [ListPopup].
@@ -83,7 +78,6 @@ fun SuperSpinner(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
-    mode: SpinnerMode = SpinnerMode.Normal,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -105,23 +99,6 @@ fun SuperSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    var alignLeft by rememberSaveable { mutableStateOf(true) }
-
-    val componentModifier = modifier.pointerInput(actualEnabled) {
-        if (!actualEnabled) return@pointerInput
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent()
-                if (event.type != PointerEventType.Move) {
-                    val eventChange = event.changes.first()
-                    if (eventChange.pressed) {
-                        alignLeft = eventChange.position.x < (size.width / 2)
-                    }
-                }
-            }
-        }
-    }
-
     val handleClick: () -> Unit = {
         if (actualEnabled) {
             onClick?.invoke()
@@ -133,7 +110,6 @@ fun SuperSpinner(
     }
 
     BasicComponent(
-        modifier = componentModifier,
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -146,8 +122,6 @@ fun SuperSpinner(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded,
-                    mode = mode,
-                    alignLeft = alignLeft,
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     onSelectedIndexChange = onSelectedIndexChange
@@ -175,18 +149,13 @@ private fun SuperSpinnerPopup(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     isDropdownExpanded: androidx.compose.runtime.MutableState<Boolean>,
-    mode: SpinnerMode,
-    alignLeft: Boolean,
     maxHeight: Dp?,
     hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback,
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
     ListPopup(
         show = isDropdownExpanded,
-        alignment = if ((mode == SpinnerMode.AlwaysOnRight || !alignLeft))
-            PopupPositionProvider.Align.Right
-        else
-            PopupPositionProvider.Align.Left,
+        alignment = PopupPositionProvider.Align.Right,
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
@@ -511,11 +480,3 @@ data class SpinnerEntry(
     val title: String? = null,
     val summary: String? = null
 )
-
-/**
- * The spinner show mode.
- */
-enum class SpinnerMode {
-    Normal,
-    AlwaysOnRight
-}

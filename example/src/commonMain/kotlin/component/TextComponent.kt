@@ -50,9 +50,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.CheckboxLocation
-import top.yukonga.miuix.kmp.extra.DropDownMode
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperCheckbox
@@ -78,9 +76,7 @@ fun TextComponent(
     switch: MutableState<Boolean>,
     switchTrue: MutableState<Boolean>,
     dropdownOptionSelected: MutableState<Int>,
-    dropdownOptionSelectedRight: MutableState<Int>,
     spinnerOptionSelected: MutableState<Int>,
-    spinnerOptionSelectedRight: MutableState<Int>,
     spinnerOptionSelectedDialog: MutableState<Int>,
     miuixSuperCheckbox: MutableState<String>,
     miuixSuperCheckboxState: MutableState<Boolean>,
@@ -91,12 +87,6 @@ fun TextComponent(
     miuixSuperSwitchAnimState: MutableState<Boolean>,
 ) {
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
-    val dropdownLongOptions = remember {
-        listOf(
-            "Option 1", "Option 2 (long)", "Option 3 (long long)", "Option 4 (long long long)",
-            "Option 5 (long long long long)", "Option 6 (long long long long long)"
-        )
-    }
     val spinnerOptions = remember {
         listOf(
             SpinnerEntry(
@@ -365,20 +355,9 @@ fun TextComponent(
     ) {
         SuperDropdown(
             title = "Dropdown",
-            summary = "Popup near click",
             items = dropdownOptions,
             selectedIndex = dropdownOptionSelected.value,
             onSelectedIndexChange = { newOption -> dropdownOptionSelected.value = newOption },
-        )
-
-        SuperDropdown(
-            title = "Dropdown",
-            summary = "Popup always on right",
-            items = dropdownLongOptions,
-            selectedIndex = dropdownOptionSelectedRight.value,
-            onSelectedIndexChange = { newOption -> dropdownOptionSelectedRight.value = newOption },
-            mode = DropDownMode.AlwaysOnRight,
-            maxHeight = 300.dp
         )
 
         SuperDropdown(
@@ -398,18 +377,9 @@ fun TextComponent(
     ) {
         SuperSpinner(
             title = "Spinner",
-            summary = "Spinner near click",
             items = spinnerOptions,
             selectedIndex = spinnerOptionSelected.value,
             onSelectedIndexChange = { newOption -> spinnerOptionSelected.value = newOption },
-        )
-        SuperSpinner(
-            title = "Spinner",
-            summary = "Spinner always on right",
-            items = spinnerOptions,
-            selectedIndex = spinnerOptionSelectedRight.value,
-            onSelectedIndexChange = { newOption -> spinnerOptionSelectedRight.value = newOption },
-            mode = SpinnerMode.AlwaysOnRight,
         )
         SuperSpinner(
             title = "Spinner",
