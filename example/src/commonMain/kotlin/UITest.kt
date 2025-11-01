@@ -165,7 +165,7 @@ fun UITest(
 
     var uiState by remember { mutableStateOf(UIState()) }
     val showTopPopup = remember { mutableStateOf(false) }
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
 
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->

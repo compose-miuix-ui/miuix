@@ -78,7 +78,7 @@ fun FourthPage(
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
     val colorModeOptions = remember { listOf("System", "Light", "Dark") }
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
     LazyColumn(
         modifier = Modifier
             .then(

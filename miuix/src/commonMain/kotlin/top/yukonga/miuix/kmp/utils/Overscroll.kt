@@ -93,11 +93,11 @@ fun Modifier.overScrollOutOfBound(
     val overScrollState = LocalOverScrollState.current
     val pullToRefreshState = LocalPullToRefreshState.current
     val currentNestedScrollToParent by rememberUpdatedState(nestedScrollToParent)
-    val currentWindowSize by rememberUpdatedState(getWindowSize())
     val currentScrollEasing by rememberUpdatedState(scrollEasing ?: DefaultParabolaScrollEasing)
     val currentSpringStiff by rememberUpdatedState(springStiff)
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
+    val windowSize = getWindowSize()
     val dispatcher = remember { NestedScrollDispatcher() }
     val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
@@ -112,20 +112,18 @@ fun Modifier.overScrollOutOfBound(
             lateinit var lastFlingAnimator: Animatable<Float, AnimationVector1D>
             var stopJob: Job? = null
 
-            private fun shouldBypassForPullToRefresh(availableY: Float): Boolean {
-                return pullToRefreshState != null &&
-                        pullToRefreshState.refreshState != RefreshState.Idle &&
-                        currentIsVertical &&
-                        availableY > 0
+            private fun shouldBypassForPullToRefresh(): Boolean {
+                // When pull-to-refresh is active (not Idle), always bypass.
+                return pullToRefreshState != null && pullToRefreshState.refreshState != RefreshState.Idle && currentIsVertical
             }
 
             private fun touchToDamped(distance: Float): Float {
-                val range = if (currentIsVertical) currentWindowSize.height else currentWindowSize.width
+                val range = if (currentIsVertical) windowSize.height else windowSize.width
                 return currentScrollEasing(distance, range)
             }
 
             private fun addTouchDelta(deltaTouch: Float): Float {
-                val maxTouch = (if (currentIsVertical) currentWindowSize.height else currentWindowSize.width).toFloat()
+                val maxTouch = (if (currentIsVertical) windowSize.height else windowSize.width).toFloat()
                 val target = currentTouch + deltaTouch
                 val overflow =
                     when {
@@ -142,7 +140,7 @@ fun Modifier.overScrollOutOfBound(
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreScroll = abs(offset) > visibilityThreshold
                 overScrollState.isOverScrollActive = newActivePreScroll
-                if (shouldBypassForPullToRefresh(available.y)) {
+                if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPreScroll(available, source)
                 }
                 // Found fling behavior in the wrong direction.
@@ -187,7 +185,7 @@ fun Modifier.overScrollOutOfBound(
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostScroll = abs(offset) > visibilityThreshold
                 overScrollState.isOverScrollActive = newActivePostScroll
-                if (shouldBypassForPullToRefresh(available.y)) {
+                if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
                 // Found fling behavior in the wrong direction.
@@ -220,7 +218,7 @@ fun Modifier.overScrollOutOfBound(
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreFling = abs(offset) > visibilityThreshold
                 overScrollState.isOverScrollActive = newActivePreFling
-                if (shouldBypassForPullToRefresh(available.y)) {
+                if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPreFling(available)
                 }
                 if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
@@ -262,7 +260,7 @@ fun Modifier.overScrollOutOfBound(
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostFling = abs(offset) > visibilityThreshold
                 overScrollState.isOverScrollActive = newActivePostFling
-                if (shouldBypassForPullToRefresh(available.y)) {
+                if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPostFling(consumed, available)
                 }
                 if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {

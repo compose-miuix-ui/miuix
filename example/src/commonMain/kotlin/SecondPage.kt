@@ -48,7 +48,7 @@ fun SecondPage(
         }
     }
 
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
 
     PullToRefresh(
         isRefreshing = isRefreshing,

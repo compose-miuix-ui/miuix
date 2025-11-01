@@ -434,7 +434,7 @@ class MiuixPopupUtils {
         @Composable
         fun MiuixPopupHost() {
             val density = LocalDensity.current
-            val windowSize = rememberUpdatedState(getWindowSize()).value
+            val windowSize = getWindowSize()
             val windowWidth by remember(windowSize, density) {
                 derivedStateOf { windowSize.width.dp / density.density }
             }

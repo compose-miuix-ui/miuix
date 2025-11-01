@@ -33,7 +33,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -192,7 +191,7 @@ fun rememberPullToRefreshState(): PullToRefreshState {
     }
 
     // Update context-dependent properties on the state instance to ensure it's always current.
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
     state.maxDragDistancePx = windowSize.height.toFloat()// * maxDragRatio
     state.refreshThresholdOffset = windowSize.height.toFloat() * maxDragRatio * thresholdRatio
 
@@ -354,7 +353,8 @@ class PullToRefreshState(
         overScrollState: OverScrollState
     ): NestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            if (overScrollState.isOverScrollActive) return Offset.Zero
+            // Only defer to overscroll when refresh is idle.
+            if (overScrollState.isOverScrollActive && refreshState == RefreshState.Idle) return Offset.Zero
 
             // If the refresh is in progress, consume all scroll events.
             if (refreshState == RefreshState.RefreshComplete
@@ -383,9 +383,7 @@ class PullToRefreshState(
         ): Offset {
 
             // If the refresh is in progress, consume all scroll events.
-            if (refreshState == RefreshState.RefreshComplete
-                || refreshState == RefreshState.Refreshing
-                || isTriggerRefresh
+            if (refreshState == RefreshState.RefreshComplete || refreshState == RefreshState.Refreshing || isTriggerRefresh
             ) {
                 return available
             }
@@ -433,12 +431,14 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
+                // During pull-to-refresh stages, prevent app bar collapse (negative y).
                 val consumedByRefresh = pullToRefreshState.createNestedScrollConnection(overScrollState)
                     .onPreScroll(available, source)
                 val remaining = available - consumedByRefresh
+                val remainingForAppBar = if (remaining.y < 0f) Offset(remaining.x, 0f) else remaining
                 val consumedByAppBar =
                     topAppBarScrollBehavior?.nestedScrollConnection
-                        ?.onPreScroll(remaining, source) ?: Offset.Zero
+                        ?.onPreScroll(remainingForAppBar, source) ?: Offset.Zero
                 return consumedByRefresh + consumedByAppBar
             }
         }
@@ -453,8 +453,11 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
+                // During pull-to-refresh stages, allow app bar to expand but not collapse.
+                val appBarConsumed = Offset(consumed.x, maxOf(0f, consumed.y))
+                val appBarAvailable = Offset(available.x, maxOf(0f, available.y))
                 val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection
-                    ?.onPostScroll(consumed, available, source) ?: Offset.Zero
+                    ?.onPostScroll(appBarConsumed, appBarAvailable, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
                     .createNestedScrollConnection(overScrollState)
@@ -473,6 +476,24 @@ private fun createPullToRefreshConnection(
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         if (pullToRefreshState.refreshState != RefreshState.Idle) {
+            // Ensure the indicator cancels and rebounds to zero.
+            if (!pullToRefreshState.isRefreshing
+                && pullToRefreshState.refreshState != RefreshState.RefreshComplete
+                && pullToRefreshState.rawDragOffset > 0f
+                && pullToRefreshState.rawDragOffset < pullToRefreshState.refreshThresholdOffset
+            ) {
+                pullToRefreshState.coroutineScope.launch {
+                    try {
+                        pullToRefreshState.dragOffsetAnimatable.animateTo(
+                            0f,
+                            animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
+                        )
+                        pullToRefreshState.rawDragOffset = 0f
+                    } finally {
+                        // No-op
+                    }
+                }
+            }
             return available
         }
         return topAppBarScrollBehavior?.nestedScrollConnection

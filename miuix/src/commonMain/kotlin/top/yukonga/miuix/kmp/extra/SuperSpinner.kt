@@ -256,7 +256,7 @@ fun SuperSpinner(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
+    val isDropdownExpanded = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
     val itemsNotEmpty = items.isNotEmpty()

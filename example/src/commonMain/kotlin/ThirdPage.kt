@@ -42,7 +42,7 @@ fun ThirdPage(
     padding: PaddingValues,
     scrollEndHaptic: Boolean
 ) {
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
 
     LazyColumn(
         modifier = Modifier

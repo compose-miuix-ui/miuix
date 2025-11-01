@@ -214,7 +214,7 @@ private fun SuperBottomSheetContent(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
     val windowHeight by remember(windowSize, density) {
         derivedStateOf { windowSize.height.dp / density.density }
     }
