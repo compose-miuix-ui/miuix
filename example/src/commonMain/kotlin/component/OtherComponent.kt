@@ -64,7 +64,6 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Like
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.toHsv
-import top.yukonga.miuix.kmp.utils.toOkLab
 import kotlin.math.round
 
 fun LazyListScope.otherComponent(
@@ -590,16 +589,11 @@ fun LazyListScope.otherComponent(
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val hsv = selectedColor.toHsv()
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
                             "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
                             "${(selectedColor.green * 255).toInt()}, " +
                             "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}" +
-                            "\nHSVA: ${(hsv.h).toInt()}, " +
-                            "${(hsv.s).toInt()}%, " +
-                            "${(hsv.v).toInt()}%, " +
                             "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f)
                 )
@@ -629,16 +623,11 @@ fun LazyListScope.otherComponent(
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val hsv = selectedColor.toHsv()
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
                             "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
                             "${(selectedColor.green * 255).toInt()}, " +
                             "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}" +
-                            "\nHSVA: ${(hsv.h).toInt()}, " +
-                            "${(hsv.s).toInt()}%, " +
-                            "${(hsv.v).toInt()}%, " +
                             "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f)
                 )
@@ -653,7 +642,7 @@ fun LazyListScope.otherComponent(
     }
 
     item(key = "colorPicker-okLab") {
-        SmallTitle(text = "ColorPicker (OKLAB)")
+        SmallTitle(text = "ColorPicker (okLab)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
 
@@ -668,16 +657,11 @@ fun LazyListScope.otherComponent(
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val ok = selectedColor.toOkLab()
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
                             "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
                             "${(selectedColor.green * 255).toInt()}, " +
                             "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}" +
-                            "\nOkLab: ${((ok.l * 1000).toInt() / 1000.0)}, " +
-                            "${((ok.a * 1000).toInt() / 1000.0)}, " +
-                            "${((ok.b * 1000).toInt() / 1000.0)} / " +
                             "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f)
                 )
@@ -687,6 +671,41 @@ fun LazyListScope.otherComponent(
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKLAB,
                 showPreview = false
+            )
+        }
+    }
+
+    item(key = "colorPicker-okLch") {
+        SmallTitle(text = "ColorPicker (OkLch)")
+        val miuixColor = MiuixTheme.colorScheme.primary
+        var selectedColor by remember { mutableStateOf(miuixColor) }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+
+            insideMargin = PaddingValues(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
+                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                            "${(selectedColor.green * 255).toInt()}, " +
+                            "${(selectedColor.blue * 255).toInt()}, " +
+                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            ColorPicker(
+                initialColor = selectedColor,
+                onColorChanged = { selectedColor = it },
+                hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+                colorSpace = ColorSpace.OKLCH
             )
         }
     }

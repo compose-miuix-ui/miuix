@@ -7,8 +7,15 @@ import androidx.annotation.IntRange
 import androidx.annotation.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.hsv
+import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cbrt
+import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sin
+
+private fun toDegrees(rad: Double): Double = rad * 180.0 / PI
+private fun toRadians(deg: Double): Double = deg * PI / 180.0
 
 
 /**
@@ -24,6 +31,21 @@ data class OkLab(val l: Double, val a: Double, val b: Double) {
         val bN = ((b / 100.0) * 0.4).toFloat().coerceIn(-0.4f, 0.4f)
         val ok = floatArrayOf(lN, aN, bN)
         return ColorUtils.okLabToColor(ok, alpha)
+    }
+}
+
+/**
+ * User-friendly OkLCH representation based on OkLab.
+ * - l: 0.0..100.0 (lightness percent)
+ * - c: 0.0..100.0 (chroma percent, scaled to typical [0.0, 0.4] internally)
+ * - h: hue in degrees [0, 360)
+ */
+data class OkLch(val l: Double, val c: Double, val h: Double) {
+    fun toColor(alpha: Float = 1f): Color {
+        val lN = (l / 100.0).coerceIn(0.0, 1.0).toFloat()
+        val cN = ((c / 100.0) * 0.4).toFloat().coerceIn(0f, 0.4f)
+        val hDeg = (((h % 360.0) + 360.0) % 360.0).toFloat()
+        return ColorUtils.oklchToColor(lN, cN, hDeg, alpha)
     }
 }
 
@@ -58,6 +80,15 @@ fun Color.toHsv(): Hsv {
     val s = (hsvArr[1] * 100.0).coerceIn(0.0, 100.0)
     val v = (hsvArr[2] * 100.0).coerceIn(0.0, 100.0)
     return Hsv(h, s, v)
+}
+
+/** Convert Compose Color to user-friendly OkLch. */
+fun Color.toOkLch(): OkLch {
+    val lch = ColorUtils.colorToOklch(this)
+    val l = (lch[0] * 100.0).coerceIn(0.0, 100.0)
+    val c = (lch[1] / 0.4 * 100.0).coerceIn(0.0, 100.0)
+    val h = lch[2].toDouble() // degrees already normalized
+    return OkLch(l, c, h)
 }
 
 object ColorUtils {
@@ -100,6 +131,31 @@ object ColorUtils {
     }
 
     /**
+     * Convert OkLab [L,a,b] to OkLCH [L,C,hDegrees].
+     */
+    fun okLabToOklch(lab: FloatArray): FloatArray {
+        val L = lab[0]
+        val a = lab[1]
+        val b = lab[2]
+        val C = kotlin.math.sqrt(a * a + b * b)
+        var h = toDegrees(atan2(b.toDouble(), a.toDouble())).toFloat()
+        if (h < 0f) h += 360f
+        return floatArrayOf(L, C, h)
+    }
+
+    /**
+     * Convert OkLCH [L,C,hDegrees] to OkLab [L,a,b].
+     */
+    fun oklchToOkLab(lch: FloatArray): FloatArray {
+        val L = lch[0]
+        val C = lch[1]
+        val hRad = toRadians(lch[2].toDouble()).toFloat()
+        val a = C * cos(hRad)
+        val b = C * sin(hRad)
+        return floatArrayOf(L, a, b)
+    }
+
+    /**
      * Convert an OkLab color vector to a Compose Color (sRGB).
      * @param okLab OkLab vector [L, a, b]
      * @param alpha Alpha in 0..1
@@ -111,6 +167,18 @@ object ColorUtils {
     }
 
     /**
+     * Convert OkLCH to Compose Color (sRGB).
+     * @param L Lightness in 0..1
+     * @param C Chroma in 0..0.4 (typical sRGB gamut)
+     * @param hDeg Hue in degrees [0,360)
+     */
+    fun oklchToColor(L: Float, C: Float, hDeg: Float, alpha: Float = 1f): Color {
+        val norm = normalizeOklch(L, C, hDeg)
+        val lab = oklchToOkLab(norm)
+        return okLabToColor(lab, alpha)
+    }
+
+    /**
      * Convert a Compose Color (sRGB) to OkLab.
      * @param color Compose Color in sRGB
      * @return OkLab vector [L, a, b]
@@ -118,6 +186,17 @@ object ColorUtils {
     fun colorToOkLab(color: Color): FloatArray {
         val rgb = floatArrayOf(color.red, color.green, color.blue)
         return rgbToOkLab(rgb)
+    }
+
+    /** Convert Compose Color to OkLCH [L,C,hDeg]. */
+    fun colorToOklch(color: Color): FloatArray {
+        val lab = colorToOkLab(color)
+        val lch = okLabToOklch(lab)
+        // Clamp C to [0,0.4] for typical sRGB and normalize hue
+        val C = lch[1].coerceIn(0f, 0.4f)
+        var h = lch[2] % 360f
+        if (h < 0f) h += 360f
+        return floatArrayOf(lch[0].coerceIn(0f, 1f), C, h)
     }
 
     /**
@@ -185,7 +264,7 @@ object ColorUtils {
         val b_ = if (C == 0f) 0f else lab[2] / C
 
         val L = lab[0]
-        val h = 0.5f + (0.5f * kotlin.math.atan2(-lab[2], -lab[1])) / kotlin.math.PI.toFloat()
+        val h = 0.5f + (0.5f * atan2(-lab[2], -lab[1])) / PI.toFloat()
 
         val STMax = getSTMax(a_, b_)
         val SMax = STMax[0]
@@ -222,8 +301,8 @@ object ColorUtils {
      * @return sRGB array [r, g, b] in 0..1
      */
     fun okhsvToSrgb(h: Float, s: Float, v: Float): FloatArray {
-        val a_ = kotlin.math.cos(2f * kotlin.math.PI.toFloat() * h)
-        val b_ = kotlin.math.sin(2f * kotlin.math.PI.toFloat() * h)
+        val a_ = cos(2f * PI.toFloat() * h)
+        val b_ = sin(2f * PI.toFloat() * h)
 
         val STMax = getSTMax(a_, b_)
         val SMax = STMax[0]
@@ -278,6 +357,36 @@ object ColorUtils {
     fun okhsvToColor(h: Float, s: Float, v: Float, alpha: Float = 1f): Color {
         val srgb = okhsvToSrgb(h, s, v)
         return Color(srgb[0], srgb[1], srgb[2], alpha)
+    }
+
+    /**
+     * Convert sRGB (0..1) to OkLCH.
+     */
+    fun srgbToOklch(r: Float, g: Float, b: Float): FloatArray {
+        val lab = linearSrgbToOklab(
+            srgbTransferFunctionInv(r),
+            srgbTransferFunctionInv(g),
+            srgbTransferFunctionInv(b)
+        )
+        val lch = okLabToOklch(lab)
+        val L = lch[0].coerceIn(0f, 1f)
+        val C = lch[1].coerceIn(0f, 0.4f)
+        var h = lch[2] % 360f
+        if (h < 0f) h += 360f
+        return floatArrayOf(L, C, h)
+    }
+
+    /**
+     * Convert OkLCH to sRGB (0..1).
+     */
+    fun oklchToSrgb(L: Float, C: Float, hDeg: Float): FloatArray {
+        val lab = oklchToOkLab(normalizeOklch(L, C, hDeg))
+        val rgbLin = oklabToLinearSrgb(lab[0], lab[1], lab[2])
+        return floatArrayOf(
+            srgbTransferFunction(rgbLin[0]).coerceIn(0f, 1f),
+            srgbTransferFunction(rgbLin[1]).coerceIn(0f, 1f),
+            srgbTransferFunction(rgbLin[2]).coerceIn(0f, 1f)
+        )
     }
 
     private fun srgbTransferFunction(a: Float): Float {
@@ -411,7 +520,7 @@ object ColorUtils {
         val f1 = wl * lDS + wm * mDS + ws * sDS
         val f2 = wl * lDS2 + wm * mDS2 + ws * sDS2
 
-        S = S - (f * f1) / (f1 * f1 - 0.5f * f * f2)
+        S -= (f * f1) / (f1 * f1 - 0.5f * f * f2)
 
         return S
     }
@@ -453,5 +562,36 @@ object ColorUtils {
             val hue = i.toFloat() / steps.toFloat()
             okhsvToColor(hue, 1f, 1f)
         }
+    }
+
+    // Simple cache for OkLCH hue colors keyed by rounded L and C
+    private val okLchHueCache = mutableMapOf<String, List<Color>>()
+
+    /**
+     * Generate OkLCH hue colors for a hue slider at given lightness and chroma.
+     * @param l Lightness in 0..1
+     * @param cProportion Chroma proportion 0..1 (scaled to 0..0.4 internally)
+     * @param steps Number of hue samples
+     */
+    fun generateOkLchHueColors(l: Float, cProportion: Float, steps: Int = 36): List<Color> {
+        val lClamped = l.coerceIn(0f, 1f)
+        val cClamped = cProportion.coerceIn(0f, 1f)
+        val key = "${(lClamped * 100).toInt()}:${(cClamped * 100).toInt()}:$steps"
+        return okLchHueCache.getOrPut(key) {
+            val cInternal = cClamped * 0.4f
+            (0 until steps).map { i ->
+                val hDeg = i.toFloat() / steps.toFloat() * 360f
+                oklchToColor(lClamped, cInternal, hDeg)
+            }
+        }
+    }
+
+    /** Normalize OkLCH input to safe ranges and canonical hue degrees. */
+    fun normalizeOklch(L: Float, C: Float, hDeg: Float): FloatArray {
+        val Ln = L.coerceIn(0f, 1f)
+        val Cn = C.coerceIn(0f, 0.4f)
+        var hn = hDeg % 360f
+        if (hn < 0f) hn += 360f
+        return floatArrayOf(Ln, Cn, hn)
     }
 }

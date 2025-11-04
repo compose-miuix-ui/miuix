@@ -64,6 +64,7 @@ ColorPicker(
 | showPreview    | Boolean                           | Show color preview            | true                               | No       |
 | hapticEffect   | SliderDefaults.SliderHapticEffect | Slider haptic feedback effect | SliderDefaults.DefaultHapticEffect | No       |
 | modifier       | Modifier                          | Modifier for the component    | Modifier                           | No       |
+| colorSpace     | ColorSpace                        | Color space to use            | ColorSpace.HSV                     | No       |
 
 ## Individual Slider Components
 
@@ -128,6 +129,24 @@ AlphaSlider(
 ```
 
 ## Advanced Usage
+
+### Color Spaces
+
+ColorPicker supports multiple color spaces via `colorSpace`:
+- `ColorSpace.HSV` — classic HSV sliders (Hue, Saturation, Value, Alpha).
+- `ColorSpace.OKHSV` — perceptual HSV variant based on OkLCH, more uniform hue steps.
+- `ColorSpace.OKLAB` — OkLab sliders (Lightness, a, b, Alpha) for perceptual editing.
+- `ColorSpace.OKLCH` — OkLCH sliders (Lightness, Chroma, Hue, Alpha). Chroma is clamped to typical sRGB gamut.
+
+Example: use the OKLCH color space
+
+```kotlin
+ColorPicker(
+    initialColor = Color(0xFF4CAF50),
+    onColorChanged = { /* Handle color change */ },
+    colorSpace = ColorSpace.OKLCH
+)
+```
 
 ### Using in Forms
 
