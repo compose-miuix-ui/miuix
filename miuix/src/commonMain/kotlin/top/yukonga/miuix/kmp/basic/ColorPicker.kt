@@ -41,8 +41,10 @@ import com.mocharealm.gaze.capsule.ContinuousCapsule
 import top.yukonga.miuix.kmp.utils.ColorUtils
 import top.yukonga.miuix.kmp.utils.Hsv
 import top.yukonga.miuix.kmp.utils.OkLab
+import top.yukonga.miuix.kmp.utils.OkLch
 import top.yukonga.miuix.kmp.utils.toHsv
 import top.yukonga.miuix.kmp.utils.toOkLab
+import top.yukonga.miuix.kmp.utils.toOkLch
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -78,6 +80,16 @@ fun ColorPicker(
 
         ColorSpace.OKLAB -> {
             OkLabColorPicker(
+                initialColor = initialColor,
+                onColorChanged = onColorChanged,
+                showPreview = showPreview,
+                hapticEffect = hapticEffect,
+                modifier = modifier
+            )
+        }
+
+        ColorSpace.OKLCH -> {
+            OkLchColorPicker(
                 initialColor = initialColor,
                 onColorChanged = onColorChanged,
                 showPreview = showPreview,
@@ -641,6 +653,203 @@ fun OkLabColorPicker(
 }
 
 /**
+ * A [OkLchColorPicker] component using OkLCH color space with perceptual adjustments.
+ * OkLCH provides intuitive control with Lightness, Chroma, and Hue.
+ */
+@Composable
+fun OkLchColorPicker(
+    initialColor: Color,
+    onColorChanged: (Color) -> Unit,
+    showPreview: Boolean = true,
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
+    modifier: Modifier = Modifier
+) {
+    var initialSetup by remember { mutableStateOf(true) }
+    var currentL by remember { mutableStateOf(0f) } // 0..1
+    var currentC by remember { mutableStateOf(0f) } // proportion 0..1 (scaled to 0..0.4 internally)
+    var currentH by remember { mutableStateOf(0f) } // normalized 0..1 (scaled to 360)
+    var currentAlpha by remember { mutableStateOf(1f) }
+
+    val selectedColor = remember(currentL, currentC, currentH, currentAlpha) {
+        OkLch(
+            l = (currentL * 100.0),
+            c = (currentC * 100.0),
+            h = (currentH * 360.0)
+        ).toColor(currentAlpha)
+    }
+
+    LaunchedEffect(initialColor) {
+        if (initialSetup) {
+            val oklch = initialColor.toOkLch()
+            currentL = (oklch.l / 100.0).toFloat()
+            currentC = (oklch.c / 100.0).toFloat()
+            currentH = (oklch.h / 360.0).toFloat()
+            currentAlpha = initialColor.alpha
+            initialSetup = false
+        }
+    }
+
+    LaunchedEffect(selectedColor) {
+        if (!initialSetup) {
+            onColorChanged(selectedColor)
+        }
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Color preview
+        if (showPreview) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(26.dp)
+                    .clip(ContinuousCapsule)
+                    .background(selectedColor)
+            )
+        }
+
+        // Hue selection
+        OkLchHueSlider(
+            currentL = currentL,
+            currentC = currentC,
+            currentH = currentH,
+            onHueChanged = { currentH = it },
+            hapticEffect = hapticEffect
+        )
+
+        // Lightness selection
+        OkLchLightnessSlider(
+            currentL = currentL,
+            currentC = currentC,
+            currentH = currentH,
+            onLightnessChanged = { currentL = it },
+            hapticEffect = hapticEffect
+        )
+
+        // Chroma selection
+        OkLchChromaSlider(
+            currentL = currentL,
+            currentC = currentC,
+            currentH = currentH,
+            onChromaChanged = { currentC = it },
+            hapticEffect = hapticEffect
+        )
+
+        // Alpha selection
+        OkLchAlphaSlider(
+            currentL = currentL,
+            currentC = currentC,
+            currentH = currentH,
+            currentAlpha = currentAlpha,
+            onAlphaChanged = { currentAlpha = it },
+            hapticEffect = hapticEffect
+        )
+    }
+}
+
+@Composable
+fun OkLchLightnessSlider(
+    currentL: Float,
+    currentC: Float,
+    currentH: Float,
+    onLightnessChanged: (Float) -> Unit,
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+) {
+    val hDeg = currentH * 360f
+    val cInternal = currentC * 0.4f
+    val colors = remember(currentC, currentH) {
+        listOf(
+            ColorUtils.oklchToColor(0f, cInternal, hDeg, 1f),
+            ColorUtils.oklchToColor(1f, cInternal, hDeg, 1f)
+        )
+    }
+
+    ColorSlider(
+        value = currentL,
+        onValueChanged = onLightnessChanged,
+        drawBrushColors = colors,
+        modifier = Modifier.fillMaxWidth(),
+        hapticEffect = hapticEffect
+    )
+}
+
+@Composable
+fun OkLchChromaSlider(
+    currentL: Float,
+    currentC: Float,
+    currentH: Float,
+    onChromaChanged: (Float) -> Unit,
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+) {
+    val hDeg = currentH * 360f
+    val colors = remember(currentL, currentH) {
+        listOf(
+            ColorUtils.oklchToColor(currentL, 0f, hDeg, 1f),
+            ColorUtils.oklchToColor(currentL, 0.4f, hDeg, 1f)
+        )
+    }
+
+    ColorSlider(
+        value = currentC,
+        onValueChanged = onChromaChanged,
+        drawBrushColors = colors,
+        modifier = Modifier.fillMaxWidth(),
+        hapticEffect = hapticEffect
+    )
+}
+
+@Composable
+fun OkLchHueSlider(
+    currentL: Float,
+    currentC: Float,
+    currentH: Float,
+    onHueChanged: (Float) -> Unit,
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+) {
+    val colors = remember(currentL, currentC) {
+        ColorUtils.generateOkLchHueColors(currentL, currentC)
+    }
+
+    ColorSlider(
+        value = currentH,
+        onValueChanged = onHueChanged,
+        drawBrushColors = colors,
+        modifier = Modifier.fillMaxWidth(),
+        hapticEffect = hapticEffect
+    )
+}
+
+@Composable
+fun OkLchAlphaSlider(
+    currentL: Float,
+    currentC: Float,
+    currentH: Float,
+    currentAlpha: Float,
+    onAlphaChanged: (Float) -> Unit,
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+) {
+    val hDeg = currentH * 360f
+    val cInternal = currentC * 0.4f
+    val colors = remember(currentL, currentC, currentH) {
+        val opaque = ColorUtils.oklchToColor(currentL, cInternal, hDeg, 1f)
+        val transparent = Color(opaque.red, opaque.green, opaque.blue, 0f)
+        listOf(transparent, opaque)
+    }
+
+    ColorSlider(
+        value = currentAlpha,
+        onValueChanged = onAlphaChanged,
+        drawBrushColors = colors,
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawCheckerboard(),
+        hapticEffect = hapticEffect
+    )
+}
+
+/**
  * A [OkLabLightnessSlider] component for selecting the lightness (L) of a color in OkLab space.
  */
 @Composable
@@ -926,5 +1135,6 @@ private fun handleSliderInteraction(
 enum class ColorSpace {
     HSV,
     OKHSV,
-    OKLAB
+    OKLAB,
+    OKLCH
 }

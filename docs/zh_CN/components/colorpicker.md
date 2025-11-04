@@ -64,6 +64,7 @@ ColorPicker(
 | showPreview    | Boolean                           | 是否显示颜色预览     | true                               | 否       |
 | hapticEffect   | SliderDefaults.SliderHapticEffect | 滑块的触觉反馈效果   | SliderDefaults.DefaultHapticEffect | 否       |
 | modifier       | Modifier                          | 应用于组件的修饰符   | Modifier                           | 否       |
+| colorSpace     | ColorSpace                        | 选择使用的颜色空间   | ColorSpace.HSV                     | 否       |
 
 ## 单独使用滑块组件
 
@@ -128,6 +129,24 @@ AlphaSlider(
 ```
 
 ## 进阶用法
+
+### 颜色空间
+
+ColorPicker 通过 `colorSpace` 支持多种颜色空间：
+- `ColorSpace.HSV` — 经典 HSV 滑条（色相、饱和度、明度、透明度）。
+- `ColorSpace.OKHSV` — 基于 OkLCH 的感知 HSV 变体，色相步进更均匀。
+- `ColorSpace.OKLAB` — OkLab 滑条（亮度 L、a、b、透明度），更符合人眼的感知。
+- `ColorSpace.OKLCH` — OkLCH 滑条（亮度 L、色度 C、色相 H、透明度）。为保证 sRGB 色域，色度会在常见范围内进行约束。
+
+示例：使用 OKLCH 颜色空间
+
+```kotlin
+ColorPicker(
+    initialColor = Color(0xFF4CAF50),
+    onColorChanged = { /* 处理颜色变化 */ },
+    colorSpace = ColorSpace.OKLCH
+)
+```
 
 ### 在表单中使用
 
