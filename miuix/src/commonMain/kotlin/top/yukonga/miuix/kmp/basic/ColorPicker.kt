@@ -38,13 +38,14 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
-import top.yukonga.miuix.kmp.utils.ColorUtils
-import top.yukonga.miuix.kmp.utils.Hsv
-import top.yukonga.miuix.kmp.utils.OkLab
-import top.yukonga.miuix.kmp.utils.OkLch
-import top.yukonga.miuix.kmp.utils.toHsv
-import top.yukonga.miuix.kmp.utils.toOkLab
-import top.yukonga.miuix.kmp.utils.toOkLch
+import top.yukonga.miuix.kmp.color.api.toHsv
+import top.yukonga.miuix.kmp.color.api.toOkLab
+import top.yukonga.miuix.kmp.color.api.toOkLch
+import top.yukonga.miuix.kmp.color.core.Transforms
+import top.yukonga.miuix.kmp.color.space.Hsv
+import top.yukonga.miuix.kmp.color.space.OkHsv
+import top.yukonga.miuix.kmp.color.space.OkLab
+import top.yukonga.miuix.kmp.color.space.OkLch
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -221,7 +222,7 @@ fun HsvHueSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
 ) {
     val hsvHueColors = remember {
-        ColorUtils.generateHsvHueColors()
+        Transforms.generateHsvHueColors()
     }
 
     ColorSlider(
@@ -353,12 +354,16 @@ fun OkHsvColorPicker(
     var currentAlpha by remember { mutableStateOf(1f) }
 
     val selectedColor = remember(currentH, currentS, currentV, currentAlpha) {
-        ColorUtils.okhsvToColor(currentH, currentS, currentV, currentAlpha)
+        OkHsv(
+            h = currentH,
+            s = currentS,
+            v = currentV
+        ).toColor(currentAlpha)
     }
 
     LaunchedEffect(initialColor) {
         if (initialSetup) {
-            val okhsv = ColorUtils.colorToOkhsv(initialColor)
+            val okhsv = Transforms.colorToOkhsv(initialColor)
             currentH = okhsv[0]
             currentS = okhsv[1]
             currentV = okhsv[2]
@@ -438,7 +443,7 @@ fun OkHsvHueSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
 ) {
     val okHsvHueColors = remember {
-        ColorUtils.generateOkHsvHueColors()
+        Transforms.generateOkHsvHueColors()
     }
 
     ColorSlider(
@@ -467,8 +472,8 @@ fun OkHsvSaturationSlider(
 ) {
     val saturationColors = remember(currentH) {
         listOf(
-            ColorUtils.okhsvToColor(currentH, 0f, 1f, 1f),
-            ColorUtils.okhsvToColor(currentH, 1f, 1f, 1f)
+            Transforms.okhsvToColor(currentH, 0f, 1f, 1f),
+            Transforms.okhsvToColor(currentH, 1f, 1f, 1f)
         )
     }
 
@@ -500,8 +505,8 @@ fun OkHsvValueSlider(
 ) {
     val valueColors = remember(currentH, currentS) {
         listOf(
-            ColorUtils.okhsvToColor(currentH, currentS, 0f, 1f),
-            ColorUtils.okhsvToColor(currentH, currentS, 1f, 1f)
+            Transforms.okhsvToColor(currentH, currentS, 0f, 1f),
+            Transforms.okhsvToColor(currentH, currentS, 1f, 1f)
         )
     }
 
@@ -534,7 +539,7 @@ fun OkHsvAlphaSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
 ) {
     val alphaColors = remember(currentH, currentS, currentV) {
-        val baseColor = ColorUtils.okhsvToColor(currentH, currentS, currentV)
+        val baseColor = Transforms.okhsvToColor(currentH, currentS, currentV)
         listOf(baseColor.copy(alpha = 0f), baseColor.copy(alpha = 1f))
     }
 
@@ -761,8 +766,8 @@ fun OkLchLightnessSlider(
     val cInternal = currentC * 0.4f
     val colors = remember(currentC, currentH) {
         listOf(
-            ColorUtils.oklchToColor(0f, cInternal, hDeg, 1f),
-            ColorUtils.oklchToColor(1f, cInternal, hDeg, 1f)
+            Transforms.oklchToColor(0f, cInternal, hDeg, 1f),
+            Transforms.oklchToColor(1f, cInternal, hDeg, 1f)
         )
     }
 
@@ -786,8 +791,8 @@ fun OkLchChromaSlider(
     val hDeg = currentH * 360f
     val colors = remember(currentL, currentH) {
         listOf(
-            ColorUtils.oklchToColor(currentL, 0f, hDeg, 1f),
-            ColorUtils.oklchToColor(currentL, 0.4f, hDeg, 1f)
+            Transforms.oklchToColor(currentL, 0f, hDeg, 1f),
+            Transforms.oklchToColor(currentL, 0.4f, hDeg, 1f)
         )
     }
 
@@ -809,7 +814,7 @@ fun OkLchHueSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
 ) {
     val colors = remember(currentL, currentC) {
-        ColorUtils.generateOkLchHueColors(currentL, currentC)
+        Transforms.generateOkLchHueColors(currentL, currentC)
     }
 
     ColorSlider(
@@ -833,7 +838,7 @@ fun OkLchAlphaSlider(
     val hDeg = currentH * 360f
     val cInternal = currentC * 0.4f
     val colors = remember(currentL, currentC, currentH) {
-        val opaque = ColorUtils.oklchToColor(currentL, cInternal, hDeg, 1f)
+        val opaque = Transforms.oklchToColor(currentL, cInternal, hDeg, 1f)
         val transparent = Color(opaque.red, opaque.green, opaque.blue, 0f)
         listOf(transparent, opaque)
     }

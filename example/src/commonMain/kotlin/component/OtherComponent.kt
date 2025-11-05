@@ -63,7 +63,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Like
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.toHsv
 import kotlin.math.round
 
 fun LazyListScope.otherComponent(
@@ -573,7 +572,7 @@ fun LazyListScope.otherComponent(
         }
     }
 
-    item(key = "colorPicker-hsv") {
+    item(key = "colorPicker-HSV") {
         SmallTitle(text = "ColorPicker (HSV)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
@@ -606,7 +605,7 @@ fun LazyListScope.otherComponent(
         }
     }
 
-    item(key = "colorPicker-okHsv") {
+    item(key = "colorPicker-OKHSV") {
         SmallTitle(text = "ColorPicker (OKHSV)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
@@ -641,8 +640,8 @@ fun LazyListScope.otherComponent(
         }
     }
 
-    item(key = "colorPicker-okLab") {
-        SmallTitle(text = "ColorPicker (okLab)")
+    item(key = "colorPicker-OKLAB") {
+        SmallTitle(text = "ColorPicker (OKLAB)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
 
@@ -675,8 +674,8 @@ fun LazyListScope.otherComponent(
         }
     }
 
-    item(key = "colorPicker-okLch") {
-        SmallTitle(text = "ColorPicker (OkLch)")
+    item(key = "colorPicker-OKLCH") {
+        SmallTitle(text = "ColorPicker (OKLCH)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
 
@@ -726,16 +725,11 @@ fun LazyListScope.otherComponent(
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val hsv = selectedColor.toHsv()
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
                             "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
                             "${(selectedColor.green * 255).toInt()}, " +
                             "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}" +
-                            "\nHSVA: ${(hsv.h).toInt()}, " +
-                            "${(hsv.s).toInt()}%, " +
-                            "${(hsv.v).toInt()}%, " +
                             "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f)
                 )

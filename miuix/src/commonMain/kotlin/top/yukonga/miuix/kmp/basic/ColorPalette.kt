@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
-import top.yukonga.miuix.kmp.utils.Hsv
-import top.yukonga.miuix.kmp.utils.toHsv
+import top.yukonga.miuix.kmp.color.api.toHsv
+import top.yukonga.miuix.kmp.color.space.Hsv
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
