@@ -425,7 +425,7 @@ fun darkColorScheme(
     secondaryContainerVariant: Color = Color(0xFF4F4F4F),
     onSecondaryContainerVariant: Color = Color(0xFF959595),
     tertiaryContainer: Color = Color(0xFF2B3B54),
-    onTertiaryContainer: Color = Color(0xFF277AF7),
+    onTertiaryContainer: Color = Color(0xFF4788ff),
     tertiaryContainerVariant: Color = Color(0xFF505050),
     background: Color = Color.Black,
     onBackground: Color = Color(0xFFF2F2F2),

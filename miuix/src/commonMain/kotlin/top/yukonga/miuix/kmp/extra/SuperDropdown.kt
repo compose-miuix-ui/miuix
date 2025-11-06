@@ -290,7 +290,7 @@ object DropdownDefaults {
         contentColor: Color = MiuixTheme.colorScheme.onSurface,
         containerColor: Color = MiuixTheme.colorScheme.surface,
         selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surface
     ): DropdownColors {
         return DropdownColors(
             contentColor = contentColor,
