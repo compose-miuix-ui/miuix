@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -213,7 +216,20 @@ fun ListPopup(
         enableWindowDim = enableWindowDim,
         transformOrigin = { effectiveTransformOrigin },
     ) {
-        val shape = remember { ContinuousRoundedRectangle(16.dp) }
+        val transition = updateTransition(targetState = show.value)
+        val scale by transition.animateFloat(
+            transitionSpec = {
+                spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f)
+            }
+        ) { isShown ->
+            if (isShown) 1f else 0.15f
+        }
+
+        val baseCornerRadiusPx = with(density) { 16.dp.toPx() }
+        val appliedCornerDp = with(density) {
+            (baseCornerRadiusPx / scale.coerceAtLeast(0.001f)).toDp()
+        }
+        val shape = ContinuousRoundedRectangle(appliedCornerDp)
         val elevationPx by remember(shadowElevation, density) {
             derivedStateOf { with(density) { shadowElevation.toPx() } }
         }

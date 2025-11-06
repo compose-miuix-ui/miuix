@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
+import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -80,14 +81,14 @@ class MiuixPopupUtils {
         private var nextZIndex = 1f
 
         private val DialogDimEnter: EnterTransition =
-            fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
+            fadeIn(animationSpec = tween(300, easing = SinOutEasing))
         private val DialogDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(250, easing = SinOutEasing))
 
         private val PopupDimEnter: EnterTransition =
-            fadeIn(animationSpec = tween(150, easing = DecelerateEasing(1.5f)))
+            fadeIn(animationSpec = tween(300, easing = SinOutEasing))
         private val PopupDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(150, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(150, easing = SinOutEasing))
 
         @Composable
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
@@ -131,9 +132,10 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupEnterTransition(transformOrigin: () -> TransformOrigin): EnterTransition {
             return remember(transformOrigin()) {
                 fadeIn(
-                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(2f))
+                    animationSpec = tween(durationMillis = 200, easing = DecelerateEasing(1.5f))
                 ) + scaleIn(
-                    animationSpec = spring(dampingRatio = 0.88f, stiffness = 300f, visibilityThreshold = 0.001f),
+                    initialScale = 0.15f,
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f),
                     transformOrigin = transformOrigin()
                 )
             }
@@ -143,9 +145,9 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupExitTransition(transformOrigin: () -> TransformOrigin): ExitTransition {
             return remember(transformOrigin()) {
                 fadeOut(
-                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(0.8f))
+                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f))
                 ) + scaleOut(
-                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(0.8f)),
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f),
                     transformOrigin = transformOrigin()
                 )
             }
