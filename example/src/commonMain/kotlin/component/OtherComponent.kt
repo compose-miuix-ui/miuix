@@ -703,8 +703,8 @@ fun LazyListScope.otherComponent(
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
-                hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                colorSpace = ColorSpace.OKLCH
+                colorSpace = ColorSpace.OKLCH,
+                showPreview = false
             )
         }
     }
