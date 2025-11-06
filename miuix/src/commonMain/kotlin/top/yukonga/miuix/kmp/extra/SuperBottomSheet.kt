@@ -3,8 +3,12 @@
 
 package top.yukonga.miuix.kmp.extra
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -56,6 +60,7 @@ import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
@@ -117,8 +122,30 @@ fun SuperBottomSheet(
         }
     }
 
+    @Composable
+    fun rememberDefaultSheetEnterTransition(): EnterTransition {
+        return remember {
+            slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(450, easing = DecelerateEasing(1.5f))
+            )
+        }
+    }
+
+    @Composable
+    fun rememberDefaultSheetExitTransition(): ExitTransition {
+        return remember {
+            slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(450, easing = DecelerateEasing(0.8f))
+            )
+        }
+    }
+
     DialogLayout(
         visible = show,
+        enterTransition = rememberDefaultSheetEnterTransition(),
+        exitTransition = rememberDefaultSheetExitTransition(),
         enableWindowDim = enableWindowDim,
         enableAutoLargeScreen = false,
         dimAlpha = dimAlpha
@@ -389,6 +416,44 @@ private fun DragHandleArea(
         modifier = Modifier
             .fillMaxWidth()
             .height(24.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        // Provide immediate press feedback even before dragging
+                        isPressing.floatValue = 1f
+                        coroutineScope.launch {
+                            pressScale.animateTo(
+                                targetValue = 1.15f,
+                                animationSpec = tween(durationMillis = 100)
+                            )
+                        }
+                        coroutineScope.launch {
+                            pressWidth.animateTo(
+                                targetValue = 55f,
+                                animationSpec = tween(durationMillis = 100)
+                            )
+                        }
+
+                        // Wait for release; if released without drag, reset here.
+                        val released = tryAwaitRelease()
+                        if (released) {
+                            isPressing.floatValue = 0f
+                            coroutineScope.launch {
+                                pressScale.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(durationMillis = 150)
+                                )
+                            }
+                            coroutineScope.launch {
+                                pressWidth.animateTo(
+                                    targetValue = 45f,
+                                    animationSpec = tween(durationMillis = 150)
+                                )
+                            }
+                        }
+                    }
+                )
+            }
             .pointerInput(allowDismiss) {
                 detectVerticalDragGestures(
                     onDragStart = {

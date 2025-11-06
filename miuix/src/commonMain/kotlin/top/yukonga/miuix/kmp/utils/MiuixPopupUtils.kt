@@ -95,15 +95,15 @@ class MiuixPopupUtils {
             return remember(largeScreen) {
                 if (largeScreen) {
                     fadeIn(
-                        animationSpec = spring(dampingRatio = 0.9f, stiffness = 900f)
+                        animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f)
                     ) + scaleIn(
                         initialScale = 0.8f,
-                        animationSpec = spring(0.73f, 900f)
+                        animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f)
                     )
                 } else {
                     slideInVertically(
                         initialOffsetY = { fullHeight -> fullHeight },
-                        animationSpec = spring(dampingRatio = 0.92f, stiffness = 400f)
+                        animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f)
                     )
                 }
             }
@@ -122,7 +122,7 @@ class MiuixPopupUtils {
                 } else {
                     slideOutVertically(
                         targetOffsetY = { fullHeight -> fullHeight },
-                        animationSpec = tween(200, easing = DecelerateEasing(1.5f))
+                        animationSpec = tween(300, easing = DecelerateEasing(0.8f))
                     )
                 }
             }
@@ -223,7 +223,7 @@ class MiuixPopupUtils {
                 }
                 onDispose {
                     if (state.showState.value) {
-                        dialogStates.removeAll { it.showState === state.showState }
+                        state.showState.value = false
                     }
                 }
             }
@@ -288,7 +288,7 @@ class MiuixPopupUtils {
                 }
                 onDispose {
                     if (state.showState.value) {
-                        popupStates.removeAll { it.showState === state.showState }
+                        state.showState.value = false
                     }
                 }
             }
