@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import top.yukonga.miuix.kmp.anim.AccelerateEasing
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -132,13 +131,9 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupEnterTransition(transformOrigin: () -> TransformOrigin): EnterTransition {
             return remember(transformOrigin()) {
                 fadeIn(
-                    animationSpec = tween(durationMillis = 120, easing = DecelerateEasing(1.5f))
+                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(2f))
                 ) + scaleIn(
-                    animationSpec = spring(
-                        dampingRatio = 0.82f,
-                        stiffness = 500f,
-                        visibilityThreshold = 0.001f
-                    ),
+                    animationSpec = spring(dampingRatio = 0.88f, stiffness = 300f, visibilityThreshold = 0.001f),
                     transformOrigin = transformOrigin()
                 )
             }
@@ -148,13 +143,9 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupExitTransition(transformOrigin: () -> TransformOrigin): ExitTransition {
             return remember(transformOrigin()) {
                 fadeOut(
-                    animationSpec = tween(durationMillis = 120, easing = AccelerateEasing(1.5f))
+                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(0.8f))
                 ) + scaleOut(
-                    animationSpec = spring(
-                        dampingRatio = 0.82f,
-                        stiffness = 500f,
-                        visibilityThreshold = 0.001f
-                    ),
+                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(0.8f)),
                     transformOrigin = transformOrigin()
                 )
             }
