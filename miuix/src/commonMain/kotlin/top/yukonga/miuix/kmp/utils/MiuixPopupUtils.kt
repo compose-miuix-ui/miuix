@@ -132,10 +132,10 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupEnterTransition(transformOrigin: () -> TransformOrigin): EnterTransition {
             return remember(transformOrigin()) {
                 fadeIn(
-                    animationSpec = tween(durationMillis = 200, easing = DecelerateEasing(1.5f))
+                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f))
                 ) + scaleIn(
                     initialScale = 0.15f,
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f),
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 450f, visibilityThreshold = 0.001f),
                     transformOrigin = transformOrigin()
                 )
             }
@@ -145,9 +145,9 @@ class MiuixPopupUtils {
         private fun rememberDefaultPopupExitTransition(transformOrigin: () -> TransformOrigin): ExitTransition {
             return remember(transformOrigin()) {
                 fadeOut(
-                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f))
+                    animationSpec = tween(durationMillis = 140, easing = DecelerateEasing(1.5f))
                 ) + scaleOut(
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f),
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 450f, visibilityThreshold = 0.001f),
                     transformOrigin = transformOrigin()
                 )
             }

@@ -219,10 +219,10 @@ fun ListPopup(
         val transition = updateTransition(targetState = show.value)
         val scale by transition.animateFloat(
             transitionSpec = {
-                spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.001f)
+                spring(dampingRatio = 0.82f, stiffness = 450f, visibilityThreshold = 0.001f)
             }
         ) { isShown ->
-            if (isShown) 1f else 0.15f
+            if (isShown) 1f else 0.25f
         }
 
         val baseCornerRadiusPx = with(density) { 16.dp.toPx() }
