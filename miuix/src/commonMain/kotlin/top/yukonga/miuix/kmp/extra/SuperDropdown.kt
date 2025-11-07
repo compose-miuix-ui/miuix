@@ -57,6 +57,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperDropdown].
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
+ * @param leftAction The action to be shown at the left side of the [SuperDropdown].
  * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param insideMargin The margin inside the [SuperDropdown].
  * @param maxHeight The maximum height of the [ListPopup].
@@ -74,6 +75,7 @@ fun SuperDropdown(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
+    leftAction: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -106,14 +108,23 @@ fun SuperDropdown(
     }
 
     BasicComponent(
+        modifier = modifier,
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = if (itemsNotEmpty) {
-            {
+        leftAction = leftAction,
+        rightActions = {
+            SuperDropdownRightActions(
+                showValue = showValue,
+                itemsNotEmpty = itemsNotEmpty,
+                items = items,
+                selectedIndex = selectedIndex,
+                actionColor = actionColor
+            )
+            if (itemsNotEmpty) {
                 SuperDropdownPopup(
                     items = items,
                     selectedIndex = selectedIndex,
@@ -124,15 +135,6 @@ fun SuperDropdown(
                     onSelectedIndexChange = onSelectedIndexChange
                 )
             }
-        } else null,
-        rightActions = {
-            SuperDropdownRightActions(
-                showValue = showValue,
-                itemsNotEmpty = itemsNotEmpty,
-                items = items,
-                selectedIndex = selectedIndex,
-                actionColor = actionColor
-            )
         },
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,

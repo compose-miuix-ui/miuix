@@ -142,6 +142,7 @@ Scaffold {
 | titleColor            | BasicComponentColors      | Title text color config     | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Selector description        | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config   | BasicComponentDefaults.summaryColor() | No       |
+| spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content         | null                                  | No       |
 | modifier              | Modifier                  | Component modifier          | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding    | BasicComponentDefaults.InsideMargin   | No       |
@@ -161,6 +162,7 @@ Scaffold {
 | titleColor            | BasicComponentColors      | Title text color config     | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Selector description        | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config   | BasicComponentDefaults.summaryColor() | No       |
+| spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content         | null                                  | No       |
 | dialogButtonString    | String                    | Dialog bottom button text   | -                                     | Yes      |
 | popupModifier         | Modifier                  | Dialog popup modifier       | Modifier                              | No       |
@@ -179,7 +181,48 @@ Scaffold {
 | title         | String?                           | Option title       |
 | summary       | String?                           | Option description |
 
+### SpinnerColors Properties
+
+| Property Name            | Type  | Description                       |
+| ------------------------ | ----- | --------------------------------- |
+| contentColor             | Color | Option title color                |
+| summaryColor             | Color | Option summary color              |
+| containerColor           | Color | Option background color           |
+| selectedContentColor     | Color | Selected item title color         |
+| selectedSummaryColor     | Color | Selected item summary color       |
+| selectedContainerColor   | Color | Selected item background color    |
+| selectedIndicatorColor   | Color | Selected check icon color         |
+
 ## Advanced Usage
+
+### Custom Colors
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+val options = listOf(
+    SpinnerEntry(title = "Red"),
+    SpinnerEntry(title = "Green"),
+    SpinnerEntry(title = "Blue")
+)
+
+Scaffold {
+    SuperSpinner(
+        title = "Custom Colors",
+        items = options,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { selectedIndex = it },
+        spinnerColors = SpinnerDefaults.spinnerColors(
+            contentColor = MiuixTheme.colorScheme.onSurface,
+            summaryColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            containerColor = MiuixTheme.colorScheme.surface,
+            selectedContentColor = Color.Red,
+            selectedSummaryColor = Color.Red,
+            selectedContainerColor = Color.Red.copy(alpha = 0.12f),
+            selectedIndicatorColor = Color.Red
+        )
+    )
+}
+```
 
 ### Custom Left Content
 

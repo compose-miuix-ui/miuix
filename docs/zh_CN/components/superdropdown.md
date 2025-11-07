@@ -81,6 +81,7 @@ SuperDropdown(
 | summary               | String?              | 下拉菜单的摘要说明       | null                                  | 否       |
 | summaryColor          | BasicComponentColors | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
 | dropdownColors        | DropdownColors       | 下拉菜单的颜色配置       | DropdownDefaults.dropdownColors()     | 否       |
+| leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容   | null                                  | 否       |
 | modifier              | Modifier             | 应用于组件的修饰符       | Modifier                              | 否       |
 | insideMargin          | PaddingValues        | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
 | maxHeight             | Dp?                  | 下拉菜单的最大高度       | null                                  | 否       |

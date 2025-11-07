@@ -44,23 +44,23 @@ Scaffold {
 ### SuperBottomSheet 属性
 
 | 属性名                     | 类型                            | 说明                         | 默认值                                      | 是否必须 |
-| -------------------------- | ------------------------------- | ---------------------------- | ------------------------------------------- | -------- |
-| show                       | MutableState\<Boolean>          | 控制底部抽屉显示状态的状态对象 | -                                           | 是       |
-| modifier                   | Modifier                        | 应用于底部抽屉的修饰符       | Modifier                                    | 否       |
-| title                      | String?                         | 底部抽屉的标题               | null                                        | 否       |
-| leftAction                 | @Composable (() -> Unit?)?      | 可选的左侧操作按钮(例如关闭按钮) | null                                     | 否       |
-| rightAction                | @Composable (() -> Unit?)?      | 可选的右侧操作按钮(例如提交按钮) | null                                     | 否       |
-| backgroundColor            | Color                           | 底部抽屉背景色               | SuperBottomSheetDefaults.backgroundColor()  | 否       |
-| enableWindowDim            | Boolean                         | 是否启用遮罩层               | true                                        | 否       |
-| cornerRadius               | Dp                              | 顶部圆角半径                 | SuperBottomSheetDefaults.cornerRadius       | 否       |
-| sheetMaxWidth              | Dp                              | 底部抽屉的最大宽度           | SuperBottomSheetDefaults.sheetMaxWidth      | 否       |
-| onDismissRequest           | (() -> Unit)?                   | 底部抽屉关闭时的回调函数     | null                                        | 否       |
-| outsideMargin              | DpSize                          | 底部抽屉外部边距             | SuperBottomSheetDefaults.outsideMargin      | 否       |
-| insideMargin               | DpSize                          | 底部抽屉内部内容的边距       | SuperBottomSheetDefaults.insideMargin       | 否       |
-| defaultWindowInsetsPadding | Boolean                         | 是否应用默认窗口插入内边距   | true                                        | 否       |
-| dragHandleColor            | Color                           | 拖拽指示器的颜色             | SuperBottomSheetDefaults.dragHandleColor()  | 否       |
-| allowDismiss               | Boolean                         | 是否允许通过拖拽或返回手势关闭抽屉 | true                                  | 否       |
-| content                    | @Composable () -> Unit          | 底部抽屉的内容               | -                                           | 是       |
+| -------------------------- | ----------------------------- | ---------------------------- | ------------------------------------------- | -------- |
+| show                       | MutableState\<Boolean>        | 控制底部抽屉显示状态的状态对象 | -                                           | 是       |
+| modifier                   | Modifier                      | 应用于底部抽屉的修饰符       | Modifier                                    | 否       |
+| title                      | String?                       | 底部抽屉的标题               | null                                        | 否       |
+| leftAction                 | @Composable (() -> Unit)?     | 可选的左侧操作按钮(例如关闭按钮) | null                                     | 否       |
+| rightAction                | @Composable (() -> Unit)?     | 可选的右侧操作按钮(例如提交按钮) | null                                     | 否       |
+| backgroundColor            | Color                         | 底部抽屉背景色               | SuperBottomSheetDefaults.backgroundColor()  | 否       |
+| enableWindowDim            | Boolean                       | 是否启用遮罩层               | true                                        | 否       |
+| cornerRadius               | Dp                            | 顶部圆角半径                 | SuperBottomSheetDefaults.cornerRadius       | 否       |
+| sheetMaxWidth              | Dp                            | 底部抽屉的最大宽度           | SuperBottomSheetDefaults.sheetMaxWidth      | 否       |
+| onDismissRequest           | (() -> Unit)?                 | 底部抽屉关闭时的回调函数     | null                                        | 否       |
+| outsideMargin              | DpSize                        | 底部抽屉外部边距             | SuperBottomSheetDefaults.outsideMargin      | 否       |
+| insideMargin               | DpSize                        | 底部抽屉内部内容的边距       | SuperBottomSheetDefaults.insideMargin       | 否       |
+| defaultWindowInsetsPadding | Boolean                       | 是否应用默认窗口插入内边距   | true                                        | 否       |
+| dragHandleColor            | Color                         | 拖拽指示器的颜色             | SuperBottomSheetDefaults.dragHandleColor()  | 否       |
+| allowDismiss               | Boolean                       | 是否允许通过拖拽或返回手势关闭抽屉 | true                                  | 否       |
+| content                    | @Composable () -> Unit        | 底部抽屉的内容               | -                                           | 是       |
 
 ### SuperBottomSheetDefaults 对象
 

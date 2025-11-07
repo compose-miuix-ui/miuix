@@ -142,6 +142,7 @@ Scaffold {
 | titleColor            | BasicComponentColors      | 标题文本的颜色配置     | BasicComponentDefaults.titleColor()   | 否       |
 | summary               | String?                   | 选择器的摘要说明       | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置     | BasicComponentDefaults.summaryColor() | 否       |
+| spinnerColors         | SpinnerColors             | 选择器的颜色配置       | SpinnerDefaults.spinnerColors()       | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容   | null                                  | 否       |
 | modifier              | Modifier                  | 应用于组件的修饰符     | Modifier                              | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距     | BasicComponentDefaults.InsideMargin   | 否       |
@@ -161,6 +162,7 @@ Scaffold {
 | titleColor            | BasicComponentColors      | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()   | 否       |
 | summary               | String?                   | 选择器的摘要说明         | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
+| spinnerColors         | SpinnerColors             | 选择器的颜色配置         | SpinnerDefaults.spinnerColors()       | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容     | null                                  | 否       |
 | dialogButtonString    | String                    | 对话框底部按钮的文本     | -                                     | 是       |
 | popupModifier         | Modifier                  | 应用于弹出对话框的修饰符 | Modifier                              | 否       |
@@ -179,7 +181,48 @@ Scaffold {
 | title   | String?                           | 选项的标题     |
 | summary | String?                           | 选项的摘要描述 |
 
+### SpinnerColors 属性
+
+| 属性名                  | 类型  | 说明                 |
+| ----------------------- | ----- | -------------------- |
+| contentColor            | Color | 选项标题颜色         |
+| summaryColor            | Color | 选项摘要颜色         |
+| containerColor          | Color | 选项背景颜色         |
+| selectedContentColor    | Color | 选中项标题颜色       |
+| selectedSummaryColor    | Color | 选中项摘要颜色       |
+| selectedContainerColor  | Color | 选中项背景颜色       |
+| selectedIndicatorColor  | Color | 选中指示图标颜色     |
+
 ## 进阶用法
+
+### 自定义颜色
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+val options = listOf(
+    SpinnerEntry(title = "红色"),
+    SpinnerEntry(title = "绿色"),
+    SpinnerEntry(title = "蓝色")
+)
+
+Scaffold {
+    SuperSpinner(
+        title = "自定义颜色",
+        items = options,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { selectedIndex = it },
+        spinnerColors = SpinnerDefaults.spinnerColors(
+            contentColor = MiuixTheme.colorScheme.onSurface,
+            summaryColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            containerColor = MiuixTheme.colorScheme.surface,
+            selectedContentColor = Color.Red,
+            selectedSummaryColor = Color.Red,
+            selectedContainerColor = Color.Red.copy(alpha = 0.12f),
+            selectedIndicatorColor = Color.Red
+        )
+    )
+}
+```
 
 ### 自定义左侧内容
 

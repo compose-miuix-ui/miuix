@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -124,12 +123,12 @@ fun TextComponent(
             leftAction = {
                 Text(
                     text = "Left",
-                    modifier = Modifier.padding(end = 16.dp)
+                    modifier = Modifier.padding(end = 8.dp)
                 )
             },
             rightActions = {
                 Text(text = "Right1")
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(text = "Right2")
             },
             onClick = {},
@@ -141,7 +140,7 @@ fun TextComponent(
             leftAction = {
                 Text(
                     text = "Left",
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier.padding(end = 8.dp),
                     color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
                 )
             },
@@ -150,7 +149,7 @@ fun TextComponent(
                     text = "Right1",
                     color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
                 )
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(
                     text = "Right2",
                     color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
@@ -169,8 +168,7 @@ fun TextComponent(
         SuperArrow(
             leftAction = {
                 Box(
-                    contentAlignment = Alignment.TopStart,
-                    modifier = Modifier.padding(end = 16.dp)
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Icon(
                         imageVector = MiuixIcons.Useful.Personal,

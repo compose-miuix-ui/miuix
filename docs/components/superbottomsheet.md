@@ -43,24 +43,24 @@ Scaffold {
 
 ### SuperBottomSheet Properties
 
-| Property Name              | Type                               | Description                                  | Default Value                               | Required |
-| -------------------------- | ---------------------------------- | -------------------------------------------- | ------------------------------------------- | -------- |
-| show                       | MutableState\<Boolean>             | State object to control bottom sheet visibility | -                                        | Yes      |
-| modifier                   | Modifier                           | Modifier applied to the bottom sheet         | Modifier                                    | No       |
-| title                      | String?                            | Bottom sheet title                           | null                                        | No       |
-| leftAction                 | @Composable (() -> Unit?)?         | Optional composable for left action (e.g., close button) | null                           | No       |
-| rightAction                | @Composable (() -> Unit?)?         | Optional composable for right action (e.g., submit button) | null                         | No       |
-| backgroundColor            | Color                              | Bottom sheet background color                | SuperBottomSheetDefaults.backgroundColor()  | No       |
-| enableWindowDim            | Boolean                            | Whether to enable dimming layer              | true                                        | No       |
-| cornerRadius               | Dp                                 | Corner radius of the top corners             | SuperBottomSheetDefaults.cornerRadius       | No       |
-| sheetMaxWidth              | Dp                                 | Maximum width of the bottom sheet            | SuperBottomSheetDefaults.sheetMaxWidth      | No       |
-| onDismissRequest           | (() -> Unit)?                      | Callback when bottom sheet is dismissed      | null                                        | No       |
-| outsideMargin              | DpSize                             | Bottom sheet external margin                 | SuperBottomSheetDefaults.outsideMargin      | No       |
-| insideMargin               | DpSize                             | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
-| defaultWindowInsetsPadding | Boolean                            | Whether to apply default window insets padding | true                                      | No       |
-| dragHandleColor            | Color                              | Drag indicator color                         | SuperBottomSheetDefaults.dragHandleColor()  | No       |
-| allowDismiss               | Boolean                            | Whether to allow dismissing the sheet via drag or back gesture | true                            | No       |
-| content                    | @Composable () -> Unit             | Bottom sheet content                         | -                                           | Yes      |
+| Property Name              | Type                             | Description                                  | Default Value                               | Required |
+| -------------------------- | -------------------------------- | -------------------------------------------- | ------------------------------------------- | -------- |
+| show                       | MutableState\<Boolean>           | State object to control bottom sheet visibility | -                                        | Yes      |
+| modifier                   | Modifier                         | Modifier applied to the bottom sheet         | Modifier                                    | No       |
+| title                      | String?                          | Bottom sheet title                           | null                                        | No       |
+| leftAction                 | @Composable (() -> Unit)?        | Optional composable for left action (e.g., close button) | null                           | No       |
+| rightAction                | @Composable (() -> Unit)?        | Optional composable for right action (e.g., submit button) | null                         | No       |
+| backgroundColor            | Color                            | Bottom sheet background color                | SuperBottomSheetDefaults.backgroundColor()  | No       |
+| enableWindowDim            | Boolean                          | Whether to enable dimming layer              | true                                        | No       |
+| cornerRadius               | Dp                               | Corner radius of the top corners             | SuperBottomSheetDefaults.cornerRadius       | No       |
+| sheetMaxWidth              | Dp                               | Maximum width of the bottom sheet            | SuperBottomSheetDefaults.sheetMaxWidth      | No       |
+| onDismissRequest           | (() -> Unit)?                    | Callback when bottom sheet is dismissed      | null                                        | No       |
+| outsideMargin              | DpSize                           | Bottom sheet external margin                 | SuperBottomSheetDefaults.outsideMargin      | No       |
+| insideMargin               | DpSize                           | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
+| defaultWindowInsetsPadding | Boolean                          | Whether to apply default window insets padding | true                                      | No       |
+| dragHandleColor            | Color                            | Drag indicator color                         | SuperBottomSheetDefaults.dragHandleColor()  | No       |
+| allowDismiss               | Boolean                          | Whether to allow dismissing the sheet via drag or back gesture | true                            | No       |
+| content                    | @Composable () -> Unit           | Bottom sheet content                         | -                                           | Yes      |
 
 ### SuperBottomSheetDefaults Object
 

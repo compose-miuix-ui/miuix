@@ -1,6 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -18,10 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Scan
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -78,6 +83,17 @@ fun SecondPage(
                                 selectedIndex = dropdownSelectedOption,
                                 onSelectedIndexChange = { newOption ->
                                     dropdownSelectedOption = newOption
+                                },
+                                leftAction = {
+                                    Box(
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = MiuixIcons.Useful.Scan,
+                                            contentDescription = "Share",
+                                            tint = MiuixTheme.colorScheme.onBackground
+                                        )
+                                    }
                                 }
                             )
                         }
