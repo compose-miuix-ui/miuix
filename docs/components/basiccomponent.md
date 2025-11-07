@@ -93,8 +93,8 @@ BasicComponent(
 | titleColor        | BasicComponentColors            | Title color configuration                             | BasicComponentDefaults.titleColor()   | No       |
 | summary           | String?                         | Summary of the component                              | null                                  | No       |
 | summaryColor      | BasicComponentColors            | Summary color configuration                           | BasicComponentDefaults.summaryColor() | No       |
-| leftAction        | @Composable (() -> Unit?)?      | Composable content on the left side of the component  | null                                  | No       |
-| rightActions      | @Composable RowScope.() -> Unit | Composable content on the right side of the component | {}                                    | No       |
+| leftAction        | @Composable (() -> Unit)?       | Composable content on the left side of the component  | null                                  | No       |
+| rightActions      | @Composable (RowScope.() -> Unit)? | Composable content on the right side of the component | null                                 | No       |
 | modifier          | Modifier                        | Modifier for the component                            | Modifier                              | No       |
 | insideMargin      | PaddingValues                   | Internal padding of the component                     | BasicComponentDefaults.InsideMargin   | No       |
 | onClick           | (() -> Unit)?                   | Callback triggered when the component is clicked      | null                                  | No       |
