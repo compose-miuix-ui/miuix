@@ -120,6 +120,8 @@ fun BasicComponent(
             }
         }
 
+        Spacer(modifier = Modifier.size(8.dp))
+        
         // Right actions (optional)
         rightActions()
     }
