@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.extra
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -103,7 +102,6 @@ private fun SuperArrowRightActions(
     }
     Image(
         modifier = Modifier
-            .padding(start = 8.dp)
             .size(width = 10.dp, height = 16.dp),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
