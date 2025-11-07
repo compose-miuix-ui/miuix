@@ -51,7 +51,7 @@ fun BasicComponent(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
-    rightActions: @Composable RowScope.() -> Unit = {},
+    rightActions: @Composable (RowScope.() -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -120,10 +120,11 @@ fun BasicComponent(
             }
         }
 
-        Spacer(modifier = Modifier.size(8.dp))
-        
-        // Right actions (optional)
-        rightActions()
+        if (rightActions != null) {
+            // Add a Spacer for margin when rightActions are present
+            Spacer(modifier = Modifier.width(8.dp))
+            rightActions()
+        }
     }
 }
 
