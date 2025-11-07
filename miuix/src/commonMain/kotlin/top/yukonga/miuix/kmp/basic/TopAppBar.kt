@@ -277,13 +277,14 @@ class TopAppBarState(
     initialHeightOffset: Float,
     initialContentOffset: Float
 ) {
+
     /**
      * The top app bar's height offset limit in pixels, which represents the limit that a top app
      * bar is allowed to collapse to.
      *
      * Use this limit to coerce the [heightOffset] value when it's updated.
      */
-    var heightOffsetLimit by mutableFloatStateOf(initialHeightOffsetLimit)
+    var heightOffsetLimit = initialHeightOffsetLimit
 
     /**
      * The top app bar's current height offset in pixels. This height offset is applied to the fixed
@@ -583,16 +584,18 @@ private fun TopAppBarLayout(
     }
 
     // Small Title Animation
-    val extOffset by remember(scrolledOffset) {
+    val extOffset by remember(heightOffset) {
         derivedStateOf {
-            abs(scrolledOffset.offset()) / expandedHeightPx * 2
+            abs(heightOffset) / expandedHeightPx * 2
         }
     }
 
+    println("extOffset: ${extOffset.coerceIn(0f, 1f)}")
+
     // Large Title Alpha Animation
-    val largeTitleAlpha by remember(scrolledOffset, expandedHeightPx) {
+    val largeTitleAlpha by remember(heightOffset, expandedHeightPx) {
         derivedStateOf {
-            1f - (abs(scrolledOffset.offset()) / expandedHeightPx * 2).coerceIn(0f, 1f)
+            1f - (abs(heightOffset) / expandedHeightPx * 2).coerceIn(0f, 1f)
         }
     }
 
