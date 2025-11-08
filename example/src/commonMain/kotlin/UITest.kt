@@ -75,10 +75,10 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.extra.DropdownImpl
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -92,8 +92,8 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Scan
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.utils.verticalOverscrollEffect
 import utils.FPSMonitor
 
 private object UIConstants {
@@ -227,8 +227,8 @@ private fun WideScreenLayout(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehaviorList: List<TopAppBarScrollBehavior>,
+    currentScrollBehavior: TopAppBarScrollBehavior,
     colorMode: MutableState<Int>
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -280,7 +280,7 @@ private fun WideScreenLayout(
 
 @Composable
 private fun WideScreenPanel(
-    barScrollBehavior: ScrollBehavior,
+    barScrollBehavior: TopAppBarScrollBehavior,
     uiState: UIState,
     layoutDirection: LayoutDirection
 ) {
@@ -304,9 +304,9 @@ private fun WideScreenPanel(
                 .then(
                     if (uiState.scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                 )
-                .overScrollVertical()
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
+            overscrollEffect = verticalOverscrollEffect()
         ) {
             item {
                 Card(
@@ -335,8 +335,8 @@ private fun WideScreenContent(
     navigationItems: List<NavigationItem>,
     uiState: UIState,
     showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehaviorList: List<TopAppBarScrollBehavior>,
+    currentScrollBehavior: TopAppBarScrollBehavior,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>
 ) {
@@ -403,8 +403,8 @@ private fun CompactScreenLayout(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehaviorList: List<TopAppBarScrollBehavior>,
+    currentScrollBehavior: TopAppBarScrollBehavior,
     colorMode: MutableState<Int>
 ) {
     Scaffold(
@@ -663,7 +663,7 @@ private fun TopAppBarActions(
 @Composable
 fun AppPager(
     modifier: Modifier = Modifier,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
+    topAppBarScrollBehaviorList: List<TopAppBarScrollBehavior>,
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,

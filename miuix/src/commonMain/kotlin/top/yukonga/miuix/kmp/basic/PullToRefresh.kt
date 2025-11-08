@@ -101,7 +101,7 @@ fun PullToRefresh(
     modifier: Modifier = Modifier,
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    topAppBarScrollBehavior: ScrollBehavior? = null,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior? = null,
     color: Color = PullToRefreshDefaults.color,
     circleSize: Dp = PullToRefreshDefaults.circleSize,
     refreshTexts: List<String> = PullToRefreshDefaults.refreshTexts,
@@ -350,12 +350,8 @@ class PullToRefreshState(
 
     /** Creates a [NestedScrollConnection] for the pull-to-refresh logic itself. */
     internal fun createNestedScrollConnection(
-        overScrollState: OverScrollState
     ): NestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            // Only defer to overscroll when refresh is idle.
-            if (overScrollState.isOverScrollActive && refreshState == RefreshState.Idle) return Offset.Zero
-
             // If the refresh is in progress, consume all scroll events.
             if (refreshState == RefreshState.RefreshComplete
                 || refreshState == RefreshState.Refreshing
@@ -410,18 +406,22 @@ class PullToRefreshState(
  */
 private fun createPullToRefreshConnection(
     pullToRefreshState: PullToRefreshState,
-    topAppBarScrollBehavior: ScrollBehavior?,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior?,
     overScrollState: OverScrollState
 ): NestedScrollConnection = object : NestedScrollConnection {
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         when (pullToRefreshState.refreshState) {
             RefreshState.Idle -> {
+                // If overscroll is active, prevent TopAppBar collapse (negative y)
+                val availableForAppBar = if (overScrollState.isOverScrollActive && available.y < 0f) {
+                    Offset(available.x, 0f)
+                } else available
                 val consumedByAppBar =
                     topAppBarScrollBehavior?.nestedScrollConnection
-                        ?.onPreScroll(available, source) ?: Offset.Zero
+                        ?.onPreScroll(availableForAppBar, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
-                    .createNestedScrollConnection(overScrollState)
+                    .createNestedScrollConnection()
                     .onPreScroll(remaining, source)
                 return consumedByAppBar + consumedByRefresh
             }
@@ -432,8 +432,7 @@ private fun createPullToRefreshConnection(
 
             else -> {
                 // During pull-to-refresh stages, prevent app bar collapse (negative y).
-                val consumedByRefresh = pullToRefreshState.createNestedScrollConnection(overScrollState)
-                    .onPreScroll(available, source)
+                val consumedByRefresh = pullToRefreshState.createNestedScrollConnection().onPreScroll(available, source)
                 val remaining = available - consumedByRefresh
                 val remainingForAppBar = if (remaining.y < 0f) Offset(remaining.x, 0f) else remaining
                 val consumedByAppBar =
@@ -460,7 +459,7 @@ private fun createPullToRefreshConnection(
                     ?.onPostScroll(appBarConsumed, appBarAvailable, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
-                    .createNestedScrollConnection(overScrollState)
+                    .createNestedScrollConnection()
                     .onPostScroll(consumed, remaining, source)
                 return consumedByAppBar + consumedByRefresh
             }

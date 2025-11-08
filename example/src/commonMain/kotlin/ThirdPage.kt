@@ -24,19 +24,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.utils.verticalOverscrollEffect
 
 @Composable
 fun ThirdPage(
-    topAppBarScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior,
     padding: PaddingValues,
     scrollEndHaptic: Boolean
 ) {
@@ -45,11 +45,10 @@ fun ThirdPage(
             .then(
                 if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
             )
-            .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
         contentPadding = PaddingValues(top = padding.calculateTopPadding()),
-        overscrollEffect = null
+        overscrollEffect = verticalOverscrollEffect()
     ) {
         item(key = "light") {
             SmallTitle("Light Theme Colors")

@@ -22,18 +22,18 @@ import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Scan
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.utils.verticalOverscrollEffect
 
 @Composable
 fun SecondPage(
-    topAppBarScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior,
     padding: PaddingValues,
     scrollEndHaptic: Boolean
 ) {
@@ -64,10 +64,9 @@ fun SecondPage(
                 .then(
                     if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                 )
-                .overScrollVertical()
                 .fillMaxHeight(),
             contentPadding = PaddingValues(top = padding.calculateTopPadding() + 12.dp),
-            overscrollEffect = null
+            overscrollEffect = verticalOverscrollEffect()
         ) {
             item {
                 Card(

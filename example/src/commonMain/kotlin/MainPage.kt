@@ -24,10 +24,10 @@ import component.TextComponent
 import component.otherComponent
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.AddSecret
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
@@ -70,12 +70,12 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Unlike
 import top.yukonga.miuix.kmp.icon.icons.useful.Unstick
 import top.yukonga.miuix.kmp.icon.icons.useful.Update
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.utils.verticalOverscrollEffect
 
 @Composable
 fun MainPage(
-    topAppBarScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior,
     padding: PaddingValues,
     scrollEndHaptic: Boolean,
 ) {
@@ -179,11 +179,10 @@ fun MainPage(
             .then(
                 if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
             )
-            .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
         contentPadding = PaddingValues(top = padding.calculateTopPadding()),
-        overscrollEffect = null,
+        overscrollEffect = verticalOverscrollEffect()
     ) {
         item(key = "searchbar") {
             SmallTitle(text = "SearchBar")

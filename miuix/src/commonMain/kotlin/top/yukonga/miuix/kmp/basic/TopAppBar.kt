@@ -83,7 +83,7 @@ import kotlin.math.roundToInt
  * @param largeTitle The large title of the [TopAppBar], If not specified, it will be the same as title.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
- * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
+ * @param scrollBehavior The [TopAppBarScrollBehavior] that controls the behavior of the [TopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [TopAppBar].
  * @param horizontalPadding The horizontal padding of the [TopAppBar]'s title & large title.
  */
@@ -95,7 +95,7 @@ fun TopAppBar(
     largeTitle: String? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
-    scrollBehavior: ScrollBehavior? = null,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
     horizontalPadding: Dp = 26.dp
 ) {
@@ -156,7 +156,7 @@ fun TopAppBar(
  * @param color The background color of the [SmallTopAppBar].
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
- * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [SmallTopAppBar].
+ * @param scrollBehavior The [TopAppBarScrollBehavior] that controls the behavior of the [SmallTopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SmallTopAppBar].
  * @param horizontalPadding The horizontal padding of the [SmallTopAppBar]'s title.
  */
@@ -167,7 +167,7 @@ fun SmallTopAppBar(
     color: Color = MiuixTheme.colorScheme.background,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
-    scrollBehavior: ScrollBehavior? = null,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
     horizontalPadding: Dp = 26.dp
 ) {
@@ -206,10 +206,10 @@ fun SmallTopAppBar(
 }
 
 /**
- * Returns a [ScrollBehavior] that adjusts its properties to affect the colors and
+ * Returns a [TopAppBarScrollBehavior] that adjusts its properties to affect the colors and
  * height of the top app bar.
  *
- * A top app bar that is set up with this [ScrollBehavior] will immediately collapse
+ * A top app bar that is set up with this [TopAppBarScrollBehavior] will immediately collapse
  * when the nested content is pulled up, and will expand back the collapsed area when the
  * content is pulled all the way down.
  *
@@ -230,7 +230,7 @@ fun MiuixScrollBehavior(
     canScroll: () -> Boolean = { true },
     snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = 2500f),
     flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay()
-): ScrollBehavior =
+): TopAppBarScrollBehavior =
     remember(state, canScroll, snapAnimationSpec, flingAnimationSpec) {
         ExitUntilCollapsedScrollBehavior(
             state = state,
@@ -254,7 +254,7 @@ fun MiuixScrollBehavior(
 fun rememberTopAppBarState(
     initialHeightOffsetLimit: Float = -Float.MAX_VALUE,
     initialHeightOffset: Float = 0f,
-    initialContentOffset: Float = 0f
+    initialContentOffset: Float = 0f,
 ): TopAppBarState {
     return rememberSaveable(saver = Saver) {
         TopAppBarState(initialHeightOffsetLimit, initialHeightOffset, initialContentOffset)
@@ -263,7 +263,7 @@ fun rememberTopAppBarState(
 
 /**
  * A state object that can be hoisted to control and observe the top app bar state. The state is
- * read and updated by a [ScrollBehavior] implementation.
+ * read and updated by a [TopAppBarScrollBehavior] implementation.
  *
  * In most cases, this state will be created via [rememberTopAppBarState].
  *
@@ -275,7 +275,7 @@ fun rememberTopAppBarState(
 class TopAppBarState(
     initialHeightOffsetLimit: Float,
     initialHeightOffset: Float,
-    initialContentOffset: Float
+    initialContentOffset: Float,
 ) {
 
     /**
@@ -305,7 +305,7 @@ class TopAppBarState(
      * The content offset is used to compute the [overlappedFraction], which can later be read by an
      * implementation.
      *
-     * This value is updated by a [ScrollBehavior] whenever a nested scroll connection
+     * This value is updated by a [TopAppBarScrollBehavior] whenever a nested scroll connection
      * consumes scroll events. A common implementation would update the value to be the sum of all
      * [NestedScrollConnection.onPostScroll] `consumed.y` values.
      */
@@ -363,7 +363,7 @@ class TopAppBarState(
 }
 
 @Stable
-interface ScrollBehavior {
+interface TopAppBarScrollBehavior {
 
     /**
      * A [TopAppBarState] that is attached to this behavior and is read and updated when scrolling
@@ -399,10 +399,10 @@ interface ScrollBehavior {
 }
 
 /**
- * A [ScrollBehavior] that adjusts its properties to affect the colors and height of a top
+ * A [TopAppBarScrollBehavior] that adjusts its properties to affect the colors and height of a top
  * app bar.
  *
- * A top app bar that is set up with this [ScrollBehavior] will immediately collapse when
+ * A top app bar that is set up with this [TopAppBarScrollBehavior] will immediately collapse when
  * the nested content is pulled up, and will expand back the collapsed area when the content is
  * pulled all the way down.
  *
@@ -420,13 +420,14 @@ private class ExitUntilCollapsedScrollBehavior(
     override val snapAnimationSpec: AnimationSpec<Float>?,
     override val flingAnimationSpec: DecayAnimationSpec<Float>?,
     val canScroll: () -> Boolean = { true },
-) : ScrollBehavior {
+) : TopAppBarScrollBehavior {
     override val isPinned: Boolean = false
     override var nestedScrollConnection =
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // Don't intercept if scrolling down.
-                if (!canScroll() || available.y > 0) return Offset.Zero
+                if (!canScroll() || available.y > 0f) return Offset.Zero
+
                 val prevHeightOffset = state.heightOffset
                 state.heightOffset = state.heightOffset + available.y
                 return if (prevHeightOffset != state.heightOffset) {
@@ -477,20 +478,8 @@ private class ExitUntilCollapsedScrollBehavior(
 }
 
 /**
- * Settles the app bar to a stable state (fully expanded or collapsed) by animating
- * its height offset.
- *
- * This function is invoked after a drag or fling gesture, using the provided velocity
- * to drive a decay animation, followed by a snap animation if the bar is left in an
- * intermediate state.
- *
- * @param state The [TopAppBarState] that holds the current and target height offsets.
- * @param velocity The velocity from the fling gesture to be consumed.
- * @param flingAnimationSpec The [DecayAnimationSpec] for the fling animation.
- * @param snapAnimationSpec The [AnimationSpec] for the final snap to a stable state.
- * @return The [Velocity] that was actually consumed by the fling decay animation. This
- * ensures accurate reporting within the nested scroll system, allowing any unconsumed
- * velocity to be propagated to parent consumers.
+ * Settles the app bar by flinging, in case the given velocity is greater than zero, and snapping
+ * after the fling settles.
  */
 private suspend fun settleAppBar(
     state: TopAppBarState,
@@ -538,7 +527,8 @@ private suspend fun settleAppBar(
             }
         }
     }
-    return Velocity(0f, velocity - remainingVelocity)
+
+    return Velocity(0f, remainingVelocity)
 }
 
 /** A functional interface for providing an app-bar scroll offset. */

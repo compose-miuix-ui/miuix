@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollHorizontal
+import top.yukonga.miuix.kmp.utils.horizontalOverscrollEffect
 
 /**
  * A [TabRow] with Miuix style.
@@ -78,11 +78,10 @@ fun TabRow(
             state = config.listState,
             modifier = Modifier
                 .fillMaxSize()
-                .overScrollHorizontal()
                 .clip(config.shape),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
-            overscrollEffect = null
+            overscrollEffect = horizontalOverscrollEffect()
         ) {
             itemsIndexed(tabs) { index, tabText ->
                 TabItem(
@@ -147,11 +146,10 @@ fun TabRowWithContour(
                 state = config.listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .overScrollHorizontal()
                     .clip(ContinuousRoundedRectangle(cornerRadius)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(contourPadding),
-                overscrollEffect = null
+                overscrollEffect = horizontalOverscrollEffect()
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(

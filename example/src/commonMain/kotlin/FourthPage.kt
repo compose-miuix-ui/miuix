@@ -20,19 +20,19 @@ import androidx.compose.ui.unit.dp
 import misc.VersionInfo
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.utils.verticalOverscrollEffect
 
 @Composable
 fun FourthPage(
-    topAppBarScrollBehavior: ScrollBehavior,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior,
     padding: PaddingValues,
     showFPSMonitor: Boolean,
     onShowFPSMonitorChange: (Boolean) -> Unit,
@@ -82,11 +82,10 @@ fun FourthPage(
             .then(
                 if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
             )
-            .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
         contentPadding = PaddingValues(top = padding.calculateTopPadding()),
-        overscrollEffect = null
+        overscrollEffect = verticalOverscrollEffect()
     ) {
         item {
             Card(
