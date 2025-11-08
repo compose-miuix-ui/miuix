@@ -4,7 +4,7 @@
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -70,7 +70,6 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Unlike
 import top.yukonga.miuix.kmp.icon.icons.useful.Unstick
 import top.yukonga.miuix.kmp.icon.icons.useful.Update
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -173,7 +172,6 @@ fun MainPage(
         )
     }
 
-    val windowSize = getWindowSize()
     val focusManager = LocalFocusManager.current
 
     LazyColumn(
@@ -183,7 +181,7 @@ fun MainPage(
             )
             .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-            .height(windowSize.height.dp),
+            .fillMaxHeight(),
         contentPadding = PaddingValues(top = padding.calculateTopPadding()),
         overscrollEffect = null,
     ) {

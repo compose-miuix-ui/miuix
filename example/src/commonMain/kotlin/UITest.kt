@@ -24,8 +24,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -91,7 +91,6 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Order
 import top.yukonga.miuix.kmp.icon.icons.useful.Scan
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.WindowSize
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -164,7 +163,6 @@ fun UITest(
 
     var uiState by remember { mutableStateOf(UIState()) }
     val showTopPopup = remember { mutableStateOf(false) }
-    val windowSize = getWindowSize()
 
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
@@ -193,7 +191,6 @@ fun UITest(
                     showTopPopup = showTopPopup,
                     topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
                     currentScrollBehavior = currentScrollBehavior,
-                    windowSize = windowSize,
                     colorMode = colorMode
                 )
             } else {
@@ -232,7 +229,6 @@ private fun WideScreenLayout(
     showTopPopup: MutableState<Boolean>,
     topAppBarScrollBehaviorList: List<ScrollBehavior>,
     currentScrollBehavior: ScrollBehavior,
-    windowSize: WindowSize,
     colorMode: MutableState<Int>
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -256,7 +252,6 @@ private fun WideScreenLayout(
                 WideScreenPanel(
                     barScrollBehavior = barScrollBehavior,
                     uiState = uiState,
-                    windowSize = windowSize,
                     layoutDirection = layoutDirection
                 )
             }
@@ -287,7 +282,6 @@ private fun WideScreenLayout(
 private fun WideScreenPanel(
     barScrollBehavior: ScrollBehavior,
     uiState: UIState,
-    windowSize: WindowSize,
     layoutDirection: LayoutDirection
 ) {
     val page = LocalPagerState.current.targetPage
@@ -303,7 +297,7 @@ private fun WideScreenPanel(
                 scrollBehavior = barScrollBehavior
             )
         },
-        popupHost = { null }
+        popupHost = { }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -312,7 +306,7 @@ private fun WideScreenPanel(
                 )
                 .overScrollVertical()
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
-                .height(windowSize.let { getWindowSize().height.dp }),
+                .fillMaxHeight(),
         ) {
             item {
                 Card(
@@ -383,7 +377,7 @@ private fun WideScreenContent(
             )
         },
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
-        popupHost = { null }
+        popupHost = { }
     ) { padding ->
         AppPager(
             modifier = Modifier

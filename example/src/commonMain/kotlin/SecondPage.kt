@@ -4,6 +4,7 @@
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +28,6 @@ import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Scan
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -52,8 +52,6 @@ fun SecondPage(
         }
     }
 
-    val windowSize = getWindowSize()
-
     PullToRefresh(
         isRefreshing = isRefreshing,
         onRefresh = { isRefreshing = true },
@@ -63,11 +61,11 @@ fun SecondPage(
     ) {
         LazyColumn(
             modifier = Modifier
-                .height(windowSize.height.dp)
-                .overScrollVertical()
                 .then(
                     if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
-                ),
+                )
+                .overScrollVertical()
+                .fillMaxHeight(),
             contentPadding = PaddingValues(top = padding.calculateTopPadding() + 12.dp),
             overscrollEffect = null
         ) {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +31,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -40,8 +40,6 @@ fun ThirdPage(
     padding: PaddingValues,
     scrollEndHaptic: Boolean
 ) {
-    val windowSize = getWindowSize()
-
     LazyColumn(
         modifier = Modifier
             .then(
@@ -49,7 +47,7 @@ fun ThirdPage(
             )
             .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-            .height(windowSize.height.dp),
+            .fillMaxHeight(),
         contentPadding = PaddingValues(top = padding.calculateTopPadding()),
         overscrollEffect = null
     ) {
