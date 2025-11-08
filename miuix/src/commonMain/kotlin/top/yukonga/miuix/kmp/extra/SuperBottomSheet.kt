@@ -74,8 +74,8 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param show The show state of the [SuperBottomSheet].
  * @param modifier The modifier to be applied to the [SuperBottomSheet].
  * @param title Optional title to display at the top of the [SuperBottomSheet].
- * @param leftAction Optional composable to display on the left side of the title (e.g. a close button).
- * @param rightAction Optional composable to display on the right side of the title (e.g. a submit button).
+ * @param leftAction Optional [Composable] to display on the left side of the title (e.g. a close button).
+ * @param rightAction Optional [Composable] to display on the right side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [SuperBottomSheet].
  * @param enableWindowDim Whether to dim the window behind the [SuperBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [SuperBottomSheet].

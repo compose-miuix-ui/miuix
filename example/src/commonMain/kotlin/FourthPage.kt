@@ -235,7 +235,13 @@ fun Dialog(showDialog: MutableState<Boolean>) {
             ) {
                 SuperArrow(
                     title = "View Source",
-                    rightText = "GitHub",
+                    rightActions = {
+                        Text(
+                            modifier = Modifier.padding(end = 8.dp),
+                            text = "GitHub",
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                        )
+                    },
                     onClick = {
                         uriHandler.openUri("https://github.com/compose-miuix-ui/miuix")
                     }
@@ -243,7 +249,13 @@ fun Dialog(showDialog: MutableState<Boolean>) {
                 )
                 SuperArrow(
                     title = "Join Group",
-                    rightText = "Telegram",
+                    rightActions = {
+                        Text(
+                            modifier = Modifier.padding(end = 8.dp),
+                            text = "Telegram",
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                        )
+                    },
                     onClick = {
                         uriHandler.openUri("https://t.me/YuKongA13579")
                     }

@@ -75,37 +75,35 @@ Scaffold {
 
 ### SuperArrow Properties
 
-| Property Name    | Type                      | Description                       | Default Value                          | Required |
-| ---------------- | ------------------------- | --------------------------------- | -------------------------------------- | -------- |
-| title            | String                    | Arrow item title                  | -                                      | Yes      |
-| titleColor       | BasicComponentColors      | Title text color configuration    | BasicComponentDefaults.titleColor()    | No       |
-| summary          | String?                   | Arrow item summary description    | null                                   | No       |
-| summaryColor     | BasicComponentColors      | Summary text color configuration  | BasicComponentDefaults.summaryColor()  | No       |
-| leftAction       | @Composable (() -> Unit)? | Custom left content               | null                                   | No       |
-| rightText        | String?                   | Right text content                | null                                   | No       |
-| rightActionColor | RightActionColors         | Right text and arrow color config | SuperArrowDefaults.rightActionColors() | No       |
-| modifier         | Modifier                  | Modifier applied to component     | Modifier                               | No       |
-| insideMargin     | PaddingValues             | Internal content padding          | BasicComponentDefaults.InsideMargin    | No       |
-| onClick          | (() -> Unit)?             | Callback triggered on click       | null                                   | No       |
-| holdDownState    | Boolean                   | Whether component is held down    | false                                  | No       |
-| enabled          | Boolean                   | Whether component is interactive  | true                                   | No       |
+| Property Name    | Type                           | Description                          | Default Value                       | Required |
+| ---------------- | ------------------------------ | ------------------------------------ | ----------------------------------- | -------- |
+| title            | String                         | Arrow item title                     | -                                   | Yes      |
+| titleColor       | BasicComponentColors           | Title text color configuration       | BasicComponentDefaults.titleColor() | No       |
+| summary          | String?                        | Arrow item summary description       | null                                | No       |
+| summaryColor     | BasicComponentColors           | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No     |
+| leftAction       | @Composable (() -> Unit)?      | Custom left content                  | null                                | No       |
+| rightActions     | @Composable RowScope.() -> Unit | Custom right-side content (slot)     | {}                                  | No       |
+| modifier         | Modifier                       | Modifier applied to component        | Modifier                            | No       |
+| insideMargin     | PaddingValues                  | Internal content padding             | BasicComponentDefaults.InsideMargin | No       |
+| onClick          | (() -> Unit)?                  | Callback triggered on click          | null                                | No       |
+| holdDownState    | Boolean                        | Whether component is held down       | false                               | No       |
+| enabled          | Boolean                        | Whether component is interactive     | true                                | No       |
 
 ### SuperArrowDefaults Object
 
-The SuperArrowDefaults object provides default values and color configurations for the arrow component.
+The SuperArrowDefaults object provides default color configuration for the trailing arrow icon.
 
 #### Methods
 
-| Method Name       | Type              | Description                                   |
-| ----------------- | ----------------- | --------------------------------------------- |
-| rightActionColors | RightActionColors | Creates color config for right text and arrow |
+| Method Name       | Type              | Description                                        |
+| ----------------- | ----------------- | -------------------------------------------------- |
+| rightActionColors | RightActionColors | Returns tint colors used by the trailing arrow icon |
 
-### RightActionColors Class
+### Arrow Tint
 
-| Parameter     | Type  | Description             |
-| ------------- | ----- | ----------------------- |
-| color         | Color | Color in normal state   |
-| disabledColor | Color | Color in disabled state |
+- The trailing arrow icon is always shown and tinted automatically.
+- Tint uses `MiuixTheme.colorScheme.onSurfaceVariantActions` when `enabled = true`.
+- Tint uses `MiuixTheme.colorScheme.disabledOnSecondaryVariant` when `enabled = false`.
 
 ## Advanced Usage
 
@@ -127,13 +125,15 @@ SuperArrow(
 )
 ```
 
-### With Right Text
+### With Right Actions (Text)
 
 ```kotlin
 SuperArrow(
     title = "Storage Space",
     summary = "Manage app storage space",
-    rightText = "12.5 GB",
+    rightActions = {
+        Text("12.5 GB")
+    },
     onClick = { /* Handle click event */ }
 )
 ```
@@ -145,13 +145,15 @@ val showDialog = remember { mutableStateOf(false) }
 var language by remember { mutableStateOf("Simplified Chinese") }
 
 Scaffold {
-    SuperArrow(
-        title = "Language Settings",
-        summary = "Select app display language",
-        rightText = language,
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
-    )
+SuperArrow(
+    title = "Language Settings",
+    summary = "Select app display language",
+    rightActions = {
+        Text(language)
+    },
+    onClick = { showDialog.value = true },
+    holdDownState = showDialog.value
+)
     SuperDialog(
         title = "Select Language",
         show = showDialog,
@@ -187,22 +189,3 @@ Scaffold {
 }
 ```
 
-### Custom Colors
-
-```kotlin
-SuperArrow(
-    title = "Custom Colors",
-    titleColor = BasicComponentDefaults.titleColor(
-        color = MiuixTheme.colorScheme.primary
-    ),
-    summary = "Using custom colors",
-    summaryColor = BasicComponentDefaults.summaryColor(
-        color = MiuixTheme.colorScheme.secondary
-    ),
-    rightActionColor = RightActionColors(
-        color = MiuixTheme.colorScheme.primary,
-        disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
-    ),
-    onClick = { /* Handle click event */ }
-)
-```

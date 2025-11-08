@@ -196,6 +196,13 @@ fun TextComponent(
 
         SuperArrow(
             title = "Disabled Arrow",
+            rightActions = {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "Right",
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                )
+            },
             onClick = {},
             enabled = false
         )

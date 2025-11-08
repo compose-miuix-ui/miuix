@@ -57,7 +57,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperDropdown].
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
- * @param leftAction The action to be shown at the left side of the [SuperDropdown].
+ * @param leftAction The [Composable] content that on the left side of the [SuperDropdown].
  * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param insideMargin The margin inside the [SuperDropdown].
  * @param maxHeight The maximum height of the [ListPopup].

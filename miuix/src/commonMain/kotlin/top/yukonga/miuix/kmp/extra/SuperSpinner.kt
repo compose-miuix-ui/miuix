@@ -67,7 +67,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperSpinner].
  * @param summaryColor The color of the summary of the [SuperSpinner].
  * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
- * @param leftAction The action to be shown at the left side of the [SuperSpinner].
+ * @param leftAction The [Composable] content that on the left side of the [SuperSpinner].
  * @param modifier The [Modifier] to be applied to the [SuperSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
  * @param maxHeight The maximum height of the [ListPopup].

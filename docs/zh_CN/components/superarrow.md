@@ -75,37 +75,35 @@ Scaffold {
 
 ### SuperArrow 属性
 
-| 属性名           | 类型                      | 说明                     | 默认值                                 | 是否必须 |
-| ---------------- | ------------------------- | ------------------------ | -------------------------------------- | -------- |
-| title            | String                    | 箭头项的标题             | -                                      | 是       |
-| titleColor       | BasicComponentColors      | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()    | 否       |
-| summary          | String?                   | 箭头项的摘要说明         | null                                   | 否       |
-| summaryColor     | BasicComponentColors      | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor()  | 否       |
-| leftAction       | @Composable (() -> Unit)? | 左侧自定义内容           | null                                   | 否       |
-| rightText        | String?                   | 右侧文本内容             | null                                   | 否       |
-| rightActionColor | RightActionColors         | 右侧文本和箭头的颜色配置 | SuperArrowDefaults.rightActionColors() | 否       |
-| modifier         | Modifier                  | 应用于组件的修饰符       | Modifier                               | 否       |
-| insideMargin     | PaddingValues             | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin    | 否       |
-| onClick          | (() -> Unit)?             | 点击箭头时触发的回调     | null                                   | 否       |
-| holdDownState    | Boolean                   | 组件是否处于按下状态     | false                                  | 否       |
-| enabled          | Boolean                   | 组件是否可交互           | true                                   | 否       |
+| 属性名           | 类型                           | 说明                             | 默认值                              | 是否必须 |
+| ---------------- | ------------------------------ | -------------------------------- | ----------------------------------- | -------- |
+| title            | String                         | 箭头项的标题                      | -                                   | 是       |
+| titleColor       | BasicComponentColors           | 标题文本的颜色配置                | BasicComponentDefaults.titleColor() | 否       |
+| summary          | String?                        | 箭头项的摘要说明                  | null                                | 否       |
+| summaryColor     | BasicComponentColors           | 摘要文本的颜色配置                | BasicComponentDefaults.summaryColor() | 否     |
+| leftAction       | @Composable (() -> Unit)?      | 左侧自定义内容                    | null                                | 否       |
+| rightActions     | @Composable RowScope.() -> Unit | 右侧自定义内容插槽（slot）         | {}                                  | 否       |
+| modifier         | Modifier                       | 应用于组件的修饰符                | Modifier                            | 否       |
+| insideMargin     | PaddingValues                  | 组件内部内容的边距                | BasicComponentDefaults.InsideMargin | 否       |
+| onClick          | (() -> Unit)?                  | 点击时触发的回调                  | null                                | 否       |
+| holdDownState    | Boolean                        | 组件是否处于按下状态              | false                               | 否       |
+| enabled          | Boolean                        | 组件是否可交互                    | true                                | 否       |
 
 ### SuperArrowDefaults 对象
 
-SuperArrowDefaults 对象提供了箭头组件的默认值和颜色配置。
+SuperArrowDefaults 对象提供右侧箭头图标的默认颜色配置。
 
 #### 方法
 
-| 方法名            | 类型              | 说明                         |
-| ----------------- | ----------------- | ---------------------------- |
-| rightActionColors | RightActionColors | 创建右侧文本和箭头的颜色配置 |
+| 方法名            | 类型              | 说明                                   |
+| ----------------- | ----------------- | -------------------------------------- |
+| rightActionColors | RightActionColors | 返回用于右侧箭头图标的着色（tint）配置 |
 
-### RightActionColors 类
+### 箭头着色说明
 
-| 参数          | 类型  | 说明             |
-| ------------- | ----- | ---------------- |
-| color         | Color | 正常状态下的颜色 |
-| disabledColor | Color | 禁用状态下的颜色 |
+- 右侧箭头图标始终显示，并根据 `enabled` 自动着色。
+- 当 `enabled = true` 时使用 `MiuixTheme.colorScheme.onSurfaceVariantActions`。
+- 当 `enabled = false` 时使用 `MiuixTheme.colorScheme.disabledOnSecondaryVariant`。
 
 ## 进阶用法
 
@@ -127,13 +125,15 @@ SuperArrow(
 )
 ```
 
-### 带右侧文本
+### 带右侧文本（使用 rightActions 插槽）
 
 ```kotlin
 SuperArrow(
     title = "存储空间",
     summary = "管理应用存储空间",
-    rightText = "12.5 GB",
+    rightActions = {
+        Text("12.5 GB")
+    },
     onClick = { /* 处理点击事件 */ }
 )
 ```
@@ -145,13 +145,15 @@ val showDialog = remember { mutableStateOf(false) }
 var language by remember { mutableStateOf("简体中文") }
 
 Scaffold {
-    SuperArrow(
-        title = "语言设置",
-        summary = "选择应用显示语言",
-        rightText = language,
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
-    )
+SuperArrow(
+    title = "语言设置",
+    summary = "选择应用显示语言",
+    rightActions = {
+        Text(language)
+    },
+    onClick = { showDialog.value = true },
+    holdDownState = showDialog.value
+)
     SuperDialog(
         title = "选择语言",
         show = showDialog,
@@ -185,24 +187,4 @@ Scaffold {
         }
     }
 }
-```
-
-### 自定义颜色
-
-```kotlin
-SuperArrow(
-    title = "自定义颜色",
-    titleColor = BasicComponentDefaults.titleColor(
-        color = MiuixTheme.colorScheme.primary
-    ),
-    summary = "使用自定义颜色",
-    summaryColor = BasicComponentDefaults.summaryColor(
-        color = MiuixTheme.colorScheme.secondary
-    ),
-    rightActionColor = RightActionColors(
-        color = MiuixTheme.colorScheme.primary,
-        disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
-    ),
-    onClick = { /* 处理点击事件 */ }
-)
 ```

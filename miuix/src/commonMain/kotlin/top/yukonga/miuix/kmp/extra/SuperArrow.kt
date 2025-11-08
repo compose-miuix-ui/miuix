@@ -7,21 +7,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -34,8 +29,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperArrow].
  * @param summaryColor The color of the summary.
  * @param leftAction The [Composable] content that on the left side of the [SuperArrow].
- * @param rightText The text on the right side of the [SuperArrow].
- * @param rightActionColor The color of the right action.
+ * @param rightActions The [Composable] content on the right side of the [SuperArrow].
  * @param modifier The modifier to be applied to the [SuperArrow].
  * @param insideMargin The margin inside the [SuperArrow].
  * @param onClick The callback when the [SuperArrow] is clicked.
@@ -49,24 +43,13 @@ fun SuperArrow(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
-    rightText: String? = null,
-    rightActionColor: RightActionColors = SuperArrowDefaults.rightActionColors(),
+    rightActions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
-    val rightActionsContent: @Composable (RowScope.() -> Unit) =
-        remember(rightText, rightActionColor, enabled) {
-            {
-                SuperArrowRightActions(
-                    rightText = rightText,
-                    tintColor = rightActionColor.color(enabled)
-                )
-            }
-        }
-
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -75,7 +58,12 @@ fun SuperArrow(
         summary = summary,
         summaryColor = summaryColor,
         leftAction = leftAction,
-        rightActions = rightActionsContent,
+        rightActions = {
+            SuperArrowRightActions(
+                rightActions = rightActions,
+                enabled = enabled
+            )
+        },
         onClick = onClick?.takeIf { enabled },
         holdDownState = holdDownState,
         enabled = enabled
@@ -83,23 +71,14 @@ fun SuperArrow(
 }
 
 @Composable
-private fun SuperArrowRightActions(
-    rightText: String?,
-    tintColor: Color
+private fun RowScope.SuperArrowRightActions(
+    rightActions: @Composable RowScope.() -> Unit,
+    enabled: Boolean,
 ) {
-    val tintFilter = remember(tintColor) { ColorFilter.tint(tintColor) }
-
-    if (rightText != null) {
-        Text(
-            modifier = Modifier.widthIn(max = 130.dp),
-            text = rightText,
-            fontSize = MiuixTheme.textStyles.body2.fontSize,
-            color = tintColor,
-            textAlign = TextAlign.End,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2
-        )
-    }
+    rightActions()
+    val tintFilter = ColorFilter.tint(
+        color = SuperArrowDefaults.rightActionColors().color(enabled = enabled)
+    )
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp),
