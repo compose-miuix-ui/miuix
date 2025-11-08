@@ -673,6 +673,7 @@ fun AppPager(
         state = LocalPagerState.current,
         modifier = modifier,
         userScrollEnabled = uiState.enablePageUserScroll,
+        verticalAlignment = Alignment.Top,
         beyondViewportPageCount = 1,
         overscrollEffect = null,
         pageContent = { page ->
