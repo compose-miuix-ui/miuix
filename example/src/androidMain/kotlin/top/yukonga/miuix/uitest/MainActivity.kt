@@ -22,9 +22,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val colorMode = remember { mutableIntStateOf(0) }
-            val darkMode = colorMode.intValue == 2 || colorMode.intValue == 5
-                    || (isSystemInDarkTheme() && colorMode.intValue == 0)
-                    || (isSystemInDarkTheme() && colorMode.intValue == 3)
+            val darkMode = when (colorMode.intValue) {
+                2, 5 -> true
+                0, 3 -> isSystemInDarkTheme()
+                else -> false
+            }
 
             DisposableEffect(darkMode) {
                 enableEdgeToEdge(
