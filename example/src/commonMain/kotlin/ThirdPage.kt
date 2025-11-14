@@ -56,7 +56,7 @@ fun ThirdPage(
             SmallTitle("Light Theme Colors")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = lightColorScheme().surface),
+                colors = CardDefaults.defaultColors(color = lightColorScheme().surfaceContainer),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
@@ -68,7 +68,7 @@ fun ThirdPage(
             val dynLight = platformDynamicColors(dark = false)
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = dynLight.surface),
+                colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
@@ -79,7 +79,7 @@ fun ThirdPage(
             SmallTitle("Dark Theme Colors")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = darkColorScheme().surface),
+                colors = CardDefaults.defaultColors(color = darkColorScheme().surfaceContainer),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
@@ -91,7 +91,7 @@ fun ThirdPage(
             val dynDark = platformDynamicColors(dark = true)
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
-                colors = CardDefaults.defaultColors(color = dynDark.surface),
+                colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
