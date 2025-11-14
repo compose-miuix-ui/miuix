@@ -144,7 +144,7 @@ object BasicComponentDefaults {
      */
     @Composable
     fun titleColor(
-        color: Color = MiuixTheme.colorScheme.onSurface,
+        color: Color = MiuixTheme.colorScheme.onBackground,
         disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
     ): BasicComponentColors {
         return BasicComponentColors(

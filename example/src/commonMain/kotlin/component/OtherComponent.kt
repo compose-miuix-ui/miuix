@@ -757,7 +757,7 @@ fun LazyListScope.otherComponent(
             showIndication = true
         ) {
             Text(
-                color = MiuixTheme.colorScheme.onPrimary,
+                color = MiuixTheme.colorScheme.onPrimaryVariant,
                 text = "Card",
                 fontSize = 19.sp,
                 fontWeight = FontWeight.SemiBold

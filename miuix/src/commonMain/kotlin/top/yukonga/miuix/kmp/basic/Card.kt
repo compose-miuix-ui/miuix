@@ -178,8 +178,8 @@ object CardDefaults {
      */
     @Composable
     fun defaultColors(
-        color: Color = MiuixTheme.colorScheme.surface,
-        contentColor: Color = MiuixTheme.colorScheme.onSurface
+        color: Color = MiuixTheme.colorScheme.surfaceContainer,
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
     ): CardColors {
         return CardColors(
             color = color,

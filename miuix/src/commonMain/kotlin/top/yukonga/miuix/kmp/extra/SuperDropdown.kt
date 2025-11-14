@@ -289,10 +289,10 @@ object DropdownDefaults {
 
     @Composable
     fun dropdownColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurface,
-        containerColor: Color = MiuixTheme.colorScheme.surface,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surface
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer
     ): DropdownColors {
         return DropdownColors(
             contentColor = contentColor,

@@ -105,8 +105,6 @@ class Colors(
     onSurfaceVariantSummary: Color,
     onSurfaceVariantActions: Color,
     disabledOnSurface: Color,
-    outline: Color,
-    dividerLine: Color,
     surfaceContainer: Color,
     onSurfaceContainer: Color,
     onSurfaceContainerVariant: Color,
@@ -114,6 +112,8 @@ class Colors(
     onSurfaceContainerHigh: Color,
     surfaceContainerHighest: Color,
     onSurfaceContainerHighest: Color,
+    outline: Color,
+    dividerLine: Color,
     windowDimming: Color,
     sliderKeyPoint: Color,
     sliderKeyPointForeground: Color,
@@ -198,10 +198,6 @@ class Colors(
         internal set
     var disabledOnSurface by mutableStateOf(disabledOnSurface, structuralEqualityPolicy())
         internal set
-    var outline by mutableStateOf(outline, structuralEqualityPolicy())
-        internal set
-    var dividerLine by mutableStateOf(dividerLine, structuralEqualityPolicy())
-        internal set
     var surfaceContainer by mutableStateOf(surfaceContainer, structuralEqualityPolicy())
         internal set
     var onSurfaceContainer by mutableStateOf(onSurfaceContainer, structuralEqualityPolicy())
@@ -215,6 +211,10 @@ class Colors(
     var surfaceContainerHighest by mutableStateOf(surfaceContainerHighest, structuralEqualityPolicy())
         internal set
     var onSurfaceContainerHighest by mutableStateOf(onSurfaceContainerHighest, structuralEqualityPolicy())
+        internal set
+    var outline by mutableStateOf(outline, structuralEqualityPolicy())
+        internal set
+    var dividerLine by mutableStateOf(dividerLine, structuralEqualityPolicy())
         internal set
     var windowDimming by mutableStateOf(windowDimming, structuralEqualityPolicy())
         internal set
@@ -264,8 +264,6 @@ class Colors(
         onSurfaceVariantSummary: Color = this.onSurfaceVariantSummary,
         onSurfaceVariantActions: Color = this.onSurfaceVariantActions,
         disabledOnSurface: Color = this.disabledOnSurface,
-        outline: Color = this.outline,
-        dividerLine: Color = this.dividerLine,
         surfaceContainer: Color = this.surfaceContainer,
         onSurfaceContainer: Color = this.onSurfaceContainer,
         onSurfaceContainerVariant: Color = this.onSurfaceContainerVariant,
@@ -273,6 +271,8 @@ class Colors(
         onSurfaceContainerHigh: Color = this.onSurfaceContainerHigh,
         surfaceContainerHighest: Color = this.surfaceContainerHighest,
         onSurfaceContainerHighest: Color = this.onSurfaceContainerHighest,
+        outline: Color = this.outline,
+        dividerLine: Color = this.dividerLine,
         windowDimming: Color = this.windowDimming,
         sliderKeyPoint: Color = this.sliderKeyPoint,
         sliderKeyPointForeground: Color = this.sliderKeyPointForeground,
@@ -318,8 +318,6 @@ class Colors(
             onSurfaceVariantSummary,
             onSurfaceVariantActions,
             disabledOnSurface,
-            outline,
-            dividerLine,
             surfaceContainer,
             onSurfaceContainer,
             onSurfaceContainerVariant,
@@ -327,6 +325,8 @@ class Colors(
             onSurfaceContainerHigh,
             surfaceContainerHighest,
             onSurfaceContainerHighest,
+            outline,
+            dividerLine,
             windowDimming,
             sliderKeyPoint,
             sliderKeyPointForeground,
@@ -364,25 +364,25 @@ fun lightColorScheme(
     tertiaryContainer: Color = Color(0xFFEAF2FF),
     onTertiaryContainer: Color = Color(0xFF3482FF),
     tertiaryContainerVariant: Color = Color(0xFFEAF2FF),
-    background: Color = Color(0xFFF7F7F7),
+    background: Color = Color.White,
     onBackground: Color = Color.Black,
     onBackgroundVariant: Color = Color(0xFF8C93B0),
-    surface: Color = Color.White,
+    surface: Color = Color(0xFFF7F7F7),
     onSurface: Color = Color.Black,
     surfaceVariant: Color = Color.White,
     onSurfaceSecondary: Color = Color(0xCC000000),
     onSurfaceVariantSummary: Color = Color(0x99000000),
     onSurfaceVariantActions: Color = Color(0x66000000),
     disabledOnSurface: Color = Color(0xFFB2B2B2),
-    outline: Color = Color(0xFFD9D9D9),
-    dividerLine: Color = Color(0xFFE0E0E0),
-    surfaceContainer: Color = Color(0xFFF9F9F9),
-    onSurfaceContainer: Color = Color(0xFF323232),
+    surfaceContainer: Color = Color.White,
+    onSurfaceContainer: Color = Color.Black,
     onSurfaceContainerVariant: Color = Color(0xFF959595),
     surfaceContainerHigh: Color = Color(0xFFE8E8E8),
     onSurfaceContainerHigh: Color = Color(0xFFA2A2A2),
     surfaceContainerHighest: Color = Color(0xFFE8E8E8),
     onSurfaceContainerHighest: Color = Color.Black,
+    outline: Color = Color(0xFFD9D9D9),
+    dividerLine: Color = Color(0xFFE0E0E0),
     windowDimming: Color = Color.Black.copy(alpha = 0.3F),
     sliderKeyPoint: Color = Color(0x4DA3B3CD),
     sliderKeyPointForeground: Color = Color(0xFF6EB5FF),
@@ -428,8 +428,6 @@ fun lightColorScheme(
         onSurfaceVariantSummary,
         onSurfaceVariantActions,
         disabledOnSurface,
-        outline,
-        dividerLine,
         surfaceContainer,
         onSurfaceContainer,
         onSurfaceContainerVariant,
@@ -437,6 +435,8 @@ fun lightColorScheme(
         onSurfaceContainerHigh,
         surfaceContainerHighest,
         onSurfaceContainerHighest,
+        outline,
+        dividerLine,
         windowDimming,
         sliderKeyPoint,
         sliderKeyPointForeground,
@@ -473,25 +473,25 @@ fun darkColorScheme(
     tertiaryContainer: Color = Color(0xFF2B3B54),
     onTertiaryContainer: Color = Color(0xFF4788ff),
     tertiaryContainerVariant: Color = Color(0xFF505050),
-    background: Color = Color.Black,
-    onBackground: Color = Color(0xFFF2F2F2),
+    background: Color = Color(0xFF242424),
+    onBackground: Color = Color(0xE6FFFFFF),
     onBackgroundVariant: Color = Color(0xFF787E96),
-    surface: Color = Color(0xFF242424),
-    onSurface: Color = Color(0xE6FFFFFF),
+    surface: Color = Color.Black,
+    onSurface: Color = Color(0xFFF2F2F2),
     surfaceVariant: Color = Color(0xFF242424),
     onSurfaceSecondary: Color = Color(0xCCFFFFFF),
     onSurfaceVariantSummary: Color = Color(0x80FFFFFF),
     onSurfaceVariantActions: Color = Color(0x66FFFFFF),
     disabledOnSurface: Color = Color(0xFF666666),
-    outline: Color = Color(0xFF404040),
-    dividerLine: Color = Color(0xFF393939),
-    surfaceContainer: Color = Color(0xFF161616),
-    onSurfaceContainer: Color = Color(0xFFD0D0D0),
+    surfaceContainer: Color = Color(0xFF242424),
+    onSurfaceContainer: Color = Color(0xE6FFFFFF),
     onSurfaceContainerVariant: Color = Color(0xFF737373),
     surfaceContainerHigh: Color = Color(0xFF242424),
     onSurfaceContainerHigh: Color = Color(0xFF666666),
     surfaceContainerHighest: Color = Color(0xFF2D2D2D),
     onSurfaceContainerHighest: Color = Color(0xFFE9E9E9),
+    outline: Color = Color(0xFF404040),
+    dividerLine: Color = Color(0xFF393939),
     windowDimming: Color = Color.Black.copy(alpha = 0.6F),
     sliderKeyPoint: Color = Color(0x4D7A8AA6),
     sliderKeyPointForeground: Color = Color(0xFF5DAAFF),
@@ -537,8 +537,6 @@ fun darkColorScheme(
         onSurfaceVariantSummary,
         onSurfaceVariantActions,
         disabledOnSurface,
-        outline,
-        dividerLine,
         surfaceContainer,
         onSurfaceContainer,
         onSurfaceContainerVariant,
@@ -546,6 +544,8 @@ fun darkColorScheme(
         onSurfaceContainerHigh,
         surfaceContainerHighest,
         onSurfaceContainerHighest,
+        outline,
+        dividerLine,
         windowDimming,
         sliderKeyPoint,
         sliderKeyPointForeground,
@@ -593,8 +593,6 @@ internal fun Colors.updateColorsFrom(other: Colors) {
     onSurfaceVariantSummary = other.onSurfaceVariantSummary
     onSurfaceVariantActions = other.onSurfaceVariantActions
     disabledOnSurface = other.disabledOnSurface
-    outline = other.outline
-    dividerLine = other.dividerLine
     surfaceContainer = other.surfaceContainer
     onSurfaceContainer = other.onSurfaceContainer
     onSurfaceContainerVariant = other.onSurfaceContainerVariant
@@ -602,6 +600,8 @@ internal fun Colors.updateColorsFrom(other: Colors) {
     onSurfaceContainerHigh = other.onSurfaceContainerHigh
     surfaceContainerHighest = other.surfaceContainerHighest
     onSurfaceContainerHighest = other.onSurfaceContainerHighest
+    outline = other.outline
+    dividerLine = other.dividerLine
     windowDimming = other.windowDimming
     sliderKeyPoint = other.sliderKeyPoint
     sliderKeyPointForeground = other.sliderKeyPointForeground

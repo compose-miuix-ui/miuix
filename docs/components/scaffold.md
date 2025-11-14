@@ -57,7 +57,7 @@ Scaffold(
 | floatingToolbarPosition      | ToolbarPosition                     | Position to display the floating toolbar                                 | ToolbarPosition.BottomCenter      | No       |
 | snackbarHost                 | @Composable () -> Unit              | Container for displaying Snackbar, Miuix does not provide this component | {}                                | No       |
 | popupHost                    | @Composable () -> Unit              | Container for displaying popup windows                                   | \{ MiuixPopupHost() }             | No       |
-| containerColor               | Color                               | Background color of the scaffold                                         | MiuixTheme.colorScheme.background | No       |
+| containerColor               | Color                               | Background color of the scaffold                                         | MiuixTheme.colorScheme.surface | No       |
 | contentWindowInsets          | WindowInsets                        | Window insets passed to the content                                      | WindowInsets.statusBars           | No       |
 | content                      | @Composable (PaddingValues) -> Unit | Main content area of the scaffold                                        | -                                 | Yes      |
 

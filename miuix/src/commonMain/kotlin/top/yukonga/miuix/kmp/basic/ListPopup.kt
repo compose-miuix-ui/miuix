@@ -282,7 +282,7 @@ fun ListPopup(
                         ambientShadowColor = MiuixTheme.colorScheme.windowDimming,
                         spotShadowColor = MiuixTheme.colorScheme.windowDimming
                     )
-                    .background(MiuixTheme.colorScheme.surface)
+                    .background(MiuixTheme.colorScheme.surfaceContainer)
             ) {
                 content()
             }

@@ -5,4 +5,4 @@ package top.yukonga.miuix.kmp.theme
 import androidx.compose.runtime.Composable
 
 @Composable
-expect fun platformDynamicColors(dark: Boolean): Colors?
+expect fun platformDynamicColors(dark: Boolean): Colors

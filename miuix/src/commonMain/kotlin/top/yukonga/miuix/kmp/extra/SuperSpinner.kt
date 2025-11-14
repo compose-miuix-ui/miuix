@@ -510,7 +510,7 @@ object SpinnerDefaults {
 
     @Composable
     fun spinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurface,
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         containerColor: Color = MiuixTheme.colorScheme.surfaceVariant,
         selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
@@ -531,7 +531,7 @@ object SpinnerDefaults {
 
     @Composable
     fun dialogSpinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurface,
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         containerColor: Color = MiuixTheme.colorScheme.surfaceVariant,
         selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,

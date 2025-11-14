@@ -344,10 +344,10 @@ object TabRowDefaults {
      */
     @Composable
     fun tabRowColors(
-        backgroundColor: Color = MiuixTheme.colorScheme.background,
+        backgroundColor: Color = MiuixTheme.colorScheme.surface,
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        selectedBackgroundColor: Color = MiuixTheme.colorScheme.surface,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onSurface
+        selectedBackgroundColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.onBackground
     ): TabRowColors = TabRowColors(
         backgroundColor = backgroundColor,
         contentColor = contentColor,

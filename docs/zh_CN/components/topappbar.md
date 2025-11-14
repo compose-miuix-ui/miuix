@@ -123,7 +123,7 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ------------------------------ | --------------------------------- | -------- |
 | title                      | String                          | 顶部栏标题                     | -                                 | 是       |
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符           | Modifier                          | 否       |
-| color                      | Color                           | 顶部栏背景颜色                 | MiuixTheme.colorScheme.background | 否       |
+| color                      | Color                           | 顶部栏背景颜色                 | MiuixTheme.colorScheme.surface | 否       |
 | largeTitle                 | String?                         | 大标题文本，不指定时使用 title | null                              | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数       | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数       | {}                                | 否       |
@@ -137,7 +137,7 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ------------------------ | --------------------------------- | -------- |
 | title                      | String                          | 顶部栏标题               | -                                 | 是       |
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符     | Modifier                          | 否       |
-| color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.background | 否       |
+| color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.surface | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数 | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数 | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为       | null                              | 否       |

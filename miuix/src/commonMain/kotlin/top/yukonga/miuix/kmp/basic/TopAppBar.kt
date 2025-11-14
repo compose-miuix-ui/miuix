@@ -91,7 +91,7 @@ import kotlin.math.roundToInt
 fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
-    color: Color = MiuixTheme.colorScheme.background,
+    color: Color = MiuixTheme.colorScheme.surface,
     largeTitle: String? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -164,7 +164,7 @@ fun TopAppBar(
 fun SmallTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
-    color: Color = MiuixTheme.colorScheme.background,
+    color: Color = MiuixTheme.colorScheme.surface,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,

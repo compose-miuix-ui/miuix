@@ -39,18 +39,18 @@ class ThemeController(
             ColorSchemeMode.DynamicSystem -> {
                 val dark = isSystemInDarkTheme()
                 if (dark) {
-                    platformDynamicColors(dark = true) ?: material3StaticColors(dark = true)
+                    platformDynamicColors(dark = true)
                 } else {
-                    platformDynamicColors(dark = false) ?: material3StaticColors(dark = false)
+                    platformDynamicColors(dark = false)
                 }
             }
 
             ColorSchemeMode.DynamicLight -> {
-                platformDynamicColors(dark = false) ?: material3StaticColors(dark = false)
+                platformDynamicColors(dark = false)
             }
 
             ColorSchemeMode.DynamicDark -> {
-                platformDynamicColors(dark = true) ?: material3StaticColors(dark = true)
+                platformDynamicColors(dark = true)
             }
         }
     }

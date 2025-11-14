@@ -31,7 +31,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
-import top.yukonga.miuix.kmp.theme.material3StaticColors
 import top.yukonga.miuix.kmp.theme.platformDynamicColors
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -69,11 +68,11 @@ fun ThirdPage(
             val dynLight = platformDynamicColors(dark = false)
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = (dynLight ?: lightColorScheme()).surface),
+                colors = CardDefaults.defaultColors(color = dynLight.surface),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
-                if (dynLight != null) ColorsPreview(dynLight) else ColorsPreview((material3StaticColors(dark = false)))
+                ColorsPreview(dynLight)
             }
         }
         item(key = "dark") {
@@ -92,11 +91,11 @@ fun ThirdPage(
             val dynDark = platformDynamicColors(dark = true)
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
-                colors = CardDefaults.defaultColors(color = (dynDark ?: darkColorScheme()).surface),
+                colors = CardDefaults.defaultColors(color = dynDark.surface),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
-                if (dynDark != null) ColorsPreview(dynDark) else ColorsPreview((material3StaticColors(dark = true)))
+                ColorsPreview(dynDark)
             }
             Spacer(modifier = Modifier.height(12.dp + padding.calculateBottomPadding()))
         }
@@ -146,10 +145,6 @@ fun ColorsPreview(colors: Colors) {
         "onSurfaceVariantSummary" to colors.onSurfaceVariantSummary,
         "onSurfaceVariantActions" to colors.onSurfaceVariantActions,
         "disabledOnSurface" to colors.disabledOnSurface,
-        "outline" to colors.outline,
-        "dividerLine" to colors.dividerLine,
-        "sliderKeyPoint" to colors.sliderKeyPoint,
-        "sliderKeyPointForeground" to colors.sliderKeyPointForeground,
         "surfaceContainer" to colors.surfaceContainer,
         "onSurfaceContainer" to colors.onSurfaceContainer,
         "onSurfaceContainerVariant" to colors.onSurfaceContainerVariant,
@@ -157,7 +152,11 @@ fun ColorsPreview(colors: Colors) {
         "onSurfaceContainerHigh" to colors.onSurfaceContainerHigh,
         "surfaceContainerHighest" to colors.surfaceContainerHighest,
         "onSurfaceContainerHighest" to colors.onSurfaceContainerHighest,
+        "outline" to colors.outline,
+        "dividerLine" to colors.dividerLine,
         "windowDimming" to colors.windowDimming,
+        "sliderKeyPoint" to colors.sliderKeyPoint,
+        "sliderKeyPointForeground" to colors.sliderKeyPointForeground,
     )
     val colorMap = colorList.toMap()
 

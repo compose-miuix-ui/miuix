@@ -46,8 +46,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun Surface(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
-    color: Color = MiuixTheme.colorScheme.background,
-    contentColor: Color = MiuixTheme.colorScheme.onBackground,
+    color: Color = MiuixTheme.colorScheme.surface,
+    contentColor: Color = MiuixTheme.colorScheme.onSurface,
     border: BorderStroke? = null,
     shadowElevation: Dp = 0.dp,
     content: @Composable () -> Unit
@@ -94,8 +94,8 @@ fun Surface(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: Shape = RectangleShape,
-    color: Color = MiuixTheme.colorScheme.background,
-    contentColor: Color = MiuixTheme.colorScheme.onBackground,
+    color: Color = MiuixTheme.colorScheme.surface,
+    contentColor: Color = MiuixTheme.colorScheme.onSurface,
     border: BorderStroke? = null,
     shadowElevation: Dp = 0.dp,
     interactionSource: MutableInteractionSource? = null,

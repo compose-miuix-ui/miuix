@@ -40,8 +40,8 @@ Surface(
 | --------------- | ---------------------- | ------------------------------------------------ | --------------------------------- | -------- |
 | modifier        | Modifier               | Modifiers applied to Surface                     | Modifier                          | No       |
 | shape           | Shape                  | Shape of the Surface                             | RectangleShape                    | No       |
-| color           | Color                  | Background color of Surface                      | MiuixTheme.colorScheme.background | No       |
-| contentColor    | Color                  | Content color of Surface                         | MiuixTheme.colorScheme.onBackground | No       |
+| color           | Color                  | Background color of Surface                      | MiuixTheme.colorScheme.surface | No       |
+| contentColor    | Color                  | Content color of Surface                         | MiuixTheme.colorScheme.onSurface | No       |
 | border          | BorderStroke?          | Border style of Surface                          | null                              | No       |
 | shadowElevation | Dp                     | Shadow elevation of Surface                      | 0.dp                              | No       |
 | content         | @Composable () -> Unit | Composable function for the Surface content area | -                                 | Yes      |
