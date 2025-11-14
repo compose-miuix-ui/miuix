@@ -63,6 +63,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
+            implementation(compose.material3)
 
             implementation(libs.jetbrains.compose.ui.backhandler)
             implementation(libs.jetbrains.compose.window.size)

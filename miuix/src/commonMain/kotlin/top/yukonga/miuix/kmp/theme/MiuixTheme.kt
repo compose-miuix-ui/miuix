@@ -41,6 +41,41 @@ fun MiuixTheme(
     }
 }
 
+/**
+ * The Miuix theme that provides color and text styles for the Miuix components.
+ * This theme supports dynamic color schemes through the [ThemeController].
+ *
+ * @param controller The [ThemeController] that controls the current color scheme.
+ * @param textStyles The text styles for the Miuix components.
+ * @param content The content of the Miuix theme.
+ */
+@Composable
+fun MiuixTheme(
+    controller: ThemeController,
+    textStyles: TextStyles = MiuixTheme.textStyles,
+    content: @Composable () -> Unit
+) {
+    val rawColors = controller.currentColors()
+
+    val colors = remember(rawColors) {
+        rawColors.copy().apply { updateColorsFrom(this) }
+    }
+
+    val miuixTextStyles = remember(textStyles, colors.onBackground) {
+        textStyles.copy().apply { updateColorsFrom(colors.onBackground) }
+    }
+    val miuixIndication = remember(colors.onBackground) {
+        MiuixIndication(color = colors.onBackground)
+    }
+    CompositionLocalProvider(
+        LocalColors provides colors,
+        LocalTextStyles provides miuixTextStyles,
+        LocalIndication provides miuixIndication
+    ) {
+        content()
+    }
+}
+
 object MiuixTheme {
     val colorScheme: Colors
         @Composable @ReadOnlyComposable get() = LocalColors.current

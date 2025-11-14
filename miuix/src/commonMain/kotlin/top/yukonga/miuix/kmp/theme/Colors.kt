@@ -69,6 +69,10 @@ class Colors(
     onPrimary: Color,
     primaryVariant: Color,
     onPrimaryVariant: Color,
+    error: Color,
+    onError: Color,
+    errorContainer: Color,
+    onErrorContainer: Color,
     disabledPrimary: Color,
     disabledOnPrimary: Color,
     disabledPrimaryButton: Color,
@@ -111,6 +115,8 @@ class Colors(
     surfaceContainerHighest: Color,
     onSurfaceContainerHighest: Color,
     windowDimming: Color,
+    sliderKeyPoint: Color,
+    sliderKeyPointForeground: Color,
 ) {
     var primary by mutableStateOf(primary, structuralEqualityPolicy())
         internal set
@@ -119,6 +125,14 @@ class Colors(
     var primaryVariant by mutableStateOf(primaryVariant, structuralEqualityPolicy())
         internal set
     var onPrimaryVariant by mutableStateOf(onPrimaryVariant, structuralEqualityPolicy())
+        internal set
+    var error by mutableStateOf(error, structuralEqualityPolicy())
+        internal set
+    var onError by mutableStateOf(onError, structuralEqualityPolicy())
+        internal set
+    var errorContainer by mutableStateOf(errorContainer, structuralEqualityPolicy())
+        internal set
+    var onErrorContainer by mutableStateOf(onErrorContainer, structuralEqualityPolicy())
         internal set
     var disabledPrimary by mutableStateOf(disabledPrimary, structuralEqualityPolicy())
         internal set
@@ -204,12 +218,20 @@ class Colors(
         internal set
     var windowDimming by mutableStateOf(windowDimming, structuralEqualityPolicy())
         internal set
+    var sliderKeyPoint by mutableStateOf(sliderKeyPoint, structuralEqualityPolicy())
+        internal set
+    var sliderKeyPointForeground by mutableStateOf(sliderKeyPointForeground, structuralEqualityPolicy())
+        internal set
 
     fun copy(
         primary: Color = this.primary,
         onPrimary: Color = this.onPrimary,
         primaryVariant: Color = this.primaryVariant,
         onPrimaryVariant: Color = this.onPrimaryVariant,
+        error: Color = this.error,
+        onError: Color = this.onError,
+        errorContainer: Color = this.errorContainer,
+        onErrorContainer: Color = this.onErrorContainer,
         disabledPrimary: Color = this.disabledPrimary,
         disabledOnPrimary: Color = this.disabledOnPrimary,
         disabledPrimaryButton: Color = this.disabledPrimaryButton,
@@ -252,12 +274,18 @@ class Colors(
         surfaceContainerHighest: Color = this.surfaceContainerHighest,
         onSurfaceContainerHighest: Color = this.onSurfaceContainerHighest,
         windowDimming: Color = this.windowDimming,
+        sliderKeyPoint: Color = this.sliderKeyPoint,
+        sliderKeyPointForeground: Color = this.sliderKeyPointForeground,
     ): Colors =
         Colors(
             primary,
             onPrimary,
             primaryVariant,
             onPrimaryVariant,
+            error,
+            onError,
+            errorContainer,
+            onErrorContainer,
             disabledPrimary,
             disabledOnPrimary,
             disabledPrimaryButton,
@@ -300,6 +328,8 @@ class Colors(
             surfaceContainerHighest,
             onSurfaceContainerHighest,
             windowDimming,
+            sliderKeyPoint,
+            sliderKeyPointForeground,
         )
 }
 
@@ -308,6 +338,10 @@ fun lightColorScheme(
     onPrimary: Color = Color.White,
     primaryVariant: Color = Color(0xFF3482FF),
     onPrimaryVariant: Color = Color(0xFFAECDFF),
+    error: Color = Color(0xFFBA1A1A),
+    onError: Color = Color(0xFFFFFFFF),
+    errorContainer: Color = Color(0xFFFFDAD6),
+    onErrorContainer: Color = Color(0xFF410002),
     disabledPrimary: Color = Color(0xFFC2D9FF),
     disabledOnPrimary: Color = Color(0xFFF3F8FF),
     disabledPrimaryButton: Color = Color(0xFFC2D9FF),
@@ -350,12 +384,18 @@ fun lightColorScheme(
     surfaceContainerHighest: Color = Color(0xFFE8E8E8),
     onSurfaceContainerHighest: Color = Color.Black,
     windowDimming: Color = Color.Black.copy(alpha = 0.3F),
+    sliderKeyPoint: Color = Color(0x4DA3B3CD),
+    sliderKeyPointForeground: Color = Color(0xFF6EB5FF),
 ): Colors =
     Colors(
         primary,
         onPrimary,
         primaryVariant,
         onPrimaryVariant,
+        error,
+        onError,
+        errorContainer,
+        onErrorContainer,
         disabledPrimary,
         disabledOnPrimary,
         disabledPrimaryButton,
@@ -398,6 +438,8 @@ fun lightColorScheme(
         surfaceContainerHighest,
         onSurfaceContainerHighest,
         windowDimming,
+        sliderKeyPoint,
+        sliderKeyPointForeground,
     )
 
 fun darkColorScheme(
@@ -405,6 +447,10 @@ fun darkColorScheme(
     onPrimary: Color = Color.White,
     primaryVariant: Color = Color(0xFF0073DD),
     onPrimaryVariant: Color = Color(0xFF99C7F1),
+    error: Color = Color(0xFFFFB4AB),
+    onError: Color = Color(0xFF690005),
+    errorContainer: Color = Color(0xFF93000A),
+    onErrorContainer: Color = Color(0xFFFFDAD6),
     disabledPrimary: Color = Color(0xFF253E64),
     disabledOnPrimary: Color = Color(0xFF677993),
     disabledPrimaryButton: Color = Color(0xFF253E64),
@@ -447,12 +493,18 @@ fun darkColorScheme(
     surfaceContainerHighest: Color = Color(0xFF2D2D2D),
     onSurfaceContainerHighest: Color = Color(0xFFE9E9E9),
     windowDimming: Color = Color.Black.copy(alpha = 0.6F),
+    sliderKeyPoint: Color = Color(0x4D7A8AA6),
+    sliderKeyPointForeground: Color = Color(0xFF5DAAFF),
 ): Colors =
     Colors(
         primary,
         onPrimary,
         primaryVariant,
         onPrimaryVariant,
+        error,
+        onError,
+        errorContainer,
+        onErrorContainer,
         disabledPrimary,
         disabledOnPrimary,
         disabledPrimaryButton,
@@ -495,6 +547,8 @@ fun darkColorScheme(
         surfaceContainerHighest,
         onSurfaceContainerHighest,
         windowDimming,
+        sliderKeyPoint,
+        sliderKeyPointForeground,
     )
 
 @Stable
@@ -503,6 +557,10 @@ internal fun Colors.updateColorsFrom(other: Colors) {
     onPrimary = other.onPrimary
     primaryVariant = other.primaryVariant
     onPrimaryVariant = other.onPrimaryVariant
+    error = other.error
+    onError = other.onError
+    errorContainer = other.errorContainer
+    onErrorContainer = other.onErrorContainer
     disabledPrimary = other.disabledPrimary
     disabledOnPrimary = other.disabledOnPrimary
     disabledPrimaryButton = other.disabledPrimaryButton
@@ -545,6 +603,8 @@ internal fun Colors.updateColorsFrom(other: Colors) {
     surfaceContainerHighest = other.surfaceContainerHighest
     onSurfaceContainerHighest = other.onSurfaceContainerHighest
     windowDimming = other.windowDimming
+    sliderKeyPoint = other.sliderKeyPoint
+    sliderKeyPointForeground = other.sliderKeyPointForeground
 }
 
 internal val LocalColors = staticCompositionLocalOf { lightColorScheme() }

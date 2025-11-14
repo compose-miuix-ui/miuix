@@ -31,6 +31,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import top.yukonga.miuix.kmp.theme.material3StaticColors
+import top.yukonga.miuix.kmp.theme.platformDynamicColors
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -62,15 +64,39 @@ fun ThirdPage(
                 ColorsPreview(lightColorScheme())
             }
         }
+        item(key = "dynamic_light") {
+            SmallTitle("Dynamic Light Colors")
+            val dynLight = platformDynamicColors(dark = false)
+            Card(
+                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(color = (dynLight ?: lightColorScheme()).surface),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp)
+            ) {
+                if (dynLight != null) ColorsPreview(dynLight) else ColorsPreview((material3StaticColors(dark = false)))
+            }
+        }
         item(key = "dark") {
             SmallTitle("Dark Theme Colors")
             Card(
-                modifier = Modifier.padding(horizontal = 12.dp),
+                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                 colors = CardDefaults.defaultColors(color = darkColorScheme().surface),
                 cornerRadius = 16.dp,
                 insideMargin = PaddingValues(horizontal = 16.dp)
             ) {
                 ColorsPreview(darkColorScheme())
+            }
+        }
+        item(key = "dynamic_dark") {
+            SmallTitle("Dynamic Dark Colors")
+            val dynDark = platformDynamicColors(dark = true)
+            Card(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                colors = CardDefaults.defaultColors(color = (dynDark ?: darkColorScheme()).surface),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp)
+            ) {
+                if (dynDark != null) ColorsPreview(dynDark) else ColorsPreview((material3StaticColors(dark = true)))
             }
             Spacer(modifier = Modifier.height(12.dp + padding.calculateBottomPadding()))
         }
@@ -84,6 +110,10 @@ fun ColorsPreview(colors: Colors) {
         "onPrimary" to colors.onPrimary,
         "primaryVariant" to colors.primaryVariant,
         "onPrimaryVariant" to colors.onPrimaryVariant,
+        "error" to colors.error,
+        "onError" to colors.onError,
+        "errorContainer" to colors.errorContainer,
+        "onErrorContainer" to colors.onErrorContainer,
         "disabledPrimary" to colors.disabledPrimary,
         "disabledOnPrimary" to colors.disabledOnPrimary,
         "disabledPrimaryButton" to colors.disabledPrimaryButton,
@@ -118,6 +148,8 @@ fun ColorsPreview(colors: Colors) {
         "disabledOnSurface" to colors.disabledOnSurface,
         "outline" to colors.outline,
         "dividerLine" to colors.dividerLine,
+        "sliderKeyPoint" to colors.sliderKeyPoint,
+        "sliderKeyPointForeground" to colors.sliderKeyPointForeground,
         "surfaceContainer" to colors.surfaceContainer,
         "onSurfaceContainer" to colors.onSurfaceContainer,
         "onSurfaceContainerVariant" to colors.onSurfaceContainerVariant,
@@ -185,4 +217,3 @@ private fun ColorBlock(name: String, surfaceColor: Color, textColor: Color, modi
         }
     }
 }
-
