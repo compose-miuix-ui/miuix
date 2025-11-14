@@ -590,8 +590,6 @@ private fun TopAppBarLayout(
         }
     }
 
-    println("extOffset: ${extOffset.coerceIn(0f, 1f)}")
-
     // Large Title Alpha Animation
     val largeTitleAlpha by remember(heightOffset, expandedHeightPx) {
         derivedStateOf {
