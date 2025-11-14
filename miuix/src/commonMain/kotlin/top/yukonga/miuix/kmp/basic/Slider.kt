@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -62,7 +61,6 @@ import kotlin.math.abs
  *   When true, slider increases from right to left (useful for RTL layouts or custom direction requirements).
  * @param height The height of the [Slider].
  * @param colors The [SliderColors] of the [Slider].
- * @param effect Whether to show the effect of the [Slider].
  * @param hapticEffect The haptic effect of the [Slider].
  * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
  * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
@@ -82,7 +80,6 @@ fun Slider(
     reverseDirection: Boolean = false,
     height: Dp = SliderDefaults.MinHeight,
     colors: SliderColors = SliderDefaults.sliderColors(),
-    effect: Boolean = false,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
@@ -186,9 +183,11 @@ fun Slider(
         SliderTrack(
             modifier = Modifier.fillMaxWidth().height(height),
             shape = shape,
-            backgroundColor = colors.backgroundColor(),
+            backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
-            effect = effect,
+            thumbColor = colors.thumbColor(enabled),
+            keyPointColor = colors.keyPointColor(),
+            keyPointForegroundColor = colors.keyPointForegroundColor(),
             value = coercedValue,
             valueRange = valueRange,
             isDragging = isDragging,
@@ -196,8 +195,6 @@ fun Slider(
             reverseDirection = reverseDirection,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor()
         )
     }
 }
@@ -334,9 +331,11 @@ fun VerticalSlider(
         SliderTrack(
             modifier = Modifier.width(width).fillMaxHeight(),
             shape = shape,
-            backgroundColor = colors.backgroundColor(),
+            backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
-            effect = effect,
+            thumbColor = colors.thumbColor(enabled),
+            keyPointColor = colors.keyPointColor(),
+            keyPointForegroundColor = colors.keyPointForegroundColor(),
             value = coercedValue,
             valueRange = valueRange,
             isDragging = isDragging,
@@ -344,8 +343,6 @@ fun VerticalSlider(
             reverseDirection = reverseDirection,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor()
         )
     }
 }
@@ -365,7 +362,6 @@ fun VerticalSlider(
  * @param onValueChangeFinished Lambda to be invoked when value change has ended.
  * @param height The height of the [RangeSlider].
  * @param colors The [SliderColors] of the [RangeSlider].
- * @param effect Whether to show the effect of the [RangeSlider].
  * @param hapticEffect The haptic effect of the [RangeSlider].
  * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
  * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
@@ -384,7 +380,6 @@ fun RangeSlider(
     onValueChangeFinished: (() -> Unit)? = null,
     height: Dp = SliderDefaults.MinHeight,
     colors: SliderColors = SliderDefaults.sliderColors(),
-    effect: Boolean = false,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
@@ -593,17 +588,17 @@ fun RangeSlider(
         RangeSliderTrack(
             modifier = Modifier.fillMaxWidth().height(height),
             shape = shape,
-            backgroundColor = colors.backgroundColor(),
+            backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
-            effect = effect,
+            thumbColor = colors.thumbColor(enabled),
+            keyPointColor = colors.keyPointColor(),
+            keyPointForegroundColor = colors.keyPointForegroundColor(),
             valueStart = coercedStart,
             valueEnd = coercedEnd,
             valueRange = valueRange,
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor()
         )
     }
 }
@@ -617,7 +612,9 @@ private fun SliderTrack(
     shape: ContinuousRoundedRectangle,
     backgroundColor: Color,
     foregroundColor: Color,
-    effect: Boolean,
+    thumbColor: Color,
+    keyPointColor: Color,
+    keyPointForegroundColor: Color,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
@@ -625,8 +622,6 @@ private fun SliderTrack(
     reverseDirection: Boolean = false,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
-    keyPointColor: Color,
-    keyPointForegroundColor: Color
 ) {
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
@@ -642,11 +637,6 @@ private fun SliderTrack(
         val barHeight = size.height
         val barWidth = size.width
         val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-        val cornerRadius = if (effect) {
-            if (isVertical) CornerRadius(barWidth / 2) else CornerRadius(barHeight / 2)
-        } else {
-            CornerRadius.Zero
-        }
 
         if (isVertical) {
             val thumbRadius = barWidth / 2f
@@ -655,11 +645,10 @@ private fun SliderTrack(
             val centerY = thumbRadius + effectiveFraction * availableHeight
             val fillHeight = (barHeight - centerY).coerceAtLeast(0f)
 
-            drawRoundRect(
+            drawRect(
                 color = foregroundColor,
                 size = Size(barWidth, fillHeight),
                 topLeft = Offset(0f, centerY),
-                cornerRadius = cornerRadius
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -671,7 +660,7 @@ private fun SliderTrack(
                     drawCircle(
                         color = kpColor,
                         radius = keyPointRadius,
-                        center = Offset(barWidth / 2f, y)
+                        center = Offset(barWidth / 2f, y),
                     )
                 }
             }
@@ -681,7 +670,7 @@ private fun SliderTrack(
                 center = Offset(barWidth / 2f, centerY)
             )
             drawCircle(
-                color = Color.White,
+                color = thumbColor,
                 radius = thumbRadius * 0.72f,
                 center = Offset(barWidth / 2f, centerY)
             )
@@ -691,11 +680,10 @@ private fun SliderTrack(
             val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
             val centerX = thumbRadius + effectiveFraction * availableWidth
 
-            drawRoundRect(
+            drawRect(
                 color = foregroundColor,
                 size = Size(centerX, barHeight),
                 topLeft = Offset(0f, 0f),
-                cornerRadius = cornerRadius
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -707,19 +695,19 @@ private fun SliderTrack(
                     drawCircle(
                         color = kpColor,
                         radius = keyPointRadius,
-                        center = Offset(x, barHeight / 2f)
+                        center = Offset(x, barHeight / 2f),
                     )
                 }
             }
             drawCircle(
                 color = foregroundColor,
                 radius = thumbRadius,
-                center = Offset(centerX, barHeight / 2f)
+                center = Offset(centerX, barHeight / 2f),
             )
             drawCircle(
-                color = Color.White,
+                color = thumbColor,
                 radius = thumbRadius * 0.72f,
-                center = Offset(centerX, barHeight / 2f)
+                center = Offset(centerX, barHeight / 2f),
             )
         }
     }
@@ -734,15 +722,15 @@ private fun RangeSliderTrack(
     shape: ContinuousRoundedRectangle,
     backgroundColor: Color,
     foregroundColor: Color,
-    effect: Boolean,
+    thumbColor: Color,
+    keyPointColor: Color,
+    keyPointForegroundColor: Color,
     valueStart: Float,
     valueEnd: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
-    keyPointColor: Color,
-    keyPointForegroundColor: Color
 ) {
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
@@ -763,13 +751,11 @@ private fun RangeSliderTrack(
         val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
         val startX = thumbRadius + startFraction * availableWidth
         val endX = thumbRadius + endFraction * availableWidth
-        val cornerRadius = if (effect) CornerRadius(barHeight / 2) else CornerRadius.Zero
 
-        drawRoundRect(
+        drawRect(
             color = foregroundColor,
             size = Size((endX - startX).coerceAtLeast(0f), barHeight),
             topLeft = Offset(startX, 0f),
-            cornerRadius = cornerRadius
         )
 
         if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -780,7 +766,7 @@ private fun RangeSliderTrack(
                 drawCircle(
                     color = kpColor,
                     radius = keyPointRadius,
-                    center = Offset(x, barHeight / 2f)
+                    center = Offset(x, barHeight / 2f),
                 )
             }
         }
@@ -793,7 +779,7 @@ private fun RangeSliderTrack(
             center = Offset(startX, centerY)
         )
         drawCircle(
-            color = Color.White,
+            color = thumbColor,
             radius = thumbRadius * 0.72f,
             center = Offset(startX, centerY)
         )
@@ -803,7 +789,7 @@ private fun RangeSliderTrack(
             center = Offset(endX, centerY)
         )
         drawCircle(
-            color = Color.White,
+            color = thumbColor,
             radius = thumbRadius * 0.72f,
             center = Offset(endX, centerY)
         )
@@ -1109,12 +1095,18 @@ object SliderDefaults {
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
         backgroundColor: Color = MiuixTheme.colorScheme.secondaryVariant,
+        disabledBackgroundColor: Color = MiuixTheme.colorScheme.disabledSecondary,
+        thumbColor: Color = MiuixTheme.colorScheme.onPrimary,
+        disabledThumbColor: Color = MiuixTheme.colorScheme.disabledOnPrimary,
         keyPointColor: Color = MiuixTheme.colorScheme.sliderKeyPoint,
         keyPointForegroundColor: Color = MiuixTheme.colorScheme.sliderKeyPointForeground,
     ): SliderColors = SliderColors(
         foregroundColor = foregroundColor,
         disabledForegroundColor = disabledForegroundColor,
         backgroundColor = backgroundColor,
+        disabledBackgroundColor = disabledBackgroundColor,
+        thumbColor = thumbColor,
+        disabledThumbColor = disabledThumbColor,
         keyPointColor = keyPointColor,
         keyPointForegroundColor = keyPointForegroundColor
     )
@@ -1125,6 +1117,9 @@ class SliderColors(
     private val foregroundColor: Color,
     private val disabledForegroundColor: Color,
     private val backgroundColor: Color,
+    private val disabledBackgroundColor: Color,
+    private val thumbColor: Color,
+    private val disabledThumbColor: Color,
     private val keyPointColor: Color,
     private val keyPointForegroundColor: Color
 ) {
@@ -1133,7 +1128,12 @@ class SliderColors(
         if (enabled) foregroundColor else disabledForegroundColor
 
     @Stable
-    internal fun backgroundColor(): Color = backgroundColor
+    internal fun backgroundColor(enabled: Boolean): Color =
+        if (enabled) backgroundColor else disabledBackgroundColor
+
+    @Stable
+    internal fun thumbColor(enabled: Boolean): Color =
+        if (enabled) thumbColor else disabledThumbColor
 
     @Stable
     internal fun keyPointColor(): Color = keyPointColor

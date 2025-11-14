@@ -4,6 +4,7 @@ package top.yukonga.miuix.kmp.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 
 internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
     return Colors(
@@ -15,8 +16,8 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         onError = cs.onError,
         errorContainer = cs.errorContainer,
         onErrorContainer = cs.onErrorContainer,
-        disabledPrimary = cs.primary.copy(alpha = 0.4f),
-        disabledOnPrimary = cs.onPrimary.copy(alpha = 0.6f),
+        disabledPrimary = cs.inversePrimary,
+        disabledOnPrimary = cs.onPrimary.copy(alpha = 0.38f),
         disabledPrimaryButton = cs.primary.copy(alpha = 0.4f),
         disabledOnPrimaryButton = cs.onPrimary.copy(alpha = 0.6f),
         disabledPrimarySlider = cs.inversePrimary,
@@ -26,9 +27,9 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         onSecondary = cs.onSecondary,
         secondaryVariant = cs.secondaryContainer,
         onSecondaryVariant = cs.onSecondaryFixed,
-        disabledSecondary = cs.secondary.copy(alpha = 0.2f),
+        disabledSecondary = cs.secondary.copy(alpha = 0.38f),
         disabledOnSecondary = cs.onSecondary.copy(alpha = 0.4f),
-        disabledSecondaryVariant = cs.secondary.copy(alpha = 0.2f),
+        disabledSecondaryVariant = cs.secondary.copy(alpha = 0.38f),
         disabledOnSecondaryVariant = cs.secondary.copy(alpha = 0.4f),
         secondaryContainer = cs.secondaryContainer,
         onSecondaryContainer = cs.onSecondaryContainer,
@@ -45,7 +46,7 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         surfaceVariant = cs.surfaceVariant,
         onSurfaceSecondary = cs.onSurface.copy(alpha = 0.8f),
         onSurfaceVariantSummary = cs.onSurface.copy(alpha = 0.6f),
-        onSurfaceVariantActions = cs.onSurface.copy(alpha = 0.4f),
+        onSurfaceVariantActions = cs.onSurface.copy(alpha = 0.6f),
         disabledOnSurface = cs.onSurface,
         surfaceContainer = cs.surfaceContainer,
         onSurfaceContainer = cs.onSurface,

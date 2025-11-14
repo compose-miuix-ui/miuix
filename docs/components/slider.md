@@ -96,7 +96,7 @@ Slider(
 | reverseDirection      | Boolean                           | Controls the direction of slider. When false, increases left to right. When true, increases right to left (RTL)                                                                | false                              | No       |
 | height                | Dp                                | Height of the slider                                                                                                                                                           | SliderDefaults.MinHeight           | No       |
 | colors                | SliderColors                      | Color configuration of the slider                                                                                                                                              | SliderDefaults.sliderColors()      | No       |
-| effect                | Boolean                           | Whether to show special effects                                                                                                                                                | false                              | No       |
+
 | hapticEffect          | SliderDefaults.SliderHapticEffect | Type of haptic feedback                                                                                                                                                        | SliderDefaults.DefaultHapticEffect | No       |
 | showKeyPoints         | Boolean                           | Whether to show key point indicators on the slider. Only works when keyPoints is not null                                                                                      | false                              | No       |
 | keyPoints             | List\<Float\>?                    | Custom key point values to display on the slider. If null, uses step positions from steps parameter. Values should be within valueRange                                        | null                               | No       |
@@ -135,7 +135,7 @@ Slider(
 | onValueChangeFinished | (() -> Unit)?                               | Called when value change has ended                                                                                                                                             | null                               | No       |
 | height                | Dp                                          | Height of the slider                                                                                                                                                           | SliderDefaults.MinHeight           | No       |
 | colors                | SliderColors                                | Color configuration of the slider                                                                                                                                              | SliderDefaults.sliderColors()      | No       |
-| effect                | Boolean                                     | Whether to show special effects                                                                                                                                                | false                              | No       |
+
 | hapticEffect          | SliderDefaults.SliderHapticEffect           | Type of haptic feedback                                                                                                                                                        | SliderDefaults.DefaultHapticEffect | No       |
 | showKeyPoints         | Boolean                                     | Whether to show key point indicators on the slider. Only works when keyPoints is not null                                                                                      | false                              | No       |
 | keyPoints             | List\<Float\>?                              | Custom key point values to display on the slider. If null, uses step positions from steps parameter. Values should be within valueRange                                        | null                               | No       |
@@ -168,13 +168,16 @@ The SliderDefaults object provides default configurations for the Slider compone
 
 ### SliderColors Class
 
-| Property Name           | Type  | Description                       |
-| ----------------------- | ----- | --------------------------------- |
-| foregroundColor         | Color | Foreground color of the slider    |
-| disabledForegroundColor | Color | Foreground color when disabled    |
-| backgroundColor         | Color | Background color of the slider    |
-| keyPointColor           | Color | Color of key point indicators in background |
-| keyPointForegroundColor | Color | Color of key point indicators in foreground |
+| Property Name           | Type  | Description                                   |
+| ----------------------- | ----- | --------------------------------------------- |
+| foregroundColor         | Color | Foreground color of the slider                |
+| disabledForegroundColor | Color | Foreground color when disabled                |
+| backgroundColor         | Color | Background color of the slider                |
+| disabledBackgroundColor | Color | Background color when disabled                |
+| thumbColor              | Color | Thumb color                                   |
+| disabledThumbColor      | Color | Thumb color when disabled                     |
+| keyPointColor           | Color | Color of key point indicators in background   |
+| keyPointForegroundColor | Color | Color of key point indicators in foreground   |
 
 ## Advanced Usage
 
@@ -224,7 +227,7 @@ Slider(
 )
 ```
 
-### Custom Height and Effects
+### Custom Height
 
 ```kotlin
 var brightness by remember { mutableFloatStateOf(0.8f) }
@@ -232,8 +235,7 @@ var brightness by remember { mutableFloatStateOf(0.8f) }
 Slider(
     value = brightness,
     onValueChange = { brightness = it },
-    height = 40.dp,
-    effect = true
+    height = 40.dp
 )
 ```
 
