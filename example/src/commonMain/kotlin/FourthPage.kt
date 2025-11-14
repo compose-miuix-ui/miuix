@@ -75,7 +75,7 @@ fun FourthPage(
     }
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
-    val colorModeOptions = remember { listOf("System", "Light", "Dark") }
+    val colorModeOptions = remember { listOf("System", "Light", "Dark", "DynamicSystem", "DynamicLight", "DynamicDark") }
 
     LazyColumn(
         modifier = Modifier

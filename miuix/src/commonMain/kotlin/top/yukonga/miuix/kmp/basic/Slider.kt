@@ -1109,8 +1109,8 @@ object SliderDefaults {
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
         backgroundColor: Color = MiuixTheme.colorScheme.secondaryVariant,
-        keyPointColor: Color = Color(0x4DA3B3CD),
-        keyPointForegroundColor: Color = Color(0xFF6EB5FF),
+        keyPointColor: Color = MiuixTheme.colorScheme.sliderKeyPoint,
+        keyPointForegroundColor: Color = MiuixTheme.colorScheme.sliderKeyPointForeground,
     ): SliderColors = SliderColors(
         foregroundColor = foregroundColor,
         disabledForegroundColor = disabledForegroundColor,
