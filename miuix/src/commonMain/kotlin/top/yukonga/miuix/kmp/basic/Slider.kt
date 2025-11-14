@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -643,12 +643,13 @@ private fun SliderTrack(
             val availableHeight = (barHeight - 2f * thumbRadius).coerceAtLeast(0f)
             val effectiveFraction = if (reverseDirection) fraction else (1f - fraction)
             val centerY = thumbRadius + effectiveFraction * availableHeight
-            val fillHeight = (barHeight - centerY).coerceAtLeast(0f)
 
-            drawRect(
+            drawLine(
                 color = foregroundColor,
-                size = Size(barWidth, fillHeight),
-                topLeft = Offset(0f, centerY),
+                start = Offset(barWidth / 2f, barHeight),
+                end = Offset(barWidth / 2f, centerY),
+                strokeWidth = barWidth,
+                cap = StrokeCap.Round
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -665,11 +666,6 @@ private fun SliderTrack(
                 }
             }
             drawCircle(
-                color = foregroundColor,
-                radius = thumbRadius,
-                center = Offset(barWidth / 2f, centerY)
-            )
-            drawCircle(
                 color = thumbColor,
                 radius = thumbRadius * 0.72f,
                 center = Offset(barWidth / 2f, centerY)
@@ -680,10 +676,12 @@ private fun SliderTrack(
             val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
             val centerX = thumbRadius + effectiveFraction * availableWidth
 
-            drawRect(
+            drawLine(
                 color = foregroundColor,
-                size = Size(centerX, barHeight),
-                topLeft = Offset(0f, 0f),
+                start = Offset(0f, barHeight / 2f),
+                end = Offset(centerX, barHeight / 2f),
+                strokeWidth = barHeight,
+                cap = StrokeCap.Round
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -699,11 +697,6 @@ private fun SliderTrack(
                     )
                 }
             }
-            drawCircle(
-                color = foregroundColor,
-                radius = thumbRadius,
-                center = Offset(centerX, barHeight / 2f),
-            )
             drawCircle(
                 color = thumbColor,
                 radius = thumbRadius * 0.72f,
@@ -752,10 +745,14 @@ private fun RangeSliderTrack(
         val startX = thumbRadius + startFraction * availableWidth
         val endX = thumbRadius + endFraction * availableWidth
 
-        drawRect(
+        val centerY = barHeight / 2f
+
+        drawLine(
             color = foregroundColor,
-            size = Size((endX - startX).coerceAtLeast(0f), barHeight),
-            topLeft = Offset(startX, 0f),
+            start = Offset(startX, centerY),
+            end = Offset(endX, centerY),
+            strokeWidth = barHeight,
+            cap = StrokeCap.Round
         )
 
         if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -771,22 +768,10 @@ private fun RangeSliderTrack(
             }
         }
 
-        val centerY = barHeight / 2f
-
-        drawCircle(
-            color = foregroundColor,
-            radius = thumbRadius,
-            center = Offset(startX, centerY)
-        )
         drawCircle(
             color = thumbColor,
             radius = thumbRadius * 0.72f,
             center = Offset(startX, centerY)
-        )
-        drawCircle(
-            color = foregroundColor,
-            radius = thumbRadius,
-            center = Offset(endX, centerY)
         )
         drawCircle(
             color = thumbColor,

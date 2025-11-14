@@ -621,7 +621,7 @@ object SuperBottomSheetDefaults {
      * The default background color of the [SuperBottomSheet].
      */
     @Composable
-    fun backgroundColor() = MiuixTheme.colorScheme.surface
+    fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**
      * The default color of the drag handle.

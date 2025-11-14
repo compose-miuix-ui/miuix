@@ -4,7 +4,6 @@ package top.yukonga.miuix.kmp.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 
 internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
     return Colors(
@@ -16,21 +15,21 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         onError = cs.onError,
         errorContainer = cs.errorContainer,
         onErrorContainer = cs.onErrorContainer,
-        disabledPrimary = cs.inversePrimary,
+        disabledPrimary = cs.primary.copy(alpha = 0.38f),
         disabledOnPrimary = cs.onPrimary.copy(alpha = 0.38f),
-        disabledPrimaryButton = cs.primary.copy(alpha = 0.4f),
+        disabledPrimaryButton = cs.primary.copy(alpha = 0.38f),
         disabledOnPrimaryButton = cs.onPrimary.copy(alpha = 0.6f),
-        disabledPrimarySlider = cs.inversePrimary,
+        disabledPrimarySlider = cs.secondary.copy(alpha = 0.38f),
         primaryContainer = cs.primaryContainer,
         onPrimaryContainer = cs.onPrimaryContainer,
-        secondary = cs.secondary.copy(alpha = 0.4f),
+        secondary = cs.secondary.copy(alpha = 0.38f),
         onSecondary = cs.onSecondary,
-        secondaryVariant = cs.secondaryContainer,
-        onSecondaryVariant = cs.onSecondaryFixed,
+        secondaryVariant = cs.primary.copy(alpha = 0.24f),
+        onSecondaryVariant = cs.secondary,
         disabledSecondary = cs.secondary.copy(alpha = 0.38f),
-        disabledOnSecondary = cs.onSecondary.copy(alpha = 0.4f),
-        disabledSecondaryVariant = cs.secondary.copy(alpha = 0.38f),
-        disabledOnSecondaryVariant = cs.secondary.copy(alpha = 0.4f),
+        disabledOnSecondary = cs.onSecondary.copy(alpha = 0.38f),
+        disabledSecondaryVariant = cs.secondary.copy(alpha = 0.12f),
+        disabledOnSecondaryVariant = cs.secondary.copy(alpha = 0.6f),
         secondaryContainer = cs.secondaryContainer,
         onSecondaryContainer = cs.onSecondaryContainer,
         secondaryContainerVariant = cs.secondaryContainer,
@@ -40,7 +39,7 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         tertiaryContainerVariant = cs.onSurfaceVariant.copy(alpha = 0.3f),
         background = cs.background,
         onBackground = cs.onBackground,
-        onBackgroundVariant = cs.onBackground.copy(alpha = 0.7f),
+        onBackgroundVariant = cs.primary,
         surface = cs.surface,
         onSurface = cs.onSurface,
         surfaceVariant = cs.surfaceVariant,

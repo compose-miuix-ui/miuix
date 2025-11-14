@@ -230,7 +230,7 @@ fun Dialog(showDialog: MutableState<Boolean>) {
             )
             Card(
                 colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.secondaryContainer,
+                    color = MiuixTheme.colorScheme.secondaryContainerVariant,
                 )
             ) {
                 SuperArrow(

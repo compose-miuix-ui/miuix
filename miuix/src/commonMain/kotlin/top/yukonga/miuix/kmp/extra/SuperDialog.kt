@@ -254,7 +254,7 @@ object SuperDialogDefaults {
      * The default color of the title.
      */
     @Composable
-    fun titleColor() = MiuixTheme.colorScheme.onSurface
+    fun titleColor() = MiuixTheme.colorScheme.onBackground
 
     /**
      * The default color of the summary.
@@ -266,7 +266,7 @@ object SuperDialogDefaults {
      * The default background color of the [SuperDialog].
      */
     @Composable
-    fun backgroundColor() = MiuixTheme.colorScheme.surfaceVariant
+    fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**
      * The default margin outside the [SuperDialog].
