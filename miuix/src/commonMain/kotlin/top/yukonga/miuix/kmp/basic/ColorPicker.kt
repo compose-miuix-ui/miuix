@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -317,7 +316,6 @@ fun HsvAlphaSlider(
         listOf(baseColor.copy(alpha = 0f), baseColor.copy(alpha = 1f))
     }
 
-
     ColorSlider(
         value = currentAlpha,
         onValueChanged = onAlphaChanged,
@@ -553,7 +551,6 @@ fun OkHsvAlphaSlider(
         hapticEffect = hapticEffect
     )
 }
-
 
 /**
  * A [OkLabColorPicker] component with Miuix style using OkLab color space.
@@ -1117,8 +1114,37 @@ private fun SliderIndicator(
         modifier = modifier
             .offset(x = indicatorOffsetXDp)
             .size(indicatorSize)
-            .border(6.dp, Color.White, ContinuousCapsule)
-            .background(Color.Transparent, ContinuousCapsule)
+            .drawBehind {
+                val strokeWidth = 6.dp.toPx()
+                val halfStroke = strokeWidth / 2f
+                val glowSpread = 2.dp.toPx()
+                val glowColor = Color.Black.copy(alpha = 0.25f)
+
+                val ringCenterRadius = (size.minDimension / 2f) - halfStroke
+                val gradientRadius = ringCenterRadius + halfStroke + glowSpread
+
+                val glowBrush = Brush.radialGradient(
+                    colorStops = listOf(
+                        ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
+                        ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
+                        ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
+                        ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
+                    ).toTypedArray(),
+                    center = center,
+                    radius = gradientRadius
+                )
+
+                drawCircle(
+                    brush = glowBrush,
+                    radius = gradientRadius
+                )
+
+                drawCircle(
+                    color = Color.White,
+                    radius = ringCenterRadius,
+                    style = Stroke(width = strokeWidth)
+                )
+            }
     )
 }
 
