@@ -338,7 +338,7 @@ object ProgressIndicatorDefaults {
     fun progressIndicatorColors(
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
-        backgroundColor: Color = MiuixTheme.colorScheme.tertiaryContainerVariant
+        backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer
     ): ProgressIndicatorColors {
         return ProgressIndicatorColors(
             foregroundColor = foregroundColor,
