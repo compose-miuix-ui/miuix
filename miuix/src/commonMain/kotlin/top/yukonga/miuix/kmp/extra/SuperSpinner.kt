@@ -512,11 +512,11 @@ object SpinnerDefaults {
     fun spinnerColors(
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = MiuixTheme.colorScheme.surfaceVariant,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceVariant,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer
+        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
+        selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary
     ): SpinnerColors {
         return SpinnerColors(
             contentColor = contentColor,
