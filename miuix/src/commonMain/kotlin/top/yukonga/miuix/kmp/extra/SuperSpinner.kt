@@ -533,7 +533,7 @@ object SpinnerDefaults {
     fun dialogSpinnerColors(
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = MiuixTheme.colorScheme.surfaceVariant,
+        containerColor: Color = Color.Transparent,
         selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
         selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
         selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
