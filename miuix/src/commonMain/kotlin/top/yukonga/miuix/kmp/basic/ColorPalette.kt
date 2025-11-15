@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +24,12 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -253,9 +255,37 @@ private fun PaletteCanvas(
                         y = with(density) { cyPx.toDp() - indicatorSize / 2 }
                     )
                     .size(indicatorSize)
-                    .clip(ContinuousCapsule)
-                    .border(6.dp, Color.White, ContinuousCapsule)
-                    .background(Color.Transparent, ContinuousCapsule)
+                    .drawBehind {
+                        val strokeWidth = 6.dp.toPx()
+                        val halfStroke = strokeWidth / 2f
+                        val glowSpread = 2.dp.toPx()
+                        val glowColor = Color.Black.copy(alpha = 0.25f)
+
+                        val ringCenterRadius = (size.minDimension / 2f) - halfStroke
+                        val gradientRadius = ringCenterRadius + halfStroke + glowSpread
+
+                        val glowBrush = Brush.radialGradient(
+                            colorStops = listOf(
+                                ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
+                                ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
+                                ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
+                                ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
+                            ).toTypedArray(),
+                            center = center,
+                            radius = gradientRadius
+                        )
+
+                        drawCircle(
+                            brush = glowBrush,
+                            radius = gradientRadius
+                        )
+
+                        drawCircle(
+                            color = Color.White,
+                            radius = ringCenterRadius,
+                            style = Stroke(width = strokeWidth)
+                        )
+                    }
             )
         }
     }
