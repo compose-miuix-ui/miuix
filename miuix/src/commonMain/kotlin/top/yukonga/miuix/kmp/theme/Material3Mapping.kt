@@ -36,7 +36,7 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         onSecondaryContainerVariant = cs.onSecondaryContainer,
         tertiaryContainer = cs.tertiaryContainer,
         onTertiaryContainer = cs.onTertiaryContainer,
-        tertiaryContainerVariant = cs.onTertiaryContainer,//cs.onSurfaceVariant.copy(alpha = 0.3f),
+        tertiaryContainerVariant = cs.onTertiaryContainer, // cs.onSurfaceVariant.copy(alpha = 0.3f),
         background = cs.background,
         onBackground = cs.onBackground,
         onBackgroundVariant = cs.primary,
