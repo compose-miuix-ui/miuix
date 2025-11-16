@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.extra
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -24,9 +27,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -39,11 +43,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
-import top.yukonga.miuix.kmp.utils.PredictiveBackHandler
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
 import top.yukonga.miuix.kmp.utils.getWindowSize
 
@@ -63,6 +67,7 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SuperDialog].
  * @param content The [Composable] content of the [SuperDialog].
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SuperDialog(
     show: MutableState<Boolean>,
@@ -81,11 +86,11 @@ fun SuperDialog(
 ) {
     if (!show.value) return
 
+    val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dialogHeightPx = remember { mutableIntStateOf(0) }
-    var backProgress by remember { mutableFloatStateOf(0f) }
+    val backProgress = remember { Animatable(0f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val coroutineScope = rememberCoroutineScope()
 
     DialogLayout(
         visible = show,
@@ -110,23 +115,25 @@ fun SuperDialog(
     }
 
     PredictiveBackHandler(
-        enabled = show.value,
-        onBackProgressed = { event ->
-            coroutineScope.launch {
-                backProgress = event.progress
+        enabled = show.value
+    ) { progress ->
+        try {
+            progress.collect { event ->
+                backProgress.snapTo(event.progress)
                 dimAlpha.floatValue = 1f - event.progress
             }
-        },
-        onBackCancelled = {
-            coroutineScope.launch {
-                backProgress = 0f
-                dimAlpha.floatValue = 1f
-            }
-        },
-        onBack = {
+            // Flow completed normally
             currentOnDismissRequest?.invoke()
+        } catch (_: CancellationException) {
+            // Flow cancelled
+            coroutineScope.launch {
+                backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
+                animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+                    dimAlpha.floatValue = value
+                }
+            }
         }
-    )
+    }
 }
 
 @Composable
@@ -140,7 +147,7 @@ private fun SuperDialogContent(
     outsideMargin: DpSize,
     insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean,
-    backProgress: Float,
+    backProgress: Animatable<Float, *>,
     dialogHeightPx: MutableState<Int>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit
@@ -204,14 +211,14 @@ private fun SuperDialogContent(
             if (isLargeScreen) {
                 // Large screen
                 Modifier.graphicsLayer {
-                    val scale = 1f - (backProgress * 0.2f)
+                    val scale = 1f - (backProgress.value * 0.2f)
                     scaleX = scale
                     scaleY = scale
                 }
             } else {
                 // Small screen
                 Modifier.graphicsLayer {
-                    translationY = backProgress * 800f
+                    translationY = backProgress.value * 800f
                 }
             }
         )

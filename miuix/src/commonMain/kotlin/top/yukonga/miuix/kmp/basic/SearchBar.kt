@@ -29,7 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -50,7 +52,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.Search
 import top.yukonga.miuix.kmp.icon.icons.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.BackHandler
 
 /**
  * A [SearchBar] component with Miuix style.
@@ -65,6 +66,7 @@ import top.yukonga.miuix.kmp.utils.BackHandler
  *   expanded.
  * @param content the content to be shown when the [SearchBar] is expanded.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     inputField: @Composable () -> Unit,
