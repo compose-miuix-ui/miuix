@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -232,9 +233,6 @@ fun ListPopup(
             (baseCornerRadiusPx / scale.coerceAtLeast(0.001f)).toDp()
         }
         val shape = ContinuousRoundedRectangle(appliedCornerDp)
-        val elevationPx by remember(shadowElevation, density) {
-            derivedStateOf { with(density) { shadowElevation.toPx() } }
-        }
 
         Box(
             modifier = popupModifier
@@ -271,18 +269,25 @@ fun ListPopup(
                     }
                 }
         ) {
+            val shadowColor = MiuixTheme.colorScheme.windowDimming
             Box(
                 modifier = Modifier
                     .onGloballyPositioned { coordinates ->
                         val size = coordinates.size
                         if (popupContentSize != size) popupContentSize = size
                     }
+                    .dropShadow(
+                        shape = shape,
+                        block = {
+                            this.radius = 70f
+                            this.spread = 0f
+                            this.alpha = 0.6f
+                            this.color = shadowColor
+                        }
+                    )
                     .graphicsLayer(
                         clip = true,
-                        shape = shape,
-                        shadowElevation = elevationPx,
-                        ambientShadowColor = MiuixTheme.colorScheme.windowDimming,
-                        spotShadowColor = MiuixTheme.colorScheme.windowDimming
+                        shape = shape
                     )
                     .background(MiuixTheme.colorScheme.surfaceContainer)
             ) {
