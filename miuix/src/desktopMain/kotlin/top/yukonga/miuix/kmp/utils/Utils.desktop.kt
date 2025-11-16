@@ -31,24 +31,3 @@ actual fun platform(): Platform = Platform.Desktop
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-actual fun BackHandler(
-    enabled: Boolean,
-    onBack: () -> Unit
-) {
-    androidx.compose.ui.backhandler.BackHandler(enabled = enabled, onBack = onBack)
-}
-
-@Composable
-actual fun PredictiveBackHandler(
-    enabled: Boolean,
-    onBackStarted: ((BackEventCompat) -> Unit)?,
-    onBackProgressed: ((BackEventCompat) -> Unit)?,
-    onBackCancelled: (() -> Unit)?,
-    onBack: () -> Unit
-) {
-    // Desktop doesn't support predictive back gesture, fallback to simple BackHandler
-    BackHandler(enabled = enabled, onBack = onBack)
-}

@@ -4,16 +4,13 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.browser.window
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
@@ -34,35 +31,3 @@ actual fun platform(): Platform = Platform.Js
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
-
-@Composable
-actual fun BackHandler(
-    enabled: Boolean,
-    onBack: () -> Unit
-) {
-    val currentOnBack by rememberUpdatedState(onBack)
-    DisposableEffect(enabled) {
-        if (!enabled) return@DisposableEffect onDispose { }
-        val onKeyDown: (dynamic) -> Unit = { event ->
-            if (event.key == "Escape") {
-                currentOnBack()
-            }
-        }
-        window.addEventListener("keydown", onKeyDown)
-        onDispose {
-            window.removeEventListener("keydown", onKeyDown)
-        }
-    }
-}
-
-@Composable
-actual fun PredictiveBackHandler(
-    enabled: Boolean,
-    onBackStarted: ((BackEventCompat) -> Unit)?,
-    onBackProgressed: ((BackEventCompat) -> Unit)?,
-    onBackCancelled: (() -> Unit)?,
-    onBack: () -> Unit
-) {
-    // Js doesn't support predictive back gesture, fallback to simple BackHandler
-    BackHandler(enabled = enabled, onBack = onBack)
-}

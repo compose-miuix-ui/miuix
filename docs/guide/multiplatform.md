@@ -64,21 +64,6 @@ fun MyResponsiveContent() {
 }
 ```
 
-## Back Action Handling
-
-Compose Multiplatform does not provide a complete cross-platform BackHandler interface, so Miuix offers a unified `BackHandler` interface:
-
-```kotlin
-@Composable
-fun Screen() {
-    // Handle back action
-    BackHandler(enabled = true) {
-        // Logic for handling back action
-        // For example: navigate to the previous screen or close a dialog
-    }
-}
-```
-
 ## Device Rounded Corners
 
 Android devices have varying screen corner radii, while other platforms may not have rounded corners. You can use the `getRoundedCorner()` function to retrieve the corner radius of the device (using a preset value if unavailable):

@@ -26,8 +26,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -46,7 +48,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.BackHandler
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import kotlin.math.min
@@ -65,6 +66,7 @@ import kotlin.math.min
  * @param minWidth The minimum width of the [ListPopup].
  * @param content The [Composable] content of the [ListPopup]. You should use the [ListPopupColumn] in general.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ListPopup(
     show: MutableState<Boolean>,
