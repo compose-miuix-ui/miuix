@@ -11,37 +11,6 @@ import androidx.compose.runtime.remember
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 
 /**
- * The default theme that provides color and text styles for the Miuix components.
- *
- * @param colors The color scheme for the Miuix components.
- * @param textStyles The text styles for the Miuix components.
- * @param content The content of the Miuix theme.
- */
-@Composable
-fun MiuixTheme(
-    colors: Colors = MiuixTheme.colorScheme,
-    textStyles: TextStyles = MiuixTheme.textStyles,
-    content: @Composable () -> Unit
-) {
-    val miuixColors = remember(colors) {
-        colors.copy().apply { updateColorsFrom(colors) }
-    }
-    val miuixTextStyles = remember(textStyles, colors.onBackground) {
-        textStyles.copy().apply { updateColorsFrom(colors.onBackground) }
-    }
-    val miuixIndication = remember(colors.onBackground) {
-        MiuixIndication(color = colors.onBackground)
-    }
-    CompositionLocalProvider(
-        LocalColors provides miuixColors,
-        LocalTextStyles provides miuixTextStyles,
-        LocalIndication provides miuixIndication
-    ) {
-        content()
-    }
-}
-
-/**
  * The Miuix theme that provides color and text styles for the Miuix components.
  * This theme supports dynamic color schemes through the [ThemeController].
  *
@@ -70,7 +39,8 @@ fun MiuixTheme(
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalTextStyles provides miuixTextStyles,
-        LocalIndication provides miuixIndication
+        LocalIndication provides miuixIndication,
+        LocalColorSchemeMode provides controller.colorScheme
     ) {
         content()
     }
@@ -82,4 +52,17 @@ object MiuixTheme {
 
     val textStyles: TextStyles
         @Composable @ReadOnlyComposable get() = LocalTextStyles.current
+
+    val colorSchemeMode: ColorSchemeMode
+        @Composable @ReadOnlyComposable get() = LocalColorSchemeMode.current
+
+    val isDynamicColor: Boolean
+        @Composable @ReadOnlyComposable get() = when (colorSchemeMode) {
+            ColorSchemeMode.DynamicSystem,
+            ColorSchemeMode.DynamicLight,
+            ColorSchemeMode.DynamicDark -> true
+
+            else -> false
+        }
 }
+

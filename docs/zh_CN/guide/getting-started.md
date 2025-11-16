@@ -65,13 +65,10 @@ implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
 ```kotlin
 @Composable
 fun App() {
-    val colors = if (isSystemInDarkTheme()) {
-        darkColorScheme()
-    } else {
-        lightColorScheme()
-    }
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+    // 可用：System、Light、Dark、DynamicSystem、DynamicLight、DynamicDark
     MiuixTheme(
-        colors = colors
+        controller = controller
     ) {
         // Other Content...
     }

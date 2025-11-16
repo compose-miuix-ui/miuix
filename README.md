@@ -33,9 +33,12 @@ kotlin {
 ```
 @Composable
 fun App() {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    // Use ThemeController to control color scheme mode
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+    
+    // Available modes:
+    // ColorSchemeMode.System, Light, Dark, DynamicSystem, DynamicLight, DynamicDark
+    MiuixTheme(controller = controller) {
         Scaffold(
             topBar = {
                 // TopBar

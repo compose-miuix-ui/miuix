@@ -4,20 +4,26 @@ Miuix 提供了一套完整的主题系统，使您能够轻松地在整个应�
 
 ## 使用主题
 
-要在您的应用中使用 Miuix 主题，只需将内容包装在 `MiuixTheme` 组合函数中：
+使用 `ThemeController` 控制配色模式，然后用 `MiuixTheme` 包裹内容：
 
 ```kotlin
-MiuixTheme {
-    // 您的应用内容
-    Scaffold(
-        topBar = { /* ... */ },
-    ) { padding ->
-        // 主体内容
+@Composable
+fun App() {
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+
+    // 可用模式：
+    // ColorSchemeMode.System、Light、Dark、DynamicSystem、DynamicLight、DynamicDark
+    MiuixTheme(controller = controller) {
+        Scaffold(
+            topBar = { /* ... */ },
+        ) { padding ->
+            // 主体内容
+        }
     }
 }
 ```
 
-默认情况下，Miuix 会自动选择适合当前系统设置的浅色或深色主题。
+使用 `ColorSchemeMode.System` 时会自动跟随系统深色模式。
 
 ## 颜色系统
 
@@ -110,18 +116,13 @@ Text(
 
 ## 自定义主题
 
-您可以通过提供自己的 `Colors` 和 `TextStyles` 实例来全局自定义 Miuix 主题：
+可以通过以下方式进行主题自定义：
+
+- 通过 `ThemeController(ColorSchemeMode.*)` 选择配色模式。
+- 选择动态配色：`ColorSchemeMode.DynamicSystem` / `DynamicLight` / `DynamicDark`。
+- 传入 `textStyles` 覆盖文本样式：
 
 ```kotlin
-// 自定义颜色方案
-val customColors = lightColorScheme(
-    primary = Color(0xFF6200EE),
-    onPrimary = Color.White,
-    background = Color(0xFFF5F5F5),
-    // 其他颜色...
-)
-
-// 自定义文本样式
 val customTextStyles = defaultTextStyles(
     title1 = TextStyle(
         fontSize = 36.sp,
@@ -130,9 +131,9 @@ val customTextStyles = defaultTextStyles(
     // 其他文本样式...
 )
 
-// 应用自定义主题
+val controller = remember { ThemeController(ColorSchemeMode.Light) }
 MiuixTheme(
-    colors = customColors,
+    controller = controller,
     textStyles = customTextStyles
 ) {
     // 您的应用内容
@@ -141,19 +142,13 @@ MiuixTheme(
 
 ## 跟随系统深色模式
 
-为了自动跟随系统的深色模式切换，您应该使用 `isSystemInDarkTheme()` 函数：
+跟随系统深色模式已内置，使用 `ColorSchemeMode.System` 即可：
 
 ```kotlin
 @Composable
 fun MyApp() {
-    val isDarkTheme = isSystemInDarkTheme()
-    val colors = if (isDarkTheme) {
-        darkColorScheme()
-    } else {
-        lightColorScheme()
-    }
-    
-    MiuixTheme(colors = colors) {
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+    MiuixTheme(controller = controller) {
         // 应用内容
     }
 }

@@ -4,20 +4,26 @@ Miuix provides a complete theme system that allows you to easily maintain a cons
 
 ## Using the Theme
 
-To use the Miuix theme in your application, simply wrap your content in the `MiuixTheme` composable function:
+Use `ThemeController` to control the color scheme mode, then wrap your content with `MiuixTheme`:
 
 ```kotlin
-MiuixTheme {
-    // Your application content
-    Scaffold(
-        topBar = { /* ... */ },
-    ) { padding ->
-        // Main content
+@Composable
+fun App() {
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+
+    // Available modes:
+    // ColorSchemeMode.System, Light, Dark, DynamicSystem, DynamicLight, DynamicDark
+    MiuixTheme(controller = controller) {
+        Scaffold(
+            topBar = { /* ... */ },
+        ) { padding ->
+            // Main content
+        }
     }
 }
 ```
 
-By default, Miuix automatically selects a light or dark theme suitable for the current system settings.
+`ColorSchemeMode.System` automatically follows the system’s dark mode.
 
 ## Color System
 
@@ -110,18 +116,13 @@ Text(
 
 ## Customizing the Theme
 
-You can globally customize the Miuix theme by providing your own `Colors` and `TextStyles` instances:
+You can customize the theme in the following ways:
+
+- Select a color scheme mode via `ThemeController(ColorSchemeMode.*)`.
+- Opt into dynamic colors via `ColorSchemeMode.DynamicSystem` / `DynamicLight` / `DynamicDark`.
+- Override text styles by passing `textStyles`:
 
 ```kotlin
-// Custom color scheme
-val customColors = lightColorScheme(
-    primary = Color(0xFF6200EE),
-    onPrimary = Color.White,
-    background = Color(0xFFF5F5F5),
-    // Other colors...
-)
-
-// Custom text styles
 val customTextStyles = defaultTextStyles(
     title1 = TextStyle(
         fontSize = 36.sp,
@@ -130,30 +131,24 @@ val customTextStyles = defaultTextStyles(
     // Other text styles...
 )
 
-// Apply custom theme
+val controller = remember { ThemeController(ColorSchemeMode.Light) }
 MiuixTheme(
-    colors = customColors,
+    controller = controller,
     textStyles = customTextStyles
 ) {
     // Your application content
 }
 ```
 
-## Follow to System Dark Mode
+## Follow System Dark Mode
 
-To automatically follow the system's dark mode switch, you should use the `isSystemInDarkTheme()` function:
+Following the system’s dark mode is built-in. Use `ColorSchemeMode.System`:
 
 ```kotlin
 @Composable
 fun MyApp() {
-    val isDarkTheme = isSystemInDarkTheme()
-    val colors = if (isDarkTheme) {
-        darkColorScheme()
-    } else {
-        lightColorScheme()
-    }
-    
-    MiuixTheme(colors = colors) {
+    val controller = remember { ThemeController(ColorSchemeMode.System) }
+    MiuixTheme(controller = controller) {
         // Application content
     }
 }

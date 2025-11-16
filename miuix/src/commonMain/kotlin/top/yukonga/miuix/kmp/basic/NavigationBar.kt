@@ -69,7 +69,7 @@ fun NavigationBar(
     selected: Int,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = MiuixTheme.colorScheme.surfaceContainer,
+    color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true
 ) {
