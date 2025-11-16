@@ -49,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -510,7 +509,7 @@ private fun FloatingActionButton(show: Boolean) {
         ) {
             Icon(
                 imageVector = MiuixIcons.Other.GitHub,
-                tint = Color.White,
+                tint = MiuixTheme.colorScheme.onPrimary,
                 contentDescription = "GitHub"
             )
         }
