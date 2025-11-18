@@ -372,7 +372,7 @@ class PullToRefreshState(
         }
 
         /**
-         * Add delta to the current touch tracking value and update rawDragOffset/animatable immediately.
+         * Add delta to the current touch tracking value and update dragOffset/animatable immediately.
          * Return overflow part which cannot be consumed by pull-to-refresh handling (beyond max drag).
          */
         fun addTouchDelta(deltaTouch: Float): Float {
