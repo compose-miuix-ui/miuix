@@ -34,7 +34,7 @@ import kotlin.math.sign
 
 @Stable
 internal val DefaultParabolaScrollEasing: (distance: Float, range: Int) -> Float = { distance, range ->
-    val alpha = 0.5f
+    val alpha = 0.3f
     val x = (abs(distance) / range).coerceIn(0.0f, 1.0f)
     val orig = x - x * x + (x * x * x / 3.0f)
     val current = (2f * x - x * x) / 3.0f
@@ -42,7 +42,7 @@ internal val DefaultParabolaScrollEasing: (distance: Float, range: Int) -> Float
     dampedFactor * range * sign(distance)
 }
 
-internal const val OutBoundSpringStiff = 360f
+internal const val OutBoundSpringStiff = 300f
 internal const val OutBoundSpringDamp = 1f
 
 /**
