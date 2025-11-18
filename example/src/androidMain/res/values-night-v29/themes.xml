@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!-- Copyright 2025, compose-miuix-ui contributors -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
+<resources>
     <style name="Theme.Miuix" parent="android:Theme.Material.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
     </style>

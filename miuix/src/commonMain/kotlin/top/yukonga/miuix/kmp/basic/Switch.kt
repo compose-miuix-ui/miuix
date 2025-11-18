@@ -45,7 +45,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
+import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import kotlin.math.absoluteValue
 
 /**
@@ -219,9 +221,9 @@ object SwitchDefaults {
      */
     @Composable
     fun switchColors(
-        checkedThumbColor: Color = MiuixTheme.colorScheme.onPrimary,
-        uncheckedThumbColor: Color = MiuixTheme.colorScheme.onSecondary,
-        disabledCheckedThumbColor: Color = MiuixTheme.colorScheme.disabledOnPrimary,
+        checkedThumbColor: Color = if (isDynamicColor) LocalColors.current.onPrimary else MiuixTheme.colorScheme.onPrimary,
+        uncheckedThumbColor: Color = if (isDynamicColor) LocalColors.current.onSurface.copy(0.38f) else MiuixTheme.colorScheme.onSecondary,
+        disabledCheckedThumbColor: Color = if (isDynamicColor) LocalColors.current.surface else MiuixTheme.colorScheme.disabledOnPrimary,
         disabledUncheckedThumbColor: Color = MiuixTheme.colorScheme.disabledOnSecondary,
         checkedTrackColor: Color = MiuixTheme.colorScheme.primary,
         uncheckedTrackColor: Color = MiuixTheme.colorScheme.secondary,

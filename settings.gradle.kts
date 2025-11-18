@@ -39,7 +39,7 @@ plugins {
 android {
     compileSdk = 36
     targetSdk = 36
-    minSdk = 26
+    minSdk = 24
     buildToolsVersion = "36.1.0"
 }
 

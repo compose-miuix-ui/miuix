@@ -110,7 +110,7 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         onSurfaceContainerVariant = onSurfaceContainerVariantOpaque,
         surfaceContainerHigh = cs.surfaceVariant,
         onSurfaceContainerHigh = onSurfaceContainerHighOpaque,
-        surfaceContainerHighest = if (dark) Color(0xFF2D2D2D) else Color(0xFFE8E8E8),
+        surfaceContainerHighest = cs.surfaceContainerHighest,
         onSurfaceContainerHighest = cs.onSurface,
         outline = cs.outline,
         dividerLine = cs.outlineVariant,
