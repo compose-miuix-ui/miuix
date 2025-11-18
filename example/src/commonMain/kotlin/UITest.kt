@@ -527,7 +527,7 @@ private fun FloatingToolbar(
         exit = fadeOut()
     ) {
         FloatingToolbar(
-            color = MiuixTheme.colorScheme.primaryVariant,
+            color = MiuixTheme.colorScheme.primary,
             cornerRadius = 20.dp
         ) {
             AnimatedContent(
@@ -554,7 +554,7 @@ private fun FloatingToolbar(
 
 @Composable
 private fun FloatingToolbarActions() {
-    val iconTint = MiuixTheme.colorScheme.onPrimaryVariant
+    val iconTint = MiuixTheme.colorScheme.onPrimary
 
     IconButton(onClick = { /* Action 1 */ }) {
         Icon(
