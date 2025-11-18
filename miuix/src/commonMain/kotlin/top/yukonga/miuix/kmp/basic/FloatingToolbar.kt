@@ -7,15 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -39,7 +31,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param outSidePadding Padding outside the [FloatingToolbar].
  * @param shadowElevation The shadow elevation of the [FloatingToolbar].
  * @param showDivider Whether to show the divider line around the [FloatingToolbar].
- * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [FloatingToolbar].
  * @param content The [Composable] content of the [FloatingToolbar].
  */
 @Composable
@@ -50,7 +41,6 @@ fun FloatingToolbar(
     outSidePadding: PaddingValues = FloatingToolbarDefaults.OutSidePadding,
     shadowElevation: Dp = 4.dp,
     showDivider: Boolean = false,
-    defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
@@ -58,17 +48,8 @@ fun FloatingToolbar(
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(outSidePadding)
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
-                        .windowInsetsPadding(WindowInsets.captionBar.only(WindowInsetsSides.Vertical))
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                } else Modifier
-            )
             .then(
                 if (showDivider) {
                     Modifier
@@ -95,11 +76,7 @@ fun FloatingToolbar(
             .background(color = color)
             .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } }
     ) {
-        Box(
-            modifier = modifier
-        ) {
-            content()
-        }
+        content()
     }
 }
 

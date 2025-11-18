@@ -51,7 +51,6 @@ Scaffold(
 | outSidePadding             | PaddingValues          | 工具栏外部的内边距         | FloatingToolbarDefaults.OutSidePadding | 否       |
 | shadowElevation            | Dp                     | 工具栏的阴影高度           | 4.dp                                   | 否       |
 | showDivider                | Boolean                | 是否显示工具栏周围的分割线 | false                                  | 否       |
-| defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口嵌入边距   | true                                   | 否       |
 | content                    | @Composable () -> Unit | 工具栏内容区域的可组合函数 | -                                      | 是       |
 
 ### FloatingToolbarDefaults 对象
@@ -120,14 +119,4 @@ Scaffold(
     },
     floatingToolbarPosition = ToolbarPosition.CenterEnd // 放置在右侧居中
 )
-```
-
-### 处理窗口边距
-
-```kotlin
-FloatingToolbar(
-    defaultWindowInsetsPadding = false // 自行处理窗口嵌入边距
-) {
-    // 工具栏内容
-}
 ```

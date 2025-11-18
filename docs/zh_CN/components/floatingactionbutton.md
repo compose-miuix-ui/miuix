@@ -46,7 +46,6 @@ FloatingActionButton(
 | shadowElevation            | Dp                     | 按钮的阴影高度           | 4.dp                           | 否       |
 | minWidth                   | Dp                     | 按钮的最小宽度           | 60.dp                          | 否       |
 | minHeight                  | Dp                     | 按钮的最小高度           | 60.dp                          | 否       |
-| defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入填充 | true                           | 否       |
 | content                    | @Composable () -> Unit | 按钮内容区域的可组合函数 | -                              | 是       |
 
 ## 进阶用法

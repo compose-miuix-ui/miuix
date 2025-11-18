@@ -13,12 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -162,7 +160,7 @@ fun FourthPage(
                 SettingsContent(
                     padding = PaddingValues(
                         top = innerPadding.calculateTopPadding(),
-                        bottom = if (isWideScreen) padding.calculateBottomPadding() + 12.dp else 0.dp
+                        bottom = padding.calculateBottomPadding()
                     ),
                     showFPSMonitor = showFPSMonitor,
                     onShowFPSMonitorChange = onShowFPSMonitorChange,
@@ -237,13 +235,12 @@ fun FourthPage(
             ) { innerPadding ->
                 AboutPage(
                     padding = PaddingValues(
-                        start = padding.calculateStartPadding(LocalLayoutDirection.current),
-                        end = padding.calculateEndPadding(LocalLayoutDirection.current),
                         top = innerPadding.calculateTopPadding(),
-                        bottom = if (isWideScreen) padding.calculateBottomPadding() + 12.dp else 0.dp
+                        bottom = padding.calculateBottomPadding()
                     ),
                     topAppBarScrollBehavior = topAppBarScrollBehavior,
                     scrollEndHaptic = scrollEndHaptic,
+                    isWideScreen = isWideScreen
                 )
             }
         }
@@ -299,7 +296,13 @@ fun SettingsContent(
             .background(colorScheme.surface)
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
-        contentPadding = PaddingValues(top = padding.calculateTopPadding()),
+        contentPadding = PaddingValues(
+            top = padding.calculateTopPadding(),
+            bottom = if (isWideScreen) {
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        padding.calculateBottomPadding() + 12.dp
+            } else padding.calculateBottomPadding() + 12.dp
+        ),
         overscrollEffect = null
     ) {
         item {
@@ -399,9 +402,7 @@ fun SettingsContent(
                 )
             }
             Card(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp)
             ) {
                 SuperArrow(
                     title = "About",
@@ -409,7 +410,6 @@ fun SettingsContent(
                     onClick = navToAbout
                 )
             }
-            Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
         }
     }
 }
@@ -419,6 +419,7 @@ fun AboutPage(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
     scrollEndHaptic: Boolean,
+    isWideScreen: Boolean
 ) {
     val uriHandler = LocalUriHandler.current
     LazyColumn(
@@ -428,7 +429,13 @@ fun AboutPage(
             .background(colorScheme.surface)
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
-        contentPadding = PaddingValues(top = padding.calculateTopPadding()),
+        contentPadding = PaddingValues(
+            top = padding.calculateTopPadding(),
+            bottom = if (isWideScreen) {
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        padding.calculateBottomPadding() + 12.dp
+            } else padding.calculateBottomPadding() + 12.dp
+        ),
         overscrollEffect = null
     ) {
         item {
@@ -497,7 +504,6 @@ fun AboutPage(
                     },
                 )
             }
-            Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
         }
     }
 }

@@ -51,7 +51,6 @@ Scaffold(
 | outSidePadding             | PaddingValues          | Padding outside the toolbar            | FloatingToolbarDefaults.OutSidePadding | No       |
 | shadowElevation            | Dp                     | The shadow elevation of the toolbar    | 4.dp                                   | No       |
 | showDivider                | Boolean                | Show divider line around the toolbar   | false                                  | No       |
-| defaultWindowInsetsPadding | Boolean                | Apply default window insets padding    | true                                   | No       |
 | content                    | @Composable () -> Unit | Composable content area of the toolbar | -                                      | Yes      |
 
 ### FloatingToolbarDefaults Object
@@ -120,14 +119,4 @@ Scaffold(
     },
     floatingToolbarPosition = ToolbarPosition.CenterEnd // Place centered on the right edge
 )
-```
-
-### Handling Window Insets
-
-```kotlin
-FloatingToolbar(
-    defaultWindowInsetsPadding = false // Handle window insets padding manually
-) {
-    // toolbar content
-}
 ```

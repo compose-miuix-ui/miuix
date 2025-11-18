@@ -24,14 +24,15 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -251,7 +252,8 @@ private fun WideScreenLayout(
                 WideScreenContent(
                     uiState = uiState,
                     onUiStateChange = onUiStateChange,
-                    colorMode = colorMode
+                    colorMode = colorMode,
+                    layoutDirection = layoutDirection
                 )
             }
         }
@@ -270,6 +272,12 @@ private fun WideScreenPanel(
         modifier = Modifier
             .padding(start = 18.dp, end = 12.dp)
             .fillMaxSize(),
+        contentWindowInsets =
+            WindowInsets.systemBars.union(
+                WindowInsets.displayCutout.exclude(
+                    WindowInsets.displayCutout.only(WindowInsetsSides.End)
+                )
+            ),
         topBar = {
             TopAppBar(
                 title = "Miuix",
@@ -284,6 +292,7 @@ private fun WideScreenPanel(
                 .then(
                     if (uiState.scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                 )
+                .padding(start = padding.calculateStartPadding(layoutDirection))
                 .overScrollVertical()
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
@@ -291,7 +300,6 @@ private fun WideScreenPanel(
             item {
                 Card(
                     modifier = Modifier
-                        .padding(start = padding.calculateStartPadding(layoutDirection))
                         .padding(
                             top = 12.dp + padding.calculateTopPadding(),
                             bottom = padding.calculateBottomPadding()
@@ -314,14 +322,21 @@ private fun WideScreenPanel(
 private fun WideScreenContent(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>
+    colorMode: MutableState<Int>,
+    layoutDirection: LayoutDirection
 ) {
     Scaffold(
         modifier = Modifier
             .padding(end = 6.dp)
             .fillMaxSize(),
+        contentWindowInsets =
+            WindowInsets.systemBars.union(
+                WindowInsets.displayCutout.exclude(
+                    WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+                )
+            ),
         floatingActionButton = {
-            FloatingActionButton(uiState.showFloatingActionButton)
+            FloatingActionButton(show = uiState.showFloatingActionButton)
         },
         floatingActionButtonPosition = uiState.floatingActionButtonPosition.toFabPosition(),
         floatingToolbar = {
@@ -336,12 +351,8 @@ private fun WideScreenContent(
         AppPager(
             modifier = Modifier
                 .imePadding()
-                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.End))
-                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.End)),
-            padding = PaddingValues(
-                end = padding.calculateEndPadding(LayoutDirection.Ltr),
-                top = padding.calculateTopPadding(),
-            ),
+                .padding(end = padding.calculateEndPadding(layoutDirection)),
+            padding = PaddingValues(top = padding.calculateTopPadding()),
             uiState = uiState,
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
@@ -365,7 +376,7 @@ private fun CompactScreenLayout(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(uiState.showFloatingActionButton)
+            FloatingActionButton(show = uiState.showFloatingActionButton)
         },
         floatingActionButtonPosition = uiState.floatingActionButtonPosition.toFabPosition(),
         floatingToolbar = {
@@ -378,9 +389,7 @@ private fun CompactScreenLayout(
     ) { padding ->
         AppPager(
             modifier = Modifier
-                .imePadding()
-                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)),
+                .imePadding(),
             padding = padding,
             uiState = uiState,
             onUiStateChange = onUiStateChange,
@@ -430,7 +439,9 @@ private fun NavigationBar(
 }
 
 @Composable
-private fun FloatingActionButton(show: Boolean) {
+private fun FloatingActionButton(
+    show: Boolean,
+) {
     if (show) {
         val uriHandler = LocalUriHandler.current
         FloatingActionButton(
