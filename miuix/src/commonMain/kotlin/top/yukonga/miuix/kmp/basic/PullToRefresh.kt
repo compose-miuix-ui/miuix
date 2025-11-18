@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.utils.DefaultParabolaScrollEasing
 import top.yukonga.miuix.kmp.utils.LocalOverScrollState
 import top.yukonga.miuix.kmp.utils.OverScrollState
 import top.yukonga.miuix.kmp.utils.getWindowSize
@@ -222,8 +223,8 @@ class PullToRefreshState(
     internal var maxDragDistancePx: Float = 0f
     internal var refreshThresholdOffset: Float = 0f
 
-    /** The raw drag offset in pixels, before any animation or resistance is applied. */
-    var rawDragOffset by mutableFloatStateOf(0f)
+    /** The drag offset in pixels. */
+    var dragOffset by mutableFloatStateOf(0f)
 
     /** An animatable value for the drag offset, used to drive smooth transitions. */
     val dragOffsetAnimatable = Animatable(0f)
@@ -241,6 +242,10 @@ class PullToRefreshState(
             (dragOffsetAnimatable.value / refreshThresholdOffset).coerceIn(0f, 1f)
         } else 0f
     }
+
+    // currentTouch tracks the raw touch distance similar to Overscroll's currentTouch,
+    // and is used to compute a damped visual offset via DefaultParabolaScrollEasing.
+    internal var currentTouch by mutableFloatStateOf(0f)
 
     private var isRebounding by mutableStateOf(false)
     private val _refreshCompleteAnimProgress = mutableFloatStateOf(1f)
@@ -272,11 +277,14 @@ class PullToRefreshState(
             isRefreshingInProgress = true
             coroutineScope.launch {
                 try {
+                    // keep previous behavior of animating the visual offset to threshold
                     dragOffsetAnimatable.animateTo(
                         refreshThresholdOffset,
                         animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
                     )
-                    rawDragOffset = refreshThresholdOffset
+                    dragOffset = refreshThresholdOffset
+                    // align currentTouch to threshold for continuity
+                    currentTouch = refreshThresholdOffset
                 } finally {
                     internalRefreshState = RefreshState.Refreshing
                 }
@@ -298,7 +306,7 @@ class PullToRefreshState(
     internal suspend fun handlePointerRelease(onRefresh: () -> Unit) {
         if (isRefreshing) return
 
-        if (rawDragOffset >= refreshThresholdOffset) {
+        if (dragOffset >= refreshThresholdOffset) {
             // If pulled past threshold, trigger the onRefresh callback.
             // The hoisted state will change, which will then call startRefreshing().
             isTriggerRefresh = true
@@ -311,7 +319,8 @@ class PullToRefreshState(
                     0f,
                     animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
                 )
-                rawDragOffset = 0f
+                dragOffset = 0f
+                currentTouch = 0f
             } finally {
                 isRebounding = false
             }
@@ -342,7 +351,8 @@ class PullToRefreshState(
 
     private suspend fun internalResetState() {
         dragOffsetAnimatable.snapTo(0f)
-        rawDragOffset = 0f
+        dragOffset = 0f
+        currentTouch = 0f
         isTriggerRefresh = false
         isRefreshingInProgress = false
         internalRefreshState = RefreshState.Idle
@@ -352,6 +362,36 @@ class PullToRefreshState(
     internal fun createNestedScrollConnection(
         overScrollState: OverScrollState
     ): NestedScrollConnection = object : NestedScrollConnection {
+
+        // Helper: map raw touch distance (currentTouch) -> damped visual offset using same easing as Overscroll.
+        fun touchToDamped(distance: Float): Float {
+            val maxTouch = maxDragDistancePx.coerceAtLeast(1f)
+            // DefaultParabolaScrollEasing expects range Int; ensure >= 1 to avoid div/0.
+            val rangeInt = max(1, maxTouch.toInt())
+            return DefaultParabolaScrollEasing(distance, rangeInt)
+        }
+
+        /**
+         * Add delta to the current touch tracking value and update rawDragOffset/animatable immediately.
+         * Return overflow part which cannot be consumed by pull-to-refresh handling (beyond max drag).
+         */
+        fun addTouchDelta(deltaTouch: Float): Float {
+            val maxTouch = maxDragDistancePx.coerceAtLeast(0f)
+            val target = currentTouch + deltaTouch
+            val overflow =
+                when {
+                    target > maxTouch -> target - maxTouch
+                    target < -maxTouch -> target + maxTouch
+                    else -> 0f
+                }
+            currentTouch = target.coerceIn(-maxTouch, maxTouch)
+            val damped = touchToDamped(currentTouch)
+            dragOffset = damped
+            // Update animatable to reflect immediate visual change.
+            coroutineScope.launch { dragOffsetAnimatable.snapTo(damped) }
+            return overflow
+        }
+
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             // Only defer to overscroll when refresh is idle.
             if (overScrollState.isOverScrollActive && refreshState == RefreshState.Idle) return Offset.Zero
@@ -365,15 +405,16 @@ class PullToRefreshState(
             }
 
             // When pulling up while the indicator is visible, consume the scroll to hide it.
-            if (source == NestedScrollSource.UserInput && available.y < 0 && rawDragOffset > 0f) {
+            if (source == NestedScrollSource.UserInput && available.y < 0 && (dragOffset > 0f || currentTouch > 0f)) {
                 if (isRebounding && dragOffsetAnimatable.isRunning) {
                     coroutineScope.launch { dragOffsetAnimatable.stop() }
                     isRebounding = false
                 }
-                val delta = available.y.coerceAtLeast(-rawDragOffset)
-                rawDragOffset += delta
-                coroutineScope.launch { dragOffsetAnimatable.snapTo(rawDragOffset) }
-                return Offset(0f, delta)
+                val delta = available.y
+                val overflow = addTouchDelta(delta)
+                // amount actually consumed = delta - overflow
+                val consumed = delta - overflow
+                return Offset(0f, consumed)
             }
             return Offset.Zero
         }
@@ -394,11 +435,10 @@ class PullToRefreshState(
                     coroutineScope.launch { dragOffsetAnimatable.stop() }
                     isRebounding = false
                 }
-                val resistanceFactor = 1f / (1f + rawDragOffset / refreshThresholdOffset * 0.8f)
-                val effectiveY = available.y * resistanceFactor
-                rawDragOffset += effectiveY
-                coroutineScope.launch { dragOffsetAnimatable.snapTo(rawDragOffset) }
-                return Offset(0f, effectiveY)
+                val delta = available.y
+                val overflow = addTouchDelta(delta)
+                val consumedDelta = delta - overflow
+                return Offset(0f, consumedDelta)
             }
             return Offset.Zero
         }
@@ -479,8 +519,8 @@ private fun createPullToRefreshConnection(
             // Ensure the indicator cancels and rebounds to zero.
             if (!pullToRefreshState.isRefreshing
                 && pullToRefreshState.refreshState != RefreshState.RefreshComplete
-                && pullToRefreshState.rawDragOffset > 0f
-                && pullToRefreshState.rawDragOffset < pullToRefreshState.refreshThresholdOffset
+                && pullToRefreshState.dragOffset > 0f
+                && pullToRefreshState.dragOffset < pullToRefreshState.refreshThresholdOffset
             ) {
                 pullToRefreshState.coroutineScope.launch {
                     try {
@@ -488,7 +528,8 @@ private fun createPullToRefreshConnection(
                             0f,
                             animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
                         )
-                        pullToRefreshState.rawDragOffset = 0f
+                        pullToRefreshState.dragOffset = 0f
+                        pullToRefreshState.currentTouch = 0f
                     } finally {
                         // No-op
                     }
