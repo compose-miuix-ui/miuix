@@ -98,7 +98,7 @@ fun Modifier.overScrollOutOfBound(
     val currentSpringStiff by rememberUpdatedState(springStiff)
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
-    val windowSize by rememberUpdatedState(getWindowSize())
+    val windowSize = getWindowSize()
     val dispatcher = remember { NestedScrollDispatcher() }
     val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
