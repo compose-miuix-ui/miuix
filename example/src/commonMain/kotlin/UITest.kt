@@ -554,7 +554,7 @@ private fun FloatingToolbar(
 
 @Composable
 private fun FloatingToolbarActions() {
-    val iconTint = MiuixTheme.colorScheme.onPrimaryContainer
+    val iconTint = MiuixTheme.colorScheme.onPrimaryVariant
 
     IconButton(onClick = { /* Action 1 */ }) {
         Icon(
