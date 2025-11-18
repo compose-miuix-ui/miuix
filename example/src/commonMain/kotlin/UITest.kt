@@ -49,9 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
@@ -66,20 +64,14 @@ import top.yukonga.miuix.kmp.basic.FloatingNavigationBarMode
 import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalDivider
-import top.yukonga.miuix.kmp.extra.DropdownImpl
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.other.GitHub
 import top.yukonga.miuix.kmp.icon.icons.useful.Delete
@@ -103,7 +95,7 @@ private object UIConstants {
     const val PAGE_COUNT = 4
     const val GITHUB_URL = "https://github.com/compose-miuix-ui/miuix"
 
-    val PAGE_TITLES = listOf("HomePage", "DropDown", "Colors", "Settings")
+    val PAGE_TITLES = listOf("HomePage", "Dropdowns", "Colors", "Settings")
 }
 
 enum class FloatingNavigationBarAlignment(val value: Int) {
@@ -146,10 +138,8 @@ val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle
 fun UITest(
     colorMode: MutableState<Int>,
 ) {
-    val topAppBarScrollBehaviorList = List(UIConstants.PAGE_COUNT) { MiuixScrollBehavior() }
     val pagerState = rememberPagerState(pageCount = { UIConstants.PAGE_COUNT })
     val coroutineScope = rememberCoroutineScope()
-    val currentScrollBehavior = topAppBarScrollBehaviorList[pagerState.currentPage]
 
     val navigationItems = remember {
         listOf(
@@ -161,8 +151,6 @@ fun UITest(
     }
 
     var uiState by remember { mutableStateOf(UIState()) }
-    val showTopPopup = remember { mutableStateOf(false) }
-
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
             coroutineScope.launch {
@@ -184,12 +172,8 @@ fun UITest(
 
             if (isWideScreen) {
                 WideScreenLayout(
-                    navigationItems = navigationItems,
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
-                    showTopPopup = showTopPopup,
-                    topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
-                    currentScrollBehavior = currentScrollBehavior,
                     colorMode = colorMode
                 )
             } else {
@@ -197,9 +181,6 @@ fun UITest(
                     navigationItems = navigationItems,
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
-                    showTopPopup = showTopPopup,
-                    topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
-                    currentScrollBehavior = currentScrollBehavior,
                     colorMode = colorMode
                 )
             }
@@ -222,12 +203,8 @@ fun UITest(
 
 @Composable
 private fun WideScreenLayout(
-    navigationItems: List<NavigationItem>,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
     colorMode: MutableState<Int>
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -264,11 +241,7 @@ private fun WideScreenLayout(
             )
             Box(modifier = Modifier.weight(1f - weight)) {
                 WideScreenContent(
-                    navigationItems = navigationItems,
                     uiState = uiState,
-                    showTopPopup = showTopPopup,
-                    topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
-                    currentScrollBehavior = currentScrollBehavior,
                     onUiStateChange = onUiStateChange,
                     colorMode = colorMode
                 )
@@ -331,11 +304,7 @@ private fun WideScreenPanel(
 
 @Composable
 private fun WideScreenContent(
-    navigationItems: List<NavigationItem>,
     uiState: UIState,
-    showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>
 ) {
@@ -343,28 +312,6 @@ private fun WideScreenContent(
         modifier = Modifier
             .padding(end = 6.dp)
             .fillMaxSize(),
-        topBar = {
-            AnimatedVisibility(
-                visible = uiState.showTopAppBar,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                SmallTopAppBar(
-                    title = UIConstants.PAGE_TITLES[LocalPagerState.current.targetPage],
-                    scrollBehavior = currentScrollBehavior,
-                    actions = {
-                        TopAppBarActions(
-                            items = navigationItems,
-                            showTopPopup = showTopPopup
-                        )
-                    },
-                    defaultWindowInsetsPadding = false,
-                    modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.End))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.End)),
-                )
-            }
-        },
         floatingActionButton = {
             FloatingActionButton(uiState.showFloatingActionButton)
         },
@@ -383,11 +330,9 @@ private fun WideScreenContent(
                 .imePadding()
                 .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.End))
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.End)),
-            topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
             padding = PaddingValues(
                 end = padding.calculateEndPadding(LayoutDirection.Ltr),
                 top = padding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding()
             ),
             uiState = uiState,
             onUiStateChange = onUiStateChange,
@@ -401,31 +346,10 @@ private fun CompactScreenLayout(
     navigationItems: List<NavigationItem>,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    showTopPopup: MutableState<Boolean>,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
-    currentScrollBehavior: ScrollBehavior,
     colorMode: MutableState<Int>
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            AnimatedVisibility(
-                visible = uiState.showTopAppBar,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                TopAppBar(
-                    title = "Miuix",
-                    scrollBehavior = currentScrollBehavior,
-                    actions = {
-                        TopAppBarActions(
-                            items = navigationItems,
-                            showTopPopup = showTopPopup
-                        )
-                    }
-                )
-            }
-        },
         bottomBar = {
             NavigationBar(
                 uiState = uiState,
@@ -449,7 +373,6 @@ private fun CompactScreenLayout(
                 .imePadding()
                 .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)),
-            topAppBarScrollBehaviorList = topAppBarScrollBehaviorList,
             padding = padding,
             uiState = uiState,
             onUiStateChange = onUiStateChange,
@@ -610,59 +533,8 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
 }
 
 @Composable
-private fun TopAppBarActions(
-    items: List<NavigationItem>,
-    showTopPopup: MutableState<Boolean>,
-) {
-    val hapticFeedback = LocalHapticFeedback.current
-    val page = LocalPagerState.current.targetPage
-    val handlePageChange = LocalHandlePageChange.current
-
-    ListPopup(
-        show = showTopPopup,
-        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopRight,
-        onDismissRequest = {
-            showTopPopup.value = false
-        },
-        enableWindowDim = false
-    ) {
-        ListPopupColumn {
-            items.forEachIndexed { index, navigationItem ->
-                DropdownImpl(
-                    text = navigationItem.label,
-                    optionSize = items.size,
-                    isSelected = index == page,
-                    onSelectedIndexChange = {
-                        handlePageChange(index)
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                        showTopPopup.value = false
-                    },
-                    index = index
-                )
-            }
-        }
-    }
-
-    IconButton(
-        modifier = Modifier.padding(end = 20.dp),
-        onClick = {
-            showTopPopup.value = true
-        },
-        holdDownState = showTopPopup.value
-    ) {
-        Icon(
-            imageVector = MiuixIcons.Useful.ImmersionMore,
-            tint = MiuixTheme.colorScheme.onBackground,
-            contentDescription = "More"
-        )
-    }
-}
-
-@Composable
 fun AppPager(
     modifier: Modifier = Modifier,
-    topAppBarScrollBehaviorList: List<ScrollBehavior>,
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
@@ -678,25 +550,27 @@ fun AppPager(
         pageContent = { page ->
             when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(
-                    topAppBarScrollBehavior = topAppBarScrollBehaviorList[0],
                     padding = padding,
                     scrollEndHaptic = uiState.scrollEndHaptic,
+                    isWideScreen = uiState.isWideScreen,
+                    showTopAppBar = uiState.showTopAppBar,
                 )
 
                 UIConstants.DROPDOWN_PAGE_INDEX -> SecondPage(
-                    topAppBarScrollBehavior = topAppBarScrollBehaviorList[1],
                     padding = padding,
                     scrollEndHaptic = uiState.scrollEndHaptic,
+                    isWideScreen = uiState.isWideScreen,
+                    showTopAppBar = uiState.showTopAppBar,
                 )
 
                 UIConstants.COLOR_PAGE_INDEX -> ThirdPage(
-                    topAppBarScrollBehavior = topAppBarScrollBehaviorList[2],
                     padding = padding,
                     scrollEndHaptic = uiState.scrollEndHaptic,
+                    isWideScreen = uiState.isWideScreen,
+                    showTopAppBar = uiState.showTopAppBar,
                 )
 
                 else -> FourthPage(
-                    topAppBarScrollBehavior = topAppBarScrollBehaviorList[3],
                     padding = padding,
                     showFPSMonitor = uiState.showFPSMonitor,
                     onShowFPSMonitorChange = { onUiStateChange(uiState.copy(showFPSMonitor = it)) },

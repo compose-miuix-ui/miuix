@@ -100,6 +100,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(project(":miuix"))
+            implementation(libs.jetbrains.androidx.navigation)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

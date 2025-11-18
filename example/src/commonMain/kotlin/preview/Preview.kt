@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import ui.AppTheme
 
@@ -32,7 +31,7 @@ fun UITestPreview() {
 fun MainPagePreview() {
     AppTheme {
         Scaffold {
-            MainPage(MiuixScrollBehavior(), PaddingValues(), true)
+            MainPage(PaddingValues(), scrollEndHaptic = true, isWideScreen = false, showTopAppBar = false)
         }
     }
 }
@@ -43,9 +42,10 @@ fun SecondPagePreview() {
     AppTheme {
         Scaffold {
             SecondPage(
-                MiuixScrollBehavior(),
                 PaddingValues(),
-                true
+                scrollEndHaptic = false,
+                isWideScreen = false,
+                showTopAppBar = false
             )
         }
     }
@@ -57,9 +57,10 @@ fun ThirdPagePreview() {
     AppTheme {
         Scaffold {
             ThirdPage(
-                MiuixScrollBehavior(),
                 PaddingValues(),
-                true
+                scrollEndHaptic = true,
+                isWideScreen = false,
+                showTopAppBar = false,
             )
         }
     }
@@ -71,7 +72,6 @@ fun FourthPagePreview() {
     AppTheme {
         Scaffold {
             FourthPage(
-                MiuixScrollBehavior(),
                 PaddingValues(),
                 false,
                 {},

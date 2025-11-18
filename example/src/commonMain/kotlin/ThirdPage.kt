@@ -24,10 +24,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
@@ -37,67 +40,92 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun ThirdPage(
-    topAppBarScrollBehavior: ScrollBehavior,
     padding: PaddingValues,
-    scrollEndHaptic: Boolean
+    scrollEndHaptic: Boolean,
+    isWideScreen: Boolean,
+    showTopAppBar: Boolean,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .then(
-                if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
-            )
-            .overScrollVertical()
-            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-            .fillMaxHeight(),
-        contentPadding = PaddingValues(top = padding.calculateTopPadding()),
-        overscrollEffect = null
-    ) {
-        item(key = "light") {
-            SmallTitle("Light Theme Colors")
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = lightColorScheme().surfaceContainer),
-                cornerRadius = 16.dp,
-                insideMargin = PaddingValues(horizontal = 16.dp)
-            ) {
-                ColorsPreview(lightColorScheme())
+    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    Scaffold(
+        topBar = {
+            if (showTopAppBar) {
+                if (isWideScreen) {
+                    SmallTopAppBar(
+                        title = "Colors",
+                        scrollBehavior = topAppBarScrollBehavior,
+                        defaultWindowInsetsPadding = false
+                    )
+                } else {
+                    TopAppBar(
+                        title = "Colors",
+                        scrollBehavior = topAppBarScrollBehavior
+                    )
+                }
             }
-        }
-        item(key = "dynamic_light") {
-            SmallTitle("Dynamic Light Colors")
-            val dynLight = platformDynamicColors(dark = false)
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
-                cornerRadius = 16.dp,
-                insideMargin = PaddingValues(horizontal = 16.dp)
-            ) {
-                ColorsPreview(dynLight)
+        },
+        popupHost = {}
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .then(
+                    if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                )
+                .overScrollVertical()
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                .fillMaxHeight(),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = if (isWideScreen) padding.calculateBottomPadding() + 12.dp else 0.dp
+            ),
+            overscrollEffect = null
+        ) {
+            item(key = "light") {
+                SmallTitle("Light Theme Colors")
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(color = lightColorScheme().surfaceContainer),
+                    cornerRadius = 16.dp,
+                    insideMargin = PaddingValues(horizontal = 16.dp)
+                ) {
+                    ColorsPreview(lightColorScheme())
+                }
             }
-        }
-        item(key = "dark") {
-            SmallTitle("Dark Theme Colors")
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                colors = CardDefaults.defaultColors(color = darkColorScheme().surfaceContainer),
-                cornerRadius = 16.dp,
-                insideMargin = PaddingValues(horizontal = 16.dp)
-            ) {
-                ColorsPreview(darkColorScheme())
+            item(key = "dynamic_light") {
+                SmallTitle("Dynamic Light Colors")
+                val dynLight = platformDynamicColors(dark = false)
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
+                    cornerRadius = 16.dp,
+                    insideMargin = PaddingValues(horizontal = 16.dp)
+                ) {
+                    ColorsPreview(dynLight)
+                }
             }
-        }
-        item(key = "dynamic_dark") {
-            SmallTitle("Dynamic Dark Colors")
-            val dynDark = platformDynamicColors(dark = true)
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
-                cornerRadius = 16.dp,
-                insideMargin = PaddingValues(horizontal = 16.dp)
-            ) {
-                ColorsPreview(dynDark)
+            item(key = "dark") {
+                SmallTitle("Dark Theme Colors")
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(color = darkColorScheme().surfaceContainer),
+                    cornerRadius = 16.dp,
+                    insideMargin = PaddingValues(horizontal = 16.dp)
+                ) {
+                    ColorsPreview(darkColorScheme())
+                }
             }
-            Spacer(modifier = Modifier.height(12.dp + padding.calculateBottomPadding()))
+            item(key = "dynamic_dark") {
+                SmallTitle("Dynamic Dark Colors")
+                val dynDark = platformDynamicColors(dark = true)
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
+                    cornerRadius = 16.dp,
+                    insideMargin = PaddingValues(horizontal = 16.dp)
+                ) {
+                    ColorsPreview(dynDark)
+                }
+                Spacer(modifier = Modifier.height(12.dp + padding.calculateBottomPadding()))
+            }
         }
     }
 }

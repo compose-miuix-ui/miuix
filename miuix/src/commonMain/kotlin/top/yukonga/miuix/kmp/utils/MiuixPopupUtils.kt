@@ -33,8 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -334,7 +337,33 @@ class MiuixPopupUtils {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
                             .background(dimColor)
+                    )
+                }
+            } else {
+                AnimatedVisibility(
+                    visibleState = visibleState,
+                    modifier = Modifier.zIndex(dialogState.zIndex - 0.002f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
                     )
                 }
             }
@@ -358,6 +387,7 @@ class MiuixPopupUtils {
             }
         }
 
+        @OptIn(ExperimentalComposeUiApi::class)
         @Composable
         private fun PopupEntry(
             popupState: PopupState,
@@ -397,7 +427,33 @@ class MiuixPopupUtils {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
                             .background(MiuixTheme.colorScheme.windowDimming)
+                    )
+                }
+            } else {
+                AnimatedVisibility(
+                    visibleState = visibleState,
+                    modifier = Modifier.zIndex(popupState.zIndex - 0.002f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
                     )
                 }
             }
@@ -410,6 +466,9 @@ class MiuixPopupUtils {
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     popupState.content()
+                }
+                BackHandler(enabled = visibleState.currentState || visibleState.targetState) {
+                    popupState.showState.value = false
                 }
                 DisposableEffect(popupState.showState) {
                     onDispose {
