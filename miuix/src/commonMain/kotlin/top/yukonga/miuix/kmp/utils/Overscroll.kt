@@ -99,6 +99,7 @@ fun Modifier.overScrollOutOfBound(
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
     val windowSize = getWindowSize()
+    val scrollRange = if (isVertical) windowSize.height else windowSize.width
     val dispatcher = remember { NestedScrollDispatcher() }
     val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
@@ -107,7 +108,7 @@ fun Modifier.overScrollOutOfBound(
     // and to ensure consistent, smooth continuation between interactions.
     val flingAnimatable = remember { Animatable(0f) }
 
-    val nestedConnection = remember {
+    val nestedConnection = remember(scrollRange) {
         object : NestedScrollConnection {
             /**
              * If the offset is less than this value, we consider the animation to end.
@@ -121,8 +122,7 @@ fun Modifier.overScrollOutOfBound(
             }
 
             private fun touchToDamped(distance: Float): Float {
-                val range = if (currentIsVertical) windowSize.height else windowSize.width
-                return currentScrollEasing(distance, range)
+                return currentScrollEasing(distance, scrollRange)
             }
 
             /**
@@ -133,7 +133,7 @@ fun Modifier.overScrollOutOfBound(
              * immediate response to touch deltas.
              */
             private fun addTouchDelta(deltaTouch: Float): Float {
-                val maxTouch = (if (currentIsVertical) windowSize.height else windowSize.width).toFloat()
+                val maxTouch = scrollRange.toFloat()
                 val target = currentTouch + deltaTouch
                 val overflow =
                     when {
@@ -150,7 +150,9 @@ fun Modifier.overScrollOutOfBound(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreScroll = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePreScroll
+                if (overScrollState.isOverScrollActive != newActivePreScroll) {
+                    overScrollState.isOverScrollActive = newActivePreScroll
+                }
                 if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPreScroll(available, source)
                 }
@@ -195,7 +197,9 @@ fun Modifier.overScrollOutOfBound(
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostScroll = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePostScroll
+                if (overScrollState.isOverScrollActive != newActivePostScroll) {
+                    overScrollState.isOverScrollActive = newActivePostScroll
+                }
                 if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
@@ -224,7 +228,9 @@ fun Modifier.overScrollOutOfBound(
             override suspend fun onPreFling(available: Velocity): Velocity {
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreFling = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePreFling
+                if (overScrollState.isOverScrollActive != newActivePreFling) {
+                    overScrollState.isOverScrollActive = newActivePreFling
+                }
                 if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPreFling(available)
                 }
@@ -243,8 +249,8 @@ fun Modifier.overScrollOutOfBound(
                     // Reuse the shared animatable; ensure it starts from currentTouch for a smooth continuation.
                     flingAnimatable.snapTo(currentTouch)
                     when {
-                        realVelocity < 0 -> flingAnimatable.updateBounds(lowerBound = 0f)
-                        realVelocity > 0 -> flingAnimatable.updateBounds(upperBound = 0f)
+                        realVelocity < 0 -> flingAnimatable.updateBounds(lowerBound = 0f, upperBound = Float.POSITIVE_INFINITY)
+                        realVelocity > 0 -> flingAnimatable.updateBounds(lowerBound = Float.NEGATIVE_INFINITY, upperBound = 0f)
                         else -> {
                             // no-op
                         }
@@ -271,7 +277,9 @@ fun Modifier.overScrollOutOfBound(
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostFling = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePostFling
+                if (overScrollState.isOverScrollActive != newActivePostFling) {
+                    overScrollState.isOverScrollActive = newActivePostFling
+                }
                 if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPostFling(consumed, available)
                 }
