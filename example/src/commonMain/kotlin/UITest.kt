@@ -89,6 +89,8 @@ import utils.FPSMonitor
 
 private object UIConstants {
     val WIDE_SCREEN_THRESHOLD = 840.dp
+    val MEDIUM_WIDTH_THRESHOLD = 600.dp
+    const val PORTRAIT_ASPECT_RATIO_THRESHOLD = 1.2f
     const val MAIN_PAGE_INDEX = 0
     const val DROPDOWN_PAGE_INDEX = 1
     const val COLOR_PAGE_INDEX = 2
@@ -167,7 +169,13 @@ fun UITest(
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize()
         ) {
-            val isWideScreen = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
+            val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
+
+            val isWideByShape = maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD &&
+                    (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
+
+            val isWideScreen = isDefinitelyWide || isWideByShape
+
             uiState = uiState.copy(isWideScreen = isWideScreen)
 
             if (isWideScreen) {
