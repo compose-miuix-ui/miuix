@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,7 +77,10 @@ fun ThirdPage(
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
-                bottom = if (isWideScreen) padding.calculateBottomPadding() + 12.dp else 0.dp
+                bottom = if (isWideScreen) {
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            padding.calculateBottomPadding() + 12.dp
+                } else padding.calculateBottomPadding() + 12.dp
             ),
             overscrollEffect = null
         ) {
@@ -124,7 +129,6 @@ fun ThirdPage(
                 ) {
                     ColorsPreview(dynDark)
                 }
-                Spacer(modifier = Modifier.height(12.dp + padding.calculateBottomPadding()))
             }
         }
     }

@@ -310,29 +310,18 @@ private fun ScaffoldLayout(
 
                 val alignment = floatingToolbarPosition.toAlignment()
 
-                // Adjust available space for insets more accurately
                 val availableWidth = layoutWidth - leftInset - rightInset
-                // Available height considers top bar height and bottom insets
-                val availableHeight = layoutHeight - topInset - bottomInset
+                val availableHeight = layoutHeight - topBarPlaceable.height - topInset - bottomInset
 
                 val position = alignment.align(
                     IntSize(floatingToolbarWidth, floatingToolbarHeight),
-                    // Use the calculated available space for alignment
                     IntSize(availableWidth, availableHeight),
                     layoutDirection
                 )
 
-                // Calculate final coordinates, adding back insets based on alignment
-                // Start with the aligned position within the available space
-                val x = position.x + leftInset
-                var y = position.y
+                val x = leftInset + position.x
+                val y = topBarPlaceable.height + topInset + position.y - FloatingToolbarSpacing.roundToPx()
 
-                // Specific adjustments based on vertical alignment
-                if (alignment.vertical == Alignment.Bottom) {
-                    // If bottom aligned, position relative to the bottom edge of available space
-                    y = layoutHeight - bottomInset - floatingToolbarHeight
-                }
-                // Place FloatingToolbar
                 floatingToolbarPlaceable.place(x, y)
             }
             // Place FAB
@@ -432,6 +421,9 @@ internal class FabPlacement(val left: Int, val width: Int, val height: Int)
 
 // FAB spacing above the bottom bar / bottom of the Scaffold
 private val FabSpacing = 12.dp
+
+// FloatingToolbar spacing above the bottom of the Scaffold
+private val FloatingToolbarSpacing = 4.dp
 
 // Add Alignment.vertical property helper if not available
 internal val Alignment.vertical: Alignment.Vertical

@@ -46,7 +46,6 @@ Since this component is typically used for the most common actions, it does not 
 | shadowElevation            | Dp                     | Shadow elevation of the button      | 4.dp                           | No       |
 | minWidth                   | Dp                     | Minimum width of the button         | 60.dp                          | No       |
 | minHeight                  | Dp                     | Minimum height of the button        | 60.dp                          | No       |
-| defaultWindowInsetsPadding | Boolean                | Apply default window insets padding | true                           | No       |
 | content                    | @Composable () -> Unit | Composable content of the button    | -                              | Yes      |
 
 ## Advanced Usage

@@ -67,8 +67,7 @@ import kotlin.math.round
 
 fun LazyListScope.otherComponent(
     miuixIcons: List<ImageVector>,
-    focusManager: FocusManager,
-    padding: PaddingValues
+    focusManager: FocusManager
 ) {
     item(key = "button") {
         var buttonText by remember { mutableStateOf("Cancel") }
@@ -772,8 +771,7 @@ fun LazyListScope.otherComponent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp + padding.calculateBottomPadding()),
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Card(

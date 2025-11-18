@@ -4,13 +4,7 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -36,7 +30,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param shadowElevation The shadow elevation of the [FloatingActionButton].
  * @param minWidth The minimum width of the [FloatingActionButton].
  * @param minHeight The minimum height of the [FloatingActionButton].
- * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [FloatingActionButton].
  * @param content The [Composable] content of the [FloatingActionButton].
  */
 @Composable
@@ -48,7 +41,6 @@ fun FloatingActionButton(
     shadowElevation: Dp = 4.dp,
     minWidth: Dp = 60.dp,
     minHeight: Dp = 60.dp,
-    defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
@@ -56,13 +48,6 @@ fun FloatingActionButton(
     Surface(
         onClick = currentOnClick,
         modifier = modifier
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-                } else Modifier
-            )
             .semantics { role = Role.Button },
         shape = shape,
         color = containerColor,

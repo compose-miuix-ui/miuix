@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
@@ -25,7 +24,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.ParabolaScrollEasing
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
@@ -35,8 +33,7 @@ import kotlin.math.sign
 
 // Based on https://github.com/Cormor/ComposeOverscroll
 
-
-internal const val OutBoundSpringStiff = 280f
+internal const val OutBoundSpringStiff = 300f
 internal const val OutBoundSpringDamp = 1f
 
 /**
@@ -93,19 +90,22 @@ fun Modifier.overScrollOutOfBound(
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
     val windowSize = getWindowSize()
+    val scrollRange = if (isVertical) windowSize.height else windowSize.width
     val dispatcher = remember { NestedScrollDispatcher() }
     val coroutineScope = rememberCoroutineScope()
     var offset by remember { mutableFloatStateOf(0f) }
 
-    val nestedConnection = remember {
+    // Reused Animatable instance for all fling animations to avoid creating many instances
+    // and to ensure consistent, smooth continuation between interactions.
+    val flingAnimatable = remember { Animatable(0f) }
+
+    val nestedConnection = remember(scrollRange) {
         object : NestedScrollConnection {
             /**
              * If the offset is less than this value, we consider the animation to end.
              */
             val visibilityThreshold = 1f
             var currentTouch by mutableStateOf(0f)
-            lateinit var lastFlingAnimator: Animatable<Float, AnimationVector1D>
-            var stopJob: Job? = null
 
             private fun shouldBypassForPullToRefresh(): Boolean {
                 // When pull-to-refresh is active (not Idle), always bypass.
@@ -113,12 +113,18 @@ fun Modifier.overScrollOutOfBound(
             }
 
             private fun touchToDamped(distance: Float): Float {
-                val range = if (currentIsVertical) windowSize.height else windowSize.width
-                return currentScrollEasing(distance, range)
+                return currentScrollEasing(distance, scrollRange)
             }
 
+            /**
+             * Add delta to the current touch tracking value and update offset immediately.
+             * Return overflow part which cannot be consumed by overscroll handling.
+             *
+             * This routine also updates offset synchronously to reduce visual jumps and ensure
+             * immediate response to touch deltas.
+             */
             private fun addTouchDelta(deltaTouch: Float): Float {
-                val maxTouch = (if (currentIsVertical) windowSize.height else windowSize.width).toFloat()
+                val maxTouch = scrollRange.toFloat()
                 val target = currentTouch + deltaTouch
                 val overflow =
                     when {
@@ -127,26 +133,29 @@ fun Modifier.overScrollOutOfBound(
                         else -> 0f
                     }
                 currentTouch = target.coerceIn(-maxTouch, maxTouch)
+                // Update offset immediately to keep UI smooth and prevent stuttering.
+                offset = touchToDamped(currentTouch)
                 return overflow
             }
 
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // println("Overscroll !!!onPreScroll!!! available >> $available source >> $source")
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreScroll = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePreScroll
+                if (overScrollState.isOverScrollActive != newActivePreScroll) {
+                    overScrollState.isOverScrollActive = newActivePreScroll
+                }
                 if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPreScroll(available, source)
                 }
-                // Found fling behavior in the wrong direction.
+                // If non-user input (fling/etc), hand over to parent dispatcher
                 if (source != NestedScrollSource.UserInput) {
                     return dispatcher.dispatchPreScroll(available, source)
                 }
-                if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    if (stopJob?.isActive != true) {
-                        stopJob = coroutineScope.launch {
-                            lastFlingAnimator.stop()
-                        }
+                // If a fling animation is running, request it to stop to blend with user input.
+                if (flingAnimatable.isRunning) {
+                    coroutineScope.launch {
+                        // stop() is suspend; we call it in coroutine context to stop smoothly.
+                        flingAnimatable.stop()
                     }
                 }
                 val realAvailable = when {
@@ -156,6 +165,7 @@ fun Modifier.overScrollOutOfBound(
                 val realOffset = if (currentIsVertical) realAvailable.y else realAvailable.x
                 val isSameDirection = sign(realOffset) == sign(currentTouch)
                 if (abs(currentTouch) <= visibilityThreshold || isSameDirection) {
+                    // No overscroll or continuing in same direction: don't consume here.
                     return available - realAvailable
                 }
 
@@ -176,22 +186,21 @@ fun Modifier.overScrollOutOfBound(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // println("Overscroll !!!onPostScroll!!! consumed >> $consumed available >> $available source >>> $source")
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostScroll = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePostScroll
+                if (overScrollState.isOverScrollActive != newActivePostScroll) {
+                    overScrollState.isOverScrollActive = newActivePostScroll
+                }
                 if (shouldBypassForPullToRefresh()) {
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
-                // Found fling behavior in the wrong direction.
+                // If non-user input (fling/etc), hand over to parent dispatcher
                 if (source != NestedScrollSource.UserInput) {
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
-                if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    if (stopJob?.isActive != true) {
-                        stopJob = coroutineScope.launch {
-                            lastFlingAnimator.stop()
-                        }
+                if (flingAnimatable.isRunning) {
+                    coroutineScope.launch {
+                        flingAnimatable.stop()
                     }
                 }
                 val realAvailable = when {
@@ -200,7 +209,6 @@ fun Modifier.overScrollOutOfBound(
                 }
                 val realOffset = if (currentIsVertical) realAvailable.y else realAvailable.x
                 val overflow = addTouchDelta(realOffset)
-                offset = touchToDamped(currentTouch)
                 return if (currentIsVertical) {
                     Offset(available.x - realAvailable.x, available.y - overflow)
                 } else {
@@ -209,15 +217,17 @@ fun Modifier.overScrollOutOfBound(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                // println("Overscroll !!!onPreFling!!! available >> $available")
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePreFling = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePreFling
+                if (overScrollState.isOverScrollActive != newActivePreFling) {
+                    overScrollState.isOverScrollActive = newActivePreFling
+                }
                 if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPreFling(available)
                 }
-                if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    lastFlingAnimator.stop()
+                // Stop any in-progress reused animatable to take over cleanly.
+                if (flingAnimatable.isRunning) {
+                    flingAnimatable.stop()
                 }
                 val parentConsumed = when {
                     currentNestedScrollToParent -> dispatcher.dispatchPreFling(available)
@@ -227,13 +237,17 @@ fun Modifier.overScrollOutOfBound(
                 var realVelocity = if (currentIsVertical) realAvailable.y else realAvailable.x
 
                 if (abs(currentTouch) >= visibilityThreshold && sign(realVelocity) != sign(currentTouch)) {
-                    lastFlingAnimator = Animatable(currentTouch).apply {
-                        when {
-                            realVelocity < 0 -> updateBounds(lowerBound = 0f)
-                            realVelocity > 0 -> updateBounds(upperBound = 0f)
+                    // Reuse the shared animatable; ensure it starts from currentTouch for a smooth continuation.
+                    flingAnimatable.snapTo(currentTouch)
+                    when {
+                        realVelocity < 0 -> flingAnimatable.updateBounds(lowerBound = 0f, upperBound = Float.POSITIVE_INFINITY)
+                        realVelocity > 0 -> flingAnimatable.updateBounds(lowerBound = Float.NEGATIVE_INFINITY, upperBound = 0f)
+                        else -> {
+                            // no-op
                         }
                     }
-                    realVelocity = lastFlingAnimator.animateTo(
+                    // Animate back to zero with spring, providing initial velocity.
+                    val endVelocity = flingAnimatable.animateTo(
                         0.0f,
                         spring(currentSpringDamp, currentSpringStiff, visibilityThreshold),
                         realVelocity
@@ -241,6 +255,7 @@ fun Modifier.overScrollOutOfBound(
                         currentTouch = value
                         offset = touchToDamped(currentTouch)
                     }.endState.velocity
+                    realVelocity = endVelocity
                 }
 
                 return if (currentIsVertical) {
@@ -251,15 +266,17 @@ fun Modifier.overScrollOutOfBound(
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // println("Overscroll !!!onPostFling!!! consumed >> $consumed available >> $available")
                 // Check if overScroll should be disabled for drop-down direction
                 val newActivePostFling = abs(offset) > visibilityThreshold
-                overScrollState.isOverScrollActive = newActivePostFling
+                if (overScrollState.isOverScrollActive != newActivePostFling) {
+                    overScrollState.isOverScrollActive = newActivePostFling
+                }
                 if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
                     return dispatcher.dispatchPostFling(consumed, available)
                 }
-                if (::lastFlingAnimator.isInitialized && lastFlingAnimator.isRunning) {
-                    lastFlingAnimator.stop()
+                // Stop any in-progress reused animatable to take over cleanly.
+                if (flingAnimatable.isRunning) {
+                    flingAnimatable.stop()
                 }
                 val realAvailable = when {
                     currentNestedScrollToParent -> available - dispatcher.dispatchPostFling(consumed, available)
@@ -267,8 +284,10 @@ fun Modifier.overScrollOutOfBound(
                 }
                 val initialVelocity = if (currentIsVertical) realAvailable.y else realAvailable.x
 
-                lastFlingAnimator = Animatable(currentTouch)
-                lastFlingAnimator.animateTo(
+                // Start a spring animation that brings the overscroll back to zero.
+                flingAnimatable.snapTo(currentTouch)
+                flingAnimatable.updateBounds(lowerBound = Float.NEGATIVE_INFINITY, upperBound = Float.POSITIVE_INFINITY)
+                flingAnimatable.animateTo(
                     0.0f,
                     spring(currentSpringDamp, currentSpringStiff, visibilityThreshold),
                     initialVelocity
