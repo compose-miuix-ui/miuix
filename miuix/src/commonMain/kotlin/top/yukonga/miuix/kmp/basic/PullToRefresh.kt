@@ -60,7 +60,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.utils.DefaultParabolaScrollEasing
+import top.yukonga.miuix.kmp.anim.ParabolaScrollEasing
 import top.yukonga.miuix.kmp.utils.LocalOverScrollState
 import top.yukonga.miuix.kmp.utils.OverScrollState
 import top.yukonga.miuix.kmp.utils.getWindowSize
@@ -249,7 +249,7 @@ class PullToRefreshState(
     }
 
     // currentTouch tracks the raw touch distance similar to Overscroll's currentTouch,
-    // and is used to compute a damped visual offset via DefaultParabolaScrollEasing.
+    // and is used to compute a damped visual offset via ParabolaScrollEasing.
     internal var currentTouch by mutableFloatStateOf(0f)
 
     private var isRebounding by mutableStateOf(false)
@@ -375,9 +375,9 @@ class PullToRefreshState(
             // Helper: map raw touch distance (currentTouch) -> damped visual offset using same easing as Overscroll.
             fun touchToDamped(distance: Float): Float {
                 val maxTouch = maxDragDistancePx.coerceAtLeast(1f)
-                // DefaultParabolaScrollEasing expects range Int; ensure >= 1 to avoid div/0.
+                // ParabolaScrollEasing expects range Int; ensure >= 1 to avoid div/0.
                 val rangeInt = max(1, maxTouch.toInt())
-                return DefaultParabolaScrollEasing(distance, rangeInt)
+                return ParabolaScrollEasing(distance, rangeInt)
             }
 
             /**

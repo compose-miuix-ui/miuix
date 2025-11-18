@@ -27,6 +27,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.anim.ParabolaScrollEasing
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
 import top.yukonga.miuix.kmp.basic.RefreshState
 import kotlin.math.abs
@@ -34,12 +35,6 @@ import kotlin.math.sign
 
 // Based on https://github.com/Cormor/ComposeOverscroll
 
-@Stable
-internal val DefaultParabolaScrollEasing: (distance: Float, range: Int) -> Float = { distance, range ->
-    val x = (abs(distance) / range).coerceIn(0.0f, 1.0f)
-    val dampedFactor = x - x * x + (x * x * x / 3.0f)
-    dampedFactor * range * sign(distance)
-}
 
 internal const val OutBoundSpringStiff = 280f
 internal const val OutBoundSpringDamp = 1f
@@ -93,7 +88,7 @@ fun Modifier.overScrollOutOfBound(
     val overScrollState = LocalOverScrollState.current
     val pullToRefreshState = LocalPullToRefreshState.current
     val currentNestedScrollToParent by rememberUpdatedState(nestedScrollToParent)
-    val currentScrollEasing by rememberUpdatedState(scrollEasing ?: DefaultParabolaScrollEasing)
+    val currentScrollEasing by rememberUpdatedState(scrollEasing ?: ParabolaScrollEasing)
     val currentSpringStiff by rememberUpdatedState(springStiff)
     val currentSpringDamp by rememberUpdatedState(springDamp)
     val currentIsVertical by rememberUpdatedState(isVertical)
