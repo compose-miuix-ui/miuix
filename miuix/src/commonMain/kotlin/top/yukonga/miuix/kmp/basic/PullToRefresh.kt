@@ -376,7 +376,7 @@ class PullToRefreshState(
          * Return overflow part which cannot be consumed by pull-to-refresh handling (beyond max drag).
          */
         fun addTouchDelta(deltaTouch: Float): Float {
-            val maxTouch = maxDragDistancePx.coerceAtLeast(0f)
+            val maxTouch = maxDragDistancePx.coerceAtLeast(1f)
             val target = currentTouch + deltaTouch
             val overflow =
                 when {
