@@ -97,8 +97,9 @@ fun FourthPage(
     onFabPositionChange: (Int) -> Unit,
     enablePageUserScroll: Boolean,
     onEnablePageUserScrollChange: (Boolean) -> Unit,
-    scrollEndHaptic: Boolean,
+    enableScrollEndHaptic: Boolean,
     onScrollEndHapticChange: (Boolean) -> Unit,
+    enableOverScroll: Boolean,
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
 ) {
@@ -190,8 +191,9 @@ fun FourthPage(
                     enablePageUserScroll = enablePageUserScroll,
                     onEnablePageUserScrollChange = onEnablePageUserScrollChange,
                     topAppBarScrollBehavior = topAppBarScrollBehavior,
-                    scrollEndHaptic = scrollEndHaptic,
+                    enableScrollEndHaptic = enableScrollEndHaptic,
                     onScrollEndHapticChange = onScrollEndHapticChange,
+                    enableOverScroll = enableOverScroll,
                     colorMode = colorMode,
                     isWideScreen = isWideScreen,
                     navToAbout = { navController.navigate("about") }
@@ -242,7 +244,8 @@ fun FourthPage(
                         bottom = padding.calculateBottomPadding()
                     ),
                     topAppBarScrollBehavior = topAppBarScrollBehavior,
-                    scrollEndHaptic = scrollEndHaptic,
+                    enableScrollEndHaptic = enableScrollEndHaptic,
+                    enableOverScroll = enableOverScroll,
                     isWideScreen = isWideScreen
                 )
             }
@@ -278,8 +281,9 @@ fun SettingsContent(
     enablePageUserScroll: Boolean,
     onEnablePageUserScrollChange: (Boolean) -> Unit,
     topAppBarScrollBehavior: ScrollBehavior,
-    scrollEndHaptic: Boolean,
+    enableScrollEndHaptic: Boolean,
     onScrollEndHapticChange: (Boolean) -> Unit,
+    enableOverScroll: Boolean,
     colorMode: MutableState<Int>,
     isWideScreen: Boolean,
     navToAbout: () -> Unit,
@@ -294,8 +298,10 @@ fun SettingsContent(
 
     LazyColumn(
         modifier = Modifier
-            .then(if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical()
+            .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+            .overScrollVertical(
+                isEnabled = { enableOverScroll }
+            )
             .background(colorScheme.surface)
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),
@@ -389,7 +395,7 @@ fun SettingsContent(
                 }
                 SuperSwitch(
                     title = "Enable Scroll End Haptic",
-                    checked = scrollEndHaptic,
+                    checked = enableScrollEndHaptic,
                     onCheckedChange = onScrollEndHapticChange
                 )
                 SuperSwitch(
@@ -421,14 +427,17 @@ fun SettingsContent(
 fun AboutPage(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
-    scrollEndHaptic: Boolean,
+    enableScrollEndHaptic: Boolean,
+    enableOverScroll: Boolean,
     isWideScreen: Boolean
 ) {
     val uriHandler = LocalUriHandler.current
     LazyColumn(
         modifier = Modifier
-            .then(if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical()
+            .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+            .overScrollVertical(
+                isEnabled = { enableOverScroll }
+            )
             .background(colorScheme.surface)
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
             .fillMaxHeight(),

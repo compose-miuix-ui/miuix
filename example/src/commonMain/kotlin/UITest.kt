@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -130,7 +131,8 @@ data class UIState(
     val showFloatingActionButton: Boolean = false,
     val floatingActionButtonPosition: Int = 2,
     val enablePageUserScroll: Boolean = false,
-    val scrollEndHaptic: Boolean = true,
+    val enableScrollEndHaptic: Boolean = true,
+    val enableOverScroll: Boolean = true,
     val isWideScreen: Boolean = false,
 )
 
@@ -140,6 +142,8 @@ val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle
 @Composable
 fun UITest(
     colorMode: MutableState<Int>,
+    padding: PaddingValues,
+    enableOverScroll: Boolean
 ) {
     val pagerState = rememberPagerState(pageCount = { UIConstants.PAGE_COUNT })
     val coroutineScope = rememberCoroutineScope()
@@ -178,19 +182,22 @@ fun UITest(
             val isWideScreen = isDefinitelyWide || isWideByShape
 
             uiState = uiState.copy(isWideScreen = isWideScreen)
+            uiState = uiState.copy(enableOverScroll = enableOverScroll)
 
             if (isWideScreen) {
                 WideScreenLayout(
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
-                    colorMode = colorMode
+                    colorMode = colorMode,
+                    padding = padding
                 )
             } else {
                 CompactScreenLayout(
                     navigationItems = navigationItems,
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
-                    colorMode = colorMode
+                    colorMode = colorMode,
+                    padding = padding
                 )
             }
         }
@@ -214,7 +221,8 @@ fun UITest(
 private fun WideScreenLayout(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>
+    colorMode: MutableState<Int>,
+    padding: PaddingValues
 ) {
     val layoutDirection = LocalLayoutDirection.current
 
@@ -230,14 +238,24 @@ private fun WideScreenLayout(
         }
     }
 
-    Scaffold {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+    ) {
         val barScrollBehavior = MiuixScrollBehavior()
-        Row {
+        Row(
+            modifier = Modifier.background(MiuixTheme.colorScheme.surface)
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    bottom = padding.calculateBottomPadding(),
+                    start = padding.calculateStartPadding(layoutDirection),
+                    end = padding.calculateEndPadding(layoutDirection)
+                )
+        ) {
             Box(modifier = Modifier.weight(weight)) {
                 WideScreenPanel(
                     barScrollBehavior = barScrollBehavior,
                     uiState = uiState,
-                    layoutDirection = layoutDirection
+                    layoutDirection = layoutDirection,
                 )
             }
             VerticalDivider(
@@ -264,7 +282,7 @@ private fun WideScreenLayout(
 private fun WideScreenPanel(
     barScrollBehavior: ScrollBehavior,
     uiState: UIState,
-    layoutDirection: LayoutDirection
+    layoutDirection: LayoutDirection,
 ) {
     val page = LocalPagerState.current.targetPage
     val handlePageChange = LocalHandlePageChange.current
@@ -290,10 +308,12 @@ private fun WideScreenPanel(
         LazyColumn(
             modifier = Modifier
                 .then(
-                    if (uiState.scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                    if (uiState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                 )
                 .padding(start = padding.calculateStartPadding(layoutDirection))
-                .overScrollVertical()
+                .overScrollVertical(
+                    isEnabled = { uiState.enableOverScroll }
+                )
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
         ) {
@@ -365,12 +385,14 @@ private fun CompactScreenLayout(
     navigationItems: List<NavigationItem>,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>
+    colorMode: MutableState<Int>,
+    padding: PaddingValues
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
+                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
                 uiState = uiState,
                 navigationItems = navigationItems,
             )
@@ -386,11 +408,16 @@ private fun CompactScreenLayout(
             )
         },
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition()
-    ) { padding ->
+    ) { innerPadding ->
         AppPager(
             modifier = Modifier
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = padding.calculateEndPadding(LocalLayoutDirection.current)
+                )
                 .imePadding(),
-            padding = padding,
+            padding = innerPadding,
             uiState = uiState,
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
@@ -400,6 +427,7 @@ private fun CompactScreenLayout(
 
 @Composable
 private fun NavigationBar(
+    modifier: Modifier,
     uiState: UIState,
     navigationItems: List<NavigationItem>,
 ) {
@@ -416,6 +444,7 @@ private fun NavigationBar(
             exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
         ) {
             NavigationBar(
+                modifier = Modifier.background(MiuixTheme.colorScheme.surface).then(modifier),
                 items = navigationItems,
                 selected = page,
                 onClick = handlePageChange
@@ -427,6 +456,7 @@ private fun NavigationBar(
             exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
         ) {
             FloatingNavigationBar(
+                modifier = modifier,
                 items = navigationItems,
                 selected = page,
                 mode = FloatingNavigationBarDisplayMode.fromInt(uiState.floatingNavigationBarMode).toMode(),
@@ -570,21 +600,24 @@ fun AppPager(
             when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(
                     padding = padding,
-                    scrollEndHaptic = uiState.scrollEndHaptic,
+                    enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                    enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
                     showTopAppBar = uiState.showTopAppBar,
                 )
 
                 UIConstants.DROPDOWN_PAGE_INDEX -> SecondPage(
                     padding = padding,
-                    scrollEndHaptic = uiState.scrollEndHaptic,
+                    enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                    enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
                     showTopAppBar = uiState.showTopAppBar,
                 )
 
                 UIConstants.COLOR_PAGE_INDEX -> ThirdPage(
                     padding = padding,
-                    scrollEndHaptic = uiState.scrollEndHaptic,
+                    enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                    enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
                     showTopAppBar = uiState.showTopAppBar,
                 )
@@ -615,8 +648,9 @@ fun AppPager(
                     onFabPositionChange = { onUiStateChange(uiState.copy(floatingActionButtonPosition = it)) },
                     enablePageUserScroll = uiState.enablePageUserScroll,
                     onEnablePageUserScrollChange = { onUiStateChange(uiState.copy(enablePageUserScroll = it)) },
-                    scrollEndHaptic = uiState.scrollEndHaptic,
-                    onScrollEndHapticChange = { onUiStateChange(uiState.copy(scrollEndHaptic = it)) },
+                    enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                    onScrollEndHapticChange = { onUiStateChange(uiState.copy(enableScrollEndHaptic = it)) },
+                    enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode
                 )

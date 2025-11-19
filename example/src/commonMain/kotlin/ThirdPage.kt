@@ -43,7 +43,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun ThirdPage(
     padding: PaddingValues,
-    scrollEndHaptic: Boolean,
+    enableScrollEndHaptic: Boolean,
+    enableOverScroll: Boolean,
     isWideScreen: Boolean,
     showTopAppBar: Boolean,
 ) {
@@ -70,9 +71,11 @@ fun ThirdPage(
         LazyColumn(
             modifier = Modifier
                 .then(
-                    if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                 )
-                .overScrollVertical()
+                .overScrollVertical(
+                    isEnabled = { enableOverScroll }
+                )
                 .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
             contentPadding = PaddingValues(

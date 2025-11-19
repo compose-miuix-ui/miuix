@@ -31,7 +31,12 @@ fun UITestPreview() {
 fun MainPagePreview() {
     AppTheme {
         Scaffold {
-            MainPage(PaddingValues(), scrollEndHaptic = true, isWideScreen = false, showTopAppBar = false)
+            MainPage(
+                PaddingValues(), enableScrollEndHaptic = true,
+                enableOverScroll = false,
+                isWideScreen = false,
+                showTopAppBar = false
+            )
         }
     }
 }
@@ -43,7 +48,8 @@ fun SecondPagePreview() {
         Scaffold {
             SecondPage(
                 PaddingValues(),
-                scrollEndHaptic = false,
+                enableScrollEndHaptic = true,
+                enableOverScroll = false,
                 isWideScreen = false,
                 showTopAppBar = false
             )
@@ -58,7 +64,8 @@ fun ThirdPagePreview() {
         Scaffold {
             ThirdPage(
                 PaddingValues(),
-                scrollEndHaptic = true,
+                enableScrollEndHaptic = true,
+                enableOverScroll = false,
                 isWideScreen = false,
                 showTopAppBar = false,
             )
@@ -99,6 +106,7 @@ fun FourthPagePreview() {
                 {},
                 true,
                 {},
+                false,
                 false,
                 remember { mutableIntStateOf(0) }
             )

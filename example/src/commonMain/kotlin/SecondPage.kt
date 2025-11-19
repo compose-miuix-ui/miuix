@@ -38,7 +38,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun SecondPage(
     padding: PaddingValues,
-    scrollEndHaptic: Boolean,
+    enableScrollEndHaptic: Boolean,
+    enableOverScroll: Boolean,
     isWideScreen: Boolean,
     showTopAppBar: Boolean,
 ) {
@@ -92,9 +93,11 @@ fun SecondPage(
             LazyColumn(
                 modifier = Modifier
                     .then(
-                        if (scrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                        if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
                     )
-                    .overScrollVertical()
+                    .overScrollVertical(
+                        isEnabled = { enableOverScroll }
+                    )
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding() + 12.dp,
