@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
@@ -443,27 +444,46 @@ private fun NavigationBar(
             enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
             exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
         ) {
-            NavigationBar(
-                modifier = Modifier.background(MiuixTheme.colorScheme.surface).then(modifier),
-                items = navigationItems,
-                selected = page,
-                onClick = handlePageChange
-            )
+            Box(
+                modifier = Modifier
+                    .background(MiuixTheme.colorScheme.surface)
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                event.changes.forEach { change ->
+                                    if (change.pressed) change.consume()
+                                }
+                            }
+                        }
+                    }
+                    .then(modifier)
+            ) {
+                NavigationBar(
+                    modifier = Modifier,
+                    items = navigationItems,
+                    selected = page,
+                    onClick = handlePageChange
+                )
+            }
         }
         AnimatedVisibility(
             visible = uiState.useFloatingNavigationBar,
             enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
             exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
         ) {
-            FloatingNavigationBar(
-                modifier = modifier,
-                items = navigationItems,
-                selected = page,
-                mode = FloatingNavigationBarDisplayMode.fromInt(uiState.floatingNavigationBarMode).toMode(),
-                horizontalAlignment = FloatingNavigationBarAlignment.fromInt(uiState.floatingNavigationBarPosition)
-                    .toAlignment(),
-                onClick = handlePageChange
-            )
+            Box(
+                modifier = modifier
+            ) {
+                FloatingNavigationBar(
+                    items = navigationItems,
+                    selected = page,
+                    mode = FloatingNavigationBarDisplayMode.fromInt(uiState.floatingNavigationBarMode).toMode(),
+                    horizontalAlignment = FloatingNavigationBarAlignment.fromInt(uiState.floatingNavigationBarPosition)
+                        .toAlignment(),
+                    onClick = handlePageChange
+                )
+            }
         }
     }
 }
