@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -528,6 +531,8 @@ fun BackNavigationIcon(
 @Composable
 fun AboutTopBarActions() {
     val showTopPopup = remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(0) }
+    val hapticFeedback = LocalHapticFeedback.current
     IconButton(
         modifier = Modifier.padding(end = 16.dp),
         onClick = { showTopPopup.value = true },
@@ -547,21 +552,22 @@ fun AboutTopBarActions() {
             showTopPopup.value = false
         }
     ) {
-        val showPopup = remember { mutableStateOf(false) }
-        var selectedIndex by remember { mutableStateOf(0) }
         val items = listOf("Option 1", "Option 2", "Option 3")
         ListPopupColumn {
             items.forEachIndexed { index, string ->
-                DropdownImpl(
-                    text = string,
-                    optionSize = items.size,
-                    isSelected = selectedIndex == index,
-                    onSelectedIndexChange = {
-                        selectedIndex = index
-                        showPopup.value = false
-                    },
-                    index = index
-                )
+                key(index) {
+                    DropdownImpl(
+                        text = string,
+                        optionSize = items.size,
+                        isSelected = selectedIndex == index,
+                        onSelectedIndexChange = { selectedIdx ->
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                            selectedIndex = selectedIdx
+                            showTopPopup.value = false
+                        },
+                        index = index
+                    )
+                }
             }
         }
     }

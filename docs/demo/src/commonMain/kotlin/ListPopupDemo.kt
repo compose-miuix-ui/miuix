@@ -55,8 +55,8 @@ fun ListPopupDemo() {
                                     text = string,
                                     optionSize = items.size,
                                     isSelected = selectedIndex == index,
-                                    onSelectedIndexChange = {
-                                        selectedIndex = index
+                                    onSelectedIndexChange = { selectedIdx ->
+                                        selectedIndex = selectedIdx
                                         showPopup.value = false // Close the popup menu
                                     },
                                     index = index
