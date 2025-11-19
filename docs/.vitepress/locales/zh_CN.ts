@@ -56,6 +56,14 @@ export default defineConfig({
                     ]
                 },
                 {
+                    text: '版本更新',
+                    collapsed: false,
+                    items: [
+                        { text: '更新日志 0.7.0', link: '/zh_CN/guide/changelog-0.7.0' },
+                        { text: '迁移指南 0.7.0', link: '/zh_CN/guide/migration-0.7.0' },
+                    ]
+                },
+                {
                     text: '进阶',
                     collapsed: false,
                     items: [

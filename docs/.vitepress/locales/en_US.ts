@@ -36,6 +36,14 @@ export default defineConfig({
                     ]
                 },
                 {
+                    text: 'Release Notes',
+                    collapsed: false,
+                    items: [
+                        { text: 'Changelog 0.7.0', link: '/guide/changelog-0.7.0' },
+                        { text: 'Migration Guide 0.7.0', link: '/guide/migration-0.7.0' },
+                    ]
+                },
+                {
                     text: 'Advanced',
                     collapsed: false,
                     items: [
