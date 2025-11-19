@@ -21,7 +21,7 @@ plugins {
 
 val appName = "Miuix"
 val pkgName = "top.yukonga.miuix.uitest"
-val verName = "1.0.6"
+val verName = "1.0.7"
 val verCode = getVersionCode()
 val generatedSrcDir = layout.buildDirectory.dir("generated").get().asFile.resolve("miuix-example")
 
