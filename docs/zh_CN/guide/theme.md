@@ -12,7 +12,7 @@ fun App() {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
 
     // 可用模式：
-    // ColorSchemeMode.System、Light、Dark、DynamicSystem、DynamicLight、DynamicDark
+    // ColorSchemeMode.System、Light、Dark、MonetSystem、MonetLight、MonetDark
     MiuixTheme(controller = controller) {
         Scaffold(
             topBar = { /* ... */ },
@@ -119,7 +119,7 @@ Text(
 可以通过以下方式进行主题自定义：
 
 - 通过 `ThemeController(ColorSchemeMode.*)` 选择配色模式。
-- 选择动态配色：`ColorSchemeMode.DynamicSystem` / `DynamicLight` / `DynamicDark`。
+- 选择动态配色：`ColorSchemeMode.MonetSystem` / `MonetLight` / `MonetDark`。
 - 传入 `textStyles` 覆盖文本样式：
 
 ```kotlin

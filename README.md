@@ -37,7 +37,7 @@ fun App() {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
     
     // Available modes:
-    // ColorSchemeMode.System, Light, Dark, DynamicSystem, DynamicLight, DynamicDark
+    // ColorSchemeMode.System, Light, Dark, MonetSystem, MonetLight, MonetDark
     MiuixTheme(controller = controller) {
         Scaffold(
             topBar = {

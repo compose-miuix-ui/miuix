@@ -66,7 +66,7 @@ implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
 @Composable
 fun App() {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
-    // 可用：System、Light、Dark、DynamicSystem、DynamicLight、DynamicDark
+    // 可用：System、Light、Dark、MonetSystem、MonetLight、MonetDark
     MiuixTheme(
         controller = controller
     ) {

@@ -16,9 +16,9 @@ enum class ColorSchemeMode {
     System,
     Light,
     Dark,
-    DynamicSystem,
-    DynamicLight,
-    DynamicDark,
+    MonetSystem,
+    MonetLight,
+    MonetDark,
 }
 
 @Stable
@@ -37,7 +37,7 @@ class ThemeController(
 
             ColorSchemeMode.Light -> lightColorScheme()
             ColorSchemeMode.Dark -> darkColorScheme()
-            ColorSchemeMode.DynamicSystem -> {
+            ColorSchemeMode.MonetSystem -> {
                 val dark = isSystemInDarkTheme()
                 if (dark) {
                     platformDynamicColors(dark = true)
@@ -46,11 +46,11 @@ class ThemeController(
                 }
             }
 
-            ColorSchemeMode.DynamicLight -> {
+            ColorSchemeMode.MonetLight -> {
                 platformDynamicColors(dark = false)
             }
 
-            ColorSchemeMode.DynamicDark -> {
+            ColorSchemeMode.MonetDark -> {
                 platformDynamicColors(dark = true)
             }
         }

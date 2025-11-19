@@ -12,7 +12,7 @@ fun App() {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
 
     // Available modes:
-    // ColorSchemeMode.System, Light, Dark, DynamicSystem, DynamicLight, DynamicDark
+    // ColorSchemeMode.System, Light, Dark, MonetSystem, MonetLight, MonetDark
     MiuixTheme(controller = controller) {
         Scaffold(
             topBar = { /* ... */ },
@@ -119,7 +119,7 @@ Text(
 You can customize the theme in the following ways:
 
 - Select a color scheme mode via `ThemeController(ColorSchemeMode.*)`.
-- Opt into dynamic colors via `ColorSchemeMode.DynamicSystem` / `DynamicLight` / `DynamicDark`.
+- Opt into dynamic colors via `ColorSchemeMode.MonetSystem` / `MonetLight` / `MonetDark`.
 - Override text styles by passing `textStyles`:
 
 ```kotlin

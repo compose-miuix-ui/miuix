@@ -58,9 +58,9 @@ object MiuixTheme {
 
     val isDynamicColor: Boolean
         @Composable @ReadOnlyComposable get() = when (colorSchemeMode) {
-            ColorSchemeMode.DynamicSystem,
-            ColorSchemeMode.DynamicLight,
-            ColorSchemeMode.DynamicDark -> true
+            ColorSchemeMode.MonetSystem,
+            ColorSchemeMode.MonetLight,
+            ColorSchemeMode.MonetDark -> true
 
             else -> false
         }

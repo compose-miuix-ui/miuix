@@ -17,9 +17,9 @@ fun AppTheme(
         controller = when (colorMode) {
             1 -> ThemeController(ColorSchemeMode.Light)
             2 -> ThemeController(ColorSchemeMode.Dark)
-            3 -> ThemeController(ColorSchemeMode.DynamicSystem)
-            4 -> ThemeController(ColorSchemeMode.DynamicLight)
-            5 -> ThemeController(ColorSchemeMode.DynamicDark)
+            3 -> ThemeController(ColorSchemeMode.MonetSystem)
+            4 -> ThemeController(ColorSchemeMode.MonetLight)
+            5 -> ThemeController(ColorSchemeMode.MonetDark)
             else -> ThemeController(ColorSchemeMode.System)
         },
         content = content

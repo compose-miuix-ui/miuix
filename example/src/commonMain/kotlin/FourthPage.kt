@@ -295,7 +295,7 @@ fun SettingsContent(
         remember { listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter") }
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
-    val colorModeOptions = remember { listOf("System", "Light", "Dark", "DynamicSystem", "DynamicLight", "DynamicDark") }
+    val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
 
     LazyColumn(
         modifier = Modifier
