@@ -244,6 +244,7 @@ fun FourthPage(
                         bottom = padding.calculateBottomPadding()
                     ),
                     topAppBarScrollBehavior = topAppBarScrollBehavior,
+                    showTopAppBar = showTopAppBar,
                     enableScrollEndHaptic = enableScrollEndHaptic,
                     enableOverScroll = enableOverScroll,
                     isWideScreen = isWideScreen
@@ -303,7 +304,9 @@ fun SettingsContent(
                 isEnabled = { enableOverScroll }
             )
             .background(colorScheme.surface)
-            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+            .then(
+                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+            )
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
@@ -427,6 +430,7 @@ fun SettingsContent(
 fun AboutPage(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
+    showTopAppBar: Boolean,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
     isWideScreen: Boolean
@@ -439,7 +443,9 @@ fun AboutPage(
                 isEnabled = { enableOverScroll }
             )
             .background(colorScheme.surface)
-            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+            .then(
+                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+            )
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),

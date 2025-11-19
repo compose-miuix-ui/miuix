@@ -82,7 +82,7 @@ fun SecondPage(
             isRefreshing = isRefreshing,
             onRefresh = { isRefreshing = true },
             pullToRefreshState = pullToRefreshState,
-            topAppBarScrollBehavior = topAppBarScrollBehavior,
+            topAppBarScrollBehavior = if (showTopAppBar) topAppBarScrollBehavior else null,
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding() + 12.dp,
                 bottom = if (isWideScreen) {

@@ -210,7 +210,9 @@ fun MainPage(
                 .overScrollVertical(
                     isEnabled = { enableOverScroll }
                 )
-                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                .then(
+                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+                )
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
