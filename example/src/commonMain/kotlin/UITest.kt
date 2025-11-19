@@ -143,6 +143,7 @@ val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle
 @Composable
 fun UITest(
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
     padding: PaddingValues,
     enableOverScroll: Boolean
 ) {
@@ -190,6 +191,7 @@ fun UITest(
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
                     colorMode = colorMode,
+                    seedIndex = seedIndex,
                     padding = padding
                 )
             } else {
@@ -198,6 +200,7 @@ fun UITest(
                     uiState = uiState,
                     onUiStateChange = { uiState = it },
                     colorMode = colorMode,
+                    seedIndex = seedIndex,
                     padding = padding
                 )
             }
@@ -223,6 +226,7 @@ private fun WideScreenLayout(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
     padding: PaddingValues
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -272,6 +276,7 @@ private fun WideScreenLayout(
                     uiState = uiState,
                     onUiStateChange = onUiStateChange,
                     colorMode = colorMode,
+                    seedIndex = seedIndex,
                     layoutDirection = layoutDirection
                 )
             }
@@ -344,6 +349,7 @@ private fun WideScreenContent(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
     layoutDirection: LayoutDirection
 ) {
     Scaffold(
@@ -377,6 +383,7 @@ private fun WideScreenContent(
             uiState = uiState,
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
+            seedIndex = seedIndex,
         )
     }
 }
@@ -387,6 +394,7 @@ private fun CompactScreenLayout(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
     padding: PaddingValues
 ) {
     Scaffold(
@@ -422,6 +430,7 @@ private fun CompactScreenLayout(
             uiState = uiState,
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
+            seedIndex = seedIndex,
         )
     }
 }
@@ -607,7 +616,8 @@ fun AppPager(
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>
+    colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>
 ) {
     HorizontalPager(
         state = LocalPagerState.current,
@@ -672,7 +682,8 @@ fun AppPager(
                     onScrollEndHapticChange = { onUiStateChange(uiState.copy(enableScrollEndHaptic = it)) },
                     enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
-                    colorMode = colorMode
+                    colorMode = colorMode,
+                    seedIndex = seedIndex
                 )
             }
         }

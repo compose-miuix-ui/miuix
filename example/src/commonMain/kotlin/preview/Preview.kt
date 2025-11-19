@@ -108,6 +108,7 @@ fun FourthPagePreview() {
                 {},
                 false,
                 false,
+                remember { mutableIntStateOf(0) },
                 remember { mutableIntStateOf(0) }
             )
         }

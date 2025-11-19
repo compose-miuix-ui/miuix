@@ -5,11 +5,14 @@ package top.yukonga.miuix.kmp.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import com.materialkolor.dynamicColorScheme
 
 @Stable
 enum class ColorSchemeMode {
@@ -21,40 +24,45 @@ enum class ColorSchemeMode {
     MonetDark,
 }
 
+internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
+    val cs = dynamicColorScheme(seedColor = seed, isDark = dark)
+    return mapMd3ToMiuixColorsCommon(cs, dark)
+}
+
 @Stable
 class ThemeController(
-    initialMode: ColorSchemeMode = ColorSchemeMode.System
+    colorSchemeMode: ColorSchemeMode = ColorSchemeMode.System,
+    keyColor: Color? = null,
+    isDark: Boolean? = null,
 ) {
-    var colorScheme: ColorSchemeMode by mutableStateOf(initialMode)
+    var colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
+    var keyColor: Color? by mutableStateOf(keyColor)
+    var isDark: Boolean? by mutableStateOf(isDark)
 
     @Composable
     fun currentColors(): Colors {
-        return when (colorScheme) {
+        return when (colorSchemeMode) {
             ColorSchemeMode.System -> {
-                val dark = isSystemInDarkTheme()
+                val dark = isDark ?: isSystemInDarkTheme()
                 if (dark) darkColorScheme() else lightColorScheme()
             }
 
             ColorSchemeMode.Light -> lightColorScheme()
             ColorSchemeMode.Dark -> darkColorScheme()
             ColorSchemeMode.MonetSystem -> {
-                val dark = isSystemInDarkTheme()
-                if (dark) {
-                    platformDynamicColors(dark = true)
-                } else {
-                    platformDynamicColors(dark = false)
-                }
+                val dark = isDark ?: isSystemInDarkTheme()
+                keyColor?.let { colorsFromSeed(seed = it, dark = dark) } ?: platformDynamicColors(dark = dark)
             }
 
             ColorSchemeMode.MonetLight -> {
-                platformDynamicColors(dark = false)
+                keyColor?.let { colorsFromSeed(seed = it, dark = false) } ?: platformDynamicColors(dark = false)
             }
 
             ColorSchemeMode.MonetDark -> {
-                platformDynamicColors(dark = true)
+                keyColor?.let { colorsFromSeed(seed = it, dark = true) } ?: platformDynamicColors(dark = true)
             }
         }
     }
 }
 
-internal val LocalColorSchemeMode = staticCompositionLocalOf { ColorSchemeMode.System }
+internal val LocalColorSchemeMode: ProvidableCompositionLocal<ColorSchemeMode?> = staticCompositionLocalOf { null }

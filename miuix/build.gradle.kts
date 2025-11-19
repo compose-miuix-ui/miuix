@@ -69,6 +69,7 @@ kotlin {
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.gaze.capsule) // Capsule for Multiplatform
+            implementation(libs.materialkolor.material.kolor) // Material Color for Multiplatform
         }
     }
 }

@@ -102,6 +102,7 @@ fun FourthPage(
     enableOverScroll: Boolean,
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
 ) {
     val navController = rememberNavController()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
@@ -195,6 +196,7 @@ fun FourthPage(
                     onScrollEndHapticChange = onScrollEndHapticChange,
                     enableOverScroll = enableOverScroll,
                     colorMode = colorMode,
+                    seedIndex = seedIndex,
                     isWideScreen = isWideScreen,
                     navToAbout = { navController.navigate("about") }
                 )
@@ -286,6 +288,7 @@ fun SettingsContent(
     onScrollEndHapticChange: (Boolean) -> Unit,
     enableOverScroll: Boolean,
     colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
     isWideScreen: Boolean,
     navToAbout: () -> Unit,
 ) {
@@ -296,6 +299,7 @@ fun SettingsContent(
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
     val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
+    val keyColorOptions = remember { listOf("Default") + ui.KeyColors.map { it.first } }
 
     LazyColumn(
         modifier = Modifier
@@ -412,6 +416,14 @@ fun SettingsContent(
                     selectedIndex = colorMode.value,
                     onSelectedIndexChange = { colorMode.value = it }
                 )
+                AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5)) {
+                    SuperDropdown(
+                        title = "Key Color",
+                        items = keyColorOptions,
+                        selectedIndex = seedIndex.value,
+                        onSelectedIndexChange = { seedIndex.value = it }
+                    )
+                }
             }
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp)
