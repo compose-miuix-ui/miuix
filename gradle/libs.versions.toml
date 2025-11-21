@@ -9,7 +9,7 @@ jetbrains-compose-hotReload = "1.0.0-rc04"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
 kotlin = "2.2.21"
-material-kolor = "4.0.4"
+material-kolor = "4.0.5"
 spotless = "8.1.0"
 
 [libraries]
