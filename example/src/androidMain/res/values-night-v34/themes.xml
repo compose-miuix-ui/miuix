@@ -3,8 +3,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
 <resources>
-    <style name="Theme.Miuix" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowSplashScreenBackground">@android:color/background_light</item>
+    <style name="Theme.Miuix" parent="android:Theme.Material.NoActionBar">
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowSplashScreenBackground">@android:color/system_background_dark</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
     </style>
 </resources>

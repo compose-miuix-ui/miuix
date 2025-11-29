@@ -4,7 +4,7 @@
 
 <resources>
     <style name="Theme.Miuix" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowSplashScreenBackground">@android:color/background_light</item>
+        <item name="android:windowSplashScreenBackground">@android:color/system_background_light</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
     </style>
 </resources>
