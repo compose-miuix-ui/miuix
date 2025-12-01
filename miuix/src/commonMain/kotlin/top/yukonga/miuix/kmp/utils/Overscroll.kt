@@ -39,7 +39,6 @@ import kotlin.math.sign
 private object SpringMath {
     const val MAX_FRAME_DELTA_SECONDS = 0.016f
     const val MIN_FRAME_DELTA_SECONDS = 0.001f
-    const val VALUE_THRESHOLD = 1.0f
     const val HIGH_VELOCITY_THRESHOLD = 5000.0
     const val CRITICAL_DAMPING_RATIO = 1.0f
     const val STANDARD_SPRING_PERIOD = 0.4f
@@ -106,14 +105,10 @@ private class SpringEngine {
     private var initialPos: Double = 0.0
     private var initialVelocity: Double = 0.0
 
-    private fun isAtEquilibrium(current: Double, initial: Double, target: Double): Boolean {
-        if (initial < target && current > target) return true
-        if (initial >= target || current <= target) {
-            val velocityReversed = (initial == target && sign(initialVelocity) != sign(current))
-            val closeEnough = abs(current - target) < SpringMath.VALUE_THRESHOLD
-            return velocityReversed || closeEnough
-        }
-        return true
+    private fun isAtEquilibrium(initial: Double, current: Double): Boolean {
+        if (sign(initial) < 0 && current > 0) return true // transcend
+        if (sign(initial) > 0 && current < 0) return true // transcend
+        return false
     }
 
     fun start(startValue: Float, targetValue: Float, initialVel: Float) {
@@ -139,7 +134,7 @@ private class SpringEngine {
         velocity = operator.updateVelocity(velocity, dt, currentPos, targetPos)
         currentPos += dt * velocity
 
-        if (isAtEquilibrium(currentPos, initialPos, targetPos)) {
+        if (isAtEquilibrium(initialPos, currentPos)) {
             currentPos = targetPos
             return true
         }
@@ -268,21 +263,14 @@ fun Modifier.overScrollOutOfBound(
                 return pullToRefreshState != null && pullToRefreshState.refreshState != RefreshState.Idle && currentIsVertical
             }
 
-            private fun applyDrag(delta: Float): Float {
-                if (delta == 0f) return 0f
+            private fun applyDrag(delta: Float) {
+                if (delta == 0f) return
                 rawTouchAccumulation += delta
-                val overflow = when {
-                    rawTouchAccumulation > scrollRange -> rawTouchAccumulation - scrollRange
-                    rawTouchAccumulation < -scrollRange -> rawTouchAccumulation + scrollRange
-                    else -> 0f
-                }
                 rawTouchAccumulation = rawTouchAccumulation.coerceIn(-scrollRange, scrollRange)
 
                 val normalized = min(abs(rawTouchAccumulation) / scrollRange, 1.0f)
                 val dampedDist = SpringMath.obtainDampingDistance(normalized, scrollRange)
-
                 offset = sign(rawTouchAccumulation) * dampedDist
-                return overflow
             }
 
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -295,9 +283,7 @@ fun Modifier.overScrollOutOfBound(
                     return dispatcher.dispatchPreScroll(available, source)
                 }
 
-                if (animationJob?.isActive == true) {
-                    animationJob?.cancel()
-                }
+                animationJob?.cancel()
 
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPreScroll(available, source)
@@ -306,35 +292,28 @@ fun Modifier.overScrollOutOfBound(
                 val realAvailable = available - parentConsumed
                 val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
 
-                val lastRaw = rawTouchAccumulation
-
-                if (abs(offset) > offsetThreshold) {
-                    var overflow = 0f
-                    if (sign(delta) != sign(lastRaw)) { // opposite direction
-                        val targetRaw = lastRaw + delta
-                        if (sign(targetRaw) != sign(lastRaw)) {
-                            val consumedBySpring = -lastRaw
-                            val actualConsumed = if (abs(consumedBySpring) <= abs(delta)) {
-                                consumedBySpring // can be fully consumed
-                            } else {
-                                delta
-                            }
-
-                            if (abs(consumedBySpring) <= abs(delta)) {
-                                resetState() // reset directly after complete consumption
-                            } else {
-                                overflow = applyDrag(actualConsumed)
-                            }
-
-                            return if (currentIsVertical) Offset(0f, actualConsumed - overflow) else Offset(actualConsumed - overflow, 0f)
-                        }
-                    }
-
-                    overflow = applyDrag(delta)
-                    return if (currentIsVertical) Offset(0f, realAvailable.y - overflow) else Offset(realAvailable.x - overflow, 0f)
+                if (abs(offset) <= offsetThreshold || sign(delta) == sign(rawTouchAccumulation)) {
+                    return parentConsumed
                 }
 
-                return parentConsumed
+                if (sign(delta) != sign(rawTouchAccumulation)) { // opposite direction
+                    val actualConsumed = if (abs(rawTouchAccumulation) <= abs(delta)) {
+                        -rawTouchAccumulation // can be fully consumed
+                    } else {
+                        delta
+                    }
+
+                    if (abs(rawTouchAccumulation) <= abs(delta)) {
+                        resetState() // reset directly after complete consumption
+                    } else {
+                        applyDrag(actualConsumed)
+                    }
+
+                    return if (currentIsVertical) Offset(0f, actualConsumed) else Offset(actualConsumed, 0f)
+                }
+
+                applyDrag(delta)
+                return if (currentIsVertical) Offset(0f, realAvailable.y) else Offset(realAvailable.x, 0f)
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
@@ -347,6 +326,8 @@ fun Modifier.overScrollOutOfBound(
                     return dispatcher.dispatchPostScroll(consumed, available, source)
                 }
 
+                animationJob?.cancel()
+
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPostScroll(consumed, available, source)
                 } else Offset.Zero
@@ -354,12 +335,8 @@ fun Modifier.overScrollOutOfBound(
                 val realAvailable = available - parentConsumed
                 val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
 
-                if (abs(delta) > offsetThreshold) {
-                    val overflow = applyDrag(delta)
-                    return if (currentIsVertical) Offset(0f, realAvailable.y - overflow) else Offset(realAvailable.x - overflow, 0f)
-                }
-
-                return parentConsumed
+                applyDrag(delta)
+                return realAvailable
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
@@ -384,7 +361,8 @@ fun Modifier.overScrollOutOfBound(
                 if (abs(offset) > offsetThreshold) {
                     if (sign(velocity) != sign(offset)) {
                         startSpringAnimation(velocity)
-                        return Velocity.Zero
+                        // Optimize speed and feel to prevent violent throwing
+                        return if (currentIsVertical) Velocity(0f, realAvailable.y / 2.13333f) else Velocity(realAvailable.x / 2.13333f, 0f)
                     } else {
                         startSpringAnimation(velocity)
                         return if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
