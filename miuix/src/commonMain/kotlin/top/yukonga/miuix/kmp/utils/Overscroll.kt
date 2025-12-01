@@ -309,11 +309,12 @@ fun Modifier.overScrollOutOfBound(
                         applyDrag(actualConsumed)
                     }
 
-                    return if (currentIsVertical) Offset(0f, actualConsumed) else Offset(actualConsumed, 0f)
+                    return if (currentIsVertical) Offset(parentConsumed.x, actualConsumed + parentConsumed.y)
+                    else Offset(actualConsumed + parentConsumed.x, parentConsumed.y)
                 }
 
                 applyDrag(delta)
-                return if (currentIsVertical) Offset(0f, realAvailable.y) else Offset(realAvailable.x, 0f)
+                return if (currentIsVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
@@ -336,7 +337,7 @@ fun Modifier.overScrollOutOfBound(
                 val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
 
                 applyDrag(delta)
-                return realAvailable
+                return if (currentIsVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
@@ -362,10 +363,10 @@ fun Modifier.overScrollOutOfBound(
                     if (sign(velocity) != sign(offset)) {
                         startSpringAnimation(velocity)
                         // Optimize speed and feel to prevent violent throwing
-                        return if (currentIsVertical) Velocity(0f, realAvailable.y / 2.13333f) else Velocity(realAvailable.x / 2.13333f, 0f)
+                        return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y / 2.13333f) else Velocity(realAvailable.x / 2.13333f, 0f)
                     } else {
                         startSpringAnimation(velocity)
-                        return if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
+                        return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
                     }
                 }
 
@@ -392,7 +393,7 @@ fun Modifier.overScrollOutOfBound(
                 val velocity = (if (currentIsVertical) realAvailable.y else realAvailable.x) / 1.53333f // attenuation speed
                 startSpringAnimation(velocity)
 
-                return if (currentIsVertical) Velocity(0f, realAvailable.y - velocity) else Velocity(realAvailable.x - velocity, 0f)
+                return parentConsumed + if (currentIsVertical) Velocity(0f, velocity) else Velocity(velocity, 0f)
             }
         }
     }
