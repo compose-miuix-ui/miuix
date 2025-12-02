@@ -98,20 +98,24 @@ fun SuperDialog(
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
+    val imeBottom = imeInsets.getBottom(density)
+    val isLargeScreen = SuperDialogDefaults.isLargeScreen()
+    val exitTransition: ExitTransition? = remember(isLargeScreen, imeBottom) {
+        if (!isLargeScreen && imeBottom > 0) {
+            slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(350, easing = DecelerateEasing(0.8f))
+            )
+        } else {
+            null
+        }
+    }
 
     DialogLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
         dimAlpha = dimAlpha,
-        exitTransition = if (imeInsets.getBottom(density) > 0) {
-            if (!SuperDialogDefaults.isLargeScreen()) {
-                SuperDialogDefaults.rememberDefaultDialogExitTransition()
-            } else {
-                null
-            }
-        } else {
-            null
-        }
+        exitTransition = exitTransition
     ) {
         SuperDialogContent(
             modifier = modifier,
@@ -283,16 +287,6 @@ object SuperDialogDefaults {
             derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
         }
         return largeScreen
-    }
-
-    @Composable
-    internal fun rememberDefaultDialogExitTransition(): ExitTransition {
-        return remember() {
-            slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(350, easing = DecelerateEasing(0.8f))
-            )
-        }
     }
 
     /**
