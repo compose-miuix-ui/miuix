@@ -17,7 +17,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +41,7 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
@@ -298,6 +301,10 @@ class MiuixPopupUtils {
             val visibleState = remember { MutableTransitionState(false) }
             var pendingOpen by remember { mutableStateOf(false) }
             var lastTarget by remember { mutableStateOf(false) }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val density = LocalDensity.current
+            val imeInsets = WindowInsets.ime
+
             LaunchedEffect(dialogState.showState.value) {
                 val newTarget = dialogState.showState.value
                 if (newTarget) {
@@ -307,6 +314,9 @@ class MiuixPopupUtils {
                         visibleState.targetState = true
                     }
                 } else {
+                    if (imeInsets.getBottom(density) > 0) {
+                        keyboardController?.hide()
+                    }
                     pendingOpen = false
                     visibleState.targetState = false
                 }
