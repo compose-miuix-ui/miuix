@@ -178,8 +178,8 @@ fun UITest(
         ) {
             val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
 
-            val isWideByShape = maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD &&
-                    (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
+            val isWideByShape =
+                maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD && (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
 
             val isWideScreen = isDefinitelyWide || isWideByShape
 
