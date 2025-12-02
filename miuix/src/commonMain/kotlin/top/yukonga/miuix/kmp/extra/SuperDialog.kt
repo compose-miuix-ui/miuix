@@ -3,17 +3,21 @@
 
 package top.yukonga.miuix.kmp.extra
 
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
@@ -91,11 +96,26 @@ fun SuperDialog(
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    val density = LocalDensity.current
+    val imeInsets = WindowInsets.ime
+    val imeBottom = imeInsets.getBottom(density)
+    val isLargeScreen = SuperDialogDefaults.isLargeScreen()
+    val exitTransition: ExitTransition? = remember(isLargeScreen, imeBottom) {
+        if (!isLargeScreen && imeBottom > 0) {
+            slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(350, easing = DecelerateEasing(0.8f))
+            )
+        } else {
+            null
+        }
+    }
 
     DialogLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
-        dimAlpha = dimAlpha
+        dimAlpha = dimAlpha,
+        exitTransition = exitTransition
     ) {
         SuperDialogContent(
             modifier = modifier,
@@ -153,9 +173,7 @@ private fun SuperDialogContent(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-
     val roundedCorner by rememberUpdatedState(getRoundedCorner())
-
     val windowSize by rememberUpdatedState(getWindowSize())
     val windowWidth by remember(windowSize, density) {
         derivedStateOf { windowSize.width.dp / density.density }
@@ -163,23 +181,22 @@ private fun SuperDialogContent(
     val windowHeight by remember(windowSize, density) {
         derivedStateOf { windowSize.height.dp / density.density }
     }
-
     val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
         derivedStateOf {
             if (roundedCorner != 0.dp) roundedCorner - outsideMargin.width else 32.dp
         }
     }
-
-    val contentAlignment by remember(windowHeight, windowWidth) {
+    val isLargeScreen by remember(windowWidth, windowHeight) {
+        derivedStateOf { windowHeight >= 480.dp && windowWidth >= 840.dp }
+    }
+    val contentAlignment by remember(isLargeScreen) {
         derivedStateOf {
-            if (windowHeight >= 480.dp && windowWidth >= 840.dp)
+            if (isLargeScreen)
                 Alignment.Center
             else
                 Alignment.BottomCenter
         }
     }
-
-    val isLargeScreen = windowHeight >= 480.dp && windowWidth >= 840.dp
 
     val rootBoxModifier = Modifier
         .then(
@@ -256,6 +273,21 @@ private fun SuperDialogContent(
 }
 
 object SuperDialogDefaults {
+    @Composable
+    internal fun isLargeScreen(): Boolean {
+        val density = LocalDensity.current
+        val windowSize = getWindowSize()
+        val windowWidth by remember(windowSize, density) {
+            derivedStateOf { windowSize.width.dp / density.density }
+        }
+        val windowHeight by remember(windowSize, density) {
+            derivedStateOf { windowSize.height.dp / density.density }
+        }
+        val largeScreen by remember(windowWidth, windowHeight) {
+            derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
+        }
+        return largeScreen
+    }
 
     /**
      * The default color of the title.
