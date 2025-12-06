@@ -363,7 +363,10 @@ fun Modifier.overScrollOutOfBound(
                     if (sign(velocity) != sign(offset)) {
                         startSpringAnimation(velocity)
                         // Optimize speed and feel to prevent violent throwing
-                        return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y / 2.13333f) else Velocity(realAvailable.x / 2.13333f, 0f)
+                        return parentConsumed + if (currentIsVertical) Velocity(
+                            0f,
+                            realAvailable.y / 2.13333f
+                        ) else Velocity(realAvailable.x / 2.13333f, 0f)
                     } else {
                         startSpringAnimation(velocity)
                         return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)

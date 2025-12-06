@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,11 +68,12 @@ fun ColorPicker(
     colorSpace: ColorSpace = ColorSpace.HSV,
     modifier: Modifier = Modifier,
 ) {
+    val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     when (colorSpace) {
         ColorSpace.OKHSV -> {
             OkHsvColorPicker(
                 initialColor = initialColor,
-                onColorChanged = onColorChanged,
+                onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
                 modifier = modifier
@@ -81,7 +83,7 @@ fun ColorPicker(
         ColorSpace.OKLAB -> {
             OkLabColorPicker(
                 initialColor = initialColor,
-                onColorChanged = onColorChanged,
+                onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
                 modifier = modifier
@@ -91,7 +93,7 @@ fun ColorPicker(
         ColorSpace.OKLCH -> {
             OkLchColorPicker(
                 initialColor = initialColor,
-                onColorChanged = onColorChanged,
+                onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
                 modifier = modifier
@@ -101,7 +103,7 @@ fun ColorPicker(
         else -> {
             HsvColorPicker(
                 initialColor = initialColor,
-                onColorChanged = onColorChanged,
+                onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
                 modifier = modifier
@@ -127,17 +129,22 @@ fun HsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     modifier: Modifier = Modifier
 ) {
+    val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
     var currentHue by remember { mutableStateOf(0f) }
     var currentSaturation by remember { mutableStateOf(0f) }
     var currentValue by remember { mutableStateOf(0f) }
     var currentAlpha by remember { mutableStateOf(1f) }
 
-    val selectedColor = Hsv(
-        h = currentHue.toDouble(),
-        s = (currentSaturation * 100.0),
-        v = (currentValue * 100.0)
-    ).toColor(currentAlpha)
+    val selectedColor by remember(currentHue, currentSaturation, currentValue, currentAlpha) {
+        derivedStateOf {
+            Hsv(
+                h = currentHue.toDouble(),
+                s = (currentSaturation * 100.0),
+                v = (currentValue * 100.0)
+            ).toColor(currentAlpha)
+        }
+    }
 
     LaunchedEffect(initialColor) {
         if (initialSetup) {
@@ -152,7 +159,7 @@ fun HsvColorPicker(
 
     LaunchedEffect(selectedColor) {
         if (!initialSetup) {
-            onColorChanged(selectedColor)
+            currentOnColorChanged(selectedColor)
         }
     }
 
@@ -345,6 +352,7 @@ fun OkHsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     modifier: Modifier = Modifier
 ) {
+    val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
     var currentH by remember { mutableStateOf(0f) }
     var currentS by remember { mutableStateOf(0f) }
@@ -372,7 +380,7 @@ fun OkHsvColorPicker(
 
     LaunchedEffect(selectedColor) {
         if (!initialSetup) {
-            onColorChanged(selectedColor)
+            currentOnColorChanged(selectedColor)
         }
     }
 
@@ -569,6 +577,7 @@ fun OkLabColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     modifier: Modifier = Modifier
 ) {
+    val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
     var currentL by remember { mutableStateOf(0f) }
     var currentA by remember { mutableStateOf(0f) }
@@ -596,7 +605,7 @@ fun OkLabColorPicker(
 
     LaunchedEffect(selectedColor) {
         if (!initialSetup) {
-            onColorChanged(selectedColor)
+            currentOnColorChanged(selectedColor)
         }
     }
 
@@ -666,6 +675,7 @@ fun OkLchColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     modifier: Modifier = Modifier
 ) {
+    val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
     var currentL by remember { mutableStateOf(0f) } // 0..1
     var currentC by remember { mutableStateOf(0f) } // proportion 0..1 (scaled to 0..0.4 internally)
@@ -693,7 +703,7 @@ fun OkLchColorPicker(
 
     LaunchedEffect(selectedColor) {
         if (!initialSetup) {
-            onColorChanged(selectedColor)
+            currentOnColorChanged(selectedColor)
         }
     }
 

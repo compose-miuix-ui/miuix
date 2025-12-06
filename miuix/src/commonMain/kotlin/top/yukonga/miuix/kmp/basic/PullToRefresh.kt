@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -111,6 +112,7 @@ fun PullToRefresh(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val overScrollState = LocalOverScrollState.current
+    val currentOnRefresh by rememberUpdatedState(onRefresh)
 
     // This effect acts as the bridge between the hoisted `isRefreshing` logical state
     // and the `pullToRefreshState` UI state object. It ensures the UI state always
@@ -144,7 +146,7 @@ fun PullToRefresh(
                     && event.changes.all { !it.pressed }
                 ) {
                     coroutineScope.launch {
-                        pullToRefreshState.handlePointerRelease(onRefresh)
+                        pullToRefreshState.handlePointerRelease(currentOnRefresh)
                     }
                 }
             }

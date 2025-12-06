@@ -18,8 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,25 +59,32 @@ fun Checkbox(
     colors: CheckboxColors = CheckboxDefaults.checkboxColors(),
     enabled: Boolean = true,
 ) {
+    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
     val hapticFeedback = LocalHapticFeedback.current
 
+    val targetBackgroundColor by remember(checked, enabled, colors) {
+        derivedStateOf { if (checked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled) }
+    }
     val backgroundColor by animateColorAsState(
-        targetValue = if (checked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled),
+        targetValue = targetBackgroundColor,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
 
+    val targetForegroundColor by remember(checked, enabled, colors) {
+        derivedStateOf { if (checked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled) }
+    }
     val foregroundColor by animateColorAsState(
-        targetValue = if (checked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled),
+        targetValue = targetForegroundColor,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
 
     val checkmarkAnim = rememberCheckmarkAnimationState(checked)
 
-    val finalModifier = if (onCheckedChange != null) {
+    val finalModifier = if (currentOnCheckedChange != null) {
         Modifier.toggleable(
             value = checked,
             onValueChange = {
-                onCheckedChange(it)
+                currentOnCheckedChange!!(it)
                 hapticFeedback.performHapticFeedback(
                     if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
                 )

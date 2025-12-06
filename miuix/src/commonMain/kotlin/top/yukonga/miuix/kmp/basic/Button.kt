@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +41,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param content The [Composable] content of the [Button].
  */
 @Composable
+@NonRestartableComposable
 fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -48,10 +53,11 @@ fun Button(
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
     content: @Composable RowScope.() -> Unit
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
-    val color = if (enabled) colors.color else colors.disabledColor
+    val color by remember(enabled, colors) { derivedStateOf { if (enabled) colors.color else colors.disabledColor } }
     Surface(
-        onClick = onClick,
+        onClick = currentOnClick,
         enabled = enabled,
         modifier = modifier.semantics { role = Role.Button },
         shape = shape,
@@ -82,6 +88,7 @@ fun Button(
  * @param insideMargin The margin inside the [TextButton].
  */
 @Composable
+@NonRestartableComposable
 fun TextButton(
     text: String,
     onClick: () -> Unit,
@@ -93,11 +100,12 @@ fun TextButton(
     minHeight: Dp = ButtonDefaults.MinHeight,
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
-    val color = if (enabled) colors.color else colors.disabledColor
-    val textColor = if (enabled) colors.textColor else colors.disabledTextColor
+    val color by remember(enabled, colors) { derivedStateOf { if (enabled) colors.color else colors.disabledColor } }
+    val textColor by remember(enabled, colors) { derivedStateOf { if (enabled) colors.textColor else colors.disabledTextColor } }
     Surface(
-        onClick = onClick,
+        onClick = currentOnClick,
         enabled = enabled,
         modifier = modifier.semantics { role = Role.Button },
         shape = shape,

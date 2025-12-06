@@ -257,11 +257,12 @@ private fun SuperBottomSheetContent(
     val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
+    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val rootBoxModifier = Modifier
-        .pointerInput(onDismissRequest) {
+        .pointerInput(Unit) {
             detectTapGestures(
                 onTap = {
-                    onDismissRequest?.invoke()
+                    currentOnDismiss?.invoke()
                 }
             )
         }
@@ -536,6 +537,7 @@ private fun DragHandleArea(
                         }
                     },
                     onVerticalDrag = { change, dragAmount ->
+                        change.consume()
                         velocityTracker.addPosition(change.uptimeMillis, change.position)
                         // Update drag offset with damping
                         val newOffset = dragOffsetY.value + dragAmount

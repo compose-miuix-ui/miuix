@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -35,6 +38,7 @@ import top.yukonga.miuix.kmp.basic.CheckboxDefaults
  * @param enabled Whether the [SuperCheckbox] is clickable.
  */
 @Composable
+@NonRestartableComposable
 fun SuperCheckbox(
     title: String,
     checked: Boolean,
@@ -51,11 +55,13 @@ fun SuperCheckbox(
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
+    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentOnClick by rememberUpdatedState(onClick)
     val leftActionComposable = if (checkboxLocation == CheckboxLocation.Left) {
         @Composable {
             SuperCheckboxLeftAction(
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
                 checkboxColors = checkboxColors,
                 insideMargin = insideMargin
@@ -76,15 +82,15 @@ fun SuperCheckbox(
                 rightActions = rightActions,
                 checkboxLocation = checkboxLocation,
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
                 checkboxColors = checkboxColors
             )
         },
         onClick = {
             if (enabled) {
-                onClick?.invoke()
-                onCheckedChange?.invoke(!checked)
+                currentOnClick?.invoke()
+                currentOnCheckedChange?.invoke(!checked)
             }
         },
         holdDownState = holdDownState,

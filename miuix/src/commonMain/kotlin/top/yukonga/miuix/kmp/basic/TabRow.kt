@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -53,6 +55,7 @@ import top.yukonga.miuix.kmp.utils.overScrollHorizontal
  * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
+@NonRestartableComposable
 fun TabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
@@ -113,6 +116,7 @@ fun TabRow(
  * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
+@NonRestartableComposable
 fun TabRowWithContour(
     tabs: List<String>,
     selectedTabIndex: Int,
@@ -179,6 +183,7 @@ private fun TabItem(
     shape: ContinuousRoundedRectangle,
     width: Dp
 ) {
+    val fontWeightDerived by remember(isSelected) { derivedStateOf { if (isSelected) FontWeight.Bold else FontWeight.Normal } }
     Surface(
         shape = shape,
         onClick = onClick,
@@ -196,7 +201,7 @@ private fun TabItem(
             Text(
                 text = text,
                 color = colors.contentColor(isSelected),
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = fontWeightDerived,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -214,20 +219,22 @@ private fun TabItemWithContour(
     shape: ContinuousRoundedRectangle,
     width: Dp
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
+    val fontWeightDerived by remember(isSelected) { derivedStateOf { if (isSelected) FontWeight.Bold else FontWeight.Normal } }
     Box(
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
             .clip(shape)
             .background(colors.backgroundColor(isSelected))
-            .clickable(enabled = enabled) { onClick() }
+            .clickable(enabled = enabled) { currentOnClick() }
             .semantics { role = Role.Tab },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = colors.contentColor(isSelected),
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            fontWeight = fontWeightDerived,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

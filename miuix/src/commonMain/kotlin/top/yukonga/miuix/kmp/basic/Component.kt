@@ -20,8 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,6 +67,7 @@ fun BasicComponent(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val indication = LocalIndication.current
+    val currentOnClick by rememberUpdatedState(onClick)
 
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
     LaunchedEffect(holdDownState) {
@@ -79,12 +83,12 @@ fun BasicComponent(
         }
     }
 
-    val clickableModifier = remember(onClick, enabled, interactionSource, indication) {
-        if (onClick != null && enabled) {
+    val clickableModifier = remember(enabled, interactionSource, indication, currentOnClick) {
+        if (currentOnClick != null && enabled) {
             Modifier.clickable(
                 indication = indication,
                 interactionSource = interactionSource,
-                onClick = onClick
+                onClick = currentOnClick!!
             )
         } else Modifier
     }
@@ -105,19 +109,21 @@ fun BasicComponent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
+            val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
+            val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
             if (title != null) {
                 Text(
                     text = title,
                     fontSize = MiuixTheme.textStyles.headline1.fontSize,
                     fontWeight = FontWeight.Medium,
-                    color = titleColor.color(enabled)
+                    color = titleTextColor
                 )
             }
             if (summary != null) {
                 Text(
                     text = summary,
                     fontSize = MiuixTheme.textStyles.body2.fontSize,
-                    color = summaryColor.color(enabled)
+                    color = summaryTextColor
                 )
             }
         }

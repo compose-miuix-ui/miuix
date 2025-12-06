@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -88,6 +89,7 @@ import kotlin.math.roundToInt
  * @param horizontalPadding The horizontal padding of the [TopAppBar]'s title & large title.
  */
 @Composable
+@NonRestartableComposable
 fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
@@ -161,6 +163,7 @@ fun TopAppBar(
  * @param horizontalPadding The horizontal padding of the [SmallTopAppBar]'s title.
  */
 @Composable
+@NonRestartableComposable
 fun SmallTopAppBar(
     title: String,
     modifier: Modifier = Modifier,

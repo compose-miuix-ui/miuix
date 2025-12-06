@@ -6,6 +6,10 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -21,17 +25,19 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param insideMargin The margin inside the [SmallTitle].
  */
 @Composable
+@NonRestartableComposable
 fun SmallTitle(
     text: String,
     modifier: Modifier = Modifier,
     textColor: Color = MiuixTheme.colorScheme.onBackgroundVariant,
     insideMargin: PaddingValues = PaddingValues(28.dp, 8.dp)
 ) {
+    val resolvedColor by remember(textColor) { derivedStateOf { textColor } }
     Text(
         modifier = modifier.padding(insideMargin),
         text = text,
         fontSize = MiuixTheme.textStyles.subtitle.fontSize,
         fontWeight = FontWeight.Bold,
-        color = textColor
+        color = resolvedColor
     )
 }

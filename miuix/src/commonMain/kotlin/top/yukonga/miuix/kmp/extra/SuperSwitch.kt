@@ -6,6 +6,9 @@ package top.yukonga.miuix.kmp.extra
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
@@ -33,6 +36,7 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param enabled Whether the [SuperSwitch] is clickable.
  */
 @Composable
+@NonRestartableComposable
 fun SuperSwitch(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
@@ -49,6 +53,8 @@ fun SuperSwitch(
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
+    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentOnClick by rememberUpdatedState(onClick)
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -61,15 +67,15 @@ fun SuperSwitch(
             SuperSwitchRightActions(
                 rightActions = rightActions,
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
                 switchColors = switchColors
             )
         },
         onClick = {
             if (enabled) {
-                onClick?.invoke()
-                onCheckedChange?.invoke(!checked)
+                currentOnClick?.invoke()
+                currentOnCheckedChange?.invoke(!checked)
             }
         },
         enabled = enabled

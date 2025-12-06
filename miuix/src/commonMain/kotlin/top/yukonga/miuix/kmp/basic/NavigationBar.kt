@@ -30,6 +30,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -83,6 +84,7 @@ fun NavigationBar(
         animationSpec = tween(durationMillis = 300)
     )
 
+    val currentOnClick by rememberUpdatedState(onClick)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -101,7 +103,7 @@ fun NavigationBar(
             val itemWeight = 1f / items.size
 
             items.forEachIndexed { index, item ->
-                val isSelected = remember(selected) { selected == index }
+                val isSelected = selected == index
                 var isPressed by remember { mutableStateOf(false) }
 
                 val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
@@ -121,29 +123,34 @@ fun NavigationBar(
                         }
                     }
                 }
-                val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                val fontWeight by remember(isSelected) {
+                    derivedStateOf { if (isSelected) FontWeight.Bold else FontWeight.Normal }
+                }
 
                 Column(
                     modifier = Modifier
                         .height(itemHeight)
                         .weight(itemWeight)
-                        .pointerInput(onClick, index) {
+                        .pointerInput(index) {
                             detectTapGestures(
                                 onPress = {
                                     isPressed = true
                                     tryAwaitRelease()
                                     isPressed = false
                                 },
-                                onTap = { onClick(index) }
+                                onTap = { currentOnClick(index) }
                             )
                         },
                     horizontalAlignment = CenterHorizontally
                 ) {
+                    val iconColorFilter by remember(tint) {
+                        derivedStateOf { ColorFilter.tint(tint) }
+                    }
                     Image(
                         modifier = Modifier.size(32.dp).padding(top = 6.dp),
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        colorFilter = ColorFilter.tint(tint)
+                        colorFilter = iconColorFilter
                     )
                     Text(
                         modifier = Modifier.padding(bottom = if (itemPlatform != Platform.IOS) 12.dp else 0.dp),
@@ -215,6 +222,7 @@ fun FloatingNavigationBar(
         else -> 36.dp
     }
 
+    val currentOnClick by rememberUpdatedState(onClick)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +274,7 @@ fun FloatingNavigationBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEachIndexed { index, item ->
-                val isSelected = remember(selected) { selected == index }
+                val isSelected = selected == index
                 var isPressed by remember { mutableStateOf(false) }
 
                 val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
@@ -290,25 +298,28 @@ fun FloatingNavigationBar(
 
                 Column(
                     modifier = Modifier
-                        .pointerInput(onClick, index) {
+                        .pointerInput(index) {
                             detectTapGestures(
                                 onPress = {
                                     isPressed = true
                                     tryAwaitRelease()
                                     isPressed = false
                                 },
-                                onTap = { onClick(index) }
+                                onTap = { currentOnClick(index) }
                             )
                         },
                     horizontalAlignment = CenterHorizontally
                 ) {
                     when (mode) {
                         FloatingNavigationBarMode.IconAndText -> {
+                            val iconColorFilter by remember(tint) {
+                                derivedStateOf { ColorFilter.tint(tint) }
+                            }
                             Image(
                                 modifier = Modifier.padding(top = 6.dp).size(24.dp),
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint)
+                                colorFilter = iconColorFilter
                             )
                             Box(
                                 modifier = Modifier.padding(bottom = 6.dp),
@@ -358,11 +369,14 @@ fun FloatingNavigationBar(
                         }
 
                         else -> {
+                            val iconColorFilter by remember(tint) {
+                                derivedStateOf { ColorFilter.tint(tint) }
+                            }
                             Image(
                                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint)
+                                colorFilter = iconColorFilter
                             )
                         }
                     }
@@ -398,3 +412,4 @@ data class NavigationItem(
     val label: String,
     val icon: ImageVector
 )
+    

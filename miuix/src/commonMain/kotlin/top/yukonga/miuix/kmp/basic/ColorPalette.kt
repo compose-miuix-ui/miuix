@@ -5,8 +5,8 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -127,6 +128,10 @@ fun ColorPalette(
             )
         }
 
+        val baseColor by remember(selectedRow, selectedCol, rows, hueColumns, includeGrayColumn) {
+            derivedStateOf { cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn) }
+        }
+
         PaletteCanvas(
             rows = rows,
             hueColumns = hueColumns,
@@ -138,16 +143,14 @@ fun ColorPalette(
             onSelect = { r, c ->
                 selectedRow = r
                 selectedCol = c
-                val base = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
-                val newColor = base.copy(alpha = alpha)
-                lastAcceptedHSV = base.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                val newColor = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn).copy(alpha = alpha)
+                lastAcceptedHSV = newColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             }
         )
 
-        val base = cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn)
-        val hsvBase = base.toHsv()
+        val hsvBase = baseColor.toHsv()
         val h = hsvBase.h.toFloat()
         val s = (hsvBase.s / 100.0).toFloat()
         val v = (hsvBase.v / 100.0).toFloat()
@@ -159,9 +162,9 @@ fun ColorPalette(
             currentAlpha = alpha,
             onAlphaChanged = {
                 alpha = it
-                val newColor = base.copy(alpha = it)
+                val newColor = baseColor.copy(alpha = it)
                 lastAcceptedHSV =
-                    base.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                    baseColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             }
@@ -193,17 +196,21 @@ private fun PaletteCanvas(
             .clip(shape)
             .onGloballyPositioned { sizePx = it.size }
             .pointerInput(rows, hueColumns, includeGrayColumn) {
-                detectTapGestures { pos ->
-                    if (sizePx.width == 0 || sizePx.height == 0) return@detectTapGestures
-                    val (r, c) = pointToCell(pos, sizePx, rows, totalColumns)
-                    onSelectState.value(r, c)
-                }
-            }
-            .pointerInput(rows, hueColumns, includeGrayColumn) {
-                detectDragGestures { change, _ ->
-                    if (sizePx.width == 0 || sizePx.height == 0) return@detectDragGestures
-                    val (r, c) = pointToCell(change.position, sizePx, rows, totalColumns)
-                    onSelectState.value(r, c)
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    if (sizePx.width == 0 || sizePx.height == 0) return@awaitEachGesture
+                    val (r0, c0) = pointToCell(down.position, sizePx, rows, totalColumns)
+                    onSelectState.value(r0, c0)
+
+                    val pointerId = down.id
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.find { it.id == pointerId } ?: event.changes.firstOrNull() ?: break
+                        if (!change.pressed) break
+                        val (r, c) = pointToCell(change.position, sizePx, rows, totalColumns)
+                        onSelectState.value(r, c)
+                        change.consume()
+                    }
                 }
             }
             .fillMaxWidth()

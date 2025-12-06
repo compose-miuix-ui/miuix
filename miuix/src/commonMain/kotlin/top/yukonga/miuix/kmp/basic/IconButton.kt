@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +43,7 @@ import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
  * @param content The content of this icon button, typically an [Icon].
  */
 @Composable
+@NonRestartableComposable
 fun IconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -51,6 +55,7 @@ fun IconButton(
     minWidth: Dp = IconButtonDefaults.MinWidth,
     content: @Composable () -> Unit
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val interactionSource = remember { MutableInteractionSource() }
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
@@ -68,18 +73,23 @@ fun IconButton(
         }
     }
 
+    val indication = LocalIndication.current
+    val clickableModifier = remember(enabled, interactionSource, indication, currentOnClick) {
+        Modifier.clickable(
+            enabled = enabled,
+            role = Role.Button,
+            indication = indication,
+            interactionSource = interactionSource,
+            onClick = currentOnClick
+        )
+    }
+
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
             .clip(shape)
             .background(backgroundColor)
-            .clickable(
-                enabled = enabled,
-                role = Role.Button,
-                indication = LocalIndication.current,
-                interactionSource = interactionSource,
-                onClick = onClick
-            ),
+            .then(clickableModifier),
         contentAlignment = Alignment.Center
     ) {
         content()

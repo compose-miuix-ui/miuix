@@ -27,7 +27,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -77,6 +80,7 @@ fun SearchBar(
     outsideRightAction: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     Column(
         modifier = modifier
     ) {
@@ -108,7 +112,7 @@ fun SearchBar(
     }
 
     BackHandler(enabled = expanded) {
-        onExpandedChange(false)
+        currentOnExpandedChange(false)
     }
 }
 
@@ -149,6 +153,9 @@ fun InputField(
     trailingIcon: @Composable (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
 ) {
+    val currentOnQueryChange by rememberUpdatedState(onQueryChange)
+    val currentOnSearch by rememberUpdatedState(onSearch)
+    val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
 
     val actualLeadingIcon = leadingIcon ?: {
@@ -173,7 +180,7 @@ fun InputField(
                 Icon(
                     modifier = Modifier
                         .clip(ContinuousCapsule)
-                        .clickable { onQueryChange("") },
+                        .clickable { currentOnQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
                     contentDescription = "Search Cleanup"
@@ -188,13 +195,16 @@ fun InputField(
 
     val inputTextStyle = MiuixTheme.textStyles.main.copy(fontWeight = FontWeight.Bold)
     val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
+    val labelText by remember(query, expanded, label) {
+        derivedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
+    }
 
     BasicTextField(
         value = query,
-        onValueChange = onQueryChange,
+        onValueChange = currentOnQueryChange,
         modifier = modifier
             .focusRequester(focusRequester)
-            .onFocusChanged { if (it.isFocused) onExpandedChange(true) }
+            .onFocusChanged { if (it.isFocused) currentOnExpandedChange(true) }
             .semantics {
                 onClick {
                     focusRequester.requestFocus()
@@ -206,7 +216,7 @@ fun InputField(
         textStyle = inputTextStyle,
         cursorBrush = cursorBrush,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSearch(query) }),
+        keyboardActions = KeyboardActions(onSearch = { currentOnSearch(query) }),
         interactionSource = internalInteractionSource,
         decorationBox = { innerTextField ->
             Box(
@@ -229,7 +239,7 @@ fun InputField(
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = if (!(query.isNotEmpty() || expanded)) label else "",
+                            text = labelText,
                             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh
                         )

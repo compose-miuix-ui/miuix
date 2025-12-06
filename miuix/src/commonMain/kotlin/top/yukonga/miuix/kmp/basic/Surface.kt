@@ -14,14 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -52,6 +54,10 @@ fun Surface(
     shadowElevation: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
+    val density = LocalDensity.current
+    val shadowElevationPx by remember(density, shadowElevation) {
+        derivedStateOf { with(density) { shadowElevation.toPx() } }
+    }
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
     ) {
@@ -61,12 +67,11 @@ fun Surface(
                     shape = shape,
                     backgroundColor = color,
                     border = border,
-                    shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() }
+                    shadowElevation = shadowElevationPx
                 )
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
-                }
-                .pointerInput(Unit) {},
+                },
             propagateMinConstraints = true
         ) {
             content()
@@ -103,6 +108,12 @@ fun Surface(
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+    val currentOnClick by rememberUpdatedState(onClick)
+    val density = LocalDensity.current
+    val shadowElevationPx by remember(density, shadowElevation) {
+        derivedStateOf { with(density) { shadowElevation.toPx() } }
+    }
+    val indication = LocalIndication.current
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
     ) {
@@ -112,13 +123,17 @@ fun Surface(
                     shape = shape,
                     backgroundColor = color,
                     border = border,
-                    shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() }
+                    shadowElevation = shadowElevationPx
                 )
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = LocalIndication.current,
-                    enabled = enabled,
-                    onClick = onClick,
+                .then(
+                    remember(enabled, interactionSource, indication, currentOnClick) {
+                        Modifier.clickable(
+                            interactionSource = interactionSource,
+                            indication = indication,
+                            enabled = enabled,
+                            onClick = currentOnClick,
+                        )
+                    }
                 ),
             propagateMinConstraints = true
         ) {

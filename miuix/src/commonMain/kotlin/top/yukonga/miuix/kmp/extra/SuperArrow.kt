@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -37,6 +42,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param enabled Whether the [SuperArrow] is clickable.
  */
 @Composable
+@NonRestartableComposable
 fun SuperArrow(
     title: String,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
@@ -50,6 +56,7 @@ fun SuperArrow(
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -64,7 +71,7 @@ fun SuperArrow(
                 enabled = enabled
             )
         },
-        onClick = onClick?.takeIf { enabled },
+        onClick = currentOnClick?.takeIf { enabled },
         holdDownState = holdDownState,
         enabled = enabled
     )
@@ -76,9 +83,10 @@ private fun RowScope.SuperArrowRightActions(
     enabled: Boolean,
 ) {
     rightActions()
-    val tintFilter = ColorFilter.tint(
-        color = SuperArrowDefaults.rightActionColors().color(enabled = enabled)
-    )
+    val actionColors = SuperArrowDefaults.rightActionColors()
+    val tintFilter by remember(enabled, actionColors) {
+        derivedStateOf { ColorFilter.tint(actionColors.color(enabled = enabled)) }
+    }
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp),

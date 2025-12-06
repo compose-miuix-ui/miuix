@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -94,6 +97,8 @@ fun Card(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
 
     val pressFeedback = remember(pressFeedbackType) {
         when (pressFeedbackType) {
@@ -103,9 +108,17 @@ fun Card(
         }
     }
 
+    val usedInteractionSource by remember(pressFeedback) {
+        derivedStateOf { if (pressFeedback != null) interactionSource else null }
+    }
+    val indicationLocal = LocalIndication.current
+    val indicationToUse = remember(showIndication, indicationLocal) {
+        if (showIndication == true) indicationLocal else null
+    }
+
     BasicCard(
         modifier = modifier.pressable(
-            interactionSource = if (pressFeedback != null) interactionSource else null,
+            interactionSource = usedInteractionSource,
             indication = pressFeedback,
             delay = null
         ),
@@ -116,9 +129,9 @@ fun Card(
             modifier = Modifier
                 .combinedClickable(
                     interactionSource = interactionSource,
-                    indication = if (showIndication == true) LocalIndication.current else null,
-                    onClick = { onClick?.invoke() },
-                    onLongClick = onLongPress
+                    indication = indicationToUse,
+                    onClick = { currentOnClick?.invoke() },
+                    onLongClick = currentOnLongPress
                 )
                 .padding(insideMargin),
             content = content

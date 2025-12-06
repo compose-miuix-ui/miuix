@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -75,6 +76,7 @@ import kotlin.math.abs
  *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
  */
 @Composable
+@NonRestartableComposable
 fun Slider(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -163,7 +165,8 @@ fun Slider(
                                     onValueChangeState(calculatedValue)
                                     hapticState.reset(calculatedValue)
                                 },
-                                onHorizontalDrag = { _, dragAmount ->
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
                                     dragOffset = (dragOffset + dragAmount).coerceIn(0f, size.width.toFloat())
 
                                     val thumbRadius = size.height / 2f
@@ -248,6 +251,7 @@ fun Slider(
  *   Values should be within [valueRange].
  */
 @Composable
+@NonRestartableComposable
 fun VerticalSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -335,7 +339,8 @@ fun VerticalSlider(
                                 onValueChangeState(calculatedValue)
                                 hapticState.reset(calculatedValue)
                             },
-                            onVerticalDrag = { _, dragAmount ->
+                            onVerticalDrag = { change, dragAmount ->
+                                change.consume()
                                 dragOffset = (dragOffset + dragAmount).coerceIn(0f, size.height.toFloat())
                                 val thumbRadius = size.width / 2f
                                 val availableHeight = (size.height - 2f * thumbRadius).coerceAtLeast(0f)
@@ -420,6 +425,7 @@ fun VerticalSlider(
  *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
  */
 @Composable
+@NonRestartableComposable
 fun RangeSlider(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
@@ -524,11 +530,13 @@ fun RangeSlider(
                                             startDragOffset = offset.x
                                             hapticState.resetStart(coercedStart)
                                         }
+
                                         !isOnStartThumb && isOnEndThumb -> {
                                             isDraggingEnd = true
                                             endDragOffset = offset.x
                                             hapticState.resetEnd(coercedEnd)
                                         }
+
                                         isOnStartThumb && isOnEndThumb -> {
                                             if (lastDraggedIsStart) {
                                                 isDraggingStart = true
@@ -540,6 +548,7 @@ fun RangeSlider(
                                                 hapticState.resetEnd(coercedEnd)
                                             }
                                         }
+
                                         else -> {
                                             val diffStart = abs(offset.x - startPos)
                                             val diffEnd = abs(offset.x - endPos)
@@ -555,7 +564,8 @@ fun RangeSlider(
                                         }
                                     }
                                 },
-                                onHorizontalDrag = { _, dragAmount ->
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
                                     if (isDraggingStart) {
                                         lastDraggedIsStart = true
                                         val tentativeStartOffset =

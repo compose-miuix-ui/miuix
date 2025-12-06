@@ -25,6 +25,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -81,6 +82,8 @@ fun ListPopup(
     content: @Composable () -> Unit
 ) {
     if (!show.value) return
+
+    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
     val windowSize = getWindowSize()
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
@@ -238,7 +241,7 @@ fun ListPopup(
             modifier = popupModifier
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { onDismissRequest?.invoke() }
+                        onTap = { currentOnDismiss?.invoke() }
                     )
                 }
                 .layout { measurable, constraints ->
@@ -297,7 +300,7 @@ fun ListPopup(
     }
 
     BackHandler(enabled = show.value) {
-        onDismissRequest?.invoke()
+        currentOnDismiss?.invoke()
     }
 }
 

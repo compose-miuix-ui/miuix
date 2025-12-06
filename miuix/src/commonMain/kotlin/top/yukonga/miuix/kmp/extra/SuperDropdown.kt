@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +69,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onSelectedIndexChange The callback when the selected index of the [SuperDropdown] is changed.
  */
 @Composable
+@NonRestartableComposable
 fun SuperDropdown(
     items: List<String>,
     selectedIndex: Int,
@@ -97,9 +100,10 @@ fun SuperDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
+    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            onClick?.invoke()
+            currentOnClick?.invoke()
             isDropdownExpanded.value = !isDropdownExpanded.value
             if (isDropdownExpanded.value) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)

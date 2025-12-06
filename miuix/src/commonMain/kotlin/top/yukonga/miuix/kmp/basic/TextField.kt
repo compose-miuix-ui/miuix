@@ -26,8 +26,11 @@ import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -74,6 +77,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param scrollState The scroll state for the text field.
  */
 @Composable
+@NonRestartableComposable
 fun TextField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
@@ -106,12 +110,15 @@ fun TextField(
     val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val finalModifier = Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-
-    val labelState = when {
-        label.isEmpty() -> LabelAnimState.Hidden
-        useLabelAsPlaceholder && state.text.isNotEmpty() -> LabelAnimState.Placeholder
-        state.text.isNotEmpty() -> LabelAnimState.Floating
-        else -> LabelAnimState.Normal
+    val labelState by remember(state.text, label, useLabelAsPlaceholder) {
+        derivedStateOf {
+            when {
+                label.isEmpty() -> LabelAnimState.Hidden
+                useLabelAsPlaceholder && state.text.isNotEmpty() -> LabelAnimState.Placeholder
+                state.text.isNotEmpty() -> LabelAnimState.Floating
+                else -> LabelAnimState.Normal
+            }
+        }
     }
     val labelAnim by animateDpAsState(
         when (labelState) {
@@ -126,12 +133,18 @@ fun TextField(
             else -> 17.dp
         }
     )
-    val paddingModifier = when {
-        leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-        leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-        trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-        else -> Modifier.padding(vertical = insideMargin.height)
+    val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
+        derivedStateOf {
+            when {
+                leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
+                leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
+                trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
+                else -> Modifier.padding(vertical = insideMargin.height)
+            }
+        }
     }
+
+    val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
 
     BasicTextField(
@@ -144,7 +157,7 @@ fun TextField(
         keyboardOptions = keyboardOptions,
         onKeyboardAction = onKeyboardAction,
         lineLimits = lineLimits,
-        onTextLayout = onTextLayout,
+        onTextLayout = currentOnTextLayout,
         interactionSource = interactionSource,
         inputTransformation = inputTransformation,
         outputTransformation = outputTransformation,
@@ -198,6 +211,7 @@ fun TextField(
  * @param cursorBrush The brush to be used for the cursor.
  */
 @Composable
+@NonRestartableComposable
 fun TextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
@@ -231,12 +245,15 @@ fun TextField(
     val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val finalModifier = Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-
-    val labelState = when {
-        label.isEmpty() -> LabelAnimState.Hidden
-        useLabelAsPlaceholder && value.text.isNotEmpty() -> LabelAnimState.Placeholder
-        value.text.isNotEmpty() -> LabelAnimState.Floating
-        else -> LabelAnimState.Normal
+    val labelState by remember(value.text, label, useLabelAsPlaceholder) {
+        derivedStateOf {
+            when {
+                label.isEmpty() -> LabelAnimState.Hidden
+                useLabelAsPlaceholder && value.text.isNotEmpty() -> LabelAnimState.Placeholder
+                value.text.isNotEmpty() -> LabelAnimState.Floating
+                else -> LabelAnimState.Normal
+            }
+        }
     }
     val labelAnim by animateDpAsState(
         when (labelState) {
@@ -251,17 +268,24 @@ fun TextField(
             else -> 17.dp
         }
     )
-    val paddingModifier = when {
-        leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-        leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-        trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-        else -> Modifier.padding(vertical = insideMargin.height)
+    val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
+        derivedStateOf {
+            when {
+                leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
+                leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
+                trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
+                else -> Modifier.padding(vertical = insideMargin.height)
+            }
+        }
     }
+
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
 
     BasicTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = currentOnValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
@@ -272,7 +296,7 @@ fun TextField(
         maxLines = maxLines,
         minLines = minLines,
         visualTransformation = visualTransformation,
-        onTextLayout = onTextLayout,
+        onTextLayout = currentOnTextLayout,
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->
@@ -323,6 +347,7 @@ fun TextField(
  * @param cursorBrush The brush to be used for the cursor.
  */
 @Composable
+@NonRestartableComposable
 fun TextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -356,12 +381,15 @@ fun TextField(
     val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val finalModifier = Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-
-    val labelState = when {
-        label.isEmpty() -> LabelAnimState.Hidden
-        useLabelAsPlaceholder && value.isNotEmpty() -> LabelAnimState.Placeholder
-        value.isNotEmpty() -> LabelAnimState.Floating
-        else -> LabelAnimState.Normal
+    val labelState by remember(value, label, useLabelAsPlaceholder) {
+        derivedStateOf {
+            when {
+                label.isEmpty() -> LabelAnimState.Hidden
+                useLabelAsPlaceholder && value.isNotEmpty() -> LabelAnimState.Placeholder
+                value.isNotEmpty() -> LabelAnimState.Floating
+                else -> LabelAnimState.Normal
+            }
+        }
     }
     val labelAnim by animateDpAsState(
         when (labelState) {
@@ -376,16 +404,23 @@ fun TextField(
             else -> 17.dp
         }
     )
-    val paddingModifier = when {
-        leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-        leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-        trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-        else -> Modifier.padding(vertical = insideMargin.height)
+    val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
+        derivedStateOf {
+            when {
+                leadingIcon == null && trailingIcon == null -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
+                leadingIcon == null -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
+                trailingIcon == null -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
+                else -> Modifier.padding(vertical = insideMargin.height)
+            }
+        }
     }
+
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
     BasicTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = currentOnValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
@@ -396,7 +431,7 @@ fun TextField(
         maxLines = maxLines,
         minLines = minLines,
         visualTransformation = visualTransformation,
-        onTextLayout = onTextLayout,
+        onTextLayout = currentOnTextLayout,
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->

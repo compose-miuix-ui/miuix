@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +37,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param content The [Composable] content of the [FloatingToolbar].
  */
 @Composable
+@NonRestartableComposable
 fun FloatingToolbar(
     modifier: Modifier = Modifier,
     color: Color = FloatingToolbarDefaults.defaultColor(),
@@ -47,34 +51,37 @@ fun FloatingToolbar(
     val roundedCornerShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
+    val clipRequired by remember(cornerRadius) { derivedStateOf { cornerRadius > 0.dp } }
+    val layerOrClipModifier = remember(shadowElevation, clipRequired, roundedCornerShape, density) {
+        when {
+            shadowElevation > 0.dp -> Modifier.graphicsLayer(
+                shadowElevation = with(density) { shadowElevation.toPx() },
+                shape = roundedCornerShape,
+                clip = clipRequired
+            )
+
+            clipRequired -> Modifier.clip(roundedCornerShape)
+            else -> Modifier
+        }
+    }
+    val dividerModifier = remember(showDivider, roundedCornerShape, dividerColor) {
+        if (showDivider) {
+            Modifier
+                .background(
+                    color = dividerColor,
+                    shape = roundedCornerShape
+                )
+                .padding(0.75.dp)
+        } else Modifier
+    }
+
     Box(
         modifier = modifier
             .padding(outSidePadding)
-            .then(
-                if (showDivider) {
-                    Modifier
-                        .background(
-                            color = dividerColor,
-                            shape = roundedCornerShape
-                        )
-                        .padding(0.75.dp)
-                } else Modifier
-            )
-            .then(
-                if (shadowElevation > 0.dp) {
-                    Modifier.graphicsLayer(
-                        shadowElevation = with(density) { shadowElevation.toPx() },
-                        shape = roundedCornerShape,
-                        clip = cornerRadius > 0.dp
-                    )
-                } else if (cornerRadius > 0.dp) {
-                    Modifier.clip(roundedCornerShape)
-                } else {
-                    Modifier
-                }
-            )
+            .then(dividerModifier)
+            .then(layerOrClipModifier)
             .background(color = color)
-            .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } }
+            .pointerInput(Unit) { detectTapGestures { /* consume click */ } }
     ) {
         content()
     }

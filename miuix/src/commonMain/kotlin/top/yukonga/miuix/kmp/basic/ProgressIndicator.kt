@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -43,6 +45,7 @@ import kotlin.math.sin
  * @param height The height of the indicator.
  */
 @Composable
+@NonRestartableComposable
 fun LinearProgressIndicator(
     progress: Float? = null,
     modifier: Modifier = Modifier,
@@ -50,6 +53,12 @@ fun LinearProgressIndicator(
     height: Dp = ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight
 ) {
     if (progress == null) {
+        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.backgroundColor() }
+        }
+        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.foregroundColor(true) }
+        }
         val transition = rememberInfiniteTransition()
         val animatedValue by transition.animateFloat(
             initialValue = 0f,
@@ -65,9 +74,6 @@ fun LinearProgressIndicator(
                 .fillMaxWidth()
                 .height(height)
         ) {
-            val currentBackgroundColor = colors.backgroundColor()
-            val currentForegroundColor = colors.foregroundColor(true)
-
             drawRoundRect(
                 color = currentBackgroundColor,
                 size = Size(size.width, size.height),
@@ -121,9 +127,13 @@ fun LinearProgressIndicator(
             }
         }
     } else {
-        val progressValue = progress.coerceIn(0f, 1f)
-        val currentBackgroundColor = colors.backgroundColor()
-        val currentForegroundColor = colors.foregroundColor(true)
+        val progressValue by rememberUpdatedState(progress.coerceIn(0f, 1f))
+        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.backgroundColor() }
+        }
+        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.foregroundColor(true) }
+        }
 
         Canvas(
             modifier = modifier
@@ -161,6 +171,7 @@ fun LinearProgressIndicator(
  * @param size The size (diameter) of the circular indicator.
  */
 @Composable
+@NonRestartableComposable
 fun CircularProgressIndicator(
     progress: Float? = null,
     modifier: Modifier = Modifier,
@@ -169,6 +180,12 @@ fun CircularProgressIndicator(
     size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize
 ) {
     if (progress == null) {
+        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.backgroundColor() }
+        }
+        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.foregroundColor(true) }
+        }
         val transition = rememberInfiniteTransition()
 
         val rotationAnim by transition.animateFloat(
@@ -195,9 +212,6 @@ fun CircularProgressIndicator(
         Canvas(
             modifier = modifier.size(size)
         ) {
-            val currentBackgroundColor = colors.backgroundColor()
-            val currentForegroundColor = colors.foregroundColor(true) // Assuming enabled
-
             val strokeWidthPx = strokeWidth.toPx()
             val radius = (size.toPx() - strokeWidthPx) / 2
             val center = Offset(size.toPx() / 2, size.toPx() / 2)
@@ -221,8 +235,12 @@ fun CircularProgressIndicator(
         }
     } else {
         val progressValue by rememberUpdatedState(progress.coerceIn(0f, 1f))
-        val currentBackgroundColor = colors.backgroundColor()
-        val currentForegroundColor = colors.foregroundColor(true)
+        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.backgroundColor() }
+        }
+        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
+            derivedStateOf { colors.foregroundColor(true) }
+        }
 
         Canvas(
             modifier = modifier.size(size)
@@ -265,6 +283,7 @@ fun CircularProgressIndicator(
  * @param orbitingDotSize The size of the orbiting dot.
  */
 @Composable
+@NonRestartableComposable
 fun InfiniteProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color = Color.Gray,

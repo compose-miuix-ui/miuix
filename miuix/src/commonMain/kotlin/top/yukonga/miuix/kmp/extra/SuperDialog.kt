@@ -198,6 +198,7 @@ private fun SuperDialogContent(
         }
     }
 
+    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val rootBoxModifier = Modifier
         .then(
             if (defaultWindowInsetsPadding)
@@ -209,9 +210,9 @@ private fun SuperDialogContent(
                 Modifier
         )
         .fillMaxSize()
-        .pointerInput(onDismissRequest) {
+        .pointerInput(Unit) {
             detectTapGestures(
-                onTap = { onDismissRequest?.invoke() }
+                onTap = { currentOnDismiss?.invoke() }
             )
         }
         .padding(horizontal = outsideMargin.width)

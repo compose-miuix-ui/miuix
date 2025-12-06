@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param content The [Composable] content of the [FloatingActionButton].
  */
 @Composable
+@NonRestartableComposable
 fun FloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

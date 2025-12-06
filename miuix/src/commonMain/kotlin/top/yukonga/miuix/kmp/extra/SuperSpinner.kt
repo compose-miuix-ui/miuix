@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +79,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [SuperSpinner] is changed.
  */
 @Composable
+@NonRestartableComposable
 fun SuperSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
@@ -107,9 +110,10 @@ fun SuperSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
+    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            onClick?.invoke()
+            currentOnClick?.invoke()
             isDropdownExpanded.value = !isDropdownExpanded.value
             if (isDropdownExpanded.value) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -242,6 +246,7 @@ private fun RowScope.SuperSpinnerRightActions(
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [SuperSpinner] is changed.
  */
 @Composable
+@NonRestartableComposable
 fun SuperSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
@@ -277,9 +282,10 @@ fun SuperSpinner(
         if (!actualEnabled) return@pointerInput
     }
 
+    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            onClick?.invoke()
+            currentOnClick?.invoke()
             isDropdownExpanded.value = true
             hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
         }
@@ -333,6 +339,7 @@ private fun SuperSpinnerDialog(
     spinnerColors: SpinnerColors,
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     SuperDialog(
         modifier = popupModifier,
         title = title,
@@ -355,7 +362,7 @@ private fun SuperSpinnerDialog(
                                 spinnerColors = spinnerColors
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                                onSelectedIndexChange?.invoke(selectedIdx)
+                                currentOnSelectedIndexChange?.invoke(selectedIdx)
                                 isDropdownExpanded.value = false
                             }
                         }
@@ -366,9 +373,7 @@ private fun SuperSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = {
-                            isDropdownExpanded.value = false
-                        }
+                        onClick = { isDropdownExpanded.value = false }
                     )
                 }
             ) { measurables, constraints ->
