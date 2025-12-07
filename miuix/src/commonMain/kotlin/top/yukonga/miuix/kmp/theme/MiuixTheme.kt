@@ -25,22 +25,14 @@ fun MiuixTheme(
     content: @Composable () -> Unit
 ) {
     val rawColors = controller.currentColors()
-
-    val colors = remember(rawColors) {
-        rawColors.copy().apply { updateColorsFrom(this) }
-    }
-
-    val miuixTextStyles = remember(textStyles, colors.onBackground) {
-        textStyles.copy().apply { updateColorsFrom(colors.onBackground) }
-    }
-    val miuixIndication = remember(colors.onBackground) {
-        MiuixIndication(color = colors.onBackground)
-    }
+    val miuixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
+    val miuixTextStyles = remember { textStyles.copy() }.apply { updateColorsFrom(miuixColors.onBackground) }
+    val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
     CompositionLocalProvider(
-        LocalColors provides colors,
+        LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,
         LocalIndication provides miuixIndication,
-        LocalColorSchemeMode provides controller.colorSchemeMode
+        LocalColorSchemeMode provides controller.colorSchemeMode,
     ) {
         content()
     }
@@ -60,15 +52,9 @@ fun MiuixTheme(
     textStyles: TextStyles = MiuixTheme.textStyles,
     content: @Composable () -> Unit
 ) {
-    val miuixColors = remember(colors) {
-        colors.copy().apply { updateColorsFrom(colors) }
-    }
-    val miuixTextStyles = remember(textStyles, colors.onBackground) {
-        textStyles.copy().apply { updateColorsFrom(colors.onBackground) }
-    }
-    val miuixIndication = remember(colors.onBackground) {
-        MiuixIndication(color = colors.onBackground)
-    }
+    val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
+    val miuixTextStyles = remember { textStyles.copy() }.apply { updateColorsFrom(miuixColors.onBackground) }
+    val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
     CompositionLocalProvider(
         LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,

@@ -7,7 +7,6 @@ import androidx.compose.runtime.Stable
 import kotlin.math.abs
 import kotlin.math.sign
 
-
 @Stable
 internal val ParabolaScrollEasing: (distance: Float, range: Int) -> Float = { distance, range ->
     val x = (abs(distance) / range).coerceIn(0.0f, 1.0f)

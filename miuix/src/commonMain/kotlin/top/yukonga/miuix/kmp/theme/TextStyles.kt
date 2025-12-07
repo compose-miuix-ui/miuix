@@ -3,7 +3,7 @@
 
 package top.yukonga.miuix.kmp.theme
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
  * @param title3 The title3 text style.
  * @param title4 The title4 text style.
  */
-@Immutable
+@Stable
 class TextStyles(
     main: TextStyle,
     paragraph: TextStyle,
@@ -79,20 +79,20 @@ class TextStyles(
         internal set
 
     fun copy(
-        main: TextStyle = Main,
-        paragraph: TextStyle = Paragraph,
-        body1: TextStyle = Body1,
-        body2: TextStyle = Body2,
-        button: TextStyle = Button,
-        footnote1: TextStyle = Footnote1,
-        footnote2: TextStyle = Footnote2,
-        headline1: TextStyle = Headline1,
-        headline2: TextStyle = Headline2,
-        subtitle: TextStyle = Subtitle,
-        title1: TextStyle = Title1,
-        title2: TextStyle = Title2,
-        title3: TextStyle = Title3,
-        title4: TextStyle = Title4,
+        main: TextStyle = this.main,
+        paragraph: TextStyle = this.paragraph,
+        body1: TextStyle = this.body1,
+        body2: TextStyle = this.body2,
+        button: TextStyle = this.button,
+        footnote1: TextStyle = this.footnote1,
+        footnote2: TextStyle = this.footnote2,
+        headline1: TextStyle = this.headline1,
+        headline2: TextStyle = this.headline2,
+        subtitle: TextStyle = this.subtitle,
+        title1: TextStyle = this.title1,
+        title2: TextStyle = this.title2,
+        title3: TextStyle = this.title3,
+        title4: TextStyle = this.title4,
     ): TextStyles =
         TextStyles(
             main,

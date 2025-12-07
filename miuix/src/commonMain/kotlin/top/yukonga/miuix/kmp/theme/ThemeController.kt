@@ -9,6 +9,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -44,22 +45,28 @@ class ThemeController(
         return when (colorSchemeMode) {
             ColorSchemeMode.System -> {
                 val dark = isDark ?: isSystemInDarkTheme()
-                if (dark) darkColorScheme() else lightColorScheme()
+                remember(dark) { if (dark) darkColorScheme() else lightColorScheme() }
             }
 
-            ColorSchemeMode.Light -> lightColorScheme()
-            ColorSchemeMode.Dark -> darkColorScheme()
+            ColorSchemeMode.Light -> remember { lightColorScheme() }
+            ColorSchemeMode.Dark -> remember { darkColorScheme() }
             ColorSchemeMode.MonetSystem -> {
                 val dark = isDark ?: isSystemInDarkTheme()
-                keyColor?.let { colorsFromSeed(seed = it, dark = dark) } ?: platformDynamicColors(dark = dark)
+                keyColor?.let {
+                    remember(keyColor, dark) { colorsFromSeed(seed = it, dark = dark) }
+                } ?: platformDynamicColors(dark = dark)
             }
 
             ColorSchemeMode.MonetLight -> {
-                keyColor?.let { colorsFromSeed(seed = it, dark = false) } ?: platformDynamicColors(dark = false)
+                keyColor?.let {
+                    remember(keyColor) { colorsFromSeed(seed = it, dark = false) }
+                } ?: platformDynamicColors(dark = false)
             }
 
             ColorSchemeMode.MonetDark -> {
-                keyColor?.let { colorsFromSeed(seed = it, dark = true) } ?: platformDynamicColors(dark = true)
+                keyColor?.let {
+                    remember(keyColor) { colorsFromSeed(seed = it, dark = true) }
+                } ?: platformDynamicColors(dark = true)
             }
         }
     }

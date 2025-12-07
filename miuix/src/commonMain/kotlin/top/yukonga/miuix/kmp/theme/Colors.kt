@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.theme
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +61,6 @@ import androidx.compose.ui.graphics.Color
  * @param onSurfaceContainerHighest The color of the text on surface container highest color.
  * @param windowDimming The color of the window dimming. Cases: Dialog, Dropdown.
  */
-@Immutable
 @Stable
 class Colors(
     primary: Color,
