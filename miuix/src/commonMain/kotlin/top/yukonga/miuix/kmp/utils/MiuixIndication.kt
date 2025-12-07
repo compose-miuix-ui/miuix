@@ -39,15 +39,9 @@ class MiuixIndication(
     override fun create(interactionSource: InteractionSource): DelegatableNode =
         MiuixIndicationInstance(interactionSource, color)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is MiuixIndication) return false
-        return color == other.color
-    }
+    override fun hashCode(): Int = color.hashCode()
 
-    override fun hashCode(): Int {
-        return color.hashCode()
-    }
+    override fun equals(other: Any?) = other === this
 
     private class MiuixIndicationInstance(
         private val interactionSource: InteractionSource,
@@ -70,12 +64,13 @@ class MiuixIndication(
             if (isHoldDown) targetAlpha += HOLD_DOWN_ALPHA_DELTA
 
             if (targetAlpha == 0.0f) {
+                restingAnimation?.cancel()
                 restingAnimation =
                     coroutineScope.launch {
                         if (coroutineContext.isActive) {
                             pressedAnimation?.join()
                             animatedAlpha.animateTo(
-                                targetValue = targetAlpha.coerceIn(0f, 0.10f),
+                                targetValue = targetAlpha,
                                 animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing)
                             )
                         }
@@ -86,7 +81,7 @@ class MiuixIndication(
                 pressedAnimation =
                     coroutineScope.launch {
                         animatedAlpha.animateTo(
-                            targetValue = targetAlpha.coerceIn(0f, 0.10f),
+                            targetValue = targetAlpha,
                             animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing)
                         )
                     }
