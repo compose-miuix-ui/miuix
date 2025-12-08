@@ -4,7 +4,7 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.jetbrains.dokka)
@@ -13,21 +13,17 @@ plugins {
     id("module.publication")
 }
 
-android {
-    namespace = "top.yukonga.miuix.kmp"
-}
-
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 kotlin {
-    withSourcesJar(true)
+    withSourcesJar(publish = false)
 
     jvmToolchain(21)
 
-    androidTarget {
-        publishLibraryVariants("release")
+    androidLibrary {
+        namespace = "top.yukonga.miuix.kmp"
     }
 
     jvm("desktop")

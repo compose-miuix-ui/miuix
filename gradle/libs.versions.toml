@@ -1,7 +1,7 @@
 [versions]
 android-gradle-plugin = "8.13.1"
-androidx-activity = "1.11.0"
-androidx-window = "1.5.0"
+androidx-activity = "1.12.1"
+androidx-window = "1.5.1"
 capsule = "2.1.1-patch2"
 jetbrains-androidx-navigation = "2.9.1"
 jetbrains-compose = "1.9.3"
@@ -23,7 +23,7 @@ materialkolor-material-kolor = { module = "com.materialkolor:material-kolor", ve
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
-android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
 jetbrains-compose-hotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "jetbrains-compose-hotReload" }

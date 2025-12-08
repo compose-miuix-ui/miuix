@@ -20,9 +20,7 @@ jobs:
             os: ubuntu-latest
           - target: ':miuix:assembleAndroidTest'
             os: ubuntu-latest
-          - target: ':miuix:testDebugUnitTest'
-            os: ubuntu-latest
-          - target: ':miuix:testReleaseUnitTest'
+          - target: ':miuix:jsBrowserTest'
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
