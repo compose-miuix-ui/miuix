@@ -35,6 +35,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summaryColor The color of the summary.
  * @param leftAction The [Composable] content that on the left side of the [SuperArrow].
  * @param rightActions The [Composable] content on the right side of the [SuperArrow].
+ * @param bottomAction The [Composable] content at the bottom of the [SuperArrow].
  * @param modifier The modifier to be applied to the [SuperArrow].
  * @param insideMargin The margin inside the [SuperArrow].
  * @param onClick The callback when the [SuperArrow] is clicked.
@@ -50,6 +51,7 @@ fun SuperArrow(
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable RowScope.() -> Unit = {},
+    bottomAction: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -71,9 +73,10 @@ fun SuperArrow(
                 enabled = enabled
             )
         },
+        bottomAction = bottomAction,
         onClick = currentOnClick?.takeIf { enabled },
         holdDownState = holdDownState,
-        enabled = enabled
+        enabled = enabled,
     )
 }
 

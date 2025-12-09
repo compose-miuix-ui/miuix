@@ -102,6 +102,7 @@ SuperCheckbox(
 | checkboxColors   | CheckboxColors                  | 复选框控件的颜色配置       | CheckboxDefaults.checkboxColors()     | 否       |
 | rightActions     | @Composable RowScope.() -> Unit | 右侧自定义内容（复选框前） | {}                                    | 否       |
 | checkboxLocation | CheckboxLocation                | 复选框的位置               | CheckboxLocation.Left                 | 否       |
+| bottomAction     | @Composable (() -> Unit)?       | 底部自定义内容             | null                                  | 否       |
 | onClick          | (() -> Unit)?                   | 点击选项时触发的额外回调   | null                                  | 否       |
 | holdDownState    | Boolean                         | 组件是否处于按下状态       | false                                 | 否       |
 | insideMargin     | PaddingValues                   | 组件内部内容的边距         | BasicComponentDefaults.InsideMargin   | 否       |

@@ -82,6 +82,7 @@ SuperDropdown(
 | summaryColor          | BasicComponentColors | Summary text color configuration  | BasicComponentDefaults.summaryColor() | No       |
 | dropdownColors        | DropdownColors       | Color configuration for dropdown  | DropdownDefaults.dropdownColors()     | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content           | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom content         | null                                  | No       |
 | modifier              | Modifier             | Modifier applied to the component | Modifier                              | No       |
 | insideMargin          | PaddingValues        | Internal content padding          | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                  | Maximum height of dropdown menu   | null                                  | No       |

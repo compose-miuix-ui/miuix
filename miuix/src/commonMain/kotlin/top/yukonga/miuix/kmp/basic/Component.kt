@@ -8,11 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -42,6 +44,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summaryColor The color of the summary.
  * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
  * @param rightActions The [Composable] content on the right side of the [BasicComponent].
+ * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
  * @param modifier The modifier to be applied to the [BasicComponent].
  * @param insideMargin The margin inside the [BasicComponent].
  * @param onClick The callback when the [BasicComponent] is clicked.
@@ -57,12 +60,71 @@ fun BasicComponent(
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable (RowScope.() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
+) {
+    BasicComponent(
+        leftAction = leftAction,
+        rightActions = rightActions,
+        bottomAction = bottomAction,
+        modifier = modifier,
+        insideMargin = insideMargin,
+        onClick = onClick,
+        holdDownState = holdDownState,
+        enabled = enabled,
+        interactionSource = interactionSource,
+    ) {
+        val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
+        val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
+        if (title != null) {
+            Text(
+                text = title,
+                fontSize = MiuixTheme.textStyles.headline1.fontSize,
+                fontWeight = FontWeight.Medium,
+                color = titleTextColor
+            )
+        }
+        if (summary != null) {
+            Text(
+                text = summary,
+                fontSize = MiuixTheme.textStyles.body2.fontSize,
+                color = summaryTextColor
+            )
+        }
+    }
+}
+
+/**
+ * A basic component with Miuix style. Widely used in other extension components.
+ *
+ * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
+ * @param rightActions The [Composable] content on the right side of the [BasicComponent].
+ * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
+ * @param modifier The modifier to be applied to the [BasicComponent].
+ * @param insideMargin The margin inside the [BasicComponent].
+ * @param onClick The callback when the [BasicComponent] is clicked.
+ * @param holdDownState Used to determine whether it is in the pressed state.
+ * @param enabled Whether the [BasicComponent] is enabled.
+ * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
+ * @param content The content of the [BasicComponent].
+ */
+@Composable
+fun BasicComponent(
+    leftAction: @Composable (() -> Unit)? = null,
+    rightActions: @Composable (RowScope.() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    onClick: (() -> Unit)? = null,
+    holdDownState: Boolean = false,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -93,47 +155,33 @@ fun BasicComponent(
         } else Modifier
     }
 
-    Row(
+    Column(
         modifier = modifier
             .heightIn(min = 56.dp)
             .fillMaxWidth()
             .then(clickableModifier)
-            .padding(insideMargin),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(insideMargin)
     ) {
-        // Left action (optional)
-        leftAction?.let { it() }
-
-        // Content
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
-            val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
-            if (title != null) {
-                Text(
-                    text = title,
-                    fontSize = MiuixTheme.textStyles.headline1.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    color = titleTextColor
-                )
-            }
-            if (summary != null) {
-                Text(
-                    text = summary,
-                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                    color = summaryTextColor
-                )
+            leftAction?.let { it() }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+                content = content
+            )
+
+            if (rightActions != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                rightActions()
             }
         }
 
-        if (rightActions != null) {
-            // Add a Spacer for margin when rightActions are present
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Right actions (optional)
-            rightActions()
+        if (bottomAction != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            bottomAction()
         }
     }
 }

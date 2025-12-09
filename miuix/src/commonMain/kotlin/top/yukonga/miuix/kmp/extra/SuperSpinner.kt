@@ -70,6 +70,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summaryColor The color of the summary of the [SuperSpinner].
  * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
  * @param leftAction The [Composable] content that on the left side of the [SuperSpinner].
+ * @param bottomAction The [Composable] content at the bottom of the [SuperSpinner].
  * @param modifier The [Modifier] to be applied to the [SuperSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
  * @param maxHeight The maximum height of the [ListPopup].
@@ -89,6 +90,7 @@ fun SuperSpinner(
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
     leftAction: @Composable (() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -150,6 +152,7 @@ fun SuperSpinner(
                 )
             }
         },
+        bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled

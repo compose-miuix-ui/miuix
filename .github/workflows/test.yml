@@ -20,7 +20,7 @@ jobs:
             os: ubuntu-latest
           - target: ':miuix:assembleAndroidTest'
             os: ubuntu-latest
-          - target: ':miuix:jsBrowserTest'
+          - target: ':miuix:wasmJsBrowserTest'
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:

@@ -67,6 +67,7 @@ SuperSwitch(
 | summaryColor    | BasicComponentColors            | Summary text color configuration         | BasicComponentDefaults.summaryColor() | No       |
 | leftAction      | @Composable (() -> Unit)?       | Custom left content                      | null                                  | No       |
 | rightActions    | @Composable RowScope.() -> Unit | Custom right content (before switch)     | {}                                    | No       |
+| bottomAction    | @Composable (() -> Unit)?       | Custom bottom content                     | null                                  | No       |
 | switchColors    | SwitchColors                    | Switch control color configuration       | SwitchDefaults.switchColors()         | No       |
 | modifier        | Modifier                        | Component modifier                       | Modifier                              | No       |
 | insideMargin    | PaddingValues                   | Component internal content padding       | BasicComponentDefaults.InsideMargin   | No       |

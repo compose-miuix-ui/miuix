@@ -83,6 +83,7 @@ Scaffold {
 | summaryColor     | BasicComponentColors           | 摘要文本的颜色配置                | BasicComponentDefaults.summaryColor() | 否     |
 | leftAction       | @Composable (() -> Unit)?      | 左侧自定义内容                    | null                                | 否       |
 | rightActions     | @Composable RowScope.() -> Unit | 右侧自定义内容插槽（slot）         | {}                                  | 否       |
+| bottomAction     | @Composable (() -> Unit)?       | 底部自定义内容                      | null                                  | 否       |
 | modifier         | Modifier                       | 应用于组件的修饰符                | Modifier                            | 否       |
 | insideMargin     | PaddingValues                  | 组件内部内容的边距                | BasicComponentDefaults.InsideMargin | 否       |
 | onClick          | (() -> Unit)?                  | 点击时触发的回调                  | null                                | 否       |

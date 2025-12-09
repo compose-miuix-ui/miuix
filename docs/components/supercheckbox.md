@@ -102,6 +102,7 @@ SuperCheckbox(
 | checkboxColors    | CheckboxColors                  | Checkbox control color configuration | CheckboxDefaults.checkboxColors()     | No       |
 | rightActions      | @Composable RowScope.() -> Unit | Custom content before checkbox       | {}                                    | No       |
 | checkboxLocation  | CheckboxLocation                | Checkbox position                    | CheckboxLocation.Left                 | No       |
+| bottomAction      | @Composable (() -> Unit)?       | Custom bottom content                | null                                  | No       |
 | onClick           | (() -> Unit)?                   | Additional callback on item click    | null                                  | No       |
 | holdDownState     | Boolean                         | Whether the component is held down   | false                                 | No       |
 | insideMargin      | PaddingValues                   | Internal content padding             | BasicComponentDefaults.InsideMargin   | No       |

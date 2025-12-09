@@ -111,6 +111,9 @@ fun TextComponent(
         )
     }
 
+    var volume by remember { mutableStateOf(0.5f) }
+    val showVolumeDialog = remember { mutableStateOf(false) }
+
     SmallTitle(text = "Basic Component")
     Card(
         modifier = Modifier
@@ -192,6 +195,25 @@ fun TextComponent(
                 showBottomSheet.value = true
             },
             holdDownState = showBottomSheet.value
+        )
+
+        SuperArrow(
+            title = "Slider + Dialog + Arrow",
+            rightActions = {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "${(volume * 100).toInt()}%",
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                )
+            },
+            onClick = { showVolumeDialog.value = true },
+            holdDownState = showVolumeDialog.value,
+            bottomAction = {
+                Slider(
+                    value = volume,
+                    onValueChange = { volume = it }
+                )
+            }
         )
 
         SuperArrow(
@@ -403,6 +425,7 @@ fun TextComponent(
         )
     }
     Dialog(showDialog, dialogTextFieldValue)
+    SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
     BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
 
@@ -439,6 +462,57 @@ fun Dialog(
             TextButton(
                 text = "Confirm",
                 onClick = {
+                    showDialog.value = false
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+}
+
+@Composable
+fun SliderDialog(
+    showDialog: MutableState<Boolean>,
+    volumeState: () -> Float,
+    onVolumeChange: (Float) -> Unit
+) {
+    SuperDialog(
+        title = "Adjust Volume",
+        summary = "Enter 0-100",
+        show = showDialog,
+        onDismissRequest = { showDialog.value = false }
+    ) {
+        var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
+        TextField(
+            modifier = Modifier.padding(bottom = 16.dp),
+            value = text,
+            maxLines = 1,
+            onValueChange = { newValue ->
+                val digits = newValue.filter { it.isDigit() }
+                if (digits.isEmpty()) {
+                    text = ""
+                } else {
+                    val limited = digits.take(3)
+                    val num = limited.toIntOrNull() ?: 0
+                    val clamped = num.coerceIn(0, 100)
+                    text = clamped.toString()
+                }
+            }
+        )
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            TextButton(
+                text = "Cancel",
+                onClick = { showDialog.value = false },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(20.dp))
+            TextButton(
+                text = "Confirm",
+                onClick = {
+                    val parsed = text.toIntOrNull()
+                    val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
+                    onVolumeChange(clamped / 100f)
                     showDialog.value = false
                 },
                 modifier = Modifier.weight(1f),

@@ -95,6 +95,7 @@ BasicComponent(
 | summaryColor      | BasicComponentColors            | 摘要颜色配置         | BasicComponentDefaults.summaryColor() | 否       |
 | leftAction        | @Composable (() -> Unit)?       | 组件左侧的可组合内容 | null                                  | 否       |
 | rightActions      | @Composable (RowScope.() -> Unit)? | 组件右侧的可组合内容 | null                                 | 否       |
+| bottomAction      | @Composable (() -> Unit)?       | 组件底部的可组合内容 | null                                  | 否       |
 | modifier          | Modifier                        | 应用于组件的修饰符   | Modifier                              | 否       |
 | insideMargin      | PaddingValues                   | 组件内部边距         | BasicComponentDefaults.InsideMargin   | 否       |
 | onClick           | (() -> Unit)?                   | 点击组件时触发的回调 | null                                  | 否       |

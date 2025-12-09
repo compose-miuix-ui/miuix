@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param summaryColor The color of the summary.
  * @param leftAction The [Composable] content that on the left side of the [SuperSwitch].
  * @param rightActions The [Composable] content on the right side of the [SuperSwitch].
+ * @param bottomAction The [Composable] content at the bottom of the [SuperSwitch].
  * @param switchColors The [SwitchColors] of the [SuperSwitch].
  * @param modifier The modifier to be applied to the [SuperSwitch].
  * @param insideMargin The margin inside the [SuperSwitch].
@@ -46,6 +47,7 @@ fun SuperSwitch(
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable RowScope.() -> Unit = {},
+    bottomAction: (@Composable () -> Unit)? = null,
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
@@ -72,6 +74,7 @@ fun SuperSwitch(
                 switchColors = switchColors
             )
         },
+        bottomAction = bottomAction,
         onClick = {
             if (enabled) {
                 currentOnClick?.invoke()

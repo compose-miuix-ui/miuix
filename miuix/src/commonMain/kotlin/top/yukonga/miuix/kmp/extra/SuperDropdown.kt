@@ -60,6 +60,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
  * @param leftAction The [Composable] content that on the left side of the [SuperDropdown].
+ * @param bottomAction The [Composable] content at the bottom of the [SuperDropdown].
  * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param insideMargin The margin inside the [SuperDropdown].
  * @param maxHeight The maximum height of the [ListPopup].
@@ -79,6 +80,7 @@ fun SuperDropdown(
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     leftAction: @Composable (() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -140,6 +142,7 @@ fun SuperDropdown(
                 )
             }
         },
+        bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled

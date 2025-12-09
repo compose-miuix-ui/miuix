@@ -83,6 +83,7 @@ Scaffold {
 | summaryColor     | BasicComponentColors           | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No     |
 | leftAction       | @Composable (() -> Unit)?      | Custom left content                  | null                                | No       |
 | rightActions     | @Composable RowScope.() -> Unit | Custom right-side content (slot)     | {}                                  | No       |
+| bottomAction     | @Composable (() -> Unit)?       | Custom bottom content                | null                                | No       |
 | modifier         | Modifier                       | Modifier applied to component        | Modifier                            | No       |
 | insideMargin     | PaddingValues                  | Internal content padding             | BasicComponentDefaults.InsideMargin | No       |
 | onClick          | (() -> Unit)?                  | Callback triggered on click          | null                                | No       |
@@ -188,4 +189,3 @@ SuperArrow(
     }
 }
 ```
-

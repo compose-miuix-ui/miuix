@@ -144,6 +144,7 @@ Scaffold {
 | summaryColor          | BasicComponentColors      | Summary text color config   | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content         | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom content       | null                                  | No       |
 | modifier              | Modifier                  | Component modifier          | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding    | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum dropdown height     | null                                  | No       |
