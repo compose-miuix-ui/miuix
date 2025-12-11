@@ -119,13 +119,9 @@ fun PullToRefresh(
     val overScrollState = LocalOverScrollState.current
     val currentOnRefresh by rememberUpdatedState(onRefresh)
 
-    // This effect acts as the bridge between the hoisted `isRefreshing` logical state
-    // and the `pullToRefreshState` UI state object. It ensures the UI state always
-    // reflects the logical state, even after lifecycle events.
     LaunchedEffect(isRefreshing) {
-        if (isRefreshing) {
-            pullToRefreshState.startRefreshing()
-        } else {
+        if (!isRefreshing) {
+            // Data loading completed, end refresh
             pullToRefreshState.finishRefreshing()
         }
     }
@@ -147,7 +143,10 @@ fun PullToRefresh(
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                if ((pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) && event.changes.all { !it.pressed }) {
+                if (
+                    (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) &&
+                    event.changes.all { !it.pressed }
+                ) {
                     coroutineScope.launch {
                         pullToRefreshState.handlePointerRelease(currentOnRefresh)
                     }
@@ -251,6 +250,7 @@ class PullToRefreshState(
     internal var currentTouch by mutableFloatStateOf(0f)
 
     internal var isRefreshing by mutableStateOf(false)
+    internal var isRebounding by mutableStateOf(false)
     private val _refreshCompleteAnimProgress = mutableFloatStateOf(1f)
     internal val refreshCompleteAnimProgress: Float by derivedStateOf { _refreshCompleteAnimProgress.floatValue }
 
@@ -261,7 +261,7 @@ class PullToRefreshState(
     /**
      * Drives the dragOffset using SpringEngine physics.
      */
-    internal fun animateToSpring(targetValue: Float) {
+    internal suspend fun animateToSpring(targetValue: Float) {
         animationJob?.cancel()
         animationJob = coroutineScope.launch {
             springEngine.start(
@@ -305,25 +305,21 @@ class PullToRefreshState(
                 }
             }
         }
+        animationJob?.join()
     }
 
     /**
-     * Called when the hoisted `isRefreshing` state becomes true.
-     * Forces the state machine into the refreshing state and moves the indicator.
+     * Enter the refresh queue
      */
-    internal fun startRefreshing() {
+    internal suspend fun startRefreshing(onRefresh: () -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
-            coroutineScope.launch {
-                try {
-                    // Use spring to move to threshold
-                    animateToSpring(refreshThresholdOffset)
-                    animationJob?.join()
-                } finally {
-                    if (refreshState != RefreshState.Idle && refreshState != RefreshState.RefreshComplete) {
-                        internalRefreshState = RefreshState.Refreshing
-                    }
-                }
+            try {
+                // Use spring to move to threshold
+                animateToSpring(refreshThresholdOffset)
+            } finally {
+                internalRefreshState = RefreshState.Refreshing
+                onRefresh()
             }
         }
     }
@@ -332,13 +328,11 @@ class PullToRefreshState(
      * Called when the hoisted `isRefreshing` state becomes false.
      * Triggers the completion animation and resets the state.
      */
-    internal fun finishRefreshing() {
+    internal suspend fun finishRefreshing() {
         if (isRefreshing) {
             isRefreshing = false
-            coroutineScope.launch {
-                internalRefreshState = RefreshState.RefreshComplete
-                startManualRefreshCompleteAnimation()
-            }
+            internalRefreshState = RefreshState.RefreshComplete
+            startManualRefreshCompleteAnimation()
         }
     }
 
@@ -347,17 +341,15 @@ class PullToRefreshState(
         if (isRefreshing) return
 
         if (dragOffset >= refreshThresholdOffset) {
-            // If pulled past threshold, trigger the onRefresh callback.
-            // The hoisted state will change, which will then call startRefreshing().
-            onRefresh()
+            // If pulled past threshold, will then call startRefreshing().
+            startRefreshing(onRefresh)
         } else {
             // If not pulled past threshold, rebound to the resting state using spring.
             try {
-                isRefreshing = true
+                isRebounding = true
                 animateToSpring(0f)
-                animationJob?.join()
             } finally {
-                isRefreshing = false
+                isRebounding = false
             }
         }
     }
@@ -381,7 +373,6 @@ class PullToRefreshState(
         internalRefreshState = RefreshState.Idle
         // Animate back to 0 using Spring
         animateToSpring(0f)
-        animationJob?.join()
     }
 
     /** Creates a [NestedScrollConnection] for the pull-to-refresh logic itself. */
@@ -514,15 +505,13 @@ private fun createPullToRefreshConnection(
                 pullToRefreshState.refreshState != RefreshState.Refreshing
                 && pullToRefreshState.refreshState != RefreshState.RefreshComplete
                 && !pullToRefreshState.isRefreshing
+                && !pullToRefreshState.isRebounding
                 && pullToRefreshState.dragOffset > 0f
                 && pullToRefreshState.dragOffset < pullToRefreshState.refreshThresholdOffset
             ) {
-                pullToRefreshState.coroutineScope.launch {
-                    try {
-                        pullToRefreshState.animateToSpring(0f)
-                        pullToRefreshState.animationJob?.join()
-                    } finally {
-                    }
+                try {
+                    pullToRefreshState.animateToSpring(0f)
+                } finally {
                 }
             }
             return available
