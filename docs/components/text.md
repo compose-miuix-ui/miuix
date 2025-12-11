@@ -71,7 +71,7 @@ Text(
 | -------------- | ------------------------------ | --------------------------------------------- | ----------------------------------- | -------- |
 | text           | String / AnnotatedString       | The text content to display                   | -                                   | Yes      |
 | modifier       | Modifier                       | Modifiers applied to the text                 | Modifier                            | No       |
-| color          | Color                          | Text color                                    | MiuixTheme.colorScheme.onBackground | No       |
+| color          | Color                          | Text color                                    | Color.Unspecified                   | No       |
 | autoSize       | TextAutoSize?                  | Auto-sizing behavior for text                 | null                                | No       |
 | fontSize       | TextUnit                       | Text size                                     | TextUnit.Unspecified                | No       |
 | fontStyle      | FontStyle?                     | Text font style (e.g., italic)                | null                                | No       |
@@ -129,4 +129,43 @@ Text(
         append(", this is a piece of rich text")
     }
 )
+```
+
+### Auto-sizing Text
+
+Automatically fit text within available space using `TextAutoSize`:
+
+```kotlin
+Text(
+    text = "Adaptive text",
+    autoSize = TextAutoSize.StepBased(
+        minFontSize = 12.sp,
+        maxFontSize = 17.sp,
+        stepSize = 0.3.sp
+    )
+)
+```
+
+### Clickable Links
+
+Use `AnnotatedString` with `LinkAnnotation` to create clickable links:
+
+```kotlin
+val annotated = buildAnnotatedString {
+    append("Visit ")
+    val start = length
+    append("Miuix Docs")
+    addLink(
+        LinkAnnotation.Url(
+            url = "https://compose-miuix-ui.github.io/miuix/",
+            styles = TextLinkStyles(
+                SpanStyle(color = MiuixTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            )
+        ),
+        start = start,
+        end = length
+    )
+}
+
+Text(text = annotated)
 ```

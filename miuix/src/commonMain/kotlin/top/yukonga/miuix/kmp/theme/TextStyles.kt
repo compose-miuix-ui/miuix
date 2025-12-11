@@ -11,6 +11,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
@@ -204,6 +205,7 @@ private val Subtitle: TextStyle
     get() =
         TextStyle(
             fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
         )
 
 private val Title1: TextStyle

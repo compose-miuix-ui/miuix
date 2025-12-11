@@ -39,22 +39,22 @@ Miuix 的颜色系统是基于 HyperOS 设计语言创建的，提供了一套�
 
 以下是颜色系统中一些核心属性：
 
-| 属性名             | 描述                   | 用途                 |
-| ------------------ | ---------------------- | -------------------- |
-| primary            | 主色调                 | 开关、按钮、滑块等   |
-| onPrimary          | 主色调上的文本颜色     | 主色调上的文本       |
-| primaryContainer   | 主色调容器             | 包含主色调的容器组件 |
-| onPrimaryContainer | 主色调容器上的文本颜色 | 主容器上的文本       |
-| secondary          | 次要色调               | 次要按钮、卡片等     |
-| onSecondary        | 次要色调上的文本颜色   | 次要色调上的文本     |
-| background         | 背景色                 | 应用背景             |
-| onBackground       | 背景上的文本颜色       | 背景上的文本         |
-| surface            | 表面色                 | 卡片、对话框等       |
-| onSurface          | 表面色上的文本颜色     | 常规文本             |
-| onSurfaceSecondary | 表面色上的次要文本颜色 | 次要文本             |
-| outline            | 轮廓线颜色             | 边框、分割线         |
-| dividerLine        | 分隔线颜色             | 列表分隔线           |
-| windowDimming      | 窗口遮罩颜色           | 对话框、下拉菜单背景 |
+| 属性名                | 描述          | 用途         |
+|--------------------|-------------|------------|
+| primary            | 主色调         | 开关、按钮、滑块等  |
+| onPrimary          | 主色调上的文本颜色   | 主色调上的文本    |
+| primaryContainer   | 主色调容器       | 包含主色调的容器组件 |
+| onPrimaryContainer | 主色调容器上的文本颜色 | 主容器上的文本    |
+| secondary          | 次要色调        | 次要按钮、卡片等   |
+| onSecondary        | 次要色调上的文本颜色  | 次要色调上的文本   |
+| background         | 背景色         | 应用背景       |
+| onBackground       | 背景上的文本颜色    | 背景上的文本     |
+| surface            | 表面色         | 卡片、对话框等    |
+| onSurface          | 表面色上的文本颜色   | 常规文本       |
+| onSurfaceSecondary | 表面色上的次要文本颜色 | 次要文本       |
+| outline            | 轮廓线颜色       | 边框、分割线     |
+| dividerLine        | 分隔线颜色       | 列表分隔线      |
+| windowDimming      | 窗口遮罩颜色      | 对话框、下拉菜单背景 |
 
 ### 使用颜色
 
@@ -75,28 +75,33 @@ Surface(
 }
 ```
 
-### 浅色和深色主题
+### 主题颜色方案
 
 Miuix提供了默认的浅色和深色主题颜色方案：
 
-- `lightColorScheme()` - 浅色主题的颜色方案
-- `darkColorScheme()` - 深色主题的颜色方案
+- `lightColorScheme()` - 浅色主题
+- `darkColorScheme()` - 深色主题
 
 ## 文本样式
 
-Miuix 提供了一套预定义的文本样式，以保持整个应用中文本的一致性：
+Miuix 提供了一套预定义的文本样式及使用规范，以保持整个应用中文本显示的一致性：
 
-| 样式名    | 用途             |
-| --------- | ---------------- |
-| main      | 主要文本         |
-| title1    | 大标题（32sp）   |
-| title2    | 中标题（24sp）   |
-| title3    | 小标题（20sp）   |
-| body1     | 正文（16sp）     |
-| body2     | 次要正文（14sp） |
-| button    | 按钮文本（17sp） |
-| footnote1 | 脚注（13sp）     |
-| footnote2 | 小脚注（11sp）   |
+| 样式名       | 字号   | 说明 / 用途 |
+|-----------|------|---------|
+| main      | 17sp | 通用文本    |
+| paragraph | 17sp | 多段正文    |
+| body1     | 16sp | 标准正文    |
+| body2     | 14sp | 次级正文    |
+| button    | 17sp | 按钮标签文本  |
+| footnote1 | 13sp | 脚注      |
+| footnote2 | 11sp | 小脚注     |
+| headline1 | 17sp | 区块引导标签  |
+| headline2 | 16sp | 次引导标签   |
+| subtitle  | 14sp | 辅助标题    |
+| title1    | 32sp | 大标题     |
+| title2    | 24sp | 中标题     |
+| title3    | 20sp | 小标题     |
+| title4    | 18sp | 更小的标题   |
 
 ### 使用文本样式
 

@@ -130,3 +130,42 @@ Text(
     }
 )
 ```
+
+### 文本自动适配
+
+使用 `TextAutoSize` 让文本在可用空间内自动调整字号：
+
+```kotlin
+Text(
+    text = "自适应文本",
+    autoSize = TextAutoSize.StepBased(
+        minFontSize = 12.sp,
+        maxFontSize = 17.sp,
+        stepSize = 0.3.sp
+    )
+)
+```
+
+### 可点击链接
+
+通过 `AnnotatedString` 和 `LinkAnnotation` 创建可点击链接：
+
+```kotlin
+val annotated = buildAnnotatedString {
+    append("访问 ")
+    val start = length
+    append("Miuix 文档站")
+    addLink(
+        LinkAnnotation.Url(
+            url = "https://compose-miuix-ui.github.io/miuix/",
+            styles = TextLinkStyles(
+                SpanStyle(color = MiuixTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            )
+        ),
+        start = start,
+        end = length
+    )
+}
+
+Text(text = annotated)
+```

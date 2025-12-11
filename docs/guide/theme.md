@@ -1,6 +1,7 @@
 # Theme System
 
-Miuix provides a complete theme system that allows you to easily maintain a consistent design style throughout your application. The theme system consists of color schemes and text styles.
+Miuix provides a complete theme system that allows you to easily maintain a consistent design style
+throughout your application. The theme system consists of color schemes and text styles.
 
 ## Using the Theme
 
@@ -27,7 +28,8 @@ fun App() {
 
 ## Color System
 
-The Miuix color system is based on the HyperOS design language and provides a complete set of color schemes, including:
+The Miuix color system is based on the HyperOS design language and provides a complete set of color
+schemes, including:
 
 - Primary colors
 - Secondary colors
@@ -40,7 +42,7 @@ The Miuix color system is based on the HyperOS design language and provides a co
 Below are some core properties of the color system:
 
 | Property Name      | Description               | Usage                        |
-| ------------------ | ------------------------- | ---------------------------- |
+|--------------------|---------------------------|------------------------------|
 | primary            | Primary color             | Switches, buttons, sliders   |
 | onPrimary          | Text color on primary     | Text on primary color        |
 | primaryContainer   | Primary container         | Components with primary      |
@@ -75,28 +77,34 @@ Surface(
 }
 ```
 
-### Light and Dark Themes
+### Theme Color Schemes
 
 Miuix provides default light and dark theme color schemes:
 
-- `lightColorScheme()` - Light theme color scheme
-- `darkColorScheme()` - Dark theme color scheme
+- `lightColorScheme()` - Light theme
+- `darkColorScheme()` - Dark theme
 
 ## Text Styles
 
-Miuix provides a set of predefined text styles to maintain consistency in text throughout the application:
+Miuix provides a set of predefined text styles and usage rules to maintain consistency in text
+throughout the application.
 
-| Style Name | Usage                      |
-| ---------- | -------------------------- |
-| main       | Main text                  |
-| title1     | Large title (32sp)         |
-| title2     | Medium title (24sp)        |
-| title3     | Small title (20sp)         |
-| body1      | Body text (16sp)           |
-| body2      | Secondary body text (14sp) |
-| button     | Button text (17sp)         |
-| footnote1  | Footnote (13sp)            |
-| footnote2  | Small footnote (11sp)      |
+| Style Name | Size | Notes / Usage       |
+|------------|------|---------------------|
+| main       | 17sp | Default text        |
+| paragraph  | 17sp | long text           |
+| body1      | 16sp | Standard body copy  |
+| body2      | 14sp | Secondary body copy |
+| button     | 17sp | Button labels       |
+| footnote1  | 13sp | Footnote            |
+| footnote2  | 11sp | Small footnote      |
+| headline1  | 17sp | Section lead label  |
+| headline2  | 16sp | Sub-lead label      |
+| subtitle   | 14sp | Auxiliary title     |
+| title1     | 32sp | Large title         |
+| title2     | 24sp | Medium title        |
+| title3     | 20sp | Small title         |
+| title4     | 18sp | Extra small title   |
 
 ### Using Text Styles
 
