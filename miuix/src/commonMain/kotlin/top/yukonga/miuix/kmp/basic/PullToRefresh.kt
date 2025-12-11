@@ -250,6 +250,7 @@ class PullToRefreshState(
     internal var currentTouch by mutableFloatStateOf(0f)
 
     internal var isRefreshing by mutableStateOf(false)
+    internal var isTouching by mutableStateOf(false)
     internal var isRebounding by mutableStateOf(false)
     private val _refreshCompleteAnimProgress = mutableFloatStateOf(1f)
     internal val refreshCompleteAnimProgress: Float by derivedStateOf { _refreshCompleteAnimProgress.floatValue }
@@ -318,8 +319,12 @@ class PullToRefreshState(
                 // Use spring to move to threshold
                 animateToSpring(refreshThresholdOffset)
             } finally {
-                internalRefreshState = RefreshState.Refreshing
-                onRefresh()
+                if (!isTouching) {
+                    internalRefreshState = RefreshState.Refreshing
+                    onRefresh()
+                } else {
+                    isRefreshing = false
+                }
             }
         }
     }
@@ -338,18 +343,20 @@ class PullToRefreshState(
 
     /** Handles the pointer release event to either trigger a refresh or rebound the indicator. */
     internal suspend fun handlePointerRelease(onRefresh: () -> Unit) {
-        if (isRefreshing) return
+        isTouching = false
 
-        if (dragOffset >= refreshThresholdOffset) {
-            // If pulled past threshold, will then call startRefreshing().
-            startRefreshing(onRefresh)
-        } else {
-            // If not pulled past threshold, rebound to the resting state using spring.
-            try {
-                isRebounding = true
-                animateToSpring(0f)
-            } finally {
-                isRebounding = false
+        if (!isRefreshing) {
+            if (dragOffset >= refreshThresholdOffset) {
+                // If pulled past threshold, will then call startRefreshing().
+                startRefreshing(onRefresh)
+            } else {
+                // If not pulled past threshold, rebound to the resting state using spring.
+                try {
+                    isRebounding = true
+                    animateToSpring(0f)
+                } finally {
+                    isRebounding = false
+                }
             }
         }
     }
@@ -407,12 +414,13 @@ class PullToRefreshState(
                 // Only defer to overscroll when refresh is idle.
                 if (overScrollState.isOverScrollActive && refreshState == RefreshState.Idle) return Offset.Zero
                 // If the refresh is in progress, consume all scroll events.
-                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete || isRefreshing) {
+                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete) {
                     return available
                 }
 
                 // When pulling up while the indicator is visible, consume the scroll to hide it.
                 if (source == NestedScrollSource.UserInput && available.y < 0 && (dragOffset > 0f || currentTouch > 0f)) {
+                    isTouching = true
                     animationJob?.cancel()
                     applyDrag(available.y)
                     return Offset(0f, available.y)
@@ -422,11 +430,13 @@ class PullToRefreshState(
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
                 // If the refresh is in progress, consume all scroll events.
-                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete || isRefreshing) {
+                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete) {
                     return available
                 }
+
                 // When pulling down after the content is at its top, consume the scroll to show the indicator.
-                if (source == NestedScrollSource.UserInput && available.y > 0f && consumed.y == 0f) {
+                if (source == NestedScrollSource.UserInput && available.y > 0f) {
+                    isTouching = true
                     animationJob?.cancel()
                     applyDrag(available.y)
                     return Offset(0f, available.y)
@@ -461,11 +471,9 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
-                // During pull-to-refresh stages, prevent app bar collapse (negative y).
                 val consumedByRefresh = pullToRefreshState.getOrCreateNestedScrollConnection(overScrollState).onPreScroll(available, source)
                 val remaining = available - consumedByRefresh
-                val remainingForAppBar = if (remaining.y < 0f) Offset(remaining.x, 0f) else remaining
-                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPreScroll(remainingForAppBar, source) ?: Offset.Zero
+                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPreScroll(remaining, source) ?: Offset.Zero
                 return consumedByRefresh + consumedByAppBar
             }
         }
@@ -478,10 +486,7 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
-                // During pull-to-refresh stages, allow app bar to expand but not collapse.
-                val appBarConsumed = Offset(consumed.x, maxOf(0f, consumed.y))
-                val appBarAvailable = Offset(available.x, maxOf(0f, available.y))
-                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPostScroll(appBarConsumed, appBarAvailable, source) ?: Offset.Zero
+                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPostScroll(consumed, available, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
                     .getOrCreateNestedScrollConnection(overScrollState)

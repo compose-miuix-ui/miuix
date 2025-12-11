@@ -53,7 +53,7 @@ fun SecondPage(
 
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            delay(300)
+            delay(100)
             ii += 6
             isRefreshing = false
         }
