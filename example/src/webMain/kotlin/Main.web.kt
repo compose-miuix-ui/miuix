@@ -19,7 +19,7 @@ fun main() {
 
         LocalLayoutDirection.current
         var insetTopPx by remember { mutableStateOf(0.0) }
-        var safeBottomPx by remember { mutableStateOf(0.0) }
+        var insetBottomPx by remember { mutableStateOf(0.0) }
         var insetStartPx by remember { mutableStateOf(0.0) }
         var insetEndPx by remember { mutableStateOf(0.0) }
 
@@ -27,13 +27,13 @@ fun main() {
             insetTopPx = getCssVar("--safe-area-inset-top")
             insetStartPx = getCssVar("--safe-area-inset-left")
             insetEndPx = getCssVar("--safe-area-inset-right")
-            safeBottomPx = getCssVar("--safe-area-inset-bottom")
+            insetBottomPx = getCssVar("--safe-area-inset-bottom")
         }
 
         App(
             padding = PaddingValues(
                 top = Dp(insetTopPx.toFloat()),
-                bottom = Dp(safeBottomPx.toFloat()),
+                bottom = Dp(insetBottomPx.toFloat()),
                 start = Dp(insetStartPx.toFloat()),
                 end = Dp(insetEndPx.toFloat())
             ),
