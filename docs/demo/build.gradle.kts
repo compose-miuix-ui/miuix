@@ -19,11 +19,15 @@ kotlin {
     jvmToolchain(21)
 
     js(IR) {
+        outputModuleName = "demo"
         browser {
-            outputModuleName = "demo"
             commonWebpackConfig {
                 outputFileName = "demo.js"
             }
+        }
+        compilerOptions {
+            freeCompilerArgs.add("-Xes-long-as-bigint")
+            freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
         }
         binaries.executable()
     }

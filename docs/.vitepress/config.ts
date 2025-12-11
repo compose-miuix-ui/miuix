@@ -1,8 +1,12 @@
 import { defineConfig } from 'vitepress'
 import locales from './locales'
 import zh_CN from './locales/zh_CN'
+import { componentListPlugin } from './plugins/updateComponentJson'
 
 export default defineConfig({
+  vite: {
+    plugins: [componentListPlugin()]
+  },
   base: '/miuix/',
   title: "Miuix",
   locales: locales.locales,

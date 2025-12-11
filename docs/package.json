@@ -1,8 +1,9 @@
 {
   "license": "Apache-2.0",
   "devDependencies": {
-    "vitepress": "^1.6.3",
-    "vue": "^3.5.16"
+    "@types/node": "^25.0.1",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.25"
   },
   "scripts": {
     "docs:dev": "vitepress dev --host",
