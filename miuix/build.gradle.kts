@@ -18,9 +18,8 @@ java {
 }
 
 kotlin {
-    withSourcesJar(publish = false)
-
     jvmToolchain(21)
+    withSourcesJar(true)
 
     androidLibrary {
         namespace = "top.yukonga.miuix.kmp"
