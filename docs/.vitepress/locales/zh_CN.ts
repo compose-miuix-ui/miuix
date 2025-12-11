@@ -60,6 +60,8 @@ export default defineConfig({
                     collapsed: false,
                     items: [
                         { text: '主题系统', link: '/zh_CN/guide/theme' },
+                        { text: '颜色系统', link: '/zh_CN/guide/colors' },
+                        { text: '文本样式', link: '/zh_CN/guide/textstyles' },
                         { text: '图标系统', link: '/zh_CN/guide/icons' },
                         { text: '工具函数', link: '/zh_CN/guide/utils' },
                         { text: '平台支持', link: '/zh_CN/guide/multiplatform' },

@@ -40,6 +40,8 @@ export default defineConfig({
                     collapsed: false,
                     items: [
                         { text: 'Theme System', link: '/guide/theme' },
+                        { text: 'Color System', link: '/guide/colors' },
+                        { text: 'Text Styles', link: '/guide/textstyles' },
                         { text: 'Icon System', link: '/guide/icons' },
                         { text: 'Utility Functions', link: '/guide/utils' },
                         { text: 'Platform Support', link: '/guide/multiplatform' },
