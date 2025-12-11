@@ -30,32 +30,42 @@ kotlin {
 
 ### Usage
 
+- Direct colors: provide a color scheme to `MiuixTheme(colors = ...)`, e.g. built-in `lightColorScheme()` / `darkColorScheme()`.
+
 ```
 @Composable
-fun App() {
-    // Use ThemeController to control color scheme mode
-    val controller = remember { ThemeController(ColorSchemeMode.System) }
-    
-    // Available modes:
-    // ColorSchemeMode.System, Light, Dark, MonetSystem, MonetLight, MonetDark
-    MiuixTheme(controller = controller) {
-        Scaffold(
-            topBar = {
-                // TopBar
-            },
-            bottomBar = {
-                // BottomBar
-            },
-            floatingActionButton = {
-                // FloatingActionButton
-            },
-        ) {
-            // Other Content...
-        }
+fun AppWithColors() {
+    val colors = lightColorScheme()
+    MiuixTheme(colors = colors) { /* Content */ }
+}
+```
+
+- Controller-based: control modes via `ThemeController` and enable Monet dynamic colors; pass `keyColor` to set a custom seed color.
+
+```
+@Composable
+fun AppWithMonet() {
+    val controller = remember {
+        ThemeController(
+            ColorSchemeMode.MonetSystem,
+            keyColor = Color(0xFF3482FF)
+        )
     }
+    MiuixTheme(controller = controller) { /* Content */  }
 }
 ```
 
 ### Screenshot
 
-[![screenshot](https://github.com/compose-miuix-ui/miuix/blob/main/assets/screenshot.webp?raw=true)]()
+<table>
+  <tr>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true" width="300" alt="screenshot-001"/></a></td>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true" width="300" alt="screenshot-002"/></a></td>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true" width="300" alt="screenshot-003"/></a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true" width="300" alt="screenshot-004"/></a></td>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true" width="300" alt="screenshot-005"/></a></td>
+    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true" width="300" alt="screenshot-006"/></a></td>
+  </tr>
+</table>

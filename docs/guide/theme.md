@@ -3,7 +3,7 @@
 Miuix provides a complete theme system that allows you to easily maintain a consistent design style
 throughout your application. The theme system consists of color schemes and text styles.
 
-## Using the Theme
+## Using MiuixTheme
 
 Use `ThemeController` to control the color scheme mode, then wrap your content with `MiuixTheme`:
 
@@ -25,6 +25,33 @@ fun App() {
 ```
 
 `ColorSchemeMode.System` automatically follows the system’s dark mode.
+
+### Specific Modes
+
+- Use `ThemeController` to control modes and enable Monet dynamic colors; Monet modes support a custom seed color via `keyColor`:
+
+```kotlin
+@Composable
+fun AppWithMonet() {
+    val controller = remember {
+        ThemeController(
+            ColorSchemeMode.MonetSystem, // or MonetLight, MonetDark
+            keyColor = Color(0xFF3482FF) // Custom seed color
+        )
+    }
+    MiuixTheme(controller = controller) { /* Content */ }
+}
+```
+
+- Provide a color scheme directly to `MiuixTheme(colors = ...)` for full customization or to use built-in light/dark schemes:
+
+```kotlin
+@Composable
+fun AppWithColors() {
+    val colors = lightColorScheme() // or darkColorScheme()
+    MiuixTheme(colors = colors) { /* Content */ }
+}
+```
 
 ## Color System
 
