@@ -5,6 +5,7 @@ package ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -17,26 +18,15 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val controller = when (colorMode) {
-        1 -> ThemeController(ColorSchemeMode.Light)
-        2 -> ThemeController(ColorSchemeMode.Dark)
-        3 -> ThemeController(
-            ColorSchemeMode.MonetSystem,
-            keyColor = keyColor,
-            isDark = isDark
-        )
-
-        4 -> ThemeController(
-            ColorSchemeMode.MonetLight,
-            keyColor = keyColor,
-        )
-
-        5 -> ThemeController(
-            ColorSchemeMode.MonetDark,
-            keyColor = keyColor,
-        )
-
-        else -> ThemeController(ColorSchemeMode.System)
+    val controller = remember(colorMode, keyColor, isDark) {
+        when (colorMode) {
+            1 -> ThemeController(ColorSchemeMode.Light)
+            2 -> ThemeController(ColorSchemeMode.Dark)
+            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor, isDark = isDark)
+            4 -> ThemeController(ColorSchemeMode.MonetLight, keyColor = keyColor)
+            5 -> ThemeController(ColorSchemeMode.MonetDark, keyColor = keyColor)
+            else -> ThemeController(ColorSchemeMode.System)
+        }
     }
     return MiuixTheme(
         controller = controller,
