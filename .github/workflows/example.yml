@@ -40,7 +40,7 @@ jobs:
             artifact-name: Miuix-windows-x64-exe
 
     steps:
-      - name: Checkout sources
+      - name: Checkout Sources
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
