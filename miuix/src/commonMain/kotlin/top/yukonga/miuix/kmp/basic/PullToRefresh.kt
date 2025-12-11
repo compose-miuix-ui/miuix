@@ -35,7 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -59,15 +59,20 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.ParabolaScrollEasing
 import top.yukonga.miuix.kmp.utils.LocalOverScrollState
 import top.yukonga.miuix.kmp.utils.OverScrollState
+import top.yukonga.miuix.kmp.utils.SpringEngine
+import top.yukonga.miuix.kmp.utils.SpringMath
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sign
 import kotlin.math.sin
 
 /**
@@ -79,17 +84,17 @@ import kotlin.math.sin
  * refresh is requested.
  *
  * @param isRefreshing A boolean state representing whether a refresh is currently in progress.
- *   This state should be hoisted and is the source of truth for the refresh operation.
+ * This state should be hoisted and is the source of truth for the refresh operation.
  * @param onRefresh A lambda to be invoked when a refresh is triggered by the user. This lambda
- *   should initiate the data loading and is responsible for eventually setting `isRefreshing`
- *   back to `false` upon completion.
+ * should initiate the data loading and is responsible for eventually setting `isRefreshing`
+ * back to `false` upon completion.
  * @param modifier The modifier to be applied to this container.
  * @param pullToRefreshState The state object that manages the UI and animations of the indicator.
- *   See [rememberPullToRefreshState].
+ * See [rememberPullToRefreshState].
  * @param contentPadding The padding to be applied to the content. The top padding is used to
- *   correctly offset the refresh indicator.
+ * correctly offset the refresh indicator.
  * @param topAppBarScrollBehavior An optional [ScrollBehavior] for a `TopAppBar` to coordinate
- *   scrolling between the app bar and the pull-to-refresh gesture.
+ * scrolling between the app bar and the pull-to-refresh gesture.
  * @param color The color of the refresh indicator.
  * @param circleSize The size of the refresh indicator's animated circle.
  * @param refreshTexts A list of strings representing the text shown in different states.
@@ -114,13 +119,9 @@ fun PullToRefresh(
     val overScrollState = LocalOverScrollState.current
     val currentOnRefresh by rememberUpdatedState(onRefresh)
 
-    // This effect acts as the bridge between the hoisted `isRefreshing` logical state
-    // and the `pullToRefreshState` UI state object. It ensures the UI state always
-    // reflects the logical state, even after lifecycle events.
     LaunchedEffect(isRefreshing) {
-        if (isRefreshing) {
-            pullToRefreshState.startRefreshing()
-        } else {
+        if (!isRefreshing) {
+            // Data loading completed, end refresh
             pullToRefreshState.finishRefreshing()
         }
     }
@@ -142,8 +143,9 @@ fun PullToRefresh(
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                if (pullToRefreshState.refreshState != RefreshState.RefreshComplete
-                    && event.changes.all { !it.pressed }
+                if (
+                    (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) &&
+                    event.changes.all { !it.pressed }
                 ) {
                     coroutineScope.launch {
                         pullToRefreshState.handlePointerRelease(currentOnRefresh)
@@ -197,7 +199,7 @@ fun rememberPullToRefreshState(): PullToRefreshState {
 
     // Update context-dependent properties on the state instance to ensure it's always current.
     val windowSize = getWindowSize()
-    state.maxDragDistancePx = windowSize.height.toFloat()// * maxDragRatio
+    state.maxDragDistancePx = windowSize.height.toFloat() // * maxDragRatio
     state.refreshThresholdOffset = windowSize.height.toFloat() * maxDragRatio * thresholdRatio
 
     return state
@@ -233,67 +235,95 @@ class PullToRefreshState(
     /** Cached NestedScrollConnection to avoid creating new instances on every scroll event. */
     var cachedNestedScrollConnection: NestedScrollConnection? = null
 
-    /** An animatable value for the drag offset, used to drive smooth transitions. */
-    val dragOffsetAnimatable = Animatable(0f)
     private var internalRefreshState by mutableStateOf<RefreshState>(RefreshState.Idle)
 
     /** The current visual [RefreshState] of the component. */
     val refreshState: RefreshState get() = internalRefreshState
 
-    /** A derived state that is true if the component is in the [RefreshState.Refreshing] state. */
-    val isRefreshing: Boolean by derivedStateOf { refreshState is RefreshState.Refreshing }
-
     /** The progress of the pull gesture, from 0.0 to 1.0, until the threshold is reached. */
     val pullProgress: Float by derivedStateOf {
         if (refreshThresholdOffset > 0f) {
-            (dragOffsetAnimatable.value / refreshThresholdOffset).coerceIn(0f, 1f)
+            (dragOffset / refreshThresholdOffset).coerceIn(0f, 1f)
         } else 0f
     }
 
-    // currentTouch tracks the raw touch distance similar to Overscroll's currentTouch,
-    // and is used to compute a damped visual offset via ParabolaScrollEasing.
     internal var currentTouch by mutableFloatStateOf(0f)
 
-    private var isRebounding by mutableStateOf(false)
+    internal var isRefreshing by mutableStateOf(false)
+    internal var isTouching by mutableStateOf(false)
+    internal var isRebounding by mutableStateOf(false)
     private val _refreshCompleteAnimProgress = mutableFloatStateOf(1f)
     internal val refreshCompleteAnimProgress: Float by derivedStateOf { _refreshCompleteAnimProgress.floatValue }
-    private var isRefreshingInProgress by mutableStateOf(false)
-    private var isTriggerRefresh by mutableStateOf(false)
 
-    init {
-        // This flow observes the animated drag offset and updates the state machine accordingly.
-        coroutineScope.launch {
-            snapshotFlow { dragOffsetAnimatable.value }.collectLatest { offset ->
-                if (!isRefreshing && !isRebounding) {
-                    internalRefreshState = when {
-                        refreshThresholdOffset > 0f && offset >= refreshThresholdOffset -> RefreshState.ThresholdReached
-                        offset > 0 -> RefreshState.Pulling
-                        else -> RefreshState.Idle
+    // Physics Engine for rebound
+    private val springEngine = SpringEngine()
+    internal var animationJob: Job? = null
+
+    /**
+     * Drives the dragOffset using SpringEngine physics.
+     */
+    internal suspend fun animateToSpring(targetValue: Float) {
+        animationJob?.cancel()
+        animationJob = coroutineScope.launch {
+            springEngine.start(
+                startValue = dragOffset,
+                targetValue = targetValue,
+                initialVel = 0f // Assume zero velocity on release for simplicity
+            )
+
+            var lastFrameTimeNanos = -1L
+            var isFinished = false
+
+            try {
+                while (isActive) {
+                    isFinished = withFrameNanos { frameTimeNanos ->
+                        if (lastFrameTimeNanos == -1L) {
+                            lastFrameTimeNanos = frameTimeNanos
+                            return@withFrameNanos false
+                        }
+                        val dt = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
+                        lastFrameTimeNanos = frameTimeNanos
+
+                        val finished = springEngine.step(dt)
+                        val newOffset = springEngine.currentPos.toFloat()
+
+                        // Directly update the state
+                        dragOffset = newOffset
+
+                        // Crucial: Update currentTouch using inverse damping so that if user catches
+                        // the list mid-animation, the touch tracking is consistent with visual position.
+                        currentTouch = SpringMath.obtainTouchDistance(newOffset, maxDragDistancePx)
+
+                        finished
                     }
+                    if (isFinished) break
+                }
+            } finally {
+                if (isFinished) { // Ensure position only after normal completion
+                    // Ensure we land exactly on target
+                    dragOffset = targetValue
+                    currentTouch = SpringMath.obtainTouchDistance(targetValue, maxDragDistancePx)
                 }
             }
         }
+        animationJob?.join()
     }
 
     /**
-     * Called when the hoisted `isRefreshing` state becomes true.
-     * Forces the state machine into the refreshing state and moves the indicator.
+     * Enter the refresh queue
      */
-    internal fun startRefreshing() {
-        if (!isRefreshingInProgress) {
-            isRefreshingInProgress = true
-            coroutineScope.launch {
-                try {
-                    // keep previous behavior of animating the visual offset to threshold
-                    dragOffsetAnimatable.animateTo(
-                        refreshThresholdOffset,
-                        animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
-                    )
-                    dragOffset = refreshThresholdOffset
-                    // align currentTouch to threshold for continuity
-                    currentTouch = refreshThresholdOffset
-                } finally {
+    internal suspend fun startRefreshing(onRefresh: () -> Unit) {
+        if (!isRefreshing) {
+            isRefreshing = true
+            try {
+                // Use spring to move to threshold
+                animateToSpring(refreshThresholdOffset)
+            } finally {
+                if (!isTouching) {
                     internalRefreshState = RefreshState.Refreshing
+                    onRefresh()
+                } else {
+                    isRefreshing = false
                 }
             }
         }
@@ -303,41 +333,31 @@ class PullToRefreshState(
      * Called when the hoisted `isRefreshing` state becomes false.
      * Triggers the completion animation and resets the state.
      */
-    internal fun finishRefreshing() {
-        if (isRefreshingInProgress) {
-            performAsyncReset()
+    internal suspend fun finishRefreshing() {
+        if (isRefreshing) {
+            isRefreshing = false
+            internalRefreshState = RefreshState.RefreshComplete
+            startManualRefreshCompleteAnimation()
         }
     }
 
     /** Handles the pointer release event to either trigger a refresh or rebound the indicator. */
     internal suspend fun handlePointerRelease(onRefresh: () -> Unit) {
-        if (isRefreshing) return
+        isTouching = false
 
-        if (dragOffset >= refreshThresholdOffset) {
-            // If pulled past threshold, trigger the onRefresh callback.
-            // The hoisted state will change, which will then call startRefreshing().
-            isTriggerRefresh = true
-            onRefresh()
-        } else {
-            // If not pulled past threshold, rebound to the resting state.
-            isRebounding = true
-            try {
-                dragOffsetAnimatable.animateTo(
-                    0f,
-                    animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
-                )
-                dragOffset = 0f
-                currentTouch = 0f
-            } finally {
-                isRebounding = false
+        if (!isRefreshing) {
+            if (dragOffset >= refreshThresholdOffset) {
+                // If pulled past threshold, will then call startRefreshing().
+                startRefreshing(onRefresh)
+            } else {
+                // If not pulled past threshold, rebound to the resting state using spring.
+                try {
+                    isRebounding = true
+                    animateToSpring(0f)
+                } finally {
+                    isRebounding = false
+                }
             }
-        }
-    }
-
-    private fun performAsyncReset() {
-        coroutineScope.launch {
-            internalRefreshState = RefreshState.RefreshComplete
-            startManualRefreshCompleteAnimation()
         }
     }
 
@@ -357,12 +377,9 @@ class PullToRefreshState(
     }
 
     private suspend fun internalResetState() {
-        dragOffsetAnimatable.snapTo(0f)
-        dragOffset = 0f
-        currentTouch = 0f
-        isTriggerRefresh = false
-        isRefreshingInProgress = false
         internalRefreshState = RefreshState.Idle
+        // Animate back to 0 using Spring
+        animateToSpring(0f)
     }
 
     /** Creates a [NestedScrollConnection] for the pull-to-refresh logic itself. */
@@ -373,83 +390,56 @@ class PullToRefreshState(
         cachedNestedScrollConnection?.let { return it }
 
         return (object : NestedScrollConnection {
+            private fun applyDrag(delta: Float) {
+                if (delta == 0f) return
+                currentTouch += delta
+                currentTouch = currentTouch.coerceIn(-maxDragDistancePx, maxDragDistancePx)
 
-            // Helper: map raw touch distance (currentTouch) -> damped visual offset using same easing as Overscroll.
-            fun touchToDamped(distance: Float): Float {
-                val maxTouch = maxDragDistancePx.coerceAtLeast(1f)
-                // ParabolaScrollEasing expects range Int; ensure >= 1 to avoid div/0.
-                val rangeInt = max(1, maxTouch.toInt())
-                return ParabolaScrollEasing(distance, rangeInt)
-            }
+                val normalized = min(abs(currentTouch) / maxDragDistancePx, 1.0f)
+                val dampedDist = SpringMath.obtainDampingDistance(normalized, maxDragDistancePx)
+                dragOffset = sign(currentTouch) * dampedDist
 
-            /**
-             * Add delta to the current touch tracking value and update dragOffset/animatable immediately.
-             * Return overflow part which cannot be consumed by pull-to-refresh handling (beyond max drag).
-             */
-            fun addTouchDelta(deltaTouch: Float): Float {
-                val maxTouch = maxDragDistancePx.coerceAtLeast(0f)
-                val target = currentTouch + deltaTouch
-                val overflow =
-                    when {
-                        target > maxTouch -> target - maxTouch
-                        target < -maxTouch -> target + maxTouch
-                        else -> 0f
+                when {
+                    refreshThresholdOffset > 0f && dragOffset >= refreshThresholdOffset -> RefreshState.ThresholdReached
+                    dragOffset > 0 -> RefreshState.Pulling
+                    else -> RefreshState.Idle
+                }.also { nextState ->
+                    if (refreshState != nextState) {
+                        internalRefreshState = nextState
                     }
-                currentTouch = target.coerceIn(-maxTouch, maxTouch)
-                val damped = touchToDamped(currentTouch)
-                dragOffset = damped
-                // Update animatable to reflect immediate visual change.
-                coroutineScope.launch { dragOffsetAnimatable.snapTo(damped) }
-                return overflow
+                }
             }
 
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // Only defer to overscroll when refresh is idle.
                 if (overScrollState.isOverScrollActive && refreshState == RefreshState.Idle) return Offset.Zero
-
                 // If the refresh is in progress, consume all scroll events.
-                if (refreshState == RefreshState.RefreshComplete
-                    || refreshState == RefreshState.Refreshing
-                    || isTriggerRefresh
-                ) {
+                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete) {
                     return available
                 }
 
                 // When pulling up while the indicator is visible, consume the scroll to hide it.
                 if (source == NestedScrollSource.UserInput && available.y < 0 && (dragOffset > 0f || currentTouch > 0f)) {
-                    if (isRebounding && dragOffsetAnimatable.isRunning) {
-                        coroutineScope.launch { dragOffsetAnimatable.stop() }
-                        isRebounding = false
-                    }
-                    val delta = available.y
-                    val overflow = addTouchDelta(delta)
-                    // amount actually consumed = delta - overflow
-                    val consumed = delta - overflow
-                    return Offset(0f, consumed)
+                    isTouching = true
+                    animationJob?.cancel()
+                    applyDrag(available.y)
+                    return Offset(0f, available.y)
                 }
                 return Offset.Zero
             }
 
-            override fun onPostScroll(
-                consumed: Offset, available: Offset, source: NestedScrollSource
-            ): Offset {
-
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
                 // If the refresh is in progress, consume all scroll events.
-                if (refreshState == RefreshState.RefreshComplete || refreshState == RefreshState.Refreshing || isTriggerRefresh
-                ) {
+                if (refreshState == RefreshState.Refreshing || refreshState == RefreshState.RefreshComplete) {
                     return available
                 }
 
                 // When pulling down after the content is at its top, consume the scroll to show the indicator.
-                if (source == NestedScrollSource.UserInput && available.y > 0f && consumed.y == 0f) {
-                    if (isRebounding && dragOffsetAnimatable.isRunning) {
-                        coroutineScope.launch { dragOffsetAnimatable.stop() }
-                        isRebounding = false
-                    }
-                    val delta = available.y
-                    val overflow = addTouchDelta(delta)
-                    val consumedDelta = delta - overflow
-                    return Offset(0f, consumedDelta)
+                if (source == NestedScrollSource.UserInput && available.y > 0f) {
+                    isTouching = true
+                    animationJob?.cancel()
+                    applyDrag(available.y)
+                    return Offset(0f, available.y)
                 }
                 return Offset.Zero
             }
@@ -468,9 +458,7 @@ private fun createPullToRefreshConnection(
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         when (pullToRefreshState.refreshState) {
             RefreshState.Idle -> {
-                val consumedByAppBar =
-                    topAppBarScrollBehavior?.nestedScrollConnection
-                        ?.onPreScroll(available, source) ?: Offset.Zero
+                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPreScroll(available, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
                     .getOrCreateNestedScrollConnection(overScrollState)
@@ -483,33 +471,22 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
-                // During pull-to-refresh stages, prevent app bar collapse (negative y).
-                val consumedByRefresh = pullToRefreshState.getOrCreateNestedScrollConnection(overScrollState)
-                    .onPreScroll(available, source)
+                val consumedByRefresh = pullToRefreshState.getOrCreateNestedScrollConnection(overScrollState).onPreScroll(available, source)
                 val remaining = available - consumedByRefresh
-                val remainingForAppBar = if (remaining.y < 0f) Offset(remaining.x, 0f) else remaining
-                val consumedByAppBar =
-                    topAppBarScrollBehavior?.nestedScrollConnection
-                        ?.onPreScroll(remainingForAppBar, source) ?: Offset.Zero
+                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPreScroll(remaining, source) ?: Offset.Zero
                 return consumedByRefresh + consumedByAppBar
             }
         }
     }
 
-    override fun onPostScroll(
-        consumed: Offset, available: Offset, source: NestedScrollSource
-    ): Offset {
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
         when (pullToRefreshState.refreshState) {
             RefreshState.RefreshComplete, RefreshState.Refreshing -> {
                 return available
             }
 
             else -> {
-                // During pull-to-refresh stages, allow app bar to expand but not collapse.
-                val appBarConsumed = Offset(consumed.x, maxOf(0f, consumed.y))
-                val appBarAvailable = Offset(available.x, maxOf(0f, available.y))
-                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection
-                    ?.onPostScroll(appBarConsumed, appBarAvailable, source) ?: Offset.Zero
+                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPostScroll(consumed, available, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
                     .getOrCreateNestedScrollConnection(overScrollState)
@@ -529,28 +506,22 @@ private fun createPullToRefreshConnection(
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         if (pullToRefreshState.refreshState != RefreshState.Idle) {
             // Ensure the indicator cancels and rebounds to zero.
-            if (!pullToRefreshState.isRefreshing
+            if (
+                pullToRefreshState.refreshState != RefreshState.Refreshing
                 && pullToRefreshState.refreshState != RefreshState.RefreshComplete
+                && !pullToRefreshState.isRefreshing
+                && !pullToRefreshState.isRebounding
                 && pullToRefreshState.dragOffset > 0f
                 && pullToRefreshState.dragOffset < pullToRefreshState.refreshThresholdOffset
             ) {
-                pullToRefreshState.coroutineScope.launch {
-                    try {
-                        pullToRefreshState.dragOffsetAnimatable.animateTo(
-                            0f,
-                            animationSpec = tween(easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f))
-                        )
-                        pullToRefreshState.dragOffset = 0f
-                        pullToRefreshState.currentTouch = 0f
-                    } finally {
-                        // No-op
-                    }
+                try {
+                    pullToRefreshState.animateToSpring(0f)
+                } finally {
                 }
             }
             return available
         }
-        return topAppBarScrollBehavior?.nestedScrollConnection
-            ?.onPostFling(consumed, available) ?: Velocity.Zero
+        return topAppBarScrollBehavior?.nestedScrollConnection?.onPostFling(consumed, available) ?: Velocity.Zero
     }
 }
 
@@ -587,8 +558,7 @@ private fun RefreshHeader(
                 RefreshState.Refreshing -> refreshTexts.getOrElse(2) { "" } to 1f
                 RefreshState.RefreshComplete -> {
                     val text = refreshTexts.getOrElse(3) { "" }
-                    val alpha = (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f)
-                        .coerceAtLeast(0f)
+                    val alpha = (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f).coerceAtLeast(0f)
                     text to alpha
                 }
             }
@@ -597,7 +567,7 @@ private fun RefreshHeader(
 
     val heightInfo by remember(pullToRefreshState) {
         derivedStateOf {
-            val dragOffset = pullToRefreshState.dragOffsetAnimatable.value
+            val dragOffset = pullToRefreshState.dragOffset
             val threshold = pullToRefreshState.refreshThresholdOffset
             val progress = pullToRefreshState.pullProgress
             val completeProgress = pullToRefreshState.refreshCompleteAnimProgress
@@ -685,7 +655,7 @@ private fun RefreshIndicator(
                 RefreshState.ThresholdReached -> {
                     drawThresholdIndicator(
                         center, indicatorRadiusPx, ringStrokeWidthPx, color,
-                        pullToRefreshState.dragOffsetAnimatable.value,
+                        pullToRefreshState.dragOffset,
                         pullToRefreshState.refreshThresholdOffset,
                         pullToRefreshState.maxDragDistancePx
                     )
