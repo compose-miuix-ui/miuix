@@ -1,7 +1,6 @@
 {
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/node": "^25.0.1",
     "vitepress": "^1.6.4",
     "vue": "^3.5.25"
   },
