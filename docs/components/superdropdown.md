@@ -1,3 +1,14 @@
+---
+title: SuperDropdown
+requiresScaffoldHost: true
+prerequisites:
+  - Must be used within `Scaffold` to provide `MiuixPopupHost`
+  - Using outside `Scaffold` will cause popup content not to render
+  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+hostComponent: Scaffold
+popupHost: MiuixPopupHost
+---
+
 # SuperDropdown
 
 `SuperDropdown` is a dropdown menu component in Miuix that provides a title, summary, and a list of dropdown options. It supports click interaction and is commonly used in option settings and list selections.
@@ -6,8 +17,8 @@
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superDropdown" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
-::: warning
-`SuperDropdown` must be used within a `Scaffold` component!
+::: danger Prerequisite
+This component depends on `Scaffold` providing `MiuixPopupHost` to render popup content. It must be used within `Scaffold`, otherwise popup content will not render correctly.
 :::
 
 ## Import

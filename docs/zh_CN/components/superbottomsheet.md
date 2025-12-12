@@ -1,3 +1,14 @@
+---
+title: SuperBottomSheet
+requiresScaffoldHost: true
+prerequisites:
+  - 必须在 `Scaffold` 中使用以提供 `MiuixPopupHost`
+  - 未在 `Scaffold` 中使用将导致弹出内容无法渲染
+  - 多层 `Scaffold` 时仅在顶层保留 `MiuixPopupHost`，其余置空
+hostComponent: Scaffold
+popupHost: MiuixPopupHost
+---
+
 # SuperBottomSheet
 
 `SuperBottomSheet` 是 Miuix 中的底部抽屉组件，从屏幕底部滑入显示。持拖拽手势关闭和自定义样式。
@@ -6,8 +17,8 @@
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=superBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
-::: warning 注意
-`SuperBottomSheet` 需要在 `Scaffold` 组件内使用!
+::: danger 使用前提
+此组件依赖 `Scaffold` 提供的 `MiuixPopupHost` 以显示弹出内容。必须在 `Scaffold` 中使用，否则弹出内容无法正常渲染。
 :::
 
 ## 引入

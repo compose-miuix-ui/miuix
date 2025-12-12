@@ -14,6 +14,23 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 Why not use the official `Popup` and `Dialog` instead of creating our own popup window container? Because their cross-platform support is currently incomplete, with some parameters that cannot be modified.
 :::
 
+::: tip
+When your project contains multiple nested `Scaffold`s, you should only keep `MiuixPopupHost` in the top-level `Scaffold`, and set others to empty to avoid duplicated hosts and popup conflicts:
+
+```kotlin
+Scaffold(
+    popupHost = { MiuixPopupHost() },
+) {
+    // Child pages or local layouts
+    Scaffold(
+        popupHost = { }, // empty to avoid duplicated host
+    ) {
+        // ...
+    }
+}
+```
+:::
+
 ## Import
 
 ```kotlin

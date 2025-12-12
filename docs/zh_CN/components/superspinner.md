@@ -1,3 +1,14 @@
+---
+title: SuperSpinner
+requiresScaffoldHost: true
+prerequisites:
+  - 必须在 `Scaffold` 中使用以提供 `MiuixPopupHost`
+  - 未在 `Scaffold` 中使用将导致弹出内容无法渲染
+  - 多层 `Scaffold` 时仅在顶层保留 `MiuixPopupHost`，其余置空
+hostComponent: Scaffold
+popupHost: MiuixPopupHost
+---
+
 # SuperSpinner
 
 `SuperSpinner` 是 Miuix 中的下拉选择器组件，提供了标题、摘要和带有图标、文本的选项列表，支持点击交互和多种显示模式，常用于具有视觉辅助的选项设置中。该组件与 `SuperDropdown` 组件类似，但提供更丰富的功能和交互体验。
@@ -6,8 +17,8 @@
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=superSpinner" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
-::: warning 注意
-`SuperSpinner` 需要在 `Scaffold` 组件内使用！
+::: danger 使用前提
+此组件依赖 `Scaffold` 提供的 `MiuixPopupHost` 以显示弹出内容。必须在 `Scaffold` 中使用，否则弹出内容无法正常渲染。
 :::
 
 ## 引入

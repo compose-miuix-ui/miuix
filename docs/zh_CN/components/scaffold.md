@@ -14,6 +14,23 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 为什么不用官方的 `Popup` 和 `Dialog` 而选择自行创建弹出窗口的容器？因为它们目前在跨平台支持中实现不完整，有些参数无法更改。
 :::
 
+::: tip 提示
+当项目中存在多个嵌套的 `Scaffold` 时，仅应在顶层 `Scaffold` 中保留 `MiuixPopupHost`，其他层级请置空以避免重复 Host 与弹出层冲突：
+
+```kotlin
+Scaffold(
+    popupHost = { MiuixPopupHost() },
+) {
+    // 子页面或局部布局
+    Scaffold(
+        popupHost = { }, // 置空，避免重复 Host
+    ) {
+        // ...
+    }
+}
+```
+:::
+
 ## 引入
 
 ```kotlin
