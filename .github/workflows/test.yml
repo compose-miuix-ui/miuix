@@ -3,8 +3,16 @@ name: Build All Tests
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - 'iosApp/iosApp/Info.plist'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - 'iosApp/iosApp/Info.plist'
 
 permissions:
   contents: read
