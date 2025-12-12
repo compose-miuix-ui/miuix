@@ -100,7 +100,7 @@ export default defineConfig({
                     items: [
                         { text: 'SuperArrow', link: '/components/superarrow' },
                         { text: 'SuperSwitch', link: '/components/superswitch' },
-                        { text: 'SuperCheckBox', link: '/components/supercheckbox' },
+                        { text: 'SuperCheckbox', link: '/components/supercheckbox' },
                         { text: 'SuperDropdown', link: '/components/superdropdown' },
                         { text: 'SuperSpinner', link: '/components/superspinner' },
                         { text: 'SuperDialog', link: '/components/superdialog' },

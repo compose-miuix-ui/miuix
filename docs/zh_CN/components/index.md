@@ -46,7 +46,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | -------------------------------------------- | ---------------------------------- | ---------------------- |
 | [SuperArrow](../components/superarrow)       | 基于 BasicComponent 的带箭头组件   | 指示可点击、导航提示   |
 | [SuperSwitch](../components/superswitch)     | 基于 BasicComponent 的开关组件     | 设置项开关、功能启用   |
-| [SuperCheckBox](../components/supercheckbox) | 基于 BasicComponent 的复选框组件   | 多项选择、条款同意     |
+| [SuperCheckbox](../components/supercheckbox) | 基于 BasicComponent 的复选框组件   | 多项选择、条款同意     |
 | [SuperDropdown](../components/superdropdown) | 基于 BasicComponent 的下拉菜单组件 | 选项选择、功能列表     |
 | [SuperSpinner](../components/superspinner)   | 基于 BasicComponent 的高级菜单组件 | 进阶选项选择、功能列表 |
 | [SuperDialog](../components/superdialog)     | 基于 BasicComponent 的对话弹窗组件 | 提示、确认操作         |

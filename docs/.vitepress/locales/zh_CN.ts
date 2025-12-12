@@ -120,7 +120,7 @@ export default defineConfig({
                     items: [
                         { text: 'SuperArrow', link: '/zh_CN/components/superarrow' },
                         { text: 'SuperSwitch', link: '/zh_CN/components/superswitch' },
-                        { text: 'SuperCheckBox', link: '/zh_CN/components/supercheckbox' },
+                        { text: 'SuperCheckbox', link: '/zh_CN/components/supercheckbox' },
                         { text: 'SuperDropdown', link: '/zh_CN/components/superdropdown' },
                         { text: 'SuperSpinner', link: '/zh_CN/components/superspinner' },
                         { text: 'SuperDialog', link: '/zh_CN/components/superdialog' },

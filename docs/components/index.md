@@ -46,7 +46,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | -------------------------------------------- | ------------------------------------------ | -------------------------------------- |
 | [SuperArrow](../components/superarrow)       | Arrow component based on BasicComponent    | Clickable indication, navigation hints |
 | [SuperSwitch](../components/superswitch)     | Switch component based on BasicComponent   | Setting switches, feature enabling     |
-| [SuperCheckBox](../components/supercheckbox) | Checkbox component based on BasicComponent | Multiple selection, terms agreement    |
+| [SuperCheckbox](../components/supercheckbox) | Checkbox component based on BasicComponent | Multiple selection, terms agreement    |
 | [SuperDropdown](../components/superdropdown) | Dropdown menu based on BasicComponent      | Option selection, feature list         |
 | [SuperSpinner](../components/superspinner)   | Advanced menu based on BasicComponent      | Advanced options, feature list         |
 | [SuperDialog](../components/superdialog)     | Dialog window based on BasicComponent      | Prompts, action confirmation           |
