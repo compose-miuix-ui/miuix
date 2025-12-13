@@ -3,7 +3,6 @@
 
 package ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -17,12 +16,11 @@ fun AppTheme(
     keyColor: Color? = null,
     content: @Composable () -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
-    val controller = remember(colorMode, keyColor, isDark) {
+    val controller = remember(colorMode, keyColor) {
         when (colorMode) {
             1 -> ThemeController(ColorSchemeMode.Light)
             2 -> ThemeController(ColorSchemeMode.Dark)
-            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor, isDark = isDark)
+            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor)
             4 -> ThemeController(ColorSchemeMode.MonetLight, keyColor = keyColor)
             5 -> ThemeController(ColorSchemeMode.MonetDark, keyColor = keyColor)
             else -> ThemeController(ColorSchemeMode.System)
