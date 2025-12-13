@@ -13,12 +13,15 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -234,9 +237,21 @@ private fun SuperDialogContent(
                     scaleY = scale
                 }
             } else {
+                val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
+                    derivedStateOf {
+                        bottomPadding + outsideMargin.height
+                    }
+                }
                 // Small screen
                 Modifier.graphicsLayer {
-                    translationY = backProgress.value * 800f
+                    val maxOffset = if (dialogHeightPx.value > 0) {
+                        dialogHeightPx.value.toFloat() + extraBottomPadding.toPx()
+                    } else {
+                        500f
+                    }
+                    translationY = backProgress.value * maxOffset
                 }
             }
         )

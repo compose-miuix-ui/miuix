@@ -53,7 +53,7 @@ fun SuperBottomSheetDemo() {
                         TextButton(
                             text = "Confirm",
                             onClick = { showBottomSheet.value = false }, // Close bottom sheet
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                         )
                     }
                 }

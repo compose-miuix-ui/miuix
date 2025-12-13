@@ -66,7 +66,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun TextComponent(
     showDialog: MutableState<Boolean>,
-    dialogTextFieldValue: MutableState<String>,
+    dialogSelectedColor: MutableState<Color>,
     showBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>,
@@ -424,7 +424,7 @@ fun TextComponent(
             enabled = false
         )
     }
-    Dialog(showDialog, dialogTextFieldValue)
+    Dialog(showDialog, dialogSelectedColor)
     SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
     BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
@@ -432,21 +432,20 @@ fun TextComponent(
 @Composable
 fun Dialog(
     showDialog: MutableState<Boolean>,
-    dialogTextFieldValue: MutableState<String>
+    dialogSelectedColor: MutableState<Color>
 ) {
     SuperDialog(
         title = "Dialog",
-        summary = "Summary",
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false
         }
     ) {
-        TextField(
-            modifier = Modifier.padding(bottom = 16.dp),
-            value = dialogTextFieldValue.value,
-            maxLines = 1,
-            onValueChange = { dialogTextFieldValue.value = it }
+        ColorPalette(
+            initialColor = dialogSelectedColor.value,
+            onColorChanged = { dialogSelectedColor.value = it },
+            showPreview = false,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
@@ -584,20 +583,6 @@ fun BottomSheet(
                         onCheckedChange = {
                             bottomSheetSuperSwitchState.value = it
                         }
-                    )
-                }
-                AnimatedVisibility(
-                    visible = bottomSheetSuperSwitchState.value,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    val miuixColor = MiuixTheme.colorScheme.primary
-                    var selectedColor by remember { mutableStateOf(miuixColor) }
-                    ColorPalette(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        initialColor = selectedColor,
-                        onColorChanged = { selectedColor = it },
-                        showPreview = false
                     )
                 }
                 Spacer(
