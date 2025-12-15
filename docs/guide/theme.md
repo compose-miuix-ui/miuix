@@ -10,21 +10,13 @@ Use `ThemeController` to control the color scheme mode, then wrap your content w
 ```kotlin
 @Composable
 fun App() {
+    // Available modes: System, Light, Dark, MonetSystem, MonetLight, MonetDark
     val controller = remember { ThemeController(ColorSchemeMode.System) }
-
-    // Available modes:
-    // ColorSchemeMode.System, Light, Dark, MonetSystem, MonetLight, MonetDark
-    MiuixTheme(controller = controller) {
-        Scaffold(
-            topBar = { /* ... */ },
-        ) { padding ->
-            // Main content
-        }
-    }
+    MiuixTheme(controller = controller) { /* Content */ }
 }
 ```
 
-`ColorSchemeMode.System` automatically follows the system’s dark mode.
+`ColorSchemeMode.System` / `ColorSchemeMode.MonetSystem` automatically follows the system’s dark mode.
 
 ### Specific Modes
 
@@ -58,7 +50,7 @@ fun AppWithColors() {
 You can customize the theme in the following ways:
 
 - Select a color scheme mode via `ThemeController(ColorSchemeMode.*)`.
-- Opt into dynamic colors via `ColorSchemeMode.MonetSystem` / `MonetLight` / `MonetDark`.
+- Opt into dynamic colors via `MonetSystem` / `MonetLight` / `MonetDark`.
 - Override text styles by passing `textStyles`:
 
 ```kotlin

@@ -9,21 +9,13 @@ Miuix 提供了一套完整的主题系统，使您能够轻松地在整个应�
 ```kotlin
 @Composable
 fun App() {
+    // 可用模式：System、Light、Dark、MonetSystem、MonetLight、MonetDark
     val controller = remember { ThemeController(ColorSchemeMode.System) }
-
-    // 可用模式：
-    // ColorSchemeMode.System、Light、Dark、MonetSystem、MonetLight、MonetDark
-    MiuixTheme(controller = controller) {
-        Scaffold(
-            topBar = { /* ... */ },
-        ) { padding ->
-            // 主体内容
-        }
-    }
+    MiuixTheme(controller = controller) { /* 内容 */ }
 }
 ```
 
-使用 `ColorSchemeMode.System` 时会自动跟随系统深色模式。
+使用 `ColorSchemeMode.System` / `ColorSchemeMode.MonetSystem` 时会自动跟随系统深色模式。
 
 ### 具体方式
 
@@ -57,7 +49,7 @@ fun AppWithColors() {
 可以通过以下方式进行主题自定义：
 
 - 通过 `ThemeController(ColorSchemeMode.*)` 选择配色模式。
-- 选择动态配色：`ColorSchemeMode.MonetSystem` / `MonetLight` / `MonetDark`。
+- 选择动态配色：`MonetSystem` / `MonetLight` / `MonetDark`。
 - 传入 `textStyles` 覆盖文本样式：
 
 ```kotlin

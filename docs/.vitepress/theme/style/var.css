@@ -50,11 +50,16 @@
     -webkit-text-fill-color: transparent;
 }
 
-/* mediumZoom 样式 */
+/* Medium Zoom */
 .medium-zoom-overlay {
     z-index: 30;
 }
 
 .medium-zoom-image {
     z-index: 9999 !important;
+}
+
+/* Nólëbase Integrations */
+.VPSocialLinks.VPNavBarSocialLinks.social-links {
+    margin-right: 0;
 }

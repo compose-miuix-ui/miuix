@@ -1,4 +1,5 @@
 :root {
+
     /* 手机端菜单栏顶部横条隐藏 */
     .VPNavBar.screen-open {
         border-bottom: none;

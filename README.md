@@ -34,9 +34,14 @@ kotlin {
 
 ```
 @Composable
-fun AppWithColors() {
-    val colors = lightColorScheme()
-    MiuixTheme(colors = colors) { /* Content */ }
+fun AppTheme(
+    content: @Composable () -> Unit
+) {
+    val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    return MiuixTheme(
+        colors = colors,
+        content = content
+    )
 }
 ```
 
@@ -44,14 +49,19 @@ fun AppWithColors() {
 
 ```
 @Composable
-fun AppWithMonet() {
+fun AppTheme(
+    content: @Composable () -> Unit
+) {
     val controller = remember {
         ThemeController(
             ColorSchemeMode.MonetSystem,
             keyColor = Color(0xFF3482FF)
         )
     }
-    MiuixTheme(controller = controller) { /* Content */  }
+    return MiuixTheme(
+        controller = controller,
+        content = content
+    )
 }
 ```
 

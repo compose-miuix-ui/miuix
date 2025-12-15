@@ -33,5 +33,8 @@ features:
   - icon: 🌐
     title: Cross-Platform
     details: One codebase for Android, iOS, Desktop and more via Compose Multiplatform.
----
 
+nolebase:
+  gitChangelog: false
+  pageProperties: false
+---

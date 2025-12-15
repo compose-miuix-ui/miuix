@@ -5,7 +5,7 @@ layout: home
 hero:
   name: Miuix
   text: A UI library for Compose MultiPlatform
-  tagline: 提供小米 HyperOS 设计风格的组件库
+  tagline: 提供 Xiaomi HyperOS 设计风格的组件库
   image:
     src: /Icon.webp
     alt: Logo
@@ -33,5 +33,8 @@ features:
   - icon: 🌐
     title: 全平台支持
     details: 基于 Compose Multiplatform，一套代码支持 Android、iOS、Desktop 等平台。
----
 
+nolebase:
+  gitChangelog: false
+  pageProperties: false
+---
