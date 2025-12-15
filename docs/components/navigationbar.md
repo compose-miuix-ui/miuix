@@ -84,7 +84,7 @@ Both `NavigationBar` and `FloatingNavigationBar` automatically handle the visual
 | selected                   | Int                   | Index of the current selected item  | -                                       | Yes      |
 | onClick                    | (Int) -> Unit         | Callback when clicking nav items    | -                                       | Yes      |
 | modifier                   | Modifier              | Modifier applied to the nav bar     | Modifier                                | No       |
-| color                      | Color                 | Background color of the nav bar     | MiuixTheme.colorScheme.surfaceContainer | No       |
+| color                      | Color                 | Background color of the nav bar     | MiuixTheme.colorScheme.surface          | No       |
 | showDivider                | Boolean               | Show top divider line or not        | true                                    | No       |
 | defaultWindowInsetsPadding | Boolean               | Apply default window insets padding | true                                    | No       |
 

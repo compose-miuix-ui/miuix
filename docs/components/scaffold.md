@@ -75,7 +75,7 @@ Scaffold(
 | snackbarHost                 | @Composable () -> Unit              | Container for displaying Snackbar, Miuix does not provide this component | {}                                | No       |
 | popupHost                    | @Composable () -> Unit              | Container for displaying popup windows                                   | \{ MiuixPopupHost() }             | No       |
 | containerColor               | Color                               | Background color of the scaffold                                         | MiuixTheme.colorScheme.surface | No       |
-| contentWindowInsets          | WindowInsets                        | Window insets passed to the content                                      | WindowInsets.statusBars           | No       |
+| contentWindowInsets          | WindowInsets                        | Window insets passed to the content                                      | WindowInsets.systemBars.union(WindowInsets.displayCutout) | No       |
 | content                      | @Composable (PaddingValues) -> Unit | Main content area of the scaffold                                        | -                                 | Yes      |
 
 ### FabPosition Options

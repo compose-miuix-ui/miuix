@@ -119,30 +119,30 @@ TopAppBar(
 
 ### TopAppBar Properties
 
-| Property Name              | Type                            | Description                                    | Default Value                     | Required |
-| -------------------------- | ------------------------------- | ---------------------------------------------- | --------------------------------- | -------- |
-| title                      | String                          | Top bar title                                  | -                                 | Yes      |
-| modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                          | No       |
-| color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.background | No       |
-| largeTitle                 | String?                         | Large title text, uses title if not specified  | null                              | No       |
-| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                                | No       |
-| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                                | No       |
-| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                              | No       |
-| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                              | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                             | No       |
+| Property Name              | Type                            | Description                                    | Default Value                   | Required |
+| -------------------------- | ------------------------------- | ---------------------------------------------- | ------------------------------- | -------- |
+| title                      | String                          | Top bar title                                  | -                               | Yes      |
+| modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
+| color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
+| largeTitle                 | String?                         | Large title text, uses title if not specified  | null                            | No       |
+| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
+| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
+| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
+| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
+| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                           | No       |
 
 ### SmallTopAppBar Properties
 
-| Property Name              | Type                            | Description                                    | Default Value                     | Required |
-| -------------------------- | ------------------------------- | ---------------------------------------------- | --------------------------------- | -------- |
-| title                      | String                          | Top bar title                                  | -                                 | Yes      |
-| modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                          | No       |
-| color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.background | No       |
-| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                                | No       |
-| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                                | No       |
-| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                              | No       |
-| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                              | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                             | No       |
+| Property Name              | Type                            | Description                                    | Default Value                   | Required |
+| -------------------------- | ------------------------------- | ---------------------------------------------- | ------------------------------- | -------- |
+| title                      | String                          | Top bar title                                  | -                               | Yes      |
+| modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
+| color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
+| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
+| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
+| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
+| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
+| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                           | No       |
 
 ### ScrollBehavior
 
@@ -155,7 +155,7 @@ Used to create and remember TopAppBarState:
 ```kotlin
 val scrollBehavior = MiuixScrollBehavior(
     state = rememberTopAppBarState(),
-    snapAnimationSpec = spring(stiffness = 3000f),
+    snapAnimationSpec = spring(stiffness = 2500f),
     canScroll = { true }
 )
 ```
@@ -164,7 +164,7 @@ val scrollBehavior = MiuixScrollBehavior(
 | ------------------ | --------------------------- | -------------------------- | ------------------------------------------------ |
 | state              | TopAppBarState              | rememberTopAppBarState()   | State object controlling scroll state            |
 | canScroll          | () -> Boolean               | { true }                   | Callback to control whether scrolling is allowed |
-| snapAnimationSpec  | AnimationSpec\<Float>?      | spring(stiffness = 3000f)  | Defines snap animation after scrolling           |
+| snapAnimationSpec  | AnimationSpec\<Float>?      | spring(stiffness = 2500f)  | Defines snap animation after scrolling           |
 | flingAnimationSpec | DecayAnimationSpec\<Float>? | rememberSplineBasedDecay() | Defines decay animation for fling                |
 
 ## Advanced Usage

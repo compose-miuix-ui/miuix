@@ -46,7 +46,7 @@ Scaffold(
 | Property Name              | Type                   | Description                            | Default Value                          | Required |
 | -------------------------- | ---------------------- | -------------------------------------- | -------------------------------------- | -------- |
 | modifier                   | Modifier               | Modifier applied to the toolbar        | Modifier                               | No       |
-| color                      | Color                  | Background color of the toolbar        | FloatingToolbarDefaults.DefaultColor() | No       |
+| color                      | Color                  | Background color of the toolbar        | FloatingToolbarDefaults.defaultColor() | No       |
 | cornerRadius               | Dp                     | Corner radius of the toolbar           | FloatingToolbarDefaults.CornerRadius   | No       |
 | outSidePadding             | PaddingValues          | Padding outside the toolbar            | FloatingToolbarDefaults.OutSidePadding | No       |
 | shadowElevation            | Dp                     | The shadow elevation of the toolbar    | 4.dp                                   | No       |
@@ -58,7 +58,7 @@ Scaffold(
 | Property Name  | Type                    | Description              | Value                                   |
 | -------------- | ----------------------- | ------------------------ | --------------------------------------- |
 | CornerRadius   | Dp                      | Default corner radius    | 50.dp                                   |
-| DefaultColor() | @Composable () -> Color | Default background color | MiuixTheme.colorScheme.surfaceContainer |
+| defaultColor() | @Composable () -> Color | Default background color | MiuixTheme.colorScheme.surfaceContainer |
 | OutSidePadding | PaddingValues           | Default outside padding  | PaddingValues(12.dp, 8.dp)              |
 
 ### ToolbarPosition (for Scaffold)

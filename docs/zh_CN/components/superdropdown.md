@@ -100,7 +100,7 @@ SuperDropdown(
 | enabled               | Boolean              | 组件是否可交互           | true                                  | 否       |
 | showValue             | Boolean              | 是否显示当前选中的值     | true                                  | 否       |
 | onClick               | (() -> Unit)?        | 点击下拉菜单时的额外回调 | null                                  | 否       |
-| onSelectedIndexChange | ((Int) -> Unit)?     | 选中项变化时的回调       | -                                     | 是       |
+| onSelectedIndexChange | ((Int) -> Unit)?     | 选中项变化时的回调       | -                                     | 否       |
 
 ### DropdownColors 属性
 

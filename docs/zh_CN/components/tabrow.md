@@ -81,8 +81,8 @@ TabRowDefaults 对象提供了 TabRow 组件的默认配置。
 | ----------------------------- | ---- | ----- | ---------------------------- |
 | TabRowHeight                  | Dp   | 54.dp | 标准样式的默认高度           |
 | TabRowWithContourHeight       | Dp   | 45.dp | 带轮廓样式的默认高度         |
-| TabRowCornerRadius            | Dp   | 8.dp  | 标准样式的默认圆角半径       |
-| TabRowWithContourCornerRadius | Dp   | 10.dp | 带轮廓样式的默认圆角半径     |
+| TabRowCornerRadius            | Dp   | 12.dp | 标准样式的默认圆角半径       |
+| TabRowWithContourCornerRadius | Dp   | 8.dp  | 带轮廓样式的默认圆角半径     |
 | TabRowMinWidth                | Dp   | 76.dp | 标准样式的每个标签最小宽度   |
 | TabRowWithContourMinWidth     | Dp   | 62.dp | 带轮廓样式的每个标签最小宽度 |
 | TabRowMaxWidth                | Dp   | 98.dp | 标准样式的每个标签最大宽度   |

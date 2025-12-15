@@ -94,7 +94,7 @@ SuperCheckbox(
 |------------------| ------------------------------- | -------------------------- | ------------------------------------- | -------- |
 | title            | String                          | 复选框项的标题             | -                                     | 是       |
 | checked          | Boolean                         | 复选框的选中状态           | -                                     | 是       |
-| onCheckedChange  | ((Boolean) -> Unit)?            | 复选框状态变化时的回调     | -                                     | 是       |
+| onCheckedChange  | ((Boolean) -> Unit)?            | 复选框状态变化时的回调     | -                                     | 否       |
 | modifier         | Modifier                        | 应用于组件的修饰符         | Modifier                              | 否       |
 | titleColor       | BasicComponentColors            | 标题文本的颜色配置         | BasicComponentDefaults.titleColor()   | 否       |
 | summary          | String?                         | 复选框项的摘要说明         | null                                  | 否       |

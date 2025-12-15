@@ -46,7 +46,7 @@ Checkbox(
 | 属性名          | 类型                 | 说明                     | 默认值                            | 是否必须 |
 | --------------- | -------------------- | ------------------------ | --------------------------------- | -------- |
 | checked         | Boolean              | 复选框是否处于选中状态   | -                                 | 是       |
-| onCheckedChange | ((Boolean) -> Unit)? | 选中状态变化时的回调函数 | -                                 | 是       |
+| onCheckedChange | ((Boolean) -> Unit)? | 选中状态变化时的回调函数 | -                                 | 否       |
 | modifier        | Modifier             | 应用于复选框的修饰符     | Modifier                          | 否       |
 | colors          | CheckboxColors       | 复选框的颜色配置         | CheckboxDefaults.checkboxColors() | 否       |
 | enabled         | Boolean              | 复选框是否可交互         | true                              | 否       |

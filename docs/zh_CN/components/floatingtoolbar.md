@@ -46,7 +46,7 @@ Scaffold(
 | 属性名                     | 类型                   | 说明                       | 默认值                                 | 是否必须 |
 | -------------------------- | ---------------------- | -------------------------- | -------------------------------------- | -------- |
 | modifier                   | Modifier               | 应用于工具栏的修饰符       | Modifier                               | 否       |
-| color                      | Color                  | 工具栏背景颜色             | FloatingToolbarDefaults.DefaultColor() | 否       |
+| color                      | Color                  | 工具栏背景颜色             | FloatingToolbarDefaults.defaultColor() | 否       |
 | cornerRadius               | Dp                     | 工具栏圆角半径             | FloatingToolbarDefaults.CornerRadius   | 否       |
 | outSidePadding             | PaddingValues          | 工具栏外部的内边距         | FloatingToolbarDefaults.OutSidePadding | 否       |
 | shadowElevation            | Dp                     | 工具栏的阴影高度           | 4.dp                                   | 否       |
@@ -58,7 +58,7 @@ Scaffold(
 | 属性名         | 类型                    | 说明           | 值                                      |
 | -------------- | ----------------------- | -------------- | --------------------------------------- |
 | CornerRadius   | Dp                      | 默认圆角半径   | 50.dp                                   |
-| DefaultColor() | @Composable () -> Color | 默认背景颜色   | MiuixTheme.colorScheme.surfaceContainer |
+| defaultColor() | @Composable () -> Color | 默认背景颜色   | MiuixTheme.colorScheme.surfaceContainer |
 | OutSidePadding | PaddingValues           | 默认外部内边距 | PaddingValues(12.dp, 8.dp)              |
 
 ### ToolbarPosition (用于 Scaffold)

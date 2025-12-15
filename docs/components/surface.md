@@ -88,7 +88,7 @@ Create custom styles with different shapes, colors, and borders:
 ```kotlin
 Surface(
     modifier = Modifier.size(200.dp).padding(16.dp),
-    shape = CircleShape,
+    shape = ContinuousCapsule,
     color = MiuixTheme.colorScheme.secondaryContainer,
     border = BorderStroke(2.dp, MiuixTheme.colorScheme.secondary),
     shadowElevation = 8.dp

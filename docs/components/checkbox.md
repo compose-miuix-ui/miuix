@@ -46,7 +46,7 @@ Checkbox(
 | Property Name   | Type                 | Description                       | Default Value                     | Required |
 | --------------- | -------------------- | --------------------------------- | --------------------------------- | -------- |
 | checked         | Boolean              | Whether checkbox is checked       | -                                 | Yes      |
-| onCheckedChange | ((Boolean) -> Unit)? | Callback when check state changes | -                                 | Yes      |
+| onCheckedChange | ((Boolean) -> Unit)? | Callback when check state changes | -                                 | No       |
 | modifier        | Modifier             | Modifier applied to the checkbox  | Modifier                          | No       |
 | colors          | CheckboxColors       | Color configuration for checkbox  | CheckboxDefaults.checkboxColors() | No       |
 | enabled         | Boolean              | Whether checkbox is interactive   | true                              | No       |

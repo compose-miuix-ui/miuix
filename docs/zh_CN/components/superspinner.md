@@ -162,7 +162,7 @@ Scaffold {
 | enabled               | Boolean                   | 组件是否可交互         | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中的值   | true                                  | 否       |
 | onClick               | (() -> Unit)?             | 点击选择器时的额外回调 | null                                  | 否       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调     | -                                     | 是       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调     | -                                     | 否       |
 
 ### SuperSpinner 属性（对话框模式）
 
@@ -174,7 +174,7 @@ Scaffold {
 | titleColor            | BasicComponentColors      | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()   | 否       |
 | summary               | String?                   | 选择器的摘要说明         | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
-| spinnerColors         | SpinnerColors             | 选择器的颜色配置         | SpinnerDefaults.spinnerColors()       | 否       |
+| spinnerColors         | SpinnerColors             | 选择器的颜色配置         | SpinnerDefaults.dialogSpinnerColors() | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容     | null                                  | 否       |
 | dialogButtonString    | String                    | 对话框底部按钮的文本     | -                                     | 是       |
 | popupModifier         | Modifier                  | 应用于弹出对话框的修饰符 | Modifier                              | 否       |
@@ -183,7 +183,7 @@ Scaffold {
 | enabled               | Boolean                   | 组件是否可交互           | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中的值     | true                                  | 否       |
 | onClick               | (() -> Unit)?             | 点击选择器时的额外回调   | null                                  | 否       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调       | -                                     | 是       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调       | -                                     | 否       |
 
 ### SpinnerEntry 属性
 
@@ -262,7 +262,7 @@ Scaffold {
                             1 -> Color.Green
                             else -> Color.Blue
                         },
-                        shape = CircleShape
+                        shape = ContinuousCapsule
                     )
             )
             Spacer(Modifier.width(8.dp))

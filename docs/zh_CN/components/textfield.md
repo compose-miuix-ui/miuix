@@ -117,6 +117,34 @@ TextField(
 | interactionSource     | MutableInteractionSource?                    | 交互源                 | null                                                 | 否       |
 | cursorBrush           | Brush                                        | 光标画刷               | SolidColor(MiuixTheme.colorScheme.primary)           | 否       |
 
+### TextField（state-based）属性
+
+| 属性名                | 类型                                                | 说明                           | 默认值                                        | 是否必须 |
+| --------------------- | --------------------------------------------------- | ------------------------------ | --------------------------------------------- | -------- |
+| state                 | TextFieldState                                      | 保存文本与选择的状态对象       | -                                             | 是       |
+| modifier              | Modifier                                            | 应用于输入框的修饰符           | Modifier                                      | 否       |
+| insideMargin          | DpSize                                              | 输入框内部边距                 | DpSize(16.dp, 16.dp)                          | 否       |
+| backgroundColor       | Color                                               | 输入框背景颜色                 | MiuixTheme.colorScheme.secondaryContainer     | 否       |
+| cornerRadius          | Dp                                                  | 输入框圆角半径                 | 16.dp                                         | 否       |
+| label                 | String                                              | 输入框标签文本                 | ""                                            | 否       |
+| labelColor            | Color                                               | 标签文本颜色                   | MiuixTheme.colorScheme.onSecondaryContainer   | 否       |
+| borderColor           | Color                                               | 聚焦时的边框颜色               | MiuixTheme.colorScheme.primary                | 否       |
+| useLabelAsPlaceholder | Boolean                                             | 是否使用标签作为占位符         | false                                         | 否       |
+| enabled               | Boolean                                             | 输入框是否可用                 | true                                          | 否       |
+| readOnly              | Boolean                                             | 输入框是否只读                 | false                                         | 否       |
+| inputTransformation   | InputTransformation?                                | 输入变换器                     | null                                          | 否       |
+| textStyle             | TextStyle                                           | 输入文本样式                   | MiuixTheme.textStyles.main                    | 否       |
+| keyboardOptions       | KeyboardOptions                                     | 键盘选项配置                   | KeyboardOptions.Default                       | 否       |
+| onKeyboardAction      | KeyboardActionHandler?                              | 键盘动作处理器                 | null                                          | 否       |
+| lineLimits            | TextFieldLineLimits                                 | 行数限制                       | TextFieldLineLimits.Default                   | 否       |
+| leadingIcon           | @Composable (() -> Unit)?                           | 前置图标                       | null                                          | 否       |
+| trailingIcon          | @Composable (() -> Unit)?                           | 后置图标                       | null                                          | 否       |
+| onTextLayout          | Density.(getResult: () -> TextLayoutResult?) -> Unit | 文本布局回调（带 Density 接收） | null                                          | 否       |
+| interactionSource     | MutableInteractionSource?                           | 交互源                         | null                                          | 否       |
+| cursorBrush           | Brush                                               | 光标画刷                       | SolidColor(borderColor)                       | 否       |
+| outputTransformation  | OutputTransformation?                               | 输出变换器                     | null                                          | 否       |
+| scrollState           | ScrollState                                         | 滚动状态                       | rememberScrollState()                         | 否       |
+
 ## 进阶用法
 
 ### 带图标输入框

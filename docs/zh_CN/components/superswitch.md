@@ -60,7 +60,7 @@ SuperSwitch(
 | 属性名          | 类型                            | 说明                       | 默认值                                | 是否必须 |
 | --------------- | ------------------------------- | -------------------------- | ------------------------------------- | -------- |
 | checked         | Boolean                         | 开关的选中状态             | -                                     | 是       |
-| onCheckedChange | ((Boolean) -> Unit)?            | 开关状态变化时的回调       | -                                     | 是       |
+| onCheckedChange | ((Boolean) -> Unit)?            | 开关状态变化时的回调       | -                                     | 否       |
 | title           | String                          | 开关项的标题               | -                                     | 是       |
 | titleColor      | BasicComponentColors            | 标题文本的颜色配置         | BasicComponentDefaults.titleColor()   | 否       |
 | summary         | String?                         | 开关项的摘要说明           | null                                  | 否       |

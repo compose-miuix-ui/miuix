@@ -84,7 +84,7 @@ Scaffold(
 | selected                   | Int                   | 当前选中项的索引         | -                                       | 是       |
 | onClick                    | (Int) -> Unit         | 点击导航项时的回调       | -                                       | 是       |
 | modifier                   | Modifier              | 应用于导航栏的修饰符     | Modifier                                | 否       |
-| color                      | Color                 | 导航栏背景颜色           | MiuixTheme.colorScheme.surfaceContainer | 否       |
+| color                      | Color                 | 导航栏背景颜色           | MiuixTheme.colorScheme.surface          | 否       |
 | showDivider                | Boolean               | 是否显示顶部分割线       | true                                    | 否       |
 | defaultWindowInsetsPadding | Boolean               | 是否应用默认窗口嵌入边距 | true                                    | 否       |
 

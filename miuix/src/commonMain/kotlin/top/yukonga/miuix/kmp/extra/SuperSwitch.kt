@@ -81,6 +81,7 @@ fun SuperSwitch(
                 currentOnCheckedChange?.invoke(!checked)
             }
         },
+        holdDownState = holdDownState,
         enabled = enabled
     )
 }

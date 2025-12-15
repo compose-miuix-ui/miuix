@@ -155,7 +155,7 @@ MiuixScrollBehavior 是用于控制顶部栏滚动行为的配置对象。
 ```kotlin
 val scrollBehavior = MiuixScrollBehavior(
     state = rememberTopAppBarState(),
-    snapAnimationSpec = spring(stiffness = 3000f),
+    snapAnimationSpec = spring(stiffness = 2500f),
     canScroll = { true }
 )
 ```
@@ -164,7 +164,7 @@ val scrollBehavior = MiuixScrollBehavior(
 | ------------------ | --------------------------- | -------------------------- | -------------------------- |
 | state              | TopAppBarState              | rememberTopAppBarState()   | 控制滚动状态的状态对象     |
 | canScroll          | () -> Boolean               | { true }                   | 控制是否允许滚动的回调     |
-| snapAnimationSpec  | AnimationSpec\<Float>?      | spring(stiffness = 3000f)  | 定义顶部栏滚动后的吸附动画 |
+| snapAnimationSpec  | AnimationSpec\<Float>?      | spring(stiffness = 2500f)  | 定义顶部栏滚动后的吸附动画 |
 | flingAnimationSpec | DecayAnimationSpec\<Float>? | rememberSplineBasedDecay() | 定义顶部栏滑动的衰减动画   |
 
 ## 进阶用法

@@ -138,14 +138,14 @@ PopupPositionProvider 接口定义了计算弹出列表位置的方法。
 
 #### PopupPositionProvider.Align 选项
 
-| 选项名      | 说明                 |
-| ----------- | -------------------- |
-| Left        | 相对于窗口左侧对齐   |
-| Right       | 相对于窗口右侧对齐   |
-| TopLeft     | 相对于窗口左上角对齐 |
-| TopRight    | 相对于窗口右上角对齐 |
-| BottomLeft  | 相对于窗口左下角对齐 |
-| BottomRight | 相对于窗口右下角对齐 |
+| 选项名      | 说明                         |
+| ----------- | ---------------------------- |
+| Left        | 相对于窗口左侧对齐           |
+| Right       | 相对于窗口右侧对齐           |
+| TopLeft     | 相对于窗口上方左侧对齐       |
+| TopRight    | 相对于窗口上方右侧对齐       |
+| BottomLeft  | 相对于窗口下方左侧对齐       |
+| BottomRight | 相对于窗口下方右侧对齐       |
 
 ## 进阶用法
 

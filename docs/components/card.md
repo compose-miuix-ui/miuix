@@ -30,7 +30,7 @@ Card {
 | Property Name     | Type                               | Description                               | Default Value                | Required | Applies To  |
 | ----------------- | ---------------------------------- | ----------------------------------------- | ---------------------------- | -------- | ----------- |
 | modifier          | Modifier                           | Modifier applied to the card              | Modifier                     | No       | All         |
-| colors            | CardColors?                        | Card color configuration                  | CardDefaults.defaultColors() | No       | All         |
+| colors            | CardColors                         | Card color configuration                  | CardDefaults.defaultColors() | No       | All         |
 | cornerRadius      | Dp                                 | Card corner radius                        | CardDefaults.CornerRadius    | No       | All         |
 | insideMargin      | PaddingValues                      | Card inner padding                        | CardDefaults.InsideMargin    | No       | All         |
 | pressFeedbackType | PressFeedbackType                  | Feedback type when pressed                | PressFeedbackType.None       | No       | Interactive |

@@ -67,27 +67,52 @@ Text(
 
 ## Properties
 
-| Property Name  | Type                           | Description                                   | Default Value                       | Required |
-| -------------- | ------------------------------ | --------------------------------------------- | ----------------------------------- | -------- |
-| text           | String / AnnotatedString       | The text content to display                   | -                                   | Yes      |
-| modifier       | Modifier                       | Modifiers applied to the text                 | Modifier                            | No       |
-| color          | Color                          | Text color                                    | Color.Unspecified                   | No       |
-| autoSize       | TextAutoSize?                  | Auto-sizing behavior for text                 | null                                | No       |
-| fontSize       | TextUnit                       | Text size                                     | TextUnit.Unspecified                | No       |
-| fontStyle      | FontStyle?                     | Text font style (e.g., italic)                | null                                | No       |
-| fontWeight     | FontWeight?                    | Text font weight                              | null                                | No       |
-| fontFamily     | FontFamily?                    | Text font family                              | null                                | No       |
-| letterSpacing  | TextUnit                       | Letter spacing                                | TextUnit.Unspecified                | No       |
-| textDecoration | TextDecoration?                | Text decoration (e.g., underline)             | null                                | No       |
-| textAlign      | TextAlign?                     | Text alignment                                | null                                | No       |
-| lineHeight     | TextUnit                       | Line height                                   | TextUnit.Unspecified                | No       |
-| overflow       | TextOverflow                   | Text overflow handling                        | TextOverflow.Clip                   | No       |
-| softWrap       | Boolean                        | Whether to wrap text automatically            | true                                | No       |
-| maxLines       | Int                            | Maximum number of lines                       | Int.MAX_VALUE                       | No       |
-| minLines       | Int                            | Minimum number of lines                       | 1                                   | No       |
-| onTextLayout   | (TextLayoutResult) -> Unit     | Callback after text layout is completed       | null                                | No       |
-| style          | TextStyle                      | Text style                                    | MiuixTheme.textStyles.main          | No       |
-| inlineContent  | Map<String, InlineTextContent> | Mapping for inserting inline composable items | mapOf()                             | No       |
+### Text (String) Properties
+
+| Property Name  | Type           | Description                             | Default Value              | Required |
+| -------------- | -------------- | --------------------------------------- | -------------------------- | -------- |
+| text           | String         | The text content to display             | -                          | Yes      |
+| modifier       | Modifier       | Modifiers applied to the text           | Modifier                   | No       |
+| color          | Color          | Text color                              | Color.Unspecified          | No       |
+| autoSize       | TextAutoSize?  | Auto-sizing behavior for text           | null                       | No       |
+| fontSize       | TextUnit       | Text size                               | TextUnit.Unspecified       | No       |
+| fontStyle      | FontStyle?     | Text font style (e.g., italic)          | null                       | No       |
+| fontWeight     | FontWeight?    | Text font weight                        | null                       | No       |
+| fontFamily     | FontFamily?    | Text font family                        | null                       | No       |
+| letterSpacing  | TextUnit       | Letter spacing                          | TextUnit.Unspecified       | No       |
+| textDecoration | TextDecoration? | Text decoration (e.g., underline)      | null                       | No       |
+| textAlign      | TextAlign?     | Text alignment                          | null                       | No       |
+| lineHeight     | TextUnit       | Line height                             | TextUnit.Unspecified       | No       |
+| overflow       | TextOverflow   | Text overflow handling                  | TextOverflow.Clip          | No       |
+| softWrap       | Boolean        | Whether to wrap text automatically      | true                       | No       |
+| maxLines       | Int            | Maximum number of lines                 | Int.MAX_VALUE              | No       |
+| minLines       | Int            | Minimum number of lines                 | 1                          | No       |
+| onTextLayout   | ((TextLayoutResult) -> Unit)? | Callback after layout | null                       | No       |
+| style          | TextStyle      | Text style                              | MiuixTheme.textStyles.main | No       |
+
+### Text (AnnotatedString) Properties
+
+| Property Name  | Type                           | Description                                   | Default Value              | Required |
+| -------------- | ------------------------------ | --------------------------------------------- | -------------------------- | -------- |
+| text           | AnnotatedString                | Rich text with annotations                    | -                          | Yes      |
+| modifier       | Modifier                       | Modifiers applied to the text                 | Modifier                   | No       |
+| color          | Color                          | Text color                                    | Color.Unspecified          | No       |
+| autoSize       | TextAutoSize?                  | Auto-sizing behavior for text                 | null                       | No       |
+| fontSize       | TextUnit                       | Text size                                     | TextUnit.Unspecified       | No       |
+| fontStyle      | FontStyle?                     | Text font style                               | null                       | No       |
+| fontWeight     | FontWeight?                    | Text font weight                              | null                       | No       |
+| fontFamily     | FontFamily?                    | Text font family                              | null                       | No       |
+| letterSpacing  | TextUnit                       | Letter spacing                                | TextUnit.Unspecified       | No       |
+| textDecoration | TextDecoration?                | Text decoration                               | null                       | No       |
+| textAlign      | TextAlign?                     | Text alignment                                | null                       | No       |
+| lineHeight     | TextUnit                       | Line height                                   | TextUnit.Unspecified       | No       |
+| overflow       | TextOverflow                   | Text overflow handling                        | TextOverflow.Clip          | No       |
+| softWrap       | Boolean                        | Whether to wrap text automatically            | true                       | No       |
+| maxLines       | Int                            | Maximum number of lines                       | Int.MAX_VALUE              | No       |
+| minLines       | Int                            | Minimum number of lines                       | 1                          | No       |
+| inlineContent  | Map<String, InlineTextContent> | Mapping for inserting inline composables      | mapOf()                    | No       |
+| onTextLayout   | (TextLayoutResult) -> Unit     | Callback after text layout is completed       | {}                         | No       |
+| style          | TextStyle                      | Text style                                    | MiuixTheme.textStyles.main | No       |
 
 ## Advanced Usage
 

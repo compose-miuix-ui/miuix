@@ -64,7 +64,7 @@ Scaffold {
 | backgroundColor            | Color                            | Bottom sheet background color                | SuperBottomSheetDefaults.backgroundColor()  | No       |
 | enableWindowDim            | Boolean                          | Whether to enable dimming layer              | true                                        | No       |
 | cornerRadius               | Dp                               | Corner radius of the top corners             | SuperBottomSheetDefaults.cornerRadius       | No       |
-| sheetMaxWidth              | Dp                               | Maximum width of the bottom sheet            | SuperBottomSheetDefaults.sheetMaxWidth      | No       |
+| sheetMaxWidth              | Dp                               | Maximum width of the bottom sheet            | SuperBottomSheetDefaults.maxWidth           | No       |
 | onDismissRequest           | (() -> Unit)?                    | Callback when bottom sheet is dismissed      | null                                        | No       |
 | outsideMargin              | DpSize                           | Bottom sheet external margin                 | SuperBottomSheetDefaults.outsideMargin      | No       |
 | insideMargin               | DpSize                           | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
@@ -82,7 +82,7 @@ The SuperBottomSheetDefaults object provides default settings for the SuperBotto
 | Property Name  | Type   | Description                            |
 | -------------- | ------ | -------------------------------------- |
 | cornerRadius   | Dp     | Default corner radius (28.dp)          |
-| sheetMaxWidth  | Dp     | Default maximum width (640.dp)         |
+| maxWidth       | Dp     | Default maximum width (640.dp)         |
 | outsideMargin  | DpSize | Default bottom sheet external margin   |
 | insideMargin   | DpSize | Default bottom sheet internal margin   |
 

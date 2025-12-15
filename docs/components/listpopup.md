@@ -41,11 +41,11 @@ Scaffold {
     Box {
         TextButton(
             text = "Click to show menu",
-            alignment = PopupPositionProvider.Align.Left,
             onClick = { showPopup.value = true }
         )
         ListPopup(
             show = showPopup,
+            alignment = PopupPositionProvider.Align.Left,
             onDismissRequest = { showPopup.value = false } // Close the popup menu
         ) {
             ListPopupColumn {
@@ -141,10 +141,10 @@ The PopupPositionProvider interface defines methods for calculating popup list p
 | ----------- | --------------------------------------- |
 | Left        | Align to the left of the window         |
 | Right       | Align to the right of the window        |
-| TopLeft     | Align to the top-left of the window     |
-| TopRight    | Align to the top-right of the window    |
-| BottomLeft  | Align to the bottom-left of the window  |
-| BottomRight | Align to the bottom-right of the window |
+| TopLeft     | Align above-left relative to the window |
+| TopRight    | Align above-right relative to the window|
+| BottomLeft  | Align below-left relative to the window |
+| BottomRight | Align below-right relative to the window|
 
 ## Advanced Usage
 

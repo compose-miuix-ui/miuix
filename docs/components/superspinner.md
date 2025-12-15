@@ -162,7 +162,7 @@ Scaffold {
 | enabled               | Boolean                   | Interactive state           | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value | true                                  | No       |
 | onClick               | (() -> Unit)?             | Additional click callback   | null                                  | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback   | -                                     | Yes      |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback   | -                                     | No       |
 
 ### SuperSpinner Properties (Dialog Mode)
 
@@ -183,7 +183,7 @@ Scaffold {
 | enabled               | Boolean                   | Interactive state           | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value | true                                  | No       |
 | onClick               | (() -> Unit)?             | Additional click callback   | null                                  | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback   | -                                     | Yes      |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback   | -                                     | No       |
 
 ### SpinnerEntry Properties
 
@@ -262,7 +262,7 @@ Scaffold {
                             1 -> Color.Green
                             else -> Color.Blue
                         },
-                        shape = CircleShape
+                        shape = ContinuousCapsule
                     )
             )
             Spacer(Modifier.width(8.dp))

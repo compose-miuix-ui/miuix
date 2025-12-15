@@ -96,7 +96,6 @@ Slider(
 | reverseDirection      | Boolean                           | 控制滑块的方向。false 时从左到右增加,true 时从右到左增加(适用于 RTL 布局)                                        | false                              | 否       |
 | height                | Dp                                | 滑块的高度                                                                                                       | SliderDefaults.MinHeight           | 否       |
 | colors                | SliderColors                      | 滑块的颜色配置                                                                                                   | SliderDefaults.sliderColors()      | 否       |
-
 | hapticEffect          | SliderDefaults.SliderHapticEffect | 滑块的触感反馈类型                                                                                               | SliderDefaults.DefaultHapticEffect | 否       |
 | showKeyPoints         | Boolean                           | 是否显示关键点指示器。仅当 keyPoints 不为 null 时有效                                                            | false                              | 否       |
 | keyPoints             | List\<Float\>?                    | 要在滑块上显示的自定义关键点值。如果为 null,则使用 steps 参数的步长位置。值应在 valueRange 范围内                | null                               | 否       |
@@ -135,7 +134,6 @@ Slider(
 | onValueChangeFinished | (() -> Unit)?                               | 值变化结束时调用                                                                                                 | null                               | 否       |
 | height                | Dp                                          | 滑块的高度                                                                                                       | SliderDefaults.MinHeight           | 否       |
 | colors                | SliderColors                                | 滑块的颜色配置                                                                                                   | SliderDefaults.sliderColors()      | 否       |
-
 | hapticEffect          | SliderDefaults.SliderHapticEffect           | 滑块的触感反馈类型                                                                                               | SliderDefaults.DefaultHapticEffect | 否       |
 | showKeyPoints         | Boolean                                     | 是否显示关键点指示器。仅当 keyPoints 不为 null 时有效                                                            | false                              | 否       |
 | keyPoints             | List\<Float\>?                              | 要在滑块上显示的自定义关键点值。如果为 null,则使用 steps 参数的步长位置。值应在 valueRange 范围内                | null                               | 否       |

@@ -158,7 +158,7 @@ Icon(
         .size(48.dp)
         .background(
             color = Color.LightGray.copy(alpha = 0.3f),
-            shape = CircleShape
+            shape = ContinuousCapsule
         )
         .padding(8.dp)
 )

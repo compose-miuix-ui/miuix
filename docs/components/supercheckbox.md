@@ -94,7 +94,7 @@ SuperCheckbox(
 |-------------------| ------------------------------- | ------------------------------------ | ------------------------------------- | -------- |
 | title             | String                          | Title of the checkbox item           | -                                     | Yes      |
 | checked           | Boolean                         | Checkbox checked state               | -                                     | Yes      |
-| onCheckedChange   | ((Boolean) -> Unit)?            | Callback when checkbox state changes | -                                     | Yes      |
+| onCheckedChange   | ((Boolean) -> Unit)?            | Callback when checkbox state changes | -                                     | No       |
 | modifier          | Modifier                        | Modifier applied to component        | Modifier                              | No       |
 | titleColor        | BasicComponentColors            | Title text color configuration       | BasicComponentDefaults.titleColor()   | No       |
 | summary           | String?                         | Summary description                  | null                                  | No       |

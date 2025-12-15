@@ -75,7 +75,7 @@ Scaffold(
 | snackbarHost                 | @Composable () -> Unit              | 用于显示 Snackbar 的容器，Miuix 不提供此组件 | {}                                | 否       |
 | popupHost                    | @Composable () -> Unit              | 用于显示弹出窗口的容器                       | \{ MiuixPopupHost() }             | 否       |
 | containerColor               | Color                               | 脚手架的背景颜色                             | MiuixTheme.colorScheme.surface | 否       |
-| contentWindowInsets          | WindowInsets                        | 传递给内容的窗口插入边距                     | WindowInsets.statusBars           | 否       |
+| contentWindowInsets          | WindowInsets                        | 传递给内容的窗口插入边距                     | WindowInsets.systemBars.union(WindowInsets.displayCutout) | 否       |
 | content                      | @Composable (PaddingValues) -> Unit | 脚手架的主要内容区域                         | -                                 | 是       |
 
 ### FabPosition 选项

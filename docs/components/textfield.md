@@ -117,6 +117,34 @@ TextField(
 | interactionSource     | MutableInteractionSource?                    | Interaction source                  | null                                             | No       |
 | cursorBrush           | Brush                                        | Cursor brush                        | SolidColor(MiuixTheme.colorScheme.primary)       | No       |
 
+### TextField (state-based) Properties
+
+| Property Name         | Type                                           | Description                                        | Default Value                              | Required |
+| --------------------- | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------ | -------- |
+| state                 | TextFieldState                                 | State object holding text and selection            | -                                          | Yes      |
+| modifier              | Modifier                                       | Modifier applied to the input field                | Modifier                                   | No       |
+| insideMargin          | DpSize                                         | Internal padding of input field                    | DpSize(16.dp, 16.dp)                       | No       |
+| backgroundColor       | Color                                          | Background color                                   | MiuixTheme.colorScheme.secondaryContainer  | No       |
+| cornerRadius          | Dp                                             | Corner radius                                      | 16.dp                                      | No       |
+| label                 | String                                         | Label text                                         | ""                                         | No       |
+| labelColor            | Color                                          | Label text color                                   | MiuixTheme.colorScheme.onSecondaryContainer | No       |
+| borderColor           | Color                                          | Border color when focused                          | MiuixTheme.colorScheme.primary             | No       |
+| useLabelAsPlaceholder | Boolean                                        | Use label as placeholder                           | false                                      | No       |
+| enabled               | Boolean                                        | Whether input field is enabled                     | true                                       | No       |
+| readOnly              | Boolean                                        | Whether input field is read-only                   | false                                      | No       |
+| inputTransformation   | InputTransformation?                           | Input transformation                               | null                                       | No       |
+| textStyle             | TextStyle                                      | Text style                                         | MiuixTheme.textStyles.main                 | No       |
+| keyboardOptions       | KeyboardOptions                                | Keyboard options                                   | KeyboardOptions.Default                    | No       |
+| onKeyboardAction      | KeyboardActionHandler?                         | Keyboard action handler                            | null                                       | No       |
+| lineLimits            | TextFieldLineLimits                            | Line limits                                        | TextFieldLineLimits.Default                | No       |
+| leadingIcon           | @Composable (() -> Unit)?                      | Leading icon                                       | null                                       | No       |
+| trailingIcon          | @Composable (() -> Unit)?                      | Trailing icon                                      | null                                       | No       |
+| onTextLayout          | Density.(getResult: () -> TextLayoutResult?) -> Unit | Text layout callback with density receiver    | null                                       | No       |
+| interactionSource     | MutableInteractionSource?                      | Interaction source                                 | null                                       | No       |
+| cursorBrush           | Brush                                          | Cursor brush                                       | SolidColor(borderColor)                    | No       |
+| outputTransformation  | OutputTransformation?                          | Output transformation                              | null                                       | No       |
+| scrollState           | ScrollState                                    | Scroll state                                       | rememberScrollState()                       | No       |
+
 ## Advanced Usage
 
 ### TextField with Icons

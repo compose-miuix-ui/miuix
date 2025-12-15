@@ -60,7 +60,7 @@ SuperSwitch(
 | Property Name   | Type                            | Description                              | Default Value                         | Required |
 | --------------- | ------------------------------- | ---------------------------------------- | ------------------------------------- | -------- |
 | checked         | Boolean                         | Switch checked state                     | -                                     | Yes      |
-| onCheckedChange | ((Boolean) -> Unit)?            | Switch state change callback             | -                                     | Yes      |
+| onCheckedChange | ((Boolean) -> Unit)?            | Switch state change callback             | -                                     | No       |
 | title           | String                          | Switch item title                        | -                                     | Yes      |
 | titleColor      | BasicComponentColors            | Title text color configuration           | BasicComponentDefaults.titleColor()   | No       |
 | summary         | String?                         | Switch item summary                      | null                                  | No       |
