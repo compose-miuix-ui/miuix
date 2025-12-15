@@ -45,8 +45,8 @@
 /* 标题颜色 */
 .VPDoc h1 {
     background: linear-gradient(120deg, var(--miuix-color-primary), var(--miuix-color-primary-container));
-    background-clip: text;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

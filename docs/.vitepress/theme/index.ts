@@ -1,18 +1,18 @@
 import DefaultTheme from 'vitepress/theme'
 
-/* mediumZoom */
 import mediumZoom from 'medium-zoom';
+import giscusTalk from 'vitepress-plugin-comment-with-giscus';
+import { useData, useRoute } from 'vitepress';
 import { onMounted, watch, nextTick, h } from 'vue';
-import { useRoute } from 'vitepress';
 import { NolebaseEnhancedReadabilitiesMenu, NolebaseEnhancedReadabilitiesScreenMenu } from '@nolebase/vitepress-plugin-enhanced-readabilities/client'
 
 import './style/index.css'
 import '@nolebase/vitepress-plugin-enhanced-readabilities/client/style.css'
 
-
 export default {
   extends: DefaultTheme,
 
+  /* Nólëbase Integrations */
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       'nav-bar-content-after': () => h(NolebaseEnhancedReadabilitiesMenu),
@@ -21,9 +21,30 @@ export default {
   },
 
 
-  /* mediumZoom */
   setup() {
+    const { frontmatter } = useData();
     const route = useRoute();
+
+    /* giscus */
+    giscusTalk({
+      repo: 'compose-miuix-ui/miuix-giscus',
+      repoId: 'R_kgDOQo99Eg',
+      category: 'General',
+      categoryId: 'DIC_kwDOQo99Es4Cz0CR',
+      inputPosition: 'bottom',
+      locales: {
+        'zh_CN': 'zh-CN',
+        'en_US': 'en'
+      },
+      homePageShowComment: false,
+    },
+      {
+        frontmatter, route
+      },
+      true
+    );
+
+    /* Medium Zoom */
     const initZoom = () => {
       mediumZoom('.main img', { background: 'var(--vp-c-bg)' });
     };
