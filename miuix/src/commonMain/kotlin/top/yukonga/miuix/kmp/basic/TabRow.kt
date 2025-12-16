@@ -72,8 +72,8 @@ fun TabRow(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
             .then(modifier)
+            .height(height)
     ) {
         val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, 9.dp, this.maxWidth)
 
@@ -134,8 +134,8 @@ fun TabRowWithContour(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
             .then(modifier)
+            .height(height)
     ) {
         val lazyRowAvailableWidth = this.maxWidth - (contourPadding * 2)
         val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, contourPadding, lazyRowAvailableWidth)
@@ -309,7 +309,7 @@ object TabRowDefaults {
     /**
      * The default height of the [TabRow].
      */
-    val TabRowHeight = 54.dp
+    val TabRowHeight = 42.dp
 
     /**
      * The default height of the [TabRowWithContour].

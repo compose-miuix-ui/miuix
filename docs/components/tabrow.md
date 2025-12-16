@@ -79,7 +79,7 @@ The TabRowDefaults object provides default configurations for the TabRow compone
 
 | Constant Name                 | Type | Value | Description                                  |
 | ----------------------------- | ---- | ----- | -------------------------------------------- |
-| TabRowHeight                  | Dp   | 54.dp | Default height of tab row for standard style |
+| TabRowHeight                  | Dp   | 42.dp | Default height of tab row for standard style |
 | TabRowWithContourHeight       | Dp   | 45.dp | Default height of tab row for contour style  |
 | TabRowCornerRadius            | Dp   | 12.dp | Default corner radius for standard style     |
 | TabRowWithContourCornerRadius | Dp   | 8.dp  | Default corner radius for contour style      |
