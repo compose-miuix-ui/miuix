@@ -1,7 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-val isRelease = true
+val isRelease = project.hasProperty("release")
 val baseVersion = "0.7.2"
 
 fun gitShort(): String = try {
