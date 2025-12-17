@@ -21,7 +21,7 @@ kotlin {
     jvmToolchain(21)
     withSourcesJar(true)
 
-    androidLibrary {
+    android {
         namespace = "top.yukonga.miuix.kmp"
     }
 
