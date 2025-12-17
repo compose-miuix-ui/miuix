@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 val isRelease = project.hasProperty("release")
-val baseVersion = "0.7.2"
+val baseVersion = "0.7.3"
 
 fun gitShort(): String = try {
     val p = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
