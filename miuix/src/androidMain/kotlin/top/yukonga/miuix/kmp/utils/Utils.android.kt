@@ -12,15 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.window.layout.WindowMetricsCalculator
 import kotlin.math.max
 import kotlin.math.min
@@ -82,7 +81,7 @@ fun getCornerRadiusBottom(context: Context): Int {
 
 @Composable
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
-    dismissOnBackPress = true,
+    dismissOnBackPress = false,
     dismissOnClickOutside = true,
     usePlatformDefaultWidth = false,
     decorFitsSystemWindows = false

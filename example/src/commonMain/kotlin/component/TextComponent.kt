@@ -49,15 +49,16 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.CheckboxLocation
+import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperCheckbox
 import top.yukonga.miuix.kmp.extra.SuperDialog
-import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
@@ -494,6 +495,7 @@ fun WindowDialogDemo(
             showDialog.value = false
         }
     ) {
+        val dismiss = LocalWindowDialogState.current
         ColorPalette(
             initialColor = dialogSelectedColor.value,
             onColorChanged = { dialogSelectedColor.value = it },
@@ -506,7 +508,7 @@ fun WindowDialogDemo(
             TextButton(
                 text = "Cancel",
                 onClick = {
-                    showDialog.value = false
+                    dismiss?.invoke()
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -514,7 +516,7 @@ fun WindowDialogDemo(
             TextButton(
                 text = "Confirm",
                 onClick = {
-                    showDialog.value = false
+                    dismiss?.invoke()
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
