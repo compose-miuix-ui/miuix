@@ -157,8 +157,8 @@ fun WindowDialog(
         val windowHeight by remember(windowSize, density) {
             derivedStateOf { windowSize.height.dp / density.density }
         }
-        val largeScreen by remember(windowWidth, windowHeight) {
-            derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
+        val largeScreen by remember {
+            derivedStateOf { SuperDialogDefaults.isLargeScreen() }
         }
 
         if (!internalVisible.currentState && !internalVisible.targetState) {
