@@ -54,6 +54,22 @@ fun SuperSpinnerDemo() {
                     SpinnerEntry(title = "Option 3"),
                 )
                 var selectedIndex2 by remember { mutableStateOf(0) }
+
+                // Create a rounded rectangle Painter
+                class RoundedRectanglePainter(
+                    val cornerRadius: Dp = 6.dp
+                ) : Painter() {
+                    override val intrinsicSize = Size.Unspecified
+
+                    override fun DrawScope.onDraw() {
+                        drawRoundRect(
+                            color = Color.White,
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+                        )
+                    }
+                }
+
                 val options2 = listOf(
                     SpinnerEntry(
                         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
@@ -102,20 +118,5 @@ fun SuperSpinnerDemo() {
                 }
             }
         }
-    }
-}
-
-// Create a rounded rectangle Painter
-class RoundedRectanglePainter(
-    private val cornerRadius: Dp = 6.dp
-) : Painter() {
-    override val intrinsicSize = Size.Unspecified
-
-    override fun DrawScope.onDraw() {
-        drawRoundRect(
-            color = Color.White,
-            size = Size(size.width, size.height),
-            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-        )
     }
 }

@@ -30,28 +30,28 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * A dropdown with a title and a summary.
+ * A dropdown with a title and a summary, rendered at window level without `Scaffold`.
  *
- * @param items The options of the [SuperDropdown].
+ * @param items The options of the [WindowDropdown].
  * @param selectedIndex The index of the selected option.
- * @param title The title of the [SuperDropdown].
+ * @param title The title of the [WindowDropdown].
  * @param titleColor The color of the title.
- * @param summary The summary of the [SuperDropdown].
+ * @param summary The summary of the [WindowDropdown].
  * @param summaryColor The color of the summary.
- * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
- * @param leftAction The [Composable] content that on the left side of the [SuperDropdown].
- * @param bottomAction The [Composable] content at the bottom of the [SuperDropdown].
- * @param modifier The modifier to be applied to the [SuperDropdown].
- * @param insideMargin The margin inside the [SuperDropdown].
- * @param maxHeight The maximum height of the [SuperListPopup].
- * @param enabled Whether the [SuperDropdown] is enabled.
- * @param showValue Whether to show the selected value of the [SuperDropdown].
- * @param onClick The callback when the [SuperDropdown] is clicked.
- * @param onSelectedIndexChange The callback when the selected index of the [SuperDropdown] is changed.
+ * @param dropdownColors The [DropdownColors] of the [WindowDropdown].
+ * @param leftAction The [Composable] content that on the left side of the [WindowDropdown].
+ * @param bottomAction The [Composable] content at the bottom of the [WindowDropdown].
+ * @param modifier The modifier to be applied to the [WindowDropdown].
+ * @param insideMargin The margin inside the [WindowDropdown].
+ * @param maxHeight The maximum height of the [WindowListPopup].
+ * @param enabled Whether the [WindowDropdown] is enabled.
+ * @param showValue Whether to show the selected value of the [WindowDropdown].
+ * @param onClick The callback when the [WindowDropdown] is clicked.
+ * @param onSelectedIndexChange The callback when the selected index of the [WindowDropdown] is changed.
  */
 @Composable
 @NonRestartableComposable
-fun SuperDropdown(
+fun WindowDropdown(
     items: List<String>,
     selectedIndex: Int,
     title: String,
@@ -111,7 +111,7 @@ fun SuperDropdown(
                 actionColor = actionColor
             )
             if (itemsNotEmpty) {
-                SuperDropdownPopup(
+                WindowDropdownPopup(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded,
@@ -130,7 +130,7 @@ fun SuperDropdown(
 }
 
 @Composable
-private fun SuperDropdownPopup(
+private fun WindowDropdownPopup(
     items: List<String>,
     selectedIndex: Int,
     isDropdownExpanded: MutableState<Boolean>,
@@ -140,7 +140,7 @@ private fun SuperDropdownPopup(
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
-    SuperListPopup(
+    WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.Right,
         onDismissRequest = {
@@ -148,6 +148,7 @@ private fun SuperDropdownPopup(
         },
         maxHeight = maxHeight
     ) {
+        val dismiss = LocalWindowListPopupState.current
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 key(index) {
@@ -159,7 +160,7 @@ private fun SuperDropdownPopup(
                         onSelectedIndexChange = { selectedIdx ->
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                             onSelectState.value?.invoke(selectedIdx)
-                            isDropdownExpanded.value = false
+                            dismiss()
                         },
                         index = index
                     )

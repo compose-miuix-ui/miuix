@@ -45,9 +45,9 @@ import androidx.navigation.compose.rememberNavController
 import misc.VersionInfo
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -59,10 +59,12 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.example.generated.resources.Res
 import top.yukonga.miuix.kmp.example.generated.resources.ic_launcher
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
 import top.yukonga.miuix.kmp.icon.icons.useful.Edit
@@ -219,7 +221,10 @@ fun FourthPage(
                                         }
                                     )
                                 },
-                                actions = { AboutTopBarActions() }
+                                actions = {
+                                    AboutTopBarActionsWithSuperListPopup()
+                                    AboutTopBarActionsWithWindowListPopup()
+                                }
                             )
                         } else {
                             TopAppBar(
@@ -233,7 +238,10 @@ fun FourthPage(
                                         }
                                     )
                                 },
-                                actions = { AboutTopBarActions() }
+                                actions = {
+                                    AboutTopBarActionsWithSuperListPopup()
+                                    AboutTopBarActionsWithWindowListPopup()
+                                }
                             )
                         }
                     }
@@ -556,7 +564,7 @@ fun BackNavigationIcon(
 }
 
 @Composable
-fun AboutTopBarActions() {
+fun AboutTopBarActionsWithSuperListPopup() {
     val showTopPopup = remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
@@ -567,11 +575,11 @@ fun AboutTopBarActions() {
     ) {
         Icon(
             imageVector = MiuixIcons.Useful.Edit,
-            contentDescription = "Test 1",
+            contentDescription = "SuperListPopup",
             tint = colorScheme.onBackground
         )
     }
-    ListPopup(
+    SuperListPopup(
         show = showTopPopup,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = PopupPositionProvider.Align.TopRight,
@@ -579,7 +587,7 @@ fun AboutTopBarActions() {
             showTopPopup.value = false
         }
     ) {
-        val items = listOf("Option 1", "Option 2", "Option 3")
+        val items = listOf("Super 1", "Super 2", "Super 3")
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 key(index) {
@@ -591,6 +599,52 @@ fun AboutTopBarActions() {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                             selectedIndex = selectedIdx
                             showTopPopup.value = false
+                        },
+                        index = index
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AboutTopBarActionsWithWindowListPopup() {
+    val showTopPopup = remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(0) }
+    val hapticFeedback = LocalHapticFeedback.current
+    IconButton(
+        modifier = Modifier.padding(end = 16.dp),
+        onClick = { showTopPopup.value = true },
+        holdDownState = showTopPopup.value
+    ) {
+        Icon(
+            imageVector = MiuixIcons.Useful.Edit,
+            contentDescription = "WindowListPopup",
+            tint = colorScheme.onBackground
+        )
+    }
+    WindowListPopup(
+        show = showTopPopup,
+        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
+        alignment = PopupPositionProvider.Align.TopRight,
+        onDismissRequest = {
+            showTopPopup.value = false
+        }
+    ) {
+        val state = LocalWindowListPopupState.current
+        val items = listOf("Window 1", "Window 2", "Window 3")
+        ListPopupColumn {
+            items.forEachIndexed { index, string ->
+                key(index) {
+                    DropdownImpl(
+                        text = string,
+                        optionSize = items.size,
+                        isSelected = selectedIndex == index,
+                        onSelectedIndexChange = { selectedIdx ->
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                            selectedIndex = selectedIdx
+                            state.invoke()
                         },
                         index = index
                     )

@@ -326,9 +326,6 @@ object WindowDialogDefaults {
     val insideMargin = DpSize(24.dp, 24.dp)
 }
 
-/**
- * CompositionLocal that provides a dismiss request function for [WindowDialog].
- *
- * Call the provided function to request dismissal from inside dialog content.
- */
-val LocalWindowDialogState = staticCompositionLocalOf<(() -> Unit)?> { null }
+val LocalWindowDialogState = staticCompositionLocalOf<() -> Unit> {
+    error("LocalWindowDialogState not provided")
+}

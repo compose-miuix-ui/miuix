@@ -80,16 +80,6 @@ val options = listOf(
         title = "蓝色主题",
         summary = "沉稳冷静的蓝色"
     ),
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
-        title = "绿色主题",
-        summary = "清新自然的绿色"
-    ),
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) }, 
-        title = "黄色主题",
-        summary = "明亮活泼的黄色"
-    )
 )
 
 Scaffold {
@@ -120,14 +110,14 @@ SuperSpinner(
 
 ## 对话框模式
 
-### 将下拉菜单显示在对话框中
+SuperSpinner 还支持对话框模式，适用于显示较多选项或需要更醒目的选择界面时。通过提供 `dialogButtonString` 参数即可激活此模式。
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(title = "选项 1"),
-    SpinnerEntry(title = "选项 2"),
-    SpinnerEntry(title = "选项 3")
+    SpinnerEntry(title = "选项 A"),
+    SpinnerEntry(title = "选项 B"),
+    SpinnerEntry(title = "选项 C")
 )
 
 Scaffold {
@@ -195,202 +185,12 @@ Scaffold {
 
 ### SpinnerColors 属性
 
-| 属性名                  | 类型  | 说明                 |
-| ----------------------- | ----- | -------------------- |
-| contentColor            | Color | 选项标题颜色         |
-| summaryColor            | Color | 选项摘要颜色         |
-| containerColor          | Color | 选项背景颜色         |
-| selectedContentColor    | Color | 选中项标题颜色       |
-| selectedSummaryColor    | Color | 选中项摘要颜色       |
-| selectedContainerColor  | Color | 选中项背景颜色       |
-| selectedIndicatorColor  | Color | 选中指示图标颜色     |
-
-## 进阶用法
-
-### 自定义颜色
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "红色"),
-    SpinnerEntry(title = "绿色"),
-    SpinnerEntry(title = "蓝色")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "自定义颜色",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        spinnerColors = SpinnerDefaults.spinnerColors(
-            contentColor = MiuixTheme.colorScheme.onSurface,
-            summaryColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-            containerColor = MiuixTheme.colorScheme.surface,
-            selectedContentColor = Color.Red,
-            selectedSummaryColor = Color.Red,
-            selectedContainerColor = Color.Red.copy(alpha = 0.12f),
-            selectedIndicatorColor = Color.Red
-        )
-    )
-}
-```
-
-### 自定义左侧内容
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "红色"),
-    SpinnerEntry(title = "绿色"),
-    SpinnerEntry(title = "蓝色")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "自定义左侧内容",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        leftAction = {
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .background(
-                        when (selectedIndex) {
-                            0 -> Color.Red
-                            1 -> Color.Green
-                            else -> Color.Blue
-                        },
-                        shape = ContinuousCapsule
-                    )
-            )
-            Spacer(Modifier.width(8.dp))
-        }
-    )
-}
-```
-
-### 限制下拉菜单高度
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = List(20) { SpinnerEntry(title = "选项 ${it + 1}") }
-
-Scaffold {
-    SuperSpinner(
-        title = "限制高度",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        maxHeight = 300.dp // 限制下拉菜单最大高度为300dp
-    )
-}
-```
-
-### 隐藏选中值显示
-
-```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val options = listOf(
-    SpinnerEntry(title = "选项 1"),
-    SpinnerEntry(title = "选项 2"),
-    SpinnerEntry(title = "选项 3")
-)
-
-Scaffold {
-    SuperSpinner(
-        title = "隐藏选中值",
-        items = options,
-        selectedIndex = selectedIndex,
-        onSelectedIndexChange = { selectedIndex = it },
-        showValue = false // 隐藏选中值显示
-    )
-}
-```
-
-### 结合对话框使用
-
-```kotlin
-// 创建一个圆角矩形的 Painter
-class RoundedRectanglePainter(
-    private val cornerRadius: Dp = 6.dp
-) : Painter() {
-    override val intrinsicSize = Size.Unspecified
-
-    override fun DrawScope.onDraw() {
-        drawRoundRect(
-            color = Color.White,
-            size = Size(size.width, size.height),
-            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-        )
-    }
-}
-
-var showDialog = remember { mutableStateOf(false) }
-var selectedIndex by remember { mutableStateOf(0) }
-val colorOptions = listOf(
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
-        title = "红色主题",
-        summary = "活力四射的红色"
-    ),
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
-        title = "蓝色主题",
-        summary = "沉稳冷静的蓝色"
-    ),
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
-        title = "绿色主题",
-        summary = "清新自然的绿色"
-    ),
-    SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) }, 
-        title = "黄色主题",
-        summary = "明亮活泼的黄色"
-    )
-)
-
-Scaffold {
-    SuperArrow(
-        title = "主题颜色",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
-    )
-    
-    SuperDialog(
-        title = "主题颜色设置",
-        show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
-    ) {
-        Card {
-            SuperSpinner(
-                title = "选择主题颜色",
-                summary = "选择您喜欢的主题颜色",
-                items = colorOptions,
-                selectedIndex = selectedIndex,
-                onSelectedIndexChange = { selectedIndex = it }
-            )
-        }
-        
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(top = 12.dp)
-        ) {
-            TextButton(
-                text = "取消",
-                onClick = { showDialog.value = false }, // 关闭对话框
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(16.dp))
-            TextButton(
-                text = "确认",
-                onClick = { showDialog.value = false }, // 关闭对话框
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary() // 使用主题颜色
-            )
-        }
-    }
-}
-```
+| 属性名                 | 类型  | 说明             |
+| ---------------------- | ----- | ---------------- |
+| contentColor           | Color | 选项标题颜色     |
+| summaryColor           | Color | 选项摘要颜色     |
+| containerColor         | Color | 选项背景颜色     |
+| selectedContentColor   | Color | 选中项标题颜色   |
+| selectedSummaryColor   | Color | 选中项摘要颜色   |
+| selectedContainerColor | Color | 选中项背景颜色   |
+| selectedIndicatorColor | Color | 选中指示图标颜色 |

@@ -64,16 +64,19 @@ private val availableComponents = listOf(
     AvailableComponent("SearchBar", "searchBar") { SearchBarDemo() },
     AvailableComponent("ColorPicker", "colorPicker") { ColorPickerDemo() },
     AvailableComponent("ColorPalette", "colorPalette") { ColorPaletteDemo() },
-    AvailableComponent("ListPopup", "listPopup") { ListPopupDemo() },
     AvailableComponent("SuperArrow", "superArrow") { SuperArrowDemo() },
     AvailableComponent("SuperSwitch", "superSwitch") { SuperSwitchDemo() },
     AvailableComponent("SuperCheckbox", "superCheckbox") { SuperCheckboxDemo() },
+    AvailableComponent("SuperListPopup", "superListPopup") { SuperListPopupDemo() },
     AvailableComponent("SuperDropdown", "superDropdown") { SuperDropdownDemo() },
     AvailableComponent("SuperSpinner", "superSpinner") { SuperSpinnerDemo() },
-    AvailableComponent("SuperDialog", "superDialog") { SuperDialogDemo() },
-    AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
     AvailableComponent("SuperBottomSheet", "superBottomSheet") { SuperBottomSheetDemo() },
+    AvailableComponent("SuperDialog", "superDialog") { SuperDialogDemo() },
+    AvailableComponent("WindowListPopup", "windowListPopup") { WindowListPopupDemo() },
+    AvailableComponent("WindowDropdown", "windowDropdown") { WindowDropdownDemo() },
+    AvailableComponent("WindowSpinner", "windowSpinner") { WindowSpinnerDemo() },
     AvailableComponent("WindowBottomSheet", "windowBottomSheet") { WindowBottomSheetDemo() },
+    AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
 )
 
 @Composable

@@ -38,17 +38,21 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [SearchBar](../components/searchbar)                       | Search input field                         | Content search, quick find            |
 | [ColorPalette](../components/colorpalette)                 | Grid palette with alpha slider             | Theme settings, color selection       |
 | [ColorPicker](../components/colorpicker)                   | Color selection control                    | Theme settings, color selection       |
-| [ListPopup](../components/listpopup)                       | List popup window component (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list        |
 
 ## Extended Components
 
-| Component                                    | Description                                | Common Usage                           |
-| -------------------------------------------- | ------------------------------------------ | -------------------------------------- |
-| [SuperArrow](../components/superarrow)       | Arrow component based on BasicComponent    | Clickable indication, navigation hints |
-| [SuperSwitch](../components/superswitch)     | Switch component based on BasicComponent   | Setting switches, feature enabling     |
-| [SuperCheckbox](../components/supercheckbox) | Checkbox component based on BasicComponent | Multiple selection, terms agreement    |
-| [SuperDropdown](../components/superdropdown) | Dropdown menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list         |
-| [SuperSpinner](../components/superspinner)   | Advanced menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Advanced options, feature list         |
-| [SuperDialog](../components/superdialog)     | Dialog window based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Prompts, action confirmation           |
-| [WindowDialog](../components/windowdialog)   | Window-level dialog component              | Prompts, action confirmation           |
-| [SuperBottomSheet](../components/superbottomsheet) | Bottom sheet based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Bottom drawer, additional options      |
+| Component                                            | Description                                                                              | Common Usage                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------- |
+| [SuperArrow](../components/superarrow)               | Arrow component based on BasicComponent                                                  | Clickable indication, navigation hints |
+| [SuperSwitch](../components/superswitch)             | Switch component based on BasicComponent                                                 | Setting switches, feature enabling     |
+| [SuperCheckbox](../components/supercheckbox)         | Checkbox component based on BasicComponent                                               | Multiple selection, terms agreement    |
+| [SuperListPopup](../components/superlistpopup)       | List popup component based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list         |
+| [SuperDropdown](../components/superdropdown)         | Dropdown menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Option selection, feature list         |
+| [SuperSpinner](../components/superspinner)           | Advanced menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Advanced options, feature list         |
+| [SuperBottomSheet](../components/superbottomsheet)   | Bottom sheet based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)         | Bottom drawer, additional options      |
+| [SuperDialog](../components/superdialog)             | Dialog window based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Prompts, action confirmation           |
+| [WindowListPopup](../components/windowlistpopup)     | Window-level list popup component                                                        | Option selection, feature list         |
+| [WindowDropdown](../components/windowdropdown)       | Window-level dropdown menu component                                                     | Option selection, feature list         |
+| [WindowSpinner](../components/windowspinner)         | Window-level advanced menu component                                                     | Advanced options, feature list         |
+| [WindowBottomSheet](../components/windowbottomsheet) | Window-level bottom sheet component                                                      | Bottom drawer, additional options      |
+| [WindowDialog](../components/windowdialog)           | Window-level dialog component                                                            | Prompts, action confirmation           |
