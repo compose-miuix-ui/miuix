@@ -38,7 +38,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [SearchBar](../components/searchbar)                       | 执行搜索的输入框       | 内容搜索、快速查找   |
 | [ColorPalette](../components/colorpalette)                 | 网格调色盘（含透明度） | 主题设置、颜色选择   |
 | [ColorPicker](../components/colorpicker)                   | 选择颜色的控件         | 主题设置、颜色选择   |
-| [ListPopup](../components/listpopup)                       | 列表弹出窗口组件       | 选项选择、功能列表   |
+| [ListPopup](../components/listpopup)                       | 列表弹出窗口组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表   |
 
 ## 扩展组件
 
@@ -47,7 +47,8 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [SuperArrow](../components/superarrow)       | 基于 BasicComponent 的带箭头组件   | 指示可点击、导航提示   |
 | [SuperSwitch](../components/superswitch)     | 基于 BasicComponent 的开关组件     | 设置项开关、功能启用   |
 | [SuperCheckbox](../components/supercheckbox) | 基于 BasicComponent 的复选框组件   | 多项选择、条款同意     |
-| [SuperDropdown](../components/superdropdown) | 基于 BasicComponent 的下拉菜单组件 | 选项选择、功能列表     |
-| [SuperSpinner](../components/superspinner)   | 基于 BasicComponent 的高级菜单组件 | 进阶选项选择、功能列表 |
-| [SuperDialog](../components/superdialog)     | 基于 BasicComponent 的对话弹窗组件 | 提示、确认操作         |
-| [SuperBottomSheet](../components/superbottomsheet) | 基于 BasicComponent 的底部抽屉组件 | 底部抽屉、附加选项     |
+| [SuperDropdown](../components/superdropdown) | 基于 BasicComponent 的下拉菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
+| [SuperSpinner](../components/superspinner)   | 基于 BasicComponent 的高级菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 进阶选项选择、功能列表 |
+| [SuperDialog](../components/superdialog)     | 基于 BasicComponent 的对话弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 提示、确认操作         |
+| [WindowDialog](../components/windowdialog)   | 窗口级对话框组件                   | 提示、确认操作         |
+| [SuperBottomSheet](../components/superbottomsheet) | 基于 BasicComponent 的底部抽屉组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 底部抽屉、附加选项     |

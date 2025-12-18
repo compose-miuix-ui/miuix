@@ -70,6 +70,7 @@ private val availableComponents = listOf(
     AvailableComponent("SuperCheckbox", "superCheckbox") { SuperCheckboxDemo() },
     AvailableComponent("SuperDropdown", "superDropdown") { SuperDropdownDemo() },
     AvailableComponent("SuperSpinner", "superSpinner") { SuperSpinnerDemo() },
+    AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
     AvailableComponent("SuperDialog", "superDialog") { SuperDialogDemo() },
     AvailableComponent("SuperBottomSheet", "superBottomSheet") { SuperBottomSheetDemo() },
 )

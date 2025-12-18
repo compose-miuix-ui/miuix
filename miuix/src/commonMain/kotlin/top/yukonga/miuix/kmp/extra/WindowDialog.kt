@@ -75,6 +75,24 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
 
+/**
+ * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
+ *
+ * Use [LocalWindowDialogState] inside `content` to request dismissal from inner composables.
+ *
+ * @param show The show state of the [WindowDialog].
+ * @param modifier The modifier to be applied to the [WindowDialog].
+ * @param title The title of the [WindowDialog].
+ * @param titleColor The color of the title.
+ * @param summary The summary of the [WindowDialog].
+ * @param summaryColor The color of the summary.
+ * @param backgroundColor The background color of the [WindowDialog].
+ * @param onDismissRequest The callback when the [WindowDialog] is dismissed.
+ * @param outsideMargin The margin outside the [WindowDialog].
+ * @param insideMargin The margin inside the [WindowDialog].
+ * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [WindowDialog].
+ * @param content The [Composable] content of the [WindowDialog].
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WindowDialog(
@@ -310,6 +328,15 @@ fun WindowDialog(
     }
 }
 
+/**
+ * Remembers the default enter transition for [WindowDialog].
+ *
+ * - Large screen: fade + scale-in.
+ * - Small screen: slide-in from bottom.
+ *
+ * @param largeScreen Whether current window is considered large screen.
+ * @return The enter [EnterTransition] for dialog content.
+ */
 @Composable
 private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
     return remember(largeScreen) {
@@ -329,6 +356,15 @@ private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTra
     }
 }
 
+/**
+ * Remembers the default exit transition for [WindowDialog].
+ *
+ * - Large screen: fade + scale-out.
+ * - Small screen: slide-out to bottom.
+ *
+ * @param largeScreen Whether current window is considered large screen.
+ * @return The exit [ExitTransition] for dialog content.
+ */
 @Composable
 private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition {
     return remember(largeScreen) {
@@ -348,9 +384,20 @@ private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTrans
     }
 }
 
+/**
+ * Default enter transition for dim layer of [WindowDialog].
+ */
 private val DialogDimEnter: EnterTransition =
     fadeIn(animationSpec = tween(300, easing = SinOutEasing))
+/**
+ * Default exit transition for dim layer of [WindowDialog].
+ */
 private val DialogDimExit: ExitTransition =
     fadeOut(animationSpec = tween(250, easing = SinOutEasing))
 
+/**
+ * CompositionLocal that provides a dismiss request function for [WindowDialog].
+ *
+ * Call the provided function to request dismissal from inside dialog content.
+ */
 val LocalWindowDialogState = staticCompositionLocalOf<(() -> Unit)?> { null }

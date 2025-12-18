@@ -49,5 +49,11 @@ expect fun getRoundedCorner(): Dp
 @Composable
 expect fun platformDialogProperties(): DialogProperties
 
+/**
+ * Removes platform default dialog effects such as window animations and dimming.
+ *
+ * Platform implementations should clear default window animations and dim amount to ensure
+ * Miuix custom dialog animations and dim layer behave consistently across devices.
+ */
 @Composable
 expect fun removePlatformDialogDefaultEffects()
