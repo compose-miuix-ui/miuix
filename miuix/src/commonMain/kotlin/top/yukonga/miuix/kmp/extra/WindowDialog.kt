@@ -138,9 +138,11 @@ fun WindowDialog(
     val outsideDismissDeferred = remember { mutableStateOf(false) }
     val currentOnDismissInternal by rememberUpdatedState(onDismissRequest)
 
-    fun requestDismiss() {
-        dismissPending.value = true
-        internalVisible.targetState = false
+    val requestDismiss: () -> Unit = remember {
+        {
+            dismissPending.value = true
+            internalVisible.targetState = false
+        }
     }
 
     Dialog(
