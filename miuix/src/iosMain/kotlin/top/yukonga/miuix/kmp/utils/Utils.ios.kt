@@ -7,9 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.UIKit.UIScreen
@@ -34,3 +37,13 @@ actual fun platform(): Platform = Platform.IOS
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun platformDialogProperties(): DialogProperties = DialogProperties(
+    usePlatformDefaultWidth = false,
+    scrimColor = Color.Transparent
+)
+
+@Composable
+actual fun removePlatformDialogDefaultEffects() {}

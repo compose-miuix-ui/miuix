@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.RoundedCorner
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -17,6 +18,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.window.layout.WindowMetricsCalculator
 import kotlin.math.max
 import kotlin.math.min
@@ -74,4 +77,21 @@ private fun getSystemCornerRadius(): Dp {
 fun getCornerRadiusBottom(context: Context): Int {
     val resourceId = context.resources.getIdentifier("rounded_corner_radius_bottom", "dimen", "android")
     return if (resourceId > 0) context.resources.getDimensionPixelSize(resourceId) else 0
+}
+
+@Composable
+actual fun platformDialogProperties(): DialogProperties = DialogProperties(
+    dismissOnBackPress = false,
+    usePlatformDefaultWidth = false,
+    decorFitsSystemWindows = false
+)
+
+@Composable
+actual fun removePlatformDialogDefaultEffects() {
+    val parent = LocalView.current.parent
+    val provider = parent as? DialogWindowProvider
+    val window = provider?.window
+    window?.setWindowAnimations(0)
+    window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    window?.setDimAmount(0f)
 }

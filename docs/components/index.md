@@ -38,7 +38,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [SearchBar](../components/searchbar)                       | Search input field                         | Content search, quick find            |
 | [ColorPalette](../components/colorpalette)                 | Grid palette with alpha slider             | Theme settings, color selection       |
 | [ColorPicker](../components/colorpicker)                   | Color selection control                    | Theme settings, color selection       |
-| [ListPopup](../components/listpopup)                       | List popup window component                | Option selection, feature list        |
+| [ListPopup](../components/listpopup)                       | List popup window component (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list        |
 
 ## Extended Components
 
@@ -47,7 +47,8 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [SuperArrow](../components/superarrow)       | Arrow component based on BasicComponent    | Clickable indication, navigation hints |
 | [SuperSwitch](../components/superswitch)     | Switch component based on BasicComponent   | Setting switches, feature enabling     |
 | [SuperCheckbox](../components/supercheckbox) | Checkbox component based on BasicComponent | Multiple selection, terms agreement    |
-| [SuperDropdown](../components/superdropdown) | Dropdown menu based on BasicComponent      | Option selection, feature list         |
-| [SuperSpinner](../components/superspinner)   | Advanced menu based on BasicComponent      | Advanced options, feature list         |
-| [SuperDialog](../components/superdialog)     | Dialog window based on BasicComponent      | Prompts, action confirmation           |
-| [SuperBottomSheet](../components/superbottomsheet) | Bottom sheet based on BasicComponent       | Bottom drawer, additional options      |
+| [SuperDropdown](../components/superdropdown) | Dropdown menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list         |
+| [SuperSpinner](../components/superspinner)   | Advanced menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Advanced options, feature list         |
+| [SuperDialog](../components/superdialog)     | Dialog window based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Prompts, action confirmation           |
+| [WindowDialog](../components/windowdialog)   | Window-level dialog component              | Prompts, action confirmation           |
+| [SuperBottomSheet](../components/superbottomsheet) | Bottom sheet based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Bottom drawer, additional options      |

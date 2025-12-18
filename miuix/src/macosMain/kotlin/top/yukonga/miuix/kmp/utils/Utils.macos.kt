@@ -8,9 +8,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
@@ -31,3 +33,13 @@ actual fun platform(): Platform = Platform.MacOS
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun platformDialogProperties(): DialogProperties = DialogProperties(
+    usePlatformDefaultWidth = false,
+    scrimColor = Color.Transparent
+)
+
+@Composable
+actual fun removePlatformDialogDefaultEffects() {}
