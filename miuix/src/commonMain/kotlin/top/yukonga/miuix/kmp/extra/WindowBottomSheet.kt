@@ -122,7 +122,9 @@ fun WindowBottomSheet(
 
     Dialog(
         onDismissRequest = {
-            requestDismiss()
+            if (allowDismiss) {
+                requestDismiss()
+            }
         },
         properties = platformDialogProperties()
     ) {
