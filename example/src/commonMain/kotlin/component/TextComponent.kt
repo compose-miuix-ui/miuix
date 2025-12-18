@@ -47,6 +47,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.CheckboxLocation
+import top.yukonga.miuix.kmp.extra.LocalWindowBottomSheetState
 import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperArrow
@@ -56,6 +57,7 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.extra.WindowBottomSheet
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
@@ -66,7 +68,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun TextComponent(
     showSuperDialog: MutableState<Boolean>,
     showWindowDialog: MutableState<Boolean>,
-    showBottomSheet: MutableState<Boolean>,
+    showSuperBottomSheet: MutableState<Boolean>,
+    showWindowBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>,
     checkbox: MutableState<Boolean>,
@@ -215,9 +218,18 @@ fun TextComponent(
             title = "Arrow",
             summary = "Click to show a SuperBottomSheet",
             onClick = {
-                showBottomSheet.value = true
+                showSuperBottomSheet.value = true
             },
-            holdDownState = showBottomSheet.value
+            holdDownState = showSuperBottomSheet.value
+        )
+
+        SuperArrow(
+            title = "Arrow",
+            summary = "Click to show a WindowBottomSheet",
+            onClick = {
+                showWindowBottomSheet.value = true
+            },
+            holdDownState = showWindowBottomSheet.value
         )
 
         SuperArrow(
@@ -431,7 +443,8 @@ fun TextComponent(
     SuperDialog(showSuperDialog)
     WindowDialog(showWindowDialog)
     SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
-    BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
+    SuperBottomSheet(showSuperBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
+    WindowBottomSheet(showWindowBottomSheet, bottomSheetSuperSwitchState)
 }
 
 @Composable
@@ -557,7 +570,7 @@ fun SliderDialog(
 }
 
 @Composable
-fun BottomSheet(
+fun SuperBottomSheet(
     showBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>
@@ -612,6 +625,76 @@ fun BottomSheet(
                         selectedIndex = bottomSheetDropdownSelectedOption.value,
                         onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
                     )
+                    SuperSwitch(
+                        title = "Switch",
+                        checked = bottomSheetSuperSwitchState.value,
+                        onCheckedChange = {
+                            bottomSheetSuperSwitchState.value = it
+                        }
+                    )
+                }
+                Spacer(
+                    Modifier.padding(
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WindowBottomSheet(
+    showBottomSheet: MutableState<Boolean>,
+    bottomSheetSuperSwitchState: MutableState<Boolean>
+) {
+    listOf("Option 1", "Option 2")
+    var state: (() -> Unit)? = null
+    WindowBottomSheet(
+        title = "WindowBottomSheet",
+        show = showBottomSheet,
+        onDismissRequest = {
+            showBottomSheet.value = false
+        },
+        leftAction = {
+            IconButton(
+                onClick = { state?.invoke() },
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Useful.Cancel,
+                    contentDescription = "Cancel",
+                    tint = MiuixTheme.colorScheme.onBackground
+                )
+            }
+        },
+        rightAction = {
+            IconButton(
+                onClick = { state?.invoke() },
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Useful.Confirm,
+                    contentDescription = "Confirm",
+                    tint = MiuixTheme.colorScheme.onBackground
+                )
+            }
+        }
+    ) {
+        state = LocalWindowBottomSheetState.current
+        LazyColumn {
+            item {
+                var sliderValue by remember { mutableStateOf(0.5f) }
+                Slider(
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                Card(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.secondaryContainer,
+                    )
+                ) {
                     SuperSwitch(
                         title = "Switch",
                         checked = bottomSheetSuperSwitchState.value,

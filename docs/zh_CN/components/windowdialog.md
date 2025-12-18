@@ -1,3 +1,13 @@
+---
+title: WindowDialog
+requiresScaffoldHost: false
+prerequisites:
+  - 可以在任何地方使用，不需要 `Scaffold` 或 `MiuixPopupHost`
+  - 在窗口层级渲染
+hostComponent: None
+popupHost: None
+---
+
 # WindowDialog
 
 `WindowDialog` 是一个窗口级对话框组件。它基于平台 `Dialog` 渲染，无需依赖 `Scaffold` 或 `MiuixPopupHost`。支持大屏优化动效、系统返回手势关闭，以及在内容内部通过组合局部触发关闭。
@@ -7,7 +17,7 @@
     </div>
 
 ::: tip 提示
-该组件不依赖 `Scaffold`，可在任意可组合作用域中使用。
+该组件不依赖 `Scaffold`，可在任意 Composable 作用域中使用。
 :::
 
 ## 导入

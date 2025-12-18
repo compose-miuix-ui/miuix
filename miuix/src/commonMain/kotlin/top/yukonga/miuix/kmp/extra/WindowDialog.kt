@@ -20,19 +20,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.captionBarPadding
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -47,30 +37,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.PredictiveBackHandler
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.anim.SinOutEasing
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getRoundedCorner
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
@@ -159,7 +139,6 @@ fun WindowDialog(
         val windowHeight by remember(windowSize, density) {
             derivedStateOf { windowSize.height.dp / density.density }
         }
-        val isLargeScreen = WindowDialogDefaults.isLargeScreen()
 
         if (!internalVisible.currentState && !internalVisible.targetState) {
             internalVisible.targetState = true
@@ -196,112 +175,31 @@ fun WindowDialog(
             enter = enterTransition,
             exit = effectiveExitTransition
         ) {
-            val roundedCorner = getRoundedCorner()
-            val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
-                derivedStateOf {
-                    if (roundedCorner != 0.dp) roundedCorner - outsideMargin.width else 32.dp
-                }
-            }
-
-            val rootBoxModifier = Modifier
-                .then(
-                    if (defaultWindowInsetsPadding)
-                        Modifier
-                            .imePadding()
-                            .navigationBarsPadding()
-                            .captionBarPadding()
-                    else
-                        Modifier
-                )
-                .fillMaxSize()
-                .pointerInput(internalVisible.currentState) {
-                    detectTapGestures(
-                        onTap = {
-                            if (internalVisible.currentState) {
-                                requestDismiss()
-                            } else {
-                                outsideDismissDeferred.value = true
-                            }
-                        }
-                    )
-                }
-                .padding(horizontal = outsideMargin.width)
-                .padding(bottom = outsideMargin.height)
-
-            val columnModifier = modifier
-                .widthIn(max = 420.dp)
-                .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
-                .onGloballyPositioned { coordinates ->
-                    dialogHeightPx.value = coordinates.size.height
-                }
-                .then(
-                    // Apply predictive back animation
-                    if (isLargeScreen) {
-                        // Large screen
-                        Modifier.graphicsLayer {
-                            val scale = 1f - (backProgress.value * 0.2f)
-                            scaleX = scale
-                            scaleY = scale
-                        }
+            SuperDialogContent(
+                modifier = modifier,
+                title = title,
+                titleColor = titleColor,
+                summary = summary,
+                summaryColor = summaryColor,
+                backgroundColor = backgroundColor,
+                outsideMargin = outsideMargin,
+                insideMargin = insideMargin,
+                defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+                backProgress = backProgress,
+                dialogHeightPx = dialogHeightPx,
+                onDismissRequest = {
+                    if (internalVisible.currentState) {
+                        requestDismiss()
                     } else {
-                        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                                WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-                        val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
-                            derivedStateOf {
-                                bottomPadding + outsideMargin.height
-                            }
-                        }
-                        // Small screen
-                        Modifier.graphicsLayer {
-                            val maxOffset = if (dialogHeightPx.value > 0) {
-                                dialogHeightPx.value.toFloat() + extraBottomPadding.toPx()
-                            } else {
-                                500f
-                            }
-                            translationY = backProgress.value * maxOffset
-                        }
+                        outsideDismissDeferred.value = true
                     }
-                )
-                .pointerInput(Unit) {
-                    detectTapGestures { /* Consume click to prevent dismissal */ }
-                }
-                .clip(ContinuousRoundedRectangle(bottomCornerRadius))
-                .background(backgroundColor)
-                .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
-
-            Box(
-                modifier = rootBoxModifier
-            ) {
-                val contentAlignment by remember(isLargeScreen) {
-                    derivedStateOf { if (isLargeScreen) Alignment.Center else Alignment.BottomCenter }
-                }
-                Column(
-                    modifier = columnModifier.align(contentAlignment)
-                ) {
-                    title?.let {
-                        Text(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            text = it,
-                            fontSize = MiuixTheme.textStyles.title4.fontSize,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            color = titleColor
-                        )
-                    }
-                    summary?.let {
-                        Text(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            text = it,
-                            fontSize = MiuixTheme.textStyles.body1.fontSize,
-                            textAlign = TextAlign.Center,
-                            color = summaryColor
-                        )
-                    }
+                },
+                content = {
                     CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
                         content()
                     }
                 }
-            }
+            )
         }
         PredictiveBackHandler(
             enabled = show.value
@@ -412,18 +310,18 @@ object WindowDialogDefaults {
     fun summaryColor() = MiuixTheme.colorScheme.onSurfaceSecondary
 
     /**
-     * The default background color of the [SuperDialog].
+     * The default background color of the [WindowDialog].
      */
     @Composable
     fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**
-     * The default margin outside the [SuperDialog].
+     * The default margin outside the [WindowDialog].
      */
     val outsideMargin = DpSize(12.dp, 12.dp)
 
     /**
-     * The default margin inside the [SuperDialog].
+     * The default margin inside the [WindowDialog].
      */
     val insideMargin = DpSize(24.dp, 24.dp)
 }

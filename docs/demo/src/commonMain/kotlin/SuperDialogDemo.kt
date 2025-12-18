@@ -42,11 +42,11 @@ fun SuperDialogDemo() {
                 val showDialog = remember { mutableStateOf(false) }
                 Card {
                     TextButton(
-                        text = "Show a Dialog",
+                        text = "Show a SuperDialog",
                         onClick = { showDialog.value = true }
                     )
                     SuperDialog(
-                        title = "Dialog Title",
+                        title = "SuperDialog Title",
                         summary = "This is a basic dialog example that can contain various content.",
                         show = showDialog,
                         onDismissRequest = { showDialog.value = false } // Close dialog
