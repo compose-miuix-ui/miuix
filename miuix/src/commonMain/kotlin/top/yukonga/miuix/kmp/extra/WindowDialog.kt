@@ -119,7 +119,7 @@ fun WindowDialog(
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
     val imeBottom = imeInsets.getBottom(density)
-    val isLargeScreen = SuperDialogDefaults.isLargeScreen()
+    val isLargeScreen = WindowDialogDefaults.isLargeScreen()
     val enterTransition = rememberDefaultDialogEnterTransition(isLargeScreen)
     val exitTransitionNullable: ExitTransition? = remember(isLargeScreen, imeBottom) {
         if (!isLargeScreen && imeBottom > 0) {
@@ -197,10 +197,10 @@ fun WindowDialog(
             exit = effectiveExitTransition
         ) {
             val roundedCorner = getRoundedCorner()
-            val bottomCornerRadius = if (roundedCorner != 0.dp) {
-                roundedCorner - outsideMargin.width
-            } else {
-                32.dp
+            val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
+                derivedStateOf {
+                    if (roundedCorner != 0.dp) roundedCorner - outsideMargin.width else 32.dp
+                }
             }
 
             val rootBoxModifier = Modifier
@@ -235,7 +235,9 @@ fun WindowDialog(
                     dialogHeightPx.value = coordinates.size.height
                 }
                 .then(
+                    // Apply predictive back animation
                     if (isLargeScreen) {
+                        // Large screen
                         Modifier.graphicsLayer {
                             val scale = 1f - (backProgress.value * 0.2f)
                             scaleX = scale
@@ -249,6 +251,7 @@ fun WindowDialog(
                                 bottomPadding + outsideMargin.height
                             }
                         }
+                        // Small screen
                         Modifier.graphicsLayer {
                             val maxOffset = if (dialogHeightPx.value > 0) {
                                 dialogHeightPx.value.toFloat() + extraBottomPadding.toPx()
@@ -269,9 +272,11 @@ fun WindowDialog(
             Box(
                 modifier = rootBoxModifier
             ) {
+                val contentAlignment by remember(isLargeScreen) {
+                    derivedStateOf { if (isLargeScreen) Alignment.Center else Alignment.BottomCenter }
+                }
                 Column(
-                    modifier = columnModifier
-                        .align(if (isLargeScreen) Alignment.Center else Alignment.BottomCenter)
+                    modifier = columnModifier.align(contentAlignment)
                 ) {
                     title?.let {
                         Text(
@@ -306,8 +311,10 @@ fun WindowDialog(
                     backProgress.snapTo(event.progress)
                     dimAlpha.floatValue = 1f - event.progress
                 }
+                // Flow completed normally
                 requestDismiss()
             } catch (_: CancellationException) {
+                // Flow cancelled
                 coroutineScope.launch {
                     backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
                     animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->

@@ -176,29 +176,19 @@ private fun SuperDialogContent(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    val roundedCorner by rememberUpdatedState(getRoundedCorner())
-    val windowSize by rememberUpdatedState(getWindowSize())
-    val windowWidth by remember(windowSize, density) {
-        derivedStateOf { windowSize.width.dp / density.density }
-    }
+    val windowSize = getWindowSize()
     val windowHeight by remember(windowSize, density) {
         derivedStateOf { windowSize.height.dp / density.density }
     }
+    val roundedCorner = getRoundedCorner()
     val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
         derivedStateOf {
             if (roundedCorner != 0.dp) roundedCorner - outsideMargin.width else 32.dp
         }
     }
-    val isLargeScreen by remember(windowWidth, windowHeight) {
-        derivedStateOf { windowHeight >= 480.dp && windowWidth >= 840.dp }
-    }
+    val isLargeScreen = SuperDialogDefaults.isLargeScreen()
     val contentAlignment by remember(isLargeScreen) {
-        derivedStateOf {
-            if (isLargeScreen)
-                Alignment.Center
-            else
-                Alignment.BottomCenter
-        }
+        derivedStateOf { if (isLargeScreen) Alignment.Center else Alignment.BottomCenter }
     }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)

@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -39,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
-import top.yukonga.miuix.kmp.basic.ColorPalette
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Slider
@@ -62,13 +60,12 @@ import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun TextComponent(
-    showDialog: MutableState<Boolean>,
-    dialogSelectedColor: MutableState<Color>,
+    showSuperDialog: MutableState<Boolean>,
+    showWindowDialog: MutableState<Boolean>,
     showBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>,
@@ -115,7 +112,6 @@ fun TextComponent(
 
     var volume by remember { mutableStateOf(0.5f) }
     val showVolumeDialog = remember { mutableStateOf(false) }
-    val showWindowDialog = remember { mutableStateOf(false) }
 
     SmallTitle(text = "Basic Component")
     Card(
@@ -165,50 +161,12 @@ fun TextComponent(
         )
     }
 
-    SmallTitle(text = "Arrow & Dialog & BottomSheet")
+    SmallTitle(text = "Advanced Component")
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp)
     ) {
-        SuperArrow(
-            leftAction = {
-                Box(
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = MiuixIcons.Useful.Personal,
-                        contentDescription = "Personal",
-                        tint = MiuixTheme.colorScheme.onBackground
-                    )
-                }
-            },
-            title = "Arrow",
-            summary = "Click to show a Dialog",
-            onClick = {
-                showDialog.value = true
-            },
-            holdDownState = showDialog.value
-        )
-
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a BottomSheet",
-            onClick = {
-                showBottomSheet.value = true
-            },
-            holdDownState = showBottomSheet.value
-        )
-
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a WindowDialog",
-            onClick = {
-                showWindowDialog.value = true
-            },
-            holdDownState = showWindowDialog.value
-        )
-
         SuperArrow(
             title = "Slider + Dialog + Arrow",
             rightActions = {
@@ -226,6 +184,40 @@ fun TextComponent(
                     onValueChange = { volume = it }
                 )
             }
+        )
+    }
+
+    SmallTitle(text = "Arrow & Dialog & BottomSheet")
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 12.dp)
+    ) {
+        SuperArrow(
+            title = "Arrow",
+            summary = "Click to show a SuperDialog",
+            onClick = {
+                showSuperDialog.value = true
+            },
+            holdDownState = showSuperDialog.value
+        )
+
+        SuperArrow(
+            title = "Arrow",
+            summary = "Click to show a WindowDialog",
+            onClick = {
+                showWindowDialog.value = true
+            },
+            holdDownState = showWindowDialog.value
+        )
+
+        SuperArrow(
+            title = "Arrow",
+            summary = "Click to show a SuperBottomSheet",
+            onClick = {
+                showBottomSheet.value = true
+            },
+            holdDownState = showBottomSheet.value
         )
 
         SuperArrow(
@@ -436,30 +428,24 @@ fun TextComponent(
             enabled = false
         )
     }
-    Dialog(showDialog, dialogSelectedColor)
-    WindowDialogDemo(showWindowDialog, dialogSelectedColor)
+    SuperDialog(showSuperDialog)
+    WindowDialog(showWindowDialog)
     SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
     BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
 
 @Composable
-fun Dialog(
+fun SuperDialog(
     showDialog: MutableState<Boolean>,
-    dialogSelectedColor: MutableState<Color>
 ) {
     SuperDialog(
-        title = "Dialog",
+        title = "SuperDialog",
+        summary = "A dialog component inside MiuixPopupHost.",
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false
         }
     ) {
-        ColorPalette(
-            initialColor = dialogSelectedColor.value,
-            onColorChanged = { dialogSelectedColor.value = it },
-            showPreview = false,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -484,24 +470,18 @@ fun Dialog(
 }
 
 @Composable
-fun WindowDialogDemo(
-    showDialog: MutableState<Boolean>,
-    dialogSelectedColor: MutableState<Color>
+fun WindowDialog(
+    showDialog: MutableState<Boolean>
 ) {
     WindowDialog(
         title = "WindowDialog",
+        summary = "A window-level dialog, no MiuixPopupHost required.",
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false
         }
     ) {
         val dismiss = LocalWindowDialogState.current
-        ColorPalette(
-            initialColor = dialogSelectedColor.value,
-            onColorChanged = { dialogSelectedColor.value = it },
-            showPreview = false,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

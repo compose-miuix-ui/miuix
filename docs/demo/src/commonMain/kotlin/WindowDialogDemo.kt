@@ -46,7 +46,7 @@ fun WindowDialogDemo() {
                 )
                 WindowDialog(
                     title = "WindowDialog Title",
-                    summary = "This is a window-level dialog that does not require Scaffold.",
+                    summary = "This is a window-level dialog that does not require MiuixPopupHost.",
                     show = showDialog,
                     onDismissRequest = { showDialog.value = false }
                 ) {
