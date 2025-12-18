@@ -99,13 +99,13 @@ fun WindowDialog(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     title: String? = null,
-    titleColor: Color = SuperDialogDefaults.titleColor(),
+    titleColor: Color = WindowDialogDefaults.titleColor(),
     summary: String? = null,
-    summaryColor: Color = SuperDialogDefaults.summaryColor(),
-    backgroundColor: Color = SuperDialogDefaults.backgroundColor(),
+    summaryColor: Color = WindowDialogDefaults.summaryColor(),
+    backgroundColor: Color = WindowDialogDefaults.backgroundColor(),
     onDismissRequest: (() -> Unit)? = null,
-    outsideMargin: DpSize = SuperDialogDefaults.outsideMargin,
-    insideMargin: DpSize = SuperDialogDefaults.insideMargin,
+    outsideMargin: DpSize = WindowDialogDefaults.outsideMargin,
+    insideMargin: DpSize = WindowDialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -159,9 +159,7 @@ fun WindowDialog(
         val windowHeight by remember(windowSize, density) {
             derivedStateOf { windowSize.height.dp / density.density }
         }
-        val largeScreen by remember {
-            derivedStateOf { SuperDialogDefaults.isLargeScreen() }
-        }
+        val isLargeScreen = WindowDialogDefaults.isLargeScreen()
 
         if (!internalVisible.currentState && !internalVisible.targetState) {
             internalVisible.targetState = true
@@ -232,12 +230,12 @@ fun WindowDialog(
 
             val columnModifier = modifier
                 .widthIn(max = 420.dp)
-                .heightIn(max = if (largeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
+                .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
                 .onGloballyPositioned { coordinates ->
                     dialogHeightPx.value = coordinates.size.height
                 }
                 .then(
-                    if (largeScreen) {
+                    if (isLargeScreen) {
                         Modifier.graphicsLayer {
                             val scale = 1f - (backProgress.value * 0.2f)
                             scaleX = scale
@@ -271,7 +269,10 @@ fun WindowDialog(
             Box(
                 modifier = rootBoxModifier
             ) {
-                Column(modifier = columnModifier.align(if (largeScreen) Alignment.Center else Alignment.BottomCenter)) {
+                Column(
+                    modifier = columnModifier
+                        .align(if (isLargeScreen) Alignment.Center else Alignment.BottomCenter)
+                ) {
                     title?.let {
                         Text(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -330,15 +331,6 @@ fun WindowDialog(
     }
 }
 
-/**
- * Remembers the default enter transition for [WindowDialog].
- *
- * - Large screen: fade + scale-in.
- * - Small screen: slide-in from bottom.
- *
- * @param largeScreen Whether current window is considered large screen.
- * @return The enter [EnterTransition] for dialog content.
- */
 @Composable
 private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
     return remember(largeScreen) {
@@ -358,15 +350,6 @@ private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTra
     }
 }
 
-/**
- * Remembers the default exit transition for [WindowDialog].
- *
- * - Large screen: fade + scale-out.
- * - Small screen: slide-out to bottom.
- *
- * @param largeScreen Whether current window is considered large screen.
- * @return The exit [ExitTransition] for dialog content.
- */
 @Composable
 private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition {
     return remember(largeScreen) {
@@ -386,16 +369,57 @@ private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTrans
     }
 }
 
-/**
- * Default enter transition for dim layer of [WindowDialog].
- */
 private val DialogDimEnter: EnterTransition =
     fadeIn(animationSpec = tween(300, easing = SinOutEasing))
-/**
- * Default exit transition for dim layer of [WindowDialog].
- */
+
 private val DialogDimExit: ExitTransition =
     fadeOut(animationSpec = tween(250, easing = SinOutEasing))
+
+object WindowDialogDefaults {
+    @Composable
+    internal fun isLargeScreen(): Boolean {
+        val density = LocalDensity.current
+        val windowSize = getWindowSize()
+        val windowWidth by remember(windowSize, density) {
+            derivedStateOf { windowSize.width.dp / density.density }
+        }
+        val windowHeight by remember(windowSize, density) {
+            derivedStateOf { windowSize.height.dp / density.density }
+        }
+        val largeScreen by remember(windowWidth, windowHeight) {
+            derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
+        }
+        return largeScreen
+    }
+
+    /**
+     * The default color of the title.
+     */
+    @Composable
+    fun titleColor() = MiuixTheme.colorScheme.onBackground
+
+    /**
+     * The default color of the summary.
+     */
+    @Composable
+    fun summaryColor() = MiuixTheme.colorScheme.onSurfaceSecondary
+
+    /**
+     * The default background color of the [SuperDialog].
+     */
+    @Composable
+    fun backgroundColor() = MiuixTheme.colorScheme.background
+
+    /**
+     * The default margin outside the [SuperDialog].
+     */
+    val outsideMargin = DpSize(12.dp, 12.dp)
+
+    /**
+     * The default margin inside the [SuperDialog].
+     */
+    val insideMargin = DpSize(24.dp, 24.dp)
+}
 
 /**
  * CompositionLocal that provides a dismiss request function for [WindowDialog].
