@@ -54,20 +54,39 @@ WindowDialog(
 
 ## 属性
 
-| 名称                         | 类型                    | 描述                                      | 默认值                                  | 必填 |
-| ---------------------------- | ----------------------- | ----------------------------------------- | --------------------------------------- | ---- |
-| `show`                       | `MutableState<Boolean>` | 控制显示状态                              | -                                       | 是   |
-| `modifier`                   | `Modifier`              | 根内容修饰符                              | `Modifier`                              | 否   |
-| `title`                      | `String?`               | 对话框标题                                | `null`                                  | 否   |
-| `titleColor`                 | `Color`                 | 标题颜色                                  | `SuperDialogDefaults.titleColor()`      | 否   |
-| `summary`                    | `String?`               | 对话框摘要                                | `null`                                  | 否   |
-| `summaryColor`               | `Color`                 | 摘要颜色                                  | `SuperDialogDefaults.summaryColor()`    | 否   |
-| `backgroundColor`            | `Color`                 | 对话框背景色                              | `SuperDialogDefaults.backgroundColor()` | 否   |
-| `onDismissRequest`           | `(() -> Unit)?`         | 对话框关闭时的回调                        | `null`                                  | 否   |
-| `outsideMargin`              | `DpSize`                | 相对窗口边缘的外部边距                    | `SuperDialogDefaults.outsideMargin`     | 否   |
-| `insideMargin`               | `DpSize`                | 对话框内容内部边距                        | `SuperDialogDefaults.insideMargin`      | 否   |
-| `defaultWindowInsetsPadding` | `Boolean`               | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                | 否   |
-| `content`                    | `@Composable () -> Unit`| 对话框内容                                | -                                       | 是   |
+### WindowDialog 属性
+
+| 名称                         | 类型                     | 描述                                           | 默认值                                   | 必填 |
+| ---------------------------- | ------------------------ | ---------------------------------------------- | ---------------------------------------- | ---- |
+| `show`                       | `MutableState<Boolean>`  | 控制显示状态                                   | -                                        | 是   |
+| `modifier`                   | `Modifier`               | 根内容修饰符                                   | `Modifier`                               | 否   |
+| `title`                      | `String?`                | 对话框标题                                     | `null`                                   | 否   |
+| `titleColor`                 | `Color`                  | 标题颜色                                       | `WindowDialogDefaults.titleColor()`      | 否   |
+| `summary`                    | `String?`                | 对话框摘要                                     | `null`                                   | 否   |
+| `summaryColor`               | `Color`                  | 摘要颜色                                       | `WindowDialogDefaults.summaryColor()`    | 否   |
+| `backgroundColor`            | `Color`                  | 对话框背景色                                   | `WindowDialogDefaults.backgroundColor()` | 否   |
+| `onDismissRequest`           | `(() -> Unit)?`          | 对话框关闭时的回调                             | `null`                                   | 否   |
+| `outsideMargin`              | `DpSize`                 | 相对窗口边缘的外部边距                         | `WindowDialogDefaults.outsideMargin`     | 否   |
+| `insideMargin`               | `DpSize`                 | 对话框内容内部边距                             | `WindowDialogDefaults.insideMargin`      | 否   |
+| `defaultWindowInsetsPadding` | `Boolean`                | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                   | 否   |
+| `content`                    | `@Composable () -> Unit` | 对话框内容                                     | -                                        | 是   |
+
+### WindowDialogDefaults
+
+#### 属性
+
+| 属性名        | 类型   | 说明               |
+| ------------- | ------ | ------------------ |
+| outsideMargin | DpSize | 对话框外部默认边距 |
+| insideMargin  | DpSize | 对话框内部默认边距 |
+
+#### 函数
+
+| 函数名            | 返回类型 | 说明                   |
+| ----------------- | -------- | ---------------------- |
+| titleColor()      | Color    | 获取默认标题颜色       |
+| summaryColor()    | Color    | 获取默认摘要颜色       |
+| backgroundColor() | Color    | 获取默认对话框背景颜色 |
 
 ## 在内容内部关闭
 

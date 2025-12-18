@@ -75,9 +75,7 @@ Scaffold {
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距   | true                                  | 否       |
 | content                    | @Composable () -> Unit | 对话框的内容                 | -                                     | 是       |
 
-### SuperDialogDefaults 对象
-
-SuperDialogDefaults 对象提供了 SuperDialog 组件的默认设置。
+### SuperDialogDefaults
 
 #### 属性
 
