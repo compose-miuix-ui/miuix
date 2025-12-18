@@ -82,7 +82,6 @@ fun getCornerRadiusBottom(context: Context): Int {
 @Composable
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
-    dismissOnClickOutside = true,
     usePlatformDefaultWidth = false,
     decorFitsSystemWindows = false
 )
