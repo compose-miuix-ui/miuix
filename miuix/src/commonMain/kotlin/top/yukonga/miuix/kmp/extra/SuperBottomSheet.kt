@@ -226,7 +226,7 @@ fun SuperBottomSheet(
 }
 
 @Composable
-private fun SuperBottomSheetContent(
+internal fun SuperBottomSheetContent(
     modifier: Modifier,
     title: String?,
     leftAction: @Composable (() -> Unit)? = null,

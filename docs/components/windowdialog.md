@@ -1,3 +1,13 @@
+---
+title: WindowDialog
+requiresScaffoldHost: false
+prerequisites:
+  - Can be used anywhere, does not require `Scaffold` or `MiuixPopupHost`
+  - Renders at window level
+hostComponent: None
+popupHost: None
+---
+
 # WindowDialog
 
 `WindowDialog` is a window-level dialog component. It renders using platform `Dialog` and does not require `Scaffold` or `MiuixPopupHost`. It supports large-screen optimized animations, system back gesture dismissal, and a composition local to request dismiss from inside content.

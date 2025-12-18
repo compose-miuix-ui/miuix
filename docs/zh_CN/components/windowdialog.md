@@ -1,3 +1,13 @@
+---
+title: WindowDialog
+requiresScaffoldHost: false
+prerequisites:
+  - 可以在任何地方使用，不需要 `Scaffold` 或 `MiuixPopupHost`
+  - 在窗口层级渲染
+hostComponent: None
+popupHost: None
+---
+
 # WindowDialog
 
 `WindowDialog` 是一个窗口级对话框组件。它基于平台 `Dialog` 渲染，无需依赖 `Scaffold` 或 `MiuixPopupHost`。支持大屏优化动效、系统返回手势关闭，以及在内容内部通过组合局部触发关闭。
@@ -7,7 +17,7 @@
     </div>
 
 ::: tip 提示
-该组件不依赖 `Scaffold`，可在任意可组合作用域中使用。
+该组件不依赖 `Scaffold`，可在任意 Composable 作用域中使用。
 :::
 
 ## 导入
@@ -44,20 +54,39 @@ WindowDialog(
 
 ## 属性
 
-| 名称                         | 类型                    | 描述                                      | 默认值                                  | 必填 |
-| ---------------------------- | ----------------------- | ----------------------------------------- | --------------------------------------- | ---- |
-| `show`                       | `MutableState<Boolean>` | 控制显示状态                              | -                                       | 是   |
-| `modifier`                   | `Modifier`              | 根内容修饰符                              | `Modifier`                              | 否   |
-| `title`                      | `String?`               | 对话框标题                                | `null`                                  | 否   |
-| `titleColor`                 | `Color`                 | 标题颜色                                  | `SuperDialogDefaults.titleColor()`      | 否   |
-| `summary`                    | `String?`               | 对话框摘要                                | `null`                                  | 否   |
-| `summaryColor`               | `Color`                 | 摘要颜色                                  | `SuperDialogDefaults.summaryColor()`    | 否   |
-| `backgroundColor`            | `Color`                 | 对话框背景色                              | `SuperDialogDefaults.backgroundColor()` | 否   |
-| `onDismissRequest`           | `(() -> Unit)?`         | 对话框关闭时的回调                        | `null`                                  | 否   |
-| `outsideMargin`              | `DpSize`                | 相对窗口边缘的外部边距                    | `SuperDialogDefaults.outsideMargin`     | 否   |
-| `insideMargin`               | `DpSize`                | 对话框内容内部边距                        | `SuperDialogDefaults.insideMargin`      | 否   |
-| `defaultWindowInsetsPadding` | `Boolean`               | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                | 否   |
-| `content`                    | `@Composable () -> Unit`| 对话框内容                                | -                                       | 是   |
+### WindowDialog 属性
+
+| 名称                         | 类型                     | 描述                                           | 默认值                                   | 必填 |
+| ---------------------------- | ------------------------ | ---------------------------------------------- | ---------------------------------------- | ---- |
+| `show`                       | `MutableState<Boolean>`  | 控制显示状态                                   | -                                        | 是   |
+| `modifier`                   | `Modifier`               | 根内容修饰符                                   | `Modifier`                               | 否   |
+| `title`                      | `String?`                | 对话框标题                                     | `null`                                   | 否   |
+| `titleColor`                 | `Color`                  | 标题颜色                                       | `WindowDialogDefaults.titleColor()`      | 否   |
+| `summary`                    | `String?`                | 对话框摘要                                     | `null`                                   | 否   |
+| `summaryColor`               | `Color`                  | 摘要颜色                                       | `WindowDialogDefaults.summaryColor()`    | 否   |
+| `backgroundColor`            | `Color`                  | 对话框背景色                                   | `WindowDialogDefaults.backgroundColor()` | 否   |
+| `onDismissRequest`           | `(() -> Unit)?`          | 对话框关闭时的回调                             | `null`                                   | 否   |
+| `outsideMargin`              | `DpSize`                 | 相对窗口边缘的外部边距                         | `WindowDialogDefaults.outsideMargin`     | 否   |
+| `insideMargin`               | `DpSize`                 | 对话框内容内部边距                             | `WindowDialogDefaults.insideMargin`      | 否   |
+| `defaultWindowInsetsPadding` | `Boolean`                | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                   | 否   |
+| `content`                    | `@Composable () -> Unit` | 对话框内容                                     | -                                        | 是   |
+
+### WindowDialogDefaults
+
+#### 属性
+
+| 属性名        | 类型   | 说明               |
+| ------------- | ------ | ------------------ |
+| outsideMargin | DpSize | 对话框外部默认边距 |
+| insideMargin  | DpSize | 对话框内部默认边距 |
+
+#### 函数
+
+| 函数名            | 返回类型 | 说明                   |
+| ----------------- | -------- | ---------------------- |
+| titleColor()      | Color    | 获取默认标题颜色       |
+| summaryColor()    | Color    | 获取默认摘要颜色       |
+| backgroundColor() | Color    | 获取默认对话框背景颜色 |
 
 ## 在内容内部关闭
 

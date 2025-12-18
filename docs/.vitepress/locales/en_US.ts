@@ -93,6 +93,7 @@ export default defineConfig({
                         { text: "SuperDialog", link: "/components/superdialog" },
                         { text: "WindowDialog", link: "/components/windowdialog" },
                         { text: "SuperBottomSheet", link: "/components/superbottomsheet" },
+                        { text: "WindowBottomSheet", link: "/components/windowbottomsheet" },
                     ],
                 },
             ],

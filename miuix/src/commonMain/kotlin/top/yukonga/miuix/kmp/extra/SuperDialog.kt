@@ -160,7 +160,7 @@ fun SuperDialog(
 }
 
 @Composable
-private fun SuperDialogContent(
+internal fun SuperDialogContent(
     modifier: Modifier,
     title: String?,
     titleColor: Color,
