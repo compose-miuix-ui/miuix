@@ -534,9 +534,14 @@ class MiuixPopupUtils {
             }
             DisposableEffect(Unit) {
                 onDispose {
-                    dialogStates.clear()
-                    popupStates.clear()
-                    nextZIndex = 1f
+                    // Do not clear the currently displayed window to prevent it from getting stuck in the display state.
+                    dialogStates.removeAll {
+                        !it.showState.value
+                    }
+                    popupStates.removeAll {
+                        !it.showState.value
+                    }
+                    // nextZIndex = 1f // Allow Z to continue stacking.
                 }
             }
         }
