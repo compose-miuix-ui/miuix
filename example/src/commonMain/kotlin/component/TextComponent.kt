@@ -649,7 +649,6 @@ fun WindowBottomSheet(
     showBottomSheet: MutableState<Boolean>,
     bottomSheetSuperSwitchState: MutableState<Boolean>
 ) {
-    listOf("Option 1", "Option 2")
     var state: (() -> Unit)? = null
     WindowBottomSheet(
         title = "WindowBottomSheet",
