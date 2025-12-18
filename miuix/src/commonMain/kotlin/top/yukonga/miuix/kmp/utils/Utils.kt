@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.window.DialogProperties
 
 /**
  * Window size data class.
@@ -41,3 +42,12 @@ expect fun platform(): Platform
  */
 @Composable
 expect fun getRoundedCorner(): Dp
+
+/**
+ * Returns platform-specific DialogProperties.
+ */
+@Composable
+expect fun platformDialogProperties(): DialogProperties
+
+@Composable
+expect fun removePlatformDialogDefaultEffects()

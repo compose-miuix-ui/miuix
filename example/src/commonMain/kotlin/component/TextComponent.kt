@@ -54,6 +54,7 @@ import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperCheckbox
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
@@ -113,6 +114,7 @@ fun TextComponent(
 
     var volume by remember { mutableStateOf(0.5f) }
     val showVolumeDialog = remember { mutableStateOf(false) }
+    val showWindowDialog = remember { mutableStateOf(false) }
 
     SmallTitle(text = "Basic Component")
     Card(
@@ -195,6 +197,15 @@ fun TextComponent(
                 showBottomSheet.value = true
             },
             holdDownState = showBottomSheet.value
+        )
+
+        SuperArrow(
+            title = "Arrow",
+            summary = "Click to show a WindowDialog",
+            onClick = {
+                showWindowDialog.value = true
+            },
+            holdDownState = showWindowDialog.value
         )
 
         SuperArrow(
@@ -425,6 +436,7 @@ fun TextComponent(
         )
     }
     Dialog(showDialog, dialogSelectedColor)
+    WindowDialogDemo(showWindowDialog, dialogSelectedColor)
     SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
     BottomSheet(showBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
@@ -436,6 +448,47 @@ fun Dialog(
 ) {
     SuperDialog(
         title = "Dialog",
+        show = showDialog,
+        onDismissRequest = {
+            showDialog.value = false
+        }
+    ) {
+        ColorPalette(
+            initialColor = dialogSelectedColor.value,
+            onColorChanged = { dialogSelectedColor.value = it },
+            showPreview = false,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(
+                text = "Cancel",
+                onClick = {
+                    showDialog.value = false
+                },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(20.dp))
+            TextButton(
+                text = "Confirm",
+                onClick = {
+                    showDialog.value = false
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+}
+
+@Composable
+fun WindowDialogDemo(
+    showDialog: MutableState<Boolean>,
+    dialogSelectedColor: MutableState<Color>
+) {
+    WindowDialog(
+        title = "WindowDialog",
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false

@@ -11,6 +11,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
@@ -31,3 +32,9 @@ actual fun platform(): Platform = Platform.WasmJs
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
+
+@Composable
+actual fun platformDialogProperties(): DialogProperties = DialogProperties()
+
+@Composable
+actual fun removePlatformDialogDefaultEffects() {}

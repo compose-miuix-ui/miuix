@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.UIKit.UIScreen
@@ -34,3 +35,9 @@ actual fun platform(): Platform = Platform.IOS
 
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
+
+@Composable
+actual fun platformDialogProperties(): DialogProperties = DialogProperties()
+
+@Composable
+actual fun removePlatformDialogDefaultEffects() {}
