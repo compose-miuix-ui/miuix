@@ -4,23 +4,15 @@
 package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
@@ -31,8 +23,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlendModeColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -40,7 +30,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -55,32 +44,31 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowUpDownIntegrated
-import top.yukonga.miuix.kmp.icon.icons.basic.Check
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * A spinner component with Miuix style. (Popup Mode)
+ * A spinner component with Miuix style, rendered at window level without `Scaffold`. (Popup Mode)
  *
- * @param items The list of [SpinnerEntry] to be shown in the [SuperSpinner].
- * @param selectedIndex The index of the selected item in the [SuperSpinner].
- * @param title The title of the [SuperSpinner].
- * @param titleColor The color of the title of the [SuperSpinner].
- * @param summary The summary of the [SuperSpinner].
- * @param summaryColor The color of the summary of the [SuperSpinner].
- * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
- * @param leftAction The [Composable] content that on the left side of the [SuperSpinner].
- * @param bottomAction The [Composable] content at the bottom of the [SuperSpinner].
- * @param modifier The [Modifier] to be applied to the [SuperSpinner].
- * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
- * @param maxHeight The maximum height of the [SuperListPopup].
- * @param enabled Whether the [SuperSpinner] is enabled.
- * @param showValue Whether to show the value of the [SuperSpinner].
- * @param onClick The callback when the [SuperSpinner] is clicked.
- * @param onSelectedIndexChange The callback to be invoked when the selected index of the [SuperSpinner] is changed.
+ * @param items The list of [SpinnerEntry] to be shown in the [WindowSpinner].
+ * @param selectedIndex The index of the selected item in the [WindowSpinner].
+ * @param title The title of the [WindowSpinner].
+ * @param titleColor The color of the title of the [WindowSpinner].
+ * @param summary The summary of the [WindowSpinner].
+ * @param summaryColor The color of the summary of the [WindowSpinner].
+ * @param spinnerColors The [SpinnerColors] of the [WindowSpinner].
+ * @param leftAction The [Composable] content that on the left side of the [WindowSpinner].
+ * @param bottomAction The [Composable] content at the bottom of the [WindowSpinner].
+ * @param modifier The [Modifier] to be applied to the [WindowSpinner].
+ * @param insideMargin The [PaddingValues] to be applied inside the [WindowSpinner].
+ * @param maxHeight The maximum height of the [WindowListPopup].
+ * @param enabled Whether the [WindowSpinner] is enabled.
+ * @param showValue Whether to show the value of the [WindowSpinner].
+ * @param onClick The callback when the [WindowSpinner] is clicked.
+ * @param onSelectedIndexChange The callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
 @NonRestartableComposable
-fun SuperSpinner(
+fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
@@ -132,7 +120,7 @@ fun SuperSpinner(
         summaryColor = summaryColor,
         leftAction = leftAction,
         rightActions = {
-            SuperSpinnerRightActions(
+            WindowSpinnerRightActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -140,7 +128,7 @@ fun SuperSpinner(
                 actionColor = actionColor
             )
             if (itemsNotEmpty) {
-                SuperSpinnerPopup(
+                WindowSpinnerPopup(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded,
@@ -159,7 +147,7 @@ fun SuperSpinner(
 }
 
 @Composable
-private fun SuperSpinnerPopup(
+private fun WindowSpinnerPopup(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     isDropdownExpanded: MutableState<Boolean>,
@@ -169,7 +157,7 @@ private fun SuperSpinnerPopup(
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
-    SuperListPopup(
+    WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.Right,
         onDismissRequest = {
@@ -177,6 +165,7 @@ private fun SuperSpinnerPopup(
         },
         maxHeight = maxHeight
     ) {
+        val dismiss = LocalWindowListPopupState.current
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
                 key(index) {
@@ -190,7 +179,7 @@ private fun SuperSpinnerPopup(
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
-                        isDropdownExpanded.value = false
+                        dismiss()
                     }
                 }
             }
@@ -199,7 +188,7 @@ private fun SuperSpinnerPopup(
 }
 
 @Composable
-private fun RowScope.SuperSpinnerRightActions(
+private fun RowScope.WindowSpinnerRightActions(
     showValue: Boolean,
     itemsNotEmpty: Boolean,
     items: List<SpinnerEntry>,
@@ -229,27 +218,27 @@ private fun RowScope.SuperSpinnerRightActions(
 }
 
 /**
- * A [SuperSpinner] component with Miuix style, show Spinner as dialog. (Dialog Mode)
+ * A [WindowSpinner] component with Miuix style, show Spinner as dialog, rendered at window level without `Scaffold`. (Dialog Mode)
  *
- * @param items the list of [SpinnerEntry] to be shown in the [SuperSpinner].
- * @param selectedIndex the index of the selected item in the [SuperSpinner].
- * @param title the title of the [SuperSpinner].
- * @param titleColor the color of the title of the [SuperSpinner].
- * @param summary the summary of the [SuperSpinner].
- * @param summaryColor the color of the summary of the [SuperSpinner].
- * @param leftAction the action to be shown at the left side of the [SuperSpinner].
+ * @param items the list of [SpinnerEntry] to be shown in the [WindowSpinner].
+ * @param selectedIndex the index of the selected item in the [WindowSpinner].
+ * @param title the title of the [WindowSpinner].
+ * @param titleColor the color of the title of the [WindowSpinner].
+ * @param summary the summary of the [WindowSpinner].
+ * @param summaryColor the color of the summary of the [WindowSpinner].
+ * @param leftAction the action to be shown at the left side of the [WindowSpinner].
  * @param dialogButtonString the string of the button in the dialog.
- * @param popupModifier the [Modifier] to be applied to the popup of the [SuperSpinner].
- * @param modifier the [Modifier] to be applied to the [SuperSpinner].
- * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner].
- * @param enabled whether the [SuperSpinner] is enabled.
- * @param showValue whether to show the value of the [SuperSpinner].
- * @param onClick the callback when the [SuperSpinner] is clicked.
- * @param onSelectedIndexChange the callback to be invoked when the selected index of the [SuperSpinner] is changed.
+ * @param popupModifier the [Modifier] to be applied to the popup of the [WindowSpinner].
+ * @param modifier the [Modifier] to be applied to the [WindowSpinner].
+ * @param insideMargin the [PaddingValues] to be applied inside the [WindowSpinner].
+ * @param enabled whether the [WindowSpinner] is enabled.
+ * @param showValue whether to show the value of the [WindowSpinner].
+ * @param onClick the callback when the [WindowSpinner] is clicked.
+ * @param onSelectedIndexChange the callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
 @NonRestartableComposable
-fun SuperSpinner(
+fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
@@ -303,7 +292,7 @@ fun SuperSpinner(
         summaryColor = summaryColor,
         leftAction = leftAction,
         rightActions = {
-            SuperSpinnerRightActions(
+            WindowSpinnerRightActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -316,7 +305,7 @@ fun SuperSpinner(
         enabled = actualEnabled,
     )
 
-    SuperSpinnerDialog(
+    WindowSpinnerDialog(
         items = items,
         selectedIndex = selectedIndex,
         title = title,
@@ -330,7 +319,7 @@ fun SuperSpinner(
 }
 
 @Composable
-private fun SuperSpinnerDialog(
+private fun WindowSpinnerDialog(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
@@ -342,7 +331,7 @@ private fun SuperSpinnerDialog(
     onSelectedIndexChange: ((Int) -> Unit)?
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
-    SuperDialog(
+    WindowDialog(
         modifier = popupModifier,
         title = title,
         show = isDropdownExpanded,
@@ -351,6 +340,7 @@ private fun SuperSpinnerDialog(
         },
         insideMargin = DpSize(0.dp, 24.dp),
         content = {
+            val dismiss = LocalWindowDialogState.current
             Layout(
                 content = {
                     LazyColumn {
@@ -365,7 +355,7 @@ private fun SuperSpinnerDialog(
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                isDropdownExpanded.value = false
+                                dismiss?.invoke()
                             }
                         }
                     }
@@ -375,7 +365,7 @@ private fun SuperSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { isDropdownExpanded.value = false }
+                        onClick = { dismiss?.invoke() }
                     )
                 }
             ) { measurables, constraints ->
@@ -396,164 +386,4 @@ private fun SuperSpinnerDialog(
             }
         }
     )
-}
-
-/**
- * The implementation of the spinner.
- *
- * @param entry the [SpinnerEntry] to be shown in the spinner.
- * @param entryCount the count of the entries in the spinner.
- * @param isSelected whether the entry is selected.
- * @param index the index of the entry.
- * @param dialogMode whether the spinner is in dialog mode.
- * @param onSelectedIndexChange the callback to be invoked when the selected index of the spinner is changed.
- */
-@Composable
-fun SpinnerItemImpl(
-    entry: SpinnerEntry,
-    entryCount: Int,
-    isSelected: Boolean,
-    index: Int,
-    dialogMode: Boolean = false,
-    spinnerColors: SpinnerColors,
-    onSelectedIndexChange: (Int) -> Unit,
-) {
-    val additionalTopPadding = if (!dialogMode && index == 0) 20.dp else 12.dp
-    val additionalBottomPadding = if (!dialogMode && index == entryCount - 1) 20.dp else 12.dp
-
-    val (titleColor, summaryColor, backgroundColor) = if (isSelected) {
-        Triple(
-            spinnerColors.selectedContentColor,
-            spinnerColors.selectedSummaryColor,
-            spinnerColors.selectedContainerColor
-        )
-    } else {
-        Triple(
-            spinnerColors.contentColor,
-            spinnerColors.summaryColor,
-            spinnerColors.containerColor
-        )
-    }
-
-    val selectColor = if (isSelected) spinnerColors.selectedIndicatorColor else Color.Transparent
-
-    val itemModifier = Modifier
-        .clickable { onSelectedIndexChange(index) }
-        .background(backgroundColor)
-        .then(
-            if (dialogMode) Modifier
-                .heightIn(min = 56.dp)
-                .widthIn(min = 200.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 28.dp)
-            else Modifier.padding(horizontal = 20.dp)
-        )
-        .padding(top = additionalTopPadding, bottom = additionalBottomPadding)
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = itemModifier
-    ) {
-        val contentRowModifier = if (dialogMode) Modifier else Modifier.widthIn(max = 216.dp)
-        Row(
-            modifier = contentRowModifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            entry.icon?.let {
-                it(Modifier.sizeIn(minWidth = 26.dp, minHeight = 26.dp).padding(end = 12.dp))
-            }
-            Column {
-                entry.title?.let {
-                    Text(
-                        text = it,
-                        fontSize = MiuixTheme.textStyles.body1.fontSize,
-                        fontWeight = FontWeight.Medium,
-                        color = titleColor
-                    )
-                }
-                entry.summary?.let {
-                    Text(
-                        text = it,
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = summaryColor
-                    )
-                }
-            }
-        }
-        Image(
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .size(20.dp),
-            imageVector = MiuixIcons.Basic.Check,
-            colorFilter = BlendModeColorFilter(selectColor, BlendMode.SrcIn),
-            contentDescription = null,
-        )
-    }
-}
-
-/**
- * The spinner entry.
- */
-data class SpinnerEntry(
-    val icon: @Composable ((Modifier) -> Unit)? = null,
-    val title: String? = null,
-    val summary: String? = null
-)
-
-@Immutable
-class SpinnerColors(
-    val contentColor: Color,
-    val summaryColor: Color,
-    val containerColor: Color,
-    val selectedContentColor: Color,
-    val selectedSummaryColor: Color,
-    val selectedContainerColor: Color,
-    val selectedIndicatorColor: Color
-)
-
-object SpinnerDefaults {
-
-    @Composable
-    fun spinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
-        selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary
-    ): SpinnerColors {
-        return SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor
-        )
-    }
-
-    @Composable
-    fun dialogSpinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = Color.Transparent,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer
-    ): SpinnerColors {
-        return SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor
-        )
-    }
 }

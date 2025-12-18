@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -59,9 +60,12 @@ import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowBottomSheet
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.extra.WindowDropdown
+import top.yukonga.miuix.kmp.extra.WindowSpinner
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.icon.icons.useful.Personal
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -76,37 +80,68 @@ fun TextComponent(
     checkboxTrue: MutableState<Boolean>,
     switch: MutableState<Boolean>,
     switchTrue: MutableState<Boolean>,
-    dropdownOptionSelected: MutableState<Int>,
-    spinnerOptionSelected: MutableState<Int>,
-    spinnerOptionSelectedDialog: MutableState<Int>,
-    miuixSuperCheckbox: MutableState<String>,
-    miuixSuperCheckboxState: MutableState<Boolean>,
-    miuixSuperRightCheckbox: MutableState<String>,
-    miuixSuperRightCheckboxState: MutableState<Boolean>,
-    miuixSuperSwitch: MutableState<String>,
-    miuixSuperSwitchState: MutableState<Boolean>,
-    miuixSuperSwitchAnimState: MutableState<Boolean>,
+    superDropdownOptionSelected: MutableState<Int>,
+    windowDropdownOptionSelected: MutableState<Int>,
+    superSpinnerOptionSelected: MutableState<Int>,
+    windowSpinnerOptionSelected: MutableState<Int>,
+    superSpinnerOptionSelectedDialog: MutableState<Int>,
+    windowSpinnerOptionSelectedDialog: MutableState<Int>,
+    superCheckbox: MutableState<String>,
+    superCheckboxState: MutableState<Boolean>,
+    superRightCheckbox: MutableState<String>,
+    superRightCheckboxState: MutableState<Boolean>,
+    superSwitch: MutableState<String>,
+    superSwitchState: MutableState<Boolean>,
+    superSwitchAnimState: MutableState<Boolean>,
 ) {
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
     val spinnerOptions = remember {
         listOf(
             SpinnerEntry(
-                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
+                icon = {
+                    Icon(
+                        RoundedRectanglePainter(),
+                        "Icon",
+                        Modifier.padding(end = 12.dp),
+                        Color(0xFFFF5B29)
+                    )
+                },
                 "Option 1",
                 "Red"
             ),
             SpinnerEntry(
-                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
+                icon = {
+                    Icon(
+                        RoundedRectanglePainter(),
+                        "Icon",
+                        Modifier.padding(end = 12.dp),
+                        Color(0xFF36D167)
+                    )
+                },
                 "Option 2",
                 "Green"
             ),
             SpinnerEntry(
-                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
+                icon = {
+                    Icon(
+                        RoundedRectanglePainter(),
+                        "Icon",
+                        Modifier.padding(end = 12.dp),
+                        Color(0xFF3482FF)
+                    )
+                },
                 "Option 3",
                 "Blue"
             ),
             SpinnerEntry(
-                icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
+                icon = {
+                    Icon(
+                        RoundedRectanglePainter(),
+                        "Icon",
+                        Modifier.padding(end = 12.dp),
+                        Color(0xFFFFB21D)
+                    )
+                },
                 "Option 4",
                 "Yellow"
             ),
@@ -164,88 +199,6 @@ fun TextComponent(
         )
     }
 
-    SmallTitle(text = "Advanced Component")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
-    ) {
-        SuperArrow(
-            title = "Slider + Dialog + Arrow",
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = "${(volume * 100).toInt()}%",
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                )
-            },
-            onClick = { showVolumeDialog.value = true },
-            holdDownState = showVolumeDialog.value,
-            bottomAction = {
-                Slider(
-                    value = volume,
-                    onValueChange = { volume = it }
-                )
-            }
-        )
-    }
-
-    SmallTitle(text = "Arrow & Dialog & BottomSheet")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
-    ) {
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a SuperDialog",
-            onClick = {
-                showSuperDialog.value = true
-            },
-            holdDownState = showSuperDialog.value
-        )
-
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a WindowDialog",
-            onClick = {
-                showWindowDialog.value = true
-            },
-            holdDownState = showWindowDialog.value
-        )
-
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a SuperBottomSheet",
-            onClick = {
-                showSuperBottomSheet.value = true
-            },
-            holdDownState = showSuperBottomSheet.value
-        )
-
-        SuperArrow(
-            title = "Arrow",
-            summary = "Click to show a WindowBottomSheet",
-            onClick = {
-                showWindowBottomSheet.value = true
-            },
-            holdDownState = showWindowBottomSheet.value
-        )
-
-        SuperArrow(
-            title = "Disabled Arrow",
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = "Right",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
-                )
-            },
-            onClick = {},
-            enabled = false
-        )
-    }
-
     SmallTitle(text = "Checkbox")
     Card(
         modifier = Modifier
@@ -280,34 +233,31 @@ fun TextComponent(
                 enabled = false
             )
         }
-
         SuperCheckbox(
             checkboxLocation = CheckboxLocation.Right,
             title = "Checkbox",
-            checked = miuixSuperRightCheckboxState.value,
+            checked = superRightCheckboxState.value,
             rightActions = {
                 Text(
                     modifier = Modifier.padding(end = 6.dp),
-                    text = miuixSuperRightCheckbox.value,
+                    text = superRightCheckbox.value,
                     color = MiuixTheme.colorScheme.onSurfaceVariantActions
                 )
             },
             onCheckedChange = {
-                miuixSuperRightCheckboxState.value = it
-                miuixSuperRightCheckbox.value = "$it"
+                superRightCheckboxState.value = it
+                superRightCheckbox.value = "$it"
             },
         )
-
         SuperCheckbox(
             title = "Checkbox",
-            summary = miuixSuperCheckbox.value,
-            checked = miuixSuperCheckboxState.value,
+            summary = superCheckbox.value,
+            checked = superCheckboxState.value,
             onCheckedChange = {
-                miuixSuperCheckboxState.value = it
-                miuixSuperCheckbox.value = "State: $it"
+                superCheckboxState.value = it
+                superCheckbox.value = "State: $it"
             },
         )
-
         SuperCheckbox(
             title = "Disabled Checkbox",
             checked = true,
@@ -350,43 +300,149 @@ fun TextComponent(
                 enabled = false
             )
         }
-
         SuperSwitch(
             title = "Switch",
             summary = "Click to expand a Switch",
-            checked = miuixSuperSwitchAnimState.value,
+            checked = superSwitchAnimState.value,
             onCheckedChange = {
-                miuixSuperSwitchAnimState.value = it
+                superSwitchAnimState.value = it
             },
         )
 
         AnimatedVisibility(
-            visible = miuixSuperSwitchAnimState.value,
+            visible = superSwitchAnimState.value,
             enter = fadeIn() + expandVertically(),
             exit = fadeOut() + shrinkVertically()
         ) {
             SuperSwitch(
                 title = "Switch",
-                checked = miuixSuperSwitchState.value,
+                checked = superSwitchState.value,
                 rightActions = {
                     Text(
                         modifier = Modifier.padding(end = 6.dp),
-                        text = miuixSuperSwitch.value,
+                        text = superSwitch.value,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions
                     )
                 },
                 onCheckedChange = {
-                    miuixSuperSwitchState.value = it
-                    miuixSuperSwitch.value = "$it"
+                    superSwitchState.value = it
+                    superSwitch.value = "$it"
                 },
             )
         }
-
         SuperSwitch(
             title = "Disabled Switch",
             checked = true,
             enabled = false,
             onCheckedChange = {},
+        )
+    }
+
+    SmallTitle(text = "Arrow")
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 12.dp)
+    ) {
+        SuperArrow(
+            title = "Arrow",
+            leftAction = {
+                Box(
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = MiuixIcons.Useful.Personal,
+                        contentDescription = "Personal",
+                        tint = MiuixTheme.colorScheme.onBackground
+                    )
+                }
+            },
+            rightActions = {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "Right",
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                )
+            },
+            onClick = {},
+        )
+        SuperArrow(
+            title = "Arrow + Slider + Dialog",
+            rightActions = {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "${(volume * 100).toInt()}%",
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                )
+            },
+            onClick = { showVolumeDialog.value = true },
+            holdDownState = showVolumeDialog.value,
+            bottomAction = {
+                Slider(
+                    value = volume,
+                    onValueChange = { volume = it }
+                )
+            }
+        )
+        SuperArrow(
+            title = "Disabled Arrow",
+            rightActions = {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "Right",
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                )
+            },
+            onClick = {},
+            enabled = false
+        )
+    }
+
+    SmallTitle(text = "Dialog")
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 12.dp)
+    ) {
+        SuperArrow(
+            title = "SuperDialog",
+            summary = "Click to show a SuperDialog",
+            onClick = {
+                showSuperDialog.value = true
+            },
+            holdDownState = showSuperDialog.value
+        )
+        SuperArrow(
+            title = "WindowDialog",
+            summary = "Click to show a WindowDialog",
+            onClick = {
+                showWindowDialog.value = true
+            },
+            holdDownState = showWindowDialog.value
+        )
+    }
+
+    SmallTitle(text = "BottomSheet")
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 12.dp)
+    ) {
+        SuperArrow(
+            title = "SuperBottomSheet",
+            summary = "Click to show a SuperBottomSheet",
+            onClick = {
+                showSuperBottomSheet.value = true
+            },
+            holdDownState = showSuperBottomSheet.value
+        )
+        SuperArrow(
+            title = "WindowBottomSheet",
+            summary = "Click to show a WindowBottomSheet",
+            onClick = {
+                showWindowBottomSheet.value = true
+            },
+            holdDownState = showWindowBottomSheet.value
         )
     }
 
@@ -397,14 +453,26 @@ fun TextComponent(
             .padding(bottom = 12.dp)
     ) {
         SuperDropdown(
-            title = "Dropdown",
+            title = "SuperDropdown",
             items = dropdownOptions,
-            selectedIndex = dropdownOptionSelected.value,
-            onSelectedIndexChange = { newOption -> dropdownOptionSelected.value = newOption },
+            selectedIndex = superDropdownOptionSelected.value,
+            onSelectedIndexChange = { newOption -> superDropdownOptionSelected.value = newOption },
         )
-
+        WindowDropdown(
+            title = "WindowDropdown",
+            items = dropdownOptions,
+            selectedIndex = windowDropdownOptionSelected.value,
+            onSelectedIndexChange = { newOption -> windowDropdownOptionSelected.value = newOption },
+        )
         SuperDropdown(
-            title = "Disabled Dropdown",
+            title = "Disabled SuperDropdown",
+            items = listOf("Option 2"),
+            selectedIndex = 0,
+            onSelectedIndexChange = {},
+            enabled = false
+        )
+        WindowDropdown(
+            title = "Disabled WindowDropdown",
             items = listOf("Option 3"),
             selectedIndex = 0,
             onSelectedIndexChange = {},
@@ -419,32 +487,54 @@ fun TextComponent(
             .padding(bottom = 12.dp)
     ) {
         SuperSpinner(
-            title = "Spinner",
+            title = "SuperSpinner",
             items = spinnerOptions,
-            selectedIndex = spinnerOptionSelected.value,
-            onSelectedIndexChange = { newOption -> spinnerOptionSelected.value = newOption },
+            selectedIndex = superSpinnerOptionSelected.value,
+            onSelectedIndexChange = { newOption -> superSpinnerOptionSelected.value = newOption },
+        )
+        WindowSpinner(
+            title = "WindowSpinner",
+            items = spinnerOptions,
+            selectedIndex = windowSpinnerOptionSelected.value,
+            onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
         )
         SuperSpinner(
-            title = "Spinner",
-            summary = "Spinner as Dialog",
+            title = "SuperSpinner",
+            summary = "As SuperDialog",
             dialogButtonString = "Cancel",
             items = spinnerOptions,
-            selectedIndex = spinnerOptionSelectedDialog.value,
-            onSelectedIndexChange = { newOption -> spinnerOptionSelectedDialog.value = newOption },
+            selectedIndex = superSpinnerOptionSelectedDialog.value,
+            onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
+        )
+        WindowSpinner(
+            title = "WindowSpinner",
+            summary = "As WindowDialog",
+            dialogButtonString = "Cancel",
+            items = spinnerOptions,
+            selectedIndex = windowSpinnerOptionSelectedDialog.value,
+            onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
         )
         SuperSpinner(
-            title = "Disabled Spinner",
-            items = listOf(SpinnerEntry(icon = null, title = "Option 4")),
+            title = "Disabled SuperSpinner",
+            items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
+            selectedIndex = 0,
+            onSelectedIndexChange = {},
+            enabled = false
+        )
+        WindowSpinner(
+            title = "Disabled WindowSpinner",
+            items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
             selectedIndex = 0,
             onSelectedIndexChange = {},
             enabled = false
         )
     }
+
     SuperDialog(showSuperDialog)
     WindowDialog(showWindowDialog)
     SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
     SuperBottomSheet(showSuperBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
-    WindowBottomSheet(showWindowBottomSheet, bottomSheetSuperSwitchState)
+    WindowBottomSheet(showWindowBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
 }
 
 @Composable
@@ -494,14 +584,14 @@ fun WindowDialog(
             showDialog.value = false
         }
     ) {
-        val dismiss = LocalWindowDialogState.current
+        val state = LocalWindowDialogState.current
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TextButton(
                 text = "Cancel",
                 onClick = {
-                    dismiss?.invoke()
+                    state.invoke()
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -509,7 +599,7 @@ fun WindowDialog(
             TextButton(
                 text = "Confirm",
                 onClick = {
-                    dismiss?.invoke()
+                    state.invoke()
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
@@ -620,13 +710,13 @@ fun SuperBottomSheet(
                     )
                 ) {
                     SuperDropdown(
-                        title = "Dropdown",
+                        title = "SuperDropdown",
                         items = dropdownOptions,
                         selectedIndex = bottomSheetDropdownSelectedOption.value,
                         onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
                     )
                     SuperSwitch(
-                        title = "Switch",
+                        title = "SuperSwitch",
                         checked = bottomSheetSuperSwitchState.value,
                         onCheckedChange = {
                             bottomSheetSuperSwitchState.value = it
@@ -647,8 +737,10 @@ fun SuperBottomSheet(
 @Composable
 fun WindowBottomSheet(
     showBottomSheet: MutableState<Boolean>,
+    bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>
 ) {
+    val dropdownOptions = listOf("Option 1", "Option 2")
     var state: (() -> Unit)? = null
     WindowBottomSheet(
         title = "WindowBottomSheet",
@@ -694,8 +786,14 @@ fun WindowBottomSheet(
                         color = MiuixTheme.colorScheme.secondaryContainer,
                     )
                 ) {
+                    WindowDropdown(
+                        title = "WindowDropdown",
+                        items = dropdownOptions,
+                        selectedIndex = bottomSheetDropdownSelectedOption.value,
+                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
+                    )
                     SuperSwitch(
-                        title = "Switch",
+                        title = "SuperSwitch",
                         checked = bottomSheetSuperSwitchState.value,
                         onCheckedChange = {
                             bottomSheetSuperSwitchState.value = it

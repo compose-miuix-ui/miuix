@@ -99,9 +99,12 @@ fun MainPage(
     val checkboxTrue = remember { mutableStateOf(true) }
     val switch = remember { mutableStateOf(false) }
     val switchTrue = remember { mutableStateOf(true) }
-    val dropdownOptionSelected = remember { mutableStateOf(0) }
-    val spinnerOptionSelected = remember { mutableStateOf(0) }
-    val spinnerOptionSelectedDialog = remember { mutableStateOf(2) }
+    val superDropdownOptionSelected = remember { mutableStateOf(0) }
+    val windowDropdownOptionSelected = remember { mutableStateOf(1) }
+    val superSpinnerOptionSelected = remember { mutableStateOf(0) }
+    val windowSpinnerOptionSelected = remember { mutableStateOf(1) }
+    val superSpinnerOptionSelectedDialog = remember { mutableStateOf(2) }
+    val windowSpinnerOptionSelectedDialog = remember { mutableStateOf(3) }
     val superCheckbox = remember { mutableStateOf("State: false") }
     val superCheckboxState = remember { mutableStateOf(false) }
     val superRightCheckbox = remember { mutableStateOf("false") }
@@ -124,9 +127,12 @@ fun MainPage(
             checkboxTrue,
             switch,
             switchTrue,
-            dropdownOptionSelected,
-            spinnerOptionSelected,
-            spinnerOptionSelectedDialog,
+            superDropdownOptionSelected,
+            windowDropdownOptionSelected,
+            superSpinnerOptionSelected,
+            windowSpinnerOptionSelected,
+            superSpinnerOptionSelectedDialog,
+            windowSpinnerOptionSelectedDialog,
             superCheckbox,
             superCheckboxState,
             superRightCheckbox,

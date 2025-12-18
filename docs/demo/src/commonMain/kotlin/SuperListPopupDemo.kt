@@ -15,15 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 
 @Composable
-fun ListPopupDemo() {
+fun SuperListPopupDemo() {
     Scaffold {
         Box(
             modifier = Modifier
@@ -44,7 +44,7 @@ fun ListPopupDemo() {
                         onClick = { showPopup.value = true },
                         modifier = Modifier.padding(top = 16.dp)
                     )
-                    ListPopup(
+                    SuperListPopup(
                         show = showPopup,
                         alignment = PopupPositionProvider.Align.TopLeft,
                         onDismissRequest = { showPopup.value = false } // Close the popup menu

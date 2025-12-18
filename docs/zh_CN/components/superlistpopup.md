@@ -1,0 +1,138 @@
+---
+title: SuperListPopup
+requiresScaffoldHost: true
+prerequisites:
+  - 必须在 `Scaffold` 内使用以提供 `MiuixPopupHost`
+  - 在 `Scaffold` 外使用会导致弹窗内容不渲染
+  - 在嵌套的 `Scaffold` 中，仅在顶层保留 `MiuixPopupHost`；将其他的设为空
+hostComponent: Scaffold
+popupHost: MiuixPopupHost
+---
+
+# SuperListPopup
+
+`SuperListPopup` 是 Miuix 中的弹出列表组件，用于显示包含多个选项的弹出菜单。它提供了一个轻量级的、浮动的临时列表，适用于各种下拉菜单、上下文菜单等场景。
+
+<div style="position: relative; max-width: 700px; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superListPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
+::: danger 前置条件
+此组件依赖于 `Scaffold` 提供的 `MiuixPopupHost` 来渲染弹窗内容。必须在 `Scaffold` 内部使用，否则弹窗内容将无法正常渲染。
+:::
+
+## 引入
+
+```kotlin
+import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+```
+
+## 基本用法
+
+SuperListPopup 组件可用于创建简单的下拉菜单：
+
+```kotlin
+val showPopup = remember { mutableStateOf(false) }
+var selectedIndex by remember { mutableStateOf(0) }
+val items = listOf("选项 1", "选项 2", "选项 3")
+
+Scaffold {
+    Box {
+        TextButton(
+            text = "点击显示菜单",
+            onClick = { showPopup.value = true }
+        )
+        SuperListPopup(
+            show = showPopup,
+            alignment = PopupPositionProvider.Align.Left,
+            onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
+        ) {
+            ListPopupColumn {
+                items.forEachIndexed { index, string ->
+                    DropdownImpl(
+                        text = string,
+                        optionSize = items.size,
+                        isSelected = selectedIndex == index,
+                        onSelectedIndexChange = {
+                            selectedIndex = index
+                            showPopup.value = false // 关闭弹窗菜单
+                        },
+                        index = index
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+## 组件状态
+
+### 不同的对齐方式
+
+SuperListPopup 可以设置不同的对齐选项：
+
+```kotlin
+var showPopup = remember { mutableStateOf(false) }
+
+SuperListPopup(
+    show = showPopup,
+    onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
+    alignment = PopupPositionProvider.Align.Left
+) {
+    ListPopupColumn {
+        // 自定义内容
+    }
+}
+```
+
+### 禁用窗口变暗
+
+```kotlin
+var showPopup = remember { mutableStateOf(false) }
+
+SuperListPopup(
+    show = showPopup,
+    onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
+    enableWindowDim = false // 禁用变暗层
+) {
+    ListPopupColumn {
+        // 自定义内容
+    }
+}
+```
+
+## API
+
+### SuperListPopup
+
+| 参数                    | 类型                          | 默认值                                       | 描述                                       |
+| :---------------------- | :---------------------------- | :------------------------------------------- | :----------------------------------------- |
+| `show`                  | `MutableState<Boolean>`       | -                                            | 控制弹窗的显示状态。                       |
+| `popupModifier`         | `Modifier`                    | `Modifier`                                   | 应用于弹窗容器的修饰符。                   |
+| `popupPositionProvider` | `PopupPositionProvider`       | `ListPopupDefaults.DropdownPositionProvider` | 提供弹窗的位置计算逻辑。                   |
+| `alignment`             | `PopupPositionProvider.Align` | `PopupPositionProvider.Align.Right`          | 指定弹窗相对于锚点的对齐方式。             |
+| `enableWindowDim`       | `Boolean`                     | `true`                                       | 是否在弹窗显示时使背景变暗。               |
+| `shadowElevation`       | `Dp`                          | `11.dp`                                      | 弹窗阴影的高度。                           |
+| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | 当弹窗被关闭（例如点击外部）时触发的回调。 |
+| `maxHeight`             | `Dp?`                         | `null`                                       | 弹窗内容的最大高度。                       |
+| `minWidth`              | `Dp`                          | `200.dp`                                     | 弹窗内容的最小宽度。                       |
+| `content`               | `@Composable () -> Unit`      | -                                            | 要在弹窗内显示的内容。                     |
+
+### ListPopupColumn
+
+| 参数      | 类型                     | 默认值 | 描述                     |
+| :-------- | :----------------------- | :----- | :----------------------- |
+| `content` | `@Composable () -> Unit` | -      | 要在列内显示的列表内容。 |
+
+### PopupPositionProvider.Align
+
+| 值            | 描述                       |
+| :------------ | :------------------------- |
+| `Left`        | 将弹窗对齐到锚点的左侧。   |
+| `Right`       | 将弹窗对齐到锚点的右侧。   |
+| `TopLeft`     | 将弹窗对齐到锚点的左上角。 |
+| `TopRight`    | 将弹窗对齐到锚点的右上角。 |
+| `BottomLeft`  | 将弹窗对齐到锚点的左下角。 |
+| `BottomRight` | 将弹窗对齐到锚点的右下角。 |

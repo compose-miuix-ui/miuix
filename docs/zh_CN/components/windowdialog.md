@@ -14,7 +14,7 @@ popupHost: None
 
 <div style="position: relative; max-width: 700px; height: 210px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=windowDialog" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    </div>
+</div>
 
 ::: tip 提示
 该组件不依赖 `Scaffold`，可在任意 Composable 作用域中使用。
@@ -88,14 +88,14 @@ WindowDialog(
 | summaryColor()    | Color    | 获取默认摘要颜色       |
 | backgroundColor() | Color    | 获取默认对话框背景颜色 |
 
-## 在内容内部关闭
+### LocalWindowDialogState
 
-通过 `LocalWindowDialogState` 获取关闭方法：
+提供一个 `() -> Unit` 函数，用于从内容内部关闭当前弹窗。
 
 ```kotlin
-val dismiss = LocalWindowDialogState.current
+val state = LocalWindowDialogState.current
 TextButton(
     text = "关闭",
-    onClick = { dismiss?.invoke() }
+    onClick = { state.invoke() }
 )
 ```
