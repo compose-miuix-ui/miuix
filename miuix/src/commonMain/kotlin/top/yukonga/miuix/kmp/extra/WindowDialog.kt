@@ -89,7 +89,9 @@ fun WindowDialog(
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    if (!show.value) return
+    val internalVisible = remember { MutableTransitionState(false) }
+
+    if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
 
     val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
@@ -113,15 +115,19 @@ fun WindowDialog(
     }
     val effectiveExitTransition = exitTransitionNullable ?: rememberDefaultDialogExitTransition(isLargeScreen)
 
-    val internalVisible = remember { MutableTransitionState(false) }
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
     val currentOnDismissInternal by rememberUpdatedState(onDismissRequest)
+
+    LaunchedEffect(show.value) {
+        internalVisible.targetState = show.value
+    }
 
     val requestDismiss: () -> Unit = remember {
         {
             dismissPending.value = true
             internalVisible.targetState = false
+            currentOnDismissInternal?.invoke()
         }
     }
 
@@ -227,12 +233,6 @@ fun WindowDialog(
                 requestDismiss()
             }
         }
-    }
-
-    if (!internalVisible.currentState && !internalVisible.targetState && dismissPending.value) {
-        dismissPending.value = false
-        show.value = false
-        currentOnDismissInternal?.invoke()
     }
 }
 

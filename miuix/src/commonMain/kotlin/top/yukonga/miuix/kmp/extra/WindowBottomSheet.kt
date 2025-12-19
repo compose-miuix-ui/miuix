@@ -94,7 +94,9 @@ fun WindowBottomSheet(
     allowDismiss: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    if (!show.value) return
+    val internalVisible = remember { MutableTransitionState(false) }
+
+    if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
 
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
@@ -103,14 +105,18 @@ fun WindowBottomSheet(
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
-    val internalVisible = remember { MutableTransitionState(false) }
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
+
+    LaunchedEffect(show.value) {
+        internalVisible.targetState = show.value
+    }
 
     val requestDismiss: () -> Unit = remember {
         {
             dismissPending.value = true
             internalVisible.targetState = false
+            currentOnDismissRequest?.invoke()
         }
     }
 
@@ -195,7 +201,13 @@ fun WindowBottomSheet(
                 dragOffsetY = dragOffsetY,
                 dimAlpha = dimAlpha,
                 dragSnapChannel = dragSnapChannel,
-                onDismissRequest = { requestDismiss() },
+                onDismissRequest = {
+                    if (internalVisible.currentState) {
+                        requestDismiss()
+                    } else {
+                        outsideDismissDeferred.value = true
+                    }
+                },
                 content = {
                     CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
                         content()
@@ -258,12 +270,6 @@ fun WindowBottomSheet(
                 if (allowDismiss) requestDismiss()
             }
         }
-    }
-
-    if (!internalVisible.currentState && !internalVisible.targetState && dismissPending.value) {
-        dismissPending.value = false
-        show.value = false
-        currentOnDismissRequest?.invoke()
     }
 }
 

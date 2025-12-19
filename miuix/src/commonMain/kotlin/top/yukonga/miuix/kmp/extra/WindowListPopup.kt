@@ -93,19 +93,25 @@ fun WindowListPopup(
     minWidth: Dp = 200.dp,
     content: @Composable () -> Unit
 ) {
-    if (!show.value) return
+    val internalVisible = remember { MutableTransitionState(false) }
 
-    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
+    if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
+
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val dimAlpha = remember { mutableFloatStateOf(1f) }
 
-    val internalVisible = remember { MutableTransitionState(false) }
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
+
+    LaunchedEffect(show.value) {
+        internalVisible.targetState = show.value
+    }
 
     val requestDismiss: () -> Unit = remember {
         {
             dismissPending.value = true
             internalVisible.targetState = false
+            currentOnDismissRequest?.invoke()
         }
     }
 
@@ -248,10 +254,6 @@ fun WindowListPopup(
         properties = platformDialogProperties()
     ) {
         removePlatformDialogDefaultEffects()
-
-        if (!internalVisible.currentState && !internalVisible.targetState) {
-            internalVisible.targetState = true
-        }
 
         val windowWidth by remember(windowSize, density) {
             derivedStateOf { windowSize.width.dp / density.density }
@@ -411,12 +413,6 @@ fun WindowListPopup(
                 requestDismiss()
             }
         }
-    }
-
-    if (!internalVisible.currentState && !internalVisible.targetState && dismissPending.value) {
-        dismissPending.value = false
-        show.value = false
-        currentOnDismiss?.invoke()
     }
 }
 
