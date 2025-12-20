@@ -466,14 +466,14 @@ fun TextComponent(
         )
         SuperDropdown(
             title = "Disabled SuperDropdown",
-            items = listOf("Option 2"),
+            items = listOf("Option 3"),
             selectedIndex = 0,
             onSelectedIndexChange = {},
             enabled = false
         )
         WindowDropdown(
             title = "Disabled WindowDropdown",
-            items = listOf("Option 3"),
+            items = listOf("Option 4"),
             selectedIndex = 0,
             onSelectedIndexChange = {},
             enabled = false

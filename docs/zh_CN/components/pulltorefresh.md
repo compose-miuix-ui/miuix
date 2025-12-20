@@ -3,10 +3,10 @@
 `PullToRefresh` 是 Miuix 中的下拉刷新组件，可为列表和其他可滚动内容提供刷新功能。它采用“状态提升”模式，提供了带动画的交互式刷新指示器，适用于需要刷新数据的各种场景。
 
 ::: warning 注意
-该组件只适用于支持触控的场景，并且在网页构建目标中工作不佳!
+此组件仅适用于支持触控的环境!
 :::
 
-如需演示，请查看 <a href="https://compose-miuix-ui.github.io/miuix-jsCanvas/" target="_blank">Miuix Example</a> 的 DropDown 页。
+如需示例，请查看 <a href="https://compose-miuix-ui.github.io/miuix-jsCanvas/" target="_blank">Miuix Example</a> 的 DropDowns 页。
 
 ## 引入
 
@@ -81,8 +81,6 @@ PullToRefresh 组件有以下几种状态：
 | refreshTextStyle        | TextStyle              | 刷新文本的样式           | PullToRefreshDefaults.refreshTextStyle | 否       |
 | content                 | @Composable () -> Unit | 可滚动内容的可组合函数   | 无                                     | 是       |
 
-
-
 ### PullToRefreshState 类
 
 PullToRefreshState 用于管理刷新指示器的 UI 状态，可通过 `rememberPullToRefreshState()` 创建。
@@ -96,7 +94,6 @@ PullToRefreshState 用于管理刷新指示器的 UI 状态，可通过 `remembe
 
 > 注意：PullToRefreshState 仅用于 UI 状态管理，刷新逻辑应通过 `isRefreshing` 和 `onRefresh` 控制。
 
-
 ### PullToRefreshDefaults 对象
 
 PullToRefreshDefaults 提供下拉刷新组件的默认值。
@@ -107,7 +104,6 @@ PullToRefreshDefaults 提供下拉刷新组件的默认值。
 | circleSize       | Dp            | 指示器圆圈的默认大小 | 20.dp                                                                                     |
 | refreshTexts     | List\<String> | 默认的刷新文本列表   | ["Pull down to refresh", "Release to refresh", "Refreshing...", "Refreshed successfully"] |
 | refreshTextStyle | TextStyle     | 默认的文本样式       | TextStyle(fontSize = 14.sp, fontWeight = Bold, color = color)                             |
-
 
 ## 进阶用法
 
