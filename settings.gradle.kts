@@ -3,8 +3,9 @@
 
 @file:Suppress("UnstableApiUsage")
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
-    includeBuild("convention-plugins")
     repositories {
         google {
             mavenContent {
@@ -32,20 +33,15 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("com.android.settings") version ("8.13.1")
     id("org.gradle.toolchains.foojay-resolver-convention") version ("1.0.0")
 }
 
-android {
-    compileSdk = 36
-    targetSdk = 36
-    minSdk = 24
-    buildToolsVersion = "36.1.0"
-}
+rootProject.name = "compose-ui-miuix"
 
-rootProject.name = "miuix"
+includeBuild("build-plugin")
 
 include(":miuix")
+
 include(":example")
-include(":docs:demo")
-include(":docs:iconGen")
+
+include(":docs:demo", ":docs:iconGen")

@@ -3,12 +3,8 @@
 
 plugins { kotlin("jvm") }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-}
-
 dependencies {
-    implementation(project(":miuix"))
+    implementation(projects.miuix)
 }
 
 val iconsSourceDir = rootProject.layout.projectDirectory.dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile

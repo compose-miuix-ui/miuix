@@ -5,19 +5,13 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.jetbrains.compose)
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.spotless)
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.diffplug.spotless")
 }
 
 kotlin {
-    jvmToolchain(21)
-
     js(IR) {
         outputModuleName = "demo"
         browser {
@@ -39,7 +33,7 @@ kotlin {
             implementation(compose.ui)
 
             implementation(libs.jetbrains.androidx.navigation)
-            implementation(project(":miuix"))
+            implementation(projects.miuix)
         }
     }
 }

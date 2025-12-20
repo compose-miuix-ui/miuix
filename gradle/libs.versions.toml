@@ -1,32 +1,39 @@
 [versions]
 android-gradle-plugin = "8.13.2"
-androidx-activity = "1.12.1"
+
+androidx-activity = "1.12.2"
 androidx-window = "1.5.1"
-capsule = "2.1.1-patch2"
+
+kotlin = "2.2.21"
+
+spotless = "8.1.0"
+
 jetbrains-androidx-navigation = "2.9.1"
-jetbrains-compose = "1.9.3"
+jetbrains-compose-multiplatform = "1.9.3"
 jetbrains-compose-hotReload = "1.0.0"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
-kotlin = "2.2.21"
+
+gaze-capsule = "2.1.1-patch2"
 material-kolor = "4.0.5"
-spotless = "8.1.0"
 
 [libraries]
+# Libraries
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidx-window" }
 jetbrains-androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrains-androidx-navigation" }
-jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose" }
+jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
-gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "capsule" }
+gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
 materialkolor-material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }
 
-[plugins]
-android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
-android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
-jetbrains-compose-hotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "jetbrains-compose-hotReload" }
-jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "jetbrains-dokka" }
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+# Gradle Plugins
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "android-gradle-plugin" }
+android-library-gradle-plugin = { module = "com.android.kotlin.multiplatform.library:com.android.kotlin.multiplatform.library.gradle.plugin", version.ref = "android-gradle-plugin" }
+android-application-gradle-plugin = { module = "com.android.application:com.android.application.gradle.plugin", version.ref = "android-gradle-plugin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "jetbrains-compose-multiplatform" }
+kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+hot-reload-gradle-plugin = { module = "org.jetbrains.compose.hot-reload:hot-reload-gradle-plugin", version.ref = "jetbrains-compose-hotReload" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "jetbrains-dokka" }
+spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
