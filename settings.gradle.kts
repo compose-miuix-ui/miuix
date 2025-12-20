@@ -42,6 +42,12 @@ includeBuild("build-plugin")
 
 include(":miuix")
 
-include(":example")
+include(":example:shared")
+include(":example:android")
+include(":example:desktop")
+include(":example:js")
+include(":example:wasmJs")
+include(":example:macos")
 
-include(":docs:demo", ":docs:iconGen")
+include(":docs:demo")
+include(":docs:iconGen")

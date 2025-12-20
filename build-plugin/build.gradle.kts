@@ -8,12 +8,6 @@ plugins {
     `kotlin-dsl`
 }
 
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
-    google()
-}
-
 dependencies {
     implementation(gradleApi())
     implementation(gradleKotlinDsl())
@@ -26,15 +20,4 @@ dependencies {
     implementation(libs.hot.reload.gradle.plugin)
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.spotless.plugin.gradle)
-}
-
-java {
-    targetCompatibility = JavaVersion.VERSION_21
-    sourceCompatibility = JavaVersion.VERSION_21
-}
-
-tasks.withType<KotlinCompile> {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
 }

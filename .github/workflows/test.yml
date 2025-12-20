@@ -6,13 +6,13 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docs/**'
-      - 'iosApp/iosApp/Info.plist'
+      - 'example/ios/iosApp/Info.plist'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - 'README.md'
       - 'docs/**'
-      - 'iosApp/iosApp/Info.plist'
+      - 'example/ios/iosApp/Info.plist'
 
 permissions:
   contents: read

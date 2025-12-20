@@ -41,8 +41,10 @@ actual fun getRoundedCorner(): Dp = 0.dp
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
+    dismissOnBackPress = false,
     usePlatformDefaultWidth = false,
-    scrimColor = Color.Transparent
+    scrimColor = Color.Transparent,
+    usePlatformInsets = false
 )
 
 @Composable

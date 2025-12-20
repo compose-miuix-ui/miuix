@@ -355,7 +355,7 @@ private fun WindowSpinnerDialog(
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                dismiss?.invoke()
+                                dismiss.invoke()
                             }
                         }
                     }
@@ -365,7 +365,7 @@ private fun WindowSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { dismiss?.invoke() }
+                        onClick = { dismiss.invoke() }
                     )
                 }
             ) { measurables, constraints ->

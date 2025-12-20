@@ -5,23 +5,20 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
-    id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.multiplatform")
-    id("com.diffplug.spotless")
 }
 
 kotlin {
+    jvmToolchain(BuildConfig.JDK_VERSION)
+
     js(IR) {
         outputModuleName = "demo"
         browser {
             commonWebpackConfig {
                 outputFileName = "demo.js"
             }
-        }
-        compilerOptions {
-            freeCompilerArgs.add("-Xes-long-as-bigint")
-            freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
         }
         binaries.executable()
     }
@@ -40,16 +37,4 @@ kotlin {
 
 rootProject.plugins.withType<YarnPlugin> {
     rootProject.the<YarnRootExtension>().lockFileDirectory = rootProject.file("docs/demo").resolve("kotlin-js-store")
-}
-
-spotless {
-    kotlin {
-        target("src/**/*.kt")
-        licenseHeaderFile(rootProject.file("./spotless/copyright.txt"), "(^(?![\\/ ]\\**).*$)")
-    }
-
-    kotlinGradle {
-        target("*.kts")
-        licenseHeaderFile(rootProject.file("./spotless/copyright.txt"), "(^(?![\\/ ]\\**).*$)")
-    }
 }

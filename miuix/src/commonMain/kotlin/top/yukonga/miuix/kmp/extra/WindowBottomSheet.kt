@@ -144,10 +144,6 @@ fun WindowBottomSheet(
             derivedStateOf { windowSize.height.dp / density.density }
         }
 
-        if (!internalVisible.currentState && !internalVisible.targetState) {
-            internalVisible.targetState = true
-        }
-
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = DialogDimEnter,

@@ -1,7 +1,13 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-plugins { kotlin("jvm") }
+plugins {
+    kotlin("jvm")
+}
+
+kotlin {
+    jvmToolchain(BuildConfig.JDK_VERSION)
+}
 
 dependencies {
     implementation(projects.miuix)
