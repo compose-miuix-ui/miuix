@@ -132,8 +132,12 @@ fun BasicComponent(
     val currentOnClick by rememberUpdatedState(onClick)
 
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
-    LaunchedEffect(holdDownState) {
+    LaunchedEffect(holdDownState, interactionSource, indication) {
         if (holdDownState) {
+            holdDown.value?.let { oldValue ->
+                interactionSource.emit(HoldDownInteraction.Release(oldValue))
+                holdDown.value = null
+            }
             val interaction = HoldDownInteraction.HoldDown()
             holdDown.value = interaction
             interactionSource.emit(interaction)
