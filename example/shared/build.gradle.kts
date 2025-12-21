@@ -55,7 +55,6 @@ kotlin {
                 api(compose.components.resources)
                 implementation(compose.runtime)
                 implementation(compose.ui)
-                implementation(compose.components.uiToolingPreview)
                 implementation(libs.jetbrains.androidx.navigation)
                 implementation(projects.miuix)
             }
