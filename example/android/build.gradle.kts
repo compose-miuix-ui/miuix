@@ -1,11 +1,10 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import java.util.Properties
 
 plugins {
-    kotlin("android")
+    kotlin("android") // Removed after the release of AGP 9.0.0
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -14,11 +13,16 @@ kotlin {
     jvmToolchain(BuildConfig.JDK_VERSION)
 }
 
+dependencies {
+    implementation(projects.example.shared)
+    implementation(libs.androidx.activity)
+}
+
 @Suppress("UnstableApiUsage")
 android {
+    buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
     compileSdk = BuildConfig.COMPILE_SDK
     namespace = BuildConfig.APPLICATION_ID
-    buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
     defaultConfig {
         targetSdk = BuildConfig.TARGET_SDK
         minSdk = BuildConfig.MIN_SDK
@@ -51,20 +55,10 @@ android {
             }
         }
     }
-    dependencies {
-        implementation(projects.example.shared)
-        implementation(libs.androidx.activity)
-    }
-    dependenciesInfo {
-        includeInApk = false
-        includeInBundle = false
-    }
-    packaging {
-        applicationVariants.all {
-            outputs.all {
-                (this as BaseVariantOutputImpl).outputFileName = "${BuildConfig.APPLICATION_NAME}-v$versionName($versionCode)-$name.apk"
-            }
-        }
+    base {
+        archivesName.set(
+            "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})"
+        )
     }
     buildTypes {
         release {
@@ -77,6 +71,10 @@ android {
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
         }
+    }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 }
 

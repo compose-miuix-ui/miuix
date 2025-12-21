@@ -51,13 +51,13 @@ kotlin {
         commonMain {
             kotlin.srcDir(generatedSrcDir.resolve("kotlin").absolutePath)
             dependencies {
-                api(compose.runtime)
                 api(compose.foundation)
-                api(compose.ui)
                 api(compose.components.resources)
-                api(libs.jetbrains.androidx.navigation)
-                api(projects.miuix)
+                implementation(compose.runtime)
+                implementation(compose.ui)
                 implementation(compose.components.uiToolingPreview)
+                implementation(libs.jetbrains.androidx.navigation)
+                implementation(projects.miuix)
             }
         }
 
