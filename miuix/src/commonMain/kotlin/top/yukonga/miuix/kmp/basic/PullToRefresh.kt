@@ -356,6 +356,7 @@ class PullToRefreshState(
                     animateToSpring(0f)
                 } finally {
                     isRebounding = false
+                    internalRefreshState = RefreshState.Idle
                 }
             }
         }
