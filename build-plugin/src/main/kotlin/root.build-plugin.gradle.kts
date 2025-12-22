@@ -4,6 +4,14 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 
+fun Project.configureJvmToolchain() {
+    plugins.withType<KotlinBasePlugin> {
+        extensions.configure<KotlinBaseExtension> {
+            jvmToolchain(BuildConfig.JDK_VERSION)
+        }
+    }
+}
+
 allprojects {
     apply(plugin = "module.spotless")
 
@@ -22,14 +30,6 @@ allprojects {
                 configureJvmToolchain()
                 configured = true
             }
-        }
-    }
-}
-
-fun Project.configureJvmToolchain() {
-    plugins.withType<KotlinBasePlugin> {
-        extensions.configure<KotlinBaseExtension> {
-            jvmToolchain(BuildConfig.JDK_VERSION)
         }
     }
 }

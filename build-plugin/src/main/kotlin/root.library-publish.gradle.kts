@@ -1,11 +1,6 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-allprojects {
-    group = "top.yukonga.miuix.kmp"
-    version = computedVersion
-}
-
 val isRelease = project.hasProperty("release")
 val baseVersion = BuildConfig.LIBRARY_VERSION
 
@@ -18,3 +13,7 @@ fun gitShort(): String = try {
 
 val computedVersion = if (isRelease) baseVersion else "$baseVersion-${gitShort()}-SNAPSHOT"
 
+allprojects {
+    group = "top.yukonga.miuix.kmp"
+    version = computedVersion
+}
