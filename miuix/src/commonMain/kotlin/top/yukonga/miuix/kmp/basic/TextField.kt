@@ -163,7 +163,7 @@ fun TextField(
         outputTransformation = outputTransformation,
         scrollState = scrollState,
         decorator = @Composable { innerTextField ->
-            textFieldDecorationBox(
+            TextFieldDecorationBox(
                 finalModifier = finalModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -300,7 +300,7 @@ fun TextField(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->
-            textFieldDecorationBox(
+            TextFieldDecorationBox(
                 finalModifier = finalModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -435,7 +435,7 @@ fun TextField(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->
-            textFieldDecorationBox(
+            TextFieldDecorationBox(
                 finalModifier = finalModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -458,7 +458,7 @@ private enum class LabelAnimState { Hidden, Placeholder, Normal, Floating }
  * A Miuix style decoration box for the [TextField] component.
  */
 @Composable
-private fun textFieldDecorationBox(
+private fun TextFieldDecorationBox(
     finalModifier: Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
