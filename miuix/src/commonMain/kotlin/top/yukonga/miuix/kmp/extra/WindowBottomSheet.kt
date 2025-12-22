@@ -284,7 +284,7 @@ private fun rememberDefaultSheetExitTransition(): ExitTransition {
     return remember {
         slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(450, easing = DecelerateEasing(0.8f))
+            animationSpec = tween(300, easing = DecelerateEasing(0.8f))
         )
     }
 }
@@ -293,7 +293,7 @@ private val DialogDimEnter: EnterTransition =
     fadeIn(animationSpec = tween(300, easing = SinOutEasing))
 
 private val DialogDimExit: ExitTransition =
-    fadeOut(animationSpec = tween(250, easing = SinOutEasing))
+    fadeOut(animationSpec = tween(300, easing = SinOutEasing))
 
 
 object WindowBottomSheetDefaults {

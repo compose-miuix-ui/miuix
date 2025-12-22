@@ -38,14 +38,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
-import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -64,7 +62,6 @@ class MiuixPopupUtils {
         var enableWindowDim by mutableStateOf(true)
         var dimEnterTransition by mutableStateOf<EnterTransition?>(null)
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
-        var transformOrigin by mutableStateOf({ TransformOrigin.Center })
         var content by mutableStateOf<@Composable () -> Unit>({})
     }
 
@@ -87,14 +84,14 @@ class MiuixPopupUtils {
         private var nextZIndex = 1f
 
         private val DialogDimEnter: EnterTransition =
-            fadeIn(animationSpec = tween(300, easing = SinOutEasing))
+            fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
         private val DialogDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(250, easing = SinOutEasing))
+            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
 
         private val PopupDimEnter: EnterTransition =
-            fadeIn(animationSpec = tween(300, easing = SinOutEasing))
+            fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
         private val PopupDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(150, easing = SinOutEasing))
+            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
 
         @Composable
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
@@ -135,27 +132,16 @@ class MiuixPopupUtils {
         }
 
         @Composable
-        private fun rememberDefaultPopupEnterTransition(transformOrigin: () -> TransformOrigin): EnterTransition {
-            return remember(transformOrigin()) {
-                fadeIn(
-                    animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f))
-                ) + scaleIn(
-                    initialScale = 0.15f,
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 450f, visibilityThreshold = 0.001f),
-                    transformOrigin = transformOrigin()
-                )
+        private fun rememberDefaultPopupEnterTransition(): EnterTransition {
+            return remember {
+                fadeIn(animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f)))
             }
         }
 
         @Composable
-        private fun rememberDefaultPopupExitTransition(transformOrigin: () -> TransformOrigin): ExitTransition {
-            return remember(transformOrigin()) {
-                fadeOut(
-                    animationSpec = tween(durationMillis = 140, easing = DecelerateEasing(1.5f))
-                ) + scaleOut(
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 450f, visibilityThreshold = 0.001f),
-                    transformOrigin = transformOrigin()
-                )
+        private fun rememberDefaultPopupExitTransition(): ExitTransition {
+            return remember {
+                fadeOut(animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1.5f)))
             }
         }
 
@@ -216,6 +202,12 @@ class MiuixPopupUtils {
                 state.content = latestContent
             }
 
+            LaunchedEffect(visible.value) {
+                if (visible.value && dialogStates.none { it.showState === state.showState }) {
+                    dialogStates.add(state)
+                }
+            }
+
             DisposableEffect(state.showState) {
                 if (dialogStates.none { it.showState === state.showState }) {
                     dialogStates.add(state)
@@ -237,8 +229,6 @@ class MiuixPopupUtils {
          * @param enableWindowDim Whether to dim the window behind the popup.
          * @param dimEnterTransition Optional, custom enter animation for dim layer.
          * @param dimExitTransition Optional, custom exit animation for dim layer.
-         * @param transformOrigin The pivot point in terms of fraction of the overall size,
-         *   used for scale transformations. By default it's [TransformOrigin.Center].
          * @param content The [Composable] content of the popup.
          */
         @Composable
@@ -249,7 +239,6 @@ class MiuixPopupUtils {
             enableWindowDim: Boolean = true,
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
-            transformOrigin: (() -> TransformOrigin) = { TransformOrigin.Center },
             content: (@Composable () -> Unit)? = null,
         ) {
             if (content == null) {
@@ -268,7 +257,6 @@ class MiuixPopupUtils {
             val latestEnableDim by rememberUpdatedState(enableWindowDim)
             val latestDimEnter by rememberUpdatedState(dimEnterTransition)
             val latestDimExit by rememberUpdatedState(dimExitTransition)
-            val latestOrigin by rememberUpdatedState(transformOrigin)
             val latestContent by rememberUpdatedState(content)
 
             SideEffect {
@@ -277,8 +265,13 @@ class MiuixPopupUtils {
                 state.enableWindowDim = latestEnableDim
                 state.dimEnterTransition = latestDimEnter
                 state.dimExitTransition = latestDimExit
-                state.transformOrigin = latestOrigin
                 state.content = latestContent
+            }
+
+            LaunchedEffect(visible.value) {
+                if (visible.value && popupStates.none { it.showState === state.showState }) {
+                    popupStates.add(state)
+                }
             }
 
             DisposableEffect(state.showState) {
@@ -471,8 +464,8 @@ class MiuixPopupUtils {
             AnimatedVisibility(
                 visibleState = visibleState,
                 modifier = Modifier.zIndex(popupState.zIndex),
-                enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(popupState.transformOrigin),
-                exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition(popupState.transformOrigin)
+                enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(),
+                exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition()
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     popupState.content()

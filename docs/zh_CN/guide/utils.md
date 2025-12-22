@@ -42,8 +42,7 @@ PopupLayout(
     exitTransition = fadeOut(),                       // 可选，弹出窗口内容的自定义退出动画
     enableWindowDim = true,                           // 可选，是否启用遮罩层, 默认为 true
     dimEnterTransition = fadeIn(),                    // 可选，遮罩层的自定义进入动画
-    dimExitTransition = fadeOut(),                    // 可选，遮罩层的自定义退出动画
-    transformOrigin = { TransformOrigin.Center }      // 用于缩放变换的变换原点, 默认为 TransformOrigin.Center
+    dimExitTransition = fadeOut()                    // 可选，遮罩层的自定义退出动画
 ) {
     // 弹出窗口内容
 }

@@ -42,8 +42,7 @@ PopupLayout(
     exitTransition = fadeOut(),                       // Optional, custom exit animation for popup content
     enableWindowDim = true,                           // Optional, whether to enable dimming layer, defaults to true
     dimEnterTransition = fadeIn(),                    // Optional, custom enter animation for dim layer
-    dimExitTransition = fadeOut(),                    // Optional, custom exit animation for dim layer
-    transformOrigin = { TransformOrigin.Center }      // Transform origin for scale transformations, defaults to TransformOrigin.Center
+    dimExitTransition = fadeOut()                     // Optional, custom exit animation for dim layer
 ) {
     // Popup content
 }

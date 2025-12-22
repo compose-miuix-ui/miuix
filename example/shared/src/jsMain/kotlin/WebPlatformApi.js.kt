@@ -3,14 +3,14 @@
 
 import kotlinx.browser.document
 
-public actual fun platformHideLoading() {
+actual fun platformHideLoading() {
     val loading = document.getElementById("loading")
     val composeApp = document.getElementById("composeApp")
     loading?.asDynamic().style?.display = "none"
     composeApp?.asDynamic().style?.display = "block"
 }
 
-public actual fun platformGetCssVar(name: String): Double {
+actual fun platformGetCssVar(name: String): Double {
     val docEl = document.documentElement ?: return 0.0
     val style = docEl.ownerDocument?.defaultView?.getComputedStyle(docEl) ?: return 0.0
     val raw = style.getPropertyValue(name)
@@ -21,7 +21,7 @@ public actual fun platformGetCssVar(name: String): Double {
     return px ?: 0.0
 }
 
-public actual fun platformIsTouchEnabled(): Boolean {
+actual fun platformIsTouchEnabled(): Boolean {
     val hasCoarse = js("window.matchMedia && window.matchMedia('(pointer: coarse)').matches") as? Boolean ?: false
     if (hasCoarse) return true
 
@@ -29,6 +29,6 @@ public actual fun platformIsTouchEnabled(): Boolean {
     if (hasOnTouchStart) return true
 
     val maxTouchPoints = (js("navigator.maxTouchPoints") as? Int ?: 0) +
-        (js("navigator.msMaxTouchPoints") as? Int ?: 0)
+            (js("navigator.msMaxTouchPoints") as? Int ?: 0)
     return maxTouchPoints > 0
 }

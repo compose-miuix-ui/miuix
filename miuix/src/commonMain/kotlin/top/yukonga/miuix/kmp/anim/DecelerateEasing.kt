@@ -22,6 +22,6 @@ class DecelerateEasing(
         if (factor == 1.0f) {
             1.0f - (1.0f - fraction) * (1.0f - fraction)
         } else {
-            1.0f - (1.0f - fraction).pow(2 * fraction)
+            1.0f - (1.0f - fraction).pow(2 * factor)
         }
 }
