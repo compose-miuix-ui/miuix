@@ -13,8 +13,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     withSourcesJar(true)
 
     android {

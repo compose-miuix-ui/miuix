@@ -8,8 +8,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     js(IR) {
         outputModuleName = "composeApp"
         browser {

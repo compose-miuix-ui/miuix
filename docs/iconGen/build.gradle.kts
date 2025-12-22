@@ -5,10 +5,6 @@ plugins {
     kotlin("jvm")
 }
 
-kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-}
-
 dependencies {
     implementation(projects.miuix)
 }

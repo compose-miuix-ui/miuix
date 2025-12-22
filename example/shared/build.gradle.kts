@@ -13,8 +13,6 @@ plugins {
 val generatedSrcDir = layout.buildDirectory.dir("generated").get().asFile.resolve("miuix-example")
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     android {
         androidResources.enable = true
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION

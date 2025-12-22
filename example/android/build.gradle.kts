@@ -9,10 +9,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-}
-
 dependencies {
     implementation(projects.example.shared)
     implementation(libs.androidx.activity)

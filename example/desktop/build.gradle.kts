@@ -11,8 +11,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     jvm("desktop")
 
     sourceSets {

@@ -10,8 +10,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     listOf(
         macosArm64()
     ).forEach {

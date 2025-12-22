@@ -10,8 +10,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(BuildConfig.JDK_VERSION)
-
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "composeApp"

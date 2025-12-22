@@ -6,8 +6,8 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
     id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.multiplatform")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 kotlin {
