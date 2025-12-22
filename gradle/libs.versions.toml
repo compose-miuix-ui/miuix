@@ -4,7 +4,7 @@ android-gradle-plugin = "8.13.2"
 androidx-activity = "1.12.2"
 androidx-window = "1.5.1"
 
-kotlin = "2.3.0"
+kotlin = "2.2.21"
 
 spotless = "8.1.0"
 
