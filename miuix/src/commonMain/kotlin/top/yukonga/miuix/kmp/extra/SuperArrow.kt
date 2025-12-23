@@ -14,7 +14,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -57,8 +56,6 @@ fun SuperArrow(
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
-
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -74,9 +71,7 @@ fun SuperArrow(
             )
         },
         bottomAction = bottomAction,
-        onClick = {
-            currentOnClick.takeIf { enabled }?.invoke()
-        },
+        onClick = onClick,
         holdDownState = holdDownState,
         enabled = enabled,
     )

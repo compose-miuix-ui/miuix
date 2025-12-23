@@ -68,17 +68,13 @@ fun BasicComponent(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
-
     BasicComponent(
         leftAction = leftAction,
         rightActions = rightActions,
         bottomAction = bottomAction,
         modifier = modifier,
         insideMargin = insideMargin,
-        onClick = {
-            currentOnClick.takeIf { enabled }?.invoke()
-        },
+        onClick = onClick,
         holdDownState = holdDownState,
         enabled = enabled,
         interactionSource = interactionSource,
