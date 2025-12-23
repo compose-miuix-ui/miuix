@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +45,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowDropdown] is enabled.
  * @param showValue Whether to show the selected value of the [WindowDropdown].
- * @param onClick The callback when the [WindowDropdown] is clicked.
  * @param onSelectedIndexChange The callback when the selected index of the [WindowDropdown] is changed.
  */
 @Composable
@@ -66,7 +64,6 @@ fun WindowDropdown(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onClick: (() -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -82,10 +79,8 @@ fun WindowDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            currentOnClick?.invoke()
             isDropdownExpanded.value = !isDropdownExpanded.value
             if (isDropdownExpanded.value) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)

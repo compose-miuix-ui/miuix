@@ -56,21 +56,21 @@ WindowDialog(
 
 ### WindowDialog Properties
 
-| Name                         | Type                     | Description                                      | Default                                  | Required |
-| ---------------------------- | ------------------------ | ------------------------------------------------ | ---------------------------------------- | -------- |
-| `show`                       | `MutableState<Boolean>`  | Controls visibility                              | -                                        | Yes      |
-| `modifier`                   | `Modifier`               | Root content modifier                            | `Modifier`                               | No       |
-| `title`                      | `String?`                | Dialog title                                     | `null`                                   | No       |
-| `titleColor`                 | `Color`                  | Title color                                      | `WindowDialogDefaults.titleColor()`      | No       |
-| `summary`                    | `String?`                | Dialog summary                                   | `null`                                   | No       |
-| `summaryColor`               | `Color`                  | Summary color                                    | `WindowDialogDefaults.summaryColor()`    | No       |
-| `backgroundColor`            | `Color`                  | Dialog background color                          | `WindowDialogDefaults.backgroundColor()` | No       |
-| `onDismissRequest`           | `(() -> Unit)?`          | Called when the user requests dismissal (outside tap or back) | `null`                                   | No       |
-| `onDismissFinished`          | `(() -> Unit)?`          | Callback after dialog fully dismisses            | `null`                                   | No       |
-| `outsideMargin`              | `DpSize`                 | Outer margin (window edges)                      | `WindowDialogDefaults.outsideMargin`     | No       |
-| `insideMargin`               | `DpSize`                 | Inner padding for dialog content                 | `WindowDialogDefaults.insideMargin`      | No       |
-| `defaultWindowInsetsPadding` | `Boolean`                | Apply default insets padding (IME, nav, caption) | `true`                                   | No       |
-| `content`                    | `@Composable () -> Unit` | Dialog content                                   | -                                        | Yes       |
+| Property Name              | Type                   | Description                                                   | Default Value                          | Required |
+| -------------------------- | ---------------------- | ------------------------------------------------------------- | -------------------------------------- | -------- |
+| show                       | MutableState\<Boolean> | Controls visibility of the dialog                             | -                                      | Yes      |
+| modifier                   | Modifier               | Root content modifier                                         | Modifier                               | No       |
+| title                      | String?                | Dialog title                                                  | null                                   | No       |
+| titleColor                 | Color                  | Title color                                                   | WindowDialogDefaults.titleColor()      | No       |
+| summary                    | String?                | Dialog summary                                                | null                                   | No       |
+| summaryColor               | Color                  | Summary color                                                 | WindowDialogDefaults.summaryColor()    | No       |
+| backgroundColor            | Color                  | Dialog background color                                       | WindowDialogDefaults.backgroundColor() | No       |
+| onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                   | No       |
+| onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses                         | null                                   | No       |
+| outsideMargin              | DpSize                 | Outer margin (window edges)                                   | WindowDialogDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                 | Inner padding for dialog content                              | WindowDialogDefaults.insideMargin      | No       |
+| defaultWindowInsetsPadding | Boolean                | Apply default insets padding (IME, nav, caption)              | true                                   | No       |
+| content                    | @Composable () -> Unit | Dialog content                                                | -                                      | Yes      |
 
 ### WindowDialogDefaults
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +45,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperDropdown] is enabled.
  * @param showValue Whether to show the selected value of the [SuperDropdown].
- * @param onClick The callback when the [SuperDropdown] is clicked.
  * @param onSelectedIndexChange The callback when the selected index of the [SuperDropdown] is changed.
  */
 @Composable
@@ -66,7 +64,6 @@ fun SuperDropdown(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onClick: (() -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -82,10 +79,8 @@ fun SuperDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            currentOnClick?.invoke()
             isDropdownExpanded.value = !isDropdownExpanded.value
             if (isDropdownExpanded.value) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)

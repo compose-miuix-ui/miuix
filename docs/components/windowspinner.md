@@ -143,7 +143,6 @@ WindowSpinner(
 | maxHeight             | Dp?                       | Maximum height of popup            | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional click callback          | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### WindowSpinner Properties (Dialog Mode)
@@ -164,7 +163,6 @@ WindowSpinner(
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional click callback          | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### SpinnerEntry Properties

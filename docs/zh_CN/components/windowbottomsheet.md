@@ -58,25 +58,25 @@ WindowBottomSheet(
 
 ### WindowBottomSheet 属性
 
-| 属性名                     | 类型                      | 说明                               | 默认值                                      | 是否必须 |
-| -------------------------- | ------------------------- | ---------------------------------- | ------------------------------------------- | -------- |
-| show                       | MutableState\<Boolean>    | 控制底部抽屉显示状态的状态对象     | -                                           | 是       |
-| modifier                   | Modifier                  | 应用于底部抽屉的修饰符             | Modifier                                    | 否       |
-| title                      | String?                   | 底部抽屉的标题                     | null                                        | 否       |
-| leftAction                 | @Composable (() -> Unit)? | 可选的左侧操作按钮(例如关闭按钮)   | null                                        | 否       |
-| rightAction                | @Composable (() -> Unit)? | 可选的右侧操作按钮(例如提交按钮)   | null                                        | 否       |
-| backgroundColor            | Color                     | 底部抽屉背景色                     | WindowBottomSheetDefaults.backgroundColor() | 否       |
-| enableWindowDim            | Boolean                   | 是否启用遮罩层                     | true                                        | 否       |
-| cornerRadius               | Dp                        | 顶部圆角半径                       | WindowBottomSheetDefaults.cornerRadius      | 否       |
-| sheetMaxWidth              | Dp                        | 底部抽屉的最大宽度                 | WindowBottomSheetDefaults.maxWidth          | 否       |
+| 属性名                     | 类型                      | 说明                                         | 默认值                                      | 是否必须 |
+| -------------------------- | ------------------------- | -------------------------------------------- | ------------------------------------------- | -------- |
+| show                       | MutableState\<Boolean>    | 控制底部抽屉显示状态的状态对象               | -                                           | 是       |
+| modifier                   | Modifier                  | 应用于底部抽屉的修饰符                       | Modifier                                    | 否       |
+| title                      | String?                   | 底部抽屉的标题                               | null                                        | 否       |
+| leftAction                 | @Composable (() -> Unit)? | 可选的左侧操作按钮(例如关闭按钮)             | null                                        | 否       |
+| rightAction                | @Composable (() -> Unit)? | 可选的右侧操作按钮(例如提交按钮)             | null                                        | 否       |
+| backgroundColor            | Color                     | 底部抽屉背景色                               | WindowBottomSheetDefaults.backgroundColor() | 否       |
+| enableWindowDim            | Boolean                   | 是否启用遮罩层                               | true                                        | 否       |
+| cornerRadius               | Dp                        | 顶部圆角半径                                 | WindowBottomSheetDefaults.cornerRadius      | 否       |
+| sheetMaxWidth              | Dp                        | 底部抽屉的最大宽度                           | WindowBottomSheetDefaults.maxWidth          | 否       |
 | onDismissRequest           | (() -> Unit)?             | 当用户请求关闭（点击遮罩层或返回手势）时触发 | null                                        | 否       |
-| onDismissFinished          | (() -> Unit)?             | 底部抽屉完全关闭（动画结束）时的回调 | null                                        | 否       |
-| outsideMargin              | DpSize                    | 底部抽屉外部边距                   | WindowBottomSheetDefaults.outsideMargin     | 否       |
-| insideMargin               | DpSize                    | 底部抽屉内部内容的边距             | WindowBottomSheetDefaults.insideMargin      | 否       |
-| defaultWindowInsetsPadding | Boolean                   | 是否应用默认窗口插入内边距         | true                                        | 否       |
-| dragHandleColor            | Color                     | 拖拽指示器的颜色                   | WindowBottomSheetDefaults.dragHandleColor() | 否       |
-| allowDismiss               | Boolean                   | 是否允许通过拖拽或返回手势关闭抽屉 | true                                        | 否       |
-| content                    | @Composable () -> Unit    | 底部抽屉的内容                     | -                                           | 是       |
+| onDismissFinished          | (() -> Unit)?             | 底部抽屉完全关闭（动画结束）时的回调         | null                                        | 否       |
+| outsideMargin              | DpSize                    | 底部抽屉外部边距                             | WindowBottomSheetDefaults.outsideMargin     | 否       |
+| insideMargin               | DpSize                    | 底部抽屉内部内容的边距                       | WindowBottomSheetDefaults.insideMargin      | 否       |
+| defaultWindowInsetsPadding | Boolean                   | 是否应用默认窗口插入内边距                   | true                                        | 否       |
+| dragHandleColor            | Color                     | 拖拽指示器的颜色                             | WindowBottomSheetDefaults.dragHandleColor() | 否       |
+| allowDismiss               | Boolean                   | 是否允许通过拖拽或返回手势关闭抽屉           | true                                        | 否       |
+| content                    | @Composable () -> Unit    | 底部抽屉的内容                               | -                                           | 是       |
 
 ### WindowBottomSheetDefaults
 

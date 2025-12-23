@@ -81,24 +81,23 @@ SuperDropdown(
 
 ### SuperDropdown 属性
 
-| 属性名                | 类型                      | 说明                     | 默认值                                | 是否必须 |
-| --------------------- | ------------------------- | ------------------------ | ------------------------------------- | -------- |
-| items                 | List\<String>             | 下拉选项列表             | -                                     | 是       |
-| selectedIndex         | Int                       | 当前选中项的索引         | -                                     | 是       |
-| title                 | String                    | 下拉菜单的标题           | -                                     | 是       |
-| titleColor            | BasicComponentColors      | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()   | 否       |
-| summary               | String?                   | 下拉菜单的摘要说明       | null                                  | 否       |
-| summaryColor          | BasicComponentColors      | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
-| dropdownColors        | DropdownColors            | 下拉菜单的颜色配置       | DropdownDefaults.dropdownColors()     | 否       |
-| leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容     | null                                  | 否       |
-| bottomAction          | @Composable (() -> Unit)? | 底部自定义内容           | null                                  | 否       |
-| modifier              | Modifier                  | 应用于组件的修饰符       | Modifier                              | 否       |
-| insideMargin          | PaddingValues             | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
-| maxHeight             | Dp?                       | 下拉菜单的最大高度       | null                                  | 否       |
-| enabled               | Boolean                   | 组件是否可交互           | true                                  | 否       |
-| showValue             | Boolean                   | 是否显示当前选中的值     | true                                  | 否       |
-| onClick               | (() -> Unit)?             | 点击下拉菜单时的额外回调 | null                                  | 否       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调       | -                                     | 否       |
+| 属性名                | 类型                      | 说明                 | 默认值                                | 是否必须 |
+| --------------------- | ------------------------- | -------------------- | ------------------------------------- | -------- |
+| items                 | List\<String>             | 下拉选项列表         | -                                     | 是       |
+| selectedIndex         | Int                       | 当前选中项的索引     | -                                     | 是       |
+| title                 | String                    | 下拉菜单的标题       | -                                     | 是       |
+| titleColor            | BasicComponentColors      | 标题文本的颜色配置   | BasicComponentDefaults.titleColor()   | 否       |
+| summary               | String?                   | 下拉菜单的摘要说明   | null                                  | 否       |
+| summaryColor          | BasicComponentColors      | 摘要文本的颜色配置   | BasicComponentDefaults.summaryColor() | 否       |
+| dropdownColors        | DropdownColors            | 下拉菜单的颜色配置   | DropdownDefaults.dropdownColors()     | 否       |
+| leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容 | null                                  | 否       |
+| bottomAction          | @Composable (() -> Unit)? | 底部自定义内容       | null                                  | 否       |
+| modifier              | Modifier                  | 应用于组件的修饰符   | Modifier                              | 否       |
+| insideMargin          | PaddingValues             | 组件内部内容的边距   | BasicComponentDefaults.InsideMargin   | 否       |
+| maxHeight             | Dp?                       | 下拉菜单的最大高度   | null                                  | 否       |
+| enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
+| showValue             | Boolean                   | 是否显示当前选中的值 | true                                  | 否       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调   | -                                     | 否       |
 
 ### DropdownColors 属性
 

@@ -57,23 +57,22 @@ SuperSwitch(
 
 ### SuperSwitch Properties
 
-| Property Name   | Type                            | Description                              | Default Value                         | Required |
-| --------------- | ------------------------------- | ---------------------------------------- | ------------------------------------- | -------- |
-| checked         | Boolean                         | Switch checked state                     | -                                     | Yes      |
-| onCheckedChange | ((Boolean) -> Unit)?            | Switch state change callback             | -                                     | No       |
-| title           | String                          | Switch item title                        | -                                     | Yes      |
-| titleColor      | BasicComponentColors            | Title text color configuration           | BasicComponentDefaults.titleColor()   | No       |
-| summary         | String?                         | Switch item summary                      | null                                  | No       |
-| summaryColor    | BasicComponentColors            | Summary text color configuration         | BasicComponentDefaults.summaryColor() | No       |
-| leftAction      | @Composable (() -> Unit)?       | Custom left content                      | null                                  | No       |
-| rightActions    | @Composable RowScope.() -> Unit | Custom right content (before switch)     | {}                                    | No       |
-| bottomAction    | @Composable (() -> Unit)?       | Custom bottom content                     | null                                  | No       |
-| switchColors    | SwitchColors                    | Switch control color configuration       | SwitchDefaults.switchColors()         | No       |
-| modifier        | Modifier                        | Component modifier                       | Modifier                              | No       |
-| insideMargin    | PaddingValues                   | Component internal content padding       | BasicComponentDefaults.InsideMargin   | No       |
-| onClick         | (() -> Unit)?                   | Additional callback on switch item click | null                                  | No       |
-| holdDownState   | Boolean                         | Whether the component is held down       | false                                 | No       |
-| enabled         | Boolean                         | Component interactive state              | true                                  | No       |
+| Property Name   | Type                            | Description                          | Default Value                         | Required |
+| --------------- | ------------------------------- | ------------------------------------ | ------------------------------------- | -------- |
+| checked         | Boolean                         | Switch checked state                 | -                                     | Yes      |
+| onCheckedChange | ((Boolean) -> Unit)?            | Switch state change callback         | -                                     | No       |
+| title           | String                          | Switch item title                    | -                                     | Yes      |
+| titleColor      | BasicComponentColors            | Title text color configuration       | BasicComponentDefaults.titleColor()   | No       |
+| summary         | String?                         | Switch item summary                  | null                                  | No       |
+| summaryColor    | BasicComponentColors            | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No       |
+| leftAction      | @Composable (() -> Unit)?       | Custom left content                  | null                                  | No       |
+| rightActions    | @Composable RowScope.() -> Unit | Custom right content (before switch) | {}                                    | No       |
+| bottomAction    | @Composable (() -> Unit)?       | Custom bottom content                | null                                  | No       |
+| switchColors    | SwitchColors                    | Switch control color configuration   | SwitchDefaults.switchColors()         | No       |
+| modifier        | Modifier                        | Component modifier                   | Modifier                              | No       |
+| insideMargin    | PaddingValues                   | Component internal content padding   | BasicComponentDefaults.InsideMargin   | No       |
+| holdDownState   | Boolean                         | Whether the component is held down   | false                                 | No       |
+| enabled         | Boolean                         | Component interactive state          | true                                  | No       |
 
 ## Advanced Usage
 

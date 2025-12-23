@@ -88,7 +88,6 @@ WindowDropdown(
 | maxHeight             | Dp?                       | Maximum height of dropdown menu    | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional click callback          | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### DropdownColors Properties

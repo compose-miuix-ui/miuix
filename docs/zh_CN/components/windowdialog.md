@@ -20,7 +20,7 @@ popupHost: None
 该组件不依赖 `Scaffold`，可在任意 Composable 作用域中使用。
 :::
 
-## 导入
+## 引入
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.WindowDialog
@@ -56,21 +56,21 @@ WindowDialog(
 
 ### WindowDialog 属性
 
-| 名称                         | 类型                     | 描述                                           | 默认值                                   | 必填 |
-| ---------------------------- | ------------------------ | ---------------------------------------------- | ---------------------------------------- | ---- |
-| `show`                       | `MutableState<Boolean>`  | 控制显示状态                                   | -                                        | 是   |
-| `modifier`                   | `Modifier`               | 根内容修饰符                                   | `Modifier`                               | 否   |
-| `title`                      | `String?`                | 对话框标题                                     | `null`                                   | 否   |
-| `titleColor`                 | `Color`                  | 标题颜色                                       | `WindowDialogDefaults.titleColor()`      | 否   |
-| `summary`                    | `String?`                | 对话框摘要                                     | `null`                                   | 否   |
-| `summaryColor`               | `Color`                  | 摘要颜色                                       | `WindowDialogDefaults.summaryColor()`    | 否   |
-| `backgroundColor`            | `Color`                  | 对话框背景色                                   | `WindowDialogDefaults.backgroundColor()` | 否   |
-| `onDismissRequest`           | `(() -> Unit)?`          | 当用户请求关闭（点击遮罩层或返回手势）时触发 | `null`                                   | 否   |
-| `onDismissFinished`          | `(() -> Unit)?`          | 对话框完全关闭（动画结束）时的回调             | `null`                                   | 否   |
-| `outsideMargin`              | `DpSize`                 | 相对窗口边缘的外部边距                         | `WindowDialogDefaults.outsideMargin`     | 否   |
-| `insideMargin`               | `DpSize`                 | 对话框内容内部边距                             | `WindowDialogDefaults.insideMargin`      | 否   |
-| `defaultWindowInsetsPadding` | `Boolean`                | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                   | 否   |
-| `content`                    | `@Composable () -> Unit` | 对话框内容                                     | -                                        | 是   |
+| 属性名                     | 类型                   | 说明                                           | 默认值                                 | 是否必须 |
+| -------------------------- | ---------------------- | ---------------------------------------------- | -------------------------------------- | -------- |
+| show                       | MutableState\<Boolean> | 控制显示状态                                   | -                                      | 是       |
+| modifier                   | Modifier               | 根内容修饰符                                   | Modifier                               | 否       |
+| title                      | String?                | 对话框标题                                     | null                                   | 否       |
+| titleColor                 | Color                  | 标题颜色                                       | WindowDialogDefaults.titleColor()      | 否       |
+| summary                    | String?                | 对话框摘要                                     | null                                   | 否       |
+| summaryColor               | Color                  | 摘要颜色                                       | WindowDialogDefaults.summaryColor()    | 否       |
+| backgroundColor            | Color                  | 对话框背景色                                   | WindowDialogDefaults.backgroundColor() | 否       |
+| onDismissRequest           | (() -> Unit)?          | 当用户请求关闭（点击遮罩层或返回手势）时触发   | null                                   | 否       |
+| onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调             | null                                   | 否       |
+| outsideMargin              | DpSize                 | 相对窗口边缘的外部边距                         | WindowDialogDefaults.outsideMargin     | 否       |
+| insideMargin               | DpSize                 | 对话框内容内部边距                             | WindowDialogDefaults.insideMargin      | 否       |
+| defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距（输入法/导航/标题） | true                                   | 否       |
+| content                    | @Composable () -> Unit | 对话框内容                                     | -                                      | 是       |
 
 ### WindowDialogDefaults
 

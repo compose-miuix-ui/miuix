@@ -68,20 +68,23 @@ fun BasicComponent(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
+
     BasicComponent(
         leftAction = leftAction,
         rightActions = rightActions,
         bottomAction = bottomAction,
         modifier = modifier,
         insideMargin = insideMargin,
-        onClick = onClick,
+        onClick = {
+            currentOnClick.takeIf { enabled }?.invoke()
+        },
         holdDownState = holdDownState,
         enabled = enabled,
         interactionSource = interactionSource,
     ) {
-        val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
-        val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
         if (title != null) {
+            val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
             Text(
                 text = title,
                 fontSize = MiuixTheme.textStyles.headline1.fontSize,
@@ -90,6 +93,7 @@ fun BasicComponent(
             )
         }
         if (summary != null) {
+            val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
             Text(
                 text = summary,
                 fontSize = MiuixTheme.textStyles.body2.fontSize,
@@ -150,11 +154,11 @@ fun BasicComponent(
     }
 
     val clickableModifier = remember(enabled, interactionSource, indication, currentOnClick) {
-        if (currentOnClick != null && enabled) {
+        if (enabled && currentOnClick != null) {
             Modifier.clickable(
-                indication = indication,
                 interactionSource = interactionSource,
-                onClick = currentOnClick!!
+                indication = indication,
+                onClick = currentOnClick!!,
             )
         } else Modifier
     }

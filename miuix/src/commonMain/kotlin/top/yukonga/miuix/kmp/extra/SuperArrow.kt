@@ -38,7 +38,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param bottomAction The [Composable] content at the bottom of the [SuperArrow].
  * @param modifier The modifier to be applied to the [SuperArrow].
  * @param insideMargin The margin inside the [SuperArrow].
- * @param onClick The callback when the [SuperArrow] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperArrow] is clickable.
  */
@@ -59,6 +58,7 @@ fun SuperArrow(
     enabled: Boolean = true
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
+
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -74,7 +74,9 @@ fun SuperArrow(
             )
         },
         bottomAction = bottomAction,
-        onClick = currentOnClick?.takeIf { enabled },
+        onClick = {
+            currentOnClick.takeIf { enabled }?.invoke()
+        },
         holdDownState = holdDownState,
         enabled = enabled,
     )

@@ -61,39 +61,39 @@ Box {
 }
 ```
 
-## API
+## Properties
 
 ### WindowListPopup
 
-| Parameter               | Type                          | Default                                      | Description                                                  |
-| :---------------------- | :---------------------------- | :------------------------------------------- | :----------------------------------------------------------- |
-| `show`                  | `MutableState<Boolean>`       | -                                            | Controls the visibility state of the popup.                  |
-| `popupModifier`         | `Modifier`                    | `Modifier`                                   | Modifier applied to the popup container.                     |
-| `popupPositionProvider` | `PopupPositionProvider`       | `ListPopupDefaults.DropdownPositionProvider` | Provides position calculation logic for the popup.           |
-| `alignment`             | `PopupPositionProvider.Align` | `PopupPositionProvider.Align.Right`          | Specifies the alignment of the popup relative to the anchor. |
-| `enableWindowDim`       | `Boolean`                     | `true`                                       | Whether to dim the background when popup is shown.           |
-| `shadowElevation`       | `Dp`                          | `11.dp`                                      | Elevation of the popup shadow.                               |
-| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | Called when the user requests dismissal (e.g., clicking outside) |
-| `maxHeight`             | `Dp?`                         | `null`                                       | Maximum height of the popup content.                         |
-| `minWidth`              | `Dp`                          | `200.dp`                                     | Minimum width of the popup content.                          |
-| `content`               | `@Composable () -> Unit`      | -                                            | The content to display inside the popup.                     |
+| Property Name         | Type                        | Description                                                      | Default Value                              |
+| --------------------- | --------------------------- | ---------------------------------------------------------------- | ------------------------------------------ |
+| show                  | MutableState\<Boolean>      | Controls the visibility state of the popup.                      | -                                          |
+| popupModifier         | Modifier                    | Modifier applied to the popup container.                         | Modifier                                   |
+| popupPositionProvider | PopupPositionProvider       | Provides position calculation logic for the popup.               | ListPopupDefaults.DropdownPositionProvider |
+| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.     | PopupPositionProvider.Align.Right          |
+| enableWindowDim       | Boolean                     | Whether to dim the background when popup is shown.               | true                                       |
+| shadowElevation       | Dp                          | Elevation of the popup shadow.                                   | 11.dp                                      |
+| onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside) | null                                       |
+| maxHeight             | Dp?                         | Maximum height of the popup content.                             | null                                       |
+| minWidth              | Dp                          | Minimum width of the popup content.                              | 200.dp                                     |
+| content               | @Composable () -> Unit      | The content to display inside the popup.                         | -                                          |
 
 ### ListPopupColumn
 
-| Parameter | Type                     | Default | Description                                    |
-| :-------- | :----------------------- | :------ | :--------------------------------------------- |
-| `content` | `@Composable () -> Unit` | -       | The list content to display inside the column. |
+| Property Name | Type                   | Description                                    | Default Value |
+| ------------- | ---------------------- | ---------------------------------------------- | ------------- |
+| content       | @Composable () -> Unit | The list content to display inside the column. | -             |
 
 ### PopupPositionProvider.Align
 
-| Value         | Description                                         |
-| :------------ | :-------------------------------------------------- |
-| `Left`        | Aligns the popup to the left of the anchor.         |
-| `Right`       | Aligns the popup to the right of the anchor.        |
-| `TopLeft`     | Aligns the popup to the top-left of the anchor.     |
-| `TopRight`    | Aligns the popup to the top-right of the anchor.    |
-| `BottomLeft`  | Aligns the popup to the bottom-left of the anchor.  |
-| `BottomRight` | Aligns the popup to the bottom-right of the anchor. |
+| Value       | Description                                         |
+| ----------- | --------------------------------------------------- |
+| Left        | Aligns the popup to the left of the anchor.         |
+| Right       | Aligns the popup to the right of the anchor.        |
+| TopLeft     | Aligns the popup to the top-left of the anchor.     |
+| TopRight    | Aligns the popup to the top-right of the anchor.    |
+| BottomLeft  | Aligns the popup to the bottom-left of the anchor.  |
+| BottomRight | Aligns the popup to the bottom-right of the anchor. |
 
 ### LocalWindowListPopupState
 

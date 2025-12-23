@@ -59,22 +59,22 @@ Scaffold {
 
 ### SuperDialog 属性
 
-| 属性名                     | 类型                   | 说明                         | 默认值                                | 是否必须 |
-| -------------------------- | ---------------------- | ---------------------------- | ------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | 控制对话框显示状态的状态对象 | -                                     | 是       |
-| modifier                   | Modifier               | 应用于对话框的修饰符         | Modifier                              | 否       |
-| title                      | String?                | 对话框的标题                 | null                                  | 否       |
-| titleColor                 | Color                  | 标题文本的颜色               | SuperDialogDefaults.titleColor()      | 否       |
-| summary                    | String?                | 对话框的摘要说明             | null                                  | 否       |
-| summaryColor               | Color                  | 摘要文本的颜色               | SuperDialogDefaults.summaryColor()    | 否       |
-| backgroundColor            | Color                  | 对话框背景色                 | SuperDialogDefaults.backgroundColor() | 否       |
-| enableWindowDim            | Boolean                | 是否启用遮罩层               | true                                  | 否       |
+| 属性名                     | 类型                   | 说明                                         | 默认值                                | 是否必须 |
+| -------------------------- | ---------------------- | -------------------------------------------- | ------------------------------------- | -------- |
+| show                       | MutableState\<Boolean> | 控制对话框显示状态的状态对象                 | -                                     | 是       |
+| modifier                   | Modifier               | 应用于对话框的修饰符                         | Modifier                              | 否       |
+| title                      | String?                | 对话框的标题                                 | null                                  | 否       |
+| titleColor                 | Color                  | 标题文本的颜色                               | SuperDialogDefaults.titleColor()      | 否       |
+| summary                    | String?                | 对话框的摘要说明                             | null                                  | 否       |
+| summaryColor               | Color                  | 摘要文本的颜色                               | SuperDialogDefaults.summaryColor()    | 否       |
+| backgroundColor            | Color                  | 对话框背景色                                 | SuperDialogDefaults.backgroundColor() | 否       |
+| enableWindowDim            | Boolean                | 是否启用遮罩层                               | true                                  | 否       |
 | onDismissRequest           | (() -> Unit)?          | 当用户请求关闭（点击遮罩层或返回手势）时触发 | null                                  | 否       |
-| onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调 | null                                  | 否       |
-| outsideMargin              | DpSize                 | 对话框外部边距               | SuperDialogDefaults.outsideMargin     | 否       |
-| insideMargin               | DpSize                 | 对话框内部内容的边距         | SuperDialogDefaults.insideMargin      | 否       |
-| defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距   | true                                  | 否       |
-| content                    | @Composable () -> Unit | 对话框的内容                 | -                                     | 是       |
+| onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调           | null                                  | 否       |
+| outsideMargin              | DpSize                 | 对话框外部边距                               | SuperDialogDefaults.outsideMargin     | 否       |
+| insideMargin               | DpSize                 | 对话框内部内容的边距                         | SuperDialogDefaults.insideMargin      | 否       |
+| defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距                   | true                                  | 否       |
+| content                    | @Composable () -> Unit | 对话框的内容                                 | -                                     | 是       |
 
 ### SuperDialogDefaults
 

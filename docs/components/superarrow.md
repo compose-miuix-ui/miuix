@@ -75,20 +75,20 @@ Scaffold {
 
 ### SuperArrow Properties
 
-| Property Name    | Type                           | Description                          | Default Value                       | Required |
-| ---------------- | ------------------------------ | ------------------------------------ | ----------------------------------- | -------- |
-| title            | String                         | Arrow item title                     | -                                   | Yes      |
-| titleColor       | BasicComponentColors           | Title text color configuration       | BasicComponentDefaults.titleColor() | No       |
-| summary          | String?                        | Arrow item summary description       | null                                | No       |
-| summaryColor     | BasicComponentColors           | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No     |
-| leftAction       | @Composable (() -> Unit)?      | Custom left content                  | null                                | No       |
-| rightActions     | @Composable RowScope.() -> Unit | Custom right-side content (slot)     | {}                                  | No       |
-| bottomAction     | @Composable (() -> Unit)?       | Custom bottom content                | null                                | No       |
-| modifier         | Modifier                       | Modifier applied to component        | Modifier                            | No       |
-| insideMargin     | PaddingValues                  | Internal content padding             | BasicComponentDefaults.InsideMargin | No       |
-| onClick          | (() -> Unit)?                  | Callback triggered on click          | null                                | No       |
-| holdDownState    | Boolean                        | Whether component is held down       | false                               | No       |
-| enabled          | Boolean                        | Whether component is interactive     | true                                | No       |
+| Property Name | Type                            | Description                      | Default Value                         | Required |
+| ------------- | ------------------------------- | -------------------------------- | ------------------------------------- | -------- |
+| title         | String                          | Arrow item title                 | -                                     | Yes      |
+| titleColor    | BasicComponentColors            | Title text color configuration   | BasicComponentDefaults.titleColor()   | No       |
+| summary       | String?                         | Arrow item summary description   | null                                  | No       |
+| summaryColor  | BasicComponentColors            | Summary text color configuration | BasicComponentDefaults.summaryColor() | No       |
+| leftAction    | @Composable (() -> Unit)?       | Custom left content              | null                                  | No       |
+| rightActions  | @Composable RowScope.() -> Unit | Custom right-side content (slot) | {}                                    | No       |
+| bottomAction  | @Composable (() -> Unit)?       | Custom bottom content            | null                                  | No       |
+| modifier      | Modifier                        | Modifier applied to component    | Modifier                              | No       |
+| insideMargin  | PaddingValues                   | Internal content padding         | BasicComponentDefaults.InsideMargin   | No       |
+| onClick       | (() -> Unit)?                   | Callback triggered on click      | null                                  | No       |
+| holdDownState | Boolean                         | Whether component is held down   | false                                 | No       |
+| enabled       | Boolean                         | Whether component is interactive | true                                  | No       |
 
 ### SuperArrowDefaults Object
 
@@ -96,8 +96,8 @@ The SuperArrowDefaults object provides default color configuration for the trail
 
 #### Methods
 
-| Method Name       | Type              | Description                                        |
-| ----------------- | ----------------- | -------------------------------------------------- |
+| Method Name       | Type              | Description                                         |
+| ----------------- | ----------------- | --------------------------------------------------- |
 | rightActionColors | RightActionColors | Returns tint colors used by the trailing arrow icon |
 
 ### Arrow Tint

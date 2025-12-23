@@ -161,7 +161,6 @@ Scaffold {
 | maxHeight             | Dp?                       | Maximum dropdown height         | null                                  | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional click callback       | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### SuperSpinner Properties (Dialog Mode)
@@ -182,7 +181,6 @@ Scaffold {
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional click callback       | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### SpinnerEntry Properties

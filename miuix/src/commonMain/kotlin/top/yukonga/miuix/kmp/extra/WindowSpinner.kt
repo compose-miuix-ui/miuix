@@ -63,7 +63,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowSpinner] is enabled.
  * @param showValue Whether to show the value of the [WindowSpinner].
- * @param onClick The callback when the [WindowSpinner] is clicked.
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
@@ -83,7 +82,6 @@ fun WindowSpinner(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onClick: (() -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -99,10 +97,8 @@ fun WindowSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            currentOnClick?.invoke()
             isDropdownExpanded.value = !isDropdownExpanded.value
             if (isDropdownExpanded.value) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -233,7 +229,6 @@ private fun RowScope.WindowSpinnerRightActions(
  * @param insideMargin the [PaddingValues] to be applied inside the [WindowSpinner].
  * @param enabled whether the [WindowSpinner] is enabled.
  * @param showValue whether to show the value of the [WindowSpinner].
- * @param onClick the callback when the [WindowSpinner] is clicked.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
@@ -253,7 +248,6 @@ fun WindowSpinner(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onClick: (() -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -273,12 +267,9 @@ fun WindowSpinner(
         if (!actualEnabled) return@pointerInput
     }
 
-    val currentOnClick by rememberUpdatedState(onClick)
     val handleClick: () -> Unit = {
         if (actualEnabled) {
-            currentOnClick?.invoke()
-            isDropdownExpanded.value = true
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+            isDropdownExpanded.value = !isDropdownExpanded.value
         }
     }
 

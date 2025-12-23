@@ -34,7 +34,6 @@ import top.yukonga.miuix.kmp.basic.CheckboxDefaults
  * @param checkboxLocation The location of checkbox, [CheckboxLocation.Left] or [CheckboxLocation.Right].
  * @param bottomAction The [Composable] content at the bottom of the [SuperCheckbox].
  * @param insideMargin The margin inside the [SuperCheckbox].
- * @param onClick Optional callback when the component is clicked before checkbox is toggled.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperCheckbox] is clickable.
  */
@@ -53,12 +52,10 @@ fun SuperCheckbox(
     checkboxLocation: CheckboxLocation = CheckboxLocation.Left,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
-    onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val currentOnClick by rememberUpdatedState(onClick)
     val leftActionComposable = if (checkboxLocation == CheckboxLocation.Left) {
         @Composable {
             SuperCheckboxLeftAction(
@@ -91,10 +88,7 @@ fun SuperCheckbox(
         },
         bottomAction = bottomAction,
         onClick = {
-            if (enabled) {
-                currentOnClick?.invoke()
-                currentOnCheckedChange?.invoke(!checked)
-            }
+            currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
         },
         holdDownState = holdDownState,
         enabled = enabled

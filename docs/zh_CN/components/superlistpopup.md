@@ -14,7 +14,7 @@ popupHost: MiuixPopupHost
 `SuperListPopup` 是 Miuix 中的弹出列表组件，用于显示包含多个选项的弹出菜单。它提供了一个轻量级的、浮动的临时列表，适用于各种下拉菜单、上下文菜单等场景。
 
 <div style="position: relative; max-width: 700px; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
-    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superListPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=superListPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: danger 前置条件
@@ -103,36 +103,37 @@ SuperListPopup(
 }
 ```
 
-## API
+## 属性
 
 ### SuperListPopup
 
-| 参数                    | 类型                          | 默认值                                       | 描述                                       |
-| :---------------------- | :---------------------------- | :------------------------------------------- | :----------------------------------------- |
-| `show`                  | `MutableState<Boolean>`       | -                                            | 控制弹窗的显示状态。                       |
-| `popupModifier`         | `Modifier`                    | `Modifier`                                   | 应用于弹窗容器的修饰符。                   |
-| `popupPositionProvider` | `PopupPositionProvider`       | `ListPopupDefaults.DropdownPositionProvider` | 提供弹窗的位置计算逻辑。                   |
-| `alignment`             | `PopupPositionProvider.Align` | `PopupPositionProvider.Align.Right`          | 指定弹窗相对于锚点的对齐方式。             |
-| `enableWindowDim`       | `Boolean`                     | `true`                                       | 是否在弹窗显示时使背景变暗。               |
-| `shadowElevation`       | `Dp`                          | `11.dp`                                      | 弹窗阴影的高度。                           |
-| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | 当用户请求关闭（例如点击外部）时触发。 |
-| `maxHeight`             | `Dp?`                         | `null`                                       | 弹窗内容的最大高度。                       |
-| `minWidth`              | `Dp`                          | `200.dp`                                     | 弹窗内容的最小宽度。                       |
-| `content`               | `@Composable () -> Unit`      | -                                            | 要在弹窗内显示的内容。                     |
+| 属性名                | 类型                        | 说明                                 | 默认值                                     |
+| --------------------- | --------------------------- | ------------------------------------ | ------------------------------------------ |
+| show                  | MutableState\<Boolean>      | 控制弹窗的显示状态                   | -                                          |
+| popupModifier         | Modifier                    | 应用于弹窗容器的修饰符               | Modifier                                   |
+| popupPositionProvider | PopupPositionProvider       | 提供弹窗的位置计算逻辑               | ListPopupDefaults.DropdownPositionProvider |
+| alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.Right          |
+| enableWindowDim       | Boolean                     | 是否在弹窗显示时使背景变暗           | true                                       |
+| shadowElevation       | Dp                          | 弹窗阴影的高度                       | 11.dp                                      |
+| onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
+| maxHeight             | Dp?                         | 弹窗内容的最大高度                   | null                                       |
+| minWidth              | Dp                          | 弹窗内容的最小宽度                   | 200.dp                                     |
+| content               | @Composable () -> Unit      | 要在弹窗内显示的内容                 | -                                          |
 
 ### ListPopupColumn
 
-| 参数      | 类型                     | 默认值 | 描述                     |
-| :-------- | :----------------------- | :----- | :----------------------- |
-| `content` | `@Composable () -> Unit` | -      | 要在列内显示的列表内容。 |
+| 属性名  | 类型                   | 说明                   | 默认值 |
+| ------- | ---------------------- | ---------------------- | ------ |
+| content | @Composable () -> Unit | 要在列内显示的列表内容 | -      |
 
 ### PopupPositionProvider.Align
 
-| 值            | 描述                       |
-| :------------ | :------------------------- |
-| `Left`        | 将弹窗对齐到锚点的左侧。   |
-| `Right`       | 将弹窗对齐到锚点的右侧。   |
-| `TopLeft`     | 将弹窗对齐到锚点的左上角。 |
-| `TopRight`    | 将弹窗对齐到锚点的右上角。 |
-| `BottomLeft`  | 将弹窗对齐到锚点的左下角。 |
-| `BottomRight` | 将弹窗对齐到锚点的右下角。 |
+| 值          | 说明                     |
+| ----------- | ------------------------ |
+| Left        | 将弹窗对齐到锚点的左侧   |
+| Right       | 将弹窗对齐到锚点的右侧   |
+| TopLeft     | 将弹窗对齐到锚点的左上角 |
+| TopRight    | 将弹窗对齐到锚点的右上角 |
+| BottomLeft  | 将弹窗对齐到锚点的左下角 |
+| BottomRight | 将弹窗对齐到锚点的右下角 |
+

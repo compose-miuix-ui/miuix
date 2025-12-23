@@ -32,7 +32,6 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param switchColors The [SwitchColors] of the [SuperSwitch].
  * @param modifier The modifier to be applied to the [SuperSwitch].
  * @param insideMargin The margin inside the [SuperSwitch].
- * @param onClick The callback when the [SuperSwitch] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperSwitch] is clickable.
  */
@@ -51,12 +50,10 @@ fun SuperSwitch(
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
-    onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val currentOnClick by rememberUpdatedState(onClick)
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -76,10 +73,7 @@ fun SuperSwitch(
         },
         bottomAction = bottomAction,
         onClick = {
-            if (enabled) {
-                currentOnClick?.invoke()
-                currentOnCheckedChange?.invoke(!checked)
-            }
+            currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
         },
         holdDownState = holdDownState,
         enabled = enabled

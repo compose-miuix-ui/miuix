@@ -58,25 +58,25 @@ WindowBottomSheet(
 
 ### WindowBottomSheet Properties
 
-| Property Name              | Type                             | Description                                  | Default Value                                       | Required |
-| -------------------------- | -------------------------------- | -------------------------------------------- | --------------------------------------------------- | -------- |
-| show                       | MutableState\<Boolean>           | State object to control bottom sheet visibility | -                                              | Yes      |
-| modifier                   | Modifier                         | Modifier applied to the bottom sheet         | Modifier                                            | No       |
-| title                      | String?                          | Bottom sheet title                           | null                                                | No       |
-| leftAction                 | @Composable (() -> Unit)?        | Optional composable for left action (e.g., close button) | null                                       | No       |
-| rightAction                | @Composable (() -> Unit)?        | Optional composable for right action (e.g., submit button) | null                                     | No       |
-| backgroundColor            | Color                            | Bottom sheet background color                | WindowBottomSheetDefaults.backgroundColor()         | No       |
-| enableWindowDim            | Boolean                          | Whether to enable dimming layer              | true                                                | No       |
-| cornerRadius               | Dp                               | Corner radius of the top corners             | WindowBottomSheetDefaults.cornerRadius              | No       |
-| sheetMaxWidth              | Dp                               | Maximum width of the bottom sheet            | WindowBottomSheetDefaults.maxWidth                  | No       |
-| onDismissRequest           | (() -> Unit)?                    | Called when the user requests dismissal (outside tap or back) | null                                                | No       |
-| onDismissFinished          | (() -> Unit)?                    | Callback after bottom sheet fully dismisses  | null                                                | No       |
-| outsideMargin              | DpSize                           | Bottom sheet external margin                 | WindowBottomSheetDefaults.outsideMargin             | No       |
-| insideMargin               | DpSize                           | Bottom sheet internal content margin         | WindowBottomSheetDefaults.insideMargin              | No       |
-| defaultWindowInsetsPadding | Boolean                          | Whether to apply default window insets padding | true                                              | No       |
-| dragHandleColor            | Color                            | Drag indicator color                         | WindowBottomSheetDefaults.dragHandleColor()         | No       |
-| allowDismiss               | Boolean                          | Whether to allow dismissing the sheet via drag or back gesture | true                                      | No       |
-| content                    | @Composable () -> Unit           | Bottom sheet content                         | -                                                   | Yes      |
+| Property Name              | Type                      | Description                                                    | Default Value                               | Required |
+| -------------------------- | ------------------------- | -------------------------------------------------------------- | ------------------------------------------- | -------- |
+| show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                           | Yes      |
+| modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                    | No       |
+| title                      | String?                   | Bottom sheet title                                             | null                                        | No       |
+| leftAction                 | @Composable (() -> Unit)? | Optional composable for left action (e.g., close button)       | null                                        | No       |
+| rightAction                | @Composable (() -> Unit)? | Optional composable for right action (e.g., submit button)     | null                                        | No       |
+| backgroundColor            | Color                     | Bottom sheet background color                                  | WindowBottomSheetDefaults.backgroundColor() | No       |
+| enableWindowDim            | Boolean                   | Whether to enable dimming layer                                | true                                        | No       |
+| cornerRadius               | Dp                        | Corner radius of the top corners                               | WindowBottomSheetDefaults.cornerRadius      | No       |
+| sheetMaxWidth              | Dp                        | Maximum width of the bottom sheet                              | WindowBottomSheetDefaults.maxWidth          | No       |
+| onDismissRequest           | (() -> Unit)?             | Called when the user requests dismissal (outside tap or back)  | null                                        | No       |
+| onDismissFinished          | (() -> Unit)?             | Callback after bottom sheet fully dismisses                    | null                                        | No       |
+| outsideMargin              | DpSize                    | Bottom sheet external margin                                   | WindowBottomSheetDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                    | Bottom sheet internal content margin                           | WindowBottomSheetDefaults.insideMargin      | No       |
+| defaultWindowInsetsPadding | Boolean                   | Whether to apply default window insets padding                 | true                                        | No       |
+| dragHandleColor            | Color                     | Drag indicator color                                           | WindowBottomSheetDefaults.dragHandleColor() | No       |
+| allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                        | No       |
+| content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                           | Yes      |
 
 ### WindowBottomSheetDefaults
 

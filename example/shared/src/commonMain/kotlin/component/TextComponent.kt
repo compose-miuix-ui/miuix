@@ -364,7 +364,6 @@ fun TextComponent(
                     color = MiuixTheme.colorScheme.onSurfaceVariantActions
                 )
             },
-            onClick = {},
         )
         SuperArrow(
             title = "Arrow + Slider + Dialog",
@@ -393,7 +392,6 @@ fun TextComponent(
                     color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
                 )
             },
-            onClick = {},
             enabled = false
         )
     }

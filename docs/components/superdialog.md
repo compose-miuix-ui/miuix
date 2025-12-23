@@ -59,22 +59,22 @@ Scaffold {
 
 ### SuperDialog Properties
 
-| Property Name              | Type                   | Description                                    | Default Value                         | Required |
-| -------------------------- | ---------------------- | ---------------------------------------------- | ------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | State object to control dialog visibility      | -                                     | Yes      |
-| modifier                   | Modifier               | Modifier applied to the dialog                 | Modifier                              | No       |
-| title                      | String?                | Dialog title                                   | null                                  | No       |
-| titleColor                 | Color                  | Title text color                               | SuperDialogDefaults.titleColor()      | No       |
-| summary                    | String?                | Dialog summary text                            | null                                  | No       |
-| summaryColor               | Color                  | Summary text color                             | SuperDialogDefaults.summaryColor()    | No       |
-| backgroundColor            | Color                  | Dialog background color                        | SuperDialogDefaults.backgroundColor() | No       |
-| enableWindowDim            | Boolean                | Whether to enable dimming layer                | true                                  | No       |
+| Property Name              | Type                   | Description                                                   | Default Value                         | Required |
+| -------------------------- | ---------------------- | ------------------------------------------------------------- | ------------------------------------- | -------- |
+| show                       | MutableState\<Boolean> | State object to control dialog visibility                     | -                                     | Yes      |
+| modifier                   | Modifier               | Modifier applied to the dialog                                | Modifier                              | No       |
+| title                      | String?                | Dialog title                                                  | null                                  | No       |
+| titleColor                 | Color                  | Title text color                                              | SuperDialogDefaults.titleColor()      | No       |
+| summary                    | String?                | Dialog summary text                                           | null                                  | No       |
+| summaryColor               | Color                  | Summary text color                                            | SuperDialogDefaults.summaryColor()    | No       |
+| backgroundColor            | Color                  | Dialog background color                                       | SuperDialogDefaults.backgroundColor() | No       |
+| enableWindowDim            | Boolean                | Whether to enable dimming layer                               | true                                  | No       |
 | onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                  | No       |
-| onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses          | null                                  | No       |
-| outsideMargin              | DpSize                 | Dialog external margin                         | SuperDialogDefaults.outsideMargin     | No       |
-| insideMargin               | DpSize                 | Dialog internal content margin                 | SuperDialogDefaults.insideMargin      | No       |
-| defaultWindowInsetsPadding | Boolean                | Whether to apply default window insets padding | true                                  | No       |
-| content                    | @Composable () -> Unit | Dialog content                                 | -                                     | Yes      |
+| onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses                         | null                                  | No       |
+| outsideMargin              | DpSize                 | Dialog external margin                                        | SuperDialogDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                 | Dialog internal content margin                                | SuperDialogDefaults.insideMargin      | No       |
+| defaultWindowInsetsPadding | Boolean                | Whether to apply default window insets padding                | true                                  | No       |
+| content                    | @Composable () -> Unit | Dialog content                                                | -                                     | Yes      |
 
 ### SuperDialogDefaults Object
 

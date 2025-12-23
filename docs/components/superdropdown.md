@@ -97,7 +97,6 @@ SuperDropdown(
 | maxHeight             | Dp?                       | Maximum height of dropdown menu   | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive  | true                                  | No       |
 | showValue             | Boolean                   | Whether to show selected value    | true                                  | No       |
-| onClick               | (() -> Unit)?             | Additional callback on click      | null                                  | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Callback when selection changes   | -                                     | No       |
 
 ### DropdownColors Properties
