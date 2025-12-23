@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.annotation.IntRange
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
@@ -106,6 +107,17 @@ fun Slider(
     val shape = remember(height) { ContinuousRoundedRectangle(height) }
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+
+    val progressAnimationSpec = if (isDragging) {
+        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
+    } else {
+        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    }
+    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+
+    val animatedValue by animateFloatAsState(coercedValue, progressAnimationSpec)
+    val thumbScale by animateFloatAsState(if (isDragging) 1.127f else 1f, thumbScaleAnimationSpec)
+
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
     val keyPointFractions = remember(keyPoints, stepFractions, valueRange, showKeyPoints) {
@@ -118,19 +130,14 @@ fun Slider(
 
     val fractionToValue = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
-            val f = fraction.coerceIn(0f, 1f)
-            val newValue = lerp(valueRange.start, valueRange.endInclusive, f)
-            when {
-                steps > 0 -> snapValueToTick(newValue, stepFractions, valueRange.start, valueRange.endInclusive)
-                allKeyPointFractions.isNotEmpty() -> {
-                    val closestKeyPoint = allKeyPointFractions.minByOrNull { abs(it - f) }
-                    if (closestKeyPoint != null && abs(f - closestKeyPoint) < magnetThreshold) {
-                        lerp(valueRange.start, valueRange.endInclusive, closestKeyPoint)
-                    } else newValue
-                }
-
-                else -> newValue
-            }
+            resolveValueFromFraction(
+                fraction = fraction,
+                valueRange = valueRange,
+                steps = steps,
+                stepFractions = stepFractions,
+                allKeyPointFractions = allKeyPointFractions,
+                magnetThreshold = magnetThreshold
+            )
         }
     }
 
@@ -153,13 +160,7 @@ fun Slider(
                                     isDragging = true
                                     dragOffset = offset.x
 
-                                    val thumbRadius = size.height / 2f
-                                    val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
-                                    val visualFraction =
-                                        if (availableWidth == 0f) 0f else ((offset.x - thumbRadius) / availableWidth).coerceIn(
-                                            0f,
-                                            1f
-                                        )
+                                    val visualFraction = horizontalVisualFraction(offset.x, size.width, size.height)
                                     val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChangeState(calculatedValue)
@@ -167,15 +168,9 @@ fun Slider(
                                 },
                                 onHorizontalDrag = { change, dragAmount ->
                                     change.consume()
-                                    dragOffset = (dragOffset + dragAmount).coerceIn(0f, size.width.toFloat())
+                                    dragOffset += dragAmount
 
-                                    val thumbRadius = size.height / 2f
-                                    val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
-                                    val visualFraction =
-                                        if (availableWidth == 0f) 0f else ((dragOffset - thumbRadius) / availableWidth).coerceIn(
-                                            0f,
-                                            1f
-                                        )
+                                    val visualFraction = horizontalVisualFraction(dragOffset, size.width, size.height)
                                     val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChangeState(calculatedValue)
@@ -219,7 +214,8 @@ fun Slider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            value = coercedValue,
+            value = animatedValue,
+            thumbScale = thumbScale,
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = false,
@@ -282,6 +278,17 @@ fun VerticalSlider(
     val shape = remember(width) { ContinuousRoundedRectangle(width) }
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+
+    val progressAnimationSpec = if (isDragging) {
+        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
+    } else {
+        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    }
+    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+
+    val animatedValue by animateFloatAsState(coercedValue, progressAnimationSpec)
+    val thumbScale by animateFloatAsState(if (isDragging) 1.127f else 1f, thumbScaleAnimationSpec)
+
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
     val keyPointFractions = remember(keyPoints, stepFractions, valueRange, showKeyPoints) {
@@ -294,19 +301,14 @@ fun VerticalSlider(
 
     val fractionToValueVertical = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
-            val f = fraction.coerceIn(0f, 1f)
-            val newValue = lerp(valueRange.start, valueRange.endInclusive, f)
-            when {
-                steps > 0 -> snapValueToTick(newValue, stepFractions, valueRange.start, valueRange.endInclusive)
-                allKeyPointFractions.isNotEmpty() -> {
-                    val closestKeyPoint = allKeyPointFractions.minByOrNull { abs(it - f) }
-                    if (closestKeyPoint != null && abs(f - closestKeyPoint) < magnetThreshold) {
-                        lerp(valueRange.start, valueRange.endInclusive, closestKeyPoint)
-                    } else newValue
-                }
-
-                else -> newValue
-            }
+            resolveValueFromFraction(
+                fraction = fraction,
+                valueRange = valueRange,
+                steps = steps,
+                stepFractions = stepFractions,
+                allKeyPointFractions = allKeyPointFractions,
+                magnetThreshold = magnetThreshold
+            )
         }
     }
 
@@ -327,13 +329,7 @@ fun VerticalSlider(
                             onDragStart = { offset ->
                                 isDragging = true
                                 dragOffset = offset.y
-                                val thumbRadius = size.width / 2f
-                                val availableHeight = (size.height - 2f * thumbRadius).coerceAtLeast(0f)
-                                val visualFraction =
-                                    if (availableHeight == 0f) 0f else ((offset.y - thumbRadius) / availableHeight).coerceIn(
-                                        0f,
-                                        1f
-                                    )
+                                val visualFraction = verticalVisualFraction(offset.y, size.height, size.width)
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChangeState(calculatedValue)
@@ -341,14 +337,8 @@ fun VerticalSlider(
                             },
                             onVerticalDrag = { change, dragAmount ->
                                 change.consume()
-                                dragOffset = (dragOffset + dragAmount).coerceIn(0f, size.height.toFloat())
-                                val thumbRadius = size.width / 2f
-                                val availableHeight = (size.height - 2f * thumbRadius).coerceAtLeast(0f)
-                                val visualFraction =
-                                    if (availableHeight == 0f) 0f else ((dragOffset - thumbRadius) / availableHeight).coerceIn(
-                                        0f,
-                                        1f
-                                    )
+                                dragOffset += dragAmount
+                                val visualFraction = verticalVisualFraction(dragOffset, size.height, size.width)
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChangeState(calculatedValue)
@@ -391,7 +381,8 @@ fun VerticalSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            value = coercedValue,
+            value = animatedValue,
+            thumbScale = thumbScale,
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = true,
@@ -467,6 +458,19 @@ fun RangeSlider(
 
     val coercedStart = currentStartValue.coerceIn(valueRange.start, valueRange.endInclusive)
     val coercedEnd = currentEndValue.coerceIn(valueRange.start, valueRange.endInclusive)
+
+    val progressAnimationSpec = if (isDragging) {
+        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
+    } else {
+        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    }
+    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+
+    val animatedStartValue by animateFloatAsState(coercedStart, progressAnimationSpec)
+    val animatedEndValue by animateFloatAsState(coercedEnd, progressAnimationSpec)
+    val startThumbScale by animateFloatAsState(if (isDraggingStart) 1.127f else 1f, thumbScaleAnimationSpec)
+    val endThumbScale by animateFloatAsState(if (isDraggingEnd) 1.127f else 1f, thumbScaleAnimationSpec)
+
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
     val keyPointFractions = remember(keyPoints, stepFractions, valueRange, showKeyPoints) {
@@ -479,19 +483,14 @@ fun RangeSlider(
 
     val fractionToValueRange = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
-            val f = fraction.coerceIn(0f, 1f)
-            val newValue = lerp(valueRange.start, valueRange.endInclusive, f)
-            when {
-                steps > 0 -> snapValueToTick(newValue, stepFractions, valueRange.start, valueRange.endInclusive)
-                allKeyPointFractions.isNotEmpty() -> {
-                    val closestKeyPoint = allKeyPointFractions.minByOrNull { abs(it - f) }
-                    if (closestKeyPoint != null && abs(f - closestKeyPoint) < magnetThreshold) {
-                        lerp(valueRange.start, valueRange.endInclusive, closestKeyPoint)
-                    } else newValue
-                }
-
-                else -> newValue
-            }
+            resolveValueFromFraction(
+                fraction = fraction,
+                valueRange = valueRange,
+                steps = steps,
+                stepFractions = stepFractions,
+                allKeyPointFractions = allKeyPointFractions,
+                magnetThreshold = magnetThreshold
+            )
         }
     }
 
@@ -568,15 +567,8 @@ fun RangeSlider(
                                     change.consume()
                                     if (isDraggingStart) {
                                         lastDraggedIsStart = true
-                                        val tentativeStartOffset =
-                                            (startDragOffset + dragAmount).coerceIn(0f, size.width.toFloat())
-                                        val thumbRadius = size.height / 2f
-                                        val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
-                                        val visualFractionStart =
-                                            if (availableWidth == 0f) 0f else ((tentativeStartOffset - thumbRadius) / availableWidth).coerceIn(
-                                                0f,
-                                                1f
-                                            )
+                                        val tentativeStartOffset = startDragOffset + dragAmount
+                                        val visualFractionStart = horizontalVisualFraction(tentativeStartOffset, size.width, size.height)
                                         val newStart = fractionToValueRange(visualFractionStart).coerceAtMost(currentEndValue)
 
                                         if (newStart >= currentEndValue && dragAmount > 0f && currentStartValue == currentEndValue) {
@@ -585,12 +577,9 @@ fun RangeSlider(
 
                                             endDragOffset = tentativeStartOffset
                                             hapticState.resetEnd(currentEndValue)
+                                            hapticState.inheritEndKeyPoint()
 
-                                            val visualFractionEnd =
-                                                if (availableWidth == 0f) 0f else ((endDragOffset - thumbRadius) / availableWidth).coerceIn(
-                                                    0f,
-                                                    1f
-                                                )
+                                            val visualFractionEnd = horizontalVisualFraction(endDragOffset, size.width, size.height)
                                             val newEnd = fractionToValueRange(visualFractionEnd).coerceAtLeast(currentStartValue)
                                             currentEndValue = newEnd
                                             onValueChangeState(currentStartValue..newEnd)
@@ -618,14 +607,8 @@ fun RangeSlider(
 
                                     } else if (isDraggingEnd) {
                                         lastDraggedIsStart = false
-                                        val tentativeEndOffset = (endDragOffset + dragAmount).coerceIn(0f, size.width.toFloat())
-                                        val thumbRadius = size.height / 2f
-                                        val availableWidth = (size.width - 2f * thumbRadius).coerceAtLeast(0f)
-                                        val visualFractionEnd =
-                                            if (availableWidth == 0f) 0f else ((tentativeEndOffset - thumbRadius) / availableWidth).coerceIn(
-                                                0f,
-                                                1f
-                                            )
+                                        val tentativeEndOffset = endDragOffset + dragAmount
+                                        val visualFractionEnd = horizontalVisualFraction(tentativeEndOffset, size.width, size.height)
                                         val newEnd = fractionToValueRange(visualFractionEnd).coerceAtLeast(currentStartValue)
 
                                         if (newEnd <= currentStartValue && dragAmount < 0f && currentStartValue == currentEndValue) {
@@ -633,12 +616,9 @@ fun RangeSlider(
                                             isDraggingStart = true
                                             startDragOffset = tentativeEndOffset
                                             hapticState.resetStart(currentStartValue)
+                                            hapticState.inheritStartKeyPoint()
 
-                                            val visualFractionStart =
-                                                if (availableWidth == 0f) 0f else ((startDragOffset - thumbRadius) / availableWidth).coerceIn(
-                                                    0f,
-                                                    1f
-                                                )
+                                            val visualFractionStart = horizontalVisualFraction(startDragOffset, size.width, size.height)
                                             val newStart = fractionToValueRange(visualFractionStart).coerceAtMost(currentEndValue)
                                             currentStartValue = newStart
                                             onValueChangeState(newStart..currentEndValue)
@@ -688,8 +668,10 @@ fun RangeSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueStart = coercedStart,
-            valueEnd = coercedEnd,
+            valueStart = animatedStartValue,
+            valueEnd = animatedEndValue,
+            startThumbScale = startThumbScale,
+            endThumbScale = endThumbScale,
             valueRange = valueRange,
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
@@ -711,6 +693,7 @@ private fun SliderTrack(
     keyPointColor: Color,
     keyPointForegroundColor: Color,
     value: Float,
+    thumbScale: Float = 1f,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     isVertical: Boolean,
@@ -766,7 +749,7 @@ private fun SliderTrack(
             }
             drawCircle(
                 color = thumbColor,
-                radius = thumbRadius * 0.72f,
+                radius = thumbRadius * 0.72f * thumbScale,
                 center = Offset(barWidth / 2f, centerY)
             )
         } else {
@@ -798,7 +781,7 @@ private fun SliderTrack(
             }
             drawCircle(
                 color = thumbColor,
-                radius = thumbRadius * 0.72f,
+                radius = thumbRadius * 0.72f * thumbScale,
                 center = Offset(centerX, barHeight / 2f),
             )
         }
@@ -819,6 +802,8 @@ private fun RangeSliderTrack(
     keyPointForegroundColor: Color,
     valueStart: Float,
     valueEnd: Float,
+    startThumbScale: Float = 1f,
+    endThumbScale: Float = 1f,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     showKeyPoints: Boolean,
@@ -873,12 +858,12 @@ private fun RangeSliderTrack(
 
         drawCircle(
             color = thumbColor,
-            radius = thumbRadius * 0.72f,
+            radius = thumbRadius * 0.72f * startThumbScale,
             center = Offset(startX, centerY)
         )
         drawCircle(
             color = thumbColor,
-            radius = thumbRadius * 0.72f,
+            radius = thumbRadius * 0.72f * endThumbScale,
             center = Offset(endX, centerY)
         )
     }
@@ -988,6 +973,14 @@ internal class RangeSliderHapticState {
         endEdgeFeedbackTriggered = false
         endLastStep = currentValue
         endIsAtKeyPoint = false
+    }
+
+    fun inheritStartKeyPoint() {
+        startIsAtKeyPoint = endIsAtKeyPoint
+    }
+
+    fun inheritEndKeyPoint() {
+        endIsAtKeyPoint = startIsAtKeyPoint
     }
 
     fun handleStartHapticFeedback(
@@ -1105,6 +1098,41 @@ private fun snapValueToTick(
         .minByOrNull { abs(lerp(minPx, maxPx, it) - current) }
         ?.run { lerp(minPx, maxPx, this) }
         ?: current
+}
+
+private fun resolveValueFromFraction(
+    fraction: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    stepFractions: FloatArray,
+    allKeyPointFractions: FloatArray,
+    magnetThreshold: Float
+): Float {
+    val f = fraction.coerceIn(0f, 1f)
+    val base = lerp(valueRange.start, valueRange.endInclusive, f)
+    return when {
+        steps > 0 -> snapValueToTick(base, stepFractions, valueRange.start, valueRange.endInclusive)
+        allKeyPointFractions.isNotEmpty() -> {
+            val closest = allKeyPointFractions.minByOrNull { abs(it - f) }
+            if (closest != null && abs(f - closest) < magnetThreshold) {
+                lerp(valueRange.start, valueRange.endInclusive, closest)
+            } else base
+        }
+
+        else -> base
+    }
+}
+
+private fun horizontalVisualFraction(offsetX: Float, sizeWidth: Int, sizeHeight: Int): Float {
+    val thumbRadius = sizeHeight / 2f
+    val availableWidth = (sizeWidth.toFloat() - 2f * thumbRadius).coerceAtLeast(0f)
+    return if (availableWidth == 0f) 0f else ((offsetX - thumbRadius) / availableWidth).coerceIn(0f, 1f)
+}
+
+private fun verticalVisualFraction(offsetY: Float, sizeHeight: Int, sizeWidth: Int): Float {
+    val thumbRadius = sizeWidth / 2f
+    val availableHeight = (sizeHeight.toFloat() - 2f * thumbRadius).coerceAtLeast(0f)
+    return if (availableHeight == 0f) 0f else ((offsetY - thumbRadius) / availableHeight).coerceIn(0f, 1f)
 }
 
 /**
