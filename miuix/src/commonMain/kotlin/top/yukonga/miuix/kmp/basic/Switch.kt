@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -81,7 +82,7 @@ fun Switch(
         )
     }
 
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) {
             if (!enabled) 26.dp else if (isPressed || isDragged || isHovered) 24.dp else 26.dp
@@ -159,6 +160,10 @@ fun Switch(
                             var lastPosition = down.position
                             val pointerId = down.id
 
+                            var accumulatedX = 0f
+                            var accumulatedY = 0f
+                            var rawDragOffset = 0f
+
                             while (true) {
                                 val event = awaitPointerEvent()
                                 val change = event.changes.find { it.id == pointerId } ?: event.changes.first()
@@ -184,21 +189,38 @@ fun Switch(
                                 val dy = change.position.y - lastPosition.y
                                 lastPosition = change.position
 
-                                if (!startedDrag && kotlin.math.abs(dy) > viewConfiguration.touchSlop) {
-                                    interactionSource.tryEmit(PressInteraction.Cancel(pressInteraction))
-                                }
+                                accumulatedX += dx
+                                accumulatedY += dy
 
-                                if (dx != 0f) {
-                                    if (!startedDrag) {
+                                if (!startedDrag) {
+                                    val absX = accumulatedX.absoluteValue
+                                    val absY = accumulatedY.absoluteValue
+                                    val touchSlop = viewConfiguration.touchSlop
+
+                                    if (absY > touchSlop && absY > absX) {
+                                        interactionSource.tryEmit(PressInteraction.Cancel(pressInteraction))
+                                        dragOffset = 0f
+                                        break
+                                    }
+
+                                    if (absX > touchSlop) {
                                         startedDrag = true
                                         interactionSource.tryEmit(dragInteraction)
                                         hasVibrated = true
                                         hasVibratedOnce = false
                                     }
-                                    dragOffset = (dragOffset + dx / 2).let {
-                                        if (checked) it.coerceIn(-21f, 0f) else it.coerceIn(0f, 21f)
+                                }
+
+                                if (startedDrag) {
+                                    rawDragOffset += dx / 2
+
+                                    dragOffset = if (checked) {
+                                        rawDragOffset.coerceIn(-21f, 0f)
+                                    } else {
+                                        rawDragOffset.coerceIn(0f, 21f)
                                     }
                                     change.consume()
+
                                     if (dragOffset in -11f..-10f || dragOffset in 10f..11f) {
                                         hasVibratedOnce = false
                                     } else if (dragOffset in -20f..-1f || dragOffset in 1f..20f) {
