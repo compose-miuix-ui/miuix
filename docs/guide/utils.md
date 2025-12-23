@@ -22,7 +22,8 @@ DialogLayout(
     enableAutoLargeScreen = true,       // Optional, whether to auto-detect large screen and adjust animations
     dimEnterTransition = fadeIn(),      // Optional, custom enter animation for dim layer
     dimExitTransition = fadeOut(),      // Optional, custom exit animation for dim layer
-    dimAlpha = null                     // Optional, MutableState<Float> to dynamically control dim layer alph (0f-1f)
+    dimAlpha = null,                    // Optional, MutableState<Float> to dynamically control dim layer alph (0f-1f)
+    onDismissFinished = { /* callback after dialog fully dismisses */ } // Optional, callback when the dialog is completely dismissed (after animations)
 ) {
     // Dialog content
 }
@@ -48,7 +49,7 @@ PopupLayout(
 }
 ```
 
-Normally, you don't need to use it actively. See the [ListPopup](../components/listpopup.md) documentation for details.
+Normally, you don't need to use it actively. See the [SuperListPopup](../components/superlistpopup) documentation for details.
 
 ## Overscroll Effects
 
@@ -101,11 +102,11 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-*   `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
-*   `scrollEasing`: Function `(distance: Float, range: Int) -> Float`, custom easing， default effect is similar to HyperOS feel.
-*   `springStiff`: Float, spring stiffness for rebound. Default: `280f`.
-*   `springDamp`: Float, spring damping for rebound. Default: `1f`.
-*   `isEnabled`: Lambda, whether to enable overscroll. Default: only Android/iOS.
+* `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+* `scrollEasing`: Function `(distance: Float, range: Int) -> Float`, custom easing， default effect is similar to HyperOS feel.
+* `springStiff`: Float, spring stiffness for rebound. Default: `280f`.
+* `springDamp`: Float, spring damping for rebound. Default: `1f`.
+* `isEnabled`: Lambda, whether to enable overscroll. Default: only Android/iOS.
 
 ## Scroll End Haptic Feedback (Modifier.scrollEndHaptic())
 
@@ -126,7 +127,7 @@ LazyColumn(
 
 **Parameter Explanation:**
 
-*   `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
+* `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
 
 ## Press Feedback Effects (Modifier.pressable())
 

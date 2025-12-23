@@ -22,7 +22,8 @@ DialogLayout(
     enableAutoLargeScreen = true,       // 可选，是否自动检测大屏幕并调整动画
     dimEnterTransition = fadeIn(),      // 可选，遮罩层的自定义进入动画
     dimExitTransition = fadeOut(),      // 可选，遮罩层的自定义退出动画
-    dimAlpha = null                     // 可选，MutableState<Float> 用于动态控制遮罩层透明度 (0f-1f)
+    dimAlpha = null,                    // 可选，MutableState<Float> 用于动态控制遮罩层透明度 (0f-1f)
+    onDismissFinished = { /* 动画结束后回调 */ } // 可选，对话框完全关闭（动画结束）时的回调
 ) {
     // 对话框内容
 }
@@ -48,7 +49,7 @@ PopupLayout(
 }
 ```
 
-正常情况下无需主动使用。详见 [ListPopup](../components/listpopup.md) 文档。
+正常情况下无需主动使用。详见 [SuperListPopup](../components/superlistpopup) 文档。
 
 ## 越界回弹效果 (Overscroll)
 
@@ -101,11 +102,11 @@ LazyColumn(
 
 **参数说明:**
 
-*   `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
-*   `scrollEasing`：函数 `(distance: Float, range: Int) -> Float`，自定义回弹阻尼，默认效果类似 HyperOS 手感。
-*   `springStiff`：浮点数，回弹弹性系数。默认：`280f`。
-*   `springDamp`：浮点数，回弹阻尼系数。默认：`1f`。
-*   `isEnabled`：Lambda，是否启用越界回弹。默认仅 Android/iOS。
+* `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
+* `scrollEasing`：函数 `(distance: Float, range: Int) -> Float`，自定义回弹阻尼，默认效果类似 HyperOS 手感。
+* `springStiff`：浮点数，回弹弹性系数。默认：`280f`。
+* `springDamp`：浮点数，回弹阻尼系数。默认：`1f`。
+* `isEnabled`：Lambda，是否启用越界回弹。默认仅 Android/iOS。
 
 ## 滚动到边界触觉反馈 (Modifier.scrollEndHaptic())
 
@@ -126,7 +127,7 @@ LazyColumn(
 
 **参数说明:**
 
-*   `hapticFeedbackType`: 指定滚动到达末端时要执行的触觉反馈类型。默认为 `HapticFeedbackType.TextHandleMove`。您可以使用 `androidx.compose.ui.hapticfeedback.HapticFeedbackType` 中可用的其他类型。
+* `hapticFeedbackType`: 指定滚动到达末端时要执行的触觉反馈类型。默认为 `HapticFeedbackType.TextHandleMove`。您可以使用 `androidx.compose.ui.hapticfeedback.HapticFeedbackType` 中可用的其他类型。
 
 ## 按压反馈效果 (Modifier.pressable())
 

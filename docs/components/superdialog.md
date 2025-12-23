@@ -69,7 +69,8 @@ Scaffold {
 | summaryColor               | Color                  | Summary text color                             | SuperDialogDefaults.summaryColor()    | No       |
 | backgroundColor            | Color                  | Dialog background color                        | SuperDialogDefaults.backgroundColor() | No       |
 | enableWindowDim            | Boolean                | Whether to enable dimming layer                | true                                  | No       |
-| onDismissRequest           | (() -> Unit)?          | Callback when dialog is closed                 | null                                  | No       |
+| onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                  | No       |
+| onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses          | null                                  | No       |
 | outsideMargin              | DpSize                 | Dialog external margin                         | SuperDialogDefaults.outsideMargin     | No       |
 | insideMargin               | DpSize                 | Dialog internal content margin                 | SuperDialogDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                | Whether to apply default window insets padding | true                                  | No       |

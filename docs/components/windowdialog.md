@@ -65,11 +65,12 @@ WindowDialog(
 | `summary`                    | `String?`                | Dialog summary                                   | `null`                                   | No       |
 | `summaryColor`               | `Color`                  | Summary color                                    | `WindowDialogDefaults.summaryColor()`    | No       |
 | `backgroundColor`            | `Color`                  | Dialog background color                          | `WindowDialogDefaults.backgroundColor()` | No       |
-| `onDismissRequest`           | `(() -> Unit)?`          | Callback when dialog is closed                   | `null`                                   | No       |
+| `onDismissRequest`           | `(() -> Unit)?`          | Called when the user requests dismissal (outside tap or back) | `null`                                   | No       |
+| `onDismissFinished`          | `(() -> Unit)?`          | Callback after dialog fully dismisses            | `null`                                   | No       |
 | `outsideMargin`              | `DpSize`                 | Outer margin (window edges)                      | `WindowDialogDefaults.outsideMargin`     | No       |
 | `insideMargin`               | `DpSize`                 | Inner padding for dialog content                 | `WindowDialogDefaults.insideMargin`      | No       |
 | `defaultWindowInsetsPadding` | `Boolean`                | Apply default insets padding (IME, nav, caption) | `true`                                   | No       |
-| `content`                    | `@Composable () -> Unit` | Dialog content                                   | -                                        | Yes      |
+| `content`                    | `@Composable () -> Unit` | Dialog content                                   | -                                        | Yes       |
 
 ### WindowDialogDefaults
 

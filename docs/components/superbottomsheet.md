@@ -65,7 +65,8 @@ Scaffold {
 | enableWindowDim            | Boolean                          | Whether to enable dimming layer              | true                                        | No       |
 | cornerRadius               | Dp                               | Corner radius of the top corners             | SuperBottomSheetDefaults.cornerRadius       | No       |
 | sheetMaxWidth              | Dp                               | Maximum width of the bottom sheet            | SuperBottomSheetDefaults.maxWidth           | No       |
-| onDismissRequest           | (() -> Unit)?                    | Callback when bottom sheet is dismissed      | null                                        | No       |
+| onDismissRequest           | (() -> Unit)?                    | Called when the user requests dismissal (outside tap or back) | null                                        | No       |
+| onDismissFinished          | (() -> Unit)?                    | Callback after bottom sheet fully dismisses  | null                                        | No       |
 | outsideMargin              | DpSize                           | Bottom sheet external margin                 | SuperBottomSheetDefaults.outsideMargin      | No       |
 | insideMargin               | DpSize                           | Bottom sheet internal content margin         | SuperBottomSheetDefaults.insideMargin       | No       |
 | defaultWindowInsetsPadding | Boolean                          | Whether to apply default window insets padding | true                                      | No       |

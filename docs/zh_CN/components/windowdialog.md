@@ -65,7 +65,8 @@ WindowDialog(
 | `summary`                    | `String?`                | 对话框摘要                                     | `null`                                   | 否   |
 | `summaryColor`               | `Color`                  | 摘要颜色                                       | `WindowDialogDefaults.summaryColor()`    | 否   |
 | `backgroundColor`            | `Color`                  | 对话框背景色                                   | `WindowDialogDefaults.backgroundColor()` | 否   |
-| `onDismissRequest`           | `(() -> Unit)?`          | 对话框关闭时的回调                             | `null`                                   | 否   |
+| `onDismissRequest`           | `(() -> Unit)?`          | 当用户请求关闭（点击遮罩层或返回手势）时触发 | `null`                                   | 否   |
+| `onDismissFinished`          | `(() -> Unit)?`          | 对话框完全关闭（动画结束）时的回调             | `null`                                   | 否   |
 | `outsideMargin`              | `DpSize`                 | 相对窗口边缘的外部边距                         | `WindowDialogDefaults.outsideMargin`     | 否   |
 | `insideMargin`               | `DpSize`                 | 对话框内容内部边距                             | `WindowDialogDefaults.insideMargin`      | 否   |
 | `defaultWindowInsetsPadding` | `Boolean`                | 是否应用默认窗口插入内边距（输入法/导航/标题） | `true`                                   | 否   |

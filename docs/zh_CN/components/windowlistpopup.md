@@ -77,7 +77,7 @@ Box {
 | `alignment`             | `PopupPositionProvider.Align` | `PopupPositionProvider.Align.Right`          | 指定弹窗相对于锚点的对齐方式。 |
 | `enableWindowDim`       | `Boolean`                     | `true`                                       | 是否在弹窗显示时使背景变暗。   |
 | `shadowElevation`       | `Dp`                          | `11.dp`                                      | 弹窗阴影的高度。               |
-| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | 当弹窗被关闭时触发的回调。     |
+| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | 当用户请求关闭（例如点击外部）时触发。 |
 | `maxHeight`             | `Dp?`                         | `null`                                       | 弹窗内容的最大高度。           |
 | `minWidth`              | `Dp`                          | `200.dp`                                     | 弹窗内容的最小宽度。           |
 | `content`               | `@Composable () -> Unit`      | -                                            | 要在弹窗内显示的内容。         |

@@ -73,7 +73,7 @@ Box {
 | `alignment`             | `PopupPositionProvider.Align` | `PopupPositionProvider.Align.Right`          | Specifies the alignment of the popup relative to the anchor. |
 | `enableWindowDim`       | `Boolean`                     | `true`                                       | Whether to dim the background when popup is shown.           |
 | `shadowElevation`       | `Dp`                          | `11.dp`                                      | Elevation of the popup shadow.                               |
-| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | Callback triggered when the popup is dismissed.              |
+| `onDismissRequest`      | `(() -> Unit)?`               | `null`                                       | Called when the user requests dismissal (e.g., clicking outside) |
 | `maxHeight`             | `Dp?`                         | `null`                                       | Maximum height of the popup content.                         |
 | `minWidth`              | `Dp`                          | `200.dp`                                     | Minimum width of the popup content.                          |
 | `content`               | `@Composable () -> Unit`      | -                                            | The content to display inside the popup.                     |
