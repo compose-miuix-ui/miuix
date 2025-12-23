@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -77,6 +78,7 @@ class MiuixPopupUtils {
         var dimEnterTransition by mutableStateOf<EnterTransition?>(null)
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
         var dimAlpha by mutableStateOf<MutableState<Float>?>(null)
+        var onDismissFinished by mutableStateOf<(() -> Unit)?>(null)
         var content by mutableStateOf<@Composable () -> Unit>({})
     }
 
@@ -157,6 +159,7 @@ class MiuixPopupUtils {
          * @param dimExitTransition Optional, custom exit animation for dim layer.
          * @param dimAlpha Optional, a mutable state to dynamically control the dim layer alpha (0f-1f).
          *   When provided, the dim layer will use this alpha value instead of default animations.
+         * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
          * @param content The [Composable] content of the dialog.
          */
         @Composable
@@ -169,6 +172,7 @@ class MiuixPopupUtils {
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
             dimAlpha: MutableState<Float>? = null,
+            onDismissFinished: (() -> Unit)? = null,
             content: (@Composable () -> Unit)? = null,
         ) {
             if (content == null) {
@@ -189,6 +193,7 @@ class MiuixPopupUtils {
             val latestDimEnter by rememberUpdatedState(dimEnterTransition)
             val latestDimExit by rememberUpdatedState(dimExitTransition)
             val latestDimAlpha by rememberUpdatedState(dimAlpha)
+            val latestOnDismissFinished by rememberUpdatedState(onDismissFinished)
             val latestContent by rememberUpdatedState(content)
 
             SideEffect {
@@ -199,6 +204,7 @@ class MiuixPopupUtils {
                 state.dimEnterTransition = latestDimEnter
                 state.dimExitTransition = latestDimExit
                 state.dimAlpha = latestDimAlpha
+                state.onDismissFinished = latestOnDismissFinished
                 state.content = latestContent
             }
 
@@ -383,6 +389,7 @@ class MiuixPopupUtils {
                 DisposableEffect(dialogState.showState) {
                     onDispose {
                         if (!dialogState.showState.value) {
+                            dialogState.onDismissFinished?.invoke()
                             dialogStates.removeAll { it.showState === dialogState.showState }
                         }
                     }

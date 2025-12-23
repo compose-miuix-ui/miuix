@@ -67,7 +67,8 @@ import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
  * @param summary The summary of the [WindowDialog].
  * @param summaryColor The color of the summary.
  * @param backgroundColor The background color of the [WindowDialog].
- * @param onDismissRequest The callback when the [WindowDialog] is dismissed.
+ * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
+ * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
  * @param outsideMargin The margin outside the [WindowDialog].
  * @param insideMargin The margin inside the [WindowDialog].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [WindowDialog].
@@ -84,6 +85,7 @@ fun WindowDialog(
     summaryColor: Color = WindowDialogDefaults.summaryColor(),
     backgroundColor: Color = WindowDialogDefaults.backgroundColor(),
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = WindowDialogDefaults.outsideMargin,
     insideMargin: DpSize = WindowDialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
@@ -118,6 +120,13 @@ fun WindowDialog(
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
     val currentOnDismissInternal by rememberUpdatedState(onDismissRequest)
+    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+
+    LaunchedEffect(internalVisible.currentState, show.value) {
+        if (!internalVisible.currentState && !show.value){
+            currentOnDismissFinished?.invoke()
+        }
+    }
 
     LaunchedEffect(show.value) {
         internalVisible.targetState = show.value

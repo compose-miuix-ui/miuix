@@ -83,7 +83,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * @param enableWindowDim Whether to dim the window behind the [SuperBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [SuperBottomSheet].
  * @param sheetMaxWidth The maximum width of the [SuperBottomSheet].
- * @param onDismissRequest The callback when the [SuperBottomSheet] is dismissed.
+ * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
+ * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
  * @param outsideMargin The margin outside the [SuperBottomSheet].
  * @param insideMargin The margin inside the [SuperBottomSheet].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
@@ -104,6 +105,7 @@ fun SuperBottomSheet(
     cornerRadius: Dp = SuperBottomSheetDefaults.cornerRadius,
     sheetMaxWidth: Dp = SuperBottomSheetDefaults.maxWidth,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = SuperBottomSheetDefaults.outsideMargin,
     insideMargin: DpSize = SuperBottomSheetDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
@@ -152,7 +154,8 @@ fun SuperBottomSheet(
         exitTransition = rememberDefaultSheetExitTransition(),
         enableWindowDim = enableWindowDim,
         enableAutoLargeScreen = false,
-        dimAlpha = dimAlpha
+        dimAlpha = dimAlpha,
+        onDismissFinished = onDismissFinished
     ) {
         SuperBottomSheetContent(
             modifier = modifier,

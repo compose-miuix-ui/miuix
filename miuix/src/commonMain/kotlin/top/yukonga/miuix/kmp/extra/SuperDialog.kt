@@ -69,7 +69,8 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param summary The summary of the [SuperDialog].
  * @param summaryColor The color of the summary.
  * @param backgroundColor The background color of the [SuperDialog].
- * @param onDismissRequest The callback when the [SuperDialog] is dismissed.
+ * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
+ * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
  * @param outsideMargin The margin outside the [SuperDialog].
  * @param insideMargin The margin inside the [SuperDialog].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SuperDialog].
@@ -87,6 +88,7 @@ fun SuperDialog(
     backgroundColor: Color = SuperDialogDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = SuperDialogDefaults.outsideMargin,
     insideMargin: DpSize = SuperDialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
@@ -118,7 +120,8 @@ fun SuperDialog(
         visible = show,
         enableWindowDim = enableWindowDim,
         dimAlpha = dimAlpha,
-        exitTransition = exitTransition
+        exitTransition = exitTransition,
+        onDismissFinished = onDismissFinished
     ) {
         SuperDialogContent(
             modifier = modifier,
