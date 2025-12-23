@@ -66,7 +66,8 @@ import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
  * @param enableWindowDim Whether to dim the window behind the [WindowBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [WindowBottomSheet].
  * @param sheetMaxWidth The maximum width of the [WindowBottomSheet].
- * @param onDismissRequest The callback when the [WindowBottomSheet] is dismissed.
+ * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
+ * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
  * @param outsideMargin The margin outside the [WindowBottomSheet].
  * @param insideMargin The margin inside the [WindowBottomSheet].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
@@ -87,6 +88,7 @@ fun WindowBottomSheet(
     cornerRadius: Dp = WindowBottomSheetDefaults.cornerRadius,
     sheetMaxWidth: Dp = WindowBottomSheetDefaults.maxWidth,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = WindowBottomSheetDefaults.outsideMargin,
     insideMargin: DpSize = WindowBottomSheetDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
@@ -104,9 +106,16 @@ fun WindowBottomSheet(
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
 
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
+
+    LaunchedEffect(internalVisible.currentState, show.value) {
+        if (!internalVisible.currentState && !show.value) {
+            currentOnDismissFinished?.invoke()
+        }
+    }
 
     LaunchedEffect(show.value) {
         internalVisible.targetState = show.value
