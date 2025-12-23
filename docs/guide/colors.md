@@ -63,3 +63,4 @@ This page lists all colors in the Miuix color scheme with their default light an
 | `windowDimming` | Window dimming (dialogs/dropdowns) | `#4D000000` | `#99000000` |
 | `sliderKeyPoint` | Slider key point | `#4DA3B3CD` | `#4D7A8AA6` |
 | `sliderKeyPointForeground` | Slider key point foreground | `#FF6EB5FF` | `#FF5DAAFF` |
+| `sliderBackground` | Slider background | `#0F000000` | `#26FFFFFF` |

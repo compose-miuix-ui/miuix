@@ -63,3 +63,4 @@
 | `windowDimming` | 窗口遮罩（对话框/下拉） | `#4D000000` | `#99000000` |
 | `sliderKeyPoint` | 滑块关键点 | `#4DA3B3CD` | `#4D7A8AA6` |
 | `sliderKeyPointForeground` | 滑块关键点前景 | `#FF6EB5FF` | `#FF5DAAFF` |
+| `sliderBackground` | 滑块背景 | `#0F000000` | `#26FFFFFF` |

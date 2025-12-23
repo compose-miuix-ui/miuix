@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -75,25 +74,20 @@ fun Switch(
     var hasVibrated by remember { mutableStateOf(false) }
     var hasVibratedOnce by remember { mutableStateOf(false) }
 
-    val springSpec = remember {
-        spring<Dp>(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessMedium
-        )
-    }
+    val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) {
-            if (!enabled) 26.dp else if (isPressed || isDragged || isHovered) 24.dp else 26.dp
+            if (!enabled) 25.dp else if (isPressed || isDragged || isHovered) 23.75.dp else 25.dp
         } else {
-            if (!enabled) 4.dp else if (isPressed || isDragged || isHovered) 3.dp else 4.dp
+            if (!enabled) 4.dp else if (isPressed || isDragged || isHovered) 2.75.dp else 4.dp
         } + dragOffset.dp,
         animationSpec = springSpec
     )
 
     val thumbSize by animateDpAsState(
-        targetValue = if (!enabled) 20.dp else if (isPressed || isDragged || isHovered) 23.dp else 20.dp,
+        targetValue = if (!enabled) 20.dp else if (isPressed || isDragged || isHovered) 22.5.dp else 20.dp,
         animationSpec = springSpec
     )
 
@@ -127,8 +121,8 @@ fun Switch(
     Box(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
-            .size(50.dp, 28.5.dp)
-            .requiredSize(50.dp, 28.5.dp)
+            .size(49.dp, 28.dp)
+            .requiredSize(49.dp, 28.dp)
             .clip(ContinuousCapsule)
             .drawBehind {
                 drawRect(backgroundColor)

@@ -147,7 +147,8 @@ SliderDefaults 对象提供了 Slider 组件的默认配置。
 
 | 常量名              | 类型               | 默认值                  | 说明               |
 | ------------------- | ------------------ | ----------------------- | ------------------ |
-| MinHeight           | Dp                 | 30.dp                   | 滑块的默认高度     |
+| MinHeight           | Dp                 | 28.dp                   | 滑块的默认高度     |
+| KeyPointRadius      | Dp                 | 3.855.dp                | 关键点的默认半径   |
 | DefaultHapticEffect | SliderHapticEffect | SliderHapticEffect.Edge | 默认的触感反馈类型 |
 
 ### SliderHapticEffect

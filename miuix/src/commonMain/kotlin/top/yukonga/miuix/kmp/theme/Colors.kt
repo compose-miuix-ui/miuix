@@ -59,7 +59,10 @@ import androidx.compose.ui.graphics.Color
  * @param onSurfaceContainerHigh The color of the text on surface container high color.
  * @param surfaceContainerHighest The container color of the surface color.
  * @param onSurfaceContainerHighest The color of the text on surface container highest color.
- * @param windowDimming The color of the window dimming. Cases: Dialog, Dropdown.
+ * @param windowDimming The color of the window dimming. Cases: Dialog, Dropdown, Spinner, BottomSheet.
+ * @param sliderKeyPoint The color of the slider key point.
+ * @param sliderKeyPointForeground The foreground color of the slider key point.
+ * @param sliderBackground The background color of the slider.
  */
 @Stable
 class Colors(
@@ -115,6 +118,7 @@ class Colors(
     windowDimming: Color,
     sliderKeyPoint: Color,
     sliderKeyPointForeground: Color,
+    sliderBackground: Color,
 ) {
     var primary by mutableStateOf(primary, structuralEqualityPolicy())
         internal set
@@ -220,6 +224,8 @@ class Colors(
         internal set
     var sliderKeyPointForeground by mutableStateOf(sliderKeyPointForeground, structuralEqualityPolicy())
         internal set
+    var sliderBackground by mutableStateOf(sliderBackground, structuralEqualityPolicy())
+        internal set
 
     fun copy(
         primary: Color = this.primary,
@@ -274,6 +280,7 @@ class Colors(
         windowDimming: Color = this.windowDimming,
         sliderKeyPoint: Color = this.sliderKeyPoint,
         sliderKeyPointForeground: Color = this.sliderKeyPointForeground,
+        sliderBackground: Color = this.sliderBackground,
     ): Colors =
         Colors(
             primary,
@@ -328,6 +335,7 @@ class Colors(
             windowDimming,
             sliderKeyPoint,
             sliderKeyPointForeground,
+            sliderBackground,
         )
 }
 
@@ -384,6 +392,7 @@ fun lightColorScheme(
     windowDimming: Color = Color.Black.copy(alpha = 0.3F),
     sliderKeyPoint: Color = Color(0x4DA3B3CD),
     sliderKeyPointForeground: Color = Color(0xFF6EB5FF),
+    sliderBackground: Color = Color(0x0F000000),
 ): Colors =
     Colors(
         primary,
@@ -438,6 +447,7 @@ fun lightColorScheme(
         windowDimming,
         sliderKeyPoint,
         sliderKeyPointForeground,
+        sliderBackground,
     )
 
 fun darkColorScheme(
@@ -493,6 +503,7 @@ fun darkColorScheme(
     windowDimming: Color = Color.Black.copy(alpha = 0.6F),
     sliderKeyPoint: Color = Color(0x4D7A8AA6),
     sliderKeyPointForeground: Color = Color(0xFF5DAAFF),
+    sliderBackground: Color = Color(0x26FFFFFF),
 ): Colors =
     Colors(
         primary,
@@ -547,6 +558,7 @@ fun darkColorScheme(
         windowDimming,
         sliderKeyPoint,
         sliderKeyPointForeground,
+        sliderBackground,
     )
 
 @Stable
@@ -603,6 +615,7 @@ internal fun Colors.updateColorsFrom(other: Colors) {
     windowDimming = other.windowDimming
     sliderKeyPoint = other.sliderKeyPoint
     sliderKeyPointForeground = other.sliderKeyPointForeground
+    sliderBackground = other.sliderBackground
 }
 
 internal val LocalColors = staticCompositionLocalOf { lightColorScheme() }

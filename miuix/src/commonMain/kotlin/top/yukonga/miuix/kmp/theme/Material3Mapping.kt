@@ -117,5 +117,6 @@ internal fun mapMd3ToMiuixColorsCommon(cs: ColorScheme, dark: Boolean): Colors {
         windowDimming = if (dark) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.3f),
         sliderKeyPoint = onSecondaryContainerOpaque,
         sliderKeyPointForeground = cs.onPrimary,
+        sliderBackground = secondaryVariantOpaque,
     )
 }

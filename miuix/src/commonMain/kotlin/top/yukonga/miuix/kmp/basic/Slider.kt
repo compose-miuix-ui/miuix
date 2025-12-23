@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -686,7 +687,7 @@ fun RangeSlider(
 @Composable
 private fun SliderTrack(
     modifier: Modifier,
-    shape: ContinuousRoundedRectangle,
+    shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
     thumbColor: Color,
@@ -794,7 +795,7 @@ private fun SliderTrack(
 @Composable
 private fun RangeSliderTrack(
     modifier: Modifier,
-    shape: ContinuousRoundedRectangle,
+    shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
     thumbColor: Color,
@@ -844,7 +845,7 @@ private fun RangeSliderTrack(
         )
 
         if (showKeyPoints && stepFractions.isNotEmpty()) {
-            val keyPointRadius = barHeight / 7.5f
+            val keyPointRadius = SliderDefaults.KeyPointRadius.toPx()
             stepFractions.forEach { stepFraction ->
                 val x = thumbRadius + stepFraction * availableWidth
                 val kpColor = if (x in startX..endX) keyPointForegroundColor else keyPointColor
@@ -1185,7 +1186,12 @@ object SliderDefaults {
     /**
      * The minimum height of the [Slider] and [RangeSlider].
      */
-    val MinHeight = 30.dp
+    val MinHeight = 28.dp
+
+    /**
+     * The radius of the key points on the [Slider] and [RangeSlider].
+     */
+    val KeyPointRadius = 3.855.dp
 
     /**
      * The type of haptic feedback to be used for the slider.
@@ -1210,7 +1216,7 @@ object SliderDefaults {
     fun sliderColors(
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
-        backgroundColor: Color = MiuixTheme.colorScheme.secondaryVariant,
+        backgroundColor: Color = MiuixTheme.colorScheme.sliderBackground,
         disabledBackgroundColor: Color = MiuixTheme.colorScheme.disabledSecondary,
         thumbColor: Color = MiuixTheme.colorScheme.onPrimary,
         disabledThumbColor: Color = MiuixTheme.colorScheme.disabledOnPrimary,
