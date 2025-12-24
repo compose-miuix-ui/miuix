@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -81,8 +80,7 @@ fun TabRow(
             state = config.listState,
             modifier = Modifier
                 .fillMaxSize()
-                .overScrollHorizontal()
-                .clip(config.shape),
+                .overScrollHorizontal(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
             overscrollEffect = null
@@ -151,8 +149,7 @@ fun TabRowWithContour(
                 state = config.listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .overScrollHorizontal()
-                    .clip(ContinuousRoundedRectangle(cornerRadius)),
+                    .overScrollHorizontal(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(contourPadding),
                 overscrollEffect = null
@@ -183,7 +180,6 @@ private fun TabItem(
     shape: ContinuousRoundedRectangle,
     width: Dp
 ) {
-    val fontWeightDerived by remember(isSelected) { derivedStateOf { if (isSelected) FontWeight.Bold else FontWeight.Normal } }
     Surface(
         shape = shape,
         onClick = onClick,
@@ -201,7 +197,7 @@ private fun TabItem(
             Text(
                 text = text,
                 color = colors.contentColor(isSelected),
-                fontWeight = fontWeightDerived,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -220,7 +216,6 @@ private fun TabItemWithContour(
     width: Dp
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
-    val fontWeightDerived by remember(isSelected) { derivedStateOf { if (isSelected) FontWeight.Bold else FontWeight.Normal } }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -234,7 +229,7 @@ private fun TabItemWithContour(
         Text(
             text = text,
             color = colors.contentColor(isSelected),
-            fontWeight = fontWeightDerived,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -364,7 +359,7 @@ object TabRowDefaults {
 }
 
 @Immutable
-class TabRowColors(
+data class TabRowColors(
     private val backgroundColor: Color,
     private val contentColor: Color,
     private val selectedBackgroundColor: Color,

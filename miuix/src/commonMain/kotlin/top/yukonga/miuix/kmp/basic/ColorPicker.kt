@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -32,7 +31,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
@@ -136,14 +134,12 @@ fun HsvColorPicker(
     var currentValue by remember { mutableStateOf(0f) }
     var currentAlpha by remember { mutableStateOf(1f) }
 
-    val selectedColor by remember(currentHue, currentSaturation, currentValue, currentAlpha) {
-        derivedStateOf {
-            Hsv(
-                h = currentHue.toDouble(),
-                s = (currentSaturation * 100.0),
-                v = (currentValue * 100.0)
-            ).toColor(currentAlpha)
-        }
+    val selectedColor = remember(currentHue, currentSaturation, currentValue, currentAlpha) {
+        Hsv(
+            h = currentHue.toDouble(),
+            s = (currentSaturation * 100.0),
+            v = (currentValue * 100.0)
+        ).toColor(currentAlpha)
     }
 
     LaunchedEffect(initialColor) {
@@ -1041,44 +1037,42 @@ private fun ColorSlider(
 ) {
     val onValueChangedState = rememberUpdatedState(onValueChanged)
     val density = LocalDensity.current
-    var sliderWidth by remember { mutableStateOf(0.dp) }
     val indicatorSizeDp = 20.dp
     val sliderHeightDp = 26.dp
     val sliderHeightPx = with(density) { sliderHeightDp.toPx() }
     val hapticFeedback = LocalHapticFeedback.current
     val hapticState = remember { SliderHapticState() }
 
-    val gradientBrush = remember(drawBrushColors, sliderWidth) {
-        val widthPx = with(density) { sliderWidth.toPx() }
-        val halfSliderHeightPx = with(density) { sliderHeightDp.toPx() } / 2f
-        Brush.horizontalGradient(
-            colors = drawBrushColors,
-            startX = halfSliderHeightPx,
-            endX = widthPx - halfSliderHeightPx,
-            tileMode = TileMode.Clamp
-        )
-    }
-
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .clip(ContinuousCapsule)
             .then(modifier)
             .height(sliderHeightDp)
-            .onGloballyPositioned { coordinates ->
-                sliderWidth = with(density) { coordinates.size.width.toDp() }
-            }
-            .drawBehind {
-                drawRect(brush = gradientBrush)
-                drawRect(
-                    color = Color.Gray.copy(0.1f),
-                    style = Stroke(width = with(density) { 0.5.dp.toPx() }),
+            .drawWithCache {
+                val widthPx = size.width
+                val halfSliderHeightPx = sliderHeightDp.toPx() / 2f
+                val gradientBrush = Brush.horizontalGradient(
+                    colors = drawBrushColors,
+                    startX = halfSliderHeightPx,
+                    endX = widthPx - halfSliderHeightPx,
+                    tileMode = TileMode.Clamp
                 )
+                val borderStroke = Stroke(width = 0.5.dp.toPx())
+                val borderColor = Color.Gray.copy(0.1f)
+
+                onDrawBehind {
+                    drawRect(brush = gradientBrush)
+                    drawRect(
+                        color = borderColor,
+                        style = borderStroke,
+                    )
+                }
             }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onDragStart = { offset ->
                         val newValue =
-                            handleSliderInteraction(offset.x, size.width.toFloat(), with(density) { sliderHeightDp.toPx() })
+                            handleSliderInteraction(offset.x, size.width.toFloat(), sliderHeightPx)
                         onValueChangedState.value(newValue)
                         hapticState.reset(newValue)
                     },
@@ -1087,7 +1081,8 @@ private fun ColorSlider(
                         val newValue = handleSliderInteraction(
                             change.position.x,
                             size.width.toFloat(),
-                            with(density) { sliderHeightDp.toPx() }).coerceIn(0f, 1f)
+                            sliderHeightPx
+                        ).coerceIn(0f, 1f)
                         onValueChangedState.value(newValue)
                         hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
                     }
@@ -1097,7 +1092,7 @@ private fun ColorSlider(
         SliderIndicator(
             modifier = Modifier.align(Alignment.CenterStart),
             value = value,
-            sliderWidth = sliderWidth,
+            sliderWidth = maxWidth,
             sliderSizePx = sliderHeightPx,
             indicatorSize = indicatorSizeDp
         )
@@ -1124,7 +1119,7 @@ private fun SliderIndicator(
         modifier = modifier
             .offset(x = indicatorOffsetXDp)
             .size(indicatorSize)
-            .drawBehind {
+            .drawWithCache {
                 val strokeWidth = 6.dp.toPx()
                 val halfStroke = strokeWidth / 2f
                 val glowSpread = 2.dp.toPx()
@@ -1140,20 +1135,21 @@ private fun SliderIndicator(
                         ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
                         ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
                     ).toTypedArray(),
-                    center = center,
                     radius = gradientRadius
                 )
 
-                drawCircle(
-                    brush = glowBrush,
-                    radius = gradientRadius
-                )
+                onDrawBehind {
+                    drawCircle(
+                        brush = glowBrush,
+                        radius = gradientRadius
+                    )
 
-                drawCircle(
-                    color = Color.White,
-                    radius = ringCenterRadius,
-                    style = Stroke(width = strokeWidth)
-                )
+                    drawCircle(
+                        color = Color.White,
+                        radius = ringCenterRadius,
+                        style = Stroke(width = strokeWidth)
+                    )
+                }
             }
     )
 }

@@ -12,10 +12,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +53,6 @@ fun IconButton(
     minWidth: Dp = IconButtonDefaults.MinWidth,
     content: @Composable () -> Unit
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val interactionSource = remember { MutableInteractionSource() }
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
@@ -74,14 +71,15 @@ fun IconButton(
     }
 
     val indication = LocalIndication.current
-    val clickableModifier = remember(enabled, interactionSource, indication, currentOnClick) {
-        Modifier.clickable(
-            enabled = enabled,
-            role = Role.Button,
-            indication = indication,
-            interactionSource = interactionSource,
-            onClick = currentOnClick
-        )
+    val clickableModifier = remember(enabled, interactionSource, indication, onClick) {
+        if (enabled) {
+            Modifier.clickable(
+                role = Role.Button,
+                indication = indication,
+                interactionSource = interactionSource,
+                onClick = onClick
+            )
+        } else Modifier
     }
 
     Box(

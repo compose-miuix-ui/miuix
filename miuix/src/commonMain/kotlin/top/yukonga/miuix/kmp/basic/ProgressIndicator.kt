@@ -18,9 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -30,7 +28,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ProgressIndicatorDefaults.ProgressIndicatorColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
 import kotlin.math.cos
@@ -53,12 +50,8 @@ fun LinearProgressIndicator(
     height: Dp = ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight
 ) {
     if (progress == null) {
-        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.backgroundColor() }
-        }
-        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.foregroundColor(true) }
-        }
+        val currentBackgroundColor = colors.backgroundColor()
+        val currentForegroundColor = colors.foregroundColor(true)
         val transition = rememberInfiniteTransition()
         val animatedValue by transition.animateFloat(
             initialValue = 0f,
@@ -83,20 +76,11 @@ fun LinearProgressIndicator(
             val value = animatedValue
             val segmentWidth = 0.45f
             val gap = 0.55f
-
-            val positions = listOf(
-                value,
-                value - (segmentWidth + gap),
-                value - 2 * (segmentWidth + gap)
-            )
-
-            positions.forEach { position ->
-                val adjustedPos = (position % 1f + 1f) % 1f
-
+            run {
+                val adjustedPos = (value % 1f + 1f) % 1f
                 if (adjustedPos < 1f - segmentWidth) {
                     val startX = size.width * adjustedPos
                     val width = size.width * segmentWidth
-
                     drawRoundRect(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
@@ -106,14 +90,76 @@ fun LinearProgressIndicator(
                 } else {
                     val startX = size.width * adjustedPos
                     val width = size.width * (1f - adjustedPos)
-
                     drawRoundRect(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
                         cornerRadius = CornerRadius(size.height / 2)
                     )
-
+                    val remainingWidth = adjustedPos + segmentWidth - 1f
+                    if (remainingWidth > 0) {
+                        drawRoundRect(
+                            color = currentForegroundColor,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width * remainingWidth, size.height),
+                            cornerRadius = CornerRadius(size.height / 2)
+                        )
+                    }
+                }
+            }
+            run {
+                val position = value - (segmentWidth + gap)
+                val adjustedPos = (position % 1f + 1f) % 1f
+                if (adjustedPos < 1f - segmentWidth) {
+                    val startX = size.width * adjustedPos
+                    val width = size.width * segmentWidth
+                    drawRoundRect(
+                        color = currentForegroundColor,
+                        topLeft = Offset(startX, 0f),
+                        size = Size(width, size.height),
+                        cornerRadius = CornerRadius(size.height / 2)
+                    )
+                } else {
+                    val startX = size.width * adjustedPos
+                    val width = size.width * (1f - adjustedPos)
+                    drawRoundRect(
+                        color = currentForegroundColor,
+                        topLeft = Offset(startX, 0f),
+                        size = Size(width, size.height),
+                        cornerRadius = CornerRadius(size.height / 2)
+                    )
+                    val remainingWidth = adjustedPos + segmentWidth - 1f
+                    if (remainingWidth > 0) {
+                        drawRoundRect(
+                            color = currentForegroundColor,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width * remainingWidth, size.height),
+                            cornerRadius = CornerRadius(size.height / 2)
+                        )
+                    }
+                }
+            }
+            run {
+                val position = value - 2 * (segmentWidth + gap)
+                val adjustedPos = (position % 1f + 1f) % 1f
+                if (adjustedPos < 1f - segmentWidth) {
+                    val startX = size.width * adjustedPos
+                    val width = size.width * segmentWidth
+                    drawRoundRect(
+                        color = currentForegroundColor,
+                        topLeft = Offset(startX, 0f),
+                        size = Size(width, size.height),
+                        cornerRadius = CornerRadius(size.height / 2)
+                    )
+                } else {
+                    val startX = size.width * adjustedPos
+                    val width = size.width * (1f - adjustedPos)
+                    drawRoundRect(
+                        color = currentForegroundColor,
+                        topLeft = Offset(startX, 0f),
+                        size = Size(width, size.height),
+                        cornerRadius = CornerRadius(size.height / 2)
+                    )
                     val remainingWidth = adjustedPos + segmentWidth - 1f
                     if (remainingWidth > 0) {
                         drawRoundRect(
@@ -127,13 +173,9 @@ fun LinearProgressIndicator(
             }
         }
     } else {
-        val progressValue by rememberUpdatedState(progress.coerceIn(0f, 1f))
-        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.backgroundColor() }
-        }
-        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.foregroundColor(true) }
-        }
+        val progressValue = progress.coerceIn(0f, 1f)
+        val currentBackgroundColor = colors.backgroundColor()
+        val currentForegroundColor = colors.foregroundColor(true)
 
         Canvas(
             modifier = modifier
@@ -180,12 +222,8 @@ fun CircularProgressIndicator(
     size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize
 ) {
     if (progress == null) {
-        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.backgroundColor() }
-        }
-        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.foregroundColor(true) }
-        }
+        val currentBackgroundColor = colors.backgroundColor()
+        val currentForegroundColor = colors.foregroundColor(true)
         val transition = rememberInfiniteTransition()
 
         val rotationAnim by transition.animateFloat(
@@ -234,13 +272,9 @@ fun CircularProgressIndicator(
             )
         }
     } else {
-        val progressValue by rememberUpdatedState(progress.coerceIn(0f, 1f))
-        val currentBackgroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.backgroundColor() }
-        }
-        val currentForegroundColor by androidx.compose.runtime.remember(colors) {
-            derivedStateOf { colors.foregroundColor(true) }
-        }
+        val progressValue = progress.coerceIn(0f, 1f)
+        val currentBackgroundColor = colors.backgroundColor()
+        val currentForegroundColor = colors.foregroundColor(true)
 
         Canvas(
             modifier = modifier.size(size)
@@ -291,8 +325,6 @@ fun InfiniteProgressIndicator(
     strokeWidth: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorStrokeWidth,
     orbitingDotSize: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorOrbitingDotSize
 ) {
-    val currentColor by rememberUpdatedState(color)
-
     val transition = rememberInfiniteTransition()
     val rotation by transition.animateFloat(
         initialValue = 0f,
@@ -310,7 +342,7 @@ fun InfiniteProgressIndicator(
         val radius = (size.toPx() - strokeWidth.toPx()) / 2
 
         drawCircle(
-            color = currentColor,
+            color = color,
             radius = radius,
             center = center,
             style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
@@ -324,7 +356,7 @@ fun InfiniteProgressIndicator(
         )
 
         drawCircle(
-            color = currentColor,
+            color = color,
             radius = orbitingDotSize.toPx(),
             center = dotCenter
         )
@@ -365,18 +397,18 @@ object ProgressIndicatorDefaults {
             backgroundColor = backgroundColor
         )
     }
+}
 
-    @Immutable
-    class ProgressIndicatorColors(
-        private val foregroundColor: Color,
-        private val disabledForegroundColor: Color,
-        private val backgroundColor: Color
-    ) {
-        @Stable
-        internal fun foregroundColor(enabled: Boolean): Color =
-            if (enabled) foregroundColor else disabledForegroundColor
+@Immutable
+data class ProgressIndicatorColors(
+    private val foregroundColor: Color,
+    private val disabledForegroundColor: Color,
+    private val backgroundColor: Color
+) {
+    @Stable
+    internal fun foregroundColor(enabled: Boolean): Color =
+        if (enabled) foregroundColor else disabledForegroundColor
 
-        @Stable
-        internal fun backgroundColor(): Color = backgroundColor
-    }
+    @Stable
+    internal fun backgroundColor(): Color = backgroundColor
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -55,7 +54,7 @@ fun Button(
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
-    val color by remember(enabled, colors) { derivedStateOf { if (enabled) colors.color else colors.disabledColor } }
+    val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
     Surface(
         onClick = currentOnClick,
         enabled = enabled,
@@ -102,8 +101,8 @@ fun TextButton(
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
-    val color by remember(enabled, colors) { derivedStateOf { if (enabled) colors.color else colors.disabledColor } }
-    val textColor by remember(enabled, colors) { derivedStateOf { if (enabled) colors.textColor else colors.disabledTextColor } }
+    val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
+    val textColor = remember(enabled, colors) { if (enabled) colors.textColor else colors.disabledTextColor }
     Surface(
         onClick = currentOnClick,
         enabled = enabled,
@@ -204,35 +203,15 @@ object ButtonDefaults {
 }
 
 @Immutable
-class ButtonColors(
+data class ButtonColors(
     val color: Color,
     val disabledColor: Color
-) {
-    fun copy(
-        color: Color = this.color,
-        disabledColor: Color = this.disabledColor
-    ): ButtonColors = ButtonColors(
-        color = color,
-        disabledColor = disabledColor
-    )
-}
+)
 
 @Immutable
-class TextButtonColors(
+data class TextButtonColors(
     val color: Color,
     val disabledColor: Color,
     val textColor: Color,
     val disabledTextColor: Color
-) {
-    fun copy(
-        color: Color = this.color,
-        disabledColor: Color = this.disabledColor,
-        textColor: Color = this.textColor,
-        disabledTextColor: Color = this.disabledTextColor
-    ): TextButtonColors = TextButtonColors(
-        color = color,
-        disabledColor = disabledColor,
-        textColor = textColor,
-        disabledTextColor = disabledTextColor
-    )
-}
+)

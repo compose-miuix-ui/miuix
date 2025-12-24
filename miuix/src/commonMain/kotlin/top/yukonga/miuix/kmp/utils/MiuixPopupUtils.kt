@@ -350,7 +350,12 @@ class MiuixPopupUtils {
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        event.changes.forEach { it.consume() }
+                                        var i = 0
+                                        val n = event.changes.size
+                                        while (i < n) {
+                                            event.changes[i].consume()
+                                            i++
+                                        }
                                     }
                                 }
                             }
@@ -369,7 +374,12 @@ class MiuixPopupUtils {
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        event.changes.forEach { it.consume() }
+                                        var i = 0
+                                        val n = event.changes.size
+                                        while (i < n) {
+                                            event.changes[i].consume()
+                                            i++
+                                        }
                                     }
                                 }
                             }
@@ -441,7 +451,12 @@ class MiuixPopupUtils {
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        event.changes.forEach { it.consume() }
+                                        var i = 0
+                                        val n = event.changes.size
+                                        while (i < n) {
+                                            event.changes[i].consume()
+                                            i++
+                                        }
                                     }
                                 }
                             }
@@ -460,7 +475,12 @@ class MiuixPopupUtils {
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        event.changes.forEach { it.consume() }
+                                        var i = 0
+                                        val n = event.changes.size
+                                        while (i < n) {
+                                            event.changes[i].consume()
+                                            i++
+                                        }
                                     }
                                 }
                             }

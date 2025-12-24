@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +49,7 @@ fun FloatingToolbar(
     val roundedCornerShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
-    val clipRequired by remember(cornerRadius) { derivedStateOf { cornerRadius > 0.dp } }
+    val clipRequired = cornerRadius > 0.dp
     val layerOrClipModifier = remember(shadowElevation, clipRequired, roundedCornerShape, density) {
         when {
             shadowElevation > 0.dp -> Modifier.graphicsLayer(
@@ -81,7 +79,9 @@ fun FloatingToolbar(
             .then(dividerModifier)
             .then(layerOrClipModifier)
             .background(color = color)
-            .pointerInput(Unit) { detectTapGestures { /* consume click */ } }
+            .pointerInput(Unit) {
+                detectTapGestures { /* Consume click */ }
+            }
     ) {
         content()
     }

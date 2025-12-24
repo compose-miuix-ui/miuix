@@ -109,7 +109,7 @@ object SuperArrowDefaults {
 
 
 @Immutable
-class RightActionColors(
+data class RightActionColors(
     private val color: Color,
     private val disabledColor: Color
 ) {

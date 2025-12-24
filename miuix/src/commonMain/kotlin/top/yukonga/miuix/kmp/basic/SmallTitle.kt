@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -31,11 +28,10 @@ fun SmallTitle(
     textColor: Color = MiuixTheme.colorScheme.onBackgroundVariant,
     insideMargin: PaddingValues = PaddingValues(28.dp, 8.dp)
 ) {
-    val resolvedColor by remember(textColor) { derivedStateOf { textColor } }
     Text(
         modifier = modifier.padding(insideMargin),
         text = text,
         style = MiuixTheme.textStyles.subtitle,
-        color = resolvedColor
+        color = textColor
     )
 }

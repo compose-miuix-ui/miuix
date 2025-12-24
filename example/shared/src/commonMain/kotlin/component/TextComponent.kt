@@ -171,7 +171,6 @@ fun TextComponent(
                 Spacer(Modifier.width(8.dp))
                 Text(text = "Right2")
             },
-            onClick = {},
             enabled = true
         )
         BasicComponent(
@@ -364,6 +363,7 @@ fun TextComponent(
                     color = MiuixTheme.colorScheme.onSurfaceVariantActions
                 )
             },
+            onClick = {},
         )
         SuperArrow(
             title = "Arrow + Slider + Dialog",

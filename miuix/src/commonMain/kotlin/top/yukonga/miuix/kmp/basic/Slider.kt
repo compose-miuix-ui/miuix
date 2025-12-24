@@ -737,7 +737,8 @@ private fun SliderTrack(
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
                 val keyPointRadius = barWidth / 7.5f
-                stepFractions.forEach { stepFraction ->
+                for (i in stepFractions.indices) {
+                    val stepFraction = stepFractions[i]
                     val effectiveStep = if (reverseDirection) stepFraction else (1f - stepFraction)
                     val y = thumbRadius + effectiveStep * availableHeight
                     val kpColor = if (y >= centerY) keyPointForegroundColor else keyPointColor
@@ -769,7 +770,8 @@ private fun SliderTrack(
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
                 val keyPointRadius = barHeight / 7.5f
-                stepFractions.forEach { stepFraction ->
+                for (i in stepFractions.indices) {
+                    val stepFraction = stepFractions[i]
                     val effectiveStep = if (reverseDirection) 1f - stepFraction else stepFraction
                     val x = thumbRadius + effectiveStep * availableWidth
                     val kpColor = if (x <= centerX) keyPointForegroundColor else keyPointColor
@@ -846,7 +848,8 @@ private fun RangeSliderTrack(
 
         if (showKeyPoints && stepFractions.isNotEmpty()) {
             val keyPointRadius = SliderDefaults.KeyPointRadius.toPx()
-            stepFractions.forEach { stepFraction ->
+            for (i in stepFractions.indices) {
+                val stepFraction = stepFractions[i]
                 val x = thumbRadius + stepFraction * availableWidth
                 val kpColor = if (x in startX..endX) keyPointForegroundColor else keyPointColor
                 drawCircle(
@@ -942,15 +945,19 @@ internal class SliderHapticState {
         val fraction = (currentValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val threshold = 0.005f
 
-        val nearestKeyPoint = keyPointFractions.minByOrNull { abs(it - fraction) }
-        val currentlyAtKeyPoint = nearestKeyPoint != null && abs(fraction - nearestKeyPoint) < threshold
-
-        if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        }
-
-        isAtKeyPoint = currentlyAtKeyPoint
+    var nearestDist = Float.MAX_VALUE
+    for (i in keyPointFractions.indices) {
+        val dist = abs(keyPointFractions[i] - fraction)
+        if (dist < nearestDist) nearestDist = dist
     }
+    val currentlyAtKeyPoint = nearestDist < threshold
+
+    if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    }
+
+    isAtKeyPoint = currentlyAtKeyPoint
+}
 }
 
 /**
@@ -1068,8 +1075,12 @@ internal class RangeSliderHapticState {
                 val fraction = (currentValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                 val threshold = 0.005f
 
-                val nearestKeyPoint = keyPointFractions.minByOrNull { abs(it - fraction) }
-                val currentlyAtKeyPoint = nearestKeyPoint != null && abs(fraction - nearestKeyPoint) < threshold
+                var nearestDist = Float.MAX_VALUE
+                for (i in keyPointFractions.indices) {
+                    val dist = abs(keyPointFractions[i] - fraction)
+                    if (dist < nearestDist) nearestDist = dist
+                }
+                val currentlyAtKeyPoint = nearestDist < threshold
 
                 if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -1095,10 +1106,19 @@ private fun snapValueToTick(
     minPx: Float,
     maxPx: Float
 ): Float {
-    return tickFractions
-        .minByOrNull { abs(lerp(minPx, maxPx, it) - current) }
-        ?.run { lerp(minPx, maxPx, this) }
-        ?: current
+    if (tickFractions.isEmpty()) return current
+    var bestFraction = tickFractions[0]
+    var bestDist = abs(lerp(minPx, maxPx, bestFraction) - current)
+    for (i in 1 until tickFractions.size) {
+        val f = tickFractions[i]
+        val px = lerp(minPx, maxPx, f)
+        val dist = abs(px - current)
+        if (dist < bestDist) {
+            bestDist = dist
+            bestFraction = f
+        }
+    }
+    return lerp(minPx, maxPx, bestFraction)
 }
 
 private fun resolveValueFromFraction(
@@ -1114,8 +1134,17 @@ private fun resolveValueFromFraction(
     return when {
         steps > 0 -> snapValueToTick(base, stepFractions, valueRange.start, valueRange.endInclusive)
         allKeyPointFractions.isNotEmpty() -> {
-            val closest = allKeyPointFractions.minByOrNull { abs(it - f) }
-            if (closest != null && abs(f - closest) < magnetThreshold) {
+            var closest = allKeyPointFractions[0]
+            var bestDist = abs(closest - f)
+            for (i in 1 until allKeyPointFractions.size) {
+                val cand = allKeyPointFractions[i]
+                val dist = abs(cand - f)
+                if (dist < bestDist) {
+                    bestDist = dist
+                    closest = cand
+                }
+            }
+            if (bestDist < magnetThreshold) {
                 lerp(valueRange.start, valueRange.endInclusive, closest)
             } else base
         }
@@ -1235,7 +1264,7 @@ object SliderDefaults {
 }
 
 @Immutable
-class SliderColors(
+data class SliderColors(
     private val foregroundColor: Color,
     private val disabledForegroundColor: Color,
     private val backgroundColor: Color,

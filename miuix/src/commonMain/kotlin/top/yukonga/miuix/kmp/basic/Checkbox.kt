@@ -3,31 +3,28 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -40,7 +37,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
-import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.pressable
@@ -65,23 +61,65 @@ fun Checkbox(
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
     val hapticFeedback = LocalHapticFeedback.current
 
-    val targetBackgroundColor by remember(checked, enabled, colors) {
-        derivedStateOf { if (checked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled) }
-    }
-    val backgroundColorState = animateColorAsState(
-        targetValue = targetBackgroundColor,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-    )
+    val transition = updateTransition(checked, label = "CheckboxTransition")
 
-    val targetForegroundColor by remember(checked, enabled, colors) {
-        derivedStateOf { if (checked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled) }
+    val backgroundColor by transition.animateColor(
+        transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
+        label = "BackgroundColor"
+    ) {
+        if (it) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled)
     }
-    val foregroundColorState = animateColorAsState(
-        targetValue = targetForegroundColor,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-    )
 
-    val checkmarkAnim = rememberCheckmarkAnimationState(checked)
+    val foregroundColor by transition.animateColor(
+        transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
+        label = "ForegroundColor"
+    ) {
+        if (it) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled)
+    }
+
+    val checkAlpha by transition.animateFloat(
+        transitionSpec = {
+            if (targetState) {
+                tween(durationMillis = 10, easing = FastOutSlowInEasing)
+            } else {
+                tween(durationMillis = 150, easing = FastOutSlowInEasing)
+            }
+        },
+        label = "CheckAlpha"
+    ) { if (it) 1f else 0f }
+
+    val checkStartTrim by transition.animateFloat(
+        transitionSpec = {
+            if (targetState) {
+                tween(durationMillis = 200, easing = FastOutSlowInEasing)
+            } else {
+                keyframes {
+                    durationMillis = 300
+                    0.1f at 300
+                }
+            }
+        },
+        label = "CheckStartTrim"
+    ) { if (it) 0.186f else 0.1f }
+
+    val checkEndTrim by transition.animateFloat(
+        transitionSpec = {
+            if (targetState) {
+                keyframes {
+                    durationMillis = 300
+                    0.85f at 200 using FastOutSlowInEasing
+                    0.803f at 300 using FastOutSlowInEasing
+                }
+            } else {
+                keyframes {
+                    durationMillis = 300
+                    0.1f at 300
+                }
+            }
+        },
+        label = "CheckEndTrim"
+    ) { if (it) 0.803f else 0.1f }
+
     val checkPath = remember { Path() }
 
     val finalModifier = if (currentOnCheckedChange != null) {
@@ -116,99 +154,58 @@ fun Checkbox(
                 delay = null
             )
             .clip(ContinuousCapsule)
-            .drawBehind {
-                drawCircle(backgroundColorState.value)
+            .drawWithCache {
+                val viewportSize = 23f
+                val strokeWidth = size.width * 0.09f
+                val centerX = size.width / 2
+                val centerY = size.height / 2
+                val viewportCenterX = viewportSize / 2
+                val viewportCenterY = viewportSize / 2
+
+                val leftPoint = Offset(
+                    centerX + ((5f - viewportCenterX) / viewportSize * size.width),
+                    centerY + ((9.4f - viewportCenterY) / viewportSize * size.height)
+                )
+                val middlePoint = Offset(
+                    centerX + ((10.3f - viewportCenterX) / viewportSize * size.width),
+                    centerY + ((14.9f - viewportCenterY) / viewportSize * size.height)
+                )
+                val rightPoint = Offset(
+                    centerX + ((17.9f - viewportCenterX) / viewportSize * size.width),
+                    centerY + ((5.1f - viewportCenterY) / viewportSize * size.height)
+                )
+
+                val firstSegmentLength = (middlePoint - leftPoint).getDistance()
+                val secondSegmentLength = (rightPoint - middlePoint).getDistance()
+
+                val cache = CheckmarkCache(
+                    leftPoint, middlePoint, rightPoint,
+                    firstSegmentLength, secondSegmentLength, strokeWidth
+                )
+
+                onDrawBehind {
+                    drawCircle(backgroundColor)
+                    drawTrimmedCheckmark(
+                        color = foregroundColor,
+                        alpha = checkAlpha,
+                        trimStart = checkStartTrim,
+                        trimEnd = checkEndTrim,
+                        path = checkPath,
+                        cache = cache
+                    )
+                }
             }
-            .then(finalModifier),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.size(26.dp)) {
-            drawTrimmedCheckmark(
-                color = foregroundColorState.value,
-                alpha = checkmarkAnim.alpha.value,
-                trimStart = checkmarkAnim.startTrim.value,
-                trimEnd = checkmarkAnim.endTrim.value,
-                path = checkPath
-            )
-        }
-    }
+            .then(finalModifier)
+    ) {}
 }
 
-@Composable
-private fun rememberCheckmarkAnimationState(checked: Boolean): CheckmarkAnimationState {
-    val checkAlpha = remember { Animatable(if (checked) 1f else 0f) }
-    val checkStartTrim = remember { Animatable(0.1f) }
-    val checkEndTrim = remember { Animatable(if (checked) 0.803f else 0.1f) }
-
-    LaunchedEffect(checked) {
-        if (checked) {
-            launch {
-                checkAlpha.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(
-                        durationMillis = 10,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            }
-            launch {
-                checkStartTrim.animateTo(
-                    targetValue = 0.186f,
-                    animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            }
-            launch {
-                checkEndTrim.animateTo(
-                    targetValue = 0.803f,
-                    animationSpec = keyframes {
-                        durationMillis = 300
-                        0.85f at 200 using FastOutSlowInEasing
-                        0.803f at 300 using FastOutSlowInEasing
-                    }
-                )
-            }
-        } else {
-            launch {
-                checkAlpha.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            }
-            launch {
-                checkStartTrim.animateTo(
-                    targetValue = 0.1f,
-                    animationSpec = keyframes {
-                        durationMillis = 300
-                        0.1f at 300
-                    }
-                )
-            }
-            launch {
-                checkEndTrim.animateTo(
-                    targetValue = 0.1f,
-                    animationSpec = keyframes {
-                        durationMillis = 300
-                        0.1f at 300
-                    }
-                )
-            }
-        }
-    }
-    return remember(checkAlpha, checkStartTrim, checkEndTrim) {
-        CheckmarkAnimationState(checkAlpha, checkStartTrim, checkEndTrim)
-    }
-}
-
-private class CheckmarkAnimationState(
-    val alpha: Animatable<Float, *>,
-    val startTrim: Animatable<Float, *>,
-    val endTrim: Animatable<Float, *>
+private data class CheckmarkCache(
+    val leftPoint: Offset,
+    val middlePoint: Offset,
+    val rightPoint: Offset,
+    val firstSegmentLength: Float,
+    val secondSegmentLength: Float,
+    val strokeWidth: Float
 )
 
 private fun DrawScope.drawTrimmedCheckmark(
@@ -216,74 +213,45 @@ private fun DrawScope.drawTrimmedCheckmark(
     alpha: Float = 1f,
     trimStart: Float,
     trimEnd: Float,
-    path: Path
+    path: Path,
+    cache: CheckmarkCache
 ) {
-    val viewportSize = 23f
-    val strokeWidth = size.width * 0.09f
-
     path.rewind()
 
-    val centerX = size.width / 2
-    val centerY = size.height / 2
-    val viewportCenterX = viewportSize / 2
-    val viewportCenterY = viewportSize / 2
-
-    val leftPoint = Offset(
-        centerX + ((5f - viewportCenterX) / viewportSize * size.width),
-        centerY + ((9.4f - viewportCenterY) / viewportSize * size.height)
-    )
-    val middlePoint = Offset(
-        centerX + ((10.3f - viewportCenterX) / viewportSize * size.width),
-        centerY + ((14.9f - viewportCenterY) / viewportSize * size.height)
-    )
-    val rightPoint = Offset(
-        centerX + ((17.9f - viewportCenterX) / viewportSize * size.width),
-        centerY + ((5.1f - viewportCenterY) / viewportSize * size.height)
-    )
-
-    val firstSegmentLength = (middlePoint - leftPoint).getDistance()
-    val secondSegmentLength = (rightPoint - middlePoint).getDistance()
-    val totalLength = firstSegmentLength + secondSegmentLength
+    val totalLength = cache.firstSegmentLength + cache.secondSegmentLength
 
     val startDistance = totalLength * trimStart
     val endDistance = totalLength * trimEnd
 
-    if (startDistance < firstSegmentLength && endDistance > 0) {
-        val segStartRatio = (startDistance / firstSegmentLength).coerceIn(0f, 1f)
-        val segEndRatio = (endDistance / firstSegmentLength).coerceIn(0f, 1f)
+    if (startDistance < cache.firstSegmentLength && endDistance > 0) {
+        val segStartRatio = (startDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
+        val segEndRatio = (endDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
 
-        val start = Offset(
-            leftPoint.x + (middlePoint.x - leftPoint.x) * segStartRatio,
-            leftPoint.y + (middlePoint.y - leftPoint.y) * segStartRatio
-        )
-        val end = Offset(
-            leftPoint.x + (middlePoint.x - leftPoint.x) * segEndRatio,
-            leftPoint.y + (middlePoint.y - leftPoint.y) * segEndRatio
-        )
+        val startX = cache.leftPoint.x + (cache.middlePoint.x - cache.leftPoint.x) * segStartRatio
+        val startY = cache.leftPoint.y + (cache.middlePoint.y - cache.leftPoint.y) * segStartRatio
+        val endX = cache.leftPoint.x + (cache.middlePoint.x - cache.leftPoint.x) * segEndRatio
+        val endY = cache.leftPoint.y + (cache.middlePoint.y - cache.leftPoint.y) * segEndRatio
 
-        path.moveTo(start.x, start.y)
-        path.lineTo(end.x, end.y)
+        path.moveTo(startX, startY)
+        path.lineTo(endX, endY)
     }
 
-    if (endDistance > firstSegmentLength) {
-        val segStartRatio = ((startDistance - firstSegmentLength) / secondSegmentLength).coerceIn(0f, 1f)
-        val segEndRatio = ((endDistance - firstSegmentLength) / secondSegmentLength).coerceIn(0f, 1f)
+    if (endDistance > cache.firstSegmentLength) {
+        val segStartRatio = ((startDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
+        val segEndRatio = ((endDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
 
-        val start = Offset(
-            middlePoint.x + (rightPoint.x - middlePoint.x) * segStartRatio,
-            middlePoint.y + (rightPoint.y - middlePoint.y) * segStartRatio
-        )
-        val end = Offset(
-            middlePoint.x + (rightPoint.x - middlePoint.x) * segEndRatio,
-            middlePoint.y + (rightPoint.y - middlePoint.y) * segEndRatio
-        )
+        val startX = cache.middlePoint.x + (cache.rightPoint.x - cache.middlePoint.x) * segStartRatio
+        val startY = cache.middlePoint.y + (cache.rightPoint.y - cache.middlePoint.y) * segStartRatio
+        val endX = cache.middlePoint.x + (cache.rightPoint.x - cache.middlePoint.x) * segEndRatio
+        val endY = cache.middlePoint.y + (cache.rightPoint.y - cache.middlePoint.y) * segEndRatio
 
-        if (startDistance < firstSegmentLength) {
-            path.lineTo(end.x, end.y)
+        if (startDistance < cache.firstSegmentLength) {
+            path.lineTo(endX, endY)
         } else {
-            path.moveTo(start.x, start.y)
+            path.moveTo(startX, startY)
+            path.lineTo(endX, endY)
         }
-        path.lineTo(end.x, end.y)
+        path.lineTo(endX, endY)
     }
 
     drawPath(
@@ -291,7 +259,7 @@ private fun DrawScope.drawTrimmedCheckmark(
         color = color,
         alpha = alpha,
         style = Stroke(
-            width = strokeWidth,
+            width = cache.strokeWidth,
             cap = StrokeCap.Round,
             join = StrokeJoin.Round,
             miter = 10.0f,
@@ -323,7 +291,7 @@ object CheckboxDefaults {
 }
 
 @Immutable
-class CheckboxColors(
+data class CheckboxColors(
     private val checkedForegroundColor: Color,
     private val uncheckedForegroundColor: Color,
     private val disabledCheckedForegroundColor: Color,

@@ -125,7 +125,7 @@ fun DropdownImpl(
 }
 
 @Immutable
-class DropdownColors(
+data class DropdownColors(
     val contentColor: Color,
     val containerColor: Color,
     val selectedContentColor: Color,

@@ -12,7 +12,7 @@ import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -674,7 +674,9 @@ private fun TopAppBarLayout(
                 } else Modifier
             )
             .clipToBounds()
-            .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } }
+            .pointerInput(Unit) {
+                detectTapGestures { /* Consume click */ }
+            }
     ) { measurables, constraints ->
         val navigationIconPlaceable =
             measurables
@@ -829,7 +831,9 @@ private fun SmallTopAppBarLayout(
         modifier = modifier
             .then(layoutModifier)
             .heightIn(max = 56.dp)
-            .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } }
+            .pointerInput(Unit) {
+                detectTapGestures { /* Consume click */ }
+            }
     ) { measurables, constraints ->
         val navigationIconPlaceable =
             measurables

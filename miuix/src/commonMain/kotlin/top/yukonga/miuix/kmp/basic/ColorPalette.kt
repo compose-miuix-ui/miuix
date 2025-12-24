@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -101,9 +100,9 @@ fun ColorPalette(
             k.roundToInt().coerceIn(0, hueColumns - 1)
         }
         val row = if (isGray) {
-            grayV.indexOfMinBy { rv -> sq(v - rv) }
+            indexOfNearestGrayV(v, grayV)
         } else {
-            rowSV.indexOfMinBy { (rs, rv) -> sq(s - rs) + sq(v - rv) }
+            indexOfNearestRowSV(s, v, rowSV)
         }
         selectedCol = col
         selectedRow = row
@@ -128,8 +127,8 @@ fun ColorPalette(
             )
         }
 
-        val baseColor by remember(selectedRow, selectedCol, rows, hueColumns, includeGrayColumn) {
-            derivedStateOf { cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn) }
+        val baseColor = remember(selectedRow, selectedCol, rows, hueColumns, includeGrayColumn) {
+            cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn)
         }
 
         PaletteCanvas(
@@ -140,6 +139,8 @@ fun ColorPalette(
             indicatorRadius = indicatorRadius,
             selectedRow = selectedRow,
             selectedCol = selectedCol,
+            rowSV = rowSV,
+            grayV = grayV,
             onSelect = { r, c ->
                 selectedRow = r
                 selectedCol = c
@@ -181,12 +182,12 @@ private fun PaletteCanvas(
     indicatorRadius: Dp,
     selectedRow: Int,
     selectedCol: Int,
+    rowSV: List<Pair<Float, Float>>,
+    grayV: List<Float>,
     onSelect: (row: Int, col: Int) -> Unit,
 ) {
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
-    val rowSV = remember(rows) { buildRowSV(rows) }
-    val grayV = remember(rows) { buildGrayV(rows) }
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
 
     var sizePx by remember { mutableStateOf(IntSize.Zero) }
@@ -216,30 +217,13 @@ private fun PaletteCanvas(
             .fillMaxWidth()
             .height(180.dp)
     ) {
-        Canvas(Modifier.fillMaxSize()) {
-            val w = size.width.toInt()
-            val h = size.height.toInt()
-
-            val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
-            val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-
-            for (r in 0 until rows) {
-                val top = rowEdges[r].toFloat()
-                val bottom = rowEdges[r + 1].toFloat()
-                val cellH = bottom - top
-                for (c in 0 until totalColumns) {
-                    val left = colEdges[c].toFloat()
-                    val right = colEdges[c + 1].toFloat()
-                    val cellW = right - left
-                    val color = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
-                    drawRect(
-                        color = color,
-                        topLeft = Offset(left, top),
-                        size = Size(cellW, cellH)
-                    )
-                }
-            }
-        }
+        PaletteGrid(
+            rows = rows,
+            hueColumns = hueColumns,
+            includeGrayColumn = includeGrayColumn,
+            rowSV = rowSV,
+            grayV = grayV
+        )
 
         if (sizePx.width > 0 && sizePx.height > 0) {
             val w = sizePx.width
@@ -262,7 +246,7 @@ private fun PaletteCanvas(
                         y = with(density) { cyPx.toDp() - indicatorSize / 2 }
                     )
                     .size(indicatorSize)
-                    .drawBehind {
+                    .drawWithCache {
                         val strokeWidth = 6.dp.toPx()
                         val halfStroke = strokeWidth / 2f
                         val glowSpread = 2.dp.toPx()
@@ -278,22 +262,58 @@ private fun PaletteCanvas(
                                 ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
                                 ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
                             ).toTypedArray(),
-                            center = center,
                             radius = gradientRadius
                         )
 
-                        drawCircle(
-                            brush = glowBrush,
-                            radius = gradientRadius
-                        )
+                        onDrawBehind {
+                            drawCircle(
+                                brush = glowBrush,
+                                radius = gradientRadius
+                            )
 
-                        drawCircle(
-                            color = Color.White,
-                            radius = ringCenterRadius,
-                            style = Stroke(width = strokeWidth)
-                        )
+                            drawCircle(
+                                color = Color.White,
+                                radius = ringCenterRadius,
+                                style = Stroke(width = strokeWidth)
+                            )
+                        }
                     }
             )
+        }
+    }
+}
+
+@Composable
+private fun PaletteGrid(
+    rows: Int,
+    hueColumns: Int,
+    includeGrayColumn: Boolean,
+    rowSV: List<Pair<Float, Float>>,
+    grayV: List<Float>,
+) {
+    val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width.toInt()
+        val h = size.height.toInt()
+
+        val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
+        val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
+
+        for (r in 0 until rows) {
+            val top = rowEdges[r].toFloat()
+            val bottom = rowEdges[r + 1].toFloat()
+            val cellH = bottom - top
+            for (c in 0 until totalColumns) {
+                val left = colEdges[c].toFloat()
+                val right = colEdges[c + 1].toFloat()
+                val cellW = right - left
+                val color = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
+                drawRect(
+                    color = color,
+                    topLeft = Offset(left, top),
+                    size = Size(cellW, cellH)
+                )
+            }
         }
     }
 }
@@ -363,14 +383,39 @@ private fun hsvEqualApprox(
     return dh <= epsH && abs(a.second - b.second) <= eps && abs(a.third - b.third) <= eps
 }
 
-private fun <T> List<T>.indexOfMinBy(selector: (T) -> Float): Int {
+private fun indexOfNearestGrayV(targetV: Float, grayV: List<Float>): Int {
     var idx = 0
     var minVal = Float.POSITIVE_INFINITY
-    for (i in indices) {
-        val v = selector(this[i])
+    var i = 0
+    val n = grayV.size
+    while (i < n) {
+        val diff = targetV - grayV[i]
+        val v = diff * diff
         if (v < minVal) {
-            minVal = v; idx = i
+            minVal = v
+            idx = i
         }
+        i++
+    }
+    return idx
+}
+
+private fun indexOfNearestRowSV(targetS: Float, targetV: Float, rowSV: List<Pair<Float, Float>>): Int {
+    var idx = 0
+    var minVal = Float.POSITIVE_INFINITY
+    var i = 0
+    val n = rowSV.size
+    while (i < n) {
+        val s = rowSV[i].first
+        val v = rowSV[i].second
+        val ds = targetS - s
+        val dv = targetV - v
+        val d = ds * ds + dv * dv
+        if (d < minVal) {
+            minVal = d
+            idx = i
+        }
+        i++
     }
     return idx
 }

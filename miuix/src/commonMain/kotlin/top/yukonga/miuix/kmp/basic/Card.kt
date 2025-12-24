@@ -15,14 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -108,8 +106,8 @@ fun Card(
         }
     }
 
-    val usedInteractionSource by remember(pressFeedback) {
-        derivedStateOf { if (pressFeedback != null) interactionSource else null }
+    val usedInteractionSource = remember(pressFeedback) {
+        if (pressFeedback != null) interactionSource else null
     }
     val indicationLocal = LocalIndication.current
     val indicationToUse = remember(showIndication, indicationLocal) {
@@ -202,15 +200,7 @@ object CardDefaults {
 }
 
 @Immutable
-class CardColors(
+data class CardColors(
     val color: Color,
     val contentColor: Color
-) {
-    fun copy(
-        color: Color = this.color,
-        contentColor: Color = this.contentColor,
-    ) = CardColors(
-        color.takeOrElse { this.color },
-        contentColor.takeOrElse { this.contentColor },
-    )
-}
+)

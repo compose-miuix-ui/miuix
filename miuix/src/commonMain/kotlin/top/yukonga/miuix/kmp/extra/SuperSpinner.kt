@@ -484,28 +484,7 @@ fun SpinnerItemImpl(
     }
 }
 
-/**
- * The spinner entry.
- */
-data class SpinnerEntry(
-    val icon: @Composable ((Modifier) -> Unit)? = null,
-    val title: String? = null,
-    val summary: String? = null
-)
-
-@Immutable
-class SpinnerColors(
-    val contentColor: Color,
-    val summaryColor: Color,
-    val containerColor: Color,
-    val selectedContentColor: Color,
-    val selectedSummaryColor: Color,
-    val selectedContainerColor: Color,
-    val selectedIndicatorColor: Color
-)
-
 object SpinnerDefaults {
-
     @Composable
     fun spinnerColors(
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
@@ -548,3 +527,23 @@ object SpinnerDefaults {
         )
     }
 }
+
+@Immutable
+data class SpinnerColors(
+    val contentColor: Color,
+    val summaryColor: Color,
+    val containerColor: Color,
+    val selectedContentColor: Color,
+    val selectedSummaryColor: Color,
+    val selectedContainerColor: Color,
+    val selectedIndicatorColor: Color
+)
+
+/**
+ * The spinner entry.
+ */
+data class SpinnerEntry(
+    val icon: @Composable ((Modifier) -> Unit)? = null,
+    val title: String? = null,
+    val summary: String? = null
+)

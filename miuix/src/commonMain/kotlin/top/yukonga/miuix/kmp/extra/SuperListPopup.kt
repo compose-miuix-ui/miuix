@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -20,7 +21,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -45,7 +45,6 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param popupPositionProvider The [PopupPositionProvider] of the [SuperListPopup].
  * @param alignment The alignment of the [SuperListPopup].
  * @param enableWindowDim Whether to enable window dimming when the [SuperListPopup] is shown.
- * @param shadowElevation The elevation of the shadow of the [SuperListPopup].
  * @param onDismissRequest The callback when the [SuperListPopup] is dismissed.
  * @param maxHeight The maximum height of the [SuperListPopup]. If null, the height will be calculated automatically.
  * @param minWidth The minimum width of the [SuperListPopup].
@@ -59,7 +58,6 @@ fun SuperListPopup(
     popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Right,
     enableWindowDim: Boolean = true,
-    shadowElevation: Dp = 11.dp,
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
@@ -91,7 +89,7 @@ fun SuperListPopup(
     val windowSize = getWindowSize()
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
 
-    Layout(
+    Spacer(
         modifier = Modifier
             .onGloballyPositioned { childCoordinates ->
                 childCoordinates.parentLayoutCoordinates?.let { parentLayoutCoordinates ->
@@ -104,7 +102,7 @@ fun SuperListPopup(
                     )
                 }
             }
-    ) { _, _ -> layout(0, 0) {} }
+    )
 
     if (parentBounds == IntRect.Zero) return
 
@@ -130,14 +128,15 @@ fun SuperListPopup(
                     )
                 }
                 .layout { measurable, constraints ->
+                    val minWidthPx = minWidth.roundToPx().coerceAtMost(windowSize.width)
                     val placeable = measurable.measure(
                         constraints.copy(
-                            minWidth = if (minWidth.roundToPx() <= windowSize.width) minWidth.roundToPx() else windowSize.width,
+                            minWidth = minWidthPx,
                             minHeight = if (50.dp.roundToPx() <= windowSize.height) 50.dp.roundToPx() else windowSize.height,
                             maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
                                 ?: (layoutInfo.windowBounds.height - layoutInfo.popupMargin.top - layoutInfo.popupMargin.bottom)
                                     .coerceAtLeast(50.dp.roundToPx()),
-                            maxWidth = if (minWidth.roundToPx() <= windowSize.width) windowSize.width else minWidth.roundToPx()
+                            maxWidth = windowSize.width
                         )
                     )
                     val measuredSize = IntSize(placeable.width, placeable.height)

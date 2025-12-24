@@ -27,7 +27,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -53,30 +54,36 @@ fun ListPopupColumn(
 ) {
     val scrollState = rememberScrollState()
 
-    SubcomposeLayout(
+    Layout(
+        content = content,
         modifier = Modifier.verticalScroll(scrollState)
-    ) { constraints ->
+    ) { measurables, constraints ->
         var listHeight = 0
-        val tempConstraints = constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
+        constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
 
         // Measure pass to find the widest item
-        val listWidth = subcompose("miuixPopupListFake", content).map {
-            it.measure(tempConstraints)
-        }.maxOfOrNull { it.width }?.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx()) ?: 200.dp.roundToPx()
+        var maxWidth = 0
+        measurables.forEach { measurable ->
+            val w = measurable.maxIntrinsicWidth(constraints.maxHeight)
+            if (w > maxWidth) maxWidth = w
+        }
+        val listWidth = maxWidth.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx())
 
         val childConstraints = constraints.copy(minWidth = listWidth, maxWidth = listWidth, minHeight = 0)
 
         // Actual measure and layout pass
-        val placeables = subcompose("miuixPopupListReal", content).map {
-            val placeable = it.measure(childConstraints)
-            listHeight += placeable.height
-            placeable
+        val placeables = ArrayList<Placeable>(measurables.size)
+        measurables.forEach { measurable ->
+            val p = measurable.measure(childConstraints)
+            listHeight += p.height
+            placeables.add(p)
         }
+
         layout(listWidth, min(constraints.maxHeight, listHeight)) {
             var currentY = 0
-            placeables.forEach {
-                it.place(0, currentY)
-                currentY += it.height
+            placeables.forEach { p ->
+                p.placeRelative(0, currentY)
+                currentY += p.height
             }
         }
     }

@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -32,7 +33,6 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -63,7 +63,6 @@ import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
  * @param popupPositionProvider The [PopupPositionProvider] of the [WindowListPopup].
  * @param alignment The alignment of the [WindowListPopup].
  * @param enableWindowDim Whether to enable window dimming when the [WindowListPopup] is shown.
- * @param shadowElevation The elevation of the shadow of the [WindowListPopup].
  * @param onDismissRequest The callback when the [WindowListPopup] is dismissed.
  * @param maxHeight The maximum height of the [WindowListPopup]. If null, the height will be calculated automatically.
  * @param minWidth The minimum width of the [WindowListPopup].
@@ -77,7 +76,6 @@ fun WindowListPopup(
     popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Right,
     enableWindowDim: Boolean = true,
-    shadowElevation: Dp = 11.dp,
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
@@ -123,7 +121,7 @@ fun WindowListPopup(
     val windowSize = getWindowSize()
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
 
-    Layout(
+    Spacer(
         modifier = Modifier
             .onGloballyPositioned { childCoordinates ->
                 childCoordinates.parentLayoutCoordinates?.let { parentLayoutCoordinates ->
@@ -136,7 +134,7 @@ fun WindowListPopup(
                     )
                 }
             }
-    ) { _, _ -> layout(0, 0) {} }
+    )
 
     if (parentBounds == IntRect.Zero) return
 
@@ -209,15 +207,16 @@ fun WindowListPopup(
                         )
                     }
                     .layout { measurable, constraints ->
+                        val minWidthPx = minWidth.roundToPx().coerceAtMost(windowSize.width)
                         val placeable = measurable.measure(
                             constraints.copy(
-                                minWidth = if (minWidth.roundToPx() <= windowSize.width) minWidth.roundToPx() else windowSize.width,
+                                minWidth = minWidthPx,
                                 minHeight = if (50.dp.roundToPx() <= windowSize.height) 50.dp.roundToPx() else windowSize.height,
                                 maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
                                     ?: (layoutInfo.windowBounds.height - layoutInfo.popupMargin.top - layoutInfo.popupMargin.bottom).coerceAtLeast(
                                         50.dp.roundToPx()
                                     ),
-                                maxWidth = if (minWidth.roundToPx() <= windowSize.width) windowSize.width else minWidth.roundToPx()
+                                maxWidth = windowSize.width
                             )
                         )
                         val measuredSize = IntSize(placeable.width, placeable.height)

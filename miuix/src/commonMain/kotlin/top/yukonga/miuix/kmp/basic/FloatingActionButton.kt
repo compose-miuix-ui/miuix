@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,10 +43,8 @@ fun FloatingActionButton(
     minHeight: Dp = 60.dp,
     content: @Composable () -> Unit,
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
-
     Surface(
-        onClick = currentOnClick,
+        onClick = onClick,
         modifier = modifier
             .semantics { role = Role.Button },
         shape = shape,

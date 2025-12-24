@@ -11,13 +11,11 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.toggleable
@@ -111,7 +109,7 @@ fun Switch(
             },
             enabled = enabled,
             role = Role.Switch,
-            interactionSource = null,
+            interactionSource = interactionSource,
             indication = null
         )
     } else {
@@ -122,7 +120,6 @@ fun Switch(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
             .size(49.dp, 28.dp)
-            .requiredSize(49.dp, 28.dp)
             .clip(ContinuousCapsule)
             .drawBehind {
                 drawRect(backgroundColor)
@@ -146,8 +143,6 @@ fun Switch(
                     awaitPointerEventScope {
                         while (true) {
                             val down = awaitFirstDown()
-                            val pressInteraction = PressInteraction.Press(down.position)
-                            interactionSource.tryEmit(pressInteraction)
 
                             var startedDrag = false
                             val dragInteraction = DragInteraction.Start()
@@ -160,7 +155,17 @@ fun Switch(
 
                             while (true) {
                                 val event = awaitPointerEvent()
-                                val change = event.changes.find { it.id == pointerId } ?: event.changes.first()
+                                var idx = -1
+                                val total = event.changes.size
+                                var j = 0
+                                while (j < total) {
+                                    if (event.changes[j].id == pointerId) {
+                                        idx = j
+                                        break
+                                    }
+                                    j++
+                                }
+                                val change = if (idx >= 0) event.changes[idx] else event.changes[0]
 
                                 if (!change.pressed) {
                                     if (startedDrag) {
@@ -174,7 +179,6 @@ fun Switch(
                                         }
                                         interactionSource.tryEmit(DragInteraction.Stop(dragInteraction))
                                     }
-                                    interactionSource.tryEmit(PressInteraction.Cancel(pressInteraction))
                                     dragOffset = 0f
                                     break
                                 }
@@ -192,7 +196,6 @@ fun Switch(
                                     val touchSlop = viewConfiguration.touchSlop
 
                                     if (absY > touchSlop && absY > absX) {
-                                        interactionSource.tryEmit(PressInteraction.Cancel(pressInteraction))
                                         dragOffset = 0f
                                         break
                                     }
@@ -267,7 +270,7 @@ object SwitchDefaults {
 }
 
 @Immutable
-class SwitchColors(
+data class SwitchColors(
     private val checkedThumbColor: Color,
     private val uncheckedThumbColor: Color,
     private val disabledCheckedThumbColor: Color,

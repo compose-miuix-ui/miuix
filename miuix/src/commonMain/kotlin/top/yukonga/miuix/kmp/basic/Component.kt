@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,20 +79,18 @@ fun BasicComponent(
         interactionSource = interactionSource,
     ) {
         if (title != null) {
-            val titleTextColor by remember(enabled, titleColor) { derivedStateOf { titleColor.color(enabled) } }
             Text(
                 text = title,
                 fontSize = MiuixTheme.textStyles.headline1.fontSize,
                 fontWeight = FontWeight.Medium,
-                color = titleTextColor
+                color = titleColor.color(enabled)
             )
         }
         if (summary != null) {
-            val summaryTextColor by remember(enabled, summaryColor) { derivedStateOf { summaryColor.color(enabled) } }
             Text(
                 text = summary,
                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                color = summaryTextColor
+                color = summaryColor.color(enabled)
             )
         }
     }
@@ -225,9 +222,9 @@ object BasicComponentDefaults {
 }
 
 @Immutable
-class BasicComponentColors(
-    private val color: Color,
-    private val disabledColor: Color
+data class BasicComponentColors(
+    val color: Color,
+    val disabledColor: Color
 ) {
     @Stable
     internal fun color(enabled: Boolean): Color = if (enabled) color else disabledColor
