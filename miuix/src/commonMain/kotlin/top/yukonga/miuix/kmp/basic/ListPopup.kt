@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.navigationBars
@@ -18,21 +17,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Outline.Generic
+import androidx.compose.ui.graphics.Outline.Rectangle
+import androidx.compose.ui.graphics.Outline.Rounded
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -41,8 +41,11 @@ import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.WindowSize
+import kotlin.math.abs
 import kotlin.math.min
 
+private const val MAX_ITEMS_FOR_WIDTH = 8
+private const val MAX_ITEMS_FOR_HEIGHT = 8
 
 /**
  * A column that automatically aligns the width to the widest item
@@ -58,12 +61,11 @@ fun ListPopupColumn(
         content = content,
         modifier = Modifier.verticalScroll(scrollState)
     ) { measurables, constraints ->
-        var listHeight = 0
         constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
 
         // Measure pass to find the widest item
         var maxWidth = 0
-        measurables.forEach { measurable ->
+        measurables.take(min(MAX_ITEMS_FOR_WIDTH, measurables.size)).forEach { measurable ->
             val w = measurable.maxIntrinsicWidth(constraints.maxHeight)
             if (w > maxWidth) maxWidth = w
         }
@@ -75,9 +77,9 @@ fun ListPopupColumn(
         val placeables = ArrayList<Placeable>(measurables.size)
         measurables.forEach { measurable ->
             val p = measurable.measure(childConstraints)
-            listHeight += p.height
             placeables.add(p)
         }
+        val listHeight = placeables.take(min(MAX_ITEMS_FOR_HEIGHT, placeables.size)).sumOf { it.height }
 
         layout(listWidth, min(constraints.maxHeight, listHeight)) {
             var currentY = 0
@@ -265,10 +267,10 @@ fun rememberListPopupLayoutInfo(
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val displayCutout = WindowInsets.displayCutout.asPaddingValues()
-    val statusBars = WindowInsets.statusBars.asPaddingValues()
-    val navigationBars = WindowInsets.navigationBars.asPaddingValues()
-    val captionBar = WindowInsets.captionBar.asPaddingValues()
+    val displayCutout = WindowInsets.displayCutout
+    val statusBars = WindowInsets.statusBars
+    val navigationBars = WindowInsets.navigationBars
+    val captionBar = WindowInsets.captionBar
 
     val popupMargin = remember(windowSize, layoutDirection, density, popupPositionProvider) {
         with(density) {
@@ -282,16 +284,15 @@ fun rememberListPopupLayoutInfo(
     }
 
     val windowBounds = remember(
-        windowSize, layoutDirection, displayCutout,
-        statusBars, navigationBars, captionBar, density
+        windowSize, layoutDirection, density,
+        displayCutout, statusBars, navigationBars, captionBar
     ) {
         with(density) {
             IntRect(
-                left = displayCutout.calculateLeftPadding(layoutDirection).roundToPx(),
-                top = statusBars.calculateTopPadding().roundToPx(),
-                right = windowSize.width - displayCutout.calculateRightPadding(layoutDirection).roundToPx(),
-                bottom = windowSize.height - navigationBars.calculateBottomPadding().roundToPx()
-                        - captionBar.calculateBottomPadding().roundToPx()
+                left = displayCutout.getLeft(this, layoutDirection),
+                top = statusBars.getTop(this),
+                right = windowSize.width - displayCutout.getRight(this, layoutDirection),
+                bottom = windowSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this)
             )
         }
     }
@@ -317,25 +318,55 @@ fun rememberListPopupLayoutInfo(
         )
     }
 
+    val calculatedOffset = remember(
+        popupContentSize,
+        windowBounds,
+        parentBounds,
+        alignment,
+        layoutDirection,
+        popupMargin,
+        popupPositionProvider
+    ) {
+        if (popupContentSize == IntSize.Zero) {
+            IntOffset.Zero
+        } else {
+            popupPositionProvider.calculatePosition(
+                parentBounds,
+                windowBounds,
+                layoutDirection,
+                popupContentSize,
+                popupMargin,
+                alignment
+            )
+        }
+    }
+
     val popupLayoutInfo = remember(
         popupContentSize,
         windowBounds,
         parentBounds,
-        alignment
+        alignment,
+        calculatedOffset
     ) {
-        val isRightAligned = when (alignment) {
-            PopupPositionProvider.Align.Right,
-            PopupPositionProvider.Align.TopRight,
-            PopupPositionProvider.Align.BottomRight -> true
-
-            else -> false
-        }
-
         if (popupContentSize == IntSize.Zero) {
+            val isRightAligned = when (alignment) {
+                PopupPositionProvider.Align.Right,
+                PopupPositionProvider.Align.TopRight,
+                PopupPositionProvider.Align.BottomRight -> true
+
+                else -> false
+            }
             Triple(false, false, isRightAligned)
         } else {
-            val showBelow = (windowBounds.bottom - parentBounds.bottom) > popupContentSize.height
-            val showAbove = (parentBounds.top - windowBounds.top) > popupContentSize.height
+            val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
+            val anchorCenterY = parentBounds.top + parentBounds.height / 2
+            val showBelow = popupCenterY > anchorCenterY
+            val showAbove = popupCenterY < anchorCenterY
+
+            val distLeft = abs(calculatedOffset.x - parentBounds.left)
+            val distRight = abs((calculatedOffset.x + popupContentSize.width) - parentBounds.right)
+            val isRightAligned = distRight < distLeft
+
             Triple(showBelow, showAbove, isRightAligned)
         }
     }
@@ -348,35 +379,20 @@ fun rememberListPopupLayoutInfo(
         popupMargin,
         parentBounds,
         windowBounds,
-        popupPositionProvider
+        popupPositionProvider,
+        calculatedOffset,
+        popupLayoutInfo
     ) {
         if (popupContentSize == IntSize.Zero) {
             predictedTransformOrigin
         } else {
-            val calculatedOffset = popupPositionProvider.calculatePosition(
-                parentBounds,
-                windowBounds,
-                layoutDirection,
-                popupContentSize,
-                popupMargin,
-                alignment
-            )
-
-            val isRightAligned = when (alignment) {
-                PopupPositionProvider.Align.Right,
-                PopupPositionProvider.Align.TopRight,
-                PopupPositionProvider.Align.BottomRight -> true
-
-                else -> false
-            }
+            val (showBelow, showAbove, isRightAligned) = popupLayoutInfo
             val cornerX = if (isRightAligned) {
                 (calculatedOffset.x + popupContentSize.width).toFloat()
             } else {
                 calculatedOffset.x.toFloat()
             }
 
-            val showBelow = (windowBounds.bottom - parentBounds.bottom) > popupContentSize.height
-            val showAbove = (parentBounds.top - windowBounds.top) > popupContentSize.height
             val showMiddle = !showBelow && !showAbove
             val topLeftY = calculatedOffset.y
             val cornerY = when {
@@ -430,77 +446,8 @@ fun ListPopupContent(
     val density = LocalDensity.current
     val shadowColor = MiuixTheme.colorScheme.windowDimming
 
-    val startRadiusPx = with(density) { 4.dp.toPx() }
-    val endRadiusPx = with(density) { 16.dp.toPx() }
-
-    val clipShape = remember(popupContentSize, density, popupLayoutInfo) {
-        val (showBelow, showAbove, isRightAligned) = popupLayoutInfo
-        object : Shape {
-            val path = Path()
-
-            override fun createOutline(
-                size: Size,
-                layoutDirection: LayoutDirection,
-                density: Density
-            ): Outline {
-                val progress = animationProgress()
-                val currentRadiusPx = startRadiusPx + (endRadiusPx - startRadiusPx) * progress
-                val currentWidth = size.width
-                val currentHeight = size.height
-                val unscaledVisibleWidth = if (currentWidth > 0) {
-                    (currentWidth * 0.15f) + (currentWidth - (currentWidth * 0.15f)) * progress
-                } else 0f
-                val unscaledVisibleHeight = if (currentWidth > 0) {
-                    val startRatio = 0.2f
-                    val endRatio = currentHeight / currentWidth
-                    val currentRatio = startRatio + (endRatio - startRatio) * progress
-                    unscaledVisibleWidth * currentRatio
-                } else 0f
-
-                val (left, right) = if (isRightAligned) {
-                    currentWidth - unscaledVisibleWidth to currentWidth
-                } else {
-                    0f to unscaledVisibleWidth
-                }
-
-                val (top, bottom) = when {
-                    showBelow -> 0f to unscaledVisibleHeight
-                    showAbove -> currentHeight - unscaledVisibleHeight to currentHeight
-                    else -> (currentHeight - unscaledVisibleHeight) / 2f to (currentHeight + unscaledVisibleHeight) / 2f
-                }
-
-                val currentRadiusDp = with(density) { currentRadiusPx.toDp() }
-                val shape = ContinuousRoundedRectangle(currentRadiusDp)
-                val rectSize = Size(right - left, bottom - top)
-                return when (val outline = shape.createOutline(rectSize, layoutDirection, density)) {
-                    is Outline.Generic -> {
-                        path.reset()
-                        path.addPath(outline.path, Offset(left, top))
-                        Outline.Generic(path)
-                    }
-
-                    is Outline.Rounded -> {
-                        val r = outline.roundRect
-                        Outline.Rounded(
-                            RoundRect(
-                                left = r.left + left,
-                                top = r.top + top,
-                                right = r.right + left,
-                                bottom = r.bottom + top,
-                                topLeftCornerRadius = r.topLeftCornerRadius,
-                                topRightCornerRadius = r.topRightCornerRadius,
-                                bottomRightCornerRadius = r.bottomRightCornerRadius,
-                                bottomLeftCornerRadius = r.bottomLeftCornerRadius
-                            )
-                        )
-                    }
-
-                    is Outline.Rectangle -> {
-                        Outline.Rectangle(outline.rect.translate(left, top))
-                    }
-                }
-            }
-        }
+    val shape = remember(density) {
+        ContinuousRoundedRectangle(16.dp)
     }
 
     Box(
@@ -509,27 +456,84 @@ fun ListPopupContent(
                 val size = coordinates.size
                 if (popupContentSize != size) onPopupContentSizeChange(size)
             }
-            .dropShadow(
-                shape = clipShape,
-                block = {
-                    this.radius = 70f
-                    this.alpha = 0.4f * animationProgress()
-                    this.color = shadowColor
-                }
-            )
             .graphicsLayer {
-                this.clip = true
-                this.shape = clipShape
+                val progress = animationProgress()
+                val scale = 0.15f + 0.85f * progress
+                scaleX = scale
+                scaleY = scale
+                alpha = progress
+                transformOrigin = localTransformOrigin
             }
-            .background(MiuixTheme.colorScheme.surfaceContainer, clipShape)
     ) {
+        // Shadow Layer
         Box(
-            modifier = Modifier.graphicsLayer {
-                val scale = 0.15f + 0.85f * animationProgress()
-                this.scaleX = scale
-                this.scaleY = scale
-                this.transformOrigin = localTransformOrigin
-            }
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    val progress = animationProgress()
+                    val (showBelow, showAbove, _) = popupLayoutInfo
+
+                    scaleY = progress
+                    transformOrigin = when {
+                        showBelow -> TransformOrigin(0.5f, 0f)
+                        showAbove -> TransformOrigin(0.5f, 1f)
+                        else -> TransformOrigin(0.5f, 0.5f)
+                    }
+                }
+                .dropShadow(
+                    shape = shape,
+                    block = {
+                        this.radius = 70f
+                        this.alpha = 0.4f
+                        this.color = shadowColor
+                    }
+                )
+        )
+
+        // Content Layer
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    this.shape = shape
+                    clip = true
+                }
+                .drawWithContent {
+                    val progress = animationProgress()
+                    val (showBelow, showAbove, _) = popupLayoutInfo
+                    val size = this.size
+
+                    val clipTop = when {
+                        showAbove -> size.height * (1f - progress)
+                        else -> 0f
+                    }
+                    val clipBottom = when {
+                        showBelow -> size.height * progress
+                        showAbove -> size.height
+                        else -> size.height * (0.5f + 0.5f * progress)
+                    }
+                    val clipStart = if (!showBelow && !showAbove) size.height * (0.5f - 0.5f * progress) else clipTop
+                    val currentHeight = clipBottom - clipStart
+
+                    if (currentHeight > 0f) {
+                        val visibleSize = Size(size.width, currentHeight)
+                        val outline = shape.createOutline(visibleSize, layoutDirection, density)
+
+                        translate(top = clipStart) {
+                            val path = when (outline) {
+                                is Rectangle -> Path().apply { addRect(outline.rect) }
+                                is Rounded -> Path().apply { addRoundRect(outline.roundRect) }
+                                is Generic -> outline.path
+                            }
+
+                            clipPath(path) {
+                                translate(top = -clipStart) {
+                                    this@drawWithContent.drawContent()
+                                }
+                            }
+                        }
+                    }
+                }
+                .background(MiuixTheme.colorScheme.surfaceContainer, shape)
         ) {
             content()
         }

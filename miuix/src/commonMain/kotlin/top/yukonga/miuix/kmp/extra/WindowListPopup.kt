@@ -208,14 +208,22 @@ fun WindowListPopup(
                     }
                     .layout { measurable, constraints ->
                         val minWidthPx = minWidth.roundToPx().coerceAtMost(windowSize.width)
+                        val classicMinHeightPx = with(density) { (((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2) }
+                        val safeWindowMaxHeightPx = with(density) { 416.dp.roundToPx() }
+                        val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
+                        val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
+                        val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
+                        val finalMaxHeightPx = listOf(
+                            maxHeight?.roundToPx() ?: Int.MAX_VALUE,
+                            safeWindowMaxHeightPx,
+                            sideConstrainedMax,
+                            windowSize.height
+                        ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowSize.height))
                         val placeable = measurable.measure(
                             constraints.copy(
                                 minWidth = minWidthPx,
-                                minHeight = if (50.dp.roundToPx() <= windowSize.height) 50.dp.roundToPx() else windowSize.height,
-                                maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
-                                    ?: (layoutInfo.windowBounds.height - layoutInfo.popupMargin.top - layoutInfo.popupMargin.bottom).coerceAtLeast(
-                                        50.dp.roundToPx()
-                                    ),
+                                minHeight = classicMinHeightPx.coerceAtMost(windowSize.height),
+                                maxHeight = finalMaxHeightPx,
                                 maxWidth = windowSize.width
                             )
                         )
