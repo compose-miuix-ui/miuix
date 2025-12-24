@@ -7,8 +7,10 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.pressable
 
 /**
@@ -65,7 +68,7 @@ fun Checkbox(
     val targetBackgroundColor by remember(checked, enabled, colors) {
         derivedStateOf { if (checked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled) }
     }
-    val backgroundColor by animateColorAsState(
+    val backgroundColorState = animateColorAsState(
         targetValue = targetBackgroundColor,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
@@ -73,12 +76,13 @@ fun Checkbox(
     val targetForegroundColor by remember(checked, enabled, colors) {
         derivedStateOf { if (checked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled) }
     }
-    val foregroundColor by animateColorAsState(
+    val foregroundColorState = animateColorAsState(
         targetValue = targetForegroundColor,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
 
     val checkmarkAnim = rememberCheckmarkAnimationState(checked)
+    val checkPath = remember { Path() }
 
     val finalModifier = if (currentOnCheckedChange != null) {
         Modifier.toggleable(
@@ -101,21 +105,30 @@ fun Checkbox(
     Box(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
-            .requiredSize(25.5.dp)
-            .pressable(enabled = enabled, delay = null)
+            .requiredSize(26.dp)
+            .pressable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = SinkFeedback(
+                    sinkAmount = 0.85f,
+                    animationSpec = spring(0.99f, 986.96f)
+                ),
+                enabled = enabled,
+                delay = null
+            )
             .clip(ContinuousCapsule)
             .drawBehind {
-                drawCircle(backgroundColor)
+                drawCircle(backgroundColorState.value)
             }
             .then(finalModifier),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.size(25.5.dp)) {
+        Canvas(modifier = Modifier.size(26.dp)) {
             drawTrimmedCheckmark(
-                color = foregroundColor,
+                color = foregroundColorState.value,
                 alpha = checkmarkAnim.alpha.value,
                 trimStart = checkmarkAnim.startTrim.value,
-                trimEnd = checkmarkAnim.endTrim.value
+                trimEnd = checkmarkAnim.endTrim.value,
+                path = checkPath
             )
         }
     }
@@ -124,7 +137,7 @@ fun Checkbox(
 @Composable
 private fun rememberCheckmarkAnimationState(checked: Boolean): CheckmarkAnimationState {
     val checkAlpha = remember { Animatable(if (checked) 1f else 0f) }
-    val checkStartTrim = remember { Animatable(0.0f) }
+    val checkStartTrim = remember { Animatable(0.1f) }
     val checkEndTrim = remember { Animatable(if (checked) 0.803f else 0.1f) }
 
     LaunchedEffect(checked) {
@@ -141,10 +154,10 @@ private fun rememberCheckmarkAnimationState(checked: Boolean): CheckmarkAnimatio
             launch {
                 checkStartTrim.animateTo(
                     targetValue = 0.186f,
-                    animationSpec = keyframes {
-                        durationMillis = 100
-                        0.186f at 100
-                    }
+                    animationSpec = tween(
+                        durationMillis = 200,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
             launch {
@@ -152,8 +165,8 @@ private fun rememberCheckmarkAnimationState(checked: Boolean): CheckmarkAnimatio
                     targetValue = 0.803f,
                     animationSpec = keyframes {
                         durationMillis = 300
-                        0.845f at 200
-                        0.803f at 300
+                        0.85f at 200 using FastOutSlowInEasing
+                        0.803f at 300 using FastOutSlowInEasing
                     }
                 )
             }
@@ -169,10 +182,10 @@ private fun rememberCheckmarkAnimationState(checked: Boolean): CheckmarkAnimatio
             }
             launch {
                 checkStartTrim.animateTo(
-                    targetValue = 0.0f,
+                    targetValue = 0.1f,
                     animationSpec = keyframes {
                         durationMillis = 300
-                        0.0f at 300
+                        0.1f at 300
                     }
                 )
             }
@@ -202,10 +215,13 @@ private fun DrawScope.drawTrimmedCheckmark(
     color: Color,
     alpha: Float = 1f,
     trimStart: Float,
-    trimEnd: Float
+    trimEnd: Float,
+    path: Path
 ) {
     val viewportSize = 23f
     val strokeWidth = size.width * 0.09f
+
+    path.rewind()
 
     val centerX = size.width / 2
     val centerY = size.height / 2
@@ -231,8 +247,6 @@ private fun DrawScope.drawTrimmedCheckmark(
 
     val startDistance = totalLength * trimStart
     val endDistance = totalLength * trimEnd
-
-    val path = Path()
 
     if (startDistance < firstSegmentLength && endDistance > 0) {
         val segStartRatio = (startDistance / firstSegmentLength).coerceIn(0f, 1f)
