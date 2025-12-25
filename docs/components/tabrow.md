@@ -55,6 +55,8 @@ TabRowWithContour(
 | maxWidth         | Dp               | Maximum width of each tab     | TabRowDefaults.TabRowMaxWidth     | No       |
 | height           | Dp               | Height of the tab row         | TabRowDefaults.TabRowHeight       | No       |
 | cornerRadius     | Dp               | Corner radius of tabs         | TabRowDefaults.TabRowCornerRadius | No       |
+| itemSpacing      | Dp               | Spacing between tabs          | 9.dp                              | No       |
+| contentAlignment | Alignment        | Alignment of tab content      | Alignment.Center                  | No       |
 | onTabSelected    | ((Int) -> Unit)? | Callback when tab is selected | null                              | No       |
 
 ### TabRowWithContour Properties
@@ -69,6 +71,8 @@ TabRowWithContour(
 | maxWidth         | Dp               | Maximum width of each tab     | TabRowDefaults.TabRowWithContourMaxWidth     | No       |
 | height           | Dp               | Height of the tab row         | TabRowDefaults.TabRowWithContourHeight       | No       |
 | cornerRadius     | Dp               | Corner radius of tabs         | TabRowDefaults.TabRowWithContourCornerRadius | No       |
+| itemSpacing      | Dp               | Spacing between tabs          | 5.dp                                         | No       |
+| contentAlignment | Alignment        | Alignment of tab content      | Alignment.Center                             | No       |
 | onTabSelected    | ((Int) -> Unit)? | Callback when tab is selected | null                                         | No       |
 
 ### TabRowDefaults Object

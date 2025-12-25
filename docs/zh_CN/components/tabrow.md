@@ -55,6 +55,8 @@ TabRowWithContour(
 | maxWidth         | Dp               | 每个标签的最大宽度   | TabRowDefaults.TabRowMaxWidth     | 否       |
 | height           | Dp               | 标签行的高度         | TabRowDefaults.TabRowHeight       | 否       |
 | cornerRadius     | Dp               | 标签的圆角半径       | TabRowDefaults.TabRowCornerRadius | 否       |
+| itemSpacing      | Dp               | 标签之间的间距       | 9.dp                              | 否       |
+| contentAlignment | Alignment        | 标签内容的对齐方式   | Alignment.Center                  | 否       |
 | onTabSelected    | ((Int) -> Unit)? | 标签选中时的回调函数 | null                              | 否       |
 
 ### TabRowWithContour 属性
@@ -69,6 +71,8 @@ TabRowWithContour(
 | maxWidth         | Dp               | 每个标签的最大宽度   | TabRowDefaults.TabRowWithContourMaxWidth     | 否       |
 | height           | Dp               | 标签行的高度         | TabRowDefaults.TabRowWithContourHeight       | 否       |
 | cornerRadius     | Dp               | 标签的圆角半径       | TabRowDefaults.TabRowWithContourCornerRadius | 否       |
+| itemSpacing      | Dp               | 标签之间的间距       | 5.dp                                         | 否       |
+| contentAlignment | Alignment        | 标签内容的对齐方式   | Alignment.Center                             | 否       |
 | onTabSelected    | ((Int) -> Unit)? | 标签选中时的回调函数 | null                                         | 否       |
 
 ### TabRowDefaults 对象

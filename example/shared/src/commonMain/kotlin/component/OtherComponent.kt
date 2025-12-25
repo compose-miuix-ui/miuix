@@ -19,13 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +41,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -516,7 +519,6 @@ fun LazyListScope.otherComponent(
         val tabTexts = remember { listOf("Tab 1", "Tab 2", "Tab 3") }
         val tabTexts1 = remember { listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5", "Tab 6") }
         var selectedTabIndex by remember { mutableStateOf(0) }
-        var selectedTabIndex1 by remember { mutableStateOf(0) }
         TabRow(
             tabs = tabTexts,
             selectedTabIndex = selectedTabIndex,
@@ -533,18 +535,30 @@ fun LazyListScope.otherComponent(
                 .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
+            val scope = rememberCoroutineScope()
+            val pagerState = rememberPagerState(pageCount = { tabTexts1.size })
             TabRowWithContour(
                 tabs = tabTexts1,
-                selectedTabIndex = selectedTabIndex1,
+                selectedTabIndex = pagerState.currentPage,
             ) {
-                selectedTabIndex1 = it
+                scope.launch {
+                    pagerState.animateScrollToPage(it)
+                }
             }
-            val selectedTabText by remember(selectedTabIndex1) {
-                derivedStateOf { tabTexts1[selectedTabIndex1] }
-            }
-            Text(
-                text = "Selected Tab: $selectedTabText",
-                modifier = Modifier.padding(top = 12.dp)
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                userScrollEnabled = true,
+                key = { it },
+                pageContent = { page ->
+                    Text(
+                        text = "Content of ${tabTexts1[page]}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
             )
         }
     }

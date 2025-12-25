@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -19,8 +23,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -28,17 +34,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollHorizontal
+import kotlin.math.roundToInt
 
 /**
  * A [TabRow] with Miuix style.
@@ -51,6 +59,8 @@ import top.yukonga.miuix.kmp.utils.overScrollHorizontal
  * @param maxWidth The maximum width of the tab in [TabRow].
  * @param height The height of the [TabRow].
  * @param cornerRadius The round corner radius of the tab in [TabRow].
+ * @param itemSpacing The spacing between tabs in [TabRow].
+ * @param contentAlignment The content alignment of the tab in [TabRow].
  * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
@@ -64,6 +74,8 @@ fun TabRow(
     maxWidth: Dp = TabRowDefaults.TabRowMaxWidth,
     height: Dp = TabRowDefaults.TabRowHeight,
     cornerRadius: Dp = TabRowDefaults.TabRowCornerRadius,
+    itemSpacing: Dp = 9.dp,
+    contentAlignment: Alignment = Alignment.Center,
     onTabSelected: ((Int) -> Unit)? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
@@ -73,28 +85,64 @@ fun TabRow(
             .fillMaxWidth()
             .then(modifier)
             .height(height)
+            .background(color = colors.backgroundColor(false))
     ) {
-        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, 9.dp, this.maxWidth)
+        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, this.maxWidth)
+        val density = LocalDensity.current
+        val tabWidthPx = with(density) { config.tabWidth.toPx() }
+        val spacingPx = with(density) { itemSpacing.toPx() }
+        val indicatorOffset = remember { Animatable(0f) }
+        val availableWidth = this.maxWidth
 
-        LazyRow(
-            state = config.listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .overScrollHorizontal(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-            overscrollEffect = null
-        ) {
-            itemsIndexed(tabs) { index, tabText ->
-                TabItem(
-                    text = tabText,
-                    isSelected = selectedTabIndex == index,
-                    onClick = { currentOnTabSelected?.invoke(index) },
-                    enabled = currentOnTabSelected != null,
-                    colors = colors,
-                    shape = config.shape,
-                    width = config.tabWidth
-                )
+        LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
+            val target = selectedTabIndex * (tabWidthPx + spacingPx)
+            indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+        }
+
+        LaunchedEffect(selectedTabIndex, availableWidth) {
+            val centerOffset = (availableWidth - config.tabWidth) / 2
+            val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
+            config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+        }
+
+        val scrollOffset by remember {
+            derivedStateOf {
+                val state = config.listState
+                val firstIndex = state.firstVisibleItemIndex
+                val firstOffset = state.firstVisibleItemScrollOffset
+                firstIndex * (tabWidthPx + spacingPx) + firstOffset
+            }
+        }
+
+        Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
+                    .width(config.tabWidth)
+                    .fillMaxHeight()
+                    .clip(config.shape)
+                    .background(colors.backgroundColor(true))
+            )
+            LazyRow(
+                state = config.listState,
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(itemSpacing),
+                overscrollEffect = null
+            ) {
+                itemsIndexed(tabs) { index, tabText ->
+                    TabItem(
+                        text = tabText,
+                        color = colors.contentColor(selectedTabIndex == index),
+                        isSelected = selectedTabIndex == index,
+                        onClick = { currentOnTabSelected?.invoke(index) },
+                        enabled = currentOnTabSelected != null,
+                        shape = config.shape,
+                        width = config.tabWidth,
+                        contentAlignment = contentAlignment
+                    )
+                }
             }
         }
     }
@@ -111,6 +159,8 @@ fun TabRow(
  * @param maxWidth The maximum width of the tab in [TabRow].
  * @param height The height of the [TabRow].
  * @param cornerRadius The round corner radius of the tab in [TabRow].
+ * @param itemSpacing The spacing between tabs in [TabRow].
+ * @param contentAlignment The content alignment of the tab in [TabRow].
  * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
@@ -124,6 +174,8 @@ fun TabRowWithContour(
     maxWidth: Dp = TabRowDefaults.TabRowWithContourMaxWidth,
     height: Dp = TabRowDefaults.TabRowWithContourHeight,
     cornerRadius: Dp = TabRowDefaults.TabRowWithContourCornerRadius,
+    itemSpacing: Dp = 5.dp,
+    contentAlignment: Alignment = Alignment.Center,
     onTabSelected: ((Int) -> Unit)? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
@@ -136,7 +188,32 @@ fun TabRowWithContour(
             .height(height)
     ) {
         val lazyRowAvailableWidth = this.maxWidth - (contourPadding * 2)
-        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, contourPadding, lazyRowAvailableWidth)
+        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, lazyRowAvailableWidth)
+        val density = LocalDensity.current
+        val tabWidthPx = with(density) { config.tabWidth.toPx() }
+        val spacingPx = with(density) { itemSpacing.toPx() }
+        val indicatorOffset = remember { Animatable(0f) }
+        val availableWidth = this.maxWidth
+
+        LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
+            val target = selectedTabIndex * (tabWidthPx + spacingPx)
+            indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+        }
+
+        LaunchedEffect(selectedTabIndex, availableWidth) {
+            val centerOffset = (availableWidth - (contourPadding * 2) - config.tabWidth) / 2
+            val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
+            config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+        }
+
+        val scrollOffset by remember {
+            derivedStateOf {
+                val state = config.listState
+                val firstIndex = state.firstVisibleItemIndex
+                val firstOffset = state.firstVisibleItemScrollOffset
+                firstIndex * (tabWidthPx + spacingPx) + firstOffset
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -145,24 +222,32 @@ fun TabRowWithContour(
                 .background(color = colors.backgroundColor(false))
                 .padding(contourPadding)
         ) {
+            Box(
+                Modifier
+                    .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
+                    .width(config.tabWidth)
+                    .fillMaxHeight()
+                    .clip(config.shape)
+                    .background(colors.backgroundColor(true))
+            )
             LazyRow(
                 state = config.listState,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .overScrollHorizontal(),
+                    .fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(contourPadding),
+                horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
                         text = tabText,
+                        color = colors.contentColor(selectedTabIndex == index),
                         isSelected = selectedTabIndex == index,
                         onClick = { currentOnTabSelected?.invoke(index) },
                         enabled = currentOnTabSelected != null,
-                        colors = colors,
                         shape = config.shape,
-                        width = config.tabWidth
+                        width = config.tabWidth,
+                        contentAlignment = contentAlignment
                     )
                 }
             }
@@ -170,36 +255,41 @@ fun TabRowWithContour(
     }
 }
 
+
 @Composable
 private fun TabItem(
     text: String,
+    color: Color = Color.Unspecified,
     isSelected: Boolean,
     onClick: () -> Unit,
     enabled: Boolean,
-    colors: TabRowColors,
     shape: ContinuousRoundedRectangle,
-    width: Dp
+    width: Dp,
+    contentAlignment: Alignment = Alignment.Center
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
     Surface(
         shape = shape,
-        onClick = onClick,
+        onClick = {
+            currentOnClick()
+        },
         enabled = enabled,
-        color = colors.backgroundColor(isSelected),
+        color = Color.Transparent,
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
             .semantics { role = Role.Tab }
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            contentAlignment = contentAlignment
         ) {
             Text(
                 text = text,
-                color = colors.contentColor(isSelected),
+                color = color,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -208,12 +298,13 @@ private fun TabItem(
 @Composable
 private fun TabItemWithContour(
     text: String,
+    color: Color = Color.Unspecified,
     isSelected: Boolean,
     onClick: () -> Unit,
     enabled: Boolean,
-    colors: TabRowColors,
     shape: ContinuousRoundedRectangle,
-    width: Dp
+    width: Dp,
+    contentAlignment: Alignment = Alignment.Center
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     Box(
@@ -221,17 +312,18 @@ private fun TabItemWithContour(
             .fillMaxHeight()
             .width(width)
             .clip(shape)
-            .background(colors.backgroundColor(isSelected))
-            .clickable(enabled = enabled) { currentOnClick() }
+            .clickable(enabled = enabled) {
+                currentOnClick()
+            }
             .semantics { role = Role.Tab },
-        contentAlignment = Alignment.Center
+        contentAlignment = contentAlignment
     ) {
         Text(
             text = text,
-            color = colors.contentColor(isSelected),
+            color = color,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -342,7 +434,7 @@ object TabRowDefaults {
     val TabRowWithContourMaxWidth = 84.dp
 
     /**
-     * The default colors for the [TabRow].
+     * The default colors for the [TabRow] and [TabRowWithContour].
      */
     @Composable
     fun tabRowColors(
