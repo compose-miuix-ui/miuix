@@ -44,13 +44,12 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
-            implementation(compose.material3)
 
             implementation(libs.jetbrains.compose.ui.backhandler)
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.gaze.capsule) // Capsule for Multiplatform
-            implementation(libs.materialkolor.material.kolor) // Material Color for Multiplatform
+            implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }
 
         val skikoMain by creating {
