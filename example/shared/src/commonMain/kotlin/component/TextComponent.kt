@@ -63,9 +63,9 @@ import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.extra.WindowSpinner
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -350,7 +350,7 @@ fun TextComponent(
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Useful.Personal,
+                        imageVector = MiuixIcons.Contacts,
                         contentDescription = "Personal",
                         tint = MiuixTheme.colorScheme.onBackground
                     )
@@ -675,7 +675,7 @@ fun SuperBottomSheet(
                 onClick = { showBottomSheet.value = false },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Useful.Cancel,
+                    imageVector = MiuixIcons.Close,
                     contentDescription = "Cancel",
                     tint = MiuixTheme.colorScheme.onBackground
                 )
@@ -686,7 +686,7 @@ fun SuperBottomSheet(
                 onClick = { showBottomSheet.value = false },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Useful.Confirm,
+                    imageVector = MiuixIcons.Ok,
                     contentDescription = "Confirm",
                     tint = MiuixTheme.colorScheme.onBackground
                 )
@@ -751,7 +751,7 @@ fun WindowBottomSheet(
                 onClick = { state?.invoke() },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Useful.Cancel,
+                    imageVector = MiuixIcons.Close,
                     contentDescription = "Cancel",
                     tint = MiuixTheme.colorScheme.onBackground
                 )
@@ -762,7 +762,7 @@ fun WindowBottomSheet(
                 onClick = { state?.invoke() },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Useful.Confirm,
+                    imageVector = MiuixIcons.Ok,
                     contentDescription = "Confirm",
                     tint = MiuixTheme.colorScheme.onBackground
                 )

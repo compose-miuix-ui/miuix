@@ -31,10 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -62,16 +60,13 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.VerticalSlider
+import top.yukonga.miuix.kmp.icon.All
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Like
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import kotlin.math.round
 
-fun LazyListScope.otherComponent(
-    miuixIcons: List<ImageVector>,
-    focusManager: FocusManager
-) {
+fun LazyListScope.otherComponent() {
     item(key = "button") {
         var buttonText by remember { mutableStateOf("Cancel") }
         var submitButtonText by remember { mutableStateOf("Submit") }
@@ -176,6 +171,8 @@ fun LazyListScope.otherComponent(
     }
 
     item(key = "textField") {
+        val focusManager = LocalFocusManager.current
+
         var text1 by remember { mutableStateOf("") }
         var text2 by remember { mutableStateOf(TextFieldValue("")) }
         val text3 = rememberTextFieldState(initialText = "")
@@ -572,14 +569,24 @@ fun LazyListScope.otherComponent(
                 .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp)
         ) {
-            FlowRow {
-                miuixIcons.forEach { icon ->
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = if (icon != MiuixIcons.Useful.Like) MiuixTheme.colorScheme.onBackground else Color.Unspecified,
-                        modifier = Modifier.size(24.dp)
+            val miuixIconsAll = remember { MiuixIcons.All }
+            miuixIconsAll.forEach { (weight, icons) ->
+                Text(
+                    text = weight,
+                    modifier = Modifier.padding(
+                        bottom = 6.dp,
+                        top = if (weight == "Light") 0.dp else 12.dp
                     )
+                )
+                FlowRow {
+                    icons.forEach { icon ->
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = icon.name,
+                            tint = MiuixTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }

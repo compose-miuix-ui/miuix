@@ -20,8 +20,8 @@ Icon 组件可以用于显示图标：
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "点赞图标"
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites"
 )
 ```
 
@@ -33,7 +33,7 @@ Miuix Icon 支持多种类型的图标资源：
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Settings,
+    imageVector = MiuixIcons.Settings,
     contentDescription = "设置图标"
 )
 ```
@@ -65,7 +65,7 @@ Icon(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Personal,
+    imageVector = MiuixIcons.Contacts,
     contentDescription = "人像图标",
     tint = Color.Red
 )
@@ -75,8 +75,8 @@ Icon(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "点赞图标",
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites",
     tint = Color.Unspecified // 默认情况
 )
 ```
@@ -126,8 +126,8 @@ IconDefaults 对象提供了 Icon 组件的默认配置。
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "点赞图标",
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites",
     modifier = Modifier.size(32.dp)
 )
 ```
@@ -139,7 +139,7 @@ Button(
     onClick = { /* 处理点击事件 */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Save,
+        imageVector = MiuixIcons.Save,
         contentDescription = "下载图标"
     )
     Spacer(modifier = Modifier.width(8.dp))
@@ -151,7 +151,7 @@ Button(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Info,
+    imageVector = MiuixIcons.Info,
     contentDescription = "警告图标",
     tint = Color(0xFFFFA500),
     modifier = Modifier
@@ -170,8 +170,8 @@ Icon(
 var isSelected by remember { mutableStateOf(false) }
 
 Icon(
-    imageVector = if (isSelected) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
-    contentDescription = "喜欢图标",
+    imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+    contentDescription = if (isSelected) "喜欢" else "不喜欢",
     modifier = Modifier.clickable { isSelected = !isSelected }
 )
 ```

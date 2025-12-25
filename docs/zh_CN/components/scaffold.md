@@ -113,7 +113,7 @@ Scaffold(
             title = "标题",
             navigationIcon = {
                 IconButton(onClick = { /* 处理导航点击 */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "返回")
+                    Icon(MiuixIcons.Back, contentDescription = "返回")
                 }
             },
             scrollBehavior = topAppBarScrollBehavior
@@ -121,8 +121,8 @@ Scaffold(
     },
     bottomBar = {
         val items = listOf(
-            NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-            NavigationItem("设置", MiuixIcons.Useful.Settings)
+            NavigationItem("首页", MiuixIcons.VerticalSplit),
+            NavigationItem("设置", MiuixIcons.Settings)
         )
         var selectedItem by remember { mutableStateOf(0) }
         NavigationBar(
@@ -165,7 +165,7 @@ Scaffold(
         FloatingActionButton(
             onClick = { /* 处理点击事件 */ }
         ) {
-            Icon(MiuixIcons.Useful.New, contentDescription = "添加")
+            Icon(MiuixIcons.Add, contentDescription = "添加")
         }
     },
     floatingActionButtonPosition = FabPosition.End,
@@ -201,7 +201,7 @@ Scaffold(
                 }
             }
         ) {
-            Icon(MiuixIcons.Useful.Info, contentDescription = "显示消息")
+            Icon(MiuixIcons.Info, contentDescription = "显示消息")
         }
     },
     content = { paddingValues ->

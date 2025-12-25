@@ -2,18 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 val isRelease = project.hasProperty("release")
-val baseVersion = BuildConfig.LIBRARY_VERSION
-
-fun gitShort(): String = try {
-    val p = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
-    p.inputStream.bufferedReader().readText().trim().ifEmpty { "local" }
-} catch (_: Exception) {
-    "local"
-}
-
-val computedVersion = if (isRelease) baseVersion else "$baseVersion-${gitShort()}-SNAPSHOT"
+val computedVersion = if (isRelease) BuildConfig.LIBRARY_VERSION else "${BuildConfig.LIBRARY_VERSION}-${gitHashShort()}-SNAPSHOT"
 
 allprojects {
-    group = "top.yukonga.miuix.kmp"
+    group = BuildConfig.LIBRARY_ID
     version = computedVersion
 }

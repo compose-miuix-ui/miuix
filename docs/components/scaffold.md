@@ -113,7 +113,7 @@ Scaffold(
             title = "Title",
             navigationIcon = {
                 IconButton(onClick = { /* Handle navigation click */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "Back")
+                    Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             scrollBehavior = topAppBarScrollBehavior
@@ -121,8 +121,8 @@ Scaffold(
     },
     bottomBar = {
         val items = listOf(
-            NavigationItem("Home", MiuixIcons.Useful.NavigatorSwitch),
-            NavigationItem("Settings", MiuixIcons.Useful.Settings)
+            NavigationItem("Home", MiuixIcons.VerticalSplit),
+            NavigationItem("Settings", MiuixIcons.Settings)
         )
         var selectedItem by remember { mutableStateOf(0) }
         NavigationBar(
@@ -165,7 +165,7 @@ Scaffold(
         FloatingActionButton(
             onClick = { /* Handle click event */ }
         ) {
-            Icon(MiuixIcons.Useful.New, contentDescription = "Add")
+            Icon(MiuixIcons.Add, contentDescription = "Add")
         }
     },
     floatingActionButtonPosition = FabPosition.End,
@@ -201,7 +201,7 @@ Scaffold(
                 }
             }
         ) {
-            Icon(MiuixIcons.Useful.Info, contentDescription = "Show message")
+            Icon(MiuixIcons.Info, contentDescription = "Show message")
         }
     },
     content = { paddingValues ->

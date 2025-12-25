@@ -41,6 +41,7 @@ rootProject.name = "compose-ui-miuix"
 includeBuild("build-plugin")
 
 include(":miuix")
+include(":miuix-icons")
 
 include(":example:shared")
 include(":example:android")

@@ -32,6 +32,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation("top.yukonga.miuix.kmp:miuix:<version>")
+            // 可选：添加 miuix-icons 以获取更多图标
+            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
         }
     }
 }
@@ -43,13 +45,14 @@ kotlin {
 ```kotlin
 dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
+    // 可选：添加 miuix-icons 以获取更多图标
+    implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
 }
 ```
 
 - 在其他常规项目中使用，则只需要根据需要添加对应平台后缀的依赖即可：
 
 ```kotlin
-implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-iosx64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
@@ -58,6 +61,15 @@ implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+// 可选：添加 miuix-icons
+implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-iosx64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-macosx64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
 ```
 
 ## 基本用法

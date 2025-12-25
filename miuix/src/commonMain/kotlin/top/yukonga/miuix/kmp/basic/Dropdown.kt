@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowUpDownIntegrated
-import top.yukonga.miuix.kmp.icon.icons.basic.Check
+import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
+import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -54,7 +54,7 @@ fun RowScope.DropdownRightActions(
             .padding(start = 8.dp)
             .size(10.dp, 16.dp)
             .align(Alignment.CenterVertically),
-        imageVector = MiuixIcons.Basic.ArrowUpDownIntegrated,
+        imageVector = MiuixIcons.Basic.ArrowUpDown,
         colorFilter = ColorFilter.tint(actionColor),
         contentDescription = null
     )

@@ -76,14 +76,14 @@ import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.other.GitHub
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
-import top.yukonga.miuix.kmp.icon.icons.useful.NavigatorSwitch
-import top.yukonga.miuix.kmp.icon.icons.useful.Order
-import top.yukonga.miuix.kmp.icon.icons.useful.Scan
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
+import top.yukonga.miuix.kmp.icon.extended.Image
+import top.yukonga.miuix.kmp.icon.extended.Link
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -152,10 +152,10 @@ fun UITest(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Useful.NavigatorSwitch),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Useful.Order),
-            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Useful.Scan),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Useful.Settings)
+            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
+            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Sort),
+            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Settings)
         )
     }
 
@@ -509,7 +509,7 @@ private fun FloatingActionButton(
             }
         ) {
             Icon(
-                imageVector = MiuixIcons.Other.GitHub,
+                imageVector = MiuixIcons.Link,
                 tint = MiuixTheme.colorScheme.onPrimary,
                 contentDescription = "GitHub"
             )
@@ -559,21 +559,21 @@ private fun FloatingToolbarActions() {
 
     IconButton(onClick = { /* Action 1 */ }) {
         Icon(
-            MiuixIcons.Useful.Edit,
+            MiuixIcons.Edit,
             contentDescription = "Edit",
             tint = iconTint
         )
     }
     IconButton(onClick = { /* Action 2 */ }) {
         Icon(
-            MiuixIcons.Useful.Delete,
+            MiuixIcons.Delete,
             contentDescription = "Delete",
             tint = iconTint
         )
     }
     IconButton(onClick = { /* Action 3 */ }) {
         Icon(
-            MiuixIcons.Useful.ImmersionMore,
+            MiuixIcons.More,
             contentDescription = "More",
             tint = iconTint
         )

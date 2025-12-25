@@ -158,7 +158,7 @@ TextField(
     label = "搜索",
     leadingIcon = {
         Icon(
-            imageVector = MiuixIcons.Useful.Search,
+            imageVector = MiuixIcons.Search,
             contentDescription = "搜索图标",
             modifier = Modifier.padding(horizontal = 12.dp)
         )
@@ -184,7 +184,7 @@ TextField(
             modifier = Modifier.padding(end = 12.dp)
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.Rename,
+                imageVector = MiuixIcons.Rename,
                 tint = if (passwordVisible) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSecondaryContainer,
                 contentDescription = if (passwordVisible) "隐藏密码" else "显示密码"
             )

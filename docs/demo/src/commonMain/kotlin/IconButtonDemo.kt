@@ -21,8 +21,8 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
-import top.yukonga.miuix.kmp.icon.icons.useful.Like
+import top.yukonga.miuix.kmp.icons.icons.More
+import top.yukonga.miuix.kmp.icons.icons.Favorites
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -52,7 +52,7 @@ fun IconButtonDemo() {
                         onClick = {}
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.ImmersionMore,
+                            imageVector = MiuixIcons.More,
                             tint = MiuixTheme.colorScheme.onBackground,
                             contentDescription = "More"
                         )
@@ -62,8 +62,8 @@ fun IconButtonDemo() {
                         onClick = {}
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.Like,
-                            contentDescription = "Like"
+                            imageVector = MiuixIcons.Favorites,
+                            contentDescription = "Favorites"
                         )
                     }
                     IconButton(
@@ -72,7 +72,7 @@ fun IconButtonDemo() {
                         enabled = false
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.ImmersionMore,
+                            imageVector = MiuixIcons.More,
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                             contentDescription = "More"
                         )
@@ -83,9 +83,9 @@ fun IconButtonDemo() {
                         enabled = false
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.Like,
+                            imageVector = MiuixIcons.Favorites,
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                            contentDescription = "Like"
+                            contentDescription = "Favorites"
                         )
                     }
                 }

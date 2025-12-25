@@ -10,9 +10,12 @@ dependencies {
 }
 
 val iconsSourceDir = rootProject.layout.projectDirectory.dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile
-val outputDir = layout.buildDirectory.dir("generated-svg")
+val extendedIconsSourceDir = rootProject.layout.projectDirectory.dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile
+val outputDir = project.file("../public/icons")
+val docFile = project.file("../guide/icons.md")
+val docFileZh = project.file("../zh_CN/guide/icons.md")
 
-tasks.register<JavaExec>("generateSvg") {
+tasks.register<JavaExec>("generateIcons") {
     group = "iconGen"
     description = "Generate SVGs from Compose ImageVector definitions"
     dependsOn(tasks.named("classes"))
@@ -22,12 +25,20 @@ tasks.register<JavaExec>("generateSvg") {
     val darkColor = project.findProperty("iconDarkColor")?.toString() ?: "#FFFFFF"
     val preserve = project.findProperty("iconPreserveColors")?.toString()?.equals("true", true) == true
     outputs.dir(outputDir)
-    doFirst { outputDir.get().asFile.mkdirs() }
+    doFirst {
+        if (!outputDir.exists()) {
+            outputDir.mkdirs()
+        }
+    }
     args = listOf(
         "--src", iconsSourceDir.absolutePath,
-        "--out", outputDir.get().asFile.absolutePath,
+        "--src", extendedIconsSourceDir.absolutePath,
+        "--out", outputDir.absolutePath,
         "--light", lightColor,
         "--dark", darkColor,
-        "--preserve-colors", preserve.toString()
+        "--preserve-colors", preserve.toString(),
+        "--gen-doc", "true",
+        "--doc-file", docFile.absolutePath,
+        "--doc-file-zh", docFileZh.absolutePath
     )
 }

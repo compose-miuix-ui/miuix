@@ -88,7 +88,7 @@ SearchBar(
             leadingIcon = {
                 Icon(
                     modifier = Modifier.padding(start = 12.dp, end = 8.dp),
-                    imageVector = MiuixIcons.Useful.Search,
+                    imageVector = MiuixIcons.Search,
                     contentDescription = "Search"
                 )
             }

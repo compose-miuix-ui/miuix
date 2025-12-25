@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.sp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.Search
-import top.yukonga.miuix.kmp.icon.icons.basic.SearchCleanup
+import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**

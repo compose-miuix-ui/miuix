@@ -47,8 +47,8 @@ publishing {
         artifact(javadocJar.get())
         // Provide artifacts information required
         pom {
-            name.set("miuix")
-            description.set("A UI library for Compose MultiPlatform")
+            name.set(project.name)
+            description.set(project.description)
             url.set(projectUrl)
             licenses {
                 license {
@@ -79,6 +79,11 @@ publishing {
                     id.set("Voemp")
                     name.set("Voemp")
                     url.set("$githubUrl/Voemp")
+                }
+                developer {
+                    id.set("HChenX")
+                    name.set("焕晨HChen")
+                    url.set("$githubUrl/HChenX")
                 }
             }
         }

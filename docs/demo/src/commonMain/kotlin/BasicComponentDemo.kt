@@ -19,7 +19,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
+import top.yukonga.miuix.kmp.icons.icons.Contacts
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -54,7 +54,7 @@ fun BasicComponentDemo() {
                     leftAction = {
                         Icon(
                             modifier = Modifier.padding(end = 16.dp),
-                            imageVector = MiuixIcons.Useful.Personal,
+                            imageVector = MiuixIcons.Contacts,
                             contentDescription = "Avatar Icon",
                             tint = MiuixTheme.colorScheme.onBackground
                         )

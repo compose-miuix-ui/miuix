@@ -133,8 +133,8 @@ Button(
     onClick = { /* 处理点击事件 */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "图标"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
     Spacer(modifier = Modifier.width(8.dp))
     Text("带图标按钮")

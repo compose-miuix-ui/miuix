@@ -64,8 +64,8 @@ import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
@@ -556,7 +556,7 @@ fun BackNavigationIcon(
         onClick = onClick
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Back,
+            imageVector = MiuixIcons.Back,
             contentDescription = null,
             tint = colorScheme.onBackground
         )
@@ -574,7 +574,7 @@ fun AboutTopBarActionsWithSuperListPopup() {
         holdDownState = showTopPopup.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Edit,
+            imageVector = MiuixIcons.Edit,
             contentDescription = "SuperListPopup",
             tint = colorScheme.onBackground
         )
@@ -619,7 +619,7 @@ fun AboutTopBarActionsWithWindowListPopup() {
         holdDownState = showTopPopup.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Edit,
+            imageVector = MiuixIcons.Edit,
             contentDescription = "WindowListPopup",
             tint = colorScheme.onBackground
         )

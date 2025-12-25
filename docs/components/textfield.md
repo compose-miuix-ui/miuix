@@ -158,7 +158,7 @@ TextField(
     label = "Search",
     leadingIcon = {
         Icon(
-            imageVector = MiuixIcons.Useful.Search,
+            imageVector = MiuixIcons.Search,
             contentDescription = "Search Icon",
             modifier = Modifier.padding(horizontal = 12.dp)
         )
@@ -184,7 +184,7 @@ TextField(
             modifier = Modifier.padding(end = 12.dp)
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.Rename,
+                imageVector = MiuixIcons.Rename,
                 tint = if (passwordVisible) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSecondaryContainer,
                 contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
             )

@@ -35,46 +35,7 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.AddSecret
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
-import top.yukonga.miuix.kmp.icon.icons.useful.Blocklist
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
-import top.yukonga.miuix.kmp.icon.icons.useful.Copy
-import top.yukonga.miuix.kmp.icon.icons.useful.Cut
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
-import top.yukonga.miuix.kmp.icon.icons.useful.Like
-import top.yukonga.miuix.kmp.icon.icons.useful.More
-import top.yukonga.miuix.kmp.icon.icons.useful.Move
-import top.yukonga.miuix.kmp.icon.icons.useful.NavigatorSwitch
-import top.yukonga.miuix.kmp.icon.icons.useful.New
-import top.yukonga.miuix.kmp.icon.icons.useful.Order
-import top.yukonga.miuix.kmp.icon.icons.useful.Paste
-import top.yukonga.miuix.kmp.icon.icons.useful.Pause
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
-import top.yukonga.miuix.kmp.icon.icons.useful.Play
-import top.yukonga.miuix.kmp.icon.icons.useful.Reboot
-import top.yukonga.miuix.kmp.icon.icons.useful.Redo
-import top.yukonga.miuix.kmp.icon.icons.useful.Refresh
-import top.yukonga.miuix.kmp.icon.icons.useful.Remove
-import top.yukonga.miuix.kmp.icon.icons.useful.RemoveBlocklist
-import top.yukonga.miuix.kmp.icon.icons.useful.RemoveSecret
-import top.yukonga.miuix.kmp.icon.icons.useful.Rename
-import top.yukonga.miuix.kmp.icon.icons.useful.Restore
-import top.yukonga.miuix.kmp.icon.icons.useful.Save
-import top.yukonga.miuix.kmp.icon.icons.useful.Scan
-import top.yukonga.miuix.kmp.icon.icons.useful.Search
-import top.yukonga.miuix.kmp.icon.icons.useful.SelectAll
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
-import top.yukonga.miuix.kmp.icon.icons.useful.Share
-import top.yukonga.miuix.kmp.icon.icons.useful.Stick
-import top.yukonga.miuix.kmp.icon.icons.useful.Undo
-import top.yukonga.miuix.kmp.icon.icons.useful.Unlike
-import top.yukonga.miuix.kmp.icon.icons.useful.Unstick
-import top.yukonga.miuix.kmp.icon.icons.useful.Update
+import top.yukonga.miuix.kmp.icon.All
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -143,52 +104,6 @@ fun MainPage(
         )
     }
 
-    val miuixIcons = remember {
-        listOf(
-            MiuixIcons.Useful.AddSecret,
-            MiuixIcons.Useful.Back,
-            MiuixIcons.Useful.Blocklist,
-            MiuixIcons.Useful.Cancel,
-            MiuixIcons.Useful.Confirm,
-            MiuixIcons.Useful.Copy,
-            MiuixIcons.Useful.Cut,
-            MiuixIcons.Useful.Delete,
-            MiuixIcons.Useful.Edit,
-            MiuixIcons.Useful.ImmersionMore,
-            MiuixIcons.Useful.Info,
-            MiuixIcons.Useful.Like,
-            MiuixIcons.Useful.More,
-            MiuixIcons.Useful.Move,
-            MiuixIcons.Useful.NavigatorSwitch,
-            MiuixIcons.Useful.New,
-            MiuixIcons.Useful.Order,
-            MiuixIcons.Useful.Paste,
-            MiuixIcons.Useful.Pause,
-            MiuixIcons.Useful.Personal,
-            MiuixIcons.Useful.Play,
-            MiuixIcons.Useful.Reboot,
-            MiuixIcons.Useful.Redo,
-            MiuixIcons.Useful.Refresh,
-            MiuixIcons.Useful.Remove,
-            MiuixIcons.Useful.RemoveBlocklist,
-            MiuixIcons.Useful.RemoveSecret,
-            MiuixIcons.Useful.Rename,
-            MiuixIcons.Useful.Restore,
-            MiuixIcons.Useful.Save,
-            MiuixIcons.Useful.Scan,
-            MiuixIcons.Useful.Search,
-            MiuixIcons.Useful.SelectAll,
-            MiuixIcons.Useful.Settings,
-            MiuixIcons.Useful.Share,
-            MiuixIcons.Useful.Stick,
-            MiuixIcons.Useful.Undo,
-            MiuixIcons.Useful.Unlike,
-            MiuixIcons.Useful.Unstick,
-            MiuixIcons.Useful.Update
-        )
-    }
-
-    val focusManager = LocalFocusManager.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
     Scaffold(
@@ -282,7 +197,7 @@ fun MainPage(
                 item(key = "textComponent") {
                     textComponent()
                 }
-                otherComponent(miuixIcons, focusManager)
+                otherComponent()
             }
         }
     }

@@ -27,10 +27,10 @@ Scaffold(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) { // 或 Column
                 IconButton(onClick = { /* 操作 1 */ }) {
-                    Icon(MiuixIcons.Useful.Edit, contentDescription = "编辑")
+                    Icon(MiuixIcons.Edit, contentDescription = "编辑")
                 }
                 IconButton(onClick = { /* 操作 2 */ }) {
-                    Icon(MiuixIcons.Useful.Delete, contentDescription = "删除")
+                    Icon(MiuixIcons.Delete, contentDescription = "删除")
                 }
             }
         }
@@ -81,10 +81,10 @@ FloatingToolbar(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) { // 或 Column
         IconButton(onClick = { /* 操作 1 */ }) {
-            Icon(MiuixIcons.Useful.Edit, contentDescription = "编辑", tint = MiuixTheme.colorScheme.onPrimaryContainer)
+            Icon(MiuixIcons.Edit, contentDescription = "编辑", tint = MiuixTheme.colorScheme.onPrimaryContainer)
         }
         IconButton(onClick = { /* 操作 2 */ }) {
-            Icon(MiuixIcons.Useful.Delete, contentDescription = "删除", tint = MiuixTheme.colorScheme.onPrimaryContainer)
+            Icon(MiuixIcons.Delete, contentDescription = "删除", tint = MiuixTheme.colorScheme.onPrimaryContainer)
         }
     }
 }
@@ -99,10 +99,10 @@ FloatingToolbar {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         IconButton(onClick = { /* 操作 1 */ }) {
-            Icon(MiuixIcons.Useful.Edit, contentDescription = "编辑")
+            Icon(MiuixIcons.Edit, contentDescription = "编辑")
         }
         IconButton(onClick = { /* 操作 2 */ }) {
-            Icon(MiuixIcons.Useful.Delete, contentDescription = "删除")
+            Icon(MiuixIcons.Delete, contentDescription = "删除")
         }
     }
 }

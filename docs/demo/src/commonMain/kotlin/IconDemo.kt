@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
-import top.yukonga.miuix.kmp.icon.icons.useful.Rename
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.icons.icons.Edit
+import top.yukonga.miuix.kmp.icons.icons.Contacts
+import top.yukonga.miuix.kmp.icons.icons.Rename
+import top.yukonga.miuix.kmp.icons.icons.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -49,22 +49,22 @@ fun IconDemo() {
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Useful.Personal,
+                        imageVector = MiuixIcons.Contacts,
                         contentDescription = "Personal",
                         tint = MiuixTheme.colorScheme.onBackground
                     )
                     Icon(
-                        imageVector = MiuixIcons.Useful.Settings,
+                        imageVector = MiuixIcons.Settings,
                         contentDescription = "Settings",
                         tint = MiuixTheme.colorScheme.onBackground
                     )
                     Icon(
-                        imageVector = MiuixIcons.Useful.Edit,
+                        imageVector = MiuixIcons.Edit,
                         contentDescription = "Blue Edit",
                         tint = Color.Blue
                     )
                     Icon(
-                        imageVector = MiuixIcons.Useful.Rename,
+                        imageVector = MiuixIcons.Rename,
                         contentDescription = "Green Rename",
                         tint = Color.Green
                     )

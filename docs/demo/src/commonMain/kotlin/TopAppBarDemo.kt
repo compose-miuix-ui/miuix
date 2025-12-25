@@ -30,8 +30,8 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
-import top.yukonga.miuix.kmp.icon.icons.useful.More
+import top.yukonga.miuix.kmp.icons.icons.Back
+import top.yukonga.miuix.kmp.icons.icons.More
 
 @Composable
 fun TopAppBarDemo() {
@@ -68,7 +68,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(start = 16.dp)
                                     ) {
                                         Icon(
-                                            MiuixIcons.Useful.Back,
+                                            MiuixIcons.Back,
                                             contentDescription = "Back"
                                         )
                                     }
@@ -79,7 +79,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(end = 16.dp)
                                     ) {
                                         Icon(
-                                            MiuixIcons.Useful.More,
+                                            MiuixIcons.More,
                                             contentDescription = "More"
                                         )
                                     }
@@ -121,7 +121,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(start = 16.dp)
                                     ) {
                                         Icon(
-                                            MiuixIcons.Useful.Back,
+                                            MiuixIcons.Back,
                                             contentDescription = "Back"
                                         )
                                     }
@@ -132,7 +132,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(end = 16.dp)
                                     ) {
                                         Icon(
-                                            MiuixIcons.Useful.More,
+                                            MiuixIcons.More,
                                             contentDescription = "More"
                                         )
                                     }

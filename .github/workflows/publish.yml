@@ -6,6 +6,7 @@ on:
     tags: ["*"]
     paths:
       - "miuix/**"
+      - "miuix-icons/**"
       - "build-plugin/**"
       - "gradle/**"
       - "settings.gradle.kts"

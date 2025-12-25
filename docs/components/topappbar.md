@@ -28,12 +28,12 @@ Scaffold(
             title = "Title",
             navigationIcon = {
                 IconButton(onClick = { /* Handle click event */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "Back")
+                    Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
                 IconButton(onClick = { /* Handle click event */ }) {
-                    Icon(MiuixIcons.Useful.More, contentDescription = "More")
+                    Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
         )
@@ -51,12 +51,12 @@ Scaffold(
             largeTitle = "Large Title", // If not specified, title value will be used
             navigationIcon = {
                 IconButton(onClick = { /* Handle click event */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "Back")
+                    Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
                 IconButton(onClick = { /* Handle click event */ }) {
-                    Icon(MiuixIcons.Useful.More, contentDescription = "More")
+                    Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
         )
@@ -210,7 +210,7 @@ Box(modifier = Modifier.fillMaxSize()) {
             navigationIcon = {
                 IconButton(onClick = { useSmallTopBar = false }) {
                     Icon(
-                        imageVector = MiuixIcons.Useful.Back,
+                        imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Large Title",
                         tint = MiuixTheme.colorScheme.onBackground
                     )
@@ -224,7 +224,7 @@ Box(modifier = Modifier.fillMaxSize()) {
             navigationIcon = {
                 IconButton(onClick = { useSmallTopBar = true }) {
                     Icon(
-                        imageVector = MiuixIcons.Useful.Back,
+                        imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Small Title",
                         tint = MiuixTheme.colorScheme.onBackground
                     )

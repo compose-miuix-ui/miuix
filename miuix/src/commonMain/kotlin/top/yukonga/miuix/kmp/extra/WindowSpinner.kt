@@ -43,7 +43,7 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowUpDownIntegrated
+import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -207,7 +207,7 @@ private fun RowScope.WindowSpinnerRightActions(
             .padding(start = 8.dp)
             .size(10.dp, 16.dp)
             .align(Alignment.CenterVertically),
-        imageVector = MiuixIcons.Basic.ArrowUpDownIntegrated,
+        imageVector = MiuixIcons.Basic.ArrowUpDown,
         colorFilter = ColorFilter.tint(actionColor),
         contentDescription = null
     )

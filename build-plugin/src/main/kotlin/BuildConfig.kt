@@ -17,6 +17,11 @@ object BuildConfig {
 }
 
 fun getVersionCode(): Int {
-    val process = Runtime.getRuntime().exec(arrayOf("git", "rev-list", "--count", "HEAD"))
+    val process = ProcessBuilder("git", "rev-list", "--count", "HEAD").start()
     return process.inputStream.bufferedReader().use { it.readText().trim().toInt() }
+}
+
+fun gitHashShort(): String {
+    val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
+    return process.inputStream.bufferedReader().use { it.readText().trim() }
 }

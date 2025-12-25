@@ -46,7 +46,7 @@ BasicComponent(
     leftAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
-            imageVector = MiuixIcons.Useful.Personal,
+            imageVector = MiuixIcons.Contacts,
             contentDescription = "Avatar Icon",
             tint = MiuixTheme.colorScheme.onBackground
         )
@@ -140,7 +140,7 @@ BasicComponent(
     leftAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
-            imageVector = MiuixIcons.Useful.Play,
+            imageVector = MiuixIcons.Play,
             contentDescription = "Volume Icon",
             tint = MiuixTheme.colorScheme.onBackground
         )
@@ -148,7 +148,7 @@ BasicComponent(
     rightActions = {
         IconButton(onClick = { /* Decrease volume */ }) {
             Icon(
-                imageVector = MiuixIcons.Useful.Remove,
+                imageVector = MiuixIcons.Remove,
                 contentDescription = "Decrease Volume",
                 tint = MiuixTheme.colorScheme.onBackground
             )
@@ -156,7 +156,7 @@ BasicComponent(
         Text("70%")
         IconButton(onClick = { /* Increase volume */ }) {
             Icon(
-                imageVector = MiuixIcons.Useful.New,
+                imageVector = MiuixIcons.Add,
                 contentDescription = "Increase Volume",
                 tint = MiuixTheme.colorScheme.onBackground
             )

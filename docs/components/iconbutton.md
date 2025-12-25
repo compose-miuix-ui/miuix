@@ -21,8 +21,8 @@ IconButton(
     onClick = { /* Handle click event */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Like"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -37,8 +37,8 @@ IconButton(
     enabled = false
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Like"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -56,8 +56,8 @@ Scaffold {
         holdDownState = showDialog.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Like,
-            contentDescription = "Like"
+            imageVector = MiuixIcons.Favorites,
+            contentDescription = "Favorites"
         )
     }
     // Define dialog elsewhere
@@ -109,8 +109,8 @@ IconButton(
     backgroundColor = Color.LightGray.copy(alpha = 0.3f)
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Like"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -125,8 +125,8 @@ IconButton(
     cornerRadius = 12.dp
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Like"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -142,7 +142,7 @@ Surface {
             onClick = { /* Handle click event */ }
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.New,
+                imageVector = MiuixIcons.Add,
                 tint = MiuixTheme.colorScheme.onBackground,
                 contentDescription = "Add"
             )
@@ -161,8 +161,8 @@ IconButton(
     onClick = { isLiked = !isLiked }
 ) {
     Icon(
-        imageVector = if (isLiked) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
-        contentDescription = if (isLiked) "Liked" else "Like",
+        imageVector = if (isLiked) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+        contentDescription = if (isLiked) "Like" else "Unlike",
         tint = if (isLiked) Color.Red else MiuixTheme.colorScheme.onBackground
     )
 }

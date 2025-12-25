@@ -25,7 +25,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.SelectAll
+import top.yukonga.miuix.kmp.icons.icons.SelectAll
 
 @Composable
 fun FloatingActionButtonDemo() {
@@ -57,7 +57,7 @@ fun FloatingActionButtonDemo() {
                                 }
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.Useful.SelectAll,
+                                    imageVector = MiuixIcons.SelectAll,
                                     contentDescription = "SelectAll",
                                     tint = Color.White
                                 )
@@ -86,7 +86,7 @@ fun FloatingActionButtonDemo() {
                                 }
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.Useful.SelectAll,
+                                    imageVector = MiuixIcons.SelectAll,
                                     contentDescription = "SelectAll",
                                     tint = Color.White
                                 )

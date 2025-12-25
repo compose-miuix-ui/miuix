@@ -27,9 +27,9 @@ NavigationBar 组件可用于创建固定在底部的导航菜单，：
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -50,9 +50,9 @@ FloatingNavigationBar 组件可用于创建悬浮在底部的导航菜单：
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -128,9 +128,9 @@ Scaffold(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -146,9 +146,9 @@ NavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -164,9 +164,9 @@ NavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -184,9 +184,9 @@ NavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -202,9 +202,9 @@ FloatingNavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -220,9 +220,9 @@ FloatingNavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -240,9 +240,9 @@ FloatingNavigationBar(
 
 ```kotlin
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -263,9 +263,9 @@ FloatingNavigationBar(
 ```kotlin
 val pages = listOf("首页", "我的", "设置")
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 
@@ -298,9 +298,9 @@ Scaffold(
 ```kotlin
 val pages = listOf("首页", "我的", "设置")
 val items = listOf(
-    NavigationItem("首页", MiuixIcons.Useful.NavigatorSwitch),
-    NavigationItem("我的", MiuixIcons.Useful.Personal),
-    NavigationItem("设置", MiuixIcons.Useful.Settings)
+    NavigationItem("首页", MiuixIcons.VerticalSplit),
+    NavigationItem("我的", MiuixIcons.Contacts),
+    NavigationItem("设置", MiuixIcons.Settings)
 )
 var selectedIndex by remember { mutableStateOf(0) }
 

@@ -20,8 +20,8 @@ The Icon component can be used to display icons:
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "Like Icon"
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites"
 )
 ```
 
@@ -33,7 +33,7 @@ Miuix Icon supports multiple types of icon resources:
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Settings,
+    imageVector = MiuixIcons.Settings,
     contentDescription = "Settings Icon"
 )
 ```
@@ -65,7 +65,7 @@ Icon(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Personal,
+    imageVector = MiuixIcons.Contacts,
     contentDescription = "Personal Icon",
     tint = Color.Red
 )
@@ -75,8 +75,8 @@ Icon(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "Like Icon",
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites",
     tint = Color.Unspecified // Default
 )
 ```
@@ -126,8 +126,8 @@ The IconDefaults object provides default configurations for the Icon component.
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Like,
-    contentDescription = "Like Icon",
+    imageVector = MiuixIcons.Favorites,
+    contentDescription = "Favorites",
     modifier = Modifier.size(32.dp)
 )
 ```
@@ -139,7 +139,7 @@ Button(
     onClick = { /* Handle click event */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Save,
+        imageVector = MiuixIcons.Save,
         contentDescription = "Download Icon"
     )
     Spacer(modifier = Modifier.width(8.dp))
@@ -151,7 +151,7 @@ Button(
 
 ```kotlin
 Icon(
-    imageVector = MiuixIcons.Useful.Info,
+    imageVector = MiuixIcons.Info,
     contentDescription = "Warning Icon",
     tint = Color(0xFFFFA500),
     modifier = Modifier
@@ -170,8 +170,8 @@ Icon(
 var isSelected by remember { mutableStateOf(false) }
 
 Icon(
-    imageVector = if (isSelected) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
-    contentDescription = "Like Icon",
+    imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+    contentDescription = "Favorites",
     modifier = Modifier.clickable { isSelected = !isSelected }
 )
 ```

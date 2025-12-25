@@ -88,7 +88,7 @@ SuperSwitch(
     onCheckedChange = { enabled = it },
     leftAction = {
         Icon(
-            imageVector = MiuixIcons.Useful.Order,
+            imageVector = MiuixIcons.Sort,
             contentDescription = "命令图标",
             tint = MiuixTheme.colorScheme.onBackground,
             modifier = Modifier.padding(end = 12.dp)

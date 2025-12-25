@@ -12,6 +12,8 @@ plugins {
     id("module.publication")
 }
 
+description = "A UI library for Compose MultiPlatform"
+
 kotlin {
     withSourcesJar(true)
 

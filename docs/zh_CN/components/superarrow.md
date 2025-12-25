@@ -116,7 +116,7 @@ SuperArrow(
     summary = "查看和修改您的个人资料",
     leftAction = {
         Icon(
-            imageVector = MiuixIcons.Useful.Personal,
+            imageVector = MiuixIcons.Contacts,
             contentDescription = "个人图标",
             tint = MiuixTheme.colorScheme.onBackground,
             modifier = Modifier.padding(end = 16.dp)

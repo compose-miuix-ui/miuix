@@ -21,8 +21,8 @@ IconButton(
     onClick = { /* 处理点击事件 */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "点赞"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -37,8 +37,8 @@ IconButton(
     enabled = false
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "点赞"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -56,8 +56,8 @@ Scaffold {
         holdDownState = showDialog.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Like,
-            contentDescription = "点赞"
+            imageVector = MiuixIcons.Favorites,
+            contentDescription = "Favorites"
         )
     }
     // 在其他地方定义对话框
@@ -109,8 +109,8 @@ IconButton(
     backgroundColor = Color.LightGray.copy(alpha = 0.3f)
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "点赞"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -125,8 +125,8 @@ IconButton(
     cornerRadius = 12.dp
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "点赞"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
 }
 ```
@@ -142,7 +142,7 @@ Surface {
             onClick = { /* 处理点击事件 */ }
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.New,
+                imageVector = MiuixIcons.Add,
                 tint = MiuixTheme.colorScheme.onBackground,
                 contentDescription = "添加"
             )
@@ -161,8 +161,8 @@ IconButton(
     onClick = { isLiked = !isLiked }
 ) {
     Icon(
-        imageVector = if (isLiked) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
-        contentDescription = if (isLiked) "已点赞" else "点赞",
+        imageVector = if (isLiked) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+        contentDescription = if (isLiked) "喜欢" else "不喜欢",
         tint = if (isLiked) Color.Red else MiuixTheme.colorScheme.onBackground
     )
 }

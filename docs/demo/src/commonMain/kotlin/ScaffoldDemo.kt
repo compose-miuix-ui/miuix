@@ -28,9 +28,9 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.NavigatorSwitch
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.icons.icons.VerticalSplit
+import top.yukonga.miuix.kmp.icons.icons.Contacts
+import top.yukonga.miuix.kmp.icons.icons.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -51,9 +51,9 @@ fun ScaffoldDemo() {
         ) {
             val pages = listOf("Home", "Profile", "Settings")
             val items = listOf(
-                NavigationItem("Home", MiuixIcons.Useful.NavigatorSwitch),
-                NavigationItem("Profile", MiuixIcons.Useful.Personal),
-                NavigationItem("Settings", MiuixIcons.Useful.Settings)
+                NavigationItem("Home", MiuixIcons.VerticalSplit),
+                NavigationItem("Profile", MiuixIcons.Contacts),
+                NavigationItem("Settings", MiuixIcons.Settings)
             )
             var selectedIndex by remember { mutableStateOf(0) }
             Card {
@@ -77,7 +77,7 @@ fun ScaffoldDemo() {
                             }
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Useful.Personal,
+                                imageVector = MiuixIcons.Contacts,
                                 contentDescription = "Personal",
                                 tint = Color.White
                             )

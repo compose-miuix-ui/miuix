@@ -28,12 +28,12 @@ Scaffold(
             title = "标题",
             navigationIcon = {
                 IconButton(onClick = { /* 处理点击事件 */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "返回")
+                    Icon(MiuixIcons.Back, contentDescription = "返回")
                 }
             },
             actions = {
                 IconButton(onClick = { /* 处理点击事件 */ }) {
-                    Icon(MiuixIcons.Useful.More, contentDescription = "更多")
+                    Icon(MiuixIcons.More, contentDescription = "更多")
                 }
             }
         )
@@ -51,12 +51,12 @@ Scaffold(
             largeTitle = "大标题", // 如果不指定，将使用 title 的值
             navigationIcon = {
                 IconButton(onClick = { /* 处理点击事件 */ }) {
-                    Icon(MiuixIcons.Useful.Back, contentDescription = "返回")
+                    Icon(MiuixIcons.Back, contentDescription = "返回")
                 }
             },
             actions = {
                 IconButton(onClick = { /* 处理点击事件 */ }) {
-                    Icon(MiuixIcons.Useful.More, contentDescription = "更多")
+                    Icon(MiuixIcons.More, contentDescription = "更多")
                 }
            }
         )
@@ -210,7 +210,7 @@ Box(modifier = Modifier.fillMaxSize()) {
             navigationIcon = {
                 IconButton(onClick = { useSmallTopBar = false }) {
                     Icon(
-                        imageVector = MiuixIcons.Useful.Back,
+                        imageVector = MiuixIcons.Back,
                         contentDescription = "切换到大标题",
                         tint = MiuixTheme.colorScheme.onBackground
                     )
@@ -224,7 +224,7 @@ Box(modifier = Modifier.fillMaxSize()) {
             navigationIcon = {
                 IconButton(onClick = { useSmallTopBar = true }) {
                     Icon(
-                            imageVector = MiuixIcons.Useful.Back,
+                            imageVector = MiuixIcons.Back,
                         contentDescription = "切换到小标题",
                         tint = MiuixTheme.colorScheme.onBackground
                     )

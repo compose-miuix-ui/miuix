@@ -23,7 +23,7 @@ FloatingActionButton(
     onClick = { /* Handle click event */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.New,
+        imageVector = MiuixIcons.Add,
         contentDescription = "Add"
     )
 }
@@ -58,8 +58,8 @@ FloatingActionButton(
     containerColor = Color.Red
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Like",
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites",
         tint = Color.White
     )
 }
@@ -79,7 +79,7 @@ FloatingActionButton(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.New,
+            imageVector = MiuixIcons.Add,
             contentDescription = "Add",
             tint = Color.White
         )
@@ -98,7 +98,7 @@ Scaffold(
             onClick = { /* Handle click event */ }
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.Add,
+                imageVector = MiuixIcons.Add,
                 contentDescription = "Add"
             )
         }
@@ -131,7 +131,7 @@ FloatingActionButton(
     minHeight = animatedSize
 ) {
     Icon(
-        imageVector = if (expanded) MiuixIcons.Useful.Remove else MiuixIcons.Useful.New,
+        imageVector = if (expanded) MiuixIcons.Remove else MiuixIcons.Add,
         contentDescription = if (expanded) "Remove" else "Add",
         tint = Color.White
     )

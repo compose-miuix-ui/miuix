@@ -27,10 +27,10 @@ Scaffold(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) { // or Column
                 IconButton(onClick = { /* Action 1 */ }) {
-                    Icon(MiuixIcons.Useful.Edit, contentDescription = "Edit")
+                    Icon(MiuixIcons.Edit, contentDescription = "Edit")
                 }
                 IconButton(onClick = { /* Action 2 */ }) {
-                    Icon(MiuixIcons.Useful.Delete, contentDescription = "Delete")
+                    Icon(MiuixIcons.Delete, contentDescription = "Delete")
                 }
             }
         }
@@ -81,10 +81,10 @@ FloatingToolbar(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) { // or Column
         IconButton(onClick = { /* Action 1 */ }) {
-            Icon(MiuixIcons.Useful.Edit, contentDescription = "Edit", tint = MiuixTheme.colorScheme.onPrimaryContainer)
+            Icon(MiuixIcons.Edit, contentDescription = "Edit", tint = MiuixTheme.colorScheme.onPrimaryContainer)
         }
         IconButton(onClick = { /* Action 2 */ }) {
-            Icon(MiuixIcons.Useful.Delete, contentDescription = "Delete", tint = MiuixTheme.colorScheme.onPrimaryContainer)
+            Icon(MiuixIcons.Delete, contentDescription = "Delete", tint = MiuixTheme.colorScheme.onPrimaryContainer)
         }
     }
 }
@@ -99,10 +99,10 @@ FloatingToolbar {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         IconButton(onClick = { /* Action 1 */ }) {
-            Icon(MiuixIcons.Useful.Edit, contentDescription = "Edit")
+            Icon(MiuixIcons.Edit, contentDescription = "Edit")
         }
         IconButton(onClick = { /* Action 2 */ }) {
-            Icon(MiuixIcons.Useful.Delete, contentDescription = "Delete")
+            Icon(MiuixIcons.Delete, contentDescription = "Delete")
         }
     }
 }

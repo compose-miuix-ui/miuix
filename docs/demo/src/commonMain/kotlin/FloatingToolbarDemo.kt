@@ -26,8 +26,8 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
+import top.yukonga.miuix.kmp.icons.icons.Delete
+import top.yukonga.miuix.kmp.icons.icons.Edit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -61,14 +61,14 @@ fun FloatingToolbarDemo() {
                                 ) { // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Useful.Edit,
+                                            imageVector = MiuixIcons.Edit,
                                             contentDescription = "Edit",
                                             tint = MiuixTheme.colorScheme.onBackground
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Useful.Delete,
+                                            imageVector = MiuixIcons.Delete,
                                             contentDescription = "Delete",
                                             tint = MiuixTheme.colorScheme.onBackground
                                         )
@@ -100,14 +100,14 @@ fun FloatingToolbarDemo() {
                                 ) { // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
-                                            imageVector =  MiuixIcons.Useful.Edit,
+                                            imageVector =  MiuixIcons.Edit,
                                             contentDescription = "Edit",
                                             tint = MiuixTheme.colorScheme.onBackground
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Useful.Delete,
+                                            imageVector = MiuixIcons.Delete,
                                             contentDescription = "Delete",
                                             tint = MiuixTheme.colorScheme.onBackground
                                         )

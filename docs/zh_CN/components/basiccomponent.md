@@ -46,7 +46,7 @@ BasicComponent(
     leftAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
-            imageVector = MiuixIcons.Useful.Personal,
+            imageVector = MiuixIcons.Contacts,
             contentDescription = "头像图标",
             tint = MiuixTheme.colorScheme.onBackground
         )
@@ -140,7 +140,7 @@ BasicComponent(
         leftAction = {
         Icon(
         modifier = Modifier.padding(end = 16.dp),
-            imageVector = MiuixIcons.Useful.Play,
+            imageVector = MiuixIcons.Play,
             contentDescription = "音量图标",
             tint = MiuixTheme.colorScheme.onBackground
         )
@@ -148,7 +148,7 @@ BasicComponent(
     rightActions = {
         IconButton(onClick = { /* 减小音量 */ }) {
             Icon(
-                imageVector = MiuixIcons.Useful.Remove,
+                imageVector = MiuixIcons.Remove,
                 contentDescription = "减小音量",
                 tint = MiuixTheme.colorScheme.onBackground
             )
@@ -156,7 +156,7 @@ BasicComponent(
         Text("70%")
         IconButton(onClick = { /* 增大音量 */ }) {
             Icon(
-                imageVector = MiuixIcons.Useful.New,
+                imageVector = MiuixIcons.Add,
                 contentDescription = "增大音量",
                 tint = MiuixTheme.colorScheme.onBackground
             )

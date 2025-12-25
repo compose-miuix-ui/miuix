@@ -133,8 +133,8 @@ Button(
     onClick = { /* Handle click event */ }
 ) {
     Icon(
-        imageVector = MiuixIcons.Useful.Like,
-        contentDescription = "Icon"
+        imageVector = MiuixIcons.Favorites,
+        contentDescription = "Favorites"
     )
     Spacer(modifier = Modifier.width(8.dp))
     Text("Button with Icon")

@@ -35,7 +35,7 @@ jobs:
           ./gradlew :docs:demo:jsBrowserDistribution
           mkdir -p ./docs/public/compose
           mv ./docs/demo/build/dist/js/productionExecutable/* ./docs/public/compose
-          ./gradlew :docs:iconGen:generateSvg
+          ./gradlew :docs:iconGen:generateIcons
           mv ./docs/iconGen/build/generated-svg/icons ./docs/public/icons
           cd ./docs
           yarn install

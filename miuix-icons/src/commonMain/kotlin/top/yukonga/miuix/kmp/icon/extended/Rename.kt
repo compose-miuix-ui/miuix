@@ -1,0 +1,349 @@
+// Copyright 2025, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.icon.extended
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.group
+import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+
+val MiuixIcons.Rename: ImageVector
+    get() = MiuixIcons.Regular.Rename
+
+val MiuixIcons.Light.Rename: ImageVector
+    get() {
+        if (_renameLight != null) return _renameLight!!
+        _renameLight = ImageVector.Builder(
+            name = "Rename.Light",
+            defaultWidth = 24.0f.dp,
+            defaultHeight = 24.0f.dp,
+            viewportWidth = 1198.8f,
+            viewportHeight = 1198.8f
+        ).apply {
+            group(scaleX = 1.0f, scaleY = -1.0f, translationX = -65.10000000000002f, translationY = 974.4f) {
+            addPath(
+                pathData = listOf(
+                PathNode.MoveTo(1067.0f, -40.0f),
+                PathNode.QuadTo(1118.0f, -14.0f, 1144.0f, 37.0f),
+                PathNode.QuadTo(1158.0f, 63.0f, 1161.0f, 101.0f),
+                PathNode.QuadTo(1164.0f, 139.0f, 1164.0f, 231.0f),
+                PathNode.VerticalTo(519.0f),
+                PathNode.QuadTo(1164.0f, 612.0f, 1161.0f, 649.5f),
+                PathNode.QuadTo(1158.0f, 687.0f, 1144.0f, 713.0f),
+                PathNode.QuadTo(1118.0f, 764.0f, 1067.0f, 790.0f),
+                PathNode.QuadTo(1042.0f, 804.0f, 1003.5f, 807.0f),
+                PathNode.QuadTo(965.0f, 810.0f, 873.0f, 810.0f),
+                PathNode.HorizontalTo(456.0f),
+                PathNode.QuadTo(364.0f, 810.0f, 326.0f, 807.0f),
+                PathNode.QuadTo(288.0f, 804.0f, 262.0f, 790.0f),
+                PathNode.QuadTo(211.0f, 764.0f, 185.0f, 713.0f),
+                PathNode.QuadTo(171.0f, 687.0f, 168.0f, 649.5f),
+                PathNode.QuadTo(165.0f, 612.0f, 165.0f, 519.0f),
+                PathNode.VerticalTo(231.0f),
+                PathNode.QuadTo(165.0f, 139.0f, 168.0f, 101.0f),
+                PathNode.QuadTo(171.0f, 63.0f, 185.0f, 37.0f),
+                PathNode.QuadTo(211.0f, -14.0f, 262.0f, -40.0f),
+                PathNode.QuadTo(288.0f, -54.0f, 326.0f, -57.0f),
+                PathNode.QuadTo(364.0f, -60.0f, 456.0f, -60.0f),
+                PathNode.HorizontalTo(873.0f),
+                PathNode.QuadTo(965.0f, -60.0f, 1003.5f, -57.0f),
+                PathNode.QuadTo(1042.0f, -54.0f, 1067.0f, -40.0f),
+                PathNode.Close,
+                PathNode.MoveTo(291.0f, 13.0f),
+                PathNode.QuadTo(274.0f, 21.0f, 260.0f, 35.5f),
+                PathNode.QuadTo(246.0f, 50.0f, 238.0f, 67.0f),
+                PathNode.QuadTo(229.0f, 85.0f, 227.0f, 109.5f),
+                PathNode.QuadTo(225.0f, 134.0f, 225.0f, 188.0f),
+                PathNode.VerticalTo(563.0f),
+                PathNode.QuadTo(225.0f, 617.0f, 227.0f, 641.5f),
+                PathNode.QuadTo(229.0f, 666.0f, 238.0f, 684.0f),
+                PathNode.QuadTo(254.0f, 718.0f, 291.0f, 738.0f),
+                PathNode.QuadTo(310.0f, 747.0f, 334.0f, 749.0f),
+                PathNode.QuadTo(358.0f, 751.0f, 413.0f, 751.0f),
+                PathNode.HorizontalTo(917.0f),
+                PathNode.QuadTo(971.0f, 751.0f, 995.5f, 749.0f),
+                PathNode.QuadTo(1020.0f, 747.0f, 1038.0f, 738.0f),
+                PathNode.QuadTo(1074.0f, 718.0f, 1092.0f, 684.0f),
+                PathNode.QuadTo(1101.0f, 666.0f, 1103.0f, 641.5f),
+                PathNode.QuadTo(1105.0f, 617.0f, 1105.0f, 563.0f),
+                PathNode.VerticalTo(188.0f),
+                PathNode.QuadTo(1105.0f, 134.0f, 1103.0f, 109.5f),
+                PathNode.QuadTo(1101.0f, 85.0f, 1092.0f, 67.0f),
+                PathNode.QuadTo(1073.0f, 30.0f, 1038.0f, 13.0f),
+                PathNode.QuadTo(1020.0f, 4.0f, 995.5f, 2.0f),
+                PathNode.QuadTo(971.0f, 0.0f, 917.0f, 0.0f),
+                PathNode.HorizontalTo(413.0f),
+                PathNode.QuadTo(358.0f, 0.0f, 334.0f, 2.0f),
+                PathNode.QuadTo(310.0f, 4.0f, 291.0f, 13.0f),
+                PathNode.Close,
+                PathNode.MoveTo(528.0f, 112.0f),
+                PathNode.VerticalTo(136.0f),
+                PathNode.QuadTo(528.0f, 144.0f, 522.5f, 149.0f),
+                PathNode.QuadTo(517.0f, 154.0f, 509.0f, 154.0f),
+                PathNode.HorizontalTo(482.0f),
+                PathNode.QuadTo(475.0f, 154.0f, 475.0f, 161.0f),
+                PathNode.VerticalTo(590.0f),
+                PathNode.QuadTo(475.0f, 597.0f, 482.0f, 597.0f),
+                PathNode.HorizontalTo(511.0f),
+                PathNode.QuadTo(519.0f, 597.0f, 523.5f, 602.0f),
+                PathNode.QuadTo(528.0f, 607.0f, 528.0f, 615.0f),
+                PathNode.VerticalTo(637.0f),
+                PathNode.QuadTo(528.0f, 656.0f, 509.0f, 656.0f),
+                PathNode.HorizontalTo(381.0f),
+                PathNode.QuadTo(362.0f, 656.0f, 362.0f, 637.0f),
+                PathNode.VerticalTo(616.0f),
+                PathNode.QuadTo(362.0f, 608.0f, 367.0f, 602.5f),
+                PathNode.QuadTo(372.0f, 597.0f, 379.0f, 597.0f),
+                PathNode.HorizontalTo(408.0f),
+                PathNode.QuadTo(415.0f, 597.0f, 415.0f, 590.0f),
+                PathNode.VerticalTo(161.0f),
+                PathNode.QuadTo(415.0f, 158.0f, 413.0f, 156.0f),
+                PathNode.QuadTo(411.0f, 154.0f, 408.0f, 154.0f),
+                PathNode.HorizontalTo(381.0f),
+                PathNode.QuadTo(373.0f, 154.0f, 367.5f, 149.0f),
+                PathNode.QuadTo(362.0f, 144.0f, 362.0f, 136.0f),
+                PathNode.VerticalTo(112.0f),
+                PathNode.QuadTo(362.0f, 104.0f, 367.5f, 99.0f),
+                PathNode.QuadTo(373.0f, 94.0f, 380.0f, 94.0f),
+                PathNode.HorizontalTo(509.0f),
+                PathNode.QuadTo(518.0f, 94.0f, 523.0f, 98.5f),
+                PathNode.QuadTo(528.0f, 103.0f, 528.0f, 112.0f),
+                PathNode.Close,
+            ),
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1f,
+                pathFillType = PathFillType.NonZero
+            )
+                    }
+        }.build()
+        return _renameLight!!
+    }
+
+private var _renameLight: ImageVector? = null
+
+val MiuixIcons.Regular.Rename: ImageVector
+    get() {
+        if (_renameRegular != null) return _renameRegular!!
+        _renameRegular = ImageVector.Builder(
+            name = "Rename.Regular",
+            defaultWidth = 24.0f.dp,
+            defaultHeight = 24.0f.dp,
+            viewportWidth = 1230.0f,
+            viewportHeight = 1230.0f
+        ).apply {
+            group(scaleX = 1.0f, scaleY = -1.0f, translationX = -49.5f, translationY = 990.0f) {
+            addPath(
+                pathData = listOf(
+                PathNode.MoveTo(1073.0f, -52.0f),
+                PathNode.QuadTo(1128.0f, -24.0f, 1156.0f, 31.0f),
+                PathNode.QuadTo(1170.0f, 59.0f, 1173.5f, 98.5f),
+                PathNode.QuadTo(1177.0f, 138.0f, 1177.0f, 231.0f),
+                PathNode.VerticalTo(519.0f),
+                PathNode.QuadTo(1177.0f, 613.0f, 1173.5f, 652.0f),
+                PathNode.QuadTo(1170.0f, 691.0f, 1156.0f, 719.0f),
+                PathNode.QuadTo(1128.0f, 774.0f, 1073.0f, 802.0f),
+                PathNode.QuadTo(1046.0f, 816.0f, 1006.0f, 819.5f),
+                PathNode.QuadTo(966.0f, 823.0f, 873.0f, 823.0f),
+                PathNode.HorizontalTo(456.0f),
+                PathNode.QuadTo(363.0f, 823.0f, 323.5f, 819.5f),
+                PathNode.QuadTo(284.0f, 816.0f, 256.0f, 802.0f),
+                PathNode.QuadTo(201.0f, 774.0f, 173.0f, 719.0f),
+                PathNode.QuadTo(159.0f, 691.0f, 155.5f, 652.0f),
+                PathNode.QuadTo(152.0f, 613.0f, 152.0f, 519.0f),
+                PathNode.VerticalTo(231.0f),
+                PathNode.QuadTo(152.0f, 138.0f, 155.5f, 98.5f),
+                PathNode.QuadTo(159.0f, 59.0f, 173.0f, 31.0f),
+                PathNode.QuadTo(201.0f, -24.0f, 256.0f, -52.0f),
+                PathNode.QuadTo(284.0f, -66.0f, 323.5f, -69.5f),
+                PathNode.QuadTo(363.0f, -73.0f, 456.0f, -73.0f),
+                PathNode.HorizontalTo(873.0f),
+                PathNode.QuadTo(966.0f, -73.0f, 1006.0f, -69.5f),
+                PathNode.QuadTo(1046.0f, -66.0f, 1073.0f, -52.0f),
+                PathNode.Close,
+                PathNode.MoveTo(297.0f, 25.0f),
+                PathNode.QuadTo(282.0f, 33.0f, 269.5f, 45.0f),
+                PathNode.QuadTo(257.0f, 57.0f, 250.0f, 73.0f),
+                PathNode.QuadTo(242.0f, 89.0f, 240.0f, 112.0f),
+                PathNode.QuadTo(238.0f, 135.0f, 238.0f, 188.0f),
+                PathNode.VerticalTo(563.0f),
+                PathNode.QuadTo(238.0f, 617.0f, 240.0f, 639.5f),
+                PathNode.QuadTo(242.0f, 662.0f, 250.0f, 678.0f),
+                PathNode.QuadTo(264.0f, 708.0f, 297.0f, 726.0f),
+                PathNode.QuadTo(314.0f, 734.0f, 336.5f, 736.0f),
+                PathNode.QuadTo(359.0f, 738.0f, 413.0f, 738.0f),
+                PathNode.HorizontalTo(917.0f),
+                PathNode.QuadTo(971.0f, 738.0f, 993.5f, 736.0f),
+                PathNode.QuadTo(1016.0f, 734.0f, 1032.0f, 726.0f),
+                PathNode.QuadTo(1064.0f, 708.0f, 1080.0f, 678.0f),
+                PathNode.QuadTo(1088.0f, 662.0f, 1090.0f, 639.5f),
+                PathNode.QuadTo(1092.0f, 617.0f, 1092.0f, 563.0f),
+                PathNode.VerticalTo(188.0f),
+                PathNode.QuadTo(1092.0f, 135.0f, 1090.0f, 112.0f),
+                PathNode.QuadTo(1088.0f, 89.0f, 1080.0f, 73.0f),
+                PathNode.QuadTo(1063.0f, 40.0f, 1032.0f, 25.0f),
+                PathNode.QuadTo(1016.0f, 17.0f, 993.5f, 15.0f),
+                PathNode.QuadTo(971.0f, 13.0f, 917.0f, 13.0f),
+                PathNode.HorizontalTo(413.0f),
+                PathNode.QuadTo(359.0f, 13.0f, 336.5f, 15.0f),
+                PathNode.QuadTo(314.0f, 17.0f, 297.0f, 25.0f),
+                PathNode.Close,
+                PathNode.MoveTo(537.0f, 108.0f),
+                PathNode.VerticalTo(140.0f),
+                PathNode.QuadTo(537.0f, 153.0f, 529.0f, 160.0f),
+                PathNode.QuadTo(521.0f, 167.0f, 508.0f, 167.0f),
+                PathNode.HorizontalTo(498.0f),
+                PathNode.QuadTo(488.0f, 167.0f, 488.0f, 177.0f),
+                PathNode.VerticalTo(574.0f),
+                PathNode.QuadTo(488.0f, 584.0f, 498.0f, 584.0f),
+                PathNode.HorizontalTo(511.0f),
+                PathNode.QuadTo(523.0f, 584.0f, 530.0f, 592.0f),
+                PathNode.QuadTo(537.0f, 600.0f, 537.0f, 611.0f),
+                PathNode.VerticalTo(640.0f),
+                PathNode.QuadTo(537.0f, 669.0f, 508.0f, 669.0f),
+                PathNode.HorizontalTo(381.0f),
+                PathNode.QuadTo(353.0f, 669.0f, 353.0f, 641.0f),
+                PathNode.VerticalTo(612.0f),
+                PathNode.QuadTo(353.0f, 600.0f, 360.0f, 592.0f),
+                PathNode.QuadTo(367.0f, 584.0f, 378.0f, 584.0f),
+                PathNode.HorizontalTo(392.0f),
+                PathNode.QuadTo(402.0f, 584.0f, 402.0f, 574.0f),
+                PathNode.VerticalTo(177.0f),
+                PathNode.QuadTo(402.0f, 173.0f, 399.5f, 170.0f),
+                PathNode.QuadTo(397.0f, 167.0f, 392.0f, 167.0f),
+                PathNode.HorizontalTo(381.0f),
+                PathNode.QuadTo(369.0f, 167.0f, 361.0f, 159.5f),
+                PathNode.QuadTo(353.0f, 152.0f, 353.0f, 140.0f),
+                PathNode.VerticalTo(108.0f),
+                PathNode.QuadTo(353.0f, 95.0f, 361.0f, 88.0f),
+                PathNode.QuadTo(369.0f, 81.0f, 380.0f, 81.0f),
+                PathNode.HorizontalTo(509.0f),
+                PathNode.QuadTo(521.0f, 81.0f, 529.0f, 88.0f),
+                PathNode.QuadTo(537.0f, 95.0f, 537.0f, 108.0f),
+                PathNode.Close,
+            ),
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1f,
+                pathFillType = PathFillType.NonZero
+            )
+                    }
+        }.build()
+        return _renameRegular!!
+    }
+
+private var _renameRegular: ImageVector? = null
+
+val MiuixIcons.Heavy.Rename: ImageVector
+    get() {
+        if (_renameHeavy != null) return _renameHeavy!!
+        _renameHeavy = ImageVector.Builder(
+            name = "Rename.Heavy",
+            defaultWidth = 24.0f.dp,
+            defaultHeight = 24.0f.dp,
+            viewportWidth = 1263.6f,
+            viewportHeight = 1263.6f
+        ).apply {
+            group(scaleX = 1.0f, scaleY = -1.0f, translationX = -32.700000000000045f, translationY = 1006.8f) {
+            addPath(
+                pathData = listOf(
+                PathNode.MoveTo(1079.0f, -64.0f),
+                PathNode.QuadTo(1139.0f, -35.0f, 1168.0f, 25.0f),
+                PathNode.QuadTo(1184.0f, 55.0f, 1187.5f, 96.5f),
+                PathNode.QuadTo(1191.0f, 138.0f, 1191.0f, 231.0f),
+                PathNode.VerticalTo(519.0f),
+                PathNode.QuadTo(1191.0f, 613.0f, 1187.5f, 654.0f),
+                PathNode.QuadTo(1184.0f, 695.0f, 1168.0f, 725.0f),
+                PathNode.QuadTo(1139.0f, 785.0f, 1079.0f, 814.0f),
+                PathNode.QuadTo(1050.0f, 830.0f, 1008.5f, 833.5f),
+                PathNode.QuadTo(967.0f, 837.0f, 873.0f, 837.0f),
+                PathNode.HorizontalTo(456.0f),
+                PathNode.QuadTo(363.0f, 837.0f, 321.5f, 833.5f),
+                PathNode.QuadTo(280.0f, 830.0f, 250.0f, 814.0f),
+                PathNode.QuadTo(190.0f, 785.0f, 161.0f, 725.0f),
+                PathNode.QuadTo(145.0f, 695.0f, 141.5f, 654.0f),
+                PathNode.QuadTo(138.0f, 613.0f, 138.0f, 519.0f),
+                PathNode.VerticalTo(231.0f),
+                PathNode.QuadTo(138.0f, 138.0f, 141.5f, 96.5f),
+                PathNode.QuadTo(145.0f, 55.0f, 161.0f, 25.0f),
+                PathNode.QuadTo(190.0f, -35.0f, 250.0f, -64.0f),
+                PathNode.QuadTo(280.0f, -80.0f, 321.5f, -83.5f),
+                PathNode.QuadTo(363.0f, -87.0f, 456.0f, -87.0f),
+                PathNode.HorizontalTo(873.0f),
+                PathNode.QuadTo(967.0f, -87.0f, 1008.5f, -83.5f),
+                PathNode.QuadTo(1050.0f, -80.0f, 1079.0f, -64.0f),
+                PathNode.Close,
+                PathNode.MoveTo(303.0f, 37.0f),
+                PathNode.QuadTo(290.0f, 44.0f, 279.5f, 55.0f),
+                PathNode.QuadTo(269.0f, 66.0f, 262.0f, 79.0f),
+                PathNode.QuadTo(255.0f, 93.0f, 253.5f, 114.0f),
+                PathNode.QuadTo(252.0f, 135.0f, 252.0f, 188.0f),
+                PathNode.VerticalTo(563.0f),
+                PathNode.QuadTo(252.0f, 616.0f, 253.5f, 637.0f),
+                PathNode.QuadTo(255.0f, 658.0f, 262.0f, 672.0f),
+                PathNode.QuadTo(275.0f, 699.0f, 303.0f, 714.0f),
+                PathNode.QuadTo(318.0f, 721.0f, 339.0f, 722.5f),
+                PathNode.QuadTo(360.0f, 724.0f, 413.0f, 724.0f),
+                PathNode.HorizontalTo(917.0f),
+                PathNode.QuadTo(970.0f, 724.0f, 991.0f, 722.5f),
+                PathNode.QuadTo(1012.0f, 721.0f, 1026.0f, 714.0f),
+                PathNode.QuadTo(1054.0f, 698.0f, 1068.0f, 672.0f),
+                PathNode.QuadTo(1075.0f, 658.0f, 1076.5f, 637.0f),
+                PathNode.QuadTo(1078.0f, 616.0f, 1078.0f, 563.0f),
+                PathNode.VerticalTo(188.0f),
+                PathNode.QuadTo(1078.0f, 135.0f, 1076.5f, 114.0f),
+                PathNode.QuadTo(1075.0f, 93.0f, 1068.0f, 79.0f),
+                PathNode.QuadTo(1052.0f, 51.0f, 1026.0f, 37.0f),
+                PathNode.QuadTo(1012.0f, 30.0f, 991.0f, 28.5f),
+                PathNode.QuadTo(970.0f, 27.0f, 917.0f, 27.0f),
+                PathNode.HorizontalTo(413.0f),
+                PathNode.QuadTo(360.0f, 27.0f, 339.0f, 28.5f),
+                PathNode.QuadTo(318.0f, 30.0f, 303.0f, 37.0f),
+                PathNode.Close,
+                PathNode.MoveTo(560.0f, 114.0f),
+                PathNode.VerticalTo(162.0f),
+                PathNode.QuadTo(560.0f, 178.0f, 551.0f, 186.5f),
+                PathNode.QuadTo(542.0f, 195.0f, 526.0f, 195.0f),
+                PathNode.HorizontalTo(517.0f),
+                PathNode.QuadTo(508.0f, 195.0f, 508.0f, 204.0f),
+                PathNode.VerticalTo(547.0f),
+                PathNode.QuadTo(508.0f, 556.0f, 517.0f, 556.0f),
+                PathNode.HorizontalTo(528.0f),
+                PathNode.QuadTo(543.0f, 556.0f, 551.5f, 565.0f),
+                PathNode.QuadTo(560.0f, 574.0f, 560.0f, 589.0f),
+                PathNode.VerticalTo(635.0f),
+                PathNode.QuadTo(560.0f, 669.0f, 526.0f, 669.0f),
+                PathNode.HorizontalTo(382.0f),
+                PathNode.QuadTo(348.0f, 669.0f, 348.0f, 635.0f),
+                PathNode.VerticalTo(590.0f),
+                PathNode.QuadTo(348.0f, 574.0f, 356.5f, 565.0f),
+                PathNode.QuadTo(365.0f, 556.0f, 380.0f, 556.0f),
+                PathNode.HorizontalTo(392.0f),
+                PathNode.QuadTo(401.0f, 556.0f, 401.0f, 547.0f),
+                PathNode.VerticalTo(204.0f),
+                PathNode.QuadTo(401.0f, 200.0f, 398.5f, 197.5f),
+                PathNode.QuadTo(396.0f, 195.0f, 392.0f, 195.0f),
+                PathNode.HorizontalTo(382.0f),
+                PathNode.QuadTo(366.0f, 195.0f, 357.0f, 186.5f),
+                PathNode.QuadTo(348.0f, 178.0f, 348.0f, 162.0f),
+                PathNode.VerticalTo(114.0f),
+                PathNode.QuadTo(348.0f, 99.0f, 357.0f, 90.0f),
+                PathNode.QuadTo(366.0f, 81.0f, 381.0f, 81.0f),
+                PathNode.HorizontalTo(526.0f),
+                PathNode.QuadTo(542.0f, 81.0f, 551.0f, 89.5f),
+                PathNode.QuadTo(560.0f, 98.0f, 560.0f, 114.0f),
+                PathNode.Close,
+            ),
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1f,
+                pathFillType = PathFillType.NonZero
+            )
+                    }
+        }.build()
+        return _renameHeavy!!
+    }
+
+private var _renameHeavy: ImageVector? = null
