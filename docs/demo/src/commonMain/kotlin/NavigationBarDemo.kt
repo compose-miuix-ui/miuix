@@ -28,9 +28,9 @@ import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icons.icons.VerticalSplit
-import top.yukonga.miuix.kmp.icons.icons.Contacts
-import top.yukonga.miuix.kmp.icons.icons.Settings
+import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
+import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

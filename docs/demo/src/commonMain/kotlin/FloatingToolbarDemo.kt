@@ -26,8 +26,8 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icons.icons.Delete
-import top.yukonga.miuix.kmp.icons.icons.Edit
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

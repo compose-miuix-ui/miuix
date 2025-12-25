@@ -19,7 +19,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icons.icons.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

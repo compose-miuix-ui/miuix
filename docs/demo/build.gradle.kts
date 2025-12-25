@@ -31,6 +31,7 @@ kotlin {
 
             implementation(libs.jetbrains.androidx.navigation)
             implementation(projects.miuix)
+            implementation(projects.miuixIcons)
         }
     }
 }

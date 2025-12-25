@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icons.icons.Edit
-import top.yukonga.miuix.kmp.icons.icons.Contacts
-import top.yukonga.miuix.kmp.icons.icons.Rename
-import top.yukonga.miuix.kmp.icons.icons.Settings
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Rename
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

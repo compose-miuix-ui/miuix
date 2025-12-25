@@ -27,8 +27,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icons.icons.Favorites
-import top.yukonga.miuix.kmp.icons.icons.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Favorites
+import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
