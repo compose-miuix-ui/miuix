@@ -94,23 +94,22 @@ class TextStyles(
         title2: TextStyle = this.title2,
         title3: TextStyle = this.title3,
         title4: TextStyle = this.title4,
-    ): TextStyles =
-        TextStyles(
-            main,
-            paragraph,
-            body1,
-            body2,
-            button,
-            footnote1,
-            footnote2,
-            headline1,
-            headline2,
-            subtitle,
-            title1,
-            title2,
-            title3,
-            title4,
-        )
+    ): TextStyles = TextStyles(
+        main,
+        paragraph,
+        body1,
+        body2,
+        button,
+        footnote1,
+        footnote2,
+        headline1,
+        headline2,
+        subtitle,
+        title1,
+        title2,
+        title3,
+        title4,
+    )
 }
 
 fun defaultTextStyles(
@@ -128,23 +127,22 @@ fun defaultTextStyles(
     title2: TextStyle = Title2,
     title3: TextStyle = Title3,
     title4: TextStyle = Title4,
-): TextStyles =
-    TextStyles(
-        main,
-        paragraph,
-        body1,
-        body2,
-        button,
-        footnote1,
-        footnote2,
-        headline1,
-        headline2,
-        subtitle,
-        title1,
-        title2,
-        title3,
-        title4,
-    )
+): TextStyles = TextStyles(
+    main,
+    paragraph,
+    body1,
+    body2,
+    button,
+    footnote1,
+    footnote2,
+    headline1,
+    headline2,
+    subtitle,
+    title1,
+    title2,
+    title3,
+    title4,
+)
 
 private val Main: TextStyle
     get() =
@@ -205,7 +203,7 @@ private val Subtitle: TextStyle
     get() =
         TextStyle(
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
 private val Title1: TextStyle

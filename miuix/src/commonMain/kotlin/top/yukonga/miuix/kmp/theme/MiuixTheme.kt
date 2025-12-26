@@ -22,7 +22,7 @@ import top.yukonga.miuix.kmp.utils.MiuixIndication
 fun MiuixTheme(
     controller: ThemeController,
     textStyles: TextStyles = MiuixTheme.textStyles,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val rawColors = controller.currentColors()
     val miuixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
@@ -50,7 +50,7 @@ fun MiuixTheme(
 fun MiuixTheme(
     colors: Colors = MiuixTheme.colorScheme,
     textStyles: TextStyles = MiuixTheme.textStyles,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     val miuixTextStyles = remember { textStyles.copy() }.apply { updateColorsFrom(miuixColors.onBackground) }
@@ -66,21 +66,25 @@ fun MiuixTheme(
 
 object MiuixTheme {
     val colorScheme: Colors
-        @Composable @ReadOnlyComposable get() = LocalColors.current
+        @Composable @ReadOnlyComposable
+        get() = LocalColors.current
 
     val textStyles: TextStyles
-        @Composable @ReadOnlyComposable get() = LocalTextStyles.current
+        @Composable @ReadOnlyComposable
+        get() = LocalTextStyles.current
 
     val colorSchemeMode: ColorSchemeMode?
-        @Composable @ReadOnlyComposable get() = LocalColorSchemeMode.current
+        @Composable @ReadOnlyComposable
+        get() = LocalColorSchemeMode.current
 
     val isDynamicColor: Boolean
-        @Composable @ReadOnlyComposable get() = when (colorSchemeMode) {
+        @Composable @ReadOnlyComposable
+        get() = when (colorSchemeMode) {
             ColorSchemeMode.MonetSystem,
             ColorSchemeMode.MonetLight,
-            ColorSchemeMode.MonetDark -> true
+            ColorSchemeMode.MonetDark,
+            -> true
 
             else -> false
         }
 }
-

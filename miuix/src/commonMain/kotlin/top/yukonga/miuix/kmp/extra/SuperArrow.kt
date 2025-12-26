@@ -54,7 +54,7 @@ fun SuperArrow(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     BasicComponent(
         modifier = modifier,
@@ -67,7 +67,7 @@ fun SuperArrow(
         rightActions = {
             SuperArrowRightActions(
                 rightActions = rightActions,
-                enabled = enabled
+                enabled = enabled,
             )
         },
         bottomAction = bottomAction,
@@ -103,15 +103,14 @@ object SuperArrowDefaults {
     @Composable
     fun rightActionColors() = RightActionColors(
         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-        disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
     )
 }
-
 
 @Immutable
 data class RightActionColors(
     private val color: Color,
-    private val disabledColor: Color
+    private val disabledColor: Color,
 ) {
     @Stable
     internal fun color(enabled: Boolean): Color = if (enabled) color else disabledColor

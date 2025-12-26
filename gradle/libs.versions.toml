@@ -25,6 +25,7 @@ jetbrains-androidx-navigation = { module = "org.jetbrains.androidx.navigation:na
 jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
 gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
+materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "material-kolor" }
 
 # Gradle Plugins

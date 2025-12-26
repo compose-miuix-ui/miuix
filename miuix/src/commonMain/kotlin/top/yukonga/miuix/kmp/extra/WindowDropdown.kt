@@ -103,7 +103,7 @@ fun WindowDropdown(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
             if (itemsNotEmpty) {
                 WindowDropdownPopup(
@@ -113,14 +113,14 @@ fun WindowDropdown(
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
-                    onSelectedIndexChange = onSelectedIndexChange
+                    onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
         },
         bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
-        enabled = actualEnabled
+        enabled = actualEnabled,
     )
 }
 
@@ -132,7 +132,7 @@ private fun WindowDropdownPopup(
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     WindowListPopup(
@@ -141,7 +141,7 @@ private fun WindowDropdownPopup(
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
-        maxHeight = maxHeight
+        maxHeight = maxHeight,
     ) {
         val dismiss = LocalWindowListPopupState.current
         ListPopupColumn {
@@ -157,7 +157,7 @@ private fun WindowDropdownPopup(
                             onSelectState.value?.invoke(selectedIdx)
                             dismiss()
                         },
-                        index = index
+                        index = index,
                     )
                 }
             }

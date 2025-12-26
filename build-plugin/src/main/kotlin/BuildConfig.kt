@@ -6,7 +6,7 @@ object BuildConfig {
     const val LIBRARY_ID = "top.yukonga.miuix.kmp"
     const val APPLICATION_NAME = "Miuix"
     const val APPLICATION_VERSION_NAME = "1.0.7"
-    val APPLICATION_VERSION_CODE = getVersionCode()
+    val APPLICATION_VERSION_CODE = getGitVersionCode()
     const val APPLICATION_ID = "top.yukonga.miuix.uitest"
     const val APPLICATION_SHARED_ID = "top.yukonga.miuix.shared"
     const val COMPILE_SDK = 36
@@ -16,12 +16,12 @@ object BuildConfig {
     const val JDK_VERSION = 21
 }
 
-fun getVersionCode(): Int {
+fun getGitVersionCode(): Int {
     val process = ProcessBuilder("git", "rev-list", "--count", "HEAD").start()
     return process.inputStream.bufferedReader().use { it.readText().trim().toInt() }
 }
 
-fun gitHashShort(): String {
+fun getGitHashShort(): String {
     val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
     return process.inputStream.bufferedReader().use { it.readText().trim() }
 }

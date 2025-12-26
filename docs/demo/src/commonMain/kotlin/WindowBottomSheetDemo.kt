@@ -30,7 +30,7 @@ fun WindowBottomSheetDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -38,24 +38,24 @@ fun WindowBottomSheetDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val showBottomSheet = remember { mutableStateOf(false) }
             Card {
                 TextButton(
                     text = "Show a WindowBottomSheet",
-                    onClick = { showBottomSheet.value = true }
+                    onClick = { showBottomSheet.value = true },
                 )
                 WindowBottomSheet(
                     show = showBottomSheet,
                     title = "WindowBottomSheet Title",
-                    onDismissRequest = { showBottomSheet.value = false }
+                    onDismissRequest = { showBottomSheet.value = false },
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text("This is a window-level bottom sheet that does not require MiuixPopupHost.")
                         Box(modifier = Modifier.height(16.dp))
@@ -63,7 +63,7 @@ fun WindowBottomSheetDemo() {
                         TextButton(
                             text = "Close",
                             onClick = { dismiss?.invoke() },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }

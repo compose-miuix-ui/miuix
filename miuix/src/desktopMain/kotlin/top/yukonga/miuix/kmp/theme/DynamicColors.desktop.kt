@@ -6,6 +6,4 @@ package top.yukonga.miuix.kmp.theme
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun platformDynamicColors(dark: Boolean): Colors {
-    return monetSystemColors(dark)
-}
+actual fun platformDynamicColors(dark: Boolean): Colors = monetSystemColors(dark)

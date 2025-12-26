@@ -83,14 +83,14 @@ fun BasicComponent(
                 text = title,
                 fontSize = MiuixTheme.textStyles.headline1.fontSize,
                 fontWeight = FontWeight.Medium,
-                color = titleColor.color(enabled)
+                color = titleColor.color(enabled),
             )
         }
         if (summary != null) {
             Text(
                 text = summary,
                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                color = summaryColor.color(enabled)
+                color = summaryColor.color(enabled),
             )
         }
     }
@@ -121,7 +121,7 @@ fun BasicComponent(
     holdDownState: Boolean = false,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -153,7 +153,9 @@ fun BasicComponent(
                 indication = indication,
                 onClick = currentOnClick!!,
             )
-        } else Modifier
+        } else {
+            Modifier
+        }
     }
 
     Column(
@@ -161,17 +163,17 @@ fun BasicComponent(
             .heightIn(min = 56.dp)
             .fillMaxWidth()
             .then(clickableModifier)
-            .padding(insideMargin)
+            .padding(insideMargin),
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             leftAction?.let { it() }
 
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
-                content = content
+                content = content,
             )
 
             if (rightActions != null) {
@@ -200,13 +202,11 @@ object BasicComponentDefaults {
     @Composable
     fun titleColor(
         color: Color = MiuixTheme.colorScheme.onBackground,
-        disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
-    ): BasicComponentColors {
-        return BasicComponentColors(
-            color = color,
-            disabledColor = disabledColor
-        )
-    }
+        disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+    ): BasicComponentColors = BasicComponentColors(
+        color = color,
+        disabledColor = disabledColor,
+    )
 
     /**
      * The default color of the summary.
@@ -214,17 +214,17 @@ object BasicComponentDefaults {
     @Composable
     fun summaryColor(
         color: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
     ): BasicComponentColors = BasicComponentColors(
         color = color,
-        disabledColor = disabledColor
+        disabledColor = disabledColor,
     )
 }
 
 @Immutable
 data class BasicComponentColors(
     val color: Color,
-    val disabledColor: Color
+    val disabledColor: Color,
 ) {
     @Stable
     internal fun color(enabled: Boolean): Color = if (enabled) color else disabledColor

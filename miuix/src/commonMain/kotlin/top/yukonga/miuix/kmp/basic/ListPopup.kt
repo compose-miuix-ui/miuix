@@ -53,13 +53,13 @@ private const val MAX_ITEMS_FOR_HEIGHT = 8
  */
 @Composable
 fun ListPopupColumn(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     Layout(
         content = content,
-        modifier = Modifier.verticalScroll(scrollState)
+        modifier = Modifier.verticalScroll(scrollState),
     ) { measurables, constraints ->
         constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
 
@@ -109,7 +109,7 @@ interface PopupPositionProvider {
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
         popupMargin: IntRect,
-        alignment: Align
+        alignment: Align,
     ): IntOffset
 
     /**
@@ -126,7 +126,7 @@ interface PopupPositionProvider {
         TopLeft,
         TopRight,
         BottomLeft,
-        BottomRight
+        BottomRight,
     }
 }
 
@@ -138,7 +138,7 @@ object ListPopupDefaults {
             layoutDirection: LayoutDirection,
             popupContentSize: IntSize,
             popupMargin: IntRect,
-            alignment: PopupPositionProvider.Align
+            alignment: PopupPositionProvider.Align,
         ): IntOffset {
             val offsetX = if (alignment == PopupPositionProvider.Align.Right) {
                 anchorBounds.right - popupContentSize.width - popupMargin.right
@@ -158,18 +158,16 @@ object ListPopupDefaults {
             return IntOffset(
                 x = offsetX.coerceIn(
                     windowBounds.left,
-                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left)
+                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left),
                 ),
                 y = offsetY.coerceIn(
                     (windowBounds.top + popupMargin.top).coerceAtMost(windowBounds.bottom - popupContentSize.height - popupMargin.bottom),
-                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom
-                )
+                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
+                ),
             )
         }
 
-        override fun getMargins(): PaddingValues {
-            return PaddingValues(horizontal = 0.dp, vertical = 8.dp)
-        }
+        override fun getMargins(): PaddingValues = PaddingValues(horizontal = 0.dp, vertical = 8.dp)
     }
     val ContextMenuPositionProvider = object : PopupPositionProvider {
         override fun calculatePosition(
@@ -178,7 +176,7 @@ object ListPopupDefaults {
             layoutDirection: LayoutDirection,
             popupContentSize: IntSize,
             popupMargin: IntRect,
-            alignment: PopupPositionProvider.Align
+            alignment: PopupPositionProvider.Align,
         ): IntOffset {
             val offsetX: Int
             val offsetY: Int
@@ -225,18 +223,16 @@ object ListPopupDefaults {
             return IntOffset(
                 x = offsetX.coerceIn(
                     windowBounds.left,
-                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left)
+                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left),
                 ),
                 y = offsetY.coerceIn(
                     (windowBounds.top + popupMargin.top).coerceAtMost(windowBounds.bottom - popupContentSize.height - popupMargin.bottom),
-                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom
-                )
+                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
+                ),
             )
         }
 
-        override fun getMargins(): PaddingValues {
-            return PaddingValues(horizontal = 20.dp, vertical = 0.dp)
-        }
+        override fun getMargins(): PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 0.dp)
     }
 }
 
@@ -254,7 +250,7 @@ data class ListPopupLayoutInfo(
     val popupMargin: IntRect,
     val effectiveTransformOrigin: TransformOrigin,
     val localTransformOrigin: TransformOrigin,
-    val popupLayoutInfo: Triple<Boolean, Boolean, Boolean>
+    val popupLayoutInfo: Triple<Boolean, Boolean, Boolean>,
 )
 
 @Composable
@@ -263,7 +259,7 @@ fun rememberListPopupLayoutInfo(
     alignment: PopupPositionProvider.Align,
     popupPositionProvider: PopupPositionProvider,
     parentBounds: IntRect,
-    popupContentSize: IntSize
+    popupContentSize: IntSize,
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -278,21 +274,26 @@ fun rememberListPopupLayoutInfo(
                 left = popupPositionProvider.getMargins().calculateLeftPadding(layoutDirection).roundToPx(),
                 top = popupPositionProvider.getMargins().calculateTopPadding().roundToPx(),
                 right = popupPositionProvider.getMargins().calculateRightPadding(layoutDirection).roundToPx(),
-                bottom = popupPositionProvider.getMargins().calculateBottomPadding().roundToPx()
+                bottom = popupPositionProvider.getMargins().calculateBottomPadding().roundToPx(),
             )
         }
     }
 
     val windowBounds = remember(
-        windowSize, layoutDirection, density,
-        displayCutout, statusBars, navigationBars, captionBar
+        windowSize,
+        layoutDirection,
+        density,
+        displayCutout,
+        statusBars,
+        navigationBars,
+        captionBar,
     ) {
         with(density) {
             IntRect(
                 left = displayCutout.getLeft(this, layoutDirection),
                 top = statusBars.getTop(this),
                 right = windowSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = windowSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this)
+                bottom = windowSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
             )
         }
     }
@@ -301,7 +302,8 @@ fun rememberListPopupLayoutInfo(
         val xInWindow = when (alignment) {
             PopupPositionProvider.Align.Right,
             PopupPositionProvider.Align.TopRight,
-            PopupPositionProvider.Align.BottomRight -> parentBounds.right - popupMargin.right
+            PopupPositionProvider.Align.BottomRight,
+            -> parentBounds.right - popupMargin.right
 
             else -> parentBounds.left + popupMargin.left
         }
@@ -314,7 +316,7 @@ fun rememberListPopupLayoutInfo(
         }
         safeTransformOrigin(
             xInWindow / windowSize.width.toFloat(),
-            yInWindow / windowSize.height.toFloat()
+            yInWindow / windowSize.height.toFloat(),
         )
     }
 
@@ -325,7 +327,7 @@ fun rememberListPopupLayoutInfo(
         alignment,
         layoutDirection,
         popupMargin,
-        popupPositionProvider
+        popupPositionProvider,
     ) {
         if (popupContentSize == IntSize.Zero) {
             IntOffset.Zero
@@ -336,7 +338,7 @@ fun rememberListPopupLayoutInfo(
                 layoutDirection,
                 popupContentSize,
                 popupMargin,
-                alignment
+                alignment,
             )
         }
     }
@@ -346,13 +348,14 @@ fun rememberListPopupLayoutInfo(
         windowBounds,
         parentBounds,
         alignment,
-        calculatedOffset
+        calculatedOffset,
     ) {
         if (popupContentSize == IntSize.Zero) {
             val isRightAligned = when (alignment) {
                 PopupPositionProvider.Align.Right,
                 PopupPositionProvider.Align.TopRight,
-                PopupPositionProvider.Align.BottomRight -> true
+                PopupPositionProvider.Align.BottomRight,
+                -> true
 
                 else -> false
             }
@@ -381,7 +384,7 @@ fun rememberListPopupLayoutInfo(
         windowBounds,
         popupPositionProvider,
         calculatedOffset,
-        popupLayoutInfo
+        popupLayoutInfo,
     ) {
         if (popupContentSize == IntSize.Zero) {
             predictedTransformOrigin
@@ -404,7 +407,7 @@ fun rememberListPopupLayoutInfo(
 
             safeTransformOrigin(
                 cornerX / windowSize.width.toFloat(),
-                cornerY / windowSize.height.toFloat()
+                cornerY / windowSize.height.toFloat(),
             )
         }
     }
@@ -420,7 +423,7 @@ fun rememberListPopupLayoutInfo(
                 showBelow -> 0f
                 showAbove -> 1f
                 else -> 0f
-            }
+            },
         )
     }
 
@@ -429,7 +432,7 @@ fun rememberListPopupLayoutInfo(
         popupMargin = popupMargin,
         effectiveTransformOrigin = effectiveTransformOrigin,
         localTransformOrigin = localTransformOrigin,
-        popupLayoutInfo = popupLayoutInfo
+        popupLayoutInfo = popupLayoutInfo,
     )
 }
 
@@ -441,7 +444,7 @@ fun ListPopupContent(
     animationProgress: () -> Float,
     popupLayoutInfo: Triple<Boolean, Boolean, Boolean>,
     localTransformOrigin: TransformOrigin,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val shadowColor = MiuixTheme.colorScheme.windowDimming
@@ -463,7 +466,7 @@ fun ListPopupContent(
                 scaleY = scale
                 alpha = progress
                 transformOrigin = localTransformOrigin
-            }
+            },
     ) {
         // Shadow Layer
         Box(
@@ -486,8 +489,8 @@ fun ListPopupContent(
                         this.radius = 70f
                         this.alpha = 0.4f
                         this.color = shadowColor
-                    }
-                )
+                    },
+                ),
         )
 
         // Content Layer
@@ -533,7 +536,7 @@ fun ListPopupContent(
                         }
                     }
                 }
-                .background(MiuixTheme.colorScheme.surfaceContainer, shape)
+                .background(MiuixTheme.colorScheme.surfaceContainer, shape),
         ) {
             content()
         }

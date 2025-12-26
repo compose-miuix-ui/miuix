@@ -29,7 +29,7 @@ enum class Platform {
     Desktop,
     WasmJs,
     MacOS,
-    Js
+    Js,
 }
 
 /**

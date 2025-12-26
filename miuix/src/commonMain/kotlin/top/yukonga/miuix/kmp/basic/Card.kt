@@ -57,11 +57,11 @@ fun Card(
     BasicCard(
         modifier = modifier,
         cornerRadius = cornerRadius,
-        colors = colors
+        colors = colors,
     ) {
         Column(
             modifier = Modifier.padding(insideMargin),
-            content = content
+            content = content,
         )
     }
 }
@@ -118,10 +118,10 @@ fun Card(
         modifier = modifier.pressable(
             interactionSource = usedInteractionSource,
             indication = pressFeedback,
-            delay = null
+            delay = null,
         ),
         cornerRadius = cornerRadius,
-        colors = colors
+        colors = colors,
     ) {
         Column(
             modifier = Modifier
@@ -129,10 +129,10 @@ fun Card(
                     interactionSource = interactionSource,
                     indication = indicationToUse,
                     onClick = { currentOnClick?.invoke() },
-                    onLongClick = currentOnLongPress
+                    onLongClick = currentOnLongPress,
                 )
                 .padding(insideMargin),
-            content = content
+            content = content,
         )
     }
 }
@@ -163,7 +163,7 @@ private fun BasicCard(
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 }
-                .clip(clipShape)  // For touch feedback, there is a problem when using G2Continuity.
+                .clip(clipShape) // For touch feedback, there is a problem when using G2Continuity.
                 .background(color = colors.color, shape = shape),
             propagateMinConstraints = true,
         ) {
@@ -191,16 +191,14 @@ object CardDefaults {
     fun defaultColors(
         color: Color = MiuixTheme.colorScheme.surfaceContainer,
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-    ): CardColors {
-        return CardColors(
-            color = color,
-            contentColor = contentColor
-        )
-    }
+    ): CardColors = CardColors(
+        color = color,
+        contentColor = contentColor,
+    )
 }
 
 @Immutable
 data class CardColors(
     val color: Color,
-    val contentColor: Color
+    val contentColor: Color,
 )

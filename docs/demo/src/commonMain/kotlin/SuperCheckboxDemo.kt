@@ -29,7 +29,7 @@ fun SuperCheckboxDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -37,7 +37,7 @@ fun SuperCheckboxDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var isChecked by remember { mutableStateOf(false) }
             var rightChecked by remember { mutableStateOf(false) }
@@ -47,27 +47,27 @@ fun SuperCheckboxDemo() {
                 SuperCheckbox(
                     title = "Checkbox Option",
                     checked = isChecked,
-                    onCheckedChange = { isChecked = it }
+                    onCheckedChange = { isChecked = it },
                 )
                 SuperCheckbox(
                     title = "Notifications",
                     summary = "Receive push notifications from the app",
                     checked = notificationsEnabled,
-                    onCheckedChange = { notificationsEnabled = it }
+                    onCheckedChange = { notificationsEnabled = it },
                 )
                 SuperCheckbox(
                     title = "Right Checkbox",
                     summary = "Checkbox is on the right side",
                     checked = rightChecked,
                     onCheckedChange = { rightChecked = it },
-                    checkboxLocation = CheckboxLocation.Right
+                    checkboxLocation = CheckboxLocation.Right,
                 )
                 SuperCheckbox(
                     title = "Disabled Checkbox",
                     summary = "This checkbox is currently unavailable",
                     checked = true,
                     onCheckedChange = {},
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

@@ -33,7 +33,7 @@ fun SearchBarDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -41,7 +41,7 @@ fun SearchBarDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var searchValue by remember { mutableStateOf("") }
             var expanded by remember { mutableStateOf(false) }
@@ -53,7 +53,7 @@ fun SearchBarDemo() {
                         onSearch = { expanded = false },
                         expanded = expanded,
                         onExpandedChange = { expanded = it },
-                        label = "Search"
+                        label = "Search",
                     )
                 },
                 outsideRightAction = {
@@ -61,20 +61,20 @@ fun SearchBarDemo() {
                         modifier = Modifier
                             .clickable(
                                 interactionSource = null,
-                                indication = null
+                                indication = null,
                             ) {
                                 expanded = false
                                 searchValue = ""
                             },
                         text = "Cancel",
-                        color = MiuixTheme.colorScheme.primary
+                        color = MiuixTheme.colorScheme.primary,
                     )
                 },
                 expanded = expanded,
-                onExpandedChange = { expanded = it }
+                onExpandedChange = { expanded = it },
             ) {
                 Column(
-                    Modifier.fillMaxSize()
+                    Modifier.fillMaxSize(),
                 ) {
                     repeat(4) { idx ->
                         val resultText = "Suggestion $idx"
@@ -86,7 +86,7 @@ fun SearchBarDemo() {
                             onClick = {
                                 searchValue = resultText
                                 expanded = false
-                            }
+                            },
                         )
                     }
                 }

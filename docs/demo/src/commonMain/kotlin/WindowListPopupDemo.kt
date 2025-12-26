@@ -28,25 +28,25 @@ fun WindowListPopupDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         val showPopup = remember { mutableStateOf(false) }
         var selectedIndex by remember { mutableStateOf(0) }
         val items = listOf("Option 1", "Option 2", "Option 3")
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
+            contentAlignment = Alignment.TopCenter,
         ) {
             Box {
                 TextButton(
                     text = "Show WindowListPopup",
                     onClick = { showPopup.value = true },
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = 16.dp),
                 )
                 WindowListPopup(
                     show = showPopup,
                     alignment = PopupPositionProvider.Align.TopLeft,
-                    onDismissRequest = { showPopup.value = false }
+                    onDismissRequest = { showPopup.value = false },
                 ) {
                     val dismiss = LocalWindowListPopupState.current
                     ListPopupColumn {
@@ -59,7 +59,7 @@ fun WindowListPopupDemo() {
                                     selectedIndex = selectedIdx
                                     dismiss()
                                 },
-                                index = index
+                                index = index,
                             )
                         }
                     }

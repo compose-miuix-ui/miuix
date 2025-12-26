@@ -35,7 +35,7 @@ object Transforms {
         return floatArrayOf(
             0.2104542553f * l + 0.7936177850f * m - 0.0040720468f * s,
             1.9779984951f * l - 2.4285922050f * m + 0.4505937099f * s,
-            0.0259040371f * l + 0.7827717662f * m - 0.8086757660f * s
+            0.0259040371f * l + 0.7827717662f * m - 0.8086757660f * s,
         )
     }
 
@@ -56,7 +56,7 @@ object Transforms {
         return floatArrayOf(
             (+4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s).coerceIn(0f, 1f),
             (-1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s).coerceIn(0f, 1f),
-            (-0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s).coerceIn(0f, 1f)
+            (-0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s).coerceIn(0f, 1f),
         )
     }
 
@@ -173,7 +173,7 @@ object Transforms {
             (color.red * 255).toInt(),
             (color.green * 255).toInt(),
             (color.blue * 255).toInt(),
-            hsvArr
+            hsvArr,
         )
         return hsvArr
     }
@@ -186,7 +186,7 @@ object Transforms {
         val lab = linearSrgbToOklab(
             srgbTransferFunctionInv(r),
             srgbTransferFunctionInv(g),
-            srgbTransferFunctionInv(b)
+            srgbTransferFunctionInv(b),
         )
 
         val C = kotlin.math.sqrt(lab[1] * lab[1] + lab[2] * lab[2])
@@ -211,7 +211,7 @@ object Transforms {
 
         val rgbScale = oklabToLinearSrgb(Lvt, a_ * Cvt, b_ * Cvt)
         val scaleL = cbrt(
-            1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f)
+            1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f),
         )
 
         var L2 = L / scaleL
@@ -255,7 +255,7 @@ object Transforms {
 
         val rgbScale = oklabToLinearSrgb(Lvt, a_ * Cvt, b_ * Cvt)
         val scaleL = cbrt(
-            1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f)
+            1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f),
         )
 
         L *= scaleL
@@ -265,7 +265,7 @@ object Transforms {
         return floatArrayOf(
             srgbTransferFunction(rgb[0]),
             srgbTransferFunction(rgb[1]),
-            srgbTransferFunction(rgb[2])
+            srgbTransferFunction(rgb[2]),
         )
     }
 
@@ -273,9 +273,7 @@ object Transforms {
      * Convert a Compose Color (sRGB) to OkHSV.
      * @return OkHSV array [h, s, v] with h in 0..1
      */
-    fun colorToOkhsv(color: Color): FloatArray {
-        return srgbToOkhsv(color.red, color.green, color.blue)
-    }
+    fun colorToOkhsv(color: Color): FloatArray = srgbToOkhsv(color.red, color.green, color.blue)
 
     /**
      * Convert OkHSV to Compose Color (sRGB).
@@ -289,20 +287,16 @@ object Transforms {
         return Color(srgb[0], srgb[1], srgb[2], alpha)
     }
 
-    private fun srgbTransferFunction(a: Float): Float {
-        return if (0.0031308f >= a) {
-            12.92f * a
-        } else {
-            1.055f * a.pow(0.4166666666666667f) - 0.055f
-        }
+    private fun srgbTransferFunction(a: Float): Float = if (0.0031308f >= a) {
+        12.92f * a
+    } else {
+        1.055f * a.pow(0.4166666666666667f) - 0.055f
     }
 
-    private fun srgbTransferFunctionInv(a: Float): Float {
-        return if (0.04045f < a) {
-            ((a + 0.055f) / 1.055f).pow(2.4f)
-        } else {
-            a / 12.92f
-        }
+    private fun srgbTransferFunctionInv(a: Float): Float = if (0.04045f < a) {
+        ((a + 0.055f) / 1.055f).pow(2.4f)
+    } else {
+        a / 12.92f
     }
 
     private fun linearSrgbToOklab(r: Float, g: Float, b: Float): FloatArray {
@@ -317,7 +311,7 @@ object Transforms {
         return floatArrayOf(
             0.2104542553f * l_ + 0.793617785f * m_ - 0.0040720468f * s_,
             1.9779984951f * l_ - 2.428592205f * m_ + 0.4505937099f * s_,
-            0.0259040371f * l_ + 0.7827717662f * m_ - 0.808675766f * s_
+            0.0259040371f * l_ + 0.7827717662f * m_ - 0.808675766f * s_,
         )
     }
 
@@ -333,7 +327,7 @@ object Transforms {
         return floatArrayOf(
             4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s,
             -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s,
-            -0.0041960863f * l - 0.7034186147f * m + 1.707614701f * s
+            -0.0041960863f * l - 0.7034186147f * m + 1.707614701f * s,
         )
     }
 
@@ -429,7 +423,7 @@ object Transforms {
         val sCusp = computeMaxSaturation(a, b)
         val rgbAtMax = oklabToLinearSrgb(1f, sCusp * a, sCusp * b)
         val lCusp = cbrt(
-            1f / maxOf(rgbAtMax[0], rgbAtMax[1], rgbAtMax[2])
+            1f / maxOf(rgbAtMax[0], rgbAtMax[1], rgbAtMax[2]),
         )
         val cCusp = lCusp * sCusp
         return floatArrayOf(lCusp, cCusp)

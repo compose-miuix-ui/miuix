@@ -25,7 +25,7 @@ fun SuperArrowDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -33,27 +33,27 @@ fun SuperArrowDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Card {
                     SuperArrow(
                         title = "Setting Item",
-                        onClick = { /* Handle click event */ }
+                        onClick = { /* Handle click event */ },
                     )
                     SuperArrow(
                         title = "Wireless Network",
                         summary = "Connected to WIFI-HOME",
-                        onClick = { /* Handle click event */ }
+                        onClick = { /* Handle click event */ },
                     )
                     SuperArrow(
                         title = "Disabled Item",
                         summary = "This item is currently unavailable",
                         enabled = false,
-                        onClick = { /* Won't be triggered */ }
+                        onClick = { /* Won't be triggered */ },
                     )
                 }
             }

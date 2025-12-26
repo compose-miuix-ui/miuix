@@ -31,7 +31,7 @@ fun CardDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -39,14 +39,14 @@ fun CardDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp),
                 colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.primaryVariant
+                    color = MiuixTheme.colorScheme.primaryVariant,
                 ),
                 insideMargin = PaddingValues(16.dp),
             ) {
@@ -54,19 +54,19 @@ fun CardDemo() {
                     color = MiuixTheme.colorScheme.onPrimary,
                     text = "Card",
                     fontSize = 19.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     color = MiuixTheme.colorScheme.onPrimaryVariant,
                     text = "This is a Card",
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Normal,
                 )
             }
             Row(
                 modifier = Modifier
                     .padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
@@ -79,14 +79,14 @@ fun CardDemo() {
                             color = MiuixTheme.colorScheme.onSurface,
                             text = "Card",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                         Text(
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             text = "PressFeedback: Sink\nShowIndication: true",
-                            style = MiuixTheme.textStyles.paragraph
+                            style = MiuixTheme.textStyles.paragraph,
                         )
-                    }
+                    },
                 )
                 Card(
                     modifier = Modifier.weight(1f),
@@ -97,14 +97,14 @@ fun CardDemo() {
                             color = MiuixTheme.colorScheme.onSurface,
                             text = "Card",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                         Text(
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             text = "PressFeedback: Tilt\nShowIndication: false",
-                            style = MiuixTheme.textStyles.paragraph
+                            style = MiuixTheme.textStyles.paragraph,
                         )
-                    }
+                    },
                 )
             }
         }

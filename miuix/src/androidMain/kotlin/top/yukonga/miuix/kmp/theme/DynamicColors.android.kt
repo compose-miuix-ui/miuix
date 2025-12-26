@@ -14,7 +14,6 @@ import com.materialkolor.hct.Hct
 
 @Composable
 actual fun platformDynamicColors(dark: Boolean): Colors {
-
     val context = LocalContext.current
     val roles = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         systemMd3Roles(context, dark) // Use Android 12+ system dynamic colors
@@ -25,8 +24,7 @@ actual fun platformDynamicColors(dark: Boolean): Colors {
 }
 
 @SuppressLint("NewApi")
-private fun systemColor(context: Context, resId: Int): Color =
-    Color(context.resources.getColor(resId, context.theme))
+private fun systemColor(context: Context, resId: Int): Color = Color(context.resources.getColor(resId, context.theme))
 
 private fun toneFrom(base: Color, tone: Double): Color {
     val hct = Hct.fromInt(base.toArgb())
@@ -36,7 +34,6 @@ private fun toneFrom(base: Color, tone: Double): Color {
 
 @SuppressLint("InlinedApi")
 private fun systemMd3Roles(context: Context, dark: Boolean): MonetRoles {
-
     fun resAccent1(index: Int): Int = when (index) {
         0 -> android.R.color.system_accent1_0
         10 -> android.R.color.system_accent1_10

@@ -29,7 +29,7 @@ private const val POST_FLING_CONSUMED_VELOCITY_THRESHOLD = 25.0f
  */
 private class ScrollEndHapticConnection(
     private val hapticFeedback: HapticFeedback,
-    private val hapticFeedbackType: HapticFeedbackType
+    private val hapticFeedbackType: HapticFeedbackType,
 ) : NestedScrollConnection {
 
     private enum class ScrollEndHapticState {
@@ -40,7 +40,7 @@ private class ScrollEndHapticConnection(
         TopBoundaryHit,
 
         /** Scrolled to the bottom boundary. */
-        BottomBoundaryHit
+        BottomBoundaryHit,
     }
 
     private var scrollEndHapticState = ScrollEndHapticState.Idle
@@ -67,7 +67,7 @@ private class ScrollEndHapticConnection(
         }
         // Flinging beyond the bottom boundary.
         else if (available.y < -POST_FLING_AVAILABLE_VELOCITY_THRESHOLD && !consumed.y.filter(
-                POST_FLING_CONSUMED_VELOCITY_THRESHOLD
+                POST_FLING_CONSUMED_VELOCITY_THRESHOLD,
             )
         ) {
             if (scrollEndHapticState != ScrollEndHapticState.BottomBoundaryHit) {
@@ -85,14 +85,14 @@ private class ScrollEndHapticConnection(
  * @param hapticFeedbackType The type of haptic feedback to perform.
  */
 fun Modifier.scrollEndHaptic(
-    hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.TextHandleMove
+    hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.TextHandleMove,
 ): Modifier = composed {
     val haptic = LocalHapticFeedback.current
 
     val connection = remember(haptic, hapticFeedbackType) {
         ScrollEndHapticConnection(
             hapticFeedback = haptic,
-            hapticFeedbackType = hapticFeedbackType
+            hapticFeedbackType = hapticFeedbackType,
         )
     }
     Modifier.nestedScroll(connection)

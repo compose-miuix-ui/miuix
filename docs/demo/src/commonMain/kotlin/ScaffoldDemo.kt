@@ -28,9 +28,9 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -39,7 +39,7 @@ fun ScaffoldDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -47,52 +47,52 @@ fun ScaffoldDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val pages = listOf("Home", "Profile", "Settings")
             val items = listOf(
                 NavigationItem("Home", MiuixIcons.VerticalSplit),
                 NavigationItem("Profile", MiuixIcons.Contacts),
-                NavigationItem("Settings", MiuixIcons.Settings)
+                NavigationItem("Settings", MiuixIcons.Settings),
             )
             var selectedIndex by remember { mutableStateOf(0) }
             Card {
                 Scaffold(
                     topBar = {
                         SmallTopAppBar(
-                            title = "SmallTopAppBar"
+                            title = "SmallTopAppBar",
                         )
                     },
                     bottomBar = {
                         NavigationBar(
                             items = items,
                             selected = selectedIndex,
-                            onClick = { selectedIndex = it }
+                            onClick = { selectedIndex = it },
                         )
                     },
                     floatingActionButton = {
                         FloatingActionButton(
                             onClick = {
                                 // Handle FAB click
-                            }
+                            },
                         ) {
                             Icon(
                                 imageVector = MiuixIcons.Contacts,
                                 contentDescription = "Personal",
-                                tint = Color.White
+                                tint = Color.White,
                             )
                         }
-                    }
+                    },
                 ) { paddingValues ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = "Current: ${pages[selectedIndex]}",
-                            style = MiuixTheme.textStyles.title1
+                            style = MiuixTheme.textStyles.title1,
                         )
                     }
                 }

@@ -39,7 +39,7 @@ fun TopAppBarDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -47,13 +47,13 @@ fun TopAppBarDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     val scrollBehavior = MiuixScrollBehavior()
                     Scaffold(
@@ -65,31 +65,31 @@ fun TopAppBarDemo() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(start = 16.dp)
+                                        modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.Back,
-                                            contentDescription = "Back"
+                                            contentDescription = "Back",
                                         )
                                     }
                                 },
                                 actions = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(end = 16.dp)
+                                        modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.More,
-                                            contentDescription = "More"
+                                            contentDescription = "More",
                                         )
                                     }
-                                }
+                                },
                             )
-                        }
+                        },
                     ) { paddingValues ->
                         LazyColumn(
                             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             item {
                                 Spacer(Modifier.height(8.dp))
@@ -98,10 +98,10 @@ fun TopAppBarDemo() {
                                 Card(
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp)
-                                        .padding(bottom = 8.dp)
+                                        .padding(bottom = 8.dp),
                                 ) {
                                     SuperArrow(
-                                        title = "Something"
+                                        title = "Something",
                                     )
                                 }
                             }
@@ -109,7 +109,7 @@ fun TopAppBarDemo() {
                     }
                 }
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     Scaffold(
                         topBar = {
@@ -118,30 +118,30 @@ fun TopAppBarDemo() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(start = 16.dp)
+                                        modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.Back,
-                                            contentDescription = "Back"
+                                            contentDescription = "Back",
                                         )
                                     }
                                 },
                                 actions = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(end = 16.dp)
+                                        modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.More,
-                                            contentDescription = "More"
+                                            contentDescription = "More",
                                         )
                                     }
-                                }
+                                },
                             )
-                        }
+                        },
                     ) { paddingValues ->
                         LazyColumn(
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             item {
                                 Spacer(Modifier.height(8.dp))
@@ -150,10 +150,10 @@ fun TopAppBarDemo() {
                                 Card(
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp)
-                                        .padding(bottom = 8.dp)
+                                        .padding(bottom = 8.dp),
                                 ) {
                                     SuperArrow(
-                                        title = "Something"
+                                        title = "Something",
                                     )
                                 }
                             }

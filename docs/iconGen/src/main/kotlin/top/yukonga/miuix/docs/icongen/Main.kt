@@ -13,7 +13,7 @@ data class SvgPath(
     val stroke: String? = null,
     val strokeAlpha: Float = 1.0f,
     val strokeWidth: Float = 0.0f,
-    val transform: String = ""
+    val transform: String = "",
 )
 
 /** Simple CLI entry that converts Compose vector icon definitions to SVG files. */
@@ -34,11 +34,15 @@ fun main(args: Array<String>) {
         } else if (a.startsWith("--")) {
             val next = args.getOrNull(i + 1)
             if (next != null && !next.startsWith("--")) {
-                map[a] = next; i += 2
+                map[a] = next
+                i += 2
             } else {
-                map[a] = "true"; i += 1
+                map[a] = "true"
+                i += 1
             }
-        } else i++
+        } else {
+            i++
+        }
     }
     if (srcDirs.isEmpty()) error("--src <dir> required")
     val outDir = map["--out"] ?: error("--out <dir> required")
@@ -170,8 +174,11 @@ fun main(args: Array<String>) {
                     var currentIndex = blockStart
                     while (currentIndex < applyBlock.length && count > 0) {
                         val char = applyBlock[currentIndex]
-                        if (char == '{') count++
-                        else if (char == '}') count--
+                        if (char == '{') {
+                            count++
+                        } else if (char == '}') {
+                            count--
+                        }
                         currentIndex++
                     }
 
@@ -188,8 +195,8 @@ fun main(args: Array<String>) {
                                 stroke = parseStroke(params),
                                 strokeAlpha = parseAlpha(params, "strokeAlpha"),
                                 strokeWidth = parseFloat(params, "strokeLineWidth"),
-                                transform = groupTransform
-                            )
+                                transform = groupTransform,
+                            ),
                         )
                     }
                 }
@@ -202,8 +209,11 @@ fun main(args: Array<String>) {
                     var currentIndex = start + 1
                     while (currentIndex < applyBlock.length && count > 0) {
                         val char = applyBlock[currentIndex]
-                        if (char == '(') count++
-                        else if (char == ')') count--
+                        if (char == '(') {
+                            count++
+                        } else if (char == ')') {
+                            count--
+                        }
                         currentIndex++
                     }
 
@@ -217,8 +227,11 @@ fun main(args: Array<String>) {
                             var lIndex = listStartIdx + 7 // after "listOf("
                             while (lIndex < argsContent.length && lCount > 0) {
                                 val char = argsContent[lIndex]
-                                if (char == '(') lCount++
-                                else if (char == ')') lCount--
+                                if (char == '(') {
+                                    lCount++
+                                } else if (char == ')') {
+                                    lCount--
+                                }
                                 lIndex++
                             }
                             if (lCount == 0) {
@@ -233,8 +246,8 @@ fun main(args: Array<String>) {
                                         stroke = parseStroke(argsContent),
                                         strokeAlpha = parseAlpha(argsContent, "strokeAlpha"),
                                         strokeWidth = parseFloat(argsContent, "strokeLineWidth"),
-                                        transform = groupTransform
-                                    )
+                                        transform = groupTransform,
+                                    ),
                                 )
                             }
                         }
@@ -276,7 +289,6 @@ fun main(args: Array<String>) {
 
     println("[iconGen] Generated $count SVG(s) into $dest")
     if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty())) {
-
         fun generateTable(map: Map<String, Map<String, String>>, header: String): String {
             val sb = StringBuilder()
             sb.append(header).append("\n")
@@ -446,7 +458,9 @@ fun buildSvg(paths: List<SvgPath>, w: Float, h: Float, light: String, dark: Stri
             val strokeAttr = if (p.stroke != null) {
                 val sVal = if (p.stroke == "#000000" || p.stroke == "#FFFFFF") "currentColor" else p.stroke
                 " stroke=\"$sVal\""
-            } else ""
+            } else {
+                ""
+            }
 
             val strokeAlphaAttr = if (p.strokeAlpha < 1.0f) " stroke-opacity=\"${p.strokeAlpha}\"" else ""
             val strokeWidthAttr = if (p.strokeWidth > 0f) " stroke-width=\"${p.strokeWidth}\"" else ""

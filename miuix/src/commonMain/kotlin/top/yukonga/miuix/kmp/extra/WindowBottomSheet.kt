@@ -94,7 +94,7 @@ fun WindowBottomSheet(
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = WindowBottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
 
@@ -141,7 +141,7 @@ fun WindowBottomSheet(
                 requestDismiss()
             }
         },
-        properties = platformDialogProperties()
+        properties = platformDialogProperties(),
     ) {
         removePlatformDialogDefaultEffects()
         val windowSize = getWindowSize()
@@ -156,7 +156,7 @@ fun WindowBottomSheet(
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = DialogDimEnter,
-            exit = DialogDimExit
+            exit = DialogDimExit,
         ) {
             if (enableWindowDim) {
                 val baseColor = MiuixTheme.colorScheme.windowDimming
@@ -173,10 +173,10 @@ fun WindowBottomSheet(
                                     } else {
                                         outsideDismissDeferred.value = true
                                     }
-                                }
+                                },
                             )
                         }
-                        .background(dimColor)
+                        .background(dimColor),
                 )
             }
         }
@@ -187,7 +187,7 @@ fun WindowBottomSheet(
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = enterTransition,
-            exit = exitTransition
+            exit = exitTransition,
         ) {
             SuperBottomSheetContent(
                 modifier = modifier,
@@ -217,12 +217,12 @@ fun WindowBottomSheet(
                     CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
                         content()
                     }
-                }
+                },
             )
         }
 
         PredictiveBackHandler(
-            enabled = show.value
+            enabled = show.value,
         ) { progress ->
             try {
                 progress.collect { event ->
@@ -279,23 +279,19 @@ fun WindowBottomSheet(
 }
 
 @Composable
-private fun rememberDefaultSheetEnterTransition(): EnterTransition {
-    return remember {
-        slideInVertically(
-            initialOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(450, easing = DecelerateEasing(1.5f))
-        )
-    }
+private fun rememberDefaultSheetEnterTransition(): EnterTransition = remember {
+    slideInVertically(
+        initialOffsetY = { fullHeight -> fullHeight },
+        animationSpec = tween(450, easing = DecelerateEasing(1.5f)),
+    )
 }
 
 @Composable
-private fun rememberDefaultSheetExitTransition(): ExitTransition {
-    return remember {
-        slideOutVertically(
-            targetOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(300, easing = DecelerateEasing(0.8f))
-        )
-    }
+private fun rememberDefaultSheetExitTransition(): ExitTransition = remember {
+    slideOutVertically(
+        targetOffsetY = { fullHeight -> fullHeight },
+        animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
+    )
 }
 
 private val DialogDimEnter: EnterTransition =
@@ -303,7 +299,6 @@ private val DialogDimEnter: EnterTransition =
 
 private val DialogDimExit: ExitTransition =
     fadeOut(animationSpec = tween(300, easing = SinOutEasing))
-
 
 object WindowBottomSheetDefaults {
 

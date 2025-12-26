@@ -28,7 +28,7 @@ fun TabRowDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,7 +36,7 @@ fun TabRowDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val tabs1 = listOf("Recommended", "Following", "Popular", "Featured")
             var selectedTabIndex1 by remember { mutableStateOf(0) }
@@ -44,7 +44,7 @@ fun TabRowDemo() {
             TabRow(
                 tabs = tabs1,
                 selectedTabIndex = selectedTabIndex1,
-                onTabSelected = { selectedTabIndex1 = it }
+                onTabSelected = { selectedTabIndex1 = it },
             )
             val tabs2 = listOf("All", "Photos", "Videos", "Documents")
             var selectedTabIndex2 by remember { mutableStateOf(0) }
@@ -52,7 +52,7 @@ fun TabRowDemo() {
             TabRowWithContour(
                 tabs = tabs2,
                 selectedTabIndex = selectedTabIndex2,
-                onTabSelected = { selectedTabIndex2 = it }
+                onTabSelected = { selectedTabIndex2 = it },
             )
         }
     }

@@ -103,7 +103,7 @@ fun SuperDropdown(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
             if (itemsNotEmpty) {
                 SuperDropdownPopup(
@@ -113,14 +113,14 @@ fun SuperDropdown(
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
-                    onSelectedIndexChange = onSelectedIndexChange
+                    onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
         },
         bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
-        enabled = actualEnabled
+        enabled = actualEnabled,
     )
 }
 
@@ -132,7 +132,7 @@ private fun SuperDropdownPopup(
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     SuperListPopup(
@@ -141,7 +141,7 @@ private fun SuperDropdownPopup(
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
-        maxHeight = maxHeight
+        maxHeight = maxHeight,
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, string ->
@@ -156,7 +156,7 @@ private fun SuperDropdownPopup(
                             onSelectState.value?.invoke(selectedIdx)
                             isDropdownExpanded.value = false
                         },
-                        index = index
+                        index = index,
                     )
                 }
             }

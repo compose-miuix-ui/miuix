@@ -29,7 +29,7 @@ fun ColorPickerDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -37,14 +37,14 @@ fun ColorPickerDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val miuixColor = MiuixTheme.colorScheme.primary
             var selectedColor by remember { mutableStateOf(miuixColor) }
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
-                hapticEffect = SliderDefaults.SliderHapticEffect.Step
+                hapticEffect = SliderDefaults.SliderHapticEffect.Step,
             )
         }
     }

@@ -57,7 +57,7 @@ fun Icon(
         painter = rememberVectorPainter(imageVector),
         contentDescription = contentDescription,
         modifier = modifier,
-        tint = tint
+        tint = tint,
     )
 }
 
@@ -86,7 +86,7 @@ fun Icon(
         painter = painter,
         contentDescription = contentDescription,
         modifier = modifier,
-        tint = tint
+        tint = tint,
     )
 }
 
@@ -120,7 +120,9 @@ fun Icon(
                     this.contentDescription = contentDescription
                     this.role = Role.Image
                 }
-            } else Modifier
+            } else {
+                Modifier
+            }
         }
     }
     Box(
@@ -128,7 +130,7 @@ fun Icon(
             .toolingGraphicsLayer()
             .defaultSizeFor(painter)
             .paint(painter, colorFilter = colorFilter, contentScale = ContentScale.Fit)
-            .then(semanticsModifier)
+            .then(semanticsModifier),
     )
 }
 
@@ -157,26 +159,24 @@ fun Icon(
         tint = Color.Unspecified,
         contentDescription = contentDescription,
         modifier =
-            modifier.drawWithCache {
-                val layer = obtainGraphicsLayer()
-                layer.apply {
-                    record { drawContent() }
-                    currentTint?.let { this@apply.colorFilter = ColorFilter.tint(it()) }
-                }
-                onDrawWithContent { drawLayer(graphicsLayer = layer) }
-            },
+        modifier.drawWithCache {
+            val layer = obtainGraphicsLayer()
+            layer.apply {
+                record { drawContent() }
+                currentTint?.let { this@apply.colorFilter = ColorFilter.tint(it()) }
+            }
+            onDrawWithContent { drawLayer(graphicsLayer = layer) }
+        },
     )
 }
 
-private fun Modifier.defaultSizeFor(painter: Painter) =
-    this.then(
-        if (painter.intrinsicSize == Size.Unspecified || painter.intrinsicSize.isInfinite()) {
-            DefaultIconSizeModifier
-        } else {
-            Modifier
-        }
-    )
-
+private fun Modifier.defaultSizeFor(painter: Painter) = this.then(
+    if (painter.intrinsicSize == Size.Unspecified || painter.intrinsicSize.isInfinite()) {
+        DefaultIconSizeModifier
+    } else {
+        Modifier
+    },
+)
 
 private fun Size.isInfinite() = width.isInfinite() && height.isInfinite()
 

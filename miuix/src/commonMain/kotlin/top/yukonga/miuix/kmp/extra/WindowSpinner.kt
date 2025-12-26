@@ -121,7 +121,7 @@ fun WindowSpinner(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
             if (itemsNotEmpty) {
                 WindowSpinnerPopup(
@@ -131,14 +131,14 @@ fun WindowSpinner(
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
-                    onSelectedIndexChange = onSelectedIndexChange
+                    onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
         },
         bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
-        enabled = actualEnabled
+        enabled = actualEnabled,
     )
 }
 
@@ -150,7 +150,7 @@ private fun WindowSpinnerPopup(
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     WindowListPopup(
@@ -159,7 +159,7 @@ private fun WindowSpinnerPopup(
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
-        maxHeight = maxHeight
+        maxHeight = maxHeight,
     ) {
         val dismiss = LocalWindowListPopupState.current
         ListPopupColumn {
@@ -171,7 +171,7 @@ private fun WindowSpinnerPopup(
                         isSelected = selectedIndex == index,
                         index = index,
                         dialogMode = false,
-                        spinnerColors = spinnerColors
+                        spinnerColors = spinnerColors,
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
@@ -189,7 +189,7 @@ private fun RowScope.WindowSpinnerRightActions(
     itemsNotEmpty: Boolean,
     items: List<SpinnerEntry>,
     selectedIndex: Int,
-    actionColor: Color
+    actionColor: Color,
 ) {
     if (showValue && itemsNotEmpty) {
         Text(
@@ -199,7 +199,7 @@ private fun RowScope.WindowSpinnerRightActions(
             color = actionColor,
             textAlign = TextAlign.End,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 2,
         )
     }
     Image(
@@ -209,7 +209,7 @@ private fun RowScope.WindowSpinnerRightActions(
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowUpDown,
         colorFilter = ColorFilter.tint(actionColor),
-        contentDescription = null
+        contentDescription = null,
     )
 }
 
@@ -288,7 +288,7 @@ fun WindowSpinner(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
         },
         onClick = handleClick,
@@ -305,7 +305,7 @@ fun WindowSpinner(
         isDropdownExpanded = isDropdownExpanded,
         hapticFeedback = hapticFeedback,
         spinnerColors = spinnerColors,
-        onSelectedIndexChange = onSelectedIndexChange
+        onSelectedIndexChange = onSelectedIndexChange,
     )
 }
 
@@ -315,11 +315,11 @@ private fun WindowSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    popupModifier: Modifier,
+    popupModifier: Modifier = Modifier,
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     WindowDialog(
@@ -342,7 +342,7 @@ private fun WindowSpinnerDialog(
                                 isSelected = selectedIndex == index,
                                 index = index,
                                 dialogMode = true,
-                                spinnerColors = spinnerColors
+                                spinnerColors = spinnerColors,
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
@@ -356,9 +356,9 @@ private fun WindowSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { dismiss.invoke() }
+                        onClick = { dismiss.invoke() },
                     )
-                }
+                },
             ) { measurables, constraints ->
                 if (measurables.size != 2) {
                     layout(0, 0) { }
@@ -366,8 +366,8 @@ private fun WindowSpinnerDialog(
                     val button = measurables[1].measure(constraints)
                     val lazyList = measurables[0].measure(
                         constraints.copy(
-                            maxHeight = constraints.maxHeight - button.height
-                        )
+                            maxHeight = constraints.maxHeight - button.height,
+                        ),
                     )
                     layout(constraints.maxWidth, lazyList.height + button.height) {
                         lazyList.place(0, 0)
@@ -375,6 +375,6 @@ private fun WindowSpinnerDialog(
                     }
                 }
             }
-        }
+        },
     )
 }

@@ -32,7 +32,7 @@ fun ProgressIndicatorDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -40,7 +40,7 @@ fun ProgressIndicatorDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val progressValues = listOf(0.0f, 0.25f, 0.5f, 0.75f, 1.0f, null)
             val animatedProgressValue by rememberInfiniteTransition().animateFloat(
@@ -48,17 +48,17 @@ fun ProgressIndicatorDemo() {
                 targetValue = 1f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(1000),
-                    repeatMode = RepeatMode.Reverse
-                )
+                    repeatMode = RepeatMode.Reverse,
+                ),
             )
             LinearProgressIndicator(
                 progress = animatedProgressValue,
-                modifier = Modifier
+                modifier = Modifier,
             )
             progressValues.forEach { progressValue ->
                 LinearProgressIndicator(
                     progress = progressValue,
-                    modifier = Modifier
+                    modifier = Modifier,
                 )
             }
             FlowRow(
@@ -66,16 +66,16 @@ fun ProgressIndicatorDemo() {
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 CircularProgressIndicator(
-                    progress = animatedProgressValue
+                    progress = animatedProgressValue,
                 )
                 progressValues.forEach { progressValue ->
                     CircularProgressIndicator(
-                        progress = progressValue
+                        progress = progressValue,
                     )
                 }
                 InfiniteProgressIndicator(
                     modifier = Modifier
-                        .align(alignment = Alignment.CenterVertically)
+                        .align(alignment = Alignment.CenterVertically),
                 )
             }
         }

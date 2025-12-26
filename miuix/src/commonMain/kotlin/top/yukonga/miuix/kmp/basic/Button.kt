@@ -50,7 +50,7 @@ fun Button(
     minHeight: Dp = ButtonDefaults.MinHeight,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
@@ -68,7 +68,7 @@ fun Button(
                 .padding(insideMargin),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            content = content
+            content = content,
         )
     }
 }
@@ -97,7 +97,7 @@ fun TextButton(
     cornerRadius: Dp = ButtonDefaults.CornerRadius,
     minWidth: Dp = ButtonDefaults.MinWidth,
     minHeight: Dp = ButtonDefaults.MinHeight,
-    insideMargin: PaddingValues = ButtonDefaults.InsideMargin
+    insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
@@ -120,9 +120,9 @@ fun TextButton(
                 Text(
                     text = text,
                     color = textColor,
-                    style = MiuixTheme.textStyles.button
+                    style = MiuixTheme.textStyles.button,
                 )
-            }
+            },
         )
     }
 }
@@ -157,13 +157,11 @@ object ButtonDefaults {
     @Composable
     fun buttonColors(
         color: Color = MiuixTheme.colorScheme.secondaryVariant,
-        disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant
-    ): ButtonColors {
-        return ButtonColors(
-            color = color,
-            disabledColor = disabledColor
-        )
-    }
+        disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
+    ): ButtonColors = ButtonColors(
+        color = color,
+        disabledColor = disabledColor,
+    )
 
     /**
      * The [ButtonColors] for primary buttons.
@@ -171,7 +169,7 @@ object ButtonDefaults {
     @Composable
     fun buttonColorsPrimary() = ButtonColors(
         color = MiuixTheme.colorScheme.primary,
-        disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton
+        disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton,
     )
 
     /**
@@ -182,12 +180,12 @@ object ButtonDefaults {
         color: Color = MiuixTheme.colorScheme.secondaryVariant,
         disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
         textColor: Color = MiuixTheme.colorScheme.onSecondaryVariant,
-        disabledTextColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        disabledTextColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
     ): TextButtonColors = TextButtonColors(
         color = color,
         disabledColor = disabledColor,
         textColor = textColor,
-        disabledTextColor = disabledTextColor
+        disabledTextColor = disabledTextColor,
     )
 
     /**
@@ -198,14 +196,14 @@ object ButtonDefaults {
         color = MiuixTheme.colorScheme.primary,
         disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton,
         textColor = MiuixTheme.colorScheme.onPrimary,
-        disabledTextColor = MiuixTheme.colorScheme.disabledOnPrimaryButton
+        disabledTextColor = MiuixTheme.colorScheme.disabledOnPrimaryButton,
     )
 }
 
 @Immutable
 data class ButtonColors(
     val color: Color,
-    val disabledColor: Color
+    val disabledColor: Color,
 )
 
 @Immutable
@@ -213,5 +211,5 @@ data class TextButtonColors(
     val color: Color,
     val disabledColor: Color,
     val textColor: Color,
-    val disabledTextColor: Color
+    val disabledTextColor: Color,
 )

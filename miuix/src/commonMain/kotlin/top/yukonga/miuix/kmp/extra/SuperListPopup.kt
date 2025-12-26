@@ -62,7 +62,7 @@ fun SuperListPopup(
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     var isAnimating by remember { mutableStateOf(false) }
     val animationProgress = remember { Animatable(0f) }
@@ -72,12 +72,12 @@ fun SuperListPopup(
             isAnimating = true
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f),
             )
         } else {
             animationProgress.animateTo(
                 targetValue = 0f,
-                animationSpec = tween(300, easing = DecelerateEasing(1.5f))
+                animationSpec = tween(300, easing = DecelerateEasing(1.5f)),
             )
             isAnimating = false
         }
@@ -96,10 +96,10 @@ fun SuperListPopup(
                         left = positionInWindow.x.toInt(),
                         top = positionInWindow.y.toInt(),
                         right = positionInWindow.x.toInt() + parentLayoutCoordinates.size.width,
-                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height
+                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height,
                     )
                 }
-            }
+            },
     )
 
     if (parentBounds == IntRect.Zero) return
@@ -114,18 +114,18 @@ fun SuperListPopup(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
-        popupContentSize = popupContentSize
+        popupContentSize = popupContentSize,
     )
 
     PopupLayout(
         visible = show,
-        enableWindowDim = enableWindowDim
+        enableWindowDim = enableWindowDim,
     ) {
         Box(
             modifier = popupModifier
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { currentOnDismiss?.invoke() }
+                        onTap = { currentOnDismiss?.invoke() },
                     )
                 }
                 .layout { measurable, constraints ->
@@ -139,7 +139,7 @@ fun SuperListPopup(
                         maxHeight?.roundToPx() ?: Int.MAX_VALUE,
                         safeWindowMaxHeightPx,
                         sideConstrainedMax,
-                        windowSize.height
+                        windowSize.height,
                     ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowSize.height))
 
                     val placeable = measurable.measure(
@@ -147,8 +147,8 @@ fun SuperListPopup(
                             minWidth = minWidthPx,
                             minHeight = classicMinHeightPx.coerceAtMost(windowSize.height),
                             maxHeight = finalMaxHeightPx,
-                            maxWidth = windowSize.width
-                        )
+                            maxWidth = windowSize.width,
+                        ),
                     )
                     val measuredSize = IntSize(placeable.width, placeable.height)
 
@@ -158,13 +158,13 @@ fun SuperListPopup(
                         layoutDirection,
                         measuredSize,
                         layoutInfo.popupMargin,
-                        alignment
+                        alignment,
                     )
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         placeable.place(calculatedOffset)
                     }
-                }
+                },
         ) {
             ListPopupContent(
                 popupContentSize = popupContentSize,
@@ -172,7 +172,7 @@ fun SuperListPopup(
                 animationProgress = { animationProgress.value },
                 popupLayoutInfo = layoutInfo.popupLayoutInfo,
                 localTransformOrigin = layoutInfo.localTransformOrigin,
-                content = content
+                content = content,
             )
         }
     }

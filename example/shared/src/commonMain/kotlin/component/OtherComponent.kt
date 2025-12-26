@@ -78,7 +78,7 @@ fun LazyListScope.otherComponent() {
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             TextButton(
                 text = buttonText,
@@ -86,7 +86,7 @@ fun LazyListScope.otherComponent() {
                     clickCount++
                     buttonText = "Click: $clickCount"
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(12.dp))
             TextButton(
@@ -96,20 +96,20 @@ fun LazyListScope.otherComponent() {
                     submitButtonText = "Click: $submitClickCount"
                 },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
         Row(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             TextButton(
                 text = "Disabled",
                 onClick = {},
                 modifier = Modifier.weight(1f),
-                enabled = false
+                enabled = false,
             )
             Spacer(Modifier.width(12.dp))
             TextButton(
@@ -117,7 +117,7 @@ fun LazyListScope.otherComponent() {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }
@@ -130,22 +130,22 @@ fun LazyListScope.otherComponent() {
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
                 animation = tween(1000),
-                repeatMode = RepeatMode.Reverse
-            )
+                repeatMode = RepeatMode.Reverse,
+            ),
         )
 
         LinearProgressIndicator(
             progress = animatedProgressValue,
             modifier = Modifier
                 .padding(horizontal = 15.dp)
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
         )
         progressValues.forEach { progressValue ->
             LinearProgressIndicator(
                 progress = progressValue,
                 modifier = Modifier
                     .padding(horizontal = 15.dp) // Increased from 12.dp.
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
         }
         FlowRow(
@@ -156,16 +156,16 @@ fun LazyListScope.otherComponent() {
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             CircularProgressIndicator(
-                progress = animatedProgressValue
+                progress = animatedProgressValue,
             )
             progressValues.forEach { progressValue ->
                 CircularProgressIndicator(
-                    progress = progressValue
+                    progress = progressValue,
                 )
             }
             InfiniteProgressIndicator(
                 modifier = Modifier
-                    .align(alignment = Alignment.CenterVertically)
+                    .align(alignment = Alignment.CenterVertically),
             )
         }
     }
@@ -186,7 +186,7 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
         TextField(
             value = text2,
@@ -196,7 +196,7 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
         TextField(
             state = text3,
@@ -217,7 +217,7 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
     }
 
@@ -226,7 +226,7 @@ fun LazyListScope.otherComponent() {
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
             var sliderValue by remember { mutableStateOf(0.3f) }
             Text(
@@ -234,14 +234,14 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(top = 12.dp, bottom = 4.dp),
             )
             Slider(
                 value = sliderValue,
                 onValueChange = { sliderValue = it },
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var stepsValue by remember { mutableStateOf(5f) }
             Text(
@@ -249,7 +249,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             Slider(
                 value = stepsValue,
@@ -259,7 +259,7 @@ fun LazyListScope.otherComponent() {
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var stepsWithKeyPointsValue by remember { mutableStateOf(5f) }
             Text(
@@ -267,7 +267,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             Slider(
                 value = stepsWithKeyPointsValue,
@@ -278,7 +278,7 @@ fun LazyListScope.otherComponent() {
                 showKeyPoints = true,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var customKeyPointsValue by remember { mutableStateOf(25f) }
             Text(
@@ -286,7 +286,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             Slider(
                 value = customKeyPointsValue,
@@ -297,7 +297,7 @@ fun LazyListScope.otherComponent() {
                 keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             val disabledValue by remember { mutableStateOf(0.7f) }
             Text(
@@ -305,7 +305,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             Slider(
                 value = disabledValue,
@@ -313,7 +313,7 @@ fun LazyListScope.otherComponent() {
                 enabled = false,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
         }
 
@@ -322,7 +322,7 @@ fun LazyListScope.otherComponent() {
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
             var rangeValue by remember { mutableStateOf(0.2f..0.8f) }
             Text(
@@ -330,14 +330,14 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp)
+                    .padding(top = 12.dp, bottom = 4.dp),
             )
             RangeSlider(
                 value = rangeValue,
                 onValueChange = { rangeValue = it },
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var rangeStepsValue by remember { mutableStateOf(2f..8f) }
             Text(
@@ -345,7 +345,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             RangeSlider(
                 value = rangeStepsValue,
@@ -356,7 +356,7 @@ fun LazyListScope.otherComponent() {
                 showKeyPoints = true,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var customRangeValue by remember { mutableStateOf(20f..80f) }
             Text(
@@ -364,7 +364,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             RangeSlider(
                 value = customRangeValue,
@@ -375,7 +375,7 @@ fun LazyListScope.otherComponent() {
                 keyPoints = listOf(0f, 20f, 40f, 60f, 80f, 100f),
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
             var disabledRangeValue by remember { mutableStateOf(0.3f..0.7f) }
             Text(
@@ -383,7 +383,7 @@ fun LazyListScope.otherComponent() {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             RangeSlider(
                 value = disabledRangeValue,
@@ -391,7 +391,7 @@ fun LazyListScope.otherComponent() {
                 enabled = false,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
             )
         }
 
@@ -400,7 +400,7 @@ fun LazyListScope.otherComponent() {
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
             Row(
                 modifier = Modifier
@@ -408,29 +408,29 @@ fun LazyListScope.otherComponent() {
                     .padding(horizontal = 12.dp)
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 var verticalValue1 by remember { mutableStateOf(0.3f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     VerticalSlider(
                         value = verticalValue1,
                         onValueChange = { verticalValue1 = it },
-                        modifier = Modifier.size(25.dp, 160.dp)
+                        modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
                         text = "Normal\n${(verticalValue1 * 100).toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 var verticalValue2 by remember { mutableStateOf(5f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     VerticalSlider(
                         value = verticalValue2,
@@ -438,19 +438,19 @@ fun LazyListScope.otherComponent() {
                         valueRange = 0f..6f,
                         steps = 5,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                        modifier = Modifier.size(25.dp, 160.dp)
+                        modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
                         text = "Steps\n${verticalValue2.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 var verticalValue3 by remember { mutableStateOf(5f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     VerticalSlider(
                         value = verticalValue3,
@@ -459,19 +459,19 @@ fun LazyListScope.otherComponent() {
                         steps = 5,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                         showKeyPoints = true,
-                        modifier = Modifier.size(25.dp, 160.dp)
+                        modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
                         text = "Points\n${verticalValue3.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 var verticalValue4 by remember { mutableStateOf(50f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     VerticalSlider(
                         value = verticalValue4,
@@ -480,31 +480,31 @@ fun LazyListScope.otherComponent() {
                         showKeyPoints = true,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                         keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
-                        modifier = Modifier.size(25.dp, 160.dp)
+                        modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
                         text = "Custom\n${verticalValue4.toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 val disabledVerticalValue by remember { mutableStateOf(0.7f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     VerticalSlider(
                         value = disabledVerticalValue,
                         onValueChange = {},
                         enabled = false,
-                        modifier = Modifier.size(25.dp, 160.dp)
+                        modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
                         text = "Disabled\n${(disabledVerticalValue * 100).toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -521,7 +521,7 @@ fun LazyListScope.otherComponent() {
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
             selectedTabIndex = it
         }
@@ -530,7 +530,7 @@ fun LazyListScope.otherComponent() {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             val scope = rememberCoroutineScope()
             val pagerState = rememberPagerState(pageCount = { tabTexts1.size })
@@ -553,9 +553,9 @@ fun LazyListScope.otherComponent() {
                     Text(
                         text = "Content of ${tabTexts1[page]}",
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
                     )
-                }
+                },
             )
         }
     }
@@ -567,7 +567,7 @@ fun LazyListScope.otherComponent() {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             val miuixIconsAll = remember { MiuixIcons.All }
             miuixIconsAll.forEach { (weight, icons) ->
@@ -575,8 +575,8 @@ fun LazyListScope.otherComponent() {
                     text = weight,
                     modifier = Modifier.padding(
                         bottom = 6.dp,
-                        top = if (weight == "Light") 0.dp else 12.dp
-                    )
+                        top = if (weight == "Light") 0.dp else 12.dp,
+                    ),
                 )
                 FlowRow {
                     icons.forEach { icon ->
@@ -584,7 +584,7 @@ fun LazyListScope.otherComponent() {
                             imageVector = icon,
                             contentDescription = icon.name,
                             tint = MiuixTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
                     }
                 }
@@ -602,25 +602,25 @@ fun LazyListScope.otherComponent() {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
-                    modifier = Modifier.weight(1f)
+                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f),
                 )
             }
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
-                showPreview = false
+                showPreview = false,
             )
         }
     }
@@ -636,26 +636,26 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
 
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
-                    modifier = Modifier.weight(1f)
+                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f),
                 )
             }
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKHSV,
-                showPreview = false
+                showPreview = false,
             )
         }
     }
@@ -670,26 +670,26 @@ fun LazyListScope.otherComponent() {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
-                    modifier = Modifier.weight(1f)
+                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f),
                 )
             }
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKLAB,
-                showPreview = false
+                showPreview = false,
             )
         }
     }
@@ -705,26 +705,26 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
 
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
-                    modifier = Modifier.weight(1f)
+                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f),
                 )
             }
             ColorPicker(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKLCH,
-                showPreview = false
+                showPreview = false,
             )
         }
     }
@@ -739,25 +739,25 @@ fun LazyListScope.otherComponent() {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp)
+            insideMargin = PaddingValues(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                            "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
-                    modifier = Modifier.weight(1f)
+                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
+                    modifier = Modifier.weight(1f),
                 )
             }
             ColorPalette(
                 initialColor = selectedColor,
                 onColorChanged = { selectedColor = it },
-                showPreview = false
+                showPreview = false,
             )
         }
     }
@@ -770,30 +770,30 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             colors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.primaryVariant
+                color = MiuixTheme.colorScheme.primaryVariant,
             ),
             insideMargin = PaddingValues(16.dp),
             pressFeedbackType = PressFeedbackType.None,
-            showIndication = true
+            showIndication = true,
         ) {
             Text(
                 color = MiuixTheme.colorScheme.onPrimaryVariant,
                 text = "Card",
                 fontSize = 19.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
             Text(
                 color = MiuixTheme.colorScheme.onPrimaryVariant,
                 text = "ShowIndication: true",
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
             )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Card(
                 modifier = Modifier.weight(1f),
@@ -806,14 +806,14 @@ fun LazyListScope.otherComponent() {
                         color = MiuixTheme.colorScheme.onSurface,
                         text = "Card",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         text = "PressFeedback\nType: Sink",
-                        style = MiuixTheme.textStyles.paragraph
+                        style = MiuixTheme.textStyles.paragraph,
                     )
-                }
+                },
             )
             Card(
                 modifier = Modifier.weight(1f),
@@ -825,14 +825,14 @@ fun LazyListScope.otherComponent() {
                         color = MiuixTheme.colorScheme.onSurface,
                         text = "Card",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         text = "PressFeedback\nType: Tilt",
-                        style = MiuixTheme.textStyles.paragraph
+                        style = MiuixTheme.textStyles.paragraph,
                     )
-                }
+                },
             )
         }
     }

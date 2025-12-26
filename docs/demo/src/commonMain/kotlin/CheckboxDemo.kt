@@ -28,7 +28,7 @@ fun CheckboxDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,7 +36,7 @@ fun CheckboxDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var checkbox1 by remember { mutableStateOf(false) }
             var checkbox2 by remember { mutableStateOf(true) }
@@ -45,21 +45,21 @@ fun CheckboxDemo() {
             ) {
                 Checkbox(
                     checked = checkbox1,
-                    onCheckedChange = { checkbox1 = it }
+                    onCheckedChange = { checkbox1 = it },
                 )
                 Checkbox(
                     checked = checkbox2,
-                    onCheckedChange = { checkbox2 = it }
+                    onCheckedChange = { checkbox2 = it },
                 )
                 Checkbox(
                     checked = false,
                     onCheckedChange = { },
-                    enabled = false
+                    enabled = false,
                 )
                 Checkbox(
                     checked = true,
                     onCheckedChange = { },
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

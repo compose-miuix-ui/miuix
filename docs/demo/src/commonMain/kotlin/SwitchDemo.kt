@@ -28,7 +28,7 @@ fun SwitchDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,7 +36,7 @@ fun SwitchDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var switch1 by remember { mutableStateOf(false) }
             var switch2 by remember { mutableStateOf(true) }
@@ -45,21 +45,21 @@ fun SwitchDemo() {
             ) {
                 Switch(
                     checked = switch1,
-                    onCheckedChange = { switch1 = it }
+                    onCheckedChange = { switch1 = it },
                 )
                 Switch(
                     checked = switch2,
-                    onCheckedChange = { switch2 = it }
+                    onCheckedChange = { switch2 = it },
                 )
                 Switch(
                     checked = false,
                     onCheckedChange = { },
-                    enabled = false
+                    enabled = false,
                 )
                 Switch(
                     checked = true,
                     onCheckedChange = { },
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

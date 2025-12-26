@@ -17,15 +17,15 @@ fun App(
     colorMode: MutableState<Int> = remember { mutableStateOf(0) },
     seedIndex: MutableState<Int> = remember { mutableStateOf(0) },
     padding: PaddingValues = PaddingValues(0.dp),
-    enableOverScroll: Boolean = platform() == Platform.Android || platform() == Platform.IOS
+    enableOverScroll: Boolean = platform() == Platform.Android || platform() == Platform.IOS,
 ) {
     val keyColor = keyColorFor(seedIndex.value)
     AppTheme(colorMode = colorMode.value, keyColor = keyColor) {
-            UITest(
-                colorMode = colorMode,
-                seedIndex = seedIndex,
-                padding = padding,
-                enableOverScroll = enableOverScroll
-            )
+        UITest(
+            colorMode = colorMode,
+            seedIndex = seedIndex,
+            padding = padding,
+            enableOverScroll = enableOverScroll,
+        )
     }
 }

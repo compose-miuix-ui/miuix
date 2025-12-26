@@ -47,7 +47,7 @@ fun LinearProgressIndicator(
     progress: Float? = null,
     modifier: Modifier = Modifier,
     colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(),
-    height: Dp = ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight
+    height: Dp = ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight,
 ) {
     if (progress == null) {
         val currentBackgroundColor = colors.backgroundColor()
@@ -58,19 +58,19 @@ fun LinearProgressIndicator(
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
                 animation = tween(durationMillis = 1250, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            )
+                repeatMode = RepeatMode.Restart,
+            ),
         )
 
         Canvas(
             modifier = modifier
                 .fillMaxWidth()
-                .height(height)
+                .height(height),
         ) {
             drawRoundRect(
                 color = currentBackgroundColor,
                 size = Size(size.width, size.height),
-                cornerRadius = CornerRadius(size.height / 2)
+                cornerRadius = CornerRadius(size.height / 2),
             )
 
             val value = animatedValue
@@ -85,7 +85,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                 } else {
                     val startX = size.width * adjustedPos
@@ -94,7 +94,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                     val remainingWidth = adjustedPos + segmentWidth - 1f
                     if (remainingWidth > 0) {
@@ -102,7 +102,7 @@ fun LinearProgressIndicator(
                             color = currentForegroundColor,
                             topLeft = Offset(0f, 0f),
                             size = Size(size.width * remainingWidth, size.height),
-                            cornerRadius = CornerRadius(size.height / 2)
+                            cornerRadius = CornerRadius(size.height / 2),
                         )
                     }
                 }
@@ -117,7 +117,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                 } else {
                     val startX = size.width * adjustedPos
@@ -126,7 +126,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                     val remainingWidth = adjustedPos + segmentWidth - 1f
                     if (remainingWidth > 0) {
@@ -134,7 +134,7 @@ fun LinearProgressIndicator(
                             color = currentForegroundColor,
                             topLeft = Offset(0f, 0f),
                             size = Size(size.width * remainingWidth, size.height),
-                            cornerRadius = CornerRadius(size.height / 2)
+                            cornerRadius = CornerRadius(size.height / 2),
                         )
                     }
                 }
@@ -149,7 +149,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                 } else {
                     val startX = size.width * adjustedPos
@@ -158,7 +158,7 @@ fun LinearProgressIndicator(
                         color = currentForegroundColor,
                         topLeft = Offset(startX, 0f),
                         size = Size(width, size.height),
-                        cornerRadius = CornerRadius(size.height / 2)
+                        cornerRadius = CornerRadius(size.height / 2),
                     )
                     val remainingWidth = adjustedPos + segmentWidth - 1f
                     if (remainingWidth > 0) {
@@ -166,7 +166,7 @@ fun LinearProgressIndicator(
                             color = currentForegroundColor,
                             topLeft = Offset(0f, 0f),
                             size = Size(size.width * remainingWidth, size.height),
-                            cornerRadius = CornerRadius(size.height / 2)
+                            cornerRadius = CornerRadius(size.height / 2),
                         )
                     }
                 }
@@ -180,14 +180,14 @@ fun LinearProgressIndicator(
         Canvas(
             modifier = modifier
                 .fillMaxWidth()
-                .height(height)
+                .height(height),
         ) {
             val cornerRadius = size.height / 2
 
             drawRoundRect(
                 color = currentBackgroundColor,
                 size = Size(size.width, size.height),
-                cornerRadius = CornerRadius(cornerRadius)
+                cornerRadius = CornerRadius(cornerRadius),
             )
 
             val minWidth = cornerRadius * 2
@@ -197,7 +197,7 @@ fun LinearProgressIndicator(
                 color = currentForegroundColor,
                 topLeft = Offset(0f, 0f),
                 size = Size(progressWidth, size.height),
-                cornerRadius = CornerRadius(cornerRadius)
+                cornerRadius = CornerRadius(cornerRadius),
             )
         }
     }
@@ -219,7 +219,7 @@ fun CircularProgressIndicator(
     modifier: Modifier = Modifier,
     colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(),
     strokeWidth: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth,
-    size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize
+    size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize,
 ) {
     if (progress == null) {
         val currentBackgroundColor = colors.backgroundColor()
@@ -231,8 +231,8 @@ fun CircularProgressIndicator(
             targetValue = 360f,
             animationSpec = infiniteRepeatable(
                 animation = tween(1000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            )
+                repeatMode = RepeatMode.Restart,
+            ),
         )
         val sweepAnim by transition.animateFloat(
             initialValue = 30f,
@@ -243,12 +243,12 @@ fun CircularProgressIndicator(
                     120f at 800 using LinearEasing
                     30f at 1600 using LinearEasing
                 },
-                repeatMode = RepeatMode.Restart
-            )
+                repeatMode = RepeatMode.Restart,
+            ),
         )
 
         Canvas(
-            modifier = modifier.size(size)
+            modifier = modifier.size(size),
         ) {
             val strokeWidthPx = strokeWidth.toPx()
             val radius = (size.toPx() - strokeWidthPx) / 2
@@ -258,7 +258,7 @@ fun CircularProgressIndicator(
                 color = currentBackgroundColor,
                 radius = radius,
                 center = center,
-                style = Stroke(width = strokeWidthPx)
+                style = Stroke(width = strokeWidthPx),
             )
 
             drawArc(
@@ -277,7 +277,7 @@ fun CircularProgressIndicator(
         val currentForegroundColor = colors.foregroundColor(true)
 
         Canvas(
-            modifier = modifier.size(size)
+            modifier = modifier.size(size),
         ) {
             val strokeWidthPx = strokeWidth.toPx()
             val radius = (size.toPx() - strokeWidthPx) / 2
@@ -287,7 +287,7 @@ fun CircularProgressIndicator(
                 color = currentBackgroundColor,
                 radius = radius,
                 center = center,
-                style = Stroke(width = strokeWidthPx)
+                style = Stroke(width = strokeWidthPx),
             )
 
             val minSweepAngle = 0.1f
@@ -300,7 +300,7 @@ fun CircularProgressIndicator(
                 useCenter = false,
                 topLeft = Offset(strokeWidthPx / 2, strokeWidthPx / 2),
                 size = Size(2 * radius, 2 * radius),
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round),
             )
         }
     }
@@ -323,7 +323,7 @@ fun InfiniteProgressIndicator(
     color: Color = Color.Gray,
     size: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorSize,
     strokeWidth: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorStrokeWidth,
-    orbitingDotSize: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorOrbitingDotSize
+    orbitingDotSize: Dp = ProgressIndicatorDefaults.DefaultInfiniteProgressIndicatorOrbitingDotSize,
 ) {
     val transition = rememberInfiniteTransition()
     val rotation by transition.animateFloat(
@@ -331,12 +331,12 @@ fun InfiniteProgressIndicator(
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(800, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
+            repeatMode = RepeatMode.Restart,
+        ),
     )
 
     Canvas(
-        modifier = modifier.size(size)
+        modifier = modifier.size(size),
     ) {
         val center = Offset(this.size.width / 2, this.size.height / 2)
         val radius = (size.toPx() - strokeWidth.toPx()) / 2
@@ -345,20 +345,20 @@ fun InfiniteProgressIndicator(
             color = color,
             radius = radius,
             center = center,
-            style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+            style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round),
         )
 
         val orbitRadius = radius - 2 * orbitingDotSize.toPx()
         val angle = rotation * PI.toFloat() / 180f
         val dotCenter = center + Offset(
             x = orbitRadius * cos(angle),
-            y = orbitRadius * sin(angle)
+            y = orbitRadius * sin(angle),
         )
 
         drawCircle(
             color = color,
             radius = orbitingDotSize.toPx(),
-            center = dotCenter
+            center = dotCenter,
         )
     }
 }
@@ -389,25 +389,22 @@ object ProgressIndicatorDefaults {
     fun progressIndicatorColors(
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
-        backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer
-    ): ProgressIndicatorColors {
-        return ProgressIndicatorColors(
-            foregroundColor = foregroundColor,
-            disabledForegroundColor = disabledForegroundColor,
-            backgroundColor = backgroundColor
-        )
-    }
+        backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
+    ): ProgressIndicatorColors = ProgressIndicatorColors(
+        foregroundColor = foregroundColor,
+        disabledForegroundColor = disabledForegroundColor,
+        backgroundColor = backgroundColor,
+    )
 }
 
 @Immutable
 data class ProgressIndicatorColors(
     private val foregroundColor: Color,
     private val disabledForegroundColor: Color,
-    private val backgroundColor: Color
+    private val backgroundColor: Color,
 ) {
     @Stable
-    internal fun foregroundColor(enabled: Boolean): Color =
-        if (enabled) foregroundColor else disabledForegroundColor
+    internal fun foregroundColor(enabled: Boolean): Color = if (enabled) foregroundColor else disabledForegroundColor
 
     @Stable
     internal fun backgroundColor(): Color = backgroundColor

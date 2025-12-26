@@ -11,7 +11,7 @@ fun main() {
     val iFrameParams = URLSearchParams(document.location?.search)
     val id = iFrameParams.get("id")
     ComposeViewport(
-        viewportContainerId = "ComposeTarget"
+        viewportContainerId = "ComposeTarget",
     ) {
         Demo(demoId = id)
     }

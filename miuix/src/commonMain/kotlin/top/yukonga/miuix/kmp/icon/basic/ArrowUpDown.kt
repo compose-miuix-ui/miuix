@@ -18,7 +18,7 @@ val MiuixIcons.Basic.ArrowUpDown: ImageVector
             path(
                 fill = SolidColor(Color.Black),
                 fillAlpha = 1f,
-                pathFillType = PathFillType.EvenOdd
+                pathFillType = PathFillType.EvenOdd,
             ) {
                 moveTo(2.397f, 4.7384f)
                 lineTo(4.5688f, 2.5665f)

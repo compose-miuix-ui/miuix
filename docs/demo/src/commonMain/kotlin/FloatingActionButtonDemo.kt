@@ -33,7 +33,7 @@ fun FloatingActionButtonDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -41,65 +41,65 @@ fun FloatingActionButtonDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     Scaffold(
                         floatingActionButton = {
                             FloatingActionButton(
                                 onClick = {
                                     // Handle FAB click
-                                }
+                                },
                             ) {
                                 Icon(
                                     imageVector = MiuixIcons.SelectAll,
                                     contentDescription = "SelectAll",
-                                    tint = Color.White
+                                    tint = Color.White,
                                 )
                             }
-                        }
+                        },
                     ) { paddingValues ->
                         LazyColumn(
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
                                 SuperArrow(
-                                    title = "Something"
+                                    title = "Something",
                                 )
                             }
                         }
                     }
                 }
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     Scaffold(
                         floatingActionButton = {
                             FloatingActionButton(
                                 onClick = {
                                     // Handle FAB click
-                                }
+                                },
                             ) {
                                 Icon(
                                     imageVector = MiuixIcons.SelectAll,
                                     contentDescription = "SelectAll",
-                                    tint = Color.White
+                                    tint = Color.White,
                                 )
                             }
                         },
-                        floatingActionButtonPosition = FabPosition.Center
+                        floatingActionButtonPosition = FabPosition.Center,
                     ) { paddingValues ->
                         LazyColumn(
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
                                 SuperArrow(
-                                    title = "Something"
+                                    title = "Something",
                                 )
                             }
                         }

@@ -14,7 +14,7 @@ import top.yukonga.miuix.kmp.theme.ThemeController
 fun AppTheme(
     colorMode: Int = 0,
     keyColor: Color? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val controller = remember(colorMode, keyColor) {
         when (colorMode) {
@@ -28,7 +28,7 @@ fun AppTheme(
     }
     return MiuixTheme(
         controller = controller,
-        content = content
+        content = content,
     )
 }
 
@@ -39,7 +39,7 @@ val KeyColors: List<Pair<String, Color>> = listOf(
     "Yellow" to Color(0xFFFFB21D),
     "Orange" to Color(0xFFFF5722),
     "Pink" to Color(0xFFE91E63),
-    "Teal" to Color(0xFF00BCD4)
+    "Teal" to Color(0xFF00BCD4),
 )
 
 fun keyColorFor(index: Int): Color? = if (index <= 0) null else KeyColors.getOrNull(index - 1)?.second

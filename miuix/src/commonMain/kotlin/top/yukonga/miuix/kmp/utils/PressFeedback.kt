@@ -29,16 +29,16 @@ import kotlinx.coroutines.launch
 @Immutable
 data class SinkFeedback(
     val sinkAmount: Float = 0.94f,
-    val animationSpec: AnimationSpec<Float> = spring(0.8f, 600f)
+    val animationSpec: AnimationSpec<Float> = spring(0.8f, 600f),
 ) : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode =
-        SinkFeedbackNode(interactionSource, sinkAmount, animationSpec)
+    override fun create(interactionSource: InteractionSource): DelegatableNode = SinkFeedbackNode(interactionSource, sinkAmount, animationSpec)
 
     private class SinkFeedbackNode(
         var interactionSource: InteractionSource,
         var sinkAmount: Float,
-        var animationSpec: AnimationSpec<Float>
-    ) : Modifier.Node(), LayoutModifierNode {
+        var animationSpec: AnimationSpec<Float>,
+    ) : Modifier.Node(),
+        LayoutModifierNode {
 
         private val animatedScale = Animatable(1f)
 
@@ -60,7 +60,7 @@ data class SinkFeedback(
 
         override fun MeasureScope.measure(
             measurable: Measurable,
-            constraints: Constraints
+            constraints: Constraints,
         ): MeasureResult {
             val placeable = measurable.measure(constraints)
             return layout(placeable.width, placeable.height) {
@@ -76,16 +76,17 @@ data class SinkFeedback(
 @Immutable
 data class TiltFeedback(
     val tiltAmount: Float = 8f,
-    val animationSpec: AnimationSpec<Float> = spring(0.6f, 400f)
+    val animationSpec: AnimationSpec<Float> = spring(0.6f, 400f),
 ) : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode =
-        TiltFeedbackNode(interactionSource, tiltAmount, animationSpec)
+    override fun create(interactionSource: InteractionSource): DelegatableNode = TiltFeedbackNode(interactionSource, tiltAmount, animationSpec)
 
     private class TiltFeedbackNode(
         var interactionSource: InteractionSource,
         var tiltAmount: Float,
-        var animationSpec: AnimationSpec<Float>
-    ) : Modifier.Node(), LayoutModifierNode, PointerInputModifierNode {
+        var animationSpec: AnimationSpec<Float>,
+    ) : Modifier.Node(),
+        LayoutModifierNode,
+        PointerInputModifierNode {
 
         private var transformOrigin: TransformOrigin = TransformOrigin.Center
         private var targetX = 0f
@@ -95,7 +96,7 @@ data class TiltFeedback(
 
         private fun animateToTilt(
             x: Float,
-            y: Float
+            y: Float,
         ) {
             coroutineScope.launch { animatedTiltX.animateTo(x, animationSpec) }
             coroutineScope.launch { animatedTiltY.animateTo(y, animationSpec) }
@@ -116,7 +117,7 @@ data class TiltFeedback(
         override fun onPointerEvent(
             pointerEvent: PointerEvent,
             pass: PointerEventPass,
-            bounds: IntSize
+            bounds: IntSize,
         ) {
             if (pass != PointerEventPass.Main) return
             if (pointerEvent.type == PointerEventType.Press) {
@@ -124,7 +125,7 @@ data class TiltFeedback(
 
                 transformOrigin = TransformOrigin(
                     pivotFractionX = if (offset.x < bounds.width / 2f) 1f else 0f,
-                    pivotFractionY = if (offset.y < bounds.height / 2f) 1f else 0f
+                    pivotFractionY = if (offset.y < bounds.height / 2f) 1f else 0f,
                 )
 
                 targetX = if (offset.y < bounds.height / 2f) tiltAmount else -tiltAmount
@@ -140,7 +141,7 @@ data class TiltFeedback(
 
         override fun MeasureScope.measure(
             measurable: Measurable,
-            constraints: Constraints
+            constraints: Constraints,
         ): MeasureResult {
             val placeable = measurable.measure(constraints)
             return layout(placeable.width, placeable.height) {
@@ -166,5 +167,5 @@ enum class PressFeedbackType {
     Sink,
 
     /** Tilts based on touch position when pressed. */
-    Tilt
+    Tilt,
 }

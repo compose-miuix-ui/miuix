@@ -38,10 +38,11 @@ actual fun getWindowSize(): WindowSize {
         derivedStateOf {
             val screenWidthDp = configuration.screenWidthDp
             val screenHeightDp = configuration.screenHeightDp
-            if (screenWidthDp > screenHeightDp)
+            if (screenWidthDp > screenHeightDp) {
                 WindowSize(max(widthPx, heightPx), min(widthPx, heightPx))
-            else
+            } else {
                 WindowSize(min(widthPx, heightPx), max(widthPx, heightPx))
+            }
         }
     }
     return windowSize
@@ -83,7 +84,7 @@ fun getCornerRadiusBottom(context: Context): Int {
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
     usePlatformDefaultWidth = false,
-    decorFitsSystemWindows = false
+    decorFitsSystemWindows = false,
 )
 
 @Composable

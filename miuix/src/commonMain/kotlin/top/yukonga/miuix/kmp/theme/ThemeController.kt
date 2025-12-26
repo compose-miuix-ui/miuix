@@ -34,25 +34,25 @@ enum class ColorSchemeMode {
 internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
     val hctColor = Hct.fromInt(seed.toArgb())
     val tonalSpot = SchemeTonalSpot(
-        hctColor,
-        dark,
-        0.0,
-        ColorSpec.SpecVersion.SPEC_2025,
-        DynamicScheme.Platform.PHONE
+        sourceColorHct = hctColor,
+        isDark = dark,
+        contrastLevel = 0.0,
+        specVersion = ColorSpec.SpecVersion.SPEC_2025,
+        platform = DynamicScheme.Platform.PHONE,
     )
     val colors = DynamicScheme(
         sourceColorHct = hctColor,
         variant = Variant.TONAL_SPOT,
         isDark = dark,
         contrastLevel = 0.0,
+        specVersion = ColorSpec.SpecVersion.SPEC_2025,
         platform = DynamicScheme.Platform.PHONE,
-        specVersion = ColorSpec.SpecVersion.SPEC_2021,
         primaryPalette = tonalSpot.primaryPalette,
         secondaryPalette = tonalSpot.secondaryPalette,
         tertiaryPalette = tonalSpot.tertiaryPalette,
         neutralPalette = tonalSpot.neutralPalette,
         neutralVariantPalette = tonalSpot.neutralVariantPalette,
-        errorPalette = tonalSpot.errorPalette
+        errorPalette = tonalSpot.errorPalette,
     )
     val roles = MonetRoles(
         primary = Color(colors.primary),
@@ -87,9 +87,7 @@ internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
 }
 
 @Stable
-internal fun monetSystemColors(dark: Boolean): Colors {
-    return colorsFromSeed(seed = Color(0xFF6750A4), dark = dark)
-}
+internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), dark = dark)
 
 @Stable
 class ThemeController(
@@ -102,33 +100,33 @@ class ThemeController(
     var isDark: Boolean? by mutableStateOf(isDark)
 
     @Composable
-    fun currentColors(): Colors {
-        return when (colorSchemeMode) {
-            ColorSchemeMode.System -> {
-                val dark = isDark ?: isSystemInDarkTheme()
-                remember(dark) { if (dark) darkColorScheme() else lightColorScheme() }
-            }
+    fun currentColors(): Colors = when (colorSchemeMode) {
+        ColorSchemeMode.System -> {
+            val dark = isDark ?: isSystemInDarkTheme()
+            remember(dark) { if (dark) darkColorScheme() else lightColorScheme() }
+        }
 
-            ColorSchemeMode.Light -> remember { lightColorScheme() }
-            ColorSchemeMode.Dark -> remember { darkColorScheme() }
-            ColorSchemeMode.MonetSystem -> {
-                val dark = isDark ?: isSystemInDarkTheme()
-                keyColor?.let {
-                    remember(keyColor, dark) { colorsFromSeed(seed = it, dark = dark) }
-                } ?: platformDynamicColors(dark = dark)
-            }
+        ColorSchemeMode.Light -> remember { lightColorScheme() }
 
-            ColorSchemeMode.MonetLight -> {
-                keyColor?.let {
-                    remember(keyColor) { colorsFromSeed(seed = it, dark = false) }
-                } ?: platformDynamicColors(dark = false)
-            }
+        ColorSchemeMode.Dark -> remember { darkColorScheme() }
 
-            ColorSchemeMode.MonetDark -> {
-                keyColor?.let {
-                    remember(keyColor) { colorsFromSeed(seed = it, dark = true) }
-                } ?: platformDynamicColors(dark = true)
-            }
+        ColorSchemeMode.MonetSystem -> {
+            val dark = isDark ?: isSystemInDarkTheme()
+            keyColor?.let {
+                remember(keyColor, dark) { colorsFromSeed(seed = it, dark = dark) }
+            } ?: platformDynamicColors(dark = dark)
+        }
+
+        ColorSchemeMode.MonetLight -> {
+            keyColor?.let {
+                remember(keyColor) { colorsFromSeed(seed = it, dark = false) }
+            } ?: platformDynamicColors(dark = false)
+        }
+
+        ColorSchemeMode.MonetDark -> {
+            keyColor?.let {
+                remember(keyColor) { colorsFromSeed(seed = it, dark = true) }
+            } ?: platformDynamicColors(dark = true)
         }
     }
 }

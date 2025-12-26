@@ -37,7 +37,7 @@ fun PullToRefreshDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -45,7 +45,7 @@ fun PullToRefreshDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
             var isRefreshing by rememberSaveable { mutableStateOf(false) }
@@ -68,13 +68,13 @@ fun PullToRefreshDemo() {
                     modifier = Modifier
                         .overScrollVertical()
                         .height(getWindowSize().height.dp),
-                    overscrollEffect = null
+                    overscrollEffect = null,
                 ) {
                     item {
                         Card {
                             for (i in 0 until ii) {
                                 BasicComponent(
-                                    title = "Component $i"
+                                    title = "Component $i",
                                 )
                             }
                         }

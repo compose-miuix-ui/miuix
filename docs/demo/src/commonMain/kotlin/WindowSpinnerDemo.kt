@@ -35,7 +35,7 @@ fun WindowSpinnerDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -43,7 +43,7 @@ fun WindowSpinnerDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var selectedIndex1 by remember { mutableStateOf(0) }
             val options1 = listOf(
@@ -52,9 +52,10 @@ fun WindowSpinnerDemo() {
                 SpinnerEntry(title = "Option 3"),
             )
             var selectedIndex2 by remember { mutableStateOf(0) }
+
             // Create a rounded rectangle Painter
             class RoundedRectanglePainter(
-                val cornerRadius: Dp = 6.dp
+                val cornerRadius: Dp = 6.dp,
             ) : Painter() {
                 override val intrinsicSize = Size.Unspecified
 
@@ -62,7 +63,7 @@ fun WindowSpinnerDemo() {
                     drawRoundRect(
                         color = Color.White,
                         size = Size(size.width, size.height),
-                        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+                        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx()),
                     )
                 }
             }
@@ -70,29 +71,29 @@ fun WindowSpinnerDemo() {
                 SpinnerEntry(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
                     title = "Red Theme",
-                    summary = "Vibrant red"
+                    summary = "Vibrant red",
                 ),
                 SpinnerEntry(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
                     title = "Blue Theme",
-                    summary = "Calm blue"
+                    summary = "Calm blue",
                 ),
                 SpinnerEntry(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
                     title = "Green Theme",
-                    summary = "Fresh green"
+                    summary = "Fresh green",
                 ),
                 SpinnerEntry(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
                     title = "Yellow Theme",
-                    summary = "Bright yellow"
-                )
+                    summary = "Bright yellow",
+                ),
             )
             var selectedIndex3 by remember { mutableStateOf(0) }
             val options3 = listOf(
                 SpinnerEntry(title = "Option A"),
                 SpinnerEntry(title = "Option B"),
-                SpinnerEntry(title = "Option C")
+                SpinnerEntry(title = "Option C"),
             )
 
             Card {
@@ -100,21 +101,21 @@ fun WindowSpinnerDemo() {
                     title = "Dropdown Selector",
                     items = options1,
                     selectedIndex = selectedIndex1,
-                    onSelectedIndexChange = { selectedIndex1 = it }
+                    onSelectedIndexChange = { selectedIndex1 = it },
                 )
                 WindowSpinner(
                     title = "Function Selection",
                     summary = "Choose the action you want to perform",
                     items = options2,
                     selectedIndex = selectedIndex2,
-                    onSelectedIndexChange = { selectedIndex2 = it }
+                    onSelectedIndexChange = { selectedIndex2 = it },
                 )
                 WindowSpinner(
                     title = "Dialog Selector",
                     items = options3,
                     selectedIndex = selectedIndex3,
                     onSelectedIndexChange = { selectedIndex3 = it },
-                    dialogButtonString = "Cancel"
+                    dialogButtonString = "Cancel",
                 )
                 WindowSpinner(
                     title = "Disabled Selector",
@@ -122,7 +123,7 @@ fun WindowSpinnerDemo() {
                     items = listOf(SpinnerEntry(title = "Option 1")),
                     selectedIndex = 0,
                     onSelectedIndexChange = {},
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

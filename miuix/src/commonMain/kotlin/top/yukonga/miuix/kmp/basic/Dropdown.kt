@@ -35,7 +35,7 @@ fun RowScope.DropdownRightActions(
     itemsNotEmpty: Boolean,
     items: List<String>,
     selectedIndex: Int,
-    actionColor: Color
+    actionColor: Color,
 ) {
     if (showValue && itemsNotEmpty) {
         Text(
@@ -45,7 +45,7 @@ fun RowScope.DropdownRightActions(
             color = actionColor,
             textAlign = TextAlign.End,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 2,
         )
     }
 
@@ -56,7 +56,7 @@ fun RowScope.DropdownRightActions(
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowUpDown,
         colorFilter = ColorFilter.tint(actionColor),
-        contentDescription = null
+        contentDescription = null,
     )
 }
 
@@ -76,7 +76,7 @@ fun DropdownImpl(
     isSelected: Boolean,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    onSelectedIndexChange: (Int) -> Unit
+    onSelectedIndexChange: (Int) -> Unit,
 ) {
     val additionalTopPadding = if (index == 0) 20.dp else 12.dp
     val additionalBottomPadding = if (index == optionSize - 1) 20.dp else 12.dp
@@ -102,8 +102,8 @@ fun DropdownImpl(
             .padding(horizontal = 20.dp)
             .padding(
                 top = additionalTopPadding,
-                bottom = additionalBottomPadding
-            )
+                bottom = additionalBottomPadding,
+            ),
     ) {
         Text(
             modifier = Modifier.widthIn(max = 200.dp),
@@ -129,7 +129,7 @@ data class DropdownColors(
     val contentColor: Color,
     val containerColor: Color,
     val selectedContentColor: Color,
-    val selectedContainerColor: Color
+    val selectedContainerColor: Color,
 )
 
 object DropdownDefaults {
@@ -139,13 +139,11 @@ object DropdownDefaults {
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
         selectedContentColor: Color = MiuixTheme.colorScheme.primary,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer
-    ): DropdownColors {
-        return DropdownColors(
-            contentColor = contentColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedContainerColor = selectedContainerColor
-        )
-    }
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+    ): DropdownColors = DropdownColors(
+        contentColor = contentColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedContainerColor = selectedContainerColor,
+    )
 }

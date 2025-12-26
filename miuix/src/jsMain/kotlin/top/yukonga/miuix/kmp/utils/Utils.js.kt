@@ -22,7 +22,7 @@ actual fun getWindowSize(): WindowSize {
         derivedStateOf {
             WindowSize(
                 width = window.containerSize.width,
-                height = window.containerSize.height
+                height = window.containerSize.height,
             )
         }
     }
@@ -39,7 +39,7 @@ actual fun getRoundedCorner(): Dp = 0.dp
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
     usePlatformDefaultWidth = false,
-    scrimColor = Color.Transparent
+    scrimColor = Color.Transparent,
 )
 
 @Composable

@@ -49,7 +49,7 @@ fun FloatingActionButton(
             .semantics { role = Role.Button },
         shape = shape,
         color = containerColor,
-        shadowElevation = shadowElevation
+        shadowElevation = shadowElevation,
     ) {
         Box(
             modifier = Modifier.defaultMinSize(

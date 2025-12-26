@@ -27,8 +27,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -37,7 +37,7 @@ fun ButtonDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -45,7 +45,7 @@ fun ButtonDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var buttonText1 by remember { mutableStateOf("Button") }
             var buttonText2 by remember { mutableStateOf("TextButton") }
@@ -53,24 +53,24 @@ fun ButtonDemo() {
             var clickCount2 by remember { mutableStateOf(0) }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
                     onClick = {
                         clickCount1++
                         buttonText1 = "Button: $clickCount1"
-                    }
+                    },
                 ) {
                     Icon(
                         imageVector = MiuixIcons.Favorites,
                         contentDescription = "Favorites",
                         tint = Color.Unspecified,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = buttonText1,
                         style = MiuixTheme.textStyles.button,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                 }
                 TextButton(
@@ -79,35 +79,35 @@ fun ButtonDemo() {
                         clickCount2++
                         buttonText2 = "TextButton: $clickCount2"
                     },
-                    colors = ButtonDefaults.textButtonColorsPrimary()
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
                     enabled = false,
                     onClick = {},
-                    colors = ButtonDefaults.buttonColorsPrimary()
+                    colors = ButtonDefaults.buttonColorsPrimary(),
                 ) {
                     Icon(
                         imageVector = MiuixIcons.Contacts,
                         contentDescription = null,
                         tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = "Disabled Button",
                         style = MiuixTheme.textStyles.button,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                 }
                 TextButton(
                     text = "Disabled TextButton",
                     enabled = false,
-                    onClick = {}
+                    onClick = {},
                 )
             }
         }

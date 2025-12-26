@@ -104,7 +104,10 @@ private object UIConstants {
 }
 
 enum class FloatingNavigationBarAlignment(val value: Int) {
-    Center(0), Start(1), End(2);
+    Center(0),
+    Start(1),
+    End(2),
+    ;
 
     companion object {
         fun fromInt(value: Int) = entries.find { it.value == value } ?: Center
@@ -112,7 +115,10 @@ enum class FloatingNavigationBarAlignment(val value: Int) {
 }
 
 enum class FloatingNavigationBarDisplayMode(val value: Int) {
-    IconOnly(0), IconAndText(1), TextOnly(2);
+    IconOnly(0),
+    IconAndText(1),
+    TextOnly(2),
+    ;
 
     companion object {
         fun fromInt(value: Int) = entries.find { it.value == value } ?: IconOnly
@@ -145,7 +151,7 @@ fun UITest(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     padding: PaddingValues,
-    enableOverScroll: Boolean
+    enableOverScroll: Boolean,
 ) {
     val pagerState = rememberPagerState(pageCount = { UIConstants.PAGE_COUNT })
     val coroutineScope = rememberCoroutineScope()
@@ -155,7 +161,7 @@ fun UITest(
             NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
             NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Sort),
             NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Settings)
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Settings),
         )
     }
 
@@ -163,18 +169,21 @@ fun UITest(
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
             coroutineScope.launch {
-                if (uiState.isWideScreen) pagerState.scrollToPage(page)
-                else pagerState.animateScrollToPage(page)
+                if (uiState.isWideScreen) {
+                    pagerState.scrollToPage(page)
+                } else {
+                    pagerState.animateScrollToPage(page)
+                }
             }
         }
     }
 
     CompositionLocalProvider(
         LocalPagerState provides pagerState,
-        LocalHandlePageChange provides handlePageChange
+        LocalHandlePageChange provides handlePageChange,
     ) {
         BoxWithConstraints(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
 
@@ -192,7 +201,7 @@ fun UITest(
                     onUiStateChange = { uiState = it },
                     colorMode = colorMode,
                     seedIndex = seedIndex,
-                    padding = padding
+                    padding = padding,
                 )
             } else {
                 CompactScreenLayout(
@@ -201,7 +210,7 @@ fun UITest(
                     onUiStateChange = { uiState = it },
                     colorMode = colorMode,
                     seedIndex = seedIndex,
-                    padding = padding
+                    padding = padding,
                 )
             }
         }
@@ -210,13 +219,13 @@ fun UITest(
     AnimatedVisibility(
         visible = uiState.showFPSMonitor,
         enter = fadeIn() + expandHorizontally(),
-        exit = fadeOut() + shrinkHorizontally()
+        exit = fadeOut() + shrinkHorizontally(),
     ) {
         FPSMonitor(
             modifier = Modifier
                 .statusBarsPadding()
                 .captionBarPadding()
-                .padding(all = 12.dp)
+                .padding(all = 12.dp),
         )
     }
 }
@@ -227,7 +236,7 @@ private fun WideScreenLayout(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
-    padding: PaddingValues
+    padding: PaddingValues,
 ) {
     val layoutDirection = LocalLayoutDirection.current
 
@@ -253,8 +262,8 @@ private fun WideScreenLayout(
                     top = padding.calculateTopPadding(),
                     bottom = padding.calculateBottomPadding(),
                     start = padding.calculateStartPadding(layoutDirection),
-                    end = padding.calculateEndPadding(layoutDirection)
-                )
+                    end = padding.calculateEndPadding(layoutDirection),
+                ),
         ) {
             Box(modifier = Modifier.weight(weight)) {
                 WideScreenPanel(
@@ -267,9 +276,9 @@ private fun WideScreenLayout(
                 modifier = Modifier
                     .draggable(
                         state = dragState,
-                        orientation = Orientation.Horizontal
+                        orientation = Orientation.Horizontal,
                     )
-                    .padding(horizontal = 6.dp)
+                    .padding(horizontal = 6.dp),
             )
             Box(modifier = Modifier.weight(1f - weight)) {
                 WideScreenContent(
@@ -277,7 +286,7 @@ private fun WideScreenLayout(
                     onUiStateChange = onUiStateChange,
                     colorMode = colorMode,
                     seedIndex = seedIndex,
-                    layoutDirection = layoutDirection
+                    layoutDirection = layoutDirection,
                 )
             }
         }
@@ -297,28 +306,28 @@ private fun WideScreenPanel(
             .padding(start = 18.dp, end = 12.dp)
             .fillMaxSize(),
         contentWindowInsets =
-            WindowInsets.systemBars.union(
-                WindowInsets.displayCutout.exclude(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.End)
-                )
+        WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.End),
             ),
+        ),
         topBar = {
             TopAppBar(
                 title = "Miuix",
                 horizontalPadding = 12.dp,
-                scrollBehavior = barScrollBehavior
+                scrollBehavior = barScrollBehavior,
             )
         },
-        popupHost = { }
+        popupHost = { },
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .then(
-                    if (uiState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                    if (uiState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
                 )
                 .padding(start = padding.calculateStartPadding(layoutDirection))
                 .overScrollVertical(
-                    isEnabled = { uiState.enableOverScroll }
+                    isEnabled = { uiState.enableOverScroll },
                 )
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
@@ -328,7 +337,7 @@ private fun WideScreenPanel(
                     modifier = Modifier
                         .padding(
                             top = 12.dp + padding.calculateTopPadding(),
-                            bottom = padding.calculateBottomPadding()
+                            bottom = padding.calculateBottomPadding(),
                         ),
                 ) {
                     UIConstants.PAGE_TITLES.forEachIndexed { index, title ->
@@ -350,18 +359,18 @@ private fun WideScreenContent(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
-    layoutDirection: LayoutDirection
+    layoutDirection: LayoutDirection,
 ) {
     Scaffold(
         modifier = Modifier
             .padding(end = 6.dp)
             .fillMaxSize(),
         contentWindowInsets =
-            WindowInsets.systemBars.union(
-                WindowInsets.displayCutout.exclude(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Start)
-                )
+        WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Start),
             ),
+        ),
         floatingActionButton = {
             FloatingActionButton(show = uiState.showFloatingActionButton)
         },
@@ -369,11 +378,11 @@ private fun WideScreenContent(
         floatingToolbar = {
             FloatingToolbar(
                 showFloatingToolbar = uiState.showFloatingToolbar,
-                floatingToolbarOrientation = uiState.floatingToolbarOrientation
+                floatingToolbarOrientation = uiState.floatingToolbarOrientation,
             )
         },
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
-        popupHost = { }
+        popupHost = { },
     ) { padding ->
         AppPager(
             modifier = Modifier
@@ -395,7 +404,7 @@ private fun CompactScreenLayout(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
-    padding: PaddingValues
+    padding: PaddingValues,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -413,17 +422,17 @@ private fun CompactScreenLayout(
         floatingToolbar = {
             FloatingToolbar(
                 showFloatingToolbar = uiState.showFloatingToolbar,
-                floatingToolbarOrientation = uiState.floatingToolbarOrientation
+                floatingToolbarOrientation = uiState.floatingToolbarOrientation,
             )
         },
-        floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition()
+        floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
     ) { innerPadding ->
         AppPager(
             modifier = Modifier
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = padding.calculateStartPadding(LocalLayoutDirection.current),
-                    end = padding.calculateEndPadding(LocalLayoutDirection.current)
+                    end = padding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .imePadding(),
             padding = innerPadding,
@@ -437,7 +446,7 @@ private fun CompactScreenLayout(
 
 @Composable
 private fun NavigationBar(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     uiState: UIState,
     navigationItems: List<NavigationItem>,
 ) {
@@ -446,12 +455,12 @@ private fun NavigationBar(
     AnimatedVisibility(
         visible = uiState.showNavigationBar,
         enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically()
+        exit = fadeOut() + shrinkVertically(),
     ) {
         AnimatedVisibility(
             visible = !uiState.useFloatingNavigationBar,
             enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
         ) {
             Box(
                 modifier = Modifier
@@ -466,23 +475,23 @@ private fun NavigationBar(
                             }
                         }
                     }
-                    .then(modifier)
+                    .then(modifier),
             ) {
                 NavigationBar(
                     modifier = Modifier,
                     items = navigationItems,
                     selected = page,
-                    onClick = handlePageChange
+                    onClick = handlePageChange,
                 )
             }
         }
         AnimatedVisibility(
             visible = uiState.useFloatingNavigationBar,
             enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
         ) {
             Box(
-                modifier = modifier
+                modifier = modifier,
             ) {
                 FloatingNavigationBar(
                     items = navigationItems,
@@ -490,7 +499,7 @@ private fun NavigationBar(
                     mode = FloatingNavigationBarDisplayMode.fromInt(uiState.floatingNavigationBarMode).toMode(),
                     horizontalAlignment = FloatingNavigationBarAlignment.fromInt(uiState.floatingNavigationBarPosition)
                         .toAlignment(),
-                    onClick = handlePageChange
+                    onClick = handlePageChange,
                 )
             }
         }
@@ -506,12 +515,12 @@ private fun FloatingActionButton(
         FloatingActionButton(
             onClick = {
                 uriHandler.openUri(UIConstants.GITHUB_URL)
-            }
+            },
         ) {
             Icon(
                 imageVector = MiuixIcons.Link,
                 tint = MiuixTheme.colorScheme.onPrimary,
-                contentDescription = "GitHub"
+                contentDescription = "GitHub",
             )
         }
     }
@@ -520,16 +529,16 @@ private fun FloatingActionButton(
 @Composable
 private fun FloatingToolbar(
     showFloatingToolbar: Boolean,
-    floatingToolbarOrientation: Int
+    floatingToolbarOrientation: Int,
 ) {
     AnimatedVisibility(
         visible = showFloatingToolbar,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         FloatingToolbar(
             color = MiuixTheme.colorScheme.primary,
-            cornerRadius = 20.dp
+            cornerRadius = 20.dp,
         ) {
             AnimatedContent(
                 targetState = floatingToolbarOrientation,
@@ -540,12 +549,12 @@ private fun FloatingToolbar(
                 when (orientation) {
                     0 -> Row(
                         modifier = Modifier.padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) { content() }
 
                     else -> Column(
                         modifier = Modifier.padding(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) { content() }
                 }
             }
@@ -561,21 +570,21 @@ private fun FloatingToolbarActions() {
         Icon(
             MiuixIcons.Edit,
             contentDescription = "Edit",
-            tint = iconTint
+            tint = iconTint,
         )
     }
     IconButton(onClick = { /* Action 2 */ }) {
         Icon(
             MiuixIcons.Delete,
             contentDescription = "Delete",
-            tint = iconTint
+            tint = iconTint,
         )
     }
     IconButton(onClick = { /* Action 3 */ }) {
         Icon(
             MiuixIcons.More,
             contentDescription = "More",
-            tint = iconTint
+            tint = iconTint,
         )
     }
 }
@@ -617,7 +626,7 @@ fun AppPager(
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
-    seedIndex: MutableState<Int>
+    seedIndex: MutableState<Int>,
 ) {
     HorizontalPager(
         state = LocalPagerState.current,
@@ -683,9 +692,9 @@ fun AppPager(
                     enableOverScroll = uiState.enableOverScroll,
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode,
-                    seedIndex = seedIndex
+                    seedIndex = seedIndex,
                 )
             }
-        }
+        },
     )
 }

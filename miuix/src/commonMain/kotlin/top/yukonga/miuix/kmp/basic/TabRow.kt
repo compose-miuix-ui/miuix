@@ -85,7 +85,7 @@ fun TabRow(
             .fillMaxWidth()
             .then(modifier)
             .height(height)
-            .background(color = colors.backgroundColor(false))
+            .background(color = colors.backgroundColor(false)),
     ) {
         val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, this.maxWidth)
         val density = LocalDensity.current
@@ -121,7 +121,7 @@ fun TabRow(
                     .width(config.tabWidth)
                     .fillMaxHeight()
                     .clip(config.shape)
-                    .background(colors.backgroundColor(true))
+                    .background(colors.backgroundColor(true)),
             )
             LazyRow(
                 state = config.listState,
@@ -129,7 +129,7 @@ fun TabRow(
                     .fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-                overscrollEffect = null
+                overscrollEffect = null,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItem(
@@ -140,7 +140,7 @@ fun TabRow(
                         enabled = currentOnTabSelected != null,
                         shape = config.shape,
                         width = config.tabWidth,
-                        contentAlignment = contentAlignment
+                        contentAlignment = contentAlignment,
                     )
                 }
             }
@@ -185,7 +185,7 @@ fun TabRowWithContour(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
-            .height(height)
+            .height(height),
     ) {
         val lazyRowAvailableWidth = this.maxWidth - (contourPadding * 2)
         val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, lazyRowAvailableWidth)
@@ -220,7 +220,7 @@ fun TabRowWithContour(
                 .fillMaxSize()
                 .clip(ContinuousRoundedRectangle(cornerRadius + contourPadding))
                 .background(color = colors.backgroundColor(false))
-                .padding(contourPadding)
+                .padding(contourPadding),
         ) {
             Box(
                 Modifier
@@ -228,7 +228,7 @@ fun TabRowWithContour(
                     .width(config.tabWidth)
                     .fillMaxHeight()
                     .clip(config.shape)
-                    .background(colors.backgroundColor(true))
+                    .background(colors.backgroundColor(true)),
             )
             LazyRow(
                 state = config.listState,
@@ -236,7 +236,7 @@ fun TabRowWithContour(
                     .fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-                overscrollEffect = null
+                overscrollEffect = null,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
@@ -247,14 +247,13 @@ fun TabRowWithContour(
                         enabled = currentOnTabSelected != null,
                         shape = config.shape,
                         width = config.tabWidth,
-                        contentAlignment = contentAlignment
+                        contentAlignment = contentAlignment,
                     )
                 }
             }
         }
     }
 }
-
 
 @Composable
 private fun TabItem(
@@ -265,7 +264,7 @@ private fun TabItem(
     enabled: Boolean,
     shape: ContinuousRoundedRectangle,
     width: Dp,
-    contentAlignment: Alignment = Alignment.Center
+    contentAlignment: Alignment = Alignment.Center,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     Surface(
@@ -278,11 +277,11 @@ private fun TabItem(
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
-            .semantics { role = Role.Tab }
+            .semantics { role = Role.Tab },
     ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-            contentAlignment = contentAlignment
+            contentAlignment = contentAlignment,
         ) {
             Text(
                 text = text,
@@ -304,7 +303,7 @@ private fun TabItemWithContour(
     enabled: Boolean,
     shape: ContinuousRoundedRectangle,
     width: Dp,
-    contentAlignment: Alignment = Alignment.Center
+    contentAlignment: Alignment = Alignment.Center,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     Box(
@@ -316,7 +315,7 @@ private fun TabItemWithContour(
                 currentOnClick()
             }
             .semantics { role = Role.Tab },
-        contentAlignment = contentAlignment
+        contentAlignment = contentAlignment,
     ) {
         Text(
             text = text,
@@ -334,7 +333,7 @@ private fun TabItemWithContour(
 private data class TabRowConfig(
     val tabWidth: Dp,
     val shape: ContinuousRoundedRectangle,
-    val listState: androidx.compose.foundation.lazy.LazyListState
+    val listState: androidx.compose.foundation.lazy.LazyListState,
 )
 
 /**
@@ -348,7 +347,7 @@ private fun rememberTabRowConfig(
     maxWidth: Dp,
     cornerRadius: Dp,
     spacing: Dp,
-    lazyRowAvailableWidth: Dp
+    lazyRowAvailableWidth: Dp,
 ): TabRowConfig {
     val listState = rememberLazyListState()
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
@@ -364,7 +363,7 @@ private fun calculateTabWidth(
     minWidth: Dp,
     maxWidth: Dp,
     spacing: Dp,
-    availableWidth: Dp
+    availableWidth: Dp,
 ): Dp {
     if (tabCount == 0) return minWidth
 
@@ -377,6 +376,7 @@ private fun calculateTabWidth(
         val idealWidth = contentWidth / tabCount
         when {
             idealWidth < minWidth -> minWidth
+
             idealWidth > maxWidth -> {
                 val totalMaxWidth = maxWidth * tabCount + totalSpacing
                 if (totalMaxWidth < availableWidth) {
@@ -441,12 +441,12 @@ object TabRowDefaults {
         backgroundColor: Color = MiuixTheme.colorScheme.surface,
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         selectedBackgroundColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onBackground
+        selectedContentColor: Color = MiuixTheme.colorScheme.onBackground,
     ): TabRowColors = TabRowColors(
         backgroundColor = backgroundColor,
         contentColor = contentColor,
         selectedBackgroundColor = selectedBackgroundColor,
-        selectedContentColor = selectedContentColor
+        selectedContentColor = selectedContentColor,
     )
 }
 
@@ -455,13 +455,11 @@ data class TabRowColors(
     private val backgroundColor: Color,
     private val contentColor: Color,
     private val selectedBackgroundColor: Color,
-    private val selectedContentColor: Color
+    private val selectedContentColor: Color,
 ) {
     @Stable
-    internal fun backgroundColor(selected: Boolean): Color =
-        if (selected) selectedBackgroundColor else backgroundColor
+    internal fun backgroundColor(selected: Boolean): Color = if (selected) selectedBackgroundColor else backgroundColor
 
     @Stable
-    internal fun contentColor(selected: Boolean): Color =
-        if (selected) selectedContentColor else contentColor
+    internal fun contentColor(selected: Boolean): Color = if (selected) selectedContentColor else contentColor
 }

@@ -74,7 +74,7 @@ fun ColorPicker(
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
@@ -84,7 +84,7 @@ fun ColorPicker(
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
@@ -94,7 +94,7 @@ fun ColorPicker(
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
@@ -104,7 +104,7 @@ fun ColorPicker(
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
-                modifier = modifier
+                modifier = modifier,
             )
         }
     }
@@ -125,7 +125,7 @@ fun HsvColorPicker(
     onColorChanged: (Color) -> Unit,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -138,7 +138,7 @@ fun HsvColorPicker(
         Hsv(
             h = currentHue.toDouble(),
             s = (currentSaturation * 100.0),
-            v = (currentValue * 100.0)
+            v = (currentValue * 100.0),
         ).toColor(currentAlpha)
     }
 
@@ -170,7 +170,7 @@ fun HsvColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(selectedColor)
+                    .background(selectedColor),
             )
         }
 
@@ -178,7 +178,7 @@ fun HsvColorPicker(
         HsvHueSlider(
             currentHue = currentHue,
             onHueChanged = { newHue -> currentHue = newHue * 360f },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Saturation selection
@@ -186,7 +186,7 @@ fun HsvColorPicker(
             currentHue = currentHue,
             currentSaturation = currentSaturation,
             onSaturationChanged = { currentSaturation = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Value selection
@@ -195,7 +195,7 @@ fun HsvColorPicker(
             currentSaturation = currentSaturation,
             currentValue = currentValue,
             onValueChanged = { currentValue = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Alpha selection
@@ -205,7 +205,7 @@ fun HsvColorPicker(
             currentValue = currentValue,
             currentAlpha = currentAlpha,
             onAlphaChanged = { currentAlpha = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
     }
 }
@@ -221,7 +221,7 @@ fun HsvColorPicker(
 fun HsvHueSlider(
     currentHue: Float,
     onHueChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val hsvHueColors = remember {
         Transforms.generateHsvHueColors()
@@ -232,7 +232,7 @@ fun HsvHueSlider(
         onValueChanged = onHueChanged,
         drawBrushColors = hsvHueColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -249,12 +249,12 @@ fun HsvSaturationSlider(
     currentHue: Float,
     currentSaturation: Float,
     onSaturationChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val saturationColors = remember(currentHue) {
         listOf(
             Hsv(currentHue.toDouble(), 0.0, 100.0).toColor(1f),
-            Hsv(currentHue.toDouble(), 100.0, 100.0).toColor(1f)
+            Hsv(currentHue.toDouble(), 100.0, 100.0).toColor(1f),
         )
     }
     ColorSlider(
@@ -262,7 +262,7 @@ fun HsvSaturationSlider(
         onValueChanged = onSaturationChanged,
         drawBrushColors = saturationColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -281,7 +281,7 @@ fun HsvValueSlider(
     currentSaturation: Float,
     currentValue: Float,
     onValueChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val valueColors = remember(currentHue, currentSaturation) {
         listOf(Color.Black, Hsv(currentHue.toDouble(), (currentSaturation * 100.0), 100.0).toColor())
@@ -291,7 +291,7 @@ fun HsvValueSlider(
         onValueChanged = onValueChanged,
         drawBrushColors = valueColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -312,7 +312,7 @@ fun HsvAlphaSlider(
     currentValue: Float,
     currentAlpha: Float,
     onAlphaChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val alphaColors = remember(currentHue, currentSaturation, currentValue) {
         val baseColor = Hsv(currentHue.toDouble(), (currentSaturation * 100.0), (currentValue * 100.0)).toColor()
@@ -326,7 +326,7 @@ fun HsvAlphaSlider(
         modifier = Modifier
             .fillMaxWidth()
             .drawCheckerboard(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -346,7 +346,7 @@ fun OkHsvColorPicker(
     onColorChanged: (Color) -> Unit,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -359,7 +359,7 @@ fun OkHsvColorPicker(
         OkHsv(
             h = currentH,
             s = currentS,
-            v = currentV
+            v = currentV,
         ).toColor(currentAlpha)
     }
 
@@ -391,7 +391,7 @@ fun OkHsvColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(selectedColor)
+                    .background(selectedColor),
             )
         }
 
@@ -399,7 +399,7 @@ fun OkHsvColorPicker(
         OkHsvHueSlider(
             currentH = currentH,
             onHueChanged = { currentH = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Saturation selection (OkHSV)
@@ -407,7 +407,7 @@ fun OkHsvColorPicker(
             currentH = currentH,
             currentS = currentS,
             onSaturationChanged = { currentS = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Value selection (OkHSV)
@@ -416,7 +416,7 @@ fun OkHsvColorPicker(
             currentS = currentS,
             currentV = currentV,
             onValueChanged = { currentV = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Alpha selection (OkHSV)
@@ -426,7 +426,7 @@ fun OkHsvColorPicker(
             currentV = currentV,
             currentAlpha = currentAlpha,
             onAlphaChanged = { currentAlpha = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
     }
 }
@@ -442,7 +442,7 @@ fun OkHsvColorPicker(
 fun OkHsvHueSlider(
     currentH: Float,
     onHueChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val okHsvHueColors = remember {
         Transforms.generateOkHsvHueColors()
@@ -453,7 +453,7 @@ fun OkHsvHueSlider(
         onValueChanged = onHueChanged,
         drawBrushColors = okHsvHueColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -470,12 +470,12 @@ fun OkHsvSaturationSlider(
     currentH: Float,
     currentS: Float,
     onSaturationChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val saturationColors = remember(currentH) {
         listOf(
             Transforms.okhsvToColor(currentH, 0f, 1f, 1f),
-            Transforms.okhsvToColor(currentH, 1f, 1f, 1f)
+            Transforms.okhsvToColor(currentH, 1f, 1f, 1f),
         )
     }
 
@@ -484,7 +484,7 @@ fun OkHsvSaturationSlider(
         onValueChanged = onSaturationChanged,
         drawBrushColors = saturationColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -503,12 +503,12 @@ fun OkHsvValueSlider(
     currentS: Float,
     currentV: Float,
     onValueChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val valueColors = remember(currentH, currentS) {
         listOf(
             Transforms.okhsvToColor(currentH, currentS, 0f, 1f),
-            Transforms.okhsvToColor(currentH, currentS, 1f, 1f)
+            Transforms.okhsvToColor(currentH, currentS, 1f, 1f),
         )
     }
 
@@ -517,7 +517,7 @@ fun OkHsvValueSlider(
         onValueChanged = onValueChanged,
         drawBrushColors = valueColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -538,7 +538,7 @@ fun OkHsvAlphaSlider(
     currentV: Float,
     currentAlpha: Float,
     onAlphaChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val alphaColors = remember(currentH, currentS, currentV) {
         val baseColor = Transforms.okhsvToColor(currentH, currentS, currentV)
@@ -552,7 +552,7 @@ fun OkHsvAlphaSlider(
         modifier = Modifier
             .fillMaxWidth()
             .drawCheckerboard(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -571,7 +571,7 @@ fun OkLabColorPicker(
     onColorChanged: (Color) -> Unit,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -584,7 +584,7 @@ fun OkLabColorPicker(
         OkLab(
             l = (currentL * 100.0),
             a = (currentA / 0.4 * 100.0),
-            b = (currentB / 0.4 * 100.0)
+            b = (currentB / 0.4 * 100.0),
         ).toColor(currentAlpha)
     }
 
@@ -616,7 +616,7 @@ fun OkLabColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(selectedColor)
+                    .background(selectedColor),
             )
         }
 
@@ -626,7 +626,7 @@ fun OkLabColorPicker(
             currentA = currentA,
             currentB = currentB,
             onLightnessChanged = { currentL = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // A channel selection (green-red axis)
@@ -635,7 +635,7 @@ fun OkLabColorPicker(
             currentA = currentA,
             currentB = currentB,
             onAChanged = { currentA = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // B channel selection (blue-yellow axis)
@@ -644,7 +644,7 @@ fun OkLabColorPicker(
             currentA = currentA,
             currentB = currentB,
             onBChanged = { currentB = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Alpha selection
@@ -654,7 +654,7 @@ fun OkLabColorPicker(
             currentB = currentB,
             currentAlpha = currentAlpha,
             onAlphaChanged = { currentAlpha = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
     }
 }
@@ -669,7 +669,7 @@ fun OkLchColorPicker(
     onColorChanged: (Color) -> Unit,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -682,7 +682,7 @@ fun OkLchColorPicker(
         OkLch(
             l = (currentL * 100.0),
             c = (currentC * 100.0),
-            h = (currentH * 360.0)
+            h = (currentH * 360.0),
         ).toColor(currentAlpha)
     }
 
@@ -714,7 +714,7 @@ fun OkLchColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(selectedColor)
+                    .background(selectedColor),
             )
         }
 
@@ -724,7 +724,7 @@ fun OkLchColorPicker(
             currentC = currentC,
             currentH = currentH,
             onHueChanged = { currentH = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Lightness selection
@@ -733,7 +733,7 @@ fun OkLchColorPicker(
             currentC = currentC,
             currentH = currentH,
             onLightnessChanged = { currentL = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Chroma selection
@@ -742,7 +742,7 @@ fun OkLchColorPicker(
             currentC = currentC,
             currentH = currentH,
             onChromaChanged = { currentC = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
 
         // Alpha selection
@@ -752,7 +752,7 @@ fun OkLchColorPicker(
             currentH = currentH,
             currentAlpha = currentAlpha,
             onAlphaChanged = { currentAlpha = it },
-            hapticEffect = hapticEffect
+            hapticEffect = hapticEffect,
         )
     }
 }
@@ -763,14 +763,14 @@ fun OkLchLightnessSlider(
     currentC: Float,
     currentH: Float,
     onLightnessChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val hDeg = currentH * 360f
     val cInternal = currentC * 0.4f
     val colors = remember(currentC, currentH) {
         listOf(
             Transforms.oklchToColor(0f, cInternal, hDeg, 1f),
-            Transforms.oklchToColor(1f, cInternal, hDeg, 1f)
+            Transforms.oklchToColor(1f, cInternal, hDeg, 1f),
         )
     }
 
@@ -779,7 +779,7 @@ fun OkLchLightnessSlider(
         onValueChanged = onLightnessChanged,
         drawBrushColors = colors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -789,13 +789,13 @@ fun OkLchChromaSlider(
     currentC: Float,
     currentH: Float,
     onChromaChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val hDeg = currentH * 360f
     val colors = remember(currentL, currentH) {
         listOf(
             Transforms.oklchToColor(currentL, 0f, hDeg, 1f),
-            Transforms.oklchToColor(currentL, 0.4f, hDeg, 1f)
+            Transforms.oklchToColor(currentL, 0.4f, hDeg, 1f),
         )
     }
 
@@ -804,7 +804,7 @@ fun OkLchChromaSlider(
         onValueChanged = onChromaChanged,
         drawBrushColors = colors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -814,7 +814,7 @@ fun OkLchHueSlider(
     currentC: Float,
     currentH: Float,
     onHueChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val colors = remember(currentL, currentC) {
         Transforms.generateOkLchHueColors(currentL, currentC)
@@ -825,7 +825,7 @@ fun OkLchHueSlider(
         onValueChanged = onHueChanged,
         drawBrushColors = colors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -836,7 +836,7 @@ fun OkLchAlphaSlider(
     currentH: Float,
     currentAlpha: Float,
     onAlphaChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val hDeg = currentH * 360f
     val cInternal = currentC * 0.4f
@@ -853,7 +853,7 @@ fun OkLchAlphaSlider(
         modifier = Modifier
             .fillMaxWidth()
             .drawCheckerboard(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -866,7 +866,7 @@ fun OkLabLightnessSlider(
     currentA: Float,
     currentB: Float,
     onLightnessChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val lightnessColors = remember(currentA, currentB) {
         val steps = 7
@@ -875,7 +875,7 @@ fun OkLabLightnessSlider(
             OkLab(
                 l = l * 100.0,
                 a = (currentA / 0.4 * 100.0),
-                b = (currentB / 0.4 * 100.0)
+                b = (currentB / 0.4 * 100.0),
             ).toColor()
         }
     }
@@ -884,7 +884,7 @@ fun OkLabLightnessSlider(
         onValueChanged = onLightnessChanged,
         drawBrushColors = lightnessColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -897,7 +897,7 @@ fun OkLabAChannelSlider(
     currentA: Float,
     currentB: Float,
     onAChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val aChannelColors = remember(currentL, currentB) {
         val minA = -0.3f
@@ -908,7 +908,7 @@ fun OkLabAChannelSlider(
             OkLab(
                 l = currentL * 100.0,
                 a = (a / 0.4 * 100.0),
-                b = (currentB / 0.4 * 100.0)
+                b = (currentB / 0.4 * 100.0),
             ).toColor()
         }
     }
@@ -919,7 +919,7 @@ fun OkLabAChannelSlider(
         },
         drawBrushColors = aChannelColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -932,7 +932,7 @@ fun OkLabBChannelSlider(
     currentA: Float,
     currentB: Float,
     onBChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val bChannelColors = remember(currentL, currentA) {
         val minB = -0.3f
@@ -943,7 +943,7 @@ fun OkLabBChannelSlider(
             OkLab(
                 l = currentL * 100.0,
                 a = (currentA / 0.4 * 100.0),
-                b = (b / 0.4 * 100.0)
+                b = (b / 0.4 * 100.0),
             ).toColor()
         }
     }
@@ -954,7 +954,7 @@ fun OkLabBChannelSlider(
         },
         drawBrushColors = bChannelColors,
         modifier = Modifier.fillMaxWidth(),
-        hapticEffect = hapticEffect
+        hapticEffect = hapticEffect,
     )
 }
 
@@ -968,13 +968,13 @@ fun OkLabAlphaSlider(
     currentB: Float,
     currentAlpha: Float,
     onAlphaChanged: (Float) -> Unit,
-    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect
+    hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val alphaColors = remember(currentL, currentA, currentB) {
         val baseColor = OkLab(
             l = currentL * 100.0,
             a = (currentA / 0.4 * 100.0),
-            b = (currentB / 0.4 * 100.0)
+            b = (currentB / 0.4 * 100.0),
         ).toColor()
         listOf(baseColor.copy(alpha = 0f), baseColor.copy(alpha = 1f))
     }
@@ -992,7 +992,7 @@ fun OkLabAlphaSlider(
 fun Modifier.drawCheckerboard(
     cellSizeDp: Dp = 3.dp,
     lightColor: Color = Color(0xFFCCCCCC),
-    darkColor: Color = Color(0xFFAAAAAA)
+    darkColor: Color = Color(0xFFAAAAAA),
 ): Modifier = this.then(
     Modifier.drawWithCache {
         val cell = cellSizeDp.toPx().coerceAtLeast(1f)
@@ -1008,8 +1008,8 @@ fun Modifier.drawCheckerboard(
                             x,
                             y,
                             min(x + cell, size.width),
-                            min(y + cell, size.height)
-                        )
+                            min(y + cell, size.height),
+                        ),
                     )
                     x += cell * 2f
                 }
@@ -1021,7 +1021,7 @@ fun Modifier.drawCheckerboard(
             drawRect(color = lightColor)
             drawPath(path = darkPath, color = darkColor)
         }
-    }
+    },
 )
 
 /**
@@ -1055,7 +1055,7 @@ private fun ColorSlider(
                     colors = drawBrushColors,
                     startX = halfSliderHeightPx,
                     endX = widthPx - halfSliderHeightPx,
-                    tileMode = TileMode.Clamp
+                    tileMode = TileMode.Clamp,
                 )
                 val borderStroke = Stroke(width = 0.5.dp.toPx())
                 val borderColor = Color.Gray.copy(0.1f)
@@ -1081,31 +1081,31 @@ private fun ColorSlider(
                         val newValue = handleSliderInteraction(
                             change.position.x,
                             size.width.toFloat(),
-                            sliderHeightPx
+                            sliderHeightPx,
                         ).coerceIn(0f, 1f)
                         onValueChangedState.value(newValue)
                         hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
-                    }
+                    },
                 )
-            }
+            },
     ) {
         SliderIndicator(
             modifier = Modifier.align(Alignment.CenterStart),
             value = value,
             sliderWidth = maxWidth,
             sliderSizePx = sliderHeightPx,
-            indicatorSize = indicatorSizeDp
+            indicatorSize = indicatorSizeDp,
         )
     }
 }
 
 @Composable
 private fun SliderIndicator(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     value: Float,
     sliderWidth: Dp,
     sliderSizePx: Float,
-    indicatorSize: Dp
+    indicatorSize: Dp,
 ) {
     val density = LocalDensity.current
     val indicatorOffsetXDp = with(density) {
@@ -1133,24 +1133,24 @@ private fun SliderIndicator(
                         ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
                         ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
                         ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
-                        ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
+                        ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
                     ).toTypedArray(),
-                    radius = gradientRadius
+                    radius = gradientRadius,
                 )
 
                 onDrawBehind {
                     drawCircle(
                         brush = glowBrush,
-                        radius = gradientRadius
+                        radius = gradientRadius,
                     )
 
                     drawCircle(
                         color = Color.White,
                         radius = ringCenterRadius,
-                        style = Stroke(width = strokeWidth)
+                        style = Stroke(width = strokeWidth),
                     )
                 }
-            }
+            },
     )
 }
 
@@ -1160,7 +1160,7 @@ private fun SliderIndicator(
 private fun handleSliderInteraction(
     positionX: Float,
     totalWidth: Float,
-    sliderSizePx: Float
+    sliderSizePx: Float,
 ): Float {
     val sliderHalfSizePx = sliderSizePx / 2
     val effectiveWidth = totalWidth - sliderSizePx
@@ -1173,5 +1173,5 @@ enum class ColorSpace {
     HSV,
     OKHSV,
     OKLAB,
-    OKLCH
+    OKLCH,
 }

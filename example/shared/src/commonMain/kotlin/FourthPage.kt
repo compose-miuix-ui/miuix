@@ -116,33 +116,33 @@ fun FourthPage(
         enterTransition = {
             slideInHorizontally(
                 initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             )
         },
         exitTransition = {
             slideOutHorizontally(
                 targetOffsetX = { -it / 5 },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             ) + fadeOut(
                 animationSpec = tween(durationMillis = 500),
-                targetAlpha = 0.5f
+                targetAlpha = 0.5f,
             )
         },
         popEnterTransition = {
             slideInHorizontally(
                 initialOffsetX = { -it / 5 },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             ) + fadeIn(
                 animationSpec = tween(durationMillis = 500),
-                initialAlpha = 0.5f
+                initialAlpha = 0.5f,
             )
         },
         popExitTransition = {
             slideOutHorizontally(
                 targetOffsetX = { it },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             )
-        }
+        },
     ) {
         composable("settings") {
             Scaffold(
@@ -152,22 +152,22 @@ fun FourthPage(
                             SmallTopAppBar(
                                 title = "Settings",
                                 scrollBehavior = topAppBarScrollBehavior,
-                                defaultWindowInsetsPadding = false
+                                defaultWindowInsetsPadding = false,
                             )
                         } else {
                             TopAppBar(
                                 title = "Settings",
-                                scrollBehavior = topAppBarScrollBehavior
+                                scrollBehavior = topAppBarScrollBehavior,
                             )
                         }
                     }
                 },
-                popupHost = {}
+                popupHost = {},
             ) { innerPadding ->
                 SettingsContent(
                     padding = PaddingValues(
                         top = innerPadding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding()
+                        bottom = padding.calculateBottomPadding(),
                     ),
                     showFPSMonitor = showFPSMonitor,
                     onShowFPSMonitorChange = onShowFPSMonitorChange,
@@ -200,7 +200,7 @@ fun FourthPage(
                     colorMode = colorMode,
                     seedIndex = seedIndex,
                     isWideScreen = isWideScreen,
-                    navToAbout = { navController.navigate("about") }
+                    navToAbout = { navController.navigate("about") },
                 )
             }
         }
@@ -218,13 +218,13 @@ fun FourthPage(
                                         modifier = Modifier.padding(start = 16.dp),
                                         onClick = {
                                             navController.popBackStack()
-                                        }
+                                        },
                                     )
                                 },
                                 actions = {
                                     AboutTopBarActionsWithSuperListPopup()
                                     AboutTopBarActionsWithWindowListPopup()
-                                }
+                                },
                             )
                         } else {
                             TopAppBar(
@@ -235,29 +235,29 @@ fun FourthPage(
                                         modifier = Modifier.padding(start = 16.dp),
                                         onClick = {
                                             navController.popBackStack()
-                                        }
+                                        },
                                     )
                                 },
                                 actions = {
                                     AboutTopBarActionsWithSuperListPopup()
                                     AboutTopBarActionsWithWindowListPopup()
-                                }
+                                },
                             )
                         }
                     }
                 },
-                popupHost = {}
+                popupHost = {},
             ) { innerPadding ->
                 AboutPage(
                     padding = PaddingValues(
                         top = innerPadding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding()
+                        bottom = padding.calculateBottomPadding(),
                     ),
                     topAppBarScrollBehavior = topAppBarScrollBehavior,
                     showTopAppBar = showTopAppBar,
                     enableScrollEndHaptic = enableScrollEndHaptic,
                     enableOverScroll = enableOverScroll,
-                    isWideScreen = isWideScreen
+                    isWideScreen = isWideScreen,
                 )
             }
         }
@@ -313,48 +313,50 @@ fun SettingsContent(
         modifier = Modifier
             .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
             .overScrollVertical(
-                isEnabled = { enableOverScroll }
+                isEnabled = { enableOverScroll },
             )
             .background(colorScheme.surface)
             .then(
-                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
             )
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
-            } else padding.calculateBottomPadding() + 12.dp
+                    padding.calculateBottomPadding() + 12.dp
+            } else {
+                padding.calculateBottomPadding() + 12.dp
+            },
         ),
-        overscrollEffect = null
+        overscrollEffect = null,
     ) {
         item {
             Card(
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(12.dp),
             ) {
                 SuperSwitch(
                     title = "Show FPS Monitor",
                     checked = showFPSMonitor,
-                    onCheckedChange = onShowFPSMonitorChange
+                    onCheckedChange = onShowFPSMonitorChange,
                 )
                 SuperSwitch(
                     title = "Show TopAppBar",
                     checked = showTopAppBar,
-                    onCheckedChange = onShowTopAppBarChange
+                    onCheckedChange = onShowTopAppBarChange,
                 )
                 SuperSwitch(
                     title = "Show NavigationBar",
                     checked = showNavigationBar,
                     enabled = !isWideScreen,
-                    onCheckedChange = onShowNavigationBarChange
+                    onCheckedChange = onShowNavigationBarChange,
                 )
                 AnimatedVisibility(visible = showNavigationBar && !isWideScreen) {
                     Column {
                         SuperSwitch(
                             title = "Use FloatingNavigationBar",
                             checked = useFloatingNavigationBar,
-                            onCheckedChange = onUseFloatingNavigationBarChange
+                            onCheckedChange = onUseFloatingNavigationBarChange,
                         )
                         AnimatedVisibility(visible = useFloatingNavigationBar) {
                             Column {
@@ -362,13 +364,13 @@ fun SettingsContent(
                                     title = "FloatingNavigationBar Mode",
                                     items = floatingNavigationBarModeOptions,
                                     selectedIndex = floatingNavigationBarMode,
-                                    onSelectedIndexChange = onFloatingNavigationBarModeChange
+                                    onSelectedIndexChange = onFloatingNavigationBarModeChange,
                                 )
                                 SuperDropdown(
                                     title = "FloatingNavigationBar Position",
                                     items = floatingNavigationBarPositionOptions,
                                     selectedIndex = floatingNavigationBarPosition,
-                                    onSelectedIndexChange = onFloatingNavigationBarPositionChange
+                                    onSelectedIndexChange = onFloatingNavigationBarPositionChange,
                                 )
                             }
                         }
@@ -377,7 +379,7 @@ fun SettingsContent(
                 SuperSwitch(
                     title = "Show FloatingToolbar",
                     checked = showFloatingToolbar,
-                    onCheckedChange = onShowFloatingToolbarChange
+                    onCheckedChange = onShowFloatingToolbarChange,
                 )
                 AnimatedVisibility(visible = showFloatingToolbar) {
                     Column {
@@ -385,61 +387,61 @@ fun SettingsContent(
                             title = "FloatingToolbar Position",
                             items = floatingToolbarPositionOptions,
                             selectedIndex = floatingToolbarPosition,
-                            onSelectedIndexChange = onFloatingToolbarPositionChange
+                            onSelectedIndexChange = onFloatingToolbarPositionChange,
                         )
                         SuperDropdown(
                             title = "FloatingToolbar Orientation",
                             items = floatingToolbarOrientationOptions,
                             selectedIndex = floatingToolbarOrientation,
-                            onSelectedIndexChange = onFloatingToolbarOrientationChange
+                            onSelectedIndexChange = onFloatingToolbarOrientationChange,
                         )
                     }
                 }
                 SuperSwitch(
                     title = "Show FloatingActionButton",
                     checked = showFloatingActionButton,
-                    onCheckedChange = onShowFloatingActionButtonChange
+                    onCheckedChange = onShowFloatingActionButtonChange,
                 )
                 AnimatedVisibility(visible = showFloatingActionButton) {
                     SuperDropdown(
                         title = "FloatingActionButton Position",
                         items = fabPositionOptions,
                         selectedIndex = fabPosition,
-                        onSelectedIndexChange = { onFabPositionChange(it) }
+                        onSelectedIndexChange = { onFabPositionChange(it) },
                     )
                 }
                 SuperSwitch(
                     title = "Enable Scroll End Haptic",
                     checked = enableScrollEndHaptic,
-                    onCheckedChange = onScrollEndHapticChange
+                    onCheckedChange = onScrollEndHapticChange,
                 )
                 SuperSwitch(
                     title = "Enable Page User Scroll",
                     checked = enablePageUserScroll,
-                    onCheckedChange = onEnablePageUserScrollChange
+                    onCheckedChange = onEnablePageUserScrollChange,
                 )
                 SuperDropdown(
                     title = "Color Mode",
                     items = colorModeOptions,
                     selectedIndex = colorMode.value,
-                    onSelectedIndexChange = { colorMode.value = it }
+                    onSelectedIndexChange = { colorMode.value = it },
                 )
                 AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5)) {
                     SuperDropdown(
                         title = "Key Color",
                         items = keyColorOptions,
                         selectedIndex = seedIndex.value,
-                        onSelectedIndexChange = { seedIndex.value = it }
+                        onSelectedIndexChange = { seedIndex.value = it },
                     )
                 }
             }
             Card(
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp),
             ) {
                 SuperArrow(
                     title = "About",
                     summary = "About this app",
-                    onClick = navToAbout
+                    onClick = navToAbout,
                 )
             }
         }
@@ -453,42 +455,44 @@ fun AboutPage(
     showTopAppBar: Boolean,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
-    isWideScreen: Boolean
+    isWideScreen: Boolean,
 ) {
     val uriHandler = LocalUriHandler.current
     LazyColumn(
         modifier = Modifier
             .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
             .overScrollVertical(
-                isEnabled = { enableOverScroll }
+                isEnabled = { enableOverScroll },
             )
             .background(colorScheme.surface)
             .then(
-                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
             )
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
-            } else padding.calculateBottomPadding() + 12.dp
+                    padding.calculateBottomPadding() + 12.dp
+            } else {
+                padding.calculateBottomPadding() + 12.dp
+            },
         ),
-        overscrollEffect = null
+        overscrollEffect = null,
     ) {
         item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 72.dp, bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .size(100.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White)
+                        .background(Color.White),
                 ) {
                     Image(
                         painter = painterResource(Res.drawable.ic_launcher),
@@ -499,11 +503,11 @@ fun AboutPage(
             Text(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 48.dp),
                 text = "JDK Ver. " + VersionInfo.JDK_VERSION +
-                        "\nAPP Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                    "\nAPP Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
                 textAlign = TextAlign.Center,
             )
             Card(
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp),
             ) {
                 SuperArrow(
                     title = "View Source",
@@ -511,10 +515,10 @@ fun AboutPage(
                         Text(
                             modifier = Modifier.padding(end = 8.dp),
                             text = "GitHub",
-                            color = colorScheme.onSurfaceVariantActions
+                            color = colorScheme.onSurfaceVariantActions,
                         )
                     },
-                    onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") }
+                    onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
                 )
                 SuperArrow(
                     title = "Join Group",
@@ -522,14 +526,14 @@ fun AboutPage(
                         Text(
                             modifier = Modifier.padding(end = 8.dp),
                             text = "Telegram",
-                            color = colorScheme.onSurfaceVariantActions
+                            color = colorScheme.onSurfaceVariantActions,
                         )
                     },
-                    onClick = { uriHandler.openUri("https://t.me/YuKongA13579") }
+                    onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
                 )
             }
             Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp),
             ) {
                 val list = listOf("Apache-2.0", "Apache-2.0", "Apache-2.0")
                 var selectedIndex by remember { mutableStateOf(0) }
@@ -549,16 +553,16 @@ fun AboutPage(
 @Composable
 fun BackNavigationIcon(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     IconButton(
         modifier = modifier,
-        onClick = onClick
+        onClick = onClick,
     ) {
         Icon(
             imageVector = MiuixIcons.Back,
             contentDescription = null,
-            tint = colorScheme.onBackground
+            tint = colorScheme.onBackground,
         )
     }
 }
@@ -571,12 +575,12 @@ fun AboutTopBarActionsWithSuperListPopup() {
     IconButton(
         modifier = Modifier.padding(end = 16.dp),
         onClick = { showTopPopup.value = true },
-        holdDownState = showTopPopup.value
+        holdDownState = showTopPopup.value,
     ) {
         Icon(
             imageVector = MiuixIcons.Edit,
             contentDescription = "SuperListPopup",
-            tint = colorScheme.onBackground
+            tint = colorScheme.onBackground,
         )
     }
     SuperListPopup(
@@ -585,7 +589,7 @@ fun AboutTopBarActionsWithSuperListPopup() {
         alignment = PopupPositionProvider.Align.TopRight,
         onDismissRequest = {
             showTopPopup.value = false
-        }
+        },
     ) {
         val items = listOf("Super 1", "Super 2", "Super 3")
         ListPopupColumn {
@@ -600,7 +604,7 @@ fun AboutTopBarActionsWithSuperListPopup() {
                             selectedIndex = selectedIdx
                             showTopPopup.value = false
                         },
-                        index = index
+                        index = index,
                     )
                 }
             }
@@ -616,12 +620,12 @@ fun AboutTopBarActionsWithWindowListPopup() {
     IconButton(
         modifier = Modifier.padding(end = 16.dp),
         onClick = { showTopPopup.value = true },
-        holdDownState = showTopPopup.value
+        holdDownState = showTopPopup.value,
     ) {
         Icon(
             imageVector = MiuixIcons.Edit,
             contentDescription = "WindowListPopup",
-            tint = colorScheme.onBackground
+            tint = colorScheme.onBackground,
         )
     }
     WindowListPopup(
@@ -630,7 +634,7 @@ fun AboutTopBarActionsWithWindowListPopup() {
         alignment = PopupPositionProvider.Align.TopRight,
         onDismissRequest = {
             showTopPopup.value = false
-        }
+        },
     ) {
         val state = LocalWindowListPopupState.current
         val items = listOf("Window 1", "Window 2", "Window 3")
@@ -646,7 +650,7 @@ fun AboutTopBarActionsWithWindowListPopup() {
                             selectedIndex = selectedIdx
                             state.invoke()
                         },
-                        index = index
+                        index = index,
                     )
                 }
             }

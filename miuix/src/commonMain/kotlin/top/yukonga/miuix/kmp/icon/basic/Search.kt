@@ -17,7 +17,7 @@ val MiuixIcons.Basic.Search: ImageVector
         _search = ImageVector.Builder("Search", 20.0f.dp, 20.0f.dp, 20.0f, 20.0f).apply {
             path(
                 fill = SolidColor(Color.White),
-                pathFillType = PathFillType.EvenOdd
+                pathFillType = PathFillType.EvenOdd,
             ) {
                 moveTo(12.572f, 13.379f)
                 curveTo(11.541f, 14.183f, 10.244f, 14.662f, 8.835f, 14.662f)

@@ -18,7 +18,7 @@ val MiuixIcons.Basic.SearchCleanup: ImageVector
             path(
                 fill = SolidColor(Color.White),
                 fillAlpha = 0.06f,
-                pathFillType = PathFillType.NonZero
+                pathFillType = PathFillType.NonZero,
             ) {
                 moveTo(34f, 66f)
                 curveTo(51.6731f, 66f, 66f, 51.6731f, 66f, 34f)
@@ -32,7 +32,7 @@ val MiuixIcons.Basic.SearchCleanup: ImageVector
                 stroke = SolidColor(Color.Black),
                 strokeAlpha = 0.1f,
                 strokeLineWidth = 0.0f,
-                pathFillType = PathFillType.NonZero
+                pathFillType = PathFillType.NonZero,
             ) {
                 moveTo(34f, 67f)
                 curveTo(52.2254f, 67f, 67f, 52.2254f, 67f, 34f)
@@ -44,7 +44,7 @@ val MiuixIcons.Basic.SearchCleanup: ImageVector
             path(
                 fill = SolidColor(Color.White),
                 fillAlpha = 0.3f,
-                pathFillType = PathFillType.EvenOdd
+                pathFillType = PathFillType.EvenOdd,
             ) {
                 moveTo(44.6066f, 27.8492f)
                 curveTo(45.7782f, 26.6777f, 45.7782f, 24.7782f, 44.6066f, 23.6066f)

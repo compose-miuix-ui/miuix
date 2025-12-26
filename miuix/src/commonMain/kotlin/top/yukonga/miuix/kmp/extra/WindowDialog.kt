@@ -89,7 +89,7 @@ fun WindowDialog(
     outsideMargin: DpSize = WindowDialogDefaults.outsideMargin,
     insideMargin: DpSize = WindowDialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
 
@@ -109,7 +109,7 @@ fun WindowDialog(
         if (!isLargeScreen && imeBottom > 0) {
             slideOutVertically(
                 targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(350, easing = DecelerateEasing(0.8f))
+                animationSpec = tween(350, easing = DecelerateEasing(0.8f)),
             )
         } else {
             null
@@ -123,7 +123,7 @@ fun WindowDialog(
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
 
     LaunchedEffect(internalVisible.currentState, show.value) {
-        if (!internalVisible.currentState && !show.value){
+        if (!internalVisible.currentState && !show.value) {
             currentOnDismissFinished?.invoke()
         }
     }
@@ -144,7 +144,7 @@ fun WindowDialog(
         onDismissRequest = {
             requestDismiss()
         },
-        properties = platformDialogProperties()
+        properties = platformDialogProperties(),
     ) {
         removePlatformDialogDefaultEffects()
         val windowSize = getWindowSize()
@@ -158,7 +158,7 @@ fun WindowDialog(
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = DialogDimEnter,
-            exit = DialogDimExit
+            exit = DialogDimExit,
         ) {
             val baseColor = MiuixTheme.colorScheme.windowDimming
             val dimColor = baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue))
@@ -174,17 +174,17 @@ fun WindowDialog(
                                 } else {
                                     outsideDismissDeferred.value = true
                                 }
-                            }
+                            },
                         )
                     }
-                    .background(dimColor)
+                    .background(dimColor),
             )
         }
 
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = enterTransition,
-            exit = effectiveExitTransition
+            exit = effectiveExitTransition,
         ) {
             SuperDialogContent(
                 modifier = modifier,
@@ -209,11 +209,11 @@ fun WindowDialog(
                     CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
                         content()
                     }
-                }
+                },
             )
         }
         PredictiveBackHandler(
-            enabled = show.value
+            enabled = show.value,
         ) { progress ->
             try {
                 progress.collect { event ->
@@ -242,40 +242,36 @@ fun WindowDialog(
 }
 
 @Composable
-private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
-    return remember(largeScreen) {
-        if (largeScreen) {
-            fadeIn(
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f)
-            ) + scaleIn(
-                initialScale = 0.8f,
-                animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f)
-            )
-        } else {
-            slideInVertically(
-                initialOffsetY = { fullHeight -> fullHeight },
-                animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f)
-            )
-        }
+private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
+    if (largeScreen) {
+        fadeIn(
+            animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f),
+        ) + scaleIn(
+            initialScale = 0.8f,
+            animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f),
+        )
+    } else {
+        slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f),
+        )
     }
 }
 
 @Composable
-private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition {
-    return remember(largeScreen) {
-        if (largeScreen) {
-            fadeOut(
-                animationSpec = tween(200, easing = DecelerateEasing(1.5f))
-            ) + scaleOut(
-                targetScale = 0.8f,
-                animationSpec = tween(200, easing = DecelerateEasing(1.5f))
-            )
-        } else {
-            slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(300, easing = DecelerateEasing(0.8f))
-            )
-        }
+private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition = remember(largeScreen) {
+    if (largeScreen) {
+        fadeOut(
+            animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
+        ) + scaleOut(
+            targetScale = 0.8f,
+            animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
+        )
+    } else {
+        slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
+        )
     }
 }
 

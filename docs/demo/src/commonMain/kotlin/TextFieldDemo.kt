@@ -27,7 +27,7 @@ fun TextFieldDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -35,7 +35,7 @@ fun TextFieldDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var text1 by remember { mutableStateOf("") }
             var text2 by remember { mutableStateOf("") }
@@ -44,26 +44,26 @@ fun TextFieldDemo() {
             TextField(
                 value = text1,
                 onValueChange = { text1 = it },
-                label = "Username"
+                label = "Username",
             )
 
             TextField(
                 value = text2,
                 onValueChange = { text2 = it },
                 label = "Please enter content",
-                useLabelAsPlaceholder = true
+                useLabelAsPlaceholder = true,
             )
             TextField(
                 value = "",
                 onValueChange = { },
                 label = "Disabled Input Field",
-                enabled = false
+                enabled = false,
             )
             TextField(
                 value = text3,
                 onValueChange = { text3 = it },
                 label = "Read-Only Input Field",
-                readOnly = true
+                readOnly = true,
             )
         }
     }
