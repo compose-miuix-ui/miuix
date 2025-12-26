@@ -4,7 +4,7 @@
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.utils.Platform
@@ -14,8 +14,8 @@ import ui.keyColorFor
 
 @Composable
 fun App(
-    colorMode: MutableState<Int> = remember { mutableStateOf(0) },
-    seedIndex: MutableState<Int> = remember { mutableStateOf(0) },
+    colorMode: MutableState<Int> = remember { mutableIntStateOf(0) },
+    seedIndex: MutableState<Int> = remember { mutableIntStateOf(0) },
     padding: PaddingValues = PaddingValues(0.dp),
     enableOverScroll: Boolean = platform() == Platform.Android || platform() == Platform.IOS,
 ) {

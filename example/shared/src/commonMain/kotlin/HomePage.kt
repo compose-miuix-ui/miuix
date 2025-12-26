@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,18 +52,18 @@ fun MainPage(
     val showWindowDialog = remember { mutableStateOf(false) }
     val showSuperBottomSheet = remember { mutableStateOf(false) }
     val showWindowBottomSheet = remember { mutableStateOf(false) }
-    val bottomSheetDropdownSelectedOption = remember { mutableStateOf(0) }
+    val bottomSheetDropdownSelectedOption = remember { mutableIntStateOf(0) }
     val bottomSheetSuperSwitchState = remember { mutableStateOf(true) }
     val checkbox = remember { mutableStateOf(false) }
     val checkboxTrue = remember { mutableStateOf(true) }
     val switch = remember { mutableStateOf(false) }
     val switchTrue = remember { mutableStateOf(true) }
-    val superDropdownOptionSelected = remember { mutableStateOf(0) }
-    val windowDropdownOptionSelected = remember { mutableStateOf(1) }
-    val superSpinnerOptionSelected = remember { mutableStateOf(0) }
-    val windowSpinnerOptionSelected = remember { mutableStateOf(1) }
-    val superSpinnerOptionSelectedDialog = remember { mutableStateOf(2) }
-    val windowSpinnerOptionSelectedDialog = remember { mutableStateOf(3) }
+    val superDropdownOptionSelected = remember { mutableIntStateOf(0) }
+    val windowDropdownOptionSelected = remember { mutableIntStateOf(1) }
+    val superSpinnerOptionSelected = remember { mutableIntStateOf(0) }
+    val windowSpinnerOptionSelected = remember { mutableIntStateOf(1) }
+    val superSpinnerOptionSelectedDialog = remember { mutableIntStateOf(2) }
+    val windowSpinnerOptionSelectedDialog = remember { mutableIntStateOf(3) }
     val superCheckbox = remember { mutableStateOf("State: false") }
     val superCheckboxState = remember { mutableStateOf(false) }
     val superRightCheckbox = remember { mutableStateOf("false") }
@@ -108,13 +109,13 @@ fun MainPage(
             if (showTopAppBar) {
                 if (isWideScreen) {
                     SmallTopAppBar(
-                        title = "HomePage",
+                        title = "Home",
                         scrollBehavior = topAppBarScrollBehavior,
                         defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
-                        title = "HomePage",
+                        title = "Home",
                         scrollBehavior = topAppBarScrollBehavior,
                     )
                 }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -129,10 +130,10 @@ fun HsvColorPicker(
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
-    var currentHue by remember { mutableStateOf(0f) }
-    var currentSaturation by remember { mutableStateOf(0f) }
-    var currentValue by remember { mutableStateOf(0f) }
-    var currentAlpha by remember { mutableStateOf(1f) }
+    var currentHue by remember { mutableFloatStateOf(0f) }
+    var currentSaturation by remember { mutableFloatStateOf(0f) }
+    var currentValue by remember { mutableFloatStateOf(0f) }
+    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
     val selectedColor = remember(currentHue, currentSaturation, currentValue, currentAlpha) {
         Hsv(
@@ -350,10 +351,10 @@ fun OkHsvColorPicker(
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
-    var currentH by remember { mutableStateOf(0f) }
-    var currentS by remember { mutableStateOf(0f) }
-    var currentV by remember { mutableStateOf(0f) }
-    var currentAlpha by remember { mutableStateOf(1f) }
+    var currentH by remember { mutableFloatStateOf(0f) }
+    var currentS by remember { mutableFloatStateOf(0f) }
+    var currentV by remember { mutableFloatStateOf(0f) }
+    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
     val selectedColor = remember(currentH, currentS, currentV, currentAlpha) {
         OkHsv(
@@ -575,10 +576,10 @@ fun OkLabColorPicker(
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
-    var currentL by remember { mutableStateOf(0f) }
-    var currentA by remember { mutableStateOf(0f) }
-    var currentB by remember { mutableStateOf(0f) }
-    var currentAlpha by remember { mutableStateOf(1f) }
+    var currentL by remember { mutableFloatStateOf(0f) }
+    var currentA by remember { mutableFloatStateOf(0f) }
+    var currentB by remember { mutableFloatStateOf(0f) }
+    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
     val selectedColor = remember(currentL, currentA, currentB, currentAlpha) {
         OkLab(
@@ -673,10 +674,10 @@ fun OkLchColorPicker(
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
-    var currentL by remember { mutableStateOf(0f) } // 0..1
-    var currentC by remember { mutableStateOf(0f) } // proportion 0..1 (scaled to 0..0.4 internally)
-    var currentH by remember { mutableStateOf(0f) } // normalized 0..1 (scaled to 360)
-    var currentAlpha by remember { mutableStateOf(1f) }
+    var currentL by remember { mutableFloatStateOf(0f) } // 0..1
+    var currentC by remember { mutableFloatStateOf(0f) } // proportion 0..1 (scaled to 0..0.4 internally)
+    var currentH by remember { mutableFloatStateOf(0f) } // normalized 0..1 (scaled to 360)
+    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
     val selectedColor = remember(currentL, currentC, currentH, currentAlpha) {
         OkLch(

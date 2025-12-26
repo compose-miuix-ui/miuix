@@ -41,17 +41,17 @@ object Transforms {
 
     /**
      * Convert an OkLab color-space vector to sRGB.
-     * @param color OkLab vector [L, a, b]
+     * @param color OkLab vector [l, a, b]
      * @return sRGB vector [r, g, b], each component clamped to 0..1
      */
     fun okLabToRgb(color: FloatArray): FloatArray {
-        val l_ = color[0] + 0.3963377774f * color[1] + 0.2158037573f * color[2]
-        val m_ = color[0] - 0.1055613458f * color[1] - 0.0638541728f * color[2]
-        val s_ = color[0] - 0.0894841775f * color[1] - 1.2914855480f * color[2]
+        val l1 = color[0] + 0.3963377774f * color[1] + 0.2158037573f * color[2]
+        val m1 = color[0] - 0.1055613458f * color[1] - 0.0638541728f * color[2]
+        val s1 = color[0] - 0.0894841775f * color[1] - 1.2914855480f * color[2]
 
-        val l = l_ * l_ * l_
-        val m = m_ * m_ * m_
-        val s = s_ * s_ * s_
+        val l = l1 * l1 * l1
+        val m = m1 * m1 * m1
+        val s = s1 * s1 * s1
 
         return floatArrayOf(
             (+4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s).coerceIn(0f, 1f),
@@ -61,28 +61,28 @@ object Transforms {
     }
 
     /**
-     * Convert OkLab [L,a,b] to OkLCH [L,C,hDegrees].
+     * Convert OkLab [l,a,b] to OkLCH [l,c,h].
      */
     fun okLabToOklch(lab: FloatArray): FloatArray {
-        val L = lab[0]
+        val l = lab[0]
         val a = lab[1]
         val b = lab[2]
-        val C = kotlin.math.sqrt(a * a + b * b)
+        val c = kotlin.math.sqrt(a * a + b * b)
         var h = toDegrees(atan2(b.toDouble(), a.toDouble())).toFloat()
         if (h < 0f) h += 360f
-        return floatArrayOf(L, C, h)
+        return floatArrayOf(l, c, h)
     }
 
     /**
-     * Convert OkLCH [L,C,hDegrees] to OkLab [L,a,b].
+     * Convert OkLCH [l,c,h] to OkLab [l,a,b].
      */
     fun oklchToOkLab(lch: FloatArray): FloatArray {
-        val L = lch[0]
-        val C = lch[1]
+        val l = lch[0]
+        val c = lch[1]
         val hRad = toRadians(lch[2].toDouble()).toFloat()
-        val a = C * cos(hRad)
-        val b = C * sin(hRad)
-        return floatArrayOf(L, a, b)
+        val a = c * cos(hRad)
+        val b = c * sin(hRad)
+        return floatArrayOf(l, a, b)
     }
 
     /**
@@ -98,12 +98,12 @@ object Transforms {
 
     /**
      * Convert OkLCH to Compose Color (sRGB).
-     * @param L Lightness in 0..1
-     * @param C Chroma in 0..0.4 (typical sRGB gamut)
-     * @param hDeg Hue in degrees [0,360)
+     * @param l Lightness in 0..1
+     * @param c Chroma in 0..0.4 (typical sRGB gamut)
+     * @param h Hue in degrees [0,360)
      */
-    fun oklchToColor(L: Float, C: Float, hDeg: Float, alpha: Float = 1f): Color {
-        val norm = normalizeOklch(L, C, hDeg)
+    fun oklchToColor(l: Float, c: Float, h: Float, alpha: Float = 1f): Color {
+        val norm = normalizeOklch(l, c, h)
         val lab = oklchToOkLab(norm)
         return okLabToColor(lab, alpha)
     }
@@ -111,22 +111,22 @@ object Transforms {
     /**
      * Convert a Compose Color (sRGB) to OkLab.
      * @param color Compose Color in sRGB
-     * @return OkLab vector [L, a, b]
+     * @return OkLab vector [l, a, b]
      */
     fun colorToOkLab(color: Color): FloatArray {
         val rgb = floatArrayOf(color.red, color.green, color.blue)
         return rgbToOkLab(rgb)
     }
 
-    /** Convert Compose Color to OkLCH [L,C,hDeg]. */
+    /** Convert Compose Color to OkLCH [l,c,h]. */
     fun colorToOklch(color: Color): FloatArray {
         val lab = colorToOkLab(color)
         val lch = okLabToOklch(lab)
-        // Clamp C to [0,0.4] for typical sRGB and normalize hue
-        val C = lch[1].coerceIn(0f, 0.4f)
+        // Clamp c to [0,0.4] for typical sRGB and normalize hue
+        val c = lch[1].coerceIn(0f, 0.4f)
         var h = lch[2] % 360f
         if (h < 0f) h += 360f
-        return floatArrayOf(lch[0].coerceIn(0f, 1f), C, h)
+        return floatArrayOf(lch[0].coerceIn(0f, 1f), c, h)
     }
 
     /**
@@ -189,36 +189,36 @@ object Transforms {
             srgbTransferFunctionInv(b),
         )
 
-        val C = kotlin.math.sqrt(lab[1] * lab[1] + lab[2] * lab[2])
-        val a_ = if (C == 0f) 0f else lab[1] / C
-        val b_ = if (C == 0f) 0f else lab[2] / C
+        val c = kotlin.math.sqrt(lab[1] * lab[1] + lab[2] * lab[2])
+        val a = if (c == 0f) 0f else lab[1] / c
+        val b = if (c == 0f) 0f else lab[2] / c
 
-        val L = lab[0]
+        val l = lab[0]
         val h = 0.5f + (0.5f * atan2(-lab[2], -lab[1])) / PI.toFloat()
 
-        val STMax = getSTMax(a_, b_)
-        val SMax = STMax[0]
-        val S0 = 0.5f
-        val T = STMax[1]
-        val k = 1f - S0 / SMax
+        val stMax = getSTMax(a, b)
+        val sMax = stMax[0]
+        val s0 = 0.5f
+        val tMax = stMax[1]
+        val k = 1f - s0 / sMax
 
-        val t = T / (C + L * T)
-        val Lv = t * L
-        val Cv = t * C
+        val t = tMax / (c + l * tMax)
+        val lv = t * l
+        val cv = t * c
 
-        val Lvt = toeInv(Lv)
-        val Cvt = (Cv * Lvt) / Lv
+        val lvt = toeInv(lv)
+        val cvt = (cv * lvt) / lv
 
-        val rgbScale = oklabToLinearSrgb(Lvt, a_ * Cvt, b_ * Cvt)
+        val rgbScale = oklabToLinearSrgb(lvt, a * cvt, b * cvt)
         val scaleL = cbrt(
             1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f),
         )
 
-        var L2 = L / scaleL
-        L2 = toe(L2)
+        var l2 = l / scaleL
+        l2 = toe(l2)
 
-        val v = L2 / Lv
-        val s = ((S0 + T) * Cv) / (T * S0 + T * k * Cv)
+        val v = l2 / lv
+        val s = ((s0 + tMax) * cv) / (tMax * s0 + tMax * k * cv)
 
         return floatArrayOf(h, s, v)
     }
@@ -231,37 +231,37 @@ object Transforms {
      * @return sRGB array [r, g, b] in 0..1
      */
     fun okhsvToSrgb(h: Float, s: Float, v: Float): FloatArray {
-        val a_ = cos(2f * PI.toFloat() * h)
-        val b_ = sin(2f * PI.toFloat() * h)
+        val a = cos(2f * PI.toFloat() * h)
+        val b = sin(2f * PI.toFloat() * h)
 
-        val STMax = getSTMax(a_, b_)
-        val SMax = STMax[0]
-        val S0 = 0.5f
-        val T = STMax[1]
-        val k = 1f - S0 / SMax
+        val stMax = getSTMax(a, b)
+        val sMax = stMax[0]
+        val s0 = 0.5f
+        val tMax = stMax[1]
+        val k = 1f - s0 / sMax
 
-        val Lv = 1f - (s * S0) / (S0 + T - T * k * s)
-        val Cv = (s * T * S0) / (S0 + T - T * k * s)
+        val lv = 1f - (s * s0) / (s0 + tMax - tMax * k * s)
+        val cv = (s * tMax * s0) / (s0 + tMax - tMax * k * s)
 
-        var L = v * Lv
-        var C = v * Cv
+        var l = v * lv
+        var c = v * cv
 
-        val Lvt = toeInv(Lv)
-        val Cvt = (Cv * Lvt) / Lv
+        val lvt = toeInv(lv)
+        val cvt = (cv * lvt) / lv
 
-        val LNew = toeInv(L)
-        C = (C * LNew) / L
-        L = LNew
+        val lNew = toeInv(l)
+        c = (c * lNew) / l
+        l = lNew
 
-        val rgbScale = oklabToLinearSrgb(Lvt, a_ * Cvt, b_ * Cvt)
+        val rgbScale = oklabToLinearSrgb(lvt, a * cvt, b * cvt)
         val scaleL = cbrt(
             1f / maxOf(rgbScale[0], rgbScale[1], rgbScale[2], 0f),
         )
 
-        L *= scaleL
-        C *= scaleL
+        l *= scaleL
+        c *= scaleL
 
-        val rgb = oklabToLinearSrgb(L, C * a_, C * b_)
+        val rgb = oklabToLinearSrgb(l, c * a, c * b)
         return floatArrayOf(
             srgbTransferFunction(rgb[0]),
             srgbTransferFunction(rgb[1]),
@@ -304,30 +304,30 @@ object Transforms {
         val m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b
         val s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b
 
-        val l_ = cbrt(l)
-        val m_ = cbrt(m)
-        val s_ = cbrt(s)
+        val lCbrt = cbrt(l)
+        val mCbrt = cbrt(m)
+        val sCbrt = cbrt(s)
 
         return floatArrayOf(
-            0.2104542553f * l_ + 0.793617785f * m_ - 0.0040720468f * s_,
-            1.9779984951f * l_ - 2.428592205f * m_ + 0.4505937099f * s_,
-            0.0259040371f * l_ + 0.7827717662f * m_ - 0.808675766f * s_,
+            0.2104542553f * lCbrt + 0.793617785f * mCbrt - 0.0040720468f * sCbrt,
+            1.9779984951f * lCbrt - 2.428592205f * mCbrt + 0.4505937099f * sCbrt,
+            0.0259040371f * lCbrt + 0.7827717662f * mCbrt - 0.808675766f * sCbrt,
         )
     }
 
-    private fun oklabToLinearSrgb(L: Float, a: Float, b: Float): FloatArray {
-        val l_ = L + 0.3963377774f * a + 0.2158037573f * b
-        val m_ = L - 0.1055613458f * a - 0.0638541728f * b
-        val s_ = L - 0.0894841775f * a - 1.291485548f * b
+    private fun oklabToLinearSrgb(l: Float, a: Float, b: Float): FloatArray {
+        val lCbrt = l + 0.3963377774f * a + 0.2158037573f * b
+        val mCbrt = l - 0.1055613458f * a - 0.0638541728f * b
+        val sCbrt = l - 0.0894841775f * a - 1.291485548f * b
 
-        val l = l_ * l_ * l_
-        val m = m_ * m_ * m_
-        val s = s_ * s_ * s_
+        val lLin = lCbrt * lCbrt * lCbrt
+        val mLin = mCbrt * mCbrt * mCbrt
+        val sLin = sCbrt * sCbrt * sCbrt
 
         return floatArrayOf(
-            4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s,
-            -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s,
-            -0.0041960863f * l - 0.7034186147f * m + 1.707614701f * s,
+            4.0767416621f * lLin - 3.3077115913f * mLin + 0.2309699292f * sLin,
+            -1.2684380046f * lLin + 2.6097574011f * mLin - 0.3413193965f * sLin,
+            -0.0041960863f * lLin - 0.7034186147f * mLin + 1.707614701f * sLin,
         )
     }
 
@@ -388,35 +388,35 @@ object Transforms {
             ws = 1.707614701f
         }
 
-        var S = k0 + k1 * a + k2 * b + k3 * a * a + k4 * a * b
+        var s = k0 + k1 * a + k2 * b + k3 * a * a + k4 * a * b
 
         val kL = 0.3963377774f * a + 0.2158037573f * b
         val kM = -0.1055613458f * a - 0.0638541728f * b
         val kS = -0.0894841775f * a - 1.291485548f * b
 
-        val l_ = 1f + S * kL
-        val m_ = 1f + S * kM
-        val s_ = 1f + S * kS
+        val lCbrt = 1f + s * kL
+        val mCbrt = 1f + s * kM
+        val sCbrt = 1f + s * kS
 
-        val l = l_ * l_ * l_
-        val m = m_ * m_ * m_
-        val s = s_ * s_ * s_
+        val lLin = lCbrt * lCbrt * lCbrt
+        val mLin = mCbrt * mCbrt * mCbrt
+        val sLin = sCbrt * sCbrt * sCbrt
 
-        val lDS = 3f * kL * l_ * l_
-        val mDS = 3f * kM * m_ * m_
-        val sDS = 3f * kS * s_ * s_
+        val lDs = 3f * kL * lCbrt * lCbrt
+        val mDs = 3f * kM * mCbrt * mCbrt
+        val sDs = 3f * kS * sCbrt * sCbrt
 
-        val lDS2 = 6f * kL * kL * l_
-        val mDS2 = 6f * kM * kM * m_
-        val sDS2 = 6f * kS * kS * s_
+        val lDs2 = 6f * kL * kL * lCbrt
+        val mDs2 = 6f * kM * kM * mCbrt
+        val sDs2 = 6f * kS * kS * sCbrt
 
-        val f = wl * l + wm * m + ws * s
-        val f1 = wl * lDS + wm * mDS + ws * sDS
-        val f2 = wl * lDS2 + wm * mDS2 + ws * sDS2
+        val f = wl * lLin + wm * mLin + ws * sLin
+        val f1 = wl * lDs + wm * mDs + ws * sDs
+        val f2 = wl * lDs2 + wm * mDs2 + ws * sDs2
 
-        S -= (f * f1) / (f1 * f1 - 0.5f * f * f2)
+        s -= (f * f1) / (f1 * f1 - 0.5f * f * f2)
 
-        return S
+        return s
     }
 
     private fun findCusp(a: Float, b: Float): FloatArray {
@@ -429,11 +429,11 @@ object Transforms {
         return floatArrayOf(lCusp, cCusp)
     }
 
-    private fun getSTMax(a_: Float, b_: Float, cusp: FloatArray? = null): FloatArray {
-        val cuspActual = cusp ?: findCusp(a_, b_)
-        val L = cuspActual[0]
-        val C = cuspActual[1]
-        return floatArrayOf(C / L, C / (1f - L))
+    private fun getSTMax(a: Float, b: Float, c: FloatArray? = null): FloatArray {
+        val cuspActual = c ?: findCusp(a, b)
+        val l = cuspActual[0]
+        val c = cuspActual[1]
+        return floatArrayOf(c / l, c / (1f - l))
     }
 
     /**
@@ -464,12 +464,12 @@ object Transforms {
     /**
      * Generate OkLCH hue colors for a hue slider at given lightness and chroma.
      * @param l Lightness in 0..1
-     * @param cProportion Chroma proportion 0..1 (scaled to 0..0.4 internally)
+     * @param c Chroma proportion 0..1 (scaled to 0..0.4 internally)
      * @param steps Number of hue samples
      */
-    fun generateOkLchHueColors(l: Float, cProportion: Float, steps: Int = 36): List<Color> {
+    fun generateOkLchHueColors(l: Float, c: Float, steps: Int = 36): List<Color> {
         val lClamped = l.coerceIn(0f, 1f)
-        val cClamped = cProportion.coerceIn(0f, 1f)
+        val cClamped = c.coerceIn(0f, 1f)
         val key = "${(lClamped * 100).toInt()}:${(cClamped * 100).toInt()}:$steps"
         return okLchHueCache.getOrPut(key) {
             val cInternal = cClamped * 0.4f
@@ -481,11 +481,11 @@ object Transforms {
     }
 
     /** Normalize OkLCH input to safe ranges and canonical hue degrees. */
-    fun normalizeOklch(L: Float, C: Float, hDeg: Float): FloatArray {
-        val Ln = L.coerceIn(0f, 1f)
-        val Cn = C.coerceIn(0f, 0.4f)
-        var hn = hDeg % 360f
+    fun normalizeOklch(l: Float, c: Float, h: Float): FloatArray {
+        val ln = l.coerceIn(0f, 1f)
+        val cn = c.coerceIn(0f, 0.4f)
+        var hn = h % 360f
         if (hn < 0f) hn += 360f
-        return floatArrayOf(Ln, Cn, hn)
+        return floatArrayOf(ln, cn, hn)
     }
 }

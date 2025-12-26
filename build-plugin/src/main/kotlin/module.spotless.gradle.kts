@@ -12,7 +12,7 @@ spotless {
 
     kotlin {
         target("src/**/*.kt")
-        targetExclude("**/build/**/*.kt", "miuix-icons/**/*.kt")
+        targetExclude("**/build/**/*.kt", "/**/icon/**/*.kt")
         ktlint("1.8.0")
             .customRuleSets(
                 listOf(
@@ -20,14 +20,11 @@ spotless {
                 ),
             ).editorConfigOverride(
                 mapOf(
-                    "ktlint_standard_backing-property-naming" to "disabled",
-                    "ktlint_standard_property-naming" to "disabled",
                     "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
                     "ktlint_compose_modifier-missing-check" to "disabled",
                     "ktlint_compose_compositionlocal-allowlist" to "disabled",
                     "ktlint_compose_modifier-composed-check" to "disabled",
                     "ktlint_compose_mutable-state-param-check" to "disabled",
-                    "ktlint_compose_mutable-state-autoboxing" to "disabled",
                     "ktlint_compose_param-order-check" to "disabled",
                     "ktlint_compose_parameter-naming" to "disabled",
                     "ktlint_compose_modifier-not-used-at-root" to "disabled",

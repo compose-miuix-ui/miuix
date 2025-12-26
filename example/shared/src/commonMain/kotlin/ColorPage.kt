@@ -54,13 +54,13 @@ fun ColorPage(
             if (showTopAppBar) {
                 if (isWideScreen) {
                     SmallTopAppBar(
-                        title = "Colors",
+                        title = "Color",
                         scrollBehavior = topAppBarScrollBehavior,
                         defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
-                        title = "Colors",
+                        title = "Color",
                         scrollBehavior = topAppBarScrollBehavior,
                     )
                 }

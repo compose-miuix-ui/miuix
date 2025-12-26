@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -536,7 +537,7 @@ fun AboutPage(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp),
             ) {
                 val list = listOf("Apache-2.0", "Apache-2.0", "Apache-2.0")
-                var selectedIndex by remember { mutableStateOf(0) }
+                var selectedIndex by remember { mutableIntStateOf(0) }
                 SuperDropdown(
                     title = "License",
                     items = list,
@@ -570,7 +571,7 @@ fun BackNavigationIcon(
 @Composable
 fun AboutTopBarActionsWithSuperListPopup() {
     val showTopPopup = remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
     IconButton(
         modifier = Modifier.padding(end = 16.dp),
@@ -615,7 +616,7 @@ fun AboutTopBarActionsWithSuperListPopup() {
 @Composable
 fun AboutTopBarActionsWithWindowListPopup() {
     val showTopPopup = remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
     IconButton(
         modifier = Modifier.padding(end = 16.dp),

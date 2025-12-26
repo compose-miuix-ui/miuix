@@ -75,7 +75,7 @@ import kotlinx.coroutines.sync.Mutex
 fun Modifier.pressable(
     enabled: Boolean = true,
     role: Role? = null,
-    delay: Long? = TapIndicationDelay,
+    delay: Long? = TAP_INDICATION_DELAY,
 ) = composed(
     inspectorInfo = debugInspectorInfo {
         name = "clickable"
@@ -132,7 +132,7 @@ fun Modifier.pressable(
     indication: Indication? = null,
     enabled: Boolean = true,
     role: Role? = null,
-    delay: Long? = TapIndicationDelay,
+    delay: Long? = TAP_INDICATION_DELAY,
 ) = pressableWithIndicationIfNeeded(
     interactionSource = interactionSource,
     indication = indication,
@@ -187,7 +187,7 @@ internal inline fun Modifier.pressableWithIndicationIfNeeded(
  * How long to wait before appearing 'pressed' (emitting [PressInteraction.Press]) - if a touch down
  * will quickly become a drag / scroll, this timeout means that we don't show a press effect.
  */
-internal const val TapIndicationDelay: Long = 150L
+internal const val TAP_INDICATION_DELAY: Long = 150L
 
 private data class PressableElement(
     private val interactionSource: MutableInteractionSource?,

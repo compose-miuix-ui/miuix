@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,13 +45,13 @@ fun WindowSpinnerDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var selectedIndex1 by remember { mutableStateOf(0) }
+            var selectedIndex1 by remember { mutableIntStateOf(0) }
             val options1 = listOf(
                 SpinnerEntry(title = "Option 1"),
                 SpinnerEntry(title = "Option 2"),
                 SpinnerEntry(title = "Option 3"),
             )
-            var selectedIndex2 by remember { mutableStateOf(0) }
+            var selectedIndex2 by remember { mutableIntStateOf(0) }
 
             // Create a rounded rectangle Painter
             class RoundedRectanglePainter(
@@ -67,6 +67,7 @@ fun WindowSpinnerDemo() {
                     )
                 }
             }
+
             val options2 = listOf(
                 SpinnerEntry(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
@@ -89,7 +90,7 @@ fun WindowSpinnerDemo() {
                     summary = "Bright yellow",
                 ),
             )
-            var selectedIndex3 by remember { mutableStateOf(0) }
+            var selectedIndex3 by remember { mutableIntStateOf(0) }
             val options3 = listOf(
                 SpinnerEntry(title = "Option A"),
                 SpinnerEntry(title = "Option B"),

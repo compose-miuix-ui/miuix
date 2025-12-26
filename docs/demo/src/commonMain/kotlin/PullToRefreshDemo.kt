@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,7 +50,7 @@ fun PullToRefreshDemo() {
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
             var isRefreshing by rememberSaveable { mutableStateOf(false) }
-            var ii by remember { mutableStateOf(1) }
+            var ii by remember { mutableIntStateOf(1) }
 
             LaunchedEffect(isRefreshing) {
                 if (isRefreshing) {

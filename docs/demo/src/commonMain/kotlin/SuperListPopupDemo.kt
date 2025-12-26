@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,7 +33,7 @@ fun SuperListPopupDemo() {
             contentAlignment = Alignment.Center,
         ) {
             val showPopup = remember { mutableStateOf(false) }
-            var selectedIndex by remember { mutableStateOf(0) }
+            var selectedIndex by remember { mutableIntStateOf(0) }
             val items = listOf("Option 1", "Option 2", "Option 3")
             Box(
                 modifier = Modifier.fillMaxSize(),

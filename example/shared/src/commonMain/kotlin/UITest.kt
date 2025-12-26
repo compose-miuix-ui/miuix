@@ -84,6 +84,7 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -97,10 +98,11 @@ private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
     const val ICON_PAGE_INDEX = 1
     const val COLOR_PAGE_INDEX = 2
-    const val PAGE_COUNT = 4
+    const val DROPDOWN_PAGE_INDEX = 3
+    const val PAGE_COUNT = 5
     const val GITHUB_URL = "https://github.com/compose-miuix-ui/miuix"
 
-    val PAGE_TITLES = listOf("HomePage", "Icons", "Colors", "Settings")
+    val PAGE_TITLES = listOf("Home", "Icon", "Color", "Dropdown", "Settings")
 }
 
 enum class FloatingNavigationBarAlignment(val value: Int) {
@@ -161,7 +163,8 @@ fun UITest(
             NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
             NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Create),
             NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Settings),
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Sort),
+            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Settings),
         )
     }
 
@@ -241,7 +244,7 @@ private fun WideScreenLayout(
     val layoutDirection = LocalLayoutDirection.current
 
     val windowWidth = getWindowSize().width
-    var weight by remember(windowWidth) { mutableStateOf(0.4f) }
+    var weight by remember(windowWidth) { mutableFloatStateOf(0.4f) }
     var potentialWeight by remember { mutableFloatStateOf(weight) }
     val dragState = rememberDraggableState { delta ->
         val nextPotentialWeight = potentialWeight + delta / windowWidth
@@ -633,7 +636,7 @@ fun AppPager(
         modifier = modifier,
         userScrollEnabled = uiState.enablePageUserScroll,
         verticalAlignment = Alignment.Top,
-        beyondViewportPageCount = 4,
+        beyondViewportPageCount = 5,
         overscrollEffect = null,
         pageContent = { page ->
             when (page) {
@@ -654,6 +657,14 @@ fun AppPager(
                 )
 
                 UIConstants.COLOR_PAGE_INDEX -> ColorPage(
+                    padding = padding,
+                    enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                    enableOverScroll = uiState.enableOverScroll,
+                    isWideScreen = uiState.isWideScreen,
+                    showTopAppBar = uiState.showTopAppBar,
+                )
+
+                UIConstants.DROPDOWN_PAGE_INDEX -> DropdownPage(
                     padding = padding,
                     enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                     enableOverScroll = uiState.enableOverScroll,

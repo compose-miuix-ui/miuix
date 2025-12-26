@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,8 +50,8 @@ fun ButtonDemo() {
         ) {
             var buttonText1 by remember { mutableStateOf("Button") }
             var buttonText2 by remember { mutableStateOf("TextButton") }
-            var clickCount1 by remember { mutableStateOf(0) }
-            var clickCount2 by remember { mutableStateOf(0) }
+            var clickCount1 by remember { mutableIntStateOf(0) }
+            var clickCount2 by remember { mutableIntStateOf(0) }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),

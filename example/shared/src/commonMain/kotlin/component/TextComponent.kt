@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -148,7 +149,7 @@ fun TextComponent(
         )
     }
 
-    var volume by remember { mutableStateOf(0.5f) }
+    var volume by remember { mutableFloatStateOf(0.5f) }
     val showVolumeDialog = remember { mutableStateOf(false) }
 
     SmallTitle(text = "Basic Component")
@@ -695,7 +696,7 @@ fun SuperBottomSheet(
     ) {
         LazyColumn {
             item {
-                var sliderValue by remember { mutableStateOf(0.5f) }
+                var sliderValue by remember { mutableFloatStateOf(0.5f) }
                 Slider(
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
@@ -772,7 +773,7 @@ fun WindowBottomSheet(
         state = LocalWindowBottomSheetState.current
         LazyColumn {
             item {
-                var sliderValue by remember { mutableStateOf(0.5f) }
+                var sliderValue by remember { mutableFloatStateOf(0.5f) }
                 Slider(
                     value = sliderValue,
                     onValueChange = { sliderValue = it },

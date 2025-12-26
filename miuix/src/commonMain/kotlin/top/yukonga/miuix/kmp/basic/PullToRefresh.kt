@@ -199,8 +199,8 @@ fun rememberPullToRefreshState(): PullToRefreshState {
 
     // Update context-dependent properties on the state instance to ensure it's always current.
     val windowSize = getWindowSize()
-    state.maxDragDistancePx = windowSize.height.toFloat() // * maxDragRatio
-    state.refreshThresholdOffset = windowSize.height.toFloat() * maxDragRatio * thresholdRatio
+    state.maxDragDistancePx = windowSize.height.toFloat()
+    state.refreshThresholdOffset = windowSize.height.toFloat() * MAX_DRAWRATIO * THRESHOLD_RADIO
 
     return state
 }
@@ -253,8 +253,8 @@ class PullToRefreshState(
     internal var isRefreshing by mutableStateOf(false)
     internal var isTouching by mutableStateOf(false)
     internal var isRebounding by mutableStateOf(false)
-    private val _refreshCompleteAnimProgress = mutableFloatStateOf(1f)
-    internal val refreshCompleteAnimProgress: Float by derivedStateOf { _refreshCompleteAnimProgress.floatValue }
+    private val refreshCompleteAnimProgressState = mutableFloatStateOf(1f)
+    internal val refreshCompleteAnimProgress: Float by derivedStateOf { refreshCompleteAnimProgressState.floatValue }
 
     // Physics Engine for rebound
     private val springEngine = SpringEngine()
@@ -364,7 +364,7 @@ class PullToRefreshState(
     }
 
     private suspend fun startManualRefreshCompleteAnimation() {
-        _refreshCompleteAnimProgress.floatValue = 0f
+        refreshCompleteAnimProgressState.floatValue = 0f
         val animatedValue = Animatable(0f)
         animatedValue.animateTo(
             targetValue = 1f,
@@ -373,7 +373,7 @@ class PullToRefreshState(
                 easing = CubicBezierEasing(0f, 0f, 0f, 0.37f),
             ),
         ) {
-            _refreshCompleteAnimProgress.floatValue = this.value
+            refreshCompleteAnimProgressState.floatValue = this.value
         }
         internalResetState()
     }
@@ -813,8 +813,8 @@ private fun DrawScope.drawRefreshCompleteIndicator(
     )
 }
 
-private const val maxDragRatio = 1 / 6f
-private const val thresholdRatio = 1 / 4f
+private const val MAX_DRAWRATIO = 1 / 6f
+private const val THRESHOLD_RADIO = 1 / 4f
 
 internal val LocalPullToRefreshState = compositionLocalOf<PullToRefreshState?> { null }
 

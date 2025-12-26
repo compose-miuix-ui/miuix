@@ -36,7 +36,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
@@ -101,7 +101,7 @@ fun TopAppBar(
     defaultWindowInsetsPadding: Boolean = true,
     horizontalPadding: Dp = 26.dp,
 ) {
-    val largeTitleHeight = remember { mutableStateOf(0) }
+    val largeTitleHeight = remember { mutableIntStateOf(0) }
     val expandedHeightPx by rememberUpdatedState(
         remember(largeTitleHeight.value) {
             largeTitleHeight.value.toFloat().coerceAtLeast(0f)

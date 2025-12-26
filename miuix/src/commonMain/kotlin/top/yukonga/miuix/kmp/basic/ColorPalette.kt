@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -75,8 +76,8 @@ fun ColorPalette(
     val rowSV = remember(rows) { buildRowSV(rows) }
     val grayV = remember(rows) { buildGrayV(rows) }
 
-    var selectedRow by remember { mutableStateOf(0) }
-    var selectedCol by remember { mutableStateOf(0) }
+    var selectedRow by remember { mutableIntStateOf(0) }
+    var selectedCol by remember { mutableIntStateOf(0) }
     var alpha by remember { mutableStateOf(initialColor.alpha.coerceIn(0f, 1f)) }
     var lastEmittedColor by remember { mutableStateOf<Color?>(null) }
     var lastAcceptedHSV by remember { mutableStateOf<Triple<Float, Float, Float>?>(null) }

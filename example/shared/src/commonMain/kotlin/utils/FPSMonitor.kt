@@ -6,7 +6,8 @@ package utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
@@ -20,11 +21,11 @@ import top.yukonga.miuix.kmp.basic.Text
  */
 @Composable
 fun FPSMonitor(modifier: Modifier = Modifier) {
-    var fps by remember { mutableStateOf(0) }
-    var maxFps by remember { mutableStateOf(0) }
-    var lastFrameTime by remember { mutableStateOf(0L) }
-    var frameCount by remember { mutableStateOf(0) }
-    var totalFrameTime by remember { mutableStateOf(0L) }
+    var fps by remember { mutableIntStateOf(0) }
+    var maxFps by remember { mutableIntStateOf(0) }
+    var lastFrameTime by remember { mutableLongStateOf(0L) }
+    var frameCount by remember { mutableIntStateOf(0) }
+    var totalFrameTime by remember { mutableLongStateOf(0L) }
 
     if (fps > maxFps) {
         maxFps = fps

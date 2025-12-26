@@ -44,13 +44,13 @@ fun IconsPage(
             if (showTopAppBar) {
                 if (isWideScreen) {
                     SmallTopAppBar(
-                        title = "Icons",
+                        title = "Icon",
                         scrollBehavior = topAppBarScrollBehavior,
                         defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
-                        title = "Icons",
+                        title = "Icon",
                         scrollBehavior = topAppBarScrollBehavior,
                     )
                 }

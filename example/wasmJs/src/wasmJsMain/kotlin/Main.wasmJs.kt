@@ -4,7 +4,7 @@
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -15,10 +15,10 @@ import androidx.compose.ui.window.ComposeViewport
 fun main() {
     hideLoading()
     ComposeViewport(viewportContainerId = "composeApp") {
-        var insetTopPx by remember { mutableStateOf(0.0) }
-        var insetBottomPx by remember { mutableStateOf(0.0) }
-        var insetStartPx by remember { mutableStateOf(0.0) }
-        var insetEndPx by remember { mutableStateOf(0.0) }
+        var insetTopPx by remember { mutableDoubleStateOf(0.0) }
+        var insetBottomPx by remember { mutableDoubleStateOf(0.0) }
+        var insetStartPx by remember { mutableDoubleStateOf(0.0) }
+        var insetEndPx by remember { mutableDoubleStateOf(0.0) }
 
         LaunchedEffect(Unit) {
             insetTopPx = getCssVar("--safe-area-inset-top")

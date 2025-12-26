@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,9 +38,9 @@ fun WindowDropdownDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var selectedIndex1 by remember { mutableStateOf(0) }
+            var selectedIndex1 by remember { mutableIntStateOf(0) }
             val options1 = listOf("Option 1", "Option 2", "Option 3")
-            var selectedIndex2 by remember { mutableStateOf(0) }
+            var selectedIndex2 by remember { mutableIntStateOf(0) }
             val options2 = listOf("Chinese", "English", "Japanese")
 
             Card {

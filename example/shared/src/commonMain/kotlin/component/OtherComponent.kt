@@ -25,6 +25,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,8 +69,8 @@ fun LazyListScope.otherComponent() {
     item(key = "button") {
         var buttonText by remember { mutableStateOf("Cancel") }
         var submitButtonText by remember { mutableStateOf("Submit") }
-        var clickCount by remember { mutableStateOf(0) }
-        var submitClickCount by remember { mutableStateOf(0) }
+        var clickCount by remember { mutableIntStateOf(0) }
+        var submitClickCount by remember { mutableIntStateOf(0) }
 
         SmallTitle(text = "Button")
         Row(
@@ -225,7 +227,7 @@ fun LazyListScope.otherComponent() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            var sliderValue by remember { mutableStateOf(0.3f) }
+            var sliderValue by remember { mutableFloatStateOf(0.3f) }
             Text(
                 text = "Normal: ${(sliderValue * 100).toInt()}%",
                 fontSize = 14.sp,
@@ -240,7 +242,7 @@ fun LazyListScope.otherComponent() {
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
-            var stepsValue by remember { mutableStateOf(5f) }
+            var stepsValue by remember { mutableFloatStateOf(5f) }
             Text(
                 text = "Steps: ${stepsValue.toInt()}/8",
                 fontSize = 14.sp,
@@ -258,7 +260,7 @@ fun LazyListScope.otherComponent() {
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
-            var stepsWithKeyPointsValue by remember { mutableStateOf(5f) }
+            var stepsWithKeyPointsValue by remember { mutableFloatStateOf(5f) }
             Text(
                 text = "Steps with Key Points: ${stepsWithKeyPointsValue.toInt()}/8",
                 fontSize = 14.sp,
@@ -277,7 +279,7 @@ fun LazyListScope.otherComponent() {
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
-            var customKeyPointsValue by remember { mutableStateOf(25f) }
+            var customKeyPointsValue by remember { mutableFloatStateOf(25f) }
             Text(
                 text = "Custom Key Points: ${customKeyPointsValue.toInt()}%",
                 fontSize = 14.sp,
@@ -296,7 +298,7 @@ fun LazyListScope.otherComponent() {
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
-            val disabledValue by remember { mutableStateOf(0.7f) }
+            val disabledValue by remember { mutableFloatStateOf(0.7f) }
             Text(
                 text = "Disabled: ${(disabledValue * 100).toInt()}%",
                 fontSize = 14.sp,
@@ -407,7 +409,7 @@ fun LazyListScope.otherComponent() {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                var verticalValue1 by remember { mutableStateOf(0.3f) }
+                var verticalValue1 by remember { mutableFloatStateOf(0.3f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -424,7 +426,7 @@ fun LazyListScope.otherComponent() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                var verticalValue2 by remember { mutableStateOf(5f) }
+                var verticalValue2 by remember { mutableFloatStateOf(5f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -444,7 +446,7 @@ fun LazyListScope.otherComponent() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                var verticalValue3 by remember { mutableStateOf(5f) }
+                var verticalValue3 by remember { mutableFloatStateOf(5f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -465,7 +467,7 @@ fun LazyListScope.otherComponent() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                var verticalValue4 by remember { mutableStateOf(50f) }
+                var verticalValue4 by remember { mutableFloatStateOf(50f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -486,7 +488,7 @@ fun LazyListScope.otherComponent() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                val disabledVerticalValue by remember { mutableStateOf(0.7f) }
+                val disabledVerticalValue by remember { mutableFloatStateOf(0.7f) }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -512,7 +514,7 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "TabRow")
         val tabTexts = remember { listOf("Tab 1", "Tab 2", "Tab 3") }
         val tabTexts1 = remember { listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5", "Tab 6") }
-        var selectedTabIndex by remember { mutableStateOf(0) }
+        var selectedTabIndex by remember { mutableIntStateOf(0) }
         TabRow(
             tabs = tabTexts,
             selectedTabIndex = selectedTabIndex,
