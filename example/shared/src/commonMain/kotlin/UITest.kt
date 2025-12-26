@@ -76,6 +76,7 @@ import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
@@ -83,7 +84,6 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -95,12 +95,12 @@ private object UIConstants {
     val MEDIUM_WIDTH_THRESHOLD = 600.dp
     const val PORTRAIT_ASPECT_RATIO_THRESHOLD = 1.2f
     const val MAIN_PAGE_INDEX = 0
-    const val DROPDOWN_PAGE_INDEX = 1
+    const val ICON_PAGE_INDEX = 1
     const val COLOR_PAGE_INDEX = 2
     const val PAGE_COUNT = 4
     const val GITHUB_URL = "https://github.com/compose-miuix-ui/miuix"
 
-    val PAGE_TITLES = listOf("HomePage", "Dropdowns", "Colors", "Settings")
+    val PAGE_TITLES = listOf("HomePage", "Icons", "Colors", "Settings")
 }
 
 enum class FloatingNavigationBarAlignment(val value: Int) {
@@ -159,7 +159,7 @@ fun UITest(
     val navigationItems = remember {
         listOf(
             NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Sort),
+            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Create),
             NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
             NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Settings),
         )
@@ -633,7 +633,7 @@ fun AppPager(
         modifier = modifier,
         userScrollEnabled = uiState.enablePageUserScroll,
         verticalAlignment = Alignment.Top,
-        beyondViewportPageCount = 1,
+        beyondViewportPageCount = 4,
         overscrollEffect = null,
         pageContent = { page ->
             when (page) {
@@ -645,7 +645,7 @@ fun AppPager(
                     showTopAppBar = uiState.showTopAppBar,
                 )
 
-                UIConstants.DROPDOWN_PAGE_INDEX -> SecondPage(
+                UIConstants.ICON_PAGE_INDEX -> IconsPage(
                     padding = padding,
                     enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                     enableOverScroll = uiState.enableOverScroll,
@@ -653,7 +653,7 @@ fun AppPager(
                     showTopAppBar = uiState.showTopAppBar,
                 )
 
-                UIConstants.COLOR_PAGE_INDEX -> ThirdPage(
+                UIConstants.COLOR_PAGE_INDEX -> ColorPage(
                     padding = padding,
                     enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                     enableOverScroll = uiState.enableOverScroll,
@@ -661,7 +661,7 @@ fun AppPager(
                     showTopAppBar = uiState.showTopAppBar,
                 )
 
-                else -> FourthPage(
+                else -> SettingsPage(
                     padding = padding,
                     showFPSMonitor = uiState.showFPSMonitor,
                     onShowFPSMonitorChange = { onUiStateChange(uiState.copy(showFPSMonitor = it)) },

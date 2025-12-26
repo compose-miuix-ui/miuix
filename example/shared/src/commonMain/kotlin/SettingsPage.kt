@@ -73,7 +73,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun FourthPage(
+fun SettingsPage(
     padding: PaddingValues,
     showFPSMonitor: Boolean,
     onShowFPSMonitorChange: (Boolean) -> Unit,

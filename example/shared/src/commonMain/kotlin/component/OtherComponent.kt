@@ -47,7 +47,6 @@ import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.ColorPalette
 import top.yukonga.miuix.kmp.basic.ColorPicker
 import top.yukonga.miuix.kmp.basic.ColorSpace
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.RangeSlider
@@ -60,8 +59,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.VerticalSlider
-import top.yukonga.miuix.kmp.icon.All
-import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import kotlin.math.round
@@ -557,38 +554,6 @@ fun LazyListScope.otherComponent() {
                     )
                 },
             )
-        }
-    }
-
-    item(key = "icon") {
-        SmallTitle(text = "Icon")
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(16.dp),
-        ) {
-            val miuixIconsAll = remember { MiuixIcons.All }
-            miuixIconsAll.forEach { (weight, icons) ->
-                Text(
-                    text = weight,
-                    modifier = Modifier.padding(
-                        bottom = 6.dp,
-                        top = if (weight == "Light") 0.dp else 12.dp,
-                    ),
-                )
-                FlowRow {
-                    icons.forEach { icon ->
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = icon.name,
-                            tint = MiuixTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                }
-            }
         }
     }
 

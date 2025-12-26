@@ -41,7 +41,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun ThirdPage(
+fun ColorPage(
     padding: PaddingValues,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
