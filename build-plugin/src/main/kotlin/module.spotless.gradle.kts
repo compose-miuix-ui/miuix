@@ -12,7 +12,7 @@ spotless {
 
     kotlin {
         target("src/**/*.kt")
-        targetExclude("**/build/**/*.kt", "miuix-icon/**/*.kt")
+        targetExclude("**/build/**/*.kt", "miuix-icons/**/*.kt")
         ktlint("1.8.0")
             .customRuleSets(
                 listOf(
