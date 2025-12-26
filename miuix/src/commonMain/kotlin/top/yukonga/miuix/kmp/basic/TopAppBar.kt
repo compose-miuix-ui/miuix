@@ -99,13 +99,13 @@ fun TopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = 26.dp
+    horizontalPadding: Dp = 26.dp,
 ) {
     val largeTitleHeight = remember { mutableStateOf(0) }
     val expandedHeightPx by rememberUpdatedState(
         remember(largeTitleHeight.value) {
             largeTitleHeight.value.toFloat().coerceAtLeast(0f)
-        }
+        },
     )
 
     SideEffect {
@@ -122,7 +122,7 @@ fun TopAppBar(
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
-                content = actions
+                content = actions,
             )
         }
 
@@ -131,7 +131,7 @@ fun TopAppBar(
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
     Surface(
-        color = color
+        color = color,
     ) {
         TopAppBarLayout(
             modifier = modifier,
@@ -143,7 +143,7 @@ fun TopAppBar(
             expandedHeightPx = expandedHeightPx,
             horizontalPadding = horizontalPadding,
             largeTitleHeight = largeTitleHeight,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         )
     }
 }
@@ -172,7 +172,7 @@ fun SmallTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = 26.dp
+    horizontalPadding: Dp = 26.dp,
 ) {
     SideEffect {
         // Sets the height offset limit of the SmallTopAppBar to 0f
@@ -186,7 +186,7 @@ fun SmallTopAppBar(
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
-                content = actions
+                content = actions,
             )
         }
 
@@ -195,7 +195,7 @@ fun SmallTopAppBar(
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
     Surface(
-        color = color
+        color = color,
     ) {
         SmallTopAppBarLayout(
             modifier = modifier,
@@ -203,7 +203,7 @@ fun SmallTopAppBar(
             navigationIcon = navigationIcon,
             actions = actionsRow,
             horizontalPadding = horizontalPadding,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         )
     }
 }
@@ -232,16 +232,15 @@ fun MiuixScrollBehavior(
     state: TopAppBarState = rememberTopAppBarState(),
     canScroll: () -> Boolean = { true },
     snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = 2500f),
-    flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay()
-): ScrollBehavior =
-    remember(state, canScroll, snapAnimationSpec, flingAnimationSpec) {
-        ExitUntilCollapsedScrollBehavior(
-            state = state,
-            snapAnimationSpec = snapAnimationSpec,
-            flingAnimationSpec = flingAnimationSpec,
-            canScroll = canScroll
-        )
-    }
+    flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
+): ScrollBehavior = remember(state, canScroll, snapAnimationSpec, flingAnimationSpec) {
+    ExitUntilCollapsedScrollBehavior(
+        state = state,
+        snapAnimationSpec = snapAnimationSpec,
+        flingAnimationSpec = flingAnimationSpec,
+        canScroll = canScroll,
+    )
+}
 
 /**
  * Creates a [TopAppBarState] that is remembered across compositions.
@@ -257,11 +256,9 @@ fun MiuixScrollBehavior(
 fun rememberTopAppBarState(
     initialHeightOffsetLimit: Float = -Float.MAX_VALUE,
     initialHeightOffset: Float = 0f,
-    initialContentOffset: Float = 0f
-): TopAppBarState {
-    return rememberSaveable(saver = Saver) {
-        TopAppBarState(initialHeightOffsetLimit, initialHeightOffset, initialContentOffset)
-    }
+    initialContentOffset: Float = 0f,
+): TopAppBarState = rememberSaveable(saver = Saver) {
+    TopAppBarState(initialHeightOffsetLimit, initialHeightOffset, initialContentOffset)
 }
 
 /**
@@ -278,7 +275,7 @@ fun rememberTopAppBarState(
 class TopAppBarState(
     initialHeightOffsetLimit: Float,
     initialHeightOffset: Float,
-    initialContentOffset: Float
+    initialContentOffset: Float,
 ) {
 
     /**
@@ -339,10 +336,12 @@ class TopAppBarState(
         get() =
             if (heightOffsetLimit != 0f) {
                 1 -
-                        ((heightOffsetLimit - contentOffset).coerceIn(
+                    (
+                        (heightOffsetLimit - contentOffset).coerceIn(
                             minimumValue = heightOffsetLimit,
                             maximumValue = 0f,
-                        ) / heightOffsetLimit)
+                        ) / heightOffsetLimit
+                        )
             } else {
                 0f
             }
@@ -474,7 +473,7 @@ private class ExitUntilCollapsedScrollBehavior(
                 }
                 val superConsumed = super.onPostFling(consumed, available)
                 return superConsumed +
-                        settleAppBar(state, available.y, flingAnimationSpec, snapAnimationSpec)
+                    settleAppBar(state, available.y, flingAnimationSpec, snapAnimationSpec)
             }
         }
 }
@@ -514,7 +513,7 @@ private suspend fun settleAppBar(
     if (flingAnimationSpec != null && abs(velocity) > 1f) {
         var lastValue = 0f
         AnimationState(initialValue = 0f, initialVelocity = velocity).animateDecay(
-            flingAnimationSpec
+            flingAnimationSpec,
         ) {
             val delta = value - lastValue
             val initialHeightOffset = state.heightOffset
@@ -575,7 +574,7 @@ private fun TopAppBarLayout(
     expandedHeightPx: Float,
     horizontalPadding: Dp,
     largeTitleHeight: MutableState<Int>,
-    defaultWindowInsetsPadding: Boolean
+    defaultWindowInsetsPadding: Boolean,
 ) {
     // Subtract the scrolledOffset from the maxHeight. The scrolledOffset is expected to be
     // equal or smaller than zero.
@@ -602,11 +601,11 @@ private fun TopAppBarLayout(
 
     val alpha by animateFloatAsState(
         targetValue = if (1 - extOffset.coerceIn(0f, 1f) == 0f) 1f else 0f,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = 250),
     )
     val translationY by animateFloatAsState(
         targetValue = if (extOffset > 1f) 0f else 12f,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = 250),
     )
 
     val statusBarsInsets = WindowInsets.statusBars
@@ -618,7 +617,7 @@ private fun TopAppBarLayout(
         {
             Box(
                 Modifier
-                    .layoutId("navigationIcon")
+                    .layoutId("navigationIcon"),
             ) {
                 navigationIcon()
             }
@@ -628,20 +627,20 @@ private fun TopAppBarLayout(
                     .padding(horizontal = horizontalPadding)
                     .graphicsLayer(
                         alpha = alpha,
-                        translationY = translationY
-                    )
+                        translationY = translationY,
+                    ),
             ) {
                 Text(
                     text = title,
                     fontSize = MiuixTheme.textStyles.title3.fontSize,
                     fontWeight = FontWeight.Medium,
                     overflow = TextOverflow.Ellipsis,
-                    softWrap = false
+                    softWrap = false,
                 )
             }
             Box(
                 Modifier
-                    .layoutId("actionIcons")
+                    .layoutId("actionIcons"),
             ) {
                 actions()
             }
@@ -650,7 +649,7 @@ private fun TopAppBarLayout(
                     .layoutId("largeTitle")
                     .padding(top = 56.dp)
                     .padding(horizontal = horizontalPadding)
-                    .alpha(largeTitleAlpha)
+                    .alpha(largeTitleAlpha),
             ) {
                 Text(
                     modifier = Modifier.offset { IntOffset(0, heightOffset) },
@@ -671,12 +670,14 @@ private fun TopAppBarLayout(
                     Modifier
                         .windowInsetsPadding(displayCutoutInsets.only(WindowInsetsSides.Horizontal))
                         .windowInsetsPadding(navigationBarsInsets.only(WindowInsetsSides.Horizontal))
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
             .clipToBounds()
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
-            }
+            },
     ) { measurables, constraints ->
         val navigationIconPlaceable =
             measurables
@@ -702,14 +703,14 @@ private fun TopAppBarLayout(
                     constraints.copy(
                         minWidth = 0,
                         minHeight = 0,
-                        maxHeight = Constraints.Infinity
-                    )
+                        maxHeight = Constraints.Infinity,
+                    ),
                 )
 
         val collapsedHeight = 56.dp.roundToPx()
         val expandedHeight = maxOf(
             collapsedHeight,
-            largeTitlePlaceable.height
+            largeTitlePlaceable.height,
         )
 
         val layoutHeight = lerp(
@@ -718,7 +719,9 @@ private fun TopAppBarLayout(
             fraction = if (expandedHeightPx > 0f) {
                 val offset = scrolledOffset.offset()
                 if (offset.isNaN()) 1f else (1f - (abs(offset) / expandedHeightPx).coerceIn(0f, 1f))
-            } else 1f
+            } else {
+                1f
+            },
         ).toFloat().roundToInt()
 
         layout(constraints.maxWidth, layoutHeight) {
@@ -727,7 +730,7 @@ private fun TopAppBarLayout(
             // Navigation icon
             navigationIconPlaceable.placeRelative(
                 x = 0,
-                y = verticalCenter - navigationIconPlaceable.height / 2
+                y = verticalCenter - navigationIconPlaceable.height / 2,
             )
 
             // Title
@@ -739,24 +742,23 @@ private fun TopAppBarLayout(
             }
             titlePlaceable.placeRelative(
                 x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2
+                y = verticalCenter - titlePlaceable.height / 2,
             )
 
             // Action icons
             actionIconsPlaceable.placeRelative(
                 x = constraints.maxWidth - actionIconsPlaceable.width,
-                y = verticalCenter - actionIconsPlaceable.height / 2
+                y = verticalCenter - actionIconsPlaceable.height / 2,
             )
 
             // Large title
             largeTitlePlaceable.placeRelative(
                 x = 0,
-                y = 0
+                y = 0,
             )
         }
     }
 }
-
 
 /**
  * The base [Layout] for [SmallTopAppBar]. This function lays out a top app bar navigation icon
@@ -772,12 +774,12 @@ private fun TopAppBarLayout(
  */
 @Composable
 private fun SmallTopAppBarLayout(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     title: String,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     horizontalPadding: Dp,
-    defaultWindowInsetsPadding: Boolean
+    defaultWindowInsetsPadding: Boolean,
 ) {
     val titleModifier = remember(horizontalPadding) {
         Modifier
@@ -799,7 +801,9 @@ private fun SmallTopAppBarLayout(
                     Modifier
                         .windowInsetsPadding(displayCutoutInsets.only(WindowInsetsSides.Horizontal))
                         .windowInsetsPadding(navigationBarsInsets.only(WindowInsetsSides.Horizontal))
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
     }
 
@@ -807,7 +811,7 @@ private fun SmallTopAppBarLayout(
         {
             Box(
                 Modifier
-                    .layoutId("navigationIcon")
+                    .layoutId("navigationIcon"),
             ) {
                 navigationIcon()
             }
@@ -818,12 +822,12 @@ private fun SmallTopAppBarLayout(
                     fontSize = MiuixTheme.textStyles.title3.fontSize,
                     fontWeight = FontWeight.Medium,
                     overflow = TextOverflow.Ellipsis,
-                    softWrap = false
+                    softWrap = false,
                 )
             }
             Box(
                 Modifier
-                    .layoutId("actionIcons")
+                    .layoutId("actionIcons"),
             ) {
                 actions()
             }
@@ -833,7 +837,7 @@ private fun SmallTopAppBarLayout(
             .heightIn(max = 56.dp)
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
-            }
+            },
     ) { measurables, constraints ->
         val navigationIconPlaceable =
             measurables
@@ -865,7 +869,7 @@ private fun SmallTopAppBarLayout(
             // Navigation icon
             navigationIconPlaceable.placeRelative(
                 x = 0,
-                y = verticalCenter - navigationIconPlaceable.height / 2
+                y = verticalCenter - navigationIconPlaceable.height / 2,
             )
 
             // Title
@@ -877,13 +881,13 @@ private fun SmallTopAppBarLayout(
             }
             titlePlaceable.placeRelative(
                 x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2
+                y = verticalCenter - titlePlaceable.height / 2,
             )
 
             // Action icons
             actionIconsPlaceable.placeRelative(
                 x = constraints.maxWidth - actionIconsPlaceable.width,
-                y = verticalCenter - actionIconsPlaceable.height / 2
+                y = verticalCenter - actionIconsPlaceable.height / 2,
             )
         }
     }

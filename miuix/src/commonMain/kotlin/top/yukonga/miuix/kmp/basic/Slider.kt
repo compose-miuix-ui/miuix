@@ -93,7 +93,7 @@ fun Slider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
-    magnetThreshold: Float = 0.02f
+    magnetThreshold: Float = 0.02f,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
@@ -137,7 +137,7 @@ fun Slider(
                 steps = steps,
                 stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
-                magnetThreshold = magnetThreshold
+                magnetThreshold = magnetThreshold,
             )
         }
     }
@@ -154,7 +154,7 @@ fun Slider(
                             steps,
                             magnetThreshold,
                             keyPoints,
-                            hapticEffect
+                            hapticEffect,
                         ) {
                             detectHorizontalDragGestures(
                                 onDragStart = { offset ->
@@ -181,23 +181,25 @@ fun Slider(
                                         hapticEffect,
                                         hapticFeedback,
                                         allKeyPointFractions,
-                                        hasCustomKeyPoints = keyPoints != null
+                                        hasCustomKeyPoints = keyPoints != null,
                                     )
                                 },
                                 onDragEnd = {
                                     isDragging = false
                                     onValueChangeFinishedState?.invoke()
-                                }
+                                },
                             )
                         }
                         .indication(interactionSource, LocalIndication.current)
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
                     valueRange.start..valueRange.endInclusive,
-                    if (steps > 0) steps else 0
+                    if (steps > 0) steps else 0,
                 )
                 setProgress { target ->
                     val clamped = target.coerceIn(valueRange.start, valueRange.endInclusive)
@@ -205,7 +207,7 @@ fun Slider(
                     true
                 }
             },
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart,
     ) {
         SliderTrack(
             modifier = Modifier.fillMaxWidth().height(height),
@@ -264,7 +266,7 @@ fun VerticalSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
-    magnetThreshold: Float = 0.02f
+    magnetThreshold: Float = 0.02f,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
@@ -308,7 +310,7 @@ fun VerticalSlider(
                 steps = steps,
                 stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
-                magnetThreshold = magnetThreshold
+                magnetThreshold = magnetThreshold,
             )
         }
     }
@@ -324,7 +326,7 @@ fun VerticalSlider(
                         steps,
                         magnetThreshold,
                         keyPoints,
-                        hapticEffect
+                        hapticEffect,
                     ) {
                         detectVerticalDragGestures(
                             onDragStart = { offset ->
@@ -349,22 +351,24 @@ fun VerticalSlider(
                                     hapticEffect,
                                     hapticFeedback,
                                     allKeyPointFractions,
-                                    hasCustomKeyPoints = keyPoints != null
+                                    hasCustomKeyPoints = keyPoints != null,
                                 )
                             },
                             onDragEnd = {
                                 isDragging = false
                                 onValueChangeFinishedState?.invoke()
-                            }
+                            },
                         )
                     }.indication(interactionSource, LocalIndication.current)
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
                     valueRange.start..valueRange.endInclusive,
-                    if (steps > 0) steps else 0
+                    if (steps > 0) steps else 0,
                 )
                 setProgress { target ->
                     val clamped = target.coerceIn(valueRange.start, valueRange.endInclusive)
@@ -372,7 +376,7 @@ fun VerticalSlider(
                     true
                 }
             },
-        contentAlignment = Alignment.BottomCenter
+        contentAlignment = Alignment.BottomCenter,
     ) {
         SliderTrack(
             modifier = Modifier.width(width).fillMaxHeight(),
@@ -431,7 +435,7 @@ fun RangeSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
-    magnetThreshold: Float = 0.02f
+    magnetThreshold: Float = 0.02f,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
@@ -490,7 +494,7 @@ fun RangeSlider(
                 steps = steps,
                 stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
-                magnetThreshold = magnetThreshold
+                magnetThreshold = magnetThreshold,
             )
         }
     }
@@ -506,7 +510,7 @@ fun RangeSlider(
                             steps,
                             magnetThreshold,
                             keyPoints,
-                            hapticEffect
+                            hapticEffect,
                         ) {
                             detectHorizontalDragGestures(
                                 onDragStart = { offset ->
@@ -590,7 +594,7 @@ fun RangeSlider(
                                                 hapticEffect,
                                                 hapticFeedback,
                                                 allKeyPointFractions,
-                                                hasCustomKeyPoints = keyPoints != null
+                                                hasCustomKeyPoints = keyPoints != null,
                                             )
                                         } else {
                                             startDragOffset = tentativeStartOffset
@@ -602,10 +606,9 @@ fun RangeSlider(
                                                 hapticEffect,
                                                 hapticFeedback,
                                                 allKeyPointFractions,
-                                                hasCustomKeyPoints = keyPoints != null
+                                                hasCustomKeyPoints = keyPoints != null,
                                             )
                                         }
-
                                     } else if (isDraggingEnd) {
                                         lastDraggedIsStart = false
                                         val tentativeEndOffset = endDragOffset + dragAmount
@@ -629,7 +632,7 @@ fun RangeSlider(
                                                 hapticEffect,
                                                 hapticFeedback,
                                                 allKeyPointFractions,
-                                                hasCustomKeyPoints = keyPoints != null
+                                                hasCustomKeyPoints = keyPoints != null,
                                             )
                                         } else {
                                             endDragOffset = tentativeEndOffset
@@ -641,7 +644,7 @@ fun RangeSlider(
                                                 hapticEffect,
                                                 hapticFeedback,
                                                 allKeyPointFractions,
-                                                hasCustomKeyPoints = keyPoints != null
+                                                hasCustomKeyPoints = keyPoints != null,
                                             )
                                         }
                                     }
@@ -650,16 +653,18 @@ fun RangeSlider(
                                     isDraggingStart = false
                                     isDraggingEnd = false
                                     onValueChangeFinishedState?.invoke()
-                                }
+                                },
                             )
                         }
                         .indication(interactionSource, LocalIndication.current)
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
             .semantics {
-                stateDescription = "${coercedStart}-${coercedEnd}"
+                stateDescription = "$coercedStart-$coercedEnd"
             },
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart,
     ) {
         RangeSliderTrack(
             modifier = Modifier.fillMaxWidth().height(height),
@@ -686,7 +691,7 @@ fun RangeSlider(
  */
 @Composable
 private fun SliderTrack(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
@@ -705,7 +710,7 @@ private fun SliderTrack(
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
         animationSpec = tween(150),
-        label = "SliderTrackAlpha"
+        label = "SliderTrackAlpha",
     )
 
     Canvas(
@@ -715,7 +720,7 @@ private fun SliderTrack(
             .drawBehind {
                 val overlay = Color.Black.copy(alpha = backgroundAlpha)
                 drawRect(overlay)
-            }
+            },
     ) {
         val barHeight = size.height
         val barWidth = size.width
@@ -732,7 +737,7 @@ private fun SliderTrack(
                 start = Offset(barWidth / 2f, barHeight),
                 end = Offset(barWidth / 2f, centerY),
                 strokeWidth = barWidth,
-                cap = StrokeCap.Round
+                cap = StrokeCap.Round,
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -752,7 +757,7 @@ private fun SliderTrack(
             drawCircle(
                 color = thumbColor,
                 radius = thumbRadius * 0.72f * thumbScale,
-                center = Offset(barWidth / 2f, centerY)
+                center = Offset(barWidth / 2f, centerY),
             )
         } else {
             val thumbRadius = barHeight / 2f
@@ -765,7 +770,7 @@ private fun SliderTrack(
                 start = Offset(0f, barHeight / 2f),
                 end = Offset(centerX, barHeight / 2f),
                 strokeWidth = barHeight,
-                cap = StrokeCap.Round
+                cap = StrokeCap.Round,
             )
 
             if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -796,7 +801,7 @@ private fun SliderTrack(
  */
 @Composable
 private fun RangeSliderTrack(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
@@ -815,7 +820,7 @@ private fun RangeSliderTrack(
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
         animationSpec = tween(150),
-        label = "RangeSliderTrackAlpha"
+        label = "RangeSliderTrackAlpha",
     )
 
     Canvas(
@@ -825,7 +830,7 @@ private fun RangeSliderTrack(
             .drawBehind {
                 val overlay = Color.Black.copy(alpha = backgroundAlpha)
                 drawRect(overlay)
-            }
+            },
     ) {
         val barHeight = size.height
         val barWidth = size.width
@@ -843,7 +848,7 @@ private fun RangeSliderTrack(
             start = Offset(startX, centerY),
             end = Offset(endX, centerY),
             strokeWidth = barHeight,
-            cap = StrokeCap.Round
+            cap = StrokeCap.Round,
         )
 
         if (showKeyPoints && stepFractions.isNotEmpty()) {
@@ -863,12 +868,12 @@ private fun RangeSliderTrack(
         drawCircle(
             color = thumbColor,
             radius = thumbRadius * 0.72f * startThumbScale,
-            center = Offset(startX, centerY)
+            center = Offset(startX, centerY),
         )
         drawCircle(
             color = thumbColor,
             radius = thumbRadius * 0.72f * endThumbScale,
-            center = Offset(endX, centerY)
+            center = Offset(endX, centerY),
         )
     }
 }
@@ -893,7 +898,7 @@ internal class SliderHapticState {
         hapticEffect: SliderDefaults.SliderHapticEffect,
         hapticFeedback: HapticFeedback,
         keyPointFractions: FloatArray = floatArrayOf(),
-        hasCustomKeyPoints: Boolean = false
+        hasCustomKeyPoints: Boolean = false,
     ) {
         if (hapticEffect == SliderDefaults.SliderHapticEffect.None) return
 
@@ -907,7 +912,7 @@ internal class SliderHapticState {
     private fun handleEdgeHaptic(
         currentValue: Float,
         valueRange: ClosedFloatingPointRange<Float>,
-        hapticFeedback: HapticFeedback
+        hapticFeedback: HapticFeedback,
     ) {
         val isAtEdge = currentValue == valueRange.start || currentValue == valueRange.endInclusive
         if (isAtEdge && !edgeFeedbackTriggered) {
@@ -923,7 +928,7 @@ internal class SliderHapticState {
         valueRange: ClosedFloatingPointRange<Float>,
         hapticFeedback: HapticFeedback,
         keyPointFractions: FloatArray,
-        hasCustomKeyPoints: Boolean
+        hasCustomKeyPoints: Boolean,
     ) {
         val isNotAtEdge = currentValue != valueRange.start && currentValue != valueRange.endInclusive
 
@@ -940,24 +945,24 @@ internal class SliderHapticState {
         valueRange: ClosedFloatingPointRange<Float>,
         hapticFeedback: HapticFeedback,
         keyPointFractions: FloatArray,
-        isNotAtEdge: Boolean
+        isNotAtEdge: Boolean,
     ) {
         val fraction = (currentValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val threshold = 0.005f
 
-    var nearestDist = Float.MAX_VALUE
-    for (i in keyPointFractions.indices) {
-        val dist = abs(keyPointFractions[i] - fraction)
-        if (dist < nearestDist) nearestDist = dist
-    }
-    val currentlyAtKeyPoint = nearestDist < threshold
+        var nearestDist = Float.MAX_VALUE
+        for (i in keyPointFractions.indices) {
+            val dist = abs(keyPointFractions[i] - fraction)
+            if (dist < nearestDist) nearestDist = dist
+        }
+        val currentlyAtKeyPoint = nearestDist < threshold
 
-    if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-    }
+        if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
 
-    isAtKeyPoint = currentlyAtKeyPoint
-}
+        isAtKeyPoint = currentlyAtKeyPoint
+    }
 }
 
 /**
@@ -997,7 +1002,7 @@ internal class RangeSliderHapticState {
         hapticEffect: SliderDefaults.SliderHapticEffect,
         hapticFeedback: HapticFeedback,
         keyPointFractions: FloatArray = floatArrayOf(),
-        hasCustomKeyPoints: Boolean = false
+        hasCustomKeyPoints: Boolean = false,
     ) {
         handleHapticFeedbackInternal(
             currentValue = currentValue,
@@ -1012,7 +1017,7 @@ internal class RangeSliderHapticState {
             hasCustomKeyPoints = hasCustomKeyPoints,
             onEdgeFeedbackUpdate = { startEdgeFeedbackTriggered = it },
             onLastStepUpdate = { startLastStep = it },
-            onKeyPointUpdate = { startIsAtKeyPoint = it }
+            onKeyPointUpdate = { startIsAtKeyPoint = it },
         )
     }
 
@@ -1022,7 +1027,7 @@ internal class RangeSliderHapticState {
         hapticEffect: SliderDefaults.SliderHapticEffect,
         hapticFeedback: HapticFeedback,
         keyPointFractions: FloatArray = floatArrayOf(),
-        hasCustomKeyPoints: Boolean = false
+        hasCustomKeyPoints: Boolean = false,
     ) {
         handleHapticFeedbackInternal(
             currentValue = currentValue,
@@ -1037,7 +1042,7 @@ internal class RangeSliderHapticState {
             hasCustomKeyPoints = hasCustomKeyPoints,
             onEdgeFeedbackUpdate = { endEdgeFeedbackTriggered = it },
             onLastStepUpdate = { endLastStep = it },
-            onKeyPointUpdate = { endIsAtKeyPoint = it }
+            onKeyPointUpdate = { endIsAtKeyPoint = it },
         )
     }
 
@@ -1054,7 +1059,7 @@ internal class RangeSliderHapticState {
         hasCustomKeyPoints: Boolean,
         onEdgeFeedbackUpdate: (Boolean) -> Unit,
         onLastStepUpdate: (Float) -> Unit,
-        onKeyPointUpdate: (Boolean) -> Unit
+        onKeyPointUpdate: (Boolean) -> Unit,
     ) {
         if (hapticEffect == SliderDefaults.SliderHapticEffect.None) return
 
@@ -1095,16 +1100,13 @@ internal class RangeSliderHapticState {
     }
 }
 
-private fun stepsToTickFractions(steps: Int): FloatArray {
-    return if (steps == 0) floatArrayOf() else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
-}
-
+private fun stepsToTickFractions(steps: Int): FloatArray = if (steps == 0) floatArrayOf() else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
 
 private fun snapValueToTick(
     current: Float,
     tickFractions: FloatArray,
     minPx: Float,
-    maxPx: Float
+    maxPx: Float,
 ): Float {
     if (tickFractions.isEmpty()) return current
     var bestFraction = tickFractions[0]
@@ -1127,12 +1129,13 @@ private fun resolveValueFromFraction(
     steps: Int,
     stepFractions: FloatArray,
     allKeyPointFractions: FloatArray,
-    magnetThreshold: Float
+    magnetThreshold: Float,
 ): Float {
     val f = fraction.coerceIn(0f, 1f)
     val base = lerp(valueRange.start, valueRange.endInclusive, f)
     return when {
         steps > 0 -> snapValueToTick(base, stepFractions, valueRange.start, valueRange.endInclusive)
+
         allKeyPointFractions.isNotEmpty() -> {
             var closest = allKeyPointFractions[0]
             var bestDist = abs(closest - f)
@@ -1146,7 +1149,9 @@ private fun resolveValueFromFraction(
             }
             if (bestDist < magnetThreshold) {
                 lerp(valueRange.start, valueRange.endInclusive, closest)
-            } else base
+            } else {
+                base
+            }
         }
 
         else -> base
@@ -1170,13 +1175,11 @@ private fun verticalVisualFraction(offsetY: Float, sizeHeight: Int, sizeWidth: I
  */
 private fun pointsToFractions(
     points: List<Float>,
-    valueRange: ClosedFloatingPointRange<Float>
-): FloatArray {
-    return points.map { point ->
-        ((point - valueRange.start) / (valueRange.endInclusive - valueRange.start))
-            .coerceIn(0f, 1f)
-    }.toFloatArray()
-}
+    valueRange: ClosedFloatingPointRange<Float>,
+): FloatArray = points.map { point ->
+    ((point - valueRange.start) / (valueRange.endInclusive - valueRange.start))
+        .coerceIn(0f, 1f)
+}.toFloatArray()
 
 /**
  * Computes key point fractions for slider display.
@@ -1186,13 +1189,11 @@ private fun computeKeyPointFractions(
     keyPoints: List<Float>?,
     stepFractions: FloatArray,
     valueRange: ClosedFloatingPointRange<Float>,
-    showKeyPoints: Boolean
-): FloatArray {
-    return when {
-        keyPoints != null -> pointsToFractions(keyPoints, valueRange)
-        showKeyPoints -> stepFractions
-        else -> floatArrayOf()
-    }
+    showKeyPoints: Boolean,
+): FloatArray = when {
+    keyPoints != null -> pointsToFractions(keyPoints, valueRange)
+    showKeyPoints -> stepFractions
+    else -> floatArrayOf()
 }
 
 /**
@@ -1202,13 +1203,11 @@ private fun computeKeyPointFractions(
 private fun computeAllKeyPointFractions(
     keyPoints: List<Float>?,
     stepFractions: FloatArray,
-    valueRange: ClosedFloatingPointRange<Float>
-): FloatArray {
-    return when {
-        keyPoints != null -> pointsToFractions(keyPoints, valueRange)
-        stepFractions.isNotEmpty() -> stepFractions
-        else -> floatArrayOf()
-    }
+    valueRange: ClosedFloatingPointRange<Float>,
+): FloatArray = when {
+    keyPoints != null -> pointsToFractions(keyPoints, valueRange)
+    stepFractions.isNotEmpty() -> stepFractions
+    else -> floatArrayOf()
 }
 
 object SliderDefaults {
@@ -1233,7 +1232,7 @@ object SliderDefaults {
         Edge,
 
         /** Haptic feedback at steps. */
-        Step
+        Step,
     }
 
     /**
@@ -1259,7 +1258,7 @@ object SliderDefaults {
         thumbColor = thumbColor,
         disabledThumbColor = disabledThumbColor,
         keyPointColor = keyPointColor,
-        keyPointForegroundColor = keyPointForegroundColor
+        keyPointForegroundColor = keyPointForegroundColor,
     )
 }
 
@@ -1272,19 +1271,16 @@ data class SliderColors(
     private val thumbColor: Color,
     private val disabledThumbColor: Color,
     private val keyPointColor: Color,
-    private val keyPointForegroundColor: Color
+    private val keyPointForegroundColor: Color,
 ) {
     @Stable
-    internal fun foregroundColor(enabled: Boolean): Color =
-        if (enabled) foregroundColor else disabledForegroundColor
+    internal fun foregroundColor(enabled: Boolean): Color = if (enabled) foregroundColor else disabledForegroundColor
 
     @Stable
-    internal fun backgroundColor(enabled: Boolean): Color =
-        if (enabled) backgroundColor else disabledBackgroundColor
+    internal fun backgroundColor(enabled: Boolean): Color = if (enabled) backgroundColor else disabledBackgroundColor
 
     @Stable
-    internal fun thumbColor(enabled: Boolean): Color =
-        if (enabled) thumbColor else disabledThumbColor
+    internal fun thumbColor(enabled: Boolean): Color = if (enabled) thumbColor else disabledThumbColor
 
     @Stable
     internal fun keyPointColor(): Color = keyPointColor

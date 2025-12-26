@@ -6,4 +6,3 @@ expect fun platformHideLoading()
 expect fun platformGetCssVar(name: String): Double
 
 expect fun platformIsTouchEnabled(): Boolean
-

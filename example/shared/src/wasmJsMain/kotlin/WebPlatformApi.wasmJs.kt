@@ -8,7 +8,7 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('composeApp').style.display = 'block';
         }
-    """
+    """,
 )
 private external fun hideLoading()
 
@@ -27,7 +27,7 @@ private external fun hideLoading()
             const parsed = parseFloat(trimmed);
             return Number.isNaN(parsed) ? 0.0 : parsed;
         }
-    """
+    """,
 )
 private external fun getCssVar(name: String): Double
 
@@ -45,18 +45,12 @@ private external fun getCssVar(name: String): Double
             const points = (nav.maxTouchPoints || 0) + (nav.msMaxTouchPoints || 0);
             return points > 0;
         }
-    """
+    """,
 )
 private external fun isTouchEnabled(): Boolean
 
-actual fun platformHideLoading() {
-    return hideLoading()
-}
+actual fun platformHideLoading() = hideLoading()
 
-actual fun platformGetCssVar(name: String): Double {
-    return getCssVar(name)
-}
+actual fun platformGetCssVar(name: String): Double = getCssVar(name)
 
-actual fun platformIsTouchEnabled(): Boolean {
-    return isTouchEnabled()
-}
+actual fun platformIsTouchEnabled(): Boolean = isTouchEnabled()

@@ -66,7 +66,7 @@ private class SpringOperator(dampingRatio: Float, naturalPeriod: Float) {
         currentVelocity: Double,
         deltaTime: Float,
         currentPosition: Double,
-        targetPosition: Double
+        targetPosition: Double,
     ): Double {
         val velocityDecayFactor = 1.0 - dampingCoefficient * deltaTime
         val velocityIncreaseFromSpring = stiffnessOverMass * (targetPosition - currentPosition) * deltaTime
@@ -105,7 +105,7 @@ internal class SpringEngine {
                 SpringMath.SLOWER_SPRING_PERIOD_FOR_HIGH_VELOCITY
             } else {
                 SpringMath.STANDARD_SPRING_PERIOD
-            }
+            },
         )
     }
 

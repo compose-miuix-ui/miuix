@@ -29,7 +29,7 @@ fun SuperDialogDemo() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(
                 Modifier
@@ -37,24 +37,24 @@ fun SuperDialogDemo() {
                     .widthIn(max = 600.dp)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 val showDialog = remember { mutableStateOf(false) }
                 Card {
                     TextButton(
                         text = "Show a SuperDialog",
-                        onClick = { showDialog.value = true }
+                        onClick = { showDialog.value = true },
                     )
                     SuperDialog(
                         title = "SuperDialog Title",
                         summary = "This is a basic dialog example that can contain various content.",
                         show = showDialog,
-                        onDismissRequest = { showDialog.value = false } // Close dialog
+                        onDismissRequest = { showDialog.value = false }, // Close dialog
                     ) {
                         TextButton(
                             text = "Confirm",
                             onClick = { showDialog.value = false }, // Close dialog
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }

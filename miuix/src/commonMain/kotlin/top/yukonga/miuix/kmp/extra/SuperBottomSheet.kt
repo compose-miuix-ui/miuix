@@ -111,7 +111,7 @@ fun SuperBottomSheet(
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = SuperBottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     if (!show.value) return
 
@@ -129,23 +129,19 @@ fun SuperBottomSheet(
     }
 
     @Composable
-    fun rememberDefaultSheetEnterTransition(): EnterTransition {
-        return remember {
-            slideInVertically(
-                initialOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(450, easing = DecelerateEasing(1.5f))
-            )
-        }
+    fun rememberDefaultSheetEnterTransition(): EnterTransition = remember {
+        slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(450, easing = DecelerateEasing(1.5f)),
+        )
     }
 
     @Composable
-    fun rememberDefaultSheetExitTransition(): ExitTransition {
-        return remember {
-            slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(450, easing = DecelerateEasing(0.8f))
-            )
-        }
+    fun rememberDefaultSheetExitTransition(): ExitTransition = remember {
+        slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(450, easing = DecelerateEasing(0.8f)),
+        )
     }
 
     DialogLayout(
@@ -155,7 +151,7 @@ fun SuperBottomSheet(
         enableWindowDim = enableWindowDim,
         enableAutoLargeScreen = false,
         dimAlpha = dimAlpha,
-        onDismissFinished = onDismissFinished
+        onDismissFinished = onDismissFinished,
     ) {
         SuperBottomSheetContent(
             modifier = modifier,
@@ -175,12 +171,12 @@ fun SuperBottomSheet(
             dimAlpha = dimAlpha,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
-            content = content
+            content = content,
         )
     }
 
     PredictiveBackHandler(
-        enabled = show.value
+        enabled = show.value,
     ) { progress ->
         try {
             progress.collect { event ->
@@ -230,7 +226,7 @@ fun SuperBottomSheet(
 
 @Composable
 internal fun SuperBottomSheetContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     title: String?,
     leftAction: @Composable (() -> Unit)? = null,
     rightAction: @Composable (() -> Unit)? = null,
@@ -247,7 +243,7 @@ internal fun SuperBottomSheetContent(
     dimAlpha: MutableFloatState,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val windowSize = getWindowSize()
@@ -266,7 +262,7 @@ internal fun SuperBottomSheetContent(
             detectTapGestures(
                 onTap = {
                     currentOnDismiss?.invoke()
-                }
+                },
             )
         }
         .fillMaxSize()
@@ -293,14 +289,14 @@ internal fun SuperBottomSheetContent(
             density = density,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = onDismissRequest,
-            content = content
+            content = content,
         )
     }
 }
 
 @Composable
 private fun SuperBottomSheetColumn(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     title: String?,
     leftAction: @Composable (() -> Unit?)?,
     rightAction: @Composable (() -> Unit?)?,
@@ -320,7 +316,7 @@ private fun SuperBottomSheetColumn(
     density: Density,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -334,7 +330,7 @@ private fun SuperBottomSheetColumn(
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+        contentAlignment = Alignment.BottomCenter,
     ) {
         // Background fill for the area revealed when dragging up (overscroll effect)
         if (overscrollOffsetPx > 0f) {
@@ -345,7 +341,7 @@ private fun SuperBottomSheetColumn(
                     .fillMaxWidth()
                     .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
                     .padding(horizontal = outsideMargin.width)
-                    .background(backgroundColor)
+                    .background(backgroundColor),
             )
         }
 
@@ -365,16 +361,17 @@ private fun SuperBottomSheetColumn(
                     translationY = dragOffsetY.value
                 }
                 .then(
-                    if (defaultWindowInsetsPadding)
+                    if (defaultWindowInsetsPadding) {
                         Modifier.imePadding()
-                    else
+                    } else {
                         Modifier
+                    },
                 )
                 .padding(horizontal = outsideMargin.width)
                 .clip(ContinuousRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
-                .padding(bottom = insideMargin.height)
+                .padding(bottom = insideMargin.height),
         ) {
             // Drag handle area
             DragHandleArea(
@@ -387,14 +384,14 @@ private fun SuperBottomSheetColumn(
                 density = density,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
-                onDismissRequest = onDismissRequest
+                onDismissRequest = onDismissRequest,
             )
 
             // Title and actions
             TitleAndActionsRow(
                 title = title,
                 leftAction = leftAction,
-                rightAction = rightAction
+                rightAction = rightAction,
             )
 
             // Content
@@ -414,7 +411,7 @@ private fun DragHandleArea(
     density: Density,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    onDismissRequest: (() -> Unit)?
+    onDismissRequest: (() -> Unit)?,
 ) {
     val dragStartOffset = remember { mutableFloatStateOf(0f) }
     val isPressing = remember { mutableFloatStateOf(0f) }
@@ -434,13 +431,13 @@ private fun DragHandleArea(
                         coroutineScope.launch {
                             pressScale.animateTo(
                                 targetValue = 1.15f,
-                                animationSpec = tween(durationMillis = 100)
+                                animationSpec = tween(durationMillis = 100),
                             )
                         }
                         coroutineScope.launch {
                             pressWidth.animateTo(
                                 targetValue = 55f,
-                                animationSpec = tween(durationMillis = 100)
+                                animationSpec = tween(durationMillis = 100),
                             )
                         }
 
@@ -451,17 +448,17 @@ private fun DragHandleArea(
                             coroutineScope.launch {
                                 pressScale.animateTo(
                                     targetValue = 1f,
-                                    animationSpec = tween(durationMillis = 150)
+                                    animationSpec = tween(durationMillis = 150),
                                 )
                             }
                             coroutineScope.launch {
                                 pressWidth.animateTo(
                                     targetValue = 45f,
-                                    animationSpec = tween(durationMillis = 150)
+                                    animationSpec = tween(durationMillis = 150),
                                 )
                             }
                         }
-                    }
+                    },
                 )
             }
             .pointerInput(allowDismiss) {
@@ -476,13 +473,13 @@ private fun DragHandleArea(
                             launch {
                                 pressScale.animateTo(
                                     targetValue = 1.15f,
-                                    animationSpec = tween(durationMillis = 100)
+                                    animationSpec = tween(durationMillis = 100),
                                 )
                             }
                             launch {
                                 pressWidth.animateTo(
                                     targetValue = 55f,
-                                    animationSpec = tween(durationMillis = 100)
+                                    animationSpec = tween(durationMillis = 100),
                                 )
                             }
                         }
@@ -494,13 +491,13 @@ private fun DragHandleArea(
                             launch {
                                 pressScale.animateTo(
                                     targetValue = 1f,
-                                    animationSpec = tween(durationMillis = 150)
+                                    animationSpec = tween(durationMillis = 150),
                                 )
                             }
                             launch {
                                 pressWidth.animateTo(
                                     targetValue = 45f,
-                                    animationSpec = tween(durationMillis = 150)
+                                    animationSpec = tween(durationMillis = 150),
                                 )
                             }
 
@@ -517,22 +514,24 @@ private fun DragHandleArea(
                                     val windowHeightPx = windowHeight.value * density.density
                                     dragOffsetY.animateTo(
                                         targetValue = windowHeightPx,
-                                        animationSpec = tween(durationMillis = 250)
+                                        animationSpec = tween(durationMillis = 250),
                                     )
                                 }
+
                                 // Has strong upward velocity -> continue to expand
                                 velocity > velocityThreshold -> {
                                     dragOffsetY.animateTo(
                                         targetValue = 0f,
-                                        animationSpec = tween(durationMillis = 250)
+                                        animationSpec = tween(durationMillis = 250),
                                     )
                                     dimAlpha.floatValue = 1f
                                 }
+
                                 // Not dragged far enough -> reset to original position
                                 else -> {
                                     dragOffsetY.animateTo(
                                         targetValue = 0f,
-                                        animationSpec = tween(durationMillis = 250)
+                                        animationSpec = tween(durationMillis = 250),
                                     )
                                     dimAlpha.floatValue = 1f
                                 }
@@ -570,10 +569,10 @@ private fun DragHandleArea(
                             1f
                         }
                         dimAlpha.floatValue = alpha
-                    }
+                    },
                 )
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         // Drag handle indicator
         val handleAlpha = lerp(0.2f, 0.35f, isPressing.floatValue)
@@ -586,7 +585,7 @@ private fun DragHandleArea(
                     scaleY = pressScale.value
                 }
                 .clip(ContinuousRoundedRectangle(2.dp))
-                .background(dragHandleColor.copy(alpha = handleAlpha))
+                .background(dragHandleColor.copy(alpha = handleAlpha)),
         )
     }
 }
@@ -595,12 +594,12 @@ private fun DragHandleArea(
 private fun TitleAndActionsRow(
     title: String?,
     leftAction: @Composable (() -> Unit?)?,
-    rightAction: @Composable (() -> Unit?)?
+    rightAction: @Composable (() -> Unit?)?,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 6.dp, bottom = 12.dp)
+            .padding(top = 6.dp, bottom = 12.dp),
     ) {
         // left action (e.g. close button)
         Box(modifier = Modifier.align(Alignment.CenterStart)) {
@@ -615,7 +614,7 @@ private fun TitleAndActionsRow(
                 fontSize = MiuixTheme.textStyles.title4.fontSize,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
-                color = MiuixTheme.colorScheme.onSurface
+                color = MiuixTheme.colorScheme.onSurface,
             )
         }
 

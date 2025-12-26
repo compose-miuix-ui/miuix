@@ -78,11 +78,11 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
     outsideRightAction: @Composable (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -91,21 +91,21 @@ fun SearchBar(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(vertical = insideMargin.height, horizontal = insideMargin.width)
+                    .padding(vertical = insideMargin.height, horizontal = insideMargin.width),
             ) {
                 inputField()
             }
             AnimatedVisibility(
                 visible = expanded,
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
-                exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it })
+                exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
             ) {
                 outsideRightAction?.invoke()
             }
         }
 
         AnimatedVisibility(
-            visible = expanded
+            visible = expanded,
         ) {
             content()
         }
@@ -163,7 +163,7 @@ fun InputField(
             modifier = Modifier.padding(start = 16.dp, end = 8.dp),
             imageVector = MiuixIcons.Basic.Search,
             tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
-            contentDescription = "Search"
+            contentDescription = "Search",
         )
     }
 
@@ -175,7 +175,7 @@ fun InputField(
         ) {
             Box(
                 modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.CenterStart,
             ) {
                 Icon(
                     modifier = Modifier
@@ -183,7 +183,7 @@ fun InputField(
                         .clickable { currentOnQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-                    contentDescription = "Search Cleanup"
+                    contentDescription = "Search Cleanup",
                 )
             }
         }
@@ -223,32 +223,32 @@ fun InputField(
                 modifier = Modifier
                     .background(
                         color = MiuixTheme.colorScheme.surfaceContainerHigh,
-                        shape = ContinuousCapsule
+                        shape = ContinuousCapsule,
                     ),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.CenterStart,
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     actualLeadingIcon()
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .heightIn(min = 45.dp),
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.CenterStart,
                     ) {
                         Text(
                             text = labelText,
                             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-                            color = MiuixTheme.colorScheme.onSurfaceContainerHigh
+                            color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
                         innerTextField()
                     }
                     actualTrailingIcon()
                 }
             }
-        }
+        },
     )
 
     LaunchedEffect(expanded) {

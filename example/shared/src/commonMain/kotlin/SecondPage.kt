@@ -62,17 +62,17 @@ fun SecondPage(
                     SmallTopAppBar(
                         title = "Dropdowns",
                         scrollBehavior = topAppBarScrollBehavior,
-                        defaultWindowInsetsPadding = false
+                        defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
                         title = "Dropdowns",
-                        scrollBehavior = topAppBarScrollBehavior
+                        scrollBehavior = topAppBarScrollBehavior,
                     )
                 }
             }
         },
-        popupHost = {}
+        popupHost = {},
     ) { innerPadding ->
         PullToRefresh(
             isRefreshing = isRefreshing,
@@ -83,26 +83,30 @@ fun SecondPage(
                 top = innerPadding.calculateTopPadding() + 12.dp,
                 bottom = if (isWideScreen) {
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                } else 0.dp
-            )
+                } else {
+                    0.dp
+                },
+            ),
         ) {
             LazyColumn(
                 modifier = Modifier
                     .then(
-                        if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                        if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
                     )
                     .overScrollVertical(
-                        isEnabled = { enableOverScroll }
+                        isEnabled = { enableOverScroll },
                     )
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding() + 12.dp,
                     bottom = if (isWideScreen) {
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                                padding.calculateBottomPadding() + 12.dp
-                    } else padding.calculateBottomPadding() + 12.dp
+                            padding.calculateBottomPadding() + 12.dp
+                    } else {
+                        padding.calculateBottomPadding() + 12.dp
+                    },
                 ),
-                overscrollEffect = null
+                overscrollEffect = null,
             ) {
                 item {
                     Card(

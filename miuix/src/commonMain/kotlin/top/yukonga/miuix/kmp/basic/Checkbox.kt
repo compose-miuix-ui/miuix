@@ -65,14 +65,14 @@ fun Checkbox(
 
     val backgroundColor by transition.animateColor(
         transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
-        label = "BackgroundColor"
+        label = "BackgroundColor",
     ) {
         if (it) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled)
     }
 
     val foregroundColor by transition.animateColor(
         transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
-        label = "ForegroundColor"
+        label = "ForegroundColor",
     ) {
         if (it) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled)
     }
@@ -85,7 +85,7 @@ fun Checkbox(
                 tween(durationMillis = 150, easing = FastOutSlowInEasing)
             }
         },
-        label = "CheckAlpha"
+        label = "CheckAlpha",
     ) { if (it) 1f else 0f }
 
     val checkStartTrim by transition.animateFloat(
@@ -99,7 +99,7 @@ fun Checkbox(
                 }
             }
         },
-        label = "CheckStartTrim"
+        label = "CheckStartTrim",
     ) { if (it) 0.186f else 0.1f }
 
     val checkEndTrim by transition.animateFloat(
@@ -117,7 +117,7 @@ fun Checkbox(
                 }
             }
         },
-        label = "CheckEndTrim"
+        label = "CheckEndTrim",
     ) { if (it) 0.803f else 0.1f }
 
     val checkPath = remember { Path() }
@@ -128,13 +128,13 @@ fun Checkbox(
             onValueChange = {
                 currentOnCheckedChange!!(it)
                 hapticFeedback.performHapticFeedback(
-                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
                 )
             },
             enabled = enabled,
             role = Role.Checkbox,
             indication = null,
-            interactionSource = null
+            interactionSource = null,
         )
     } else {
         modifier
@@ -148,10 +148,10 @@ fun Checkbox(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = SinkFeedback(
                     sinkAmount = 0.85f,
-                    animationSpec = spring(0.99f, 986.96f)
+                    animationSpec = spring(0.99f, 986.96f),
                 ),
                 enabled = enabled,
-                delay = null
+                delay = null,
             )
             .clip(ContinuousCapsule)
             .drawWithCache {
@@ -164,23 +164,27 @@ fun Checkbox(
 
                 val leftPoint = Offset(
                     centerX + ((5f - viewportCenterX) / viewportSize * size.width),
-                    centerY + ((9.4f - viewportCenterY) / viewportSize * size.height)
+                    centerY + ((9.4f - viewportCenterY) / viewportSize * size.height),
                 )
                 val middlePoint = Offset(
                     centerX + ((10.3f - viewportCenterX) / viewportSize * size.width),
-                    centerY + ((14.9f - viewportCenterY) / viewportSize * size.height)
+                    centerY + ((14.9f - viewportCenterY) / viewportSize * size.height),
                 )
                 val rightPoint = Offset(
                     centerX + ((17.9f - viewportCenterX) / viewportSize * size.width),
-                    centerY + ((5.1f - viewportCenterY) / viewportSize * size.height)
+                    centerY + ((5.1f - viewportCenterY) / viewportSize * size.height),
                 )
 
                 val firstSegmentLength = (middlePoint - leftPoint).getDistance()
                 val secondSegmentLength = (rightPoint - middlePoint).getDistance()
 
                 val cache = CheckmarkCache(
-                    leftPoint, middlePoint, rightPoint,
-                    firstSegmentLength, secondSegmentLength, strokeWidth
+                    leftPoint,
+                    middlePoint,
+                    rightPoint,
+                    firstSegmentLength,
+                    secondSegmentLength,
+                    strokeWidth,
                 )
 
                 onDrawBehind {
@@ -191,11 +195,11 @@ fun Checkbox(
                         trimStart = checkStartTrim,
                         trimEnd = checkEndTrim,
                         path = checkPath,
-                        cache = cache
+                        cache = cache,
                     )
                 }
             }
-            .then(finalModifier)
+            .then(finalModifier),
     ) {}
 }
 
@@ -205,7 +209,7 @@ private data class CheckmarkCache(
     val rightPoint: Offset,
     val firstSegmentLength: Float,
     val secondSegmentLength: Float,
-    val strokeWidth: Float
+    val strokeWidth: Float,
 )
 
 private fun DrawScope.drawTrimmedCheckmark(
@@ -214,7 +218,7 @@ private fun DrawScope.drawTrimmedCheckmark(
     trimStart: Float,
     trimEnd: Float,
     path: Path,
-    cache: CheckmarkCache
+    cache: CheckmarkCache,
 ) {
     path.rewind()
 
@@ -263,7 +267,7 @@ private fun DrawScope.drawTrimmedCheckmark(
             cap = StrokeCap.Round,
             join = StrokeJoin.Round,
             miter = 10.0f,
-        )
+        ),
     )
 }
 
@@ -277,7 +281,7 @@ object CheckboxDefaults {
         checkedBackgroundColor: Color = MiuixTheme.colorScheme.primary,
         uncheckedBackgroundColor: Color = MiuixTheme.colorScheme.secondary,
         disabledCheckedBackgroundColor: Color = MiuixTheme.colorScheme.disabledPrimary,
-        disabledUncheckedBackgroundColor: Color = MiuixTheme.colorScheme.disabledSecondary
+        disabledUncheckedBackgroundColor: Color = MiuixTheme.colorScheme.disabledSecondary,
     ): CheckboxColors = CheckboxColors(
         checkedForegroundColor = checkedForegroundColor,
         uncheckedForegroundColor = uncheckedForegroundColor,
@@ -286,7 +290,7 @@ object CheckboxDefaults {
         checkedBackgroundColor = checkedBackgroundColor,
         uncheckedBackgroundColor = uncheckedBackgroundColor,
         disabledCheckedBackgroundColor = disabledCheckedBackgroundColor,
-        disabledUncheckedBackgroundColor = disabledUncheckedBackgroundColor
+        disabledUncheckedBackgroundColor = disabledUncheckedBackgroundColor,
     )
 }
 
@@ -299,21 +303,17 @@ data class CheckboxColors(
     private val checkedBackgroundColor: Color,
     private val uncheckedBackgroundColor: Color,
     private val disabledCheckedBackgroundColor: Color,
-    private val disabledUncheckedBackgroundColor: Color
+    private val disabledUncheckedBackgroundColor: Color,
 ) {
     @Stable
-    internal fun checkedForegroundColor(enabled: Boolean): Color =
-        if (enabled) checkedForegroundColor else disabledCheckedForegroundColor
+    internal fun checkedForegroundColor(enabled: Boolean): Color = if (enabled) checkedForegroundColor else disabledCheckedForegroundColor
 
     @Stable
-    internal fun uncheckedForegroundColor(enabled: Boolean): Color =
-        if (enabled) uncheckedForegroundColor else disabledUncheckedForegroundColor
+    internal fun uncheckedForegroundColor(enabled: Boolean): Color = if (enabled) uncheckedForegroundColor else disabledUncheckedForegroundColor
 
     @Stable
-    internal fun checkedBackgroundColor(enabled: Boolean): Color =
-        if (enabled) checkedBackgroundColor else disabledCheckedBackgroundColor
+    internal fun checkedBackgroundColor(enabled: Boolean): Color = if (enabled) checkedBackgroundColor else disabledCheckedBackgroundColor
 
     @Stable
-    internal fun uncheckedBackgroundColor(enabled: Boolean): Color =
-        if (enabled) uncheckedBackgroundColor else disabledUncheckedBackgroundColor
+    internal fun uncheckedBackgroundColor(enabled: Boolean): Color = if (enabled) uncheckedBackgroundColor else disabledUncheckedBackgroundColor
 }

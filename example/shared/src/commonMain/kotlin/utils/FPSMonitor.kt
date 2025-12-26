@@ -40,7 +40,7 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
         text = "FPS: $fps",
-        color = color
+        color = color,
     )
 
     LaunchedEffect(Unit) {

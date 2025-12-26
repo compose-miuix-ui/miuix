@@ -34,8 +34,8 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.All
+import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -100,7 +100,7 @@ fun MainPage(
             superRightCheckboxState,
             superSwitch,
             superSwitchState,
-            superSwitchAnimState
+            superSwitchAnimState,
         )
     }
 
@@ -113,36 +113,38 @@ fun MainPage(
                     SmallTopAppBar(
                         title = "HomePage",
                         scrollBehavior = topAppBarScrollBehavior,
-                        defaultWindowInsetsPadding = false
+                        defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
                         title = "HomePage",
-                        scrollBehavior = topAppBarScrollBehavior
+                        scrollBehavior = topAppBarScrollBehavior,
                     )
                 }
             }
         },
-        popupHost = {}
+        popupHost = {},
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .then(
-                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
                 )
                 .overScrollVertical(
-                    isEnabled = { enableOverScroll }
+                    isEnabled = { enableOverScroll },
                 )
                 .then(
-                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
                 )
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 bottom = if (isWideScreen) {
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            padding.calculateBottomPadding() + 12.dp
-                } else padding.calculateBottomPadding() + 12.dp
+                        padding.calculateBottomPadding() + 12.dp
+                } else {
+                    padding.calculateBottomPadding() + 12.dp
+                },
             ),
             overscrollEffect = null,
         ) {
@@ -157,7 +159,7 @@ fun MainPage(
                             onSearch = { expanded = false },
                             expanded = expanded,
                             onExpandedChange = { expanded = it },
-                            label = "Search"
+                            label = "Search",
                         )
                     },
                     outsideRightAction = {
@@ -166,18 +168,18 @@ fun MainPage(
                                 .padding(end = 12.dp)
                                 .clickable(
                                     interactionSource = null,
-                                    indication = null
+                                    indication = null,
                                 ) {
                                     expanded = false
                                     searchValue = ""
                                 },
                             text = "Cancel",
                             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-                            color = MiuixTheme.colorScheme.primary
+                            color = MiuixTheme.colorScheme.primary,
                         )
                     },
                     expanded = expanded,
-                    onExpandedChange = { expanded = it }
+                    onExpandedChange = { expanded = it },
                 ) {
                     Column {
                         repeat(4) { idx ->
@@ -187,7 +189,7 @@ fun MainPage(
                                 onClick = {
                                     searchValue = resultText
                                     expanded = false
-                                }
+                                },
                             )
                         }
                     }

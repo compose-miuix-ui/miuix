@@ -21,10 +21,9 @@ class AccelerateEasing(
 ) : Easing {
     private val doubleFactor: Float = 2 * factor
 
-    override fun transform(fraction: Float): Float =
-        if (factor == 1.0f) {
-            fraction * fraction
-        } else {
-            fraction.pow(doubleFactor)
-        }
+    override fun transform(fraction: Float): Float = if (factor == 1.0f) {
+        fraction * fraction
+    } else {
+        fraction.pow(doubleFactor)
+    }
 }

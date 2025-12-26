@@ -11,7 +11,7 @@ plugins {
 
 kotlin {
     listOf(
-        macosArm64()
+        macosArm64(),
     ).forEach {
         it.binaries.executable {
             entryPoint = "main"

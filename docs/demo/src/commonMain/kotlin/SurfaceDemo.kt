@@ -28,7 +28,7 @@ fun SurfaceDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,7 +36,7 @@ fun SurfaceDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Surface(
                 modifier = Modifier
@@ -44,16 +44,16 @@ fun SurfaceDemo() {
                     .padding(16.dp),
                 color = MiuixTheme.colorScheme.background,
                 shape = RoundedCornerShape(16.dp),
-                shadowElevation = 4.dp
+                shadowElevation = 4.dp,
             ) {
                 Text(
                     text = "Surface Example\n\n" +
-                            "Size: height = 200.dp, width = 400.dp\n" +
-                            "color: MiuixTheme.colorScheme.background\n" +
-                            "shape: RoundedCornerShape(16.dp)\n" +
-                            "shadowElevation: 4.dp\n" +
-                            "isSystemInDarkTheme: ${isSystemInDarkTheme()}",
-                    modifier = Modifier.padding(16.dp).fillMaxSize()
+                        "Size: height = 200.dp, width = 400.dp\n" +
+                        "color: MiuixTheme.colorScheme.background\n" +
+                        "shape: RoundedCornerShape(16.dp)\n" +
+                        "shadowElevation: 4.dp\n" +
+                        "isSystemInDarkTheme: ${isSystemInDarkTheme()}",
+                    modifier = Modifier.padding(16.dp).fillMaxSize(),
                 )
             }
         }

@@ -60,7 +60,7 @@ fun Switch(
     onCheckedChange: ((Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
     colors: SwitchColors = SwitchDefaults.switchColors(),
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
     val interactionSource = remember { MutableInteractionSource() }
@@ -77,25 +77,43 @@ fun Switch(
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) {
-            if (!enabled) 25.dp else if (isPressed || isDragged || isHovered) 23.75.dp else 25.dp
+            if (!enabled) {
+                25.dp
+            } else if (isPressed || isDragged || isHovered) {
+                23.75.dp
+            } else {
+                25.dp
+            }
         } else {
-            if (!enabled) 4.dp else if (isPressed || isDragged || isHovered) 2.75.dp else 4.dp
+            if (!enabled) {
+                4.dp
+            } else if (isPressed || isDragged || isHovered) {
+                2.75.dp
+            } else {
+                4.dp
+            }
         } + dragOffset.dp,
-        animationSpec = springSpec
+        animationSpec = springSpec,
     )
 
     val thumbSize by animateDpAsState(
-        targetValue = if (!enabled) 20.dp else if (isPressed || isDragged || isHovered) 22.5.dp else 20.dp,
-        animationSpec = springSpec
+        targetValue = if (!enabled) {
+            20.dp
+        } else if (isPressed || isDragged || isHovered) {
+            22.5.dp
+        } else {
+            20.dp
+        },
+        animationSpec = springSpec,
     )
 
     val thumbColor by animateColorAsState(
-        if (checked) colors.checkedThumbColor(enabled) else colors.uncheckedThumbColor(enabled)
+        if (checked) colors.checkedThumbColor(enabled) else colors.uncheckedThumbColor(enabled),
     )
 
     val backgroundColor by animateColorAsState(
         if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
-        animationSpec = tween(durationMillis = 200)
+        animationSpec = tween(durationMillis = 200),
     )
 
     val toggleableModifier = if (currentOnCheckedChange != null) {
@@ -104,13 +122,13 @@ fun Switch(
             onValueChange = {
                 currentOnCheckedChange!!(it)
                 hapticFeedback.performHapticFeedback(
-                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
                 )
             },
             enabled = enabled,
             role = Role.Switch,
             interactionSource = interactionSource,
-            indication = null
+            indication = null,
         )
     } else {
         Modifier
@@ -126,9 +144,9 @@ fun Switch(
             }
             .hoverable(
                 interactionSource = interactionSource,
-                enabled = enabled
+                enabled = enabled,
             )
-            .then(toggleableModifier)
+            .then(toggleableModifier),
     ) {
         Box(
             modifier = Modifier
@@ -237,7 +255,7 @@ fun Switch(
                             }
                         }
                     }
-                }
+                },
         )
     }
 }
@@ -256,7 +274,7 @@ object SwitchDefaults {
         checkedTrackColor: Color = MiuixTheme.colorScheme.primary,
         uncheckedTrackColor: Color = MiuixTheme.colorScheme.secondary,
         disabledCheckedTrackColor: Color = MiuixTheme.colorScheme.disabledPrimary,
-        disabledUncheckedTrackColor: Color = MiuixTheme.colorScheme.disabledSecondary
+        disabledUncheckedTrackColor: Color = MiuixTheme.colorScheme.disabledSecondary,
     ): SwitchColors = SwitchColors(
         checkedThumbColor = checkedThumbColor,
         uncheckedThumbColor = uncheckedThumbColor,
@@ -265,7 +283,7 @@ object SwitchDefaults {
         checkedTrackColor = checkedTrackColor,
         uncheckedTrackColor = uncheckedTrackColor,
         disabledCheckedTrackColor = disabledCheckedTrackColor,
-        disabledUncheckedTrackColor = disabledUncheckedTrackColor
+        disabledUncheckedTrackColor = disabledUncheckedTrackColor,
     )
 }
 
@@ -278,21 +296,17 @@ data class SwitchColors(
     private val checkedTrackColor: Color,
     private val uncheckedTrackColor: Color,
     private val disabledCheckedTrackColor: Color,
-    private val disabledUncheckedTrackColor: Color
+    private val disabledUncheckedTrackColor: Color,
 ) {
     @Stable
-    internal fun checkedThumbColor(enabled: Boolean): Color =
-        if (enabled) checkedThumbColor else disabledCheckedThumbColor
+    internal fun checkedThumbColor(enabled: Boolean): Color = if (enabled) checkedThumbColor else disabledCheckedThumbColor
 
     @Stable
-    internal fun uncheckedThumbColor(enabled: Boolean): Color =
-        if (enabled) uncheckedThumbColor else disabledUncheckedThumbColor
+    internal fun uncheckedThumbColor(enabled: Boolean): Color = if (enabled) uncheckedThumbColor else disabledUncheckedThumbColor
 
     @Stable
-    internal fun checkedTrackColor(enabled: Boolean): Color =
-        if (enabled) checkedTrackColor else disabledCheckedTrackColor
+    internal fun checkedTrackColor(enabled: Boolean): Color = if (enabled) checkedTrackColor else disabledCheckedTrackColor
 
     @Stable
-    internal fun uncheckedTrackColor(enabled: Boolean): Color =
-        if (enabled) uncheckedTrackColor else disabledUncheckedTrackColor
+    internal fun uncheckedTrackColor(enabled: Boolean): Color = if (enabled) uncheckedTrackColor else disabledUncheckedTrackColor
 }

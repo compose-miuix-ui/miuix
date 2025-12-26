@@ -30,7 +30,7 @@ fun SuperDropdownDemo() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(
                 Modifier
@@ -38,7 +38,7 @@ fun SuperDropdownDemo() {
                     .widthIn(max = 600.dp)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 var selectedIndex1 by remember { mutableStateOf(0) }
                 val options1 = listOf("Option 1", "Option 2", "Option 3")
@@ -50,14 +50,14 @@ fun SuperDropdownDemo() {
                         title = "Dropdown Menu",
                         items = options1,
                         selectedIndex = selectedIndex1,
-                        onSelectedIndexChange = { selectedIndex1 = it }
+                        onSelectedIndexChange = { selectedIndex1 = it },
                     )
                     SuperDropdown(
                         title = "Language Settings",
                         summary = "Choose your preferred language",
                         items = options2,
                         selectedIndex = selectedIndex2,
-                        onSelectedIndexChange = { selectedIndex2 = it }
+                        onSelectedIndexChange = { selectedIndex2 = it },
                     )
                     SuperDropdown(
                         title = "Disabled Dropdown",
@@ -65,7 +65,7 @@ fun SuperDropdownDemo() {
                         items = listOf("Option 1"),
                         selectedIndex = 0,
                         onSelectedIndexChange = {},
-                        enabled = false
+                        enabled = false,
                     )
                 }
             }

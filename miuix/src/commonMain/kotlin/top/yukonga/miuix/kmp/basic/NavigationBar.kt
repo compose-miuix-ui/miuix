@@ -71,7 +71,7 @@ fun NavigationBar(
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
-    defaultWindowInsetsPadding: Boolean = true
+    defaultWindowInsetsPadding: Boolean = true,
 ) {
     require(items.size in 2..5) { "BottomBar must have between 2 and 5 items" }
 
@@ -80,14 +80,14 @@ fun NavigationBar(
 
     val animatedCaptionBarHeight by animateDpAsState(
         targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 300),
     )
 
     val currentOnClick by rememberUpdatedState(onClick)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(color)
+            .background(color),
     ) {
         if (showDivider) {
             HorizontalDivider()
@@ -95,7 +95,7 @@ fun NavigationBar(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             val platform = platform()
             val itemHeight = if (platform != Platform.IOS) 64.dp else 48.dp
@@ -116,6 +116,7 @@ fun NavigationBar(
                     }
 
                     isSelected -> onSurfaceContainerColor
+
                     else -> onSurfaceContainerVariantColor
                 }
                 val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -131,16 +132,16 @@ fun NavigationBar(
                                     tryAwaitRelease()
                                     isPressed = false
                                 },
-                                onTap = { currentOnClick(index) }
+                                onTap = { currentOnClick(index) },
                             )
                         },
-                    horizontalAlignment = CenterHorizontally
+                    horizontalAlignment = CenterHorizontally,
                 ) {
                     Image(
                         modifier = Modifier.size(32.dp).padding(top = 6.dp),
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        colorFilter = ColorFilter.tint(tint)
+                        colorFilter = ColorFilter.tint(tint),
                     )
                     Text(
                         modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 12.dp else 0.dp),
@@ -148,7 +149,7 @@ fun NavigationBar(
                         color = tint,
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
-                        fontWeight = fontWeight
+                        fontWeight = fontWeight,
                     )
                 }
             }
@@ -159,7 +160,7 @@ fun NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(navigationBarsPadding.calculateBottomPadding() + animatedCaptionBarHeight)
-                    .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } }
+                    .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } },
             )
         }
     }
@@ -203,6 +204,7 @@ fun FloatingNavigationBar(
     val platform = platform()
     val bottomPaddingValue = when (platform) {
         Platform.IOS -> 8.dp
+
         Platform.Android -> {
             val navBarBottomPadding =
                 WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
@@ -219,7 +221,7 @@ fun FloatingNavigationBar(
             .padding(
                 start = if (horizontalAlignment == Alignment.Start) horizontalOutSidePadding else 0.dp,
                 end = if (horizontalAlignment == Alignment.End) horizontalOutSidePadding else 0.dp,
-            )
+            ),
     ) {
         Row(
             modifier = Modifier
@@ -230,30 +232,34 @@ fun FloatingNavigationBar(
                             .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Bottom))
                             .windowInsetsPadding(WindowInsets.captionBar.only(WindowInsetsSides.Bottom))
                             .windowInsetsPadding(WindowInsets.navigationBars)
-                    } else Modifier
+                    } else {
+                        Modifier
+                    },
                 )
                 .then(
                     if (showDivider) {
                         Modifier
                             .background(
                                 color = MiuixTheme.colorScheme.dividerLine,
-                                shape = ContinuousRoundedRectangle(cornerRadius)
+                                shape = ContinuousRoundedRectangle(cornerRadius),
                             )
                             .padding(0.75.dp)
-                    } else Modifier
+                    } else {
+                        Modifier
+                    },
                 )
                 .then(
                     if (shadowElevation > 0.dp) {
                         Modifier.graphicsLayer(
                             shadowElevation = with(density) { shadowElevation.toPx() },
                             shape = ContinuousRoundedRectangle(cornerRadius),
-                            clip = cornerRadius > 0.dp
+                            clip = cornerRadius > 0.dp,
                         )
                     } else if (cornerRadius > 0.dp) {
                         Modifier.clip(ContinuousRoundedRectangle(cornerRadius))
                     } else {
                         Modifier
-                    }
+                    },
                 )
                 .background(color)
                 .then(modifier)
@@ -263,7 +269,7 @@ fun FloatingNavigationBar(
                     detectTapGestures { /* Consume click */ }
                 },
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             items.forEachIndexed { index, item ->
                 val isSelected = selected == index
@@ -280,6 +286,7 @@ fun FloatingNavigationBar(
                     }
 
                     isSelected -> onSurfaceContainerColor
+
                     else -> onSurfaceContainerVariantColor
                 }
                 val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -293,10 +300,10 @@ fun FloatingNavigationBar(
                                     tryAwaitRelease()
                                     isPressed = false
                                 },
-                                onTap = { currentOnClick(index) }
+                                onTap = { currentOnClick(index) },
                             )
                         },
-                    horizontalAlignment = CenterHorizontally
+                    horizontalAlignment = CenterHorizontally,
                 ) {
                     when (mode) {
                         FloatingNavigationBarMode.IconAndText -> {
@@ -304,11 +311,11 @@ fun FloatingNavigationBar(
                                 modifier = Modifier.padding(top = 6.dp).size(24.dp),
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint)
+                                colorFilter = ColorFilter.tint(tint),
                             )
                             Box(
                                 modifier = Modifier.padding(bottom = 6.dp),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 // Invisible text for layout calculation (always bold)
                                 Text(
@@ -316,7 +323,7 @@ fun FloatingNavigationBar(
                                     text = item.label,
                                     textAlign = TextAlign.Center,
                                     fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold // Always bold for layout
+                                    fontWeight = FontWeight.Bold, // Always bold for layout
                                 )
                                 // Visible text
                                 Text(
@@ -324,7 +331,7 @@ fun FloatingNavigationBar(
                                     color = tint,
                                     textAlign = TextAlign.Center,
                                     fontSize = 12.sp,
-                                    fontWeight = fontWeight
+                                    fontWeight = fontWeight,
                                 )
                             }
                         }
@@ -332,7 +339,7 @@ fun FloatingNavigationBar(
                         FloatingNavigationBarMode.TextOnly -> {
                             Box(
                                 modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 // Invisible text for layout calculation
                                 Text(
@@ -340,7 +347,7 @@ fun FloatingNavigationBar(
                                     text = item.label,
                                     textAlign = TextAlign.Center,
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold // Always bold for layout
+                                    fontWeight = FontWeight.Bold, // Always bold for layout
                                 )
                                 // Visible text
                                 Text(
@@ -348,7 +355,7 @@ fun FloatingNavigationBar(
                                     color = tint,
                                     textAlign = TextAlign.Center,
                                     fontSize = 14.sp,
-                                    fontWeight = fontWeight
+                                    fontWeight = fontWeight,
                                 )
                             }
                         }
@@ -358,7 +365,7 @@ fun FloatingNavigationBar(
                                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint)
+                                colorFilter = ColorFilter.tint(tint),
                             )
                         }
                     }
@@ -381,7 +388,7 @@ enum class FloatingNavigationBarMode {
     IconOnly,
 
     /** Show text only. */
-    TextOnly
+    TextOnly,
 }
 
 /**
@@ -392,6 +399,5 @@ enum class FloatingNavigationBarMode {
  */
 data class NavigationItem(
     val label: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )
-    

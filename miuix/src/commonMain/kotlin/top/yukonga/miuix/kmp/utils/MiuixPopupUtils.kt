@@ -56,7 +56,7 @@ class MiuixPopupUtils {
     @Stable
     class PopupState(
         val showState: MutableState<Boolean>,
-        val zIndex: Float
+        val zIndex: Float,
     ) {
         var enterTransition by mutableStateOf<EnterTransition?>(null)
         var exitTransition by mutableStateOf<ExitTransition?>(null)
@@ -69,7 +69,7 @@ class MiuixPopupUtils {
     @Stable
     class DialogState(
         val showState: MutableState<Boolean>,
-        val zIndex: Float
+        val zIndex: Float,
     ) {
         var enterTransition by mutableStateOf<EnterTransition?>(null)
         var exitTransition by mutableStateOf<ExitTransition?>(null)
@@ -96,55 +96,47 @@ class MiuixPopupUtils {
             fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
 
         @Composable
-        private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition {
-            return remember(largeScreen) {
-                if (largeScreen) {
-                    fadeIn(
-                        animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f)
-                    ) + scaleIn(
-                        initialScale = 0.8f,
-                        animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f)
-                    )
-                } else {
-                    slideInVertically(
-                        initialOffsetY = { fullHeight -> fullHeight },
-                        animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f)
-                    )
-                }
+        private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
+            if (largeScreen) {
+                fadeIn(
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f),
+                ) + scaleIn(
+                    initialScale = 0.8f,
+                    animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f),
+                )
+            } else {
+                slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f),
+                )
             }
         }
 
         @Composable
-        private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition {
-            return remember(largeScreen) {
-                if (largeScreen) {
-                    fadeOut(
-                        animationSpec = tween(200, easing = DecelerateEasing(1.5f))
-                    ) + scaleOut(
-                        targetScale = 0.8f,
-                        animationSpec = tween(200, easing = DecelerateEasing(1.5f))
-                    )
-                } else {
-                    slideOutVertically(
-                        targetOffsetY = { fullHeight -> fullHeight },
-                        animationSpec = tween(300, easing = DecelerateEasing(0.8f))
-                    )
-                }
+        private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition = remember(largeScreen) {
+            if (largeScreen) {
+                fadeOut(
+                    animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
+                ) + scaleOut(
+                    targetScale = 0.8f,
+                    animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
+                )
+            } else {
+                slideOutVertically(
+                    targetOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
+                )
             }
         }
 
         @Composable
-        private fun rememberDefaultPopupEnterTransition(): EnterTransition {
-            return remember {
-                fadeIn(animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f)))
-            }
+        private fun rememberDefaultPopupEnterTransition(): EnterTransition = remember {
+            fadeIn(animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f)))
         }
 
         @Composable
-        private fun rememberDefaultPopupExitTransition(): ExitTransition {
-            return remember {
-                fadeOut(animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1.5f)))
-            }
+        private fun rememberDefaultPopupExitTransition(): ExitTransition = remember {
+            fadeOut(animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1.5f)))
         }
 
         /**
@@ -295,7 +287,7 @@ class MiuixPopupUtils {
         @Composable
         private fun DialogEntry(
             dialogState: DialogState,
-            largeScreen: Boolean
+            largeScreen: Boolean,
         ) {
             val visibleState = remember { MutableTransitionState(false) }
             var pendingOpen by remember { mutableStateOf(false) }
@@ -336,7 +328,7 @@ class MiuixPopupUtils {
                     visibleState = visibleState,
                     modifier = Modifier.zIndex(dialogState.zIndex - 0.001f),
                     enter = dialogState.dimEnterTransition ?: DialogDimEnter,
-                    exit = dialogState.dimExitTransition ?: DialogDimExit
+                    exit = dialogState.dimExitTransition ?: DialogDimExit,
                 ) {
                     val baseColor = MiuixTheme.colorScheme.windowDimming
                     val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
@@ -359,13 +351,13 @@ class MiuixPopupUtils {
                                     }
                                 }
                             }
-                            .background(dimColor)
+                            .background(dimColor),
                     )
                 }
             } else {
                 AnimatedVisibility(
                     visibleState = visibleState,
-                    modifier = Modifier.zIndex(dialogState.zIndex - 0.002f)
+                    modifier = Modifier.zIndex(dialogState.zIndex - 0.002f),
                 ) {
                     Box(
                         modifier = Modifier
@@ -382,7 +374,7 @@ class MiuixPopupUtils {
                                         }
                                     }
                                 }
-                            }
+                            },
                     )
                 }
             }
@@ -391,7 +383,7 @@ class MiuixPopupUtils {
                 visibleState = visibleState,
                 modifier = Modifier.zIndex(dialogState.zIndex),
                 enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(effectiveLargeScreen),
-                exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen)
+                exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen),
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     dialogState.content()
@@ -442,7 +434,7 @@ class MiuixPopupUtils {
                     visibleState = visibleState,
                     modifier = Modifier.zIndex(popupState.zIndex - 0.001f),
                     enter = popupState.dimEnterTransition ?: PopupDimEnter,
-                    exit = popupState.dimExitTransition ?: PopupDimExit
+                    exit = popupState.dimExitTransition ?: PopupDimExit,
                 ) {
                     Box(
                         modifier = Modifier
@@ -460,13 +452,13 @@ class MiuixPopupUtils {
                                     }
                                 }
                             }
-                            .background(MiuixTheme.colorScheme.windowDimming)
+                            .background(MiuixTheme.colorScheme.windowDimming),
                     )
                 }
             } else {
                 AnimatedVisibility(
                     visibleState = visibleState,
-                    modifier = Modifier.zIndex(popupState.zIndex - 0.002f)
+                    modifier = Modifier.zIndex(popupState.zIndex - 0.002f),
                 ) {
                     Box(
                         modifier = Modifier
@@ -483,7 +475,7 @@ class MiuixPopupUtils {
                                         }
                                     }
                                 }
-                            }
+                            },
                     )
                 }
             }
@@ -492,7 +484,7 @@ class MiuixPopupUtils {
                 visibleState = visibleState,
                 modifier = Modifier.zIndex(popupState.zIndex),
                 enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(),
-                exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition()
+                exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition(),
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     popupState.content()
@@ -534,7 +526,7 @@ class MiuixPopupUtils {
                 key(state.showState) {
                     DialogEntry(
                         dialogState = state,
-                        largeScreen = largeScreen
+                        largeScreen = largeScreen,
                     )
                 }
             }

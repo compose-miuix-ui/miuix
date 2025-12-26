@@ -31,7 +31,7 @@ fun DividerDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -39,20 +39,20 @@ fun DividerDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Card(
                     modifier = Modifier.weight(0.5f),
-                    insideMargin = PaddingValues(16.dp)
+                    insideMargin = PaddingValues(16.dp),
                 ) {
                     Text(
                         text = "Content Above",
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -60,20 +60,20 @@ fun DividerDemo() {
                     Text(
                         text = "Content Below",
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
                 Card(
                     modifier = Modifier.weight(0.5f),
-                    insideMargin = PaddingValues(16.dp)
+                    insideMargin = PaddingValues(16.dp),
                 ) {
                     Row(
-                        modifier = Modifier.height(IntrinsicSize.Min)
+                        modifier = Modifier.height(IntrinsicSize.Min),
                     ) {
                         Text(
                             text = "Left Content",
                             modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                         VerticalDivider(
                             modifier = Modifier.padding(horizontal = 8.dp),
@@ -81,7 +81,7 @@ fun DividerDemo() {
                         Text(
                             text = "Right Content",
                             modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }

@@ -28,7 +28,7 @@ fun SliderDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,23 +36,23 @@ fun SliderDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var slider1 by remember { mutableStateOf(0.5f) }
             var slider2 by remember { mutableStateOf(0.7f) }
             var slider3 by remember { mutableStateOf(0.2f..0.8f) }
             Slider(
                 value = slider1,
-                onValueChange = { slider1 = it }
+                onValueChange = { slider1 = it },
             )
             Slider(
                 value = slider2,
                 onValueChange = { slider2 = it },
-                enabled = false
+                enabled = false,
             )
             RangeSlider(
                 value = slider3,
-                onValueChange = { slider3 = it }
+                onValueChange = { slider3 = it },
             )
         }
     }

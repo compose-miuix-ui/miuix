@@ -18,10 +18,9 @@ import kotlin.math.pow
 class DecelerateEasing(
     private val factor: Float = 1.0f,
 ) : Easing {
-    override fun transform(fraction: Float): Float =
-        if (factor == 1.0f) {
-            1.0f - (1.0f - fraction) * (1.0f - fraction)
-        } else {
-            1.0f - (1.0f - fraction).pow(2 * factor)
-        }
+    override fun transform(fraction: Float): Float = if (factor == 1.0f) {
+        1.0f - (1.0f - fraction) * (1.0f - fraction)
+    } else {
+        1.0f - (1.0f - fraction).pow(2 * factor)
+    }
 }

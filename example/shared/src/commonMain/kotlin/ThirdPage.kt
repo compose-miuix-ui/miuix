@@ -56,38 +56,40 @@ fun ThirdPage(
                     SmallTopAppBar(
                         title = "Colors",
                         scrollBehavior = topAppBarScrollBehavior,
-                        defaultWindowInsetsPadding = false
+                        defaultWindowInsetsPadding = false,
                     )
                 } else {
                     TopAppBar(
                         title = "Colors",
-                        scrollBehavior = topAppBarScrollBehavior
+                        scrollBehavior = topAppBarScrollBehavior,
                     )
                 }
             }
         },
-        popupHost = {}
+        popupHost = {},
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .then(
-                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier
+                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
                 )
                 .overScrollVertical(
-                    isEnabled = { enableOverScroll }
+                    isEnabled = { enableOverScroll },
                 )
                 .then(
-                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
                 )
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 bottom = if (isWideScreen) {
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            padding.calculateBottomPadding() + 12.dp
-                } else padding.calculateBottomPadding() + 12.dp
+                        padding.calculateBottomPadding() + 12.dp
+                } else {
+                    padding.calculateBottomPadding() + 12.dp
+                },
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item(key = "light") {
                 SmallTitle("Light Theme Colors")
@@ -95,7 +97,7 @@ fun ThirdPage(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(color = lightColorScheme().surfaceContainer),
                     cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp)
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
                     ColorsPreview(lightColorScheme())
                 }
@@ -107,7 +109,7 @@ fun ThirdPage(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
                     cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp)
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
                     ColorsPreview(dynLight)
                 }
@@ -118,7 +120,7 @@ fun ThirdPage(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(color = darkColorScheme().surfaceContainer),
                     cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp)
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
                     ColorsPreview(darkColorScheme())
                 }
@@ -130,7 +132,7 @@ fun ThirdPage(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
                     cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp)
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
                     ColorsPreview(dynDark)
                 }
@@ -198,11 +200,11 @@ fun ColorsPreview(colors: Colors) {
     val colorMap = colorList.toMap()
 
     Column(
-        modifier = Modifier.padding(top = 16.dp)
+        modifier = Modifier.padding(top = 16.dp),
     ) {
         colorList.chunked(2).forEach { rowColors ->
             Row(
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
             ) {
                 rowColors.forEachIndexed { idx, (name, color) ->
                     val (surfaceColor, textColor) = when {
@@ -222,7 +224,7 @@ fun ColorsPreview(colors: Colors) {
                         textColor = textColor,
                         modifier = Modifier
                             .weight(1f)
-                            .then(if (idx < rowColors.lastIndex) Modifier.padding(end = 16.dp) else Modifier)
+                            .then(if (idx < rowColors.lastIndex) Modifier.padding(end = 16.dp) else Modifier),
                     )
                 }
             }
@@ -238,17 +240,17 @@ private fun ColorBlock(name: String, surfaceColor: Color, textColor: Color, modi
         border = BorderStroke(1.dp, textColor),
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(100.dp),
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = name.replace(Regex("([A-Z])"), " $1").trim().replaceFirstChar { it.uppercase() },
                 color = textColor,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(12.dp),
             )
         }
     }

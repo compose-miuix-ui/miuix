@@ -75,20 +75,21 @@ import kotlinx.coroutines.sync.Mutex
 fun Modifier.pressable(
     enabled: Boolean = true,
     role: Role? = null,
-    delay: Long? = TapIndicationDelay
+    delay: Long? = TapIndicationDelay,
 ) = composed(
     inspectorInfo = debugInspectorInfo {
         name = "clickable"
         properties["enabled"] = enabled
         properties["role"] = role
         properties["delay"] = delay
-    }) {
+    },
+) {
     Modifier.pressable(
         interactionSource = remember { MutableInteractionSource() },
         indication = SinkFeedback(),
         enabled = enabled,
         role = role,
-        delay = delay
+        delay = delay,
     )
 }
 
@@ -131,16 +132,17 @@ fun Modifier.pressable(
     indication: Indication? = null,
     enabled: Boolean = true,
     role: Role? = null,
-    delay: Long? = TapIndicationDelay
+    delay: Long? = TapIndicationDelay,
 ) = pressableWithIndicationIfNeeded(
-    interactionSource = interactionSource, indication = indication
+    interactionSource = interactionSource,
+    indication = indication,
 ) { intSource, indicationNodeFactory ->
     PressableElement(
         interactionSource = intSource,
         indicationNodeFactory = indicationNodeFactory,
         enabled = enabled,
         role = role,
-        delay = delay
+        delay = delay,
     )
 }
 
@@ -153,30 +155,33 @@ fun Modifier.pressable(
 internal inline fun Modifier.pressableWithIndicationIfNeeded(
     interactionSource: MutableInteractionSource?,
     indication: Indication?,
-    crossinline createPressable: (MutableInteractionSource?, IndicationNodeFactory?) -> Modifier
-): Modifier {
-    return this.then(
-        when {
-            // Fast path - indication is managed internally
-            indication is IndicationNodeFactory -> createPressable(
-                interactionSource, indication
-            )
-            // Fast path - no need for indication
-            indication == null -> createPressable(interactionSource, null)
-            // Non-null Indication (not IndicationNodeFactory) with a non-null InteractionSource
-            interactionSource != null -> Modifier.indication(interactionSource, indication)
-                .then(createPressable(interactionSource, null))
-            // Non-null Indication (not IndicationNodeFactory) with a null InteractionSource, so we
-            // need
-            // to use composed to create an InteractionSource that can be shared. This should be a
-            // rare
-            // code path and can only be hit from new callers.
-            else -> Modifier.composed {
-                val newInteractionSource = remember { MutableInteractionSource() }
-                Modifier.indication(newInteractionSource, indication).then(createPressable(newInteractionSource, null))
-            }
-        })
-}
+    crossinline createPressable: (MutableInteractionSource?, IndicationNodeFactory?) -> Modifier,
+): Modifier = this.then(
+    when {
+        // Fast path - indication is managed internally
+        indication is IndicationNodeFactory -> createPressable(
+            interactionSource,
+            indication,
+        )
+
+        // Fast path - no need for indication
+        indication == null -> createPressable(interactionSource, null)
+
+        // Non-null Indication (not IndicationNodeFactory) with a non-null InteractionSource
+        interactionSource != null -> Modifier.indication(interactionSource, indication)
+            .then(createPressable(interactionSource, null))
+
+        // Non-null Indication (not IndicationNodeFactory) with a null InteractionSource, so we
+        // need
+        // to use composed to create an InteractionSource that can be shared. This should be a
+        // rare
+        // code path and can only be hit from new callers.
+        else -> Modifier.composed {
+            val newInteractionSource = remember { MutableInteractionSource() }
+            Modifier.indication(newInteractionSource, indication).then(createPressable(newInteractionSource, null))
+        }
+    },
+)
 
 /**
  * How long to wait before appearing 'pressed' (emitting [PressInteraction.Press]) - if a touch down
@@ -189,10 +194,14 @@ private data class PressableElement(
     private val indicationNodeFactory: IndicationNodeFactory?,
     private val enabled: Boolean,
     private val role: Role?,
-    private val delay: Long?
+    private val delay: Long?,
 ) : ModifierNodeElement<PressableNode>() {
     override fun create() = PressableNode(
-        interactionSource, indicationNodeFactory, enabled, role, delay
+        interactionSource,
+        indicationNodeFactory,
+        enabled,
+        role,
+        delay,
     )
 
     override fun update(node: PressableNode) {
@@ -214,16 +223,20 @@ internal open class PressableNode(
     indicationNodeFactory: IndicationNodeFactory?,
     enabled: Boolean,
     role: Role?,
-    delay: Long?
+    delay: Long?,
 ) : AbstractPressableNode(
-    interactionSource, indicationNodeFactory, enabled, role, delay
+    interactionSource,
+    indicationNodeFactory,
+    enabled,
+    role,
+    delay,
 ) {
     fun update(
         interactionSource: MutableInteractionSource?,
         indicationNodeFactory: IndicationNodeFactory?,
         enabled: Boolean,
         role: Role?,
-        delay: Long?
+        delay: Long?,
     ) {
         updateCommon(interactionSource, indicationNodeFactory, enabled, role, delay)
     }
@@ -234,13 +247,15 @@ internal abstract class AbstractPressableNode(
     private var indicationNodeFactory: IndicationNodeFactory?,
     enabled: Boolean,
     private var role: Role?,
-    private var delay: Long?
-) : DelegatingNode(), PointerInputModifierNode, SemanticsModifierNode, TraversableNode {
+    private var delay: Long?,
+) : DelegatingNode(),
+    PointerInputModifierNode,
+    SemanticsModifierNode,
+    TraversableNode {
     protected var enabled = enabled
         private set
 
     final override val shouldAutoInvalidate: Boolean = false
-
 
     private var pointerInputNode: SuspendingPointerInputModifierNode? = null
     private var indicationNode: DelegatableNode? = null
@@ -263,7 +278,7 @@ internal abstract class AbstractPressableNode(
         indicationNodeFactory: IndicationNodeFactory?,
         enabled: Boolean,
         role: Role?,
-        delay: Long?
+        delay: Long?,
     ) {
         var isIndicationNodeDirty = false
         // Compare against userProvidedInteractionSource, as we will create a new InteractionSource
@@ -355,7 +370,7 @@ internal abstract class AbstractPressableNode(
     final override fun onPointerEvent(
         pointerEvent: PointerEvent,
         pass: PointerEventPass,
-        bounds: IntSize
+        bounds: IntSize,
     ) {
         centerOffset = bounds.center.toOffset()
         initializeIndicationAndInteractionSourceIfNeeded()
@@ -413,7 +428,7 @@ internal abstract class AbstractPressableNode(
 
     private fun CoroutineScope.launchAwaitingReset(
         resetJob: Job,
-        block: suspend CoroutineScope.() -> Unit
+        block: suspend CoroutineScope.() -> Unit,
     ): Job = launch {
         resetJob.join()
         block()
@@ -461,7 +476,9 @@ internal abstract class AbstractPressableNode(
 }
 
 /** [detectTapGestures]'s implementation of [PressGestureScope]. */
-internal class PressGestureScopeImpl(density: Density) : PressGestureScope, Density by density {
+internal class PressGestureScopeImpl(density: Density) :
+    PressGestureScope,
+    Density by density {
     private var isReleased = false
     private var isCanceled = false
     private val mutex = Mutex(locked = false)

@@ -123,7 +123,7 @@ fun ColorPalette(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(lastEmittedColor ?: initialColor)
+                    .background(lastEmittedColor ?: initialColor),
             )
         }
 
@@ -148,7 +148,7 @@ fun ColorPalette(
                 lastAcceptedHSV = newColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
-            }
+            },
         )
 
         val hsvBase = baseColor.toHsv()
@@ -168,7 +168,7 @@ fun ColorPalette(
                     baseColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
-            }
+            },
         )
     }
 }
@@ -215,14 +215,14 @@ private fun PaletteCanvas(
                 }
             }
             .fillMaxWidth()
-            .height(180.dp)
+            .height(180.dp),
     ) {
         PaletteGrid(
             rows = rows,
             hueColumns = hueColumns,
             includeGrayColumn = includeGrayColumn,
             rowSV = rowSV,
-            grayV = grayV
+            grayV = grayV,
         )
 
         if (sizePx.width > 0 && sizePx.height > 0) {
@@ -243,7 +243,7 @@ private fun PaletteCanvas(
                 modifier = Modifier
                     .offset(
                         x = with(density) { cxPx.toDp() - indicatorSize / 2 },
-                        y = with(density) { cyPx.toDp() - indicatorSize / 2 }
+                        y = with(density) { cyPx.toDp() - indicatorSize / 2 },
                     )
                     .size(indicatorSize)
                     .drawWithCache {
@@ -260,24 +260,24 @@ private fun PaletteCanvas(
                                 ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
                                 ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
                                 ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
-                                ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent
+                                ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
                             ).toTypedArray(),
-                            radius = gradientRadius
+                            radius = gradientRadius,
                         )
 
                         onDrawBehind {
                             drawCircle(
                                 brush = glowBrush,
-                                radius = gradientRadius
+                                radius = gradientRadius,
                             )
 
                             drawCircle(
                                 color = Color.White,
                                 radius = ringCenterRadius,
-                                style = Stroke(width = strokeWidth)
+                                style = Stroke(width = strokeWidth),
                             )
                         }
-                    }
+                    },
             )
         }
     }
@@ -311,7 +311,7 @@ private fun PaletteGrid(
                 drawRect(
                     color = color,
                     topLeft = Offset(left, top),
-                    size = Size(cellW, cellH)
+                    size = Size(cellW, cellH),
                 )
             }
         }
@@ -332,7 +332,9 @@ private fun buildRowSV(rows: Int): List<Pair<Float, Float>> {
         val t = i / (rows - 1f)
         val sRamp = (t / 0.35f).coerceIn(0f, 1f)
         val s = (0.10f + 0.90f * sRamp).coerceIn(0f, 1f)
-        val v = if (t <= topBrightCut) 1f else {
+        val v = if (t <= topBrightCut) {
+            1f
+        } else {
             val k = ((t - topBrightCut) / (1f - topBrightCut)).coerceIn(0f, 1f)
             lerp(1f, 0.20f, k)
         }
@@ -376,7 +378,7 @@ private fun hsvEqualApprox(
     a: Triple<Float, Float, Float>,
     b: Triple<Float, Float, Float>,
     epsH: Float = 1.5f,
-    eps: Float = 0.02f
+    eps: Float = 0.02f,
 ): Boolean {
     val dhRaw = abs(a.first - b.first)
     val dh = min(dhRaw, 360f - dhRaw)

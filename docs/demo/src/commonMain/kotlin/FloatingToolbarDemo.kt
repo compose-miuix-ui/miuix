@@ -36,7 +36,7 @@ fun FloatingToolbarDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -44,85 +44,87 @@ fun FloatingToolbarDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     Scaffold(
                         floatingToolbar = {
                             FloatingToolbar {
                                 Row(
                                     modifier = Modifier.padding(8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) { // or Column
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
                                             imageVector = MiuixIcons.Edit,
                                             contentDescription = "Edit",
-                                            tint = MiuixTheme.colorScheme.onBackground
+                                            tint = MiuixTheme.colorScheme.onBackground,
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
                                             imageVector = MiuixIcons.Delete,
                                             contentDescription = "Delete",
-                                            tint = MiuixTheme.colorScheme.onBackground
+                                            tint = MiuixTheme.colorScheme.onBackground,
                                         )
                                     }
                                 }
                             }
-                        }
+                        },
                     ) { paddingValues ->
                         LazyColumn(
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
                                 SuperArrow(
-                                    title = "Something"
+                                    title = "Something",
                                 )
                             }
                         }
                     }
                 }
                 Card(
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
                 ) {
                     Scaffold(
                         floatingToolbar = {
                             FloatingToolbar {
                                 Row(
                                     modifier = Modifier.padding(8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) { // or Column
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
-                                            imageVector =  MiuixIcons.Edit,
+                                            imageVector = MiuixIcons.Edit,
                                             contentDescription = "Edit",
-                                            tint = MiuixTheme.colorScheme.onBackground
+                                            tint = MiuixTheme.colorScheme.onBackground,
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
                                             imageVector = MiuixIcons.Delete,
                                             contentDescription = "Delete",
-                                            tint = MiuixTheme.colorScheme.onBackground
+                                            tint = MiuixTheme.colorScheme.onBackground,
                                         )
                                     }
                                 }
                             }
                         },
-                        floatingToolbarPosition = ToolbarPosition.BottomEnd
+                        floatingToolbarPosition = ToolbarPosition.BottomEnd,
                     ) { paddingValues ->
                         LazyColumn(
-                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+                            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
                                 SuperArrow(
-                                    title = "Something"
+                                    title = "Something",
                                 )
                             }
                         }

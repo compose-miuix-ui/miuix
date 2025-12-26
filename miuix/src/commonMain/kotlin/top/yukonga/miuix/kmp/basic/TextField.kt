@@ -125,13 +125,13 @@ fun TextField(
             LabelAnimState.Floating -> -insideMargin.height / 2
             LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
             LabelAnimState.Hidden -> 0.dp
-        }
+        },
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
             LabelAnimState.Floating -> 10.dp
             else -> 17.dp
-        }
+        },
     )
     val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
         derivedStateOf {
@@ -145,7 +145,6 @@ fun TextField(
     }
 
     val currentOnTextLayout by rememberUpdatedState(onTextLayout)
-
 
     BasicTextField(
         state = state,
@@ -174,9 +173,9 @@ fun TextField(
                 labelState = labelState,
                 labelAnim = labelAnim,
                 insideMargin = insideMargin,
-                innerTextField = innerTextField
+                innerTextField = innerTextField,
             )
-        }
+        },
     )
 }
 
@@ -236,7 +235,7 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary)
+    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -260,13 +259,13 @@ fun TextField(
             LabelAnimState.Floating -> -insideMargin.height / 2
             LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
             LabelAnimState.Hidden -> 0.dp
-        }
+        },
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
             LabelAnimState.Floating -> 10.dp
             else -> 17.dp
-        }
+        },
     )
     val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
         derivedStateOf {
@@ -281,7 +280,6 @@ fun TextField(
 
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val currentOnTextLayout by rememberUpdatedState(onTextLayout)
-
 
     BasicTextField(
         value = value,
@@ -311,9 +309,9 @@ fun TextField(
                 labelState = labelState,
                 labelAnim = labelAnim,
                 insideMargin = insideMargin,
-                innerTextField = innerTextField
+                innerTextField = innerTextField,
             )
-        }
+        },
     )
 }
 
@@ -372,7 +370,7 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary)
+    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -396,13 +394,13 @@ fun TextField(
             LabelAnimState.Floating -> -insideMargin.height / 2
             LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
             LabelAnimState.Hidden -> 0.dp
-        }
+        },
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
             LabelAnimState.Floating -> 10.dp
             else -> 17.dp
-        }
+        },
     )
     val paddingModifier by remember(leadingIcon, trailingIcon, insideMargin) {
         derivedStateOf {
@@ -446,9 +444,9 @@ fun TextField(
                 labelState = labelState,
                 labelAnim = labelAnim,
                 insideMargin = insideMargin,
-                innerTextField = innerTextField
+                innerTextField = innerTextField,
             )
-        }
+        },
     )
 }
 
@@ -459,10 +457,10 @@ private enum class LabelAnimState { Hidden, Placeholder, Normal, Floating }
  */
 @Composable
 private fun TextFieldDecorationBox(
-    finalModifier: Modifier,
+    finalModifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    paddingModifier: Modifier,
+    paddingModifier: Modifier = Modifier,
     label: String,
     labelFontSize: Dp,
     labelColor: Color,
@@ -473,16 +471,16 @@ private fun TextFieldDecorationBox(
 ) {
     Box(
         modifier = finalModifier,
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             leadingIcon?.invoke()
             Box(
                 modifier = Modifier.weight(1f).then(paddingModifier),
-                contentAlignment = Alignment.TopStart
+                contentAlignment = Alignment.TopStart,
             ) {
                 if (labelState != LabelAnimState.Hidden && labelState != LabelAnimState.Placeholder) {
                     Text(
@@ -491,12 +489,12 @@ private fun TextFieldDecorationBox(
                         color = labelColor,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.offset(y = labelAnim),
-                        textAlign = TextAlign.Start
+                        textAlign = TextAlign.Start,
                     )
                 }
                 Box(
                     modifier = Modifier.offset(y = if (labelState == LabelAnimState.Floating) insideMargin.height / 2 else 0.dp),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.CenterStart,
                 ) {
                     innerTextField()
                 }

@@ -43,7 +43,7 @@ fun FloatingToolbar(
     outSidePadding: PaddingValues = FloatingToolbarDefaults.OutSidePadding,
     shadowElevation: Dp = 4.dp,
     showDivider: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val roundedCornerShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
@@ -55,10 +55,11 @@ fun FloatingToolbar(
             shadowElevation > 0.dp -> Modifier.graphicsLayer(
                 shadowElevation = with(density) { shadowElevation.toPx() },
                 shape = roundedCornerShape,
-                clip = clipRequired
+                clip = clipRequired,
             )
 
             clipRequired -> Modifier.clip(roundedCornerShape)
+
             else -> Modifier
         }
     }
@@ -67,10 +68,12 @@ fun FloatingToolbar(
             Modifier
                 .background(
                     color = dividerColor,
-                    shape = roundedCornerShape
+                    shape = roundedCornerShape,
                 )
                 .padding(0.75.dp)
-        } else Modifier
+        } else {
+            Modifier
+        }
     }
 
     Box(
@@ -81,7 +84,7 @@ fun FloatingToolbar(
             .background(color = color)
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
-            }
+            },
     ) {
         content()
     }

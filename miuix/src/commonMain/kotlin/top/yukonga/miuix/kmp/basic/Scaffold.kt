@@ -81,7 +81,7 @@ fun Scaffold(
     popupHost: @Composable () -> Unit = { MiuixPopupHost() },
     containerColor: Color = MiuixTheme.colorScheme.surface,
     contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val safeInsets = remember(contentWindowInsets) { MutableWindowInsets(contentWindowInsets) }
     Surface(
@@ -89,7 +89,7 @@ fun Scaffold(
             // Exclude currently consumed window insets from user provided contentWindowInsets
             safeInsets.insets = contentWindowInsets.exclude(consumedWindowInsets)
         },
-        color = containerColor
+        color = containerColor,
     ) {
         ScaffoldLayout(
             topBar = topBar,
@@ -132,8 +132,8 @@ private fun ScaffoldLayout(
     floatingToolbar: @Composable () -> Unit,
     floatingToolbarPosition: ToolbarPosition,
     popup: @Composable () -> Unit,
+    contentWindowInsets: WindowInsets,
     content: @Composable (PaddingValues) -> Unit,
-    contentWindowInsets: WindowInsets
 ) {
     // Create the backing value for the content padding
     // These values will be updated during measurement, but before subcomposing the body content
@@ -143,13 +143,11 @@ private fun ScaffoldLayout(
         object : PaddingValues {
             var paddingHolder by mutableStateOf(PaddingValues(0.dp))
 
-            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp =
-                paddingHolder.calculateLeftPadding(layoutDirection)
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = paddingHolder.calculateLeftPadding(layoutDirection)
 
             override fun calculateTopPadding(): Dp = paddingHolder.calculateTopPadding()
 
-            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp =
-                paddingHolder.calculateRightPadding(layoutDirection)
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = paddingHolder.calculateRightPadding(layoutDirection)
 
             override fun calculateBottomPadding(): Dp = paddingHolder.calculateBottomPadding()
         }
@@ -212,7 +210,8 @@ private fun ScaffoldLayout(
                     }
 
                     FabPosition.End,
-                    FabPosition.EndOverlay -> {
+                    FabPosition.EndOverlay,
+                    -> {
                         if (layoutDirection == LayoutDirection.Ltr) {
                             layoutWidth - FabSpacing.roundToPx() - fabWidth - rightInset
                         } else {
@@ -248,9 +247,11 @@ private fun ScaffoldLayout(
         val snackbarOffsetFromBottom =
             if (snackbarHeight != 0) {
                 snackbarHeight +
-                        (fabOffsetFromBottom
+                    (
+                        fabOffsetFromBottom
                             ?: bottomBarPlaceable.height.takeIf { !isBottomBarEmpty }
-                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout))
+                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout)
+                        )
             } else {
                 0
             }
@@ -268,17 +269,17 @@ private fun ScaffoldLayout(
         contentPadding.paddingHolder =
             PaddingValues(
                 top =
-                    if (topBarPlaceable.width == 0 && topBarPlaceable.height == 0) {
-                        insets.calculateTopPadding()
-                    } else {
-                        topBarPlaceable.height.toDp()
-                    },
+                if (topBarPlaceable.width == 0 && topBarPlaceable.height == 0) {
+                    insets.calculateTopPadding()
+                } else {
+                    topBarPlaceable.height.toDp()
+                },
                 bottom =
-                    if (isBottomBarEmpty) {
-                        insets.calculateBottomPadding()
-                    } else {
-                        bottomBarPlaceable.height.toDp()
-                    },
+                if (isBottomBarEmpty) {
+                    insets.calculateBottomPadding()
+                } else {
+                    bottomBarPlaceable.height.toDp()
+                },
                 start = insets.calculateStartPadding(layoutDirection),
                 end = insets.calculateEndPadding(layoutDirection),
             )
@@ -296,9 +297,11 @@ private fun ScaffoldLayout(
             topBarPlaceable.place(0, 0)
             // Place Snackbar
             snackbarPlaceable.place(
-                (layoutWidth - snackbarPlaceable.width +
+                (
+                    layoutWidth - snackbarPlaceable.width +
                         contentWindowInsets.getLeft(this@SubcomposeLayout, layoutDirection) -
-                        contentWindowInsets.getRight(this@SubcomposeLayout, layoutDirection)) / 2,
+                        contentWindowInsets.getRight(this@SubcomposeLayout, layoutDirection)
+                    ) / 2,
                 layoutHeight - snackbarOffsetFromBottom,
             )
             // Place BottomBar
@@ -316,7 +319,7 @@ private fun ScaffoldLayout(
                 val position = alignment.align(
                     IntSize(floatingToolbarWidth, floatingToolbarHeight),
                     IntSize(availableWidth, availableHeight),
-                    layoutDirection
+                    layoutDirection,
                 )
 
                 val x = leftInset + position.x
@@ -341,7 +344,7 @@ private enum class ScaffoldLayoutContent {
     FloatingToolbar,
     Fab,
     Popup,
-    MainContent
+    MainContent,
 }
 
 /**
@@ -351,21 +354,18 @@ private enum class ScaffoldLayoutContent {
  * Copied from [androidx.compose.foundation.layout.MutableWindowInsets], which is marked as
  * experimental and thus cannot be used cross-module.
  */
-internal class MutableWindowInsets(initialInsets: WindowInsets = WindowInsets(0, 0, 0, 0)) :
-    WindowInsets {
+internal class MutableWindowInsets(initialInsets: WindowInsets = WindowInsets(0, 0, 0, 0)) : WindowInsets {
     /**
      * The [WindowInsets] that are used for [left][getLeft], [top][getTop], [right][getRight], and
      * [bottom][getBottom] values.
      */
     var insets by mutableStateOf(initialInsets)
 
-    override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int =
-        insets.getLeft(density, layoutDirection)
+    override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = insets.getLeft(density, layoutDirection)
 
     override fun getTop(density: Density): Int = insets.getTop(density)
 
-    override fun getRight(density: Density, layoutDirection: LayoutDirection): Int =
-        insets.getRight(density, layoutDirection)
+    override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = insets.getRight(density, layoutDirection)
 
     override fun getBottom(density: Density): Int = insets.getBottom(density)
 }
@@ -398,13 +398,11 @@ value class FabPosition internal constructor(@Suppress("unused") private val val
         val EndOverlay = FabPosition(3)
     }
 
-    override fun toString(): String {
-        return when (this) {
-            Start -> "FabPosition.Start"
-            Center -> "FabPosition.Center"
-            End -> "FabPosition.End"
-            else -> "FabPosition.EndOverlay"
-        }
+    override fun toString(): String = when (this) {
+        Start -> "FabPosition.Start"
+        Center -> "FabPosition.Center"
+        End -> "FabPosition.End"
+        else -> "FabPosition.EndOverlay"
     }
 }
 
@@ -444,18 +442,25 @@ internal val Alignment.horizontal: Alignment.Horizontal
     }
 
 // Keep the internal toAlignment function for ToolbarPosition here
-internal fun ToolbarPosition.toAlignment(): Alignment {
-    return when (this) {
-        ToolbarPosition.TopStart -> Alignment.TopStart
-        ToolbarPosition.CenterStart -> Alignment.CenterStart
-        ToolbarPosition.BottomStart -> Alignment.BottomStart
-        ToolbarPosition.TopEnd -> Alignment.TopEnd
-        ToolbarPosition.CenterEnd -> Alignment.CenterEnd
-        ToolbarPosition.BottomEnd -> Alignment.BottomEnd
-        ToolbarPosition.TopCenter -> Alignment.TopCenter // Added
-        ToolbarPosition.BottomCenter -> Alignment.BottomCenter
-        else -> Alignment.BottomCenter // Default or throw error
-    }
+internal fun ToolbarPosition.toAlignment(): Alignment = when (this) {
+    ToolbarPosition.TopStart -> Alignment.TopStart
+
+    ToolbarPosition.CenterStart -> Alignment.CenterStart
+
+    ToolbarPosition.BottomStart -> Alignment.BottomStart
+
+    ToolbarPosition.TopEnd -> Alignment.TopEnd
+
+    ToolbarPosition.CenterEnd -> Alignment.CenterEnd
+
+    ToolbarPosition.BottomEnd -> Alignment.BottomEnd
+
+    ToolbarPosition.TopCenter -> Alignment.TopCenter
+
+    // Added
+    ToolbarPosition.BottomCenter -> Alignment.BottomCenter
+
+    else -> Alignment.BottomCenter // Default or throw error
 }
 
 /**
@@ -483,23 +488,22 @@ value class ToolbarPosition internal constructor(@Suppress("unused") private val
         /** Position Toolbar at the bottom end corner. */
         val BottomEnd = ToolbarPosition(5)
 
-        /** Position Toolbar horizontally centered along the top edge. */ // Added KDoc
+        /** Position Toolbar horizontally centered along the top edge. */
+        // Added KDoc
         val TopCenter = ToolbarPosition(6)
 
         /** Position Toolbar horizontally centered along the bottom edge. */
         val BottomCenter = ToolbarPosition(7)
     }
 
-    override fun toString(): String {
-        return when (this) {
-            TopStart -> "ToolbarPosition.TopStart"
-            CenterStart -> "ToolbarPosition.CenterStart"
-            BottomStart -> "ToolbarPosition.BottomStart"
-            TopEnd -> "ToolbarPosition.TopEnd"
-            CenterEnd -> "ToolbarPosition.CenterEnd"
-            BottomEnd -> "ToolbarPosition.BottomEnd"
-            TopCenter -> "ToolbarPosition.TopCenter"
-            else -> "ToolbarPosition.BottomCenter"
-        }
+    override fun toString(): String = when (this) {
+        TopStart -> "ToolbarPosition.TopStart"
+        CenterStart -> "ToolbarPosition.CenterStart"
+        BottomStart -> "ToolbarPosition.BottomStart"
+        TopEnd -> "ToolbarPosition.TopEnd"
+        CenterEnd -> "ToolbarPosition.CenterEnd"
+        BottomEnd -> "ToolbarPosition.BottomEnd"
+        TopCenter -> "ToolbarPosition.TopCenter"
+        else -> "ToolbarPosition.BottomCenter"
     }
 }

@@ -10,7 +10,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val generatedSrcDir = layout.buildDirectory.dir("generated").get().asFile.resolve("miuix-example")
+val generatedSrcDir =
+    layout.buildDirectory
+        .dir("generated")
+        .get()
+        .asFile
+        .resolve("miuix-example")
 
 kotlin {
     android {
@@ -24,7 +29,7 @@ kotlin {
 
     listOf(
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach {
         it.binaries.framework {
             baseName = "shared"
@@ -130,15 +135,15 @@ val generateVersionInfo by tasks.registering {
         val iosPlist = project.rootDir.resolve("example/ios/iosApp/Info.plist")
         if (iosPlist.exists()) {
             val content = iosPlist.readText()
-            val updatedContent = content
-                .replace(
-                    Regex("<key>CFBundleShortVersionString</key>\\s*<string>[^<]*</string>"),
-                    "<key>CFBundleShortVersionString</key>\n\t<string>${BuildConfig.APPLICATION_VERSION_NAME}</string>"
-                )
-                .replace(
-                    Regex("<key>CFBundleVersion</key>\\s*<string>[^<]*</string>"),
-                    "<key>CFBundleVersion</key>\n\t<string>${BuildConfig.APPLICATION_VERSION_CODE}</string>"
-                )
+            val updatedContent =
+                content
+                    .replace(
+                        Regex("<key>CFBundleShortVersionString</key>\\s*<string>[^<]*</string>"),
+                        "<key>CFBundleShortVersionString</key>\n\t<string>${BuildConfig.APPLICATION_VERSION_NAME}</string>",
+                    ).replace(
+                        Regex("<key>CFBundleVersion</key>\\s*<string>[^<]*</string>"),
+                        "<key>CFBundleVersion</key>\n\t<string>${BuildConfig.APPLICATION_VERSION_CODE}</string>",
+                    )
             iosPlist.writeText(updatedContent)
         }
     }

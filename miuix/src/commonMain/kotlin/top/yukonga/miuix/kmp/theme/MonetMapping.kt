@@ -72,8 +72,7 @@ private fun opaqueOver(fg: Color, bg: Color): Color {
  * @param bg The background color.
  * @return The resulting opaque color.
  */
-private fun ensureOpaqueOver(fg: Color, bg: Color): Color =
-    if (fg.alpha >= 1f) fg else opaqueOver(fg, bg)
+private fun ensureOpaqueOver(fg: Color, bg: Color): Color = if (fg.alpha >= 1f) fg else opaqueOver(fg, bg)
 
 /** Maps Monet color roles to MIUIX color scheme.
  *

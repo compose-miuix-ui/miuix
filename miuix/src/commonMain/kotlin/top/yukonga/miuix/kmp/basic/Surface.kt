@@ -52,7 +52,7 @@ fun Surface(
     contentColor: Color = MiuixTheme.colorScheme.onSurface,
     border: BorderStroke? = null,
     shadowElevation: Dp = 0.dp,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val shadowElevationPx by remember(density, shadowElevation) {
@@ -67,12 +67,12 @@ fun Surface(
                     shape = shape,
                     backgroundColor = color,
                     border = border,
-                    shadowElevation = shadowElevationPx
+                    shadowElevation = shadowElevationPx,
                 )
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 },
-            propagateMinConstraints = true
+            propagateMinConstraints = true,
         ) {
             content()
         }
@@ -104,7 +104,7 @@ fun Surface(
     border: BorderStroke? = null,
     shadowElevation: Dp = 0.dp,
     interactionSource: MutableInteractionSource? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -123,7 +123,7 @@ fun Surface(
                     shape = shape,
                     backgroundColor = color,
                     border = border,
-                    shadowElevation = shadowElevationPx
+                    shadowElevation = shadowElevationPx,
                 )
                 .then(
                     remember(enabled, interactionSource, indication, currentOnClick) {
@@ -133,9 +133,9 @@ fun Surface(
                             enabled = enabled,
                             onClick = currentOnClick,
                         )
-                    }
+                    },
                 ),
-            propagateMinConstraints = true
+            propagateMinConstraints = true,
         ) {
             content()
         }
@@ -148,18 +148,17 @@ private fun Modifier.surface(
     backgroundColor: Color,
     border: BorderStroke?,
     shadowElevation: Float,
-) =
-    this.then(
-        if (shadowElevation > 0f) {
-            Modifier.graphicsLayer(
-                shadowElevation = shadowElevation,
-                shape = shape,
-                clip = false
-            )
-        } else {
-            Modifier
-        }
-    )
-        .then(if (border != null) Modifier.border(border, shape) else Modifier)
-        .background(color = backgroundColor, shape = shape)
-        .clip(shape)
+) = this.then(
+    if (shadowElevation > 0f) {
+        Modifier.graphicsLayer(
+            shadowElevation = shadowElevation,
+            shape = shape,
+            clip = false,
+        )
+    } else {
+        Modifier
+    },
+)
+    .then(if (border != null) Modifier.border(border, shape) else Modifier)
+    .background(color = backgroundColor, shape = shape)
+    .clip(shape)

@@ -31,15 +31,14 @@ fun HorizontalDivider(
     modifier: Modifier = Modifier,
     thickness: Dp = DividerDefaults.Thickness,
     color: Color = DividerDefaults.DividerColor,
-) =
-    Canvas(modifier.fillMaxWidth().height(thickness)) {
-        drawLine(
-            color = color,
-            strokeWidth = thickness.toPx(),
-            start = Offset(0f, thickness.toPx() / 2),
-            end = Offset(size.width, thickness.toPx() / 2),
-        )
-    }
+) = Canvas(modifier.fillMaxWidth().height(thickness)) {
+    drawLine(
+        color = color,
+        strokeWidth = thickness.toPx(),
+        start = Offset(0f, thickness.toPx() / 2),
+        end = Offset(size.width, thickness.toPx() / 2),
+    )
+}
 
 /**
  * A divider is a thin line that groups content in lists and layouts.
@@ -54,16 +53,15 @@ fun HorizontalDivider(
 fun VerticalDivider(
     modifier: Modifier = Modifier,
     thickness: Dp = DividerDefaults.Thickness,
-    color: Color = DividerDefaults.DividerColor
-) =
-    Canvas(modifier.fillMaxHeight().width(thickness)) {
-        drawLine(
-            color = color,
-            strokeWidth = thickness.toPx(),
-            start = Offset(thickness.toPx() / 2, 0f),
-            end = Offset(thickness.toPx() / 2, size.height),
-        )
-    }
+    color: Color = DividerDefaults.DividerColor,
+) = Canvas(modifier.fillMaxHeight().width(thickness)) {
+    drawLine(
+        color = color,
+        strokeWidth = thickness.toPx(),
+        start = Offset(thickness.toPx() / 2, 0f),
+        end = Offset(thickness.toPx() / 2, size.height),
+    )
+}
 
 object DividerDefaults {
 
@@ -76,5 +74,4 @@ object DividerDefaults {
      * Default color of the divider line.
      */
     val DividerColor @Composable get() = MiuixTheme.colorScheme.dividerLine
-
 }

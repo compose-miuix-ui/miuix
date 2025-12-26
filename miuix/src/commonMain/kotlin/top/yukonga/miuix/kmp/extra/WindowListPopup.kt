@@ -79,7 +79,7 @@ fun WindowListPopup(
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
     var isAnimating by remember { mutableStateOf(false) }
@@ -99,12 +99,12 @@ fun WindowListPopup(
             isAnimating = true
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f),
             )
         } else {
             animationProgress.animateTo(
                 targetValue = 0f,
-                animationSpec = tween(300, easing = DecelerateEasing(1.5f))
+                animationSpec = tween(300, easing = DecelerateEasing(1.5f)),
             )
             isAnimating = false
         }
@@ -130,10 +130,10 @@ fun WindowListPopup(
                         left = positionInWindow.x.toInt(),
                         top = positionInWindow.y.toInt(),
                         right = positionInWindow.x.toInt() + parentLayoutCoordinates.size.width,
-                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height
+                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height,
                     )
                 }
-            }
+            },
     )
 
     if (parentBounds == IntRect.Zero) return
@@ -146,14 +146,14 @@ fun WindowListPopup(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
-        popupContentSize = popupContentSize
+        popupContentSize = popupContentSize,
     )
 
     Dialog(
         onDismissRequest = {
             requestDismiss()
         },
-        properties = platformDialogProperties()
+        properties = platformDialogProperties(),
     ) {
         removePlatformDialogDefaultEffects()
 
@@ -167,7 +167,7 @@ fun WindowListPopup(
         AnimatedVisibility(
             visibleState = internalVisible,
             enter = fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f))),
-            exit = fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
+            exit = fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f))),
         ) {
             val baseColor = MiuixTheme.colorScheme.windowDimming
             val dimColor = if (enableWindowDim) baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue)) else Color.Transparent
@@ -183,10 +183,10 @@ fun WindowListPopup(
                                 } else {
                                     outsideDismissDeferred.value = true
                                 }
-                            }
+                            },
                         )
                     }
-                    .background(dimColor)
+                    .background(dimColor),
             )
         }
 
@@ -203,7 +203,7 @@ fun WindowListPopup(
                                 } else {
                                     outsideDismissDeferred.value = true
                                 }
-                            }
+                            },
                         )
                     }
                     .layout { measurable, constraints ->
@@ -217,15 +217,15 @@ fun WindowListPopup(
                             maxHeight?.roundToPx() ?: Int.MAX_VALUE,
                             safeWindowMaxHeightPx,
                             sideConstrainedMax,
-                            windowSize.height
+                            windowSize.height,
                         ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowSize.height))
                         val placeable = measurable.measure(
                             constraints.copy(
                                 minWidth = minWidthPx,
                                 minHeight = classicMinHeightPx.coerceAtMost(windowSize.height),
                                 maxHeight = finalMaxHeightPx,
-                                maxWidth = windowSize.width
-                            )
+                                maxWidth = windowSize.width,
+                            ),
                         )
                         val measuredSize = IntSize(placeable.width, placeable.height)
 
@@ -235,25 +235,25 @@ fun WindowListPopup(
                             layoutDirection,
                             measuredSize,
                             layoutInfo.popupMargin,
-                            alignment
+                            alignment,
                         )
 
                         layout(constraints.maxWidth, constraints.maxHeight) {
                             placeable.place(calculatedOffset)
                         }
-                    }
+                    },
             ) {
                 val popupAlphaAnim = remember { Animatable(0f) }
                 LaunchedEffect(internalVisible.targetState) {
                     if (internalVisible.targetState) {
                         popupAlphaAnim.animateTo(
                             1f,
-                            tween(durationMillis = 150, easing = DecelerateEasing(1.5f))
+                            tween(durationMillis = 150, easing = DecelerateEasing(1.5f)),
                         )
                     } else {
                         popupAlphaAnim.animateTo(
                             0f,
-                            tween(durationMillis = 300, easing = DecelerateEasing(1.5f))
+                            tween(durationMillis = 300, easing = DecelerateEasing(1.5f)),
                         )
                     }
                 }
@@ -275,7 +275,7 @@ fun WindowListPopup(
             }
         }
         BackHandler(
-            enabled = show.value
+            enabled = show.value,
         ) {
             if (internalVisible.currentState) {
                 requestDismiss()

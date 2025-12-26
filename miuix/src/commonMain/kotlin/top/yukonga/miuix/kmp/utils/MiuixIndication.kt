@@ -36,8 +36,7 @@ private const val HOLD_DOWN_ALPHA_DELTA = 0.10f
 class MiuixIndication(
     private val color: Color = Color.Black,
 ) : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode =
-        MiuixIndicationInstance(interactionSource, color)
+    override fun create(interactionSource: InteractionSource): DelegatableNode = MiuixIndicationInstance(interactionSource, color)
 
     override fun hashCode(): Int = color.hashCode()
 
@@ -71,7 +70,7 @@ class MiuixIndication(
                             pressedAnimation?.join()
                             animatedAlpha.animateTo(
                                 targetValue = targetAlpha,
-                                animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing)
+                                animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing),
                             )
                         }
                     }
@@ -82,7 +81,7 @@ class MiuixIndication(
                     coroutineScope.launch {
                         animatedAlpha.animateTo(
                             targetValue = targetAlpha,
-                            animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing)
+                            animationSpec = tween(durationMillis = ANIM_DURATION_MS, easing = LinearEasing),
                         )
                     }
             }
@@ -109,9 +108,9 @@ class MiuixIndication(
                     }
 
                     val stateChanged = previousPressed != isPressed ||
-                            previousHovered != isHovered ||
-                            previousFocused != isFocused ||
-                            previousHoldDown != isHoldDown
+                        previousHovered != isHovered ||
+                        previousFocused != isFocused ||
+                        previousHoldDown != isHoldDown
 
                     if (stateChanged) {
                         updateStates()

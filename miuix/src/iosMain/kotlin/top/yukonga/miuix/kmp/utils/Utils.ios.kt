@@ -44,7 +44,7 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
     usePlatformDefaultWidth = false,
     scrimColor = Color.Transparent,
-    usePlatformInsets = false
+    usePlatformInsets = false,
 )
 
 @Composable

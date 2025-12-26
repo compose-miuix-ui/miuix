@@ -51,7 +51,7 @@ fun IconButton(
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
     minHeight: Dp = IconButtonDefaults.MinHeight,
     minWidth: Dp = IconButtonDefaults.MinWidth,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -77,9 +77,11 @@ fun IconButton(
                 role = Role.Button,
                 indication = indication,
                 interactionSource = interactionSource,
-                onClick = onClick
+                onClick = onClick,
             )
-        } else Modifier
+        } else {
+            Modifier
+        }
     }
 
     Box(
@@ -88,7 +90,7 @@ fun IconButton(
             .clip(shape)
             .background(backgroundColor)
             .then(clickableModifier),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         content()
     }

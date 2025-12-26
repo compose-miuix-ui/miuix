@@ -92,7 +92,7 @@ fun SuperDialog(
     outsideMargin: DpSize = SuperDialogDefaults.outsideMargin,
     insideMargin: DpSize = SuperDialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     if (!show.value) return
 
@@ -109,7 +109,7 @@ fun SuperDialog(
         if (!isLargeScreen && imeBottom > 0) {
             slideOutVertically(
                 targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(350, easing = DecelerateEasing(0.8f))
+                animationSpec = tween(350, easing = DecelerateEasing(0.8f)),
             )
         } else {
             null
@@ -121,7 +121,7 @@ fun SuperDialog(
         enableWindowDim = enableWindowDim,
         dimAlpha = dimAlpha,
         exitTransition = exitTransition,
-        onDismissFinished = onDismissFinished
+        onDismissFinished = onDismissFinished,
     ) {
         SuperDialogContent(
             modifier = modifier,
@@ -136,12 +136,12 @@ fun SuperDialog(
             backProgress = backProgress,
             dialogHeightPx = dialogHeightPx,
             onDismissRequest = currentOnDismissRequest,
-            content = content
+            content = content,
         )
     }
 
     PredictiveBackHandler(
-        enabled = show.value
+        enabled = show.value,
     ) { progress ->
         try {
             progress.collect { event ->
@@ -164,7 +164,7 @@ fun SuperDialog(
 
 @Composable
 internal fun SuperDialogContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     title: String?,
     titleColor: Color,
     summary: String?,
@@ -176,7 +176,7 @@ internal fun SuperDialogContent(
     backProgress: Animatable<Float, *>,
     dialogHeightPx: MutableState<Int>,
     onDismissRequest: (() -> Unit)?,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val windowSize = getWindowSize()
@@ -197,18 +197,19 @@ internal fun SuperDialogContent(
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val rootBoxModifier = Modifier
         .then(
-            if (defaultWindowInsetsPadding)
+            if (defaultWindowInsetsPadding) {
                 Modifier
                     .imePadding()
                     .navigationBarsPadding()
                     .captionBarPadding()
-            else
+            } else {
                 Modifier
+            },
         )
         .fillMaxSize()
         .pointerInput(Unit) {
             detectTapGestures(
-                onTap = { currentOnDismiss?.invoke() }
+                onTap = { currentOnDismiss?.invoke() },
             )
         }
         .padding(horizontal = outsideMargin.width)
@@ -231,7 +232,7 @@ internal fun SuperDialogContent(
                 }
             } else {
                 val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
                 val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
                     derivedStateOf {
                         bottomPadding + outsideMargin.height
@@ -246,7 +247,7 @@ internal fun SuperDialogContent(
                     }
                     translationY = backProgress.value * maxOffset
                 }
-            }
+            },
         )
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click to prevent dismissal */ }
@@ -264,7 +265,7 @@ internal fun SuperDialogContent(
                     fontSize = MiuixTheme.textStyles.title4.fontSize,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
-                    color = titleColor
+                    color = titleColor,
                 )
             }
             summary?.let {
@@ -273,7 +274,7 @@ internal fun SuperDialogContent(
                     text = it,
                     fontSize = MiuixTheme.textStyles.body1.fontSize,
                     textAlign = TextAlign.Center,
-                    color = summaryColor
+                    color = summaryColor,
                 )
             }
             content()

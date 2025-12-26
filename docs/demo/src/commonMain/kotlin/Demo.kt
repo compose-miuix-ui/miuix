@@ -84,14 +84,14 @@ private fun DemoSelection() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "home",
     ) {
         composable("home") {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MiuixTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Column(
                     Modifier
@@ -100,14 +100,14 @@ private fun DemoSelection() {
                         .widthIn(max = 600.dp)
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     availableComponents.forEach { demo ->
                         TextButton(
                             text = demo.name,
                             onClick = { navController.navigate(demo.id) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.textButtonColorsPrimary()
+                            colors = ButtonDefaults.textButtonColorsPrimary(),
                         )
                     }
                 }

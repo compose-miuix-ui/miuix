@@ -18,7 +18,7 @@ val MiuixIcons.Basic.ArrowRight: ImageVector
             path(
                 fill = SolidColor(Color.Black),
                 fillAlpha = 1f,
-                pathFillType = PathFillType.EvenOdd
+                pathFillType = PathFillType.EvenOdd,
             ) {
                 moveTo(1.65f, 1.469f)
                 curveTo(1.929f, 1.19f, 2.381f, 1.19f, 2.66f, 1.469f)

@@ -21,8 +21,8 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Favorites
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -31,7 +31,7 @@ fun IconButtonDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -39,53 +39,53 @@ fun IconButtonDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Card(
-                insideMargin = PaddingValues(16.dp)
+                insideMargin = PaddingValues(16.dp),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                 ) {
                     IconButton(
                         modifier = Modifier,
-                        onClick = {}
+                        onClick = {},
                     ) {
                         Icon(
                             imageVector = MiuixIcons.More,
                             tint = MiuixTheme.colorScheme.onBackground,
-                            contentDescription = "More"
-                        )
-                    }
-                    IconButton(
-                        modifier = Modifier,
-                        onClick = {}
-                    ) {
-                        Icon(
-                            imageVector = MiuixIcons.Favorites,
-                            contentDescription = "Favorites"
+                            contentDescription = "More",
                         )
                     }
                     IconButton(
                         modifier = Modifier,
                         onClick = {},
-                        enabled = false
+                    ) {
+                        Icon(
+                            imageVector = MiuixIcons.Favorites,
+                            contentDescription = "Favorites",
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier,
+                        onClick = {},
+                        enabled = false,
                     ) {
                         Icon(
                             imageVector = MiuixIcons.More,
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                            contentDescription = "More"
+                            contentDescription = "More",
                         )
                     }
                     IconButton(
                         modifier = Modifier,
                         onClick = {},
-                        enabled = false
+                        enabled = false,
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Favorites,
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                            contentDescription = "Favorites"
+                            contentDescription = "Favorites",
                         )
                     }
                 }

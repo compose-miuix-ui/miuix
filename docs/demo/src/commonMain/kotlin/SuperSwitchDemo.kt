@@ -28,7 +28,7 @@ fun SuperSwitchDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,31 +36,31 @@ fun SuperSwitchDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var isChecked by remember { mutableStateOf(false) }
             var wifiEnabled by remember { mutableStateOf(false) }
 
             Card(
-                modifier = Modifier.weight(0.5f)
+                modifier = Modifier.weight(0.5f),
             ) {
                 SuperSwitch(
                     title = "Switch Option",
                     checked = isChecked,
-                    onCheckedChange = { isChecked = it }
+                    onCheckedChange = { isChecked = it },
                 )
                 SuperSwitch(
                     title = "WiFi",
                     summary = "Turn on to connect to wireless networks",
                     checked = wifiEnabled,
-                    onCheckedChange = { wifiEnabled = it }
+                    onCheckedChange = { wifiEnabled = it },
                 )
                 SuperSwitch(
                     title = "Disabled Switch",
                     summary = "This switch is currently unavailable",
                     checked = true,
                     onCheckedChange = {},
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

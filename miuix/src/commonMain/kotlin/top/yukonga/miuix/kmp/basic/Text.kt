@@ -90,7 +90,7 @@ fun Text(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = LocalTextStyles.current.main
+    style: TextStyle = LocalTextStyles.current.main,
 ) {
     val textColor = color.takeOrElse { style.color.takeOrElse { LocalContentColor.current } }
 
@@ -98,17 +98,17 @@ fun Text(
         text = text,
         modifier = modifier,
         style =
-            style.merge(
-                color = textColor,
-                fontSize = fontSize,
-                fontWeight = fontWeight,
-                textAlign = textAlign ?: TextAlign.Unspecified,
-                lineHeight = lineHeight,
-                fontFamily = fontFamily,
-                textDecoration = textDecoration,
-                fontStyle = fontStyle,
-                letterSpacing = letterSpacing,
-            ),
+        style.merge(
+            color = textColor,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = textAlign ?: TextAlign.Unspecified,
+            lineHeight = lineHeight,
+            fontFamily = fontFamily,
+            textDecoration = textDecoration,
+            fontStyle = fontStyle,
+            letterSpacing = letterSpacing,
+        ),
         onTextLayout = onTextLayout,
         overflow = overflow,
         softWrap = softWrap,
@@ -180,7 +180,7 @@ fun Text(
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
-    style: TextStyle = LocalTextStyles.current.main
+    style: TextStyle = LocalTextStyles.current.main,
 ) {
     val textColor = color.takeOrElse { style.color.takeOrElse { LocalContentColor.current } }
     val linkStyles = rememberTextLinkStyles()
@@ -191,17 +191,17 @@ fun Text(
         text = textWithMaterialLinkStyles,
         modifier = modifier,
         style =
-            style.merge(
-                color = textColor,
-                fontSize = fontSize,
-                fontWeight = fontWeight,
-                textAlign = textAlign ?: TextAlign.Unspecified,
-                lineHeight = lineHeight,
-                fontFamily = fontFamily,
-                textDecoration = textDecoration,
-                fontStyle = fontStyle,
-                letterSpacing = letterSpacing,
-            ),
+        style.merge(
+            color = textColor,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = textAlign ?: TextAlign.Unspecified,
+            lineHeight = lineHeight,
+            fontFamily = fontFamily,
+            textDecoration = textDecoration,
+            fontStyle = fontStyle,
+            letterSpacing = letterSpacing,
+        ),
         onTextLayout = onTextLayout,
         overflow = overflow,
         softWrap = softWrap,
@@ -216,26 +216,25 @@ fun Text(
 private fun createTextWithLinkStyles(
     text: AnnotatedString,
     linkStyles: TextLinkStyles,
-): AnnotatedString =
-    text.mapAnnotations { range ->
-        val link = range.item
-        when {
-            link is LinkAnnotation.Url && link.styles == null ->
-                (range as Range<LinkAnnotation.Url>).copy(link.copy(styles = linkStyles))
+): AnnotatedString = text.mapAnnotations { range ->
+    val link = range.item
+    when {
+        link is LinkAnnotation.Url && link.styles == null ->
+            (range as Range<LinkAnnotation.Url>).copy(link.copy(styles = linkStyles))
 
-            link is LinkAnnotation.Clickable && link.styles == null ->
-                (range as Range<LinkAnnotation.Clickable>).copy(link.copy(styles = linkStyles))
+        link is LinkAnnotation.Clickable && link.styles == null ->
+            (range as Range<LinkAnnotation.Clickable>).copy(link.copy(styles = linkStyles))
 
-            else -> range
-        }
+        else -> range
     }
+}
 
 @Composable
 private fun rememberTextLinkStyles(): TextLinkStyles {
     val primaryColor = MiuixTheme.colorScheme.primary
     return remember(primaryColor) {
         TextLinkStyles(
-            style = SpanStyle(color = primaryColor, textDecoration = TextDecoration.Underline)
+            style = SpanStyle(color = primaryColor, textDecoration = TextDecoration.Underline),
         )
     }
 }

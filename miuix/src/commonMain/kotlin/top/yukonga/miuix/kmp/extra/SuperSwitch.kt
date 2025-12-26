@@ -51,7 +51,7 @@ fun SuperSwitch(
     modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     holdDownState: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
     BasicComponent(
@@ -68,7 +68,7 @@ fun SuperSwitch(
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
-                switchColors = switchColors
+                switchColors = switchColors,
             )
         },
         bottomAction = bottomAction,
@@ -76,7 +76,7 @@ fun SuperSwitch(
             currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
         },
         holdDownState = holdDownState,
-        enabled = enabled
+        enabled = enabled,
     )
 }
 
@@ -86,13 +86,13 @@ private fun RowScope.SuperSwitchRightActions(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
-    switchColors: SwitchColors
+    switchColors: SwitchColors,
 ) {
     rightActions()
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,
-        colors = switchColors
+        colors = switchColors,
     )
 }

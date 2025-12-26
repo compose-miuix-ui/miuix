@@ -9,8 +9,14 @@ dependencies {
     implementation(projects.miuix)
 }
 
-val iconsSourceDir = rootProject.layout.projectDirectory.dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile
-val extendedIconsSourceDir = rootProject.layout.projectDirectory.dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon").asFile
+val iconsSourceDir =
+    rootProject.layout.projectDirectory
+        .dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .asFile
+val extendedIconsSourceDir =
+    rootProject.layout.projectDirectory
+        .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .asFile
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
 val docFileZh = project.file("../zh_CN/guide/icons.md")
@@ -30,15 +36,25 @@ tasks.register<JavaExec>("generateIcons") {
             outputDir.mkdirs()
         }
     }
-    args = listOf(
-        "--src", iconsSourceDir.absolutePath,
-        "--src", extendedIconsSourceDir.absolutePath,
-        "--out", outputDir.absolutePath,
-        "--light", lightColor,
-        "--dark", darkColor,
-        "--preserve-colors", preserve.toString(),
-        "--gen-doc", "true",
-        "--doc-file", docFile.absolutePath,
-        "--doc-file-zh", docFileZh.absolutePath
-    )
+    args =
+        listOf(
+            "--src",
+            iconsSourceDir.absolutePath,
+            "--src",
+            extendedIconsSourceDir.absolutePath,
+            "--out",
+            outputDir.absolutePath,
+            "--light",
+            lightColor,
+            "--dark",
+            darkColor,
+            "--preserve-colors",
+            preserve.toString(),
+            "--gen-doc",
+            "true",
+            "--doc-file",
+            docFile.absolutePath,
+            "--doc-file-zh",
+            docFileZh.absolutePath,
+        )
 }

@@ -103,11 +103,11 @@ fun TextComponent(
                         RoundedRectanglePainter(),
                         "Icon",
                         Modifier.padding(end = 12.dp),
-                        Color(0xFFFF5B29)
+                        Color(0xFFFF5B29),
                     )
                 },
                 "Option 1",
-                "Red"
+                "Red",
             ),
             SpinnerEntry(
                 icon = {
@@ -115,11 +115,11 @@ fun TextComponent(
                         RoundedRectanglePainter(),
                         "Icon",
                         Modifier.padding(end = 12.dp),
-                        Color(0xFF36D167)
+                        Color(0xFF36D167),
                     )
                 },
                 "Option 2",
-                "Green"
+                "Green",
             ),
             SpinnerEntry(
                 icon = {
@@ -127,11 +127,11 @@ fun TextComponent(
                         RoundedRectanglePainter(),
                         "Icon",
                         Modifier.padding(end = 12.dp),
-                        Color(0xFF3482FF)
+                        Color(0xFF3482FF),
                     )
                 },
                 "Option 3",
-                "Blue"
+                "Blue",
             ),
             SpinnerEntry(
                 icon = {
@@ -139,11 +139,11 @@ fun TextComponent(
                         RoundedRectanglePainter(),
                         "Icon",
                         Modifier.padding(end = 12.dp),
-                        Color(0xFFFFB21D)
+                        Color(0xFFFFB21D),
                     )
                 },
                 "Option 4",
-                "Yellow"
+                "Yellow",
             ),
         )
     }
@@ -155,7 +155,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         BasicComponent(
             title = "Title",
@@ -163,7 +163,7 @@ fun TextComponent(
             leftAction = {
                 Text(
                     text = "Left",
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
             },
             rightActions = {
@@ -171,7 +171,7 @@ fun TextComponent(
                 Spacer(Modifier.width(8.dp))
                 Text(text = "Right2")
             },
-            enabled = true
+            enabled = true,
         )
         BasicComponent(
             title = "Title",
@@ -180,21 +180,21 @@ fun TextComponent(
                 Text(
                     text = "Left",
                     modifier = Modifier.padding(end = 8.dp),
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                 )
             },
             rightActions = {
                 Text(
                     text = "Right1",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = "Right2",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                 )
             },
-            enabled = false
+            enabled = false,
         )
     }
 
@@ -202,34 +202,34 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Checkbox(
                 checked = checkbox.value,
-                onCheckedChange = { checkbox.value = it }
+                onCheckedChange = { checkbox.value = it },
             )
             Checkbox(
                 checked = checkboxTrue.value,
                 onCheckedChange = { checkboxTrue.value = it },
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
             )
             Checkbox(
                 checked = false,
                 onCheckedChange = { },
                 modifier = Modifier.padding(start = 8.dp),
-                enabled = false
+                enabled = false,
             )
             Checkbox(
                 checked = true,
                 onCheckedChange = { },
                 modifier = Modifier.padding(start = 8.dp),
-                enabled = false
+                enabled = false,
             )
         }
         SuperCheckbox(
@@ -240,7 +240,7 @@ fun TextComponent(
                 Text(
                     modifier = Modifier.padding(end = 6.dp),
                     text = superRightCheckbox.value,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                 )
             },
             onCheckedChange = {
@@ -269,34 +269,34 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Switch(
                 checked = switch.value,
-                onCheckedChange = { switch.value = it }
+                onCheckedChange = { switch.value = it },
             )
             Switch(
                 checked = switchTrue.value,
                 onCheckedChange = { switchTrue.value = it },
-                modifier = Modifier.padding(start = 6.dp)
+                modifier = Modifier.padding(start = 6.dp),
             )
             Switch(
                 checked = false,
                 onCheckedChange = { },
                 modifier = Modifier.padding(start = 6.dp),
-                enabled = false
+                enabled = false,
             )
             Switch(
                 checked = true,
                 onCheckedChange = { },
                 modifier = Modifier.padding(start = 6.dp),
-                enabled = false
+                enabled = false,
             )
         }
         SuperSwitch(
@@ -311,7 +311,7 @@ fun TextComponent(
         AnimatedVisibility(
             visible = superSwitchAnimState.value,
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
         ) {
             SuperSwitch(
                 title = "Switch",
@@ -320,7 +320,7 @@ fun TextComponent(
                     Text(
                         modifier = Modifier.padding(end = 6.dp),
                         text = superSwitch.value,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 onCheckedChange = {
@@ -341,18 +341,18 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         SuperArrow(
             title = "Arrow",
             leftAction = {
                 Box(
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 ) {
                     Icon(
                         imageVector = MiuixIcons.Contacts,
                         contentDescription = "Personal",
-                        tint = MiuixTheme.colorScheme.onBackground
+                        tint = MiuixTheme.colorScheme.onBackground,
                     )
                 }
             },
@@ -360,7 +360,7 @@ fun TextComponent(
                 Text(
                     modifier = Modifier.padding(end = 8.dp),
                     text = "Right",
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                 )
             },
             onClick = {},
@@ -371,7 +371,7 @@ fun TextComponent(
                 Text(
                     modifier = Modifier.padding(end = 8.dp),
                     text = "${(volume * 100).toInt()}%",
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                 )
             },
             onClick = { showVolumeDialog.value = true },
@@ -379,9 +379,9 @@ fun TextComponent(
             bottomAction = {
                 Slider(
                     value = volume,
-                    onValueChange = { volume = it }
+                    onValueChange = { volume = it },
                 )
-            }
+            },
         )
         SuperArrow(
             title = "Disabled Arrow",
@@ -389,10 +389,10 @@ fun TextComponent(
                 Text(
                     modifier = Modifier.padding(end = 8.dp),
                     text = "Right",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                 )
             },
-            enabled = false
+            enabled = false,
         )
     }
 
@@ -400,7 +400,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         SuperArrow(
             title = "SuperDialog",
@@ -408,7 +408,7 @@ fun TextComponent(
             onClick = {
                 showSuperDialog.value = true
             },
-            holdDownState = showSuperDialog.value
+            holdDownState = showSuperDialog.value,
         )
         SuperArrow(
             title = "WindowDialog",
@@ -416,7 +416,7 @@ fun TextComponent(
             onClick = {
                 showWindowDialog.value = true
             },
-            holdDownState = showWindowDialog.value
+            holdDownState = showWindowDialog.value,
         )
     }
 
@@ -424,7 +424,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         SuperArrow(
             title = "SuperBottomSheet",
@@ -432,7 +432,7 @@ fun TextComponent(
             onClick = {
                 showSuperBottomSheet.value = true
             },
-            holdDownState = showSuperBottomSheet.value
+            holdDownState = showSuperBottomSheet.value,
         )
         SuperArrow(
             title = "WindowBottomSheet",
@@ -440,7 +440,7 @@ fun TextComponent(
             onClick = {
                 showWindowBottomSheet.value = true
             },
-            holdDownState = showWindowBottomSheet.value
+            holdDownState = showWindowBottomSheet.value,
         )
     }
 
@@ -448,7 +448,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         SuperDropdown(
             title = "SuperDropdown",
@@ -467,14 +467,14 @@ fun TextComponent(
             items = listOf("Option 3"),
             selectedIndex = 0,
             onSelectedIndexChange = {},
-            enabled = false
+            enabled = false,
         )
         WindowDropdown(
             title = "Disabled WindowDropdown",
             items = listOf("Option 4"),
             selectedIndex = 0,
             onSelectedIndexChange = {},
-            enabled = false
+            enabled = false,
         )
     }
 
@@ -482,7 +482,7 @@ fun TextComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
     ) {
         SuperSpinner(
             title = "SuperSpinner",
@@ -517,14 +517,14 @@ fun TextComponent(
             items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
             selectedIndex = 0,
             onSelectedIndexChange = {},
-            enabled = false
+            enabled = false,
         )
         WindowSpinner(
             title = "Disabled WindowSpinner",
             items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
             selectedIndex = 0,
             onSelectedIndexChange = {},
-            enabled = false
+            enabled = false,
         )
     }
 
@@ -545,17 +545,17 @@ fun SuperDialog(
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false
-        }
+        },
     ) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             TextButton(
                 text = "Cancel",
                 onClick = {
                     showDialog.value = false
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
@@ -564,7 +564,7 @@ fun SuperDialog(
                     showDialog.value = false
                 },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }
@@ -572,7 +572,7 @@ fun SuperDialog(
 
 @Composable
 fun WindowDialog(
-    showDialog: MutableState<Boolean>
+    showDialog: MutableState<Boolean>,
 ) {
     WindowDialog(
         title = "WindowDialog",
@@ -580,18 +580,18 @@ fun WindowDialog(
         show = showDialog,
         onDismissRequest = {
             showDialog.value = false
-        }
+        },
     ) {
         val state = LocalWindowDialogState.current
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             TextButton(
                 text = "Cancel",
                 onClick = {
                     state.invoke()
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
@@ -600,7 +600,7 @@ fun WindowDialog(
                     state.invoke()
                 },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }
@@ -610,13 +610,13 @@ fun WindowDialog(
 fun SliderDialog(
     showDialog: MutableState<Boolean>,
     volumeState: () -> Float,
-    onVolumeChange: (Float) -> Unit
+    onVolumeChange: (Float) -> Unit,
 ) {
     SuperDialog(
         title = "Adjust Volume",
         summary = "Enter 0-100",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showDialog.value = false },
     ) {
         var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
         TextField(
@@ -633,13 +633,13 @@ fun SliderDialog(
                     val clamped = num.coerceIn(0, 100)
                     text = clamped.toString()
                 }
-            }
+            },
         )
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             TextButton(
                 text = "Cancel",
                 onClick = { showDialog.value = false },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
@@ -651,7 +651,7 @@ fun SliderDialog(
                     showDialog.value = false
                 },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }
@@ -661,7 +661,7 @@ fun SliderDialog(
 fun SuperBottomSheet(
     showBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
-    bottomSheetSuperSwitchState: MutableState<Boolean>
+    bottomSheetSuperSwitchState: MutableState<Boolean>,
 ) {
     val dropdownOptions = listOf("Option 1", "Option 2")
     SuperBottomSheet(
@@ -677,7 +677,7 @@ fun SuperBottomSheet(
                 Icon(
                     imageVector = MiuixIcons.Close,
                     contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground
+                    tint = MiuixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -688,10 +688,10 @@ fun SuperBottomSheet(
                 Icon(
                     imageVector = MiuixIcons.Ok,
                     contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground
+                    tint = MiuixTheme.colorScheme.onBackground,
                 )
             }
-        }
+        },
     ) {
         LazyColumn {
             item {
@@ -699,33 +699,33 @@ fun SuperBottomSheet(
                 Slider(
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
                 )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = MiuixTheme.colorScheme.secondaryContainer,
-                    )
+                    ),
                 ) {
                     SuperDropdown(
                         title = "SuperDropdown",
                         items = dropdownOptions,
                         selectedIndex = bottomSheetDropdownSelectedOption.value,
-                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
+                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption },
                     )
                     SuperSwitch(
                         title = "SuperSwitch",
                         checked = bottomSheetSuperSwitchState.value,
                         onCheckedChange = {
                             bottomSheetSuperSwitchState.value = it
-                        }
+                        },
                     )
                 }
                 Spacer(
                     Modifier.padding(
                         bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-                    )
+                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                    ),
                 )
             }
         }
@@ -736,7 +736,7 @@ fun SuperBottomSheet(
 fun WindowBottomSheet(
     showBottomSheet: MutableState<Boolean>,
     bottomSheetDropdownSelectedOption: MutableState<Int>,
-    bottomSheetSuperSwitchState: MutableState<Boolean>
+    bottomSheetSuperSwitchState: MutableState<Boolean>,
 ) {
     val dropdownOptions = listOf("Option 1", "Option 2")
     var state: (() -> Unit)? = null
@@ -753,7 +753,7 @@ fun WindowBottomSheet(
                 Icon(
                     imageVector = MiuixIcons.Close,
                     contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground
+                    tint = MiuixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -764,10 +764,10 @@ fun WindowBottomSheet(
                 Icon(
                     imageVector = MiuixIcons.Ok,
                     contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground
+                    tint = MiuixTheme.colorScheme.onBackground,
                 )
             }
-        }
+        },
     ) {
         state = LocalWindowBottomSheetState.current
         LazyColumn {
@@ -776,33 +776,33 @@ fun WindowBottomSheet(
                 Slider(
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
                 )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = MiuixTheme.colorScheme.secondaryContainer,
-                    )
+                    ),
                 ) {
                     WindowDropdown(
                         title = "WindowDropdown",
                         items = dropdownOptions,
                         selectedIndex = bottomSheetDropdownSelectedOption.value,
-                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption }
+                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption },
                     )
                     SuperSwitch(
                         title = "SuperSwitch",
                         checked = bottomSheetSuperSwitchState.value,
                         onCheckedChange = {
                             bottomSheetSuperSwitchState.value = it
-                        }
+                        },
                     )
                 }
                 Spacer(
                     Modifier.padding(
                         bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-                    )
+                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                    ),
                 )
             }
         }
@@ -810,7 +810,7 @@ fun WindowBottomSheet(
 }
 
 class RoundedRectanglePainter(
-    private val cornerRadius: Dp = 6.dp
+    private val cornerRadius: Dp = 6.dp,
 ) : Painter() {
     override val intrinsicSize = Size.Unspecified
 
@@ -818,7 +818,7 @@ class RoundedRectanglePainter(
         drawRoundRect(
             color = Color.White,
             size = Size(size.width, size.height),
-            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx()),
         )
     }
 }

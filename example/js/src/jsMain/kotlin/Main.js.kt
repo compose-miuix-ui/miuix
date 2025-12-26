@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.ComposeViewport
 
@@ -16,8 +15,6 @@ import androidx.compose.ui.window.ComposeViewport
 fun main() {
     hideLoading()
     ComposeViewport(viewportContainerId = "composeApp") {
-
-        LocalLayoutDirection.current
         var insetTopPx by remember { mutableStateOf(0.0) }
         var insetBottomPx by remember { mutableStateOf(0.0) }
         var insetStartPx by remember { mutableStateOf(0.0) }
@@ -35,9 +32,9 @@ fun main() {
                 top = Dp(insetTopPx.toFloat()),
                 bottom = Dp(insetBottomPx.toFloat()),
                 start = Dp(insetStartPx.toFloat()),
-                end = Dp(insetEndPx.toFloat())
+                end = Dp(insetEndPx.toFloat()),
             ),
-            enableOverScroll = isTouchEnabled()
+            enableOverScroll = isTouchEnabled(),
         )
     }
 }

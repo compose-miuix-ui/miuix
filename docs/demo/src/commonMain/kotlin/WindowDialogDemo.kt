@@ -28,7 +28,7 @@ fun WindowDialogDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,25 +36,25 @@ fun WindowDialogDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val showDialog = remember { mutableStateOf(false) }
             Card {
                 TextButton(
                     text = "Show a WindowDialog",
-                    onClick = { showDialog.value = true }
+                    onClick = { showDialog.value = true },
                 )
                 WindowDialog(
                     title = "WindowDialog Title",
                     summary = "This is a window-level dialog that does not require MiuixPopupHost.",
                     show = showDialog,
-                    onDismissRequest = { showDialog.value = false }
+                    onDismissRequest = { showDialog.value = false },
                 ) {
                     val dismiss = LocalWindowDialogState.current
                     TextButton(
                         text = "Confirm",
                         onClick = { dismiss?.invoke() },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

@@ -53,7 +53,7 @@ fun SuperCheckbox(
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     holdDownState: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
     val leftActionComposable = if (checkboxLocation == CheckboxLocation.Left) {
@@ -63,10 +63,12 @@ fun SuperCheckbox(
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
                 checkboxColors = checkboxColors,
-                insideMargin = insideMargin
+                insideMargin = insideMargin,
             )
         }
-    } else null
+    } else {
+        null
+    }
 
     BasicComponent(
         modifier = modifier,
@@ -83,7 +85,7 @@ fun SuperCheckbox(
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
-                checkboxColors = checkboxColors
+                checkboxColors = checkboxColors,
             )
         },
         bottomAction = bottomAction,
@@ -91,7 +93,7 @@ fun SuperCheckbox(
             currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
         },
         holdDownState = holdDownState,
-        enabled = enabled
+        enabled = enabled,
     )
 }
 
@@ -101,14 +103,14 @@ private fun SuperCheckboxLeftAction(
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     checkboxColors: CheckboxColors,
-    insideMargin: PaddingValues
+    insideMargin: PaddingValues,
 ) {
     Checkbox(
         modifier = Modifier.padding(end = insideMargin.calculateLeftPadding(LayoutDirection.Ltr)),
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,
-        colors = checkboxColors
+        colors = checkboxColors,
     )
 }
 
@@ -119,7 +121,7 @@ private fun RowScope.SuperCheckboxRightActions(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
-    checkboxColors: CheckboxColors
+    checkboxColors: CheckboxColors,
 ) {
     rightActions()
     if (checkboxLocation == CheckboxLocation.Right) {
@@ -127,7 +129,7 @@ private fun RowScope.SuperCheckboxRightActions(
             checked = checked,
             onCheckedChange = onCheckedChange,
             enabled = enabled,
-            colors = checkboxColors
+            colors = checkboxColors,
         )
     }
 }

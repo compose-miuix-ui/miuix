@@ -27,28 +27,27 @@ fun SmallTitleDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-
         Column(
             Modifier
                 .padding(16.dp)
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Card {
                 Surface {
                     Column {
                         SmallTitle(
-                            text = "Small Title"
+                            text = "Small Title",
                         )
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 12.dp),
-                            insideMargin = PaddingValues(16.dp)
+                            insideMargin = PaddingValues(16.dp),
                         ) {
                             Text("This is a card with a Text inside it.")
                         }

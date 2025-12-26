@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.Rename
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -32,7 +32,7 @@ fun IconDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -40,10 +40,10 @@ fun IconDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Card(
-                insideMargin = PaddingValues(16.dp)
+                insideMargin = PaddingValues(16.dp),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
@@ -51,22 +51,22 @@ fun IconDemo() {
                     Icon(
                         imageVector = MiuixIcons.Contacts,
                         contentDescription = "Personal",
-                        tint = MiuixTheme.colorScheme.onBackground
+                        tint = MiuixTheme.colorScheme.onBackground,
                     )
                     Icon(
                         imageVector = MiuixIcons.Settings,
                         contentDescription = "Settings",
-                        tint = MiuixTheme.colorScheme.onBackground
+                        tint = MiuixTheme.colorScheme.onBackground,
                     )
                     Icon(
                         imageVector = MiuixIcons.Edit,
                         contentDescription = "Blue Edit",
-                        tint = Color.Blue
+                        tint = Color.Blue,
                     )
                     Icon(
                         imageVector = MiuixIcons.Rename,
                         contentDescription = "Green Rename",
-                        tint = Color.Green
+                        tint = Color.Green,
                     )
                 }
             }

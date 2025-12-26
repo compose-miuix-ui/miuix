@@ -53,7 +53,7 @@ android {
     }
     base {
         archivesName.set(
-            "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})"
+            "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})",
         )
     }
     buildTypes {
@@ -76,6 +76,7 @@ android {
 
 androidComponents {
     onVariants(selector().withBuildType("release")) {
-        it.packaging.resources.excludes.add("**")
+        it.packaging.resources.excludes
+            .add("**")
     }
 }

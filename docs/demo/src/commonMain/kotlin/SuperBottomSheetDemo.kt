@@ -29,7 +29,7 @@ fun SuperBottomSheetDemo() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(
                 Modifier
@@ -37,23 +37,23 @@ fun SuperBottomSheetDemo() {
                     .widthIn(max = 600.dp)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 val showBottomSheet = remember { mutableStateOf(false) }
                 Card {
                     TextButton(
                         text = "Show a BottomSheet",
-                        onClick = { showBottomSheet.value = true }
+                        onClick = { showBottomSheet.value = true },
                     )
                     SuperBottomSheet(
                         title = "BottomSheet Title",
                         show = showBottomSheet,
-                        onDismissRequest = { showBottomSheet.value = false } // Close bottom sheet
+                        onDismissRequest = { showBottomSheet.value = false }, // Close bottom sheet
                     ) {
                         TextButton(
                             text = "Confirm",
                             onClick = { showBottomSheet.value = false }, // Close bottom sheet
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                         )
                     }
                 }

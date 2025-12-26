@@ -29,6 +29,6 @@ actual fun platformIsTouchEnabled(): Boolean {
     if (hasOnTouchStart) return true
 
     val maxTouchPoints = (js("navigator.maxTouchPoints") as? Int ?: 0) +
-            (js("navigator.msMaxTouchPoints") as? Int ?: 0)
+        (js("navigator.msMaxTouchPoints") as? Int ?: 0)
     return maxTouchPoints > 0
 }

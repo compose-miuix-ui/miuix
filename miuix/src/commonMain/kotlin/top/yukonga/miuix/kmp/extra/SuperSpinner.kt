@@ -133,7 +133,7 @@ fun SuperSpinner(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
             if (itemsNotEmpty) {
                 SuperSpinnerPopup(
@@ -143,14 +143,14 @@ fun SuperSpinner(
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
-                    onSelectedIndexChange = onSelectedIndexChange
+                    onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
         },
         bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
-        enabled = actualEnabled
+        enabled = actualEnabled,
     )
 }
 
@@ -162,7 +162,7 @@ private fun SuperSpinnerPopup(
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     SuperListPopup(
@@ -171,7 +171,7 @@ private fun SuperSpinnerPopup(
         onDismissRequest = {
             isDropdownExpanded.value = false
         },
-        maxHeight = maxHeight
+        maxHeight = maxHeight,
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
@@ -182,7 +182,7 @@ private fun SuperSpinnerPopup(
                         isSelected = selectedIndex == index,
                         index = index,
                         dialogMode = false,
-                        spinnerColors = spinnerColors
+                        spinnerColors = spinnerColors,
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
@@ -200,7 +200,7 @@ private fun RowScope.SuperSpinnerRightActions(
     itemsNotEmpty: Boolean,
     items: List<SpinnerEntry>,
     selectedIndex: Int,
-    actionColor: Color
+    actionColor: Color,
 ) {
     if (showValue && itemsNotEmpty) {
         Text(
@@ -210,7 +210,7 @@ private fun RowScope.SuperSpinnerRightActions(
             color = actionColor,
             textAlign = TextAlign.End,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 2,
         )
     }
     Image(
@@ -220,7 +220,7 @@ private fun RowScope.SuperSpinnerRightActions(
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowUpDown,
         colorFilter = ColorFilter.tint(actionColor),
-        contentDescription = null
+        contentDescription = null,
     )
 }
 
@@ -299,7 +299,7 @@ fun SuperSpinner(
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
                 selectedIndex = selectedIndex,
-                actionColor = actionColor
+                actionColor = actionColor,
             )
         },
         onClick = handleClick,
@@ -316,7 +316,7 @@ fun SuperSpinner(
         isDropdownExpanded = isDropdownExpanded,
         hapticFeedback = hapticFeedback,
         spinnerColors = spinnerColors,
-        onSelectedIndexChange = onSelectedIndexChange
+        onSelectedIndexChange = onSelectedIndexChange,
     )
 }
 
@@ -326,11 +326,11 @@ private fun SuperSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    popupModifier: Modifier,
+    popupModifier: Modifier = Modifier,
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?
+    onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     SuperDialog(
@@ -352,7 +352,7 @@ private fun SuperSpinnerDialog(
                                 isSelected = selectedIndex == index,
                                 index = index,
                                 dialogMode = true,
-                                spinnerColors = spinnerColors
+                                spinnerColors = spinnerColors,
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
@@ -366,9 +366,9 @@ private fun SuperSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { isDropdownExpanded.value = false }
+                        onClick = { isDropdownExpanded.value = false },
                     )
-                }
+                },
             ) { measurables, constraints ->
                 if (measurables.size != 2) {
                     layout(0, 0) { }
@@ -376,8 +376,8 @@ private fun SuperSpinnerDialog(
                     val button = measurables[1].measure(constraints)
                     val lazyList = measurables[0].measure(
                         constraints.copy(
-                            maxHeight = constraints.maxHeight - button.height
-                        )
+                            maxHeight = constraints.maxHeight - button.height,
+                        ),
                     )
                     layout(constraints.maxWidth, lazyList.height + button.height) {
                         lazyList.place(0, 0)
@@ -385,7 +385,7 @@ private fun SuperSpinnerDialog(
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -416,13 +416,13 @@ fun SpinnerItemImpl(
         Triple(
             spinnerColors.selectedContentColor,
             spinnerColors.selectedSummaryColor,
-            spinnerColors.selectedContainerColor
+            spinnerColors.selectedContainerColor,
         )
     } else {
         Triple(
             spinnerColors.contentColor,
             spinnerColors.summaryColor,
-            spinnerColors.containerColor
+            spinnerColors.containerColor,
         )
     }
 
@@ -432,25 +432,28 @@ fun SpinnerItemImpl(
         .clickable { onSelectedIndexChange(index) }
         .background(backgroundColor)
         .then(
-            if (dialogMode) Modifier
-                .heightIn(min = 56.dp)
-                .widthIn(min = 200.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 28.dp)
-            else Modifier.padding(horizontal = 20.dp)
+            if (dialogMode) {
+                Modifier
+                    .heightIn(min = 56.dp)
+                    .widthIn(min = 200.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp)
+            } else {
+                Modifier.padding(horizontal = 20.dp)
+            },
         )
         .padding(top = additionalTopPadding, bottom = additionalBottomPadding)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = itemModifier
+        modifier = itemModifier,
     ) {
         val contentRowModifier = if (dialogMode) Modifier else Modifier.widthIn(max = 216.dp)
         Row(
             modifier = contentRowModifier,
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Start,
         ) {
             entry.icon?.let {
                 it(Modifier.sizeIn(minWidth = 26.dp, minHeight = 26.dp).padding(end = 12.dp))
@@ -461,14 +464,14 @@ fun SpinnerItemImpl(
                         text = it,
                         fontSize = MiuixTheme.textStyles.body1.fontSize,
                         fontWeight = FontWeight.Medium,
-                        color = titleColor
+                        color = titleColor,
                     )
                 }
                 entry.summary?.let {
                     Text(
                         text = it,
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = summaryColor
+                        color = summaryColor,
                     )
                 }
             }
@@ -493,18 +496,16 @@ object SpinnerDefaults {
         selectedContentColor: Color = MiuixTheme.colorScheme.primary,
         selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
         selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary
-    ): SpinnerColors {
-        return SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor
-        )
-    }
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary,
+    ): SpinnerColors = SpinnerColors(
+        contentColor = contentColor,
+        summaryColor = summaryColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedSummaryColor = selectedSummaryColor,
+        selectedContainerColor = selectedContainerColor,
+        selectedIndicatorColor = selectedIndicatorColor,
+    )
 
     @Composable
     fun dialogSpinnerColors(
@@ -514,18 +515,16 @@ object SpinnerDefaults {
         selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
         selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
         selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer
-    ): SpinnerColors {
-        return SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor
-        )
-    }
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+    ): SpinnerColors = SpinnerColors(
+        contentColor = contentColor,
+        summaryColor = summaryColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedSummaryColor = selectedSummaryColor,
+        selectedContainerColor = selectedContainerColor,
+        selectedIndicatorColor = selectedIndicatorColor,
+    )
 }
 
 @Immutable
@@ -536,7 +535,7 @@ data class SpinnerColors(
     val selectedContentColor: Color,
     val selectedSummaryColor: Color,
     val selectedContainerColor: Color,
-    val selectedIndicatorColor: Color
+    val selectedIndicatorColor: Color,
 )
 
 /**
@@ -545,5 +544,5 @@ data class SpinnerColors(
 data class SpinnerEntry(
     val icon: @Composable ((Modifier) -> Unit)? = null,
     val title: String? = null,
-    val summary: String? = null
+    val summary: String? = null,
 )

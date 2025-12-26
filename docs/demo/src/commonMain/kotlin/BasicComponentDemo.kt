@@ -28,7 +28,7 @@ fun BasicComponentDemo() {
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             Modifier
@@ -36,17 +36,17 @@ fun BasicComponentDemo() {
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Card {
                 BasicComponent(
                     title = "BasicComponent",
-                    summary = "Without onClick"
+                    summary = "Without onClick",
                 )
                 BasicComponent(
                     title = "Wi-Fi",
                     summary = "Connected to MIUI-WiFi",
-                    onClick = { /* Handle click event */ }
+                    onClick = { /* Handle click event */ },
                 )
                 BasicComponent(
                     title = "Nickname",
@@ -56,15 +56,15 @@ fun BasicComponentDemo() {
                             modifier = Modifier.padding(end = 16.dp),
                             imageVector = MiuixIcons.Contacts,
                             contentDescription = "Avatar Icon",
-                            tint = MiuixTheme.colorScheme.onBackground
+                            tint = MiuixTheme.colorScheme.onBackground,
                         )
                     },
-                    onClick = { /* Handle click event */ }
+                    onClick = { /* Handle click event */ },
                 )
                 BasicComponent(
                     title = "Mobile Network",
                     summary = "SIM card not inserted",
-                    enabled = false
+                    enabled = false,
                 )
             }
         }

@@ -39,11 +39,11 @@ import kotlin.math.sign
 @Stable
 fun Modifier.overScrollVertical(
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
+    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
 ): Modifier = overScrollOutOfBound(
     isVertical = true,
     nestedScrollToParent = nestedScrollToParent,
-    isEnabled = isEnabled
+    isEnabled = isEnabled,
 )
 
 /**
@@ -52,11 +52,11 @@ fun Modifier.overScrollVertical(
 @Stable
 fun Modifier.overScrollHorizontal(
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
+    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
 ): Modifier = overScrollOutOfBound(
     isVertical = false,
     nestedScrollToParent = nestedScrollToParent,
-    isEnabled = isEnabled
+    isEnabled = isEnabled,
 )
 
 /**
@@ -71,7 +71,7 @@ fun Modifier.overScrollHorizontal(
 fun Modifier.overScrollOutOfBound(
     isVertical: Boolean = true,
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS }
+    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
 ): Modifier = composed {
     if (!isEnabled()) return@composed this
 
@@ -177,7 +177,9 @@ fun Modifier.overScrollOutOfBound(
 
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPreScroll(available, source)
-                } else Offset.Zero
+                } else {
+                    Offset.Zero
+                }
 
                 val realAvailable = available - parentConsumed
                 val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
@@ -199,8 +201,11 @@ fun Modifier.overScrollOutOfBound(
                         applyDrag(actualConsumed)
                     }
 
-                    return if (currentIsVertical) Offset(parentConsumed.x, actualConsumed + parentConsumed.y)
-                    else Offset(actualConsumed + parentConsumed.x, parentConsumed.y)
+                    return if (currentIsVertical) {
+                        Offset(parentConsumed.x, actualConsumed + parentConsumed.y)
+                    } else {
+                        Offset(actualConsumed + parentConsumed.x, parentConsumed.y)
+                    }
                 }
 
                 applyDrag(delta)
@@ -221,7 +226,9 @@ fun Modifier.overScrollOutOfBound(
 
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPostScroll(consumed, available, source)
-                } else Offset.Zero
+                } else {
+                    Offset.Zero
+                }
 
                 val realAvailable = available - parentConsumed
                 val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
@@ -244,7 +251,9 @@ fun Modifier.overScrollOutOfBound(
 
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPreFling(available)
-                } else Velocity.Zero
+                } else {
+                    Velocity.Zero
+                }
 
                 val realAvailable = available - parentConsumed
                 val velocity = if (currentIsVertical) realAvailable.y else realAvailable.x
@@ -253,10 +262,14 @@ fun Modifier.overScrollOutOfBound(
                     if (sign(velocity) != sign(offset)) {
                         startSpringAnimation(velocity)
                         // Optimize speed and feel to prevent violent throwing
-                        return parentConsumed + if (currentIsVertical) Velocity(
-                            0f,
-                            realAvailable.y / 2.13333f
-                        ) else Velocity(realAvailable.x / 2.13333f, 0f)
+                        return parentConsumed + if (currentIsVertical) {
+                            Velocity(
+                                0f,
+                                realAvailable.y / 2.13333f,
+                            )
+                        } else {
+                            Velocity(realAvailable.x / 2.13333f, 0f)
+                        }
                     } else {
                         startSpringAnimation(velocity)
                         return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
@@ -280,7 +293,9 @@ fun Modifier.overScrollOutOfBound(
 
                 val parentConsumed = if (currentNestedScrollToParent) {
                     dispatcher.dispatchPostFling(consumed, available)
-                } else Velocity.Zero
+                } else {
+                    Velocity.Zero
+                }
 
                 val realAvailable = available - parentConsumed
                 val velocity = (if (currentIsVertical) realAvailable.y else realAvailable.x) / 1.53333f // attenuation speed
@@ -298,7 +313,6 @@ fun Modifier.overScrollOutOfBound(
             if (currentIsVertical) translationY = offset else translationX = offset
         }
 }
-
 
 /**
  * OverScrollState is used to control the overscroll effect.
