@@ -20,7 +20,7 @@ kotlin {
     android {
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
         compileSdk = BuildConfig.COMPILE_SDK
-        namespace = BuildConfig.LIBRARY_ID
+        namespace = "${BuildConfig.LIBRARY_ID}.icon"
     }
 
     jvm("desktop")
