@@ -9,6 +9,7 @@ import android.os.Build
 import android.view.RoundedCorner
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -58,12 +59,16 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     decorFitsSystemWindows = false,
 )
 
+@SuppressLint("NewApi")
 @Composable
 actual fun RemovePlatformDialogDefaultEffects() {
     val parent = LocalView.current.parent
-    val provider = parent as? DialogWindowProvider
-    val window = provider?.window
-    window?.setWindowAnimations(0)
-    window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-    window?.setDimAmount(0f)
+    DisposableEffect(parent) {
+        val provider = parent as? DialogWindowProvider
+        val window = provider?.window
+        window?.setWindowAnimations(0)
+        window?.setDimAmount(0f)
+        window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        onDispose { }
+    }
 }

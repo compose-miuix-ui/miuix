@@ -89,12 +89,12 @@ class MiuixPopupUtils {
         private val DialogDimEnter: EnterTransition =
             fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
         private val DialogDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(260, easing = DecelerateEasing(1.5f)))
 
         private val PopupDimEnter: EnterTransition =
-            fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
+            fadeIn(animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f))
         private val PopupDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
 
         @Composable
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {

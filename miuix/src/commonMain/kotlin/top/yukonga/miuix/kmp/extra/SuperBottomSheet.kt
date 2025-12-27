@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -247,11 +246,8 @@ internal fun SuperBottomSheetContent(
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit,
 ) {
-    val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
-    val windowHeight by remember(windowInfo, density) {
-        derivedStateOf { windowInfo.containerDpSize.height / density.density }
-    }
+    val windowHeight = windowInfo.containerDpSize.height
 
     val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
@@ -289,7 +285,6 @@ internal fun SuperBottomSheetContent(
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
-            density = density,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = onDismissRequest,
             content = content,
@@ -317,11 +312,11 @@ private fun SuperBottomSheetColumn(
     sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
-    density: Density,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit,
 ) {
+    val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
 
     // Calculate the overscroll offset for background fill
@@ -385,7 +380,6 @@ private fun SuperBottomSheetColumn(
                 sheetHeightPx = sheetHeightPx,
                 dragOffsetY = dragOffsetY,
                 dimAlpha = dimAlpha,
-                density = density,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
                 onDismissRequest = onDismissRequest,
@@ -412,7 +406,6 @@ private fun DragHandleArea(
     sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
-    density: Density,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
@@ -509,13 +502,13 @@ private fun DragHandleArea(
                             val dragDelta = currentOffset - dragStartOffset.floatValue
                             val velocity = velocityTracker.calculateVelocity().y
                             val velocityThreshold = 500f
-                            val dismissThresholdPx = with(density) { 150.dp.toPx() }
+                            val dismissThresholdPx = 150.dp.toPx()
 
                             when {
                                 // Dragged far enough down or has strong downward velocity -> dismiss
                                 allowDismiss && (dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0)) -> {
                                     onDismissRequest?.invoke()
-                                    val windowHeightPx = windowHeight.value * density.density
+                                    val windowHeightPx = windowHeight.value * density
                                     dragOffsetY.animateTo(
                                         targetValue = windowHeightPx,
                                         animationSpec = tween(durationMillis = 250),

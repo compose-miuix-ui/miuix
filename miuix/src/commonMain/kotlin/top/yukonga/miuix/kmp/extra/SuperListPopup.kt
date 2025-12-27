@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -24,7 +25,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
@@ -114,24 +114,22 @@ fun SuperListPopup(
         popupContentSize = popupContentSize,
     )
 
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-
     PopupLayout(
         visible = show,
         enableWindowDim = enableWindowDim,
     ) {
         Box(
             modifier = popupModifier
+                .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { currentOnDismiss?.invoke() },
                     )
                 }
                 .layout { measurable, constraints ->
-                    val minWidthPx = minWidth.roundToPx().coerceAtMost(windowInfo.containerSize.width)
-                    val classicMinHeightPx = with(density) { (((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2) }
-                    val safeWindowMaxHeightPx = with(density) { 416.dp.roundToPx() }
+                    val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
+                    val classicMinHeightPx = ((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2
+                    val safeWindowMaxHeightPx = 416.dp.roundToPx()
                     val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
                     val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
                     val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
@@ -139,15 +137,14 @@ fun SuperListPopup(
                         maxHeight?.roundToPx() ?: Int.MAX_VALUE,
                         safeWindowMaxHeightPx,
                         sideConstrainedMax,
-                        windowInfo.containerSize.height,
-                    ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height))
-
+                        constraints.maxHeight,
+                    ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(constraints.maxHeight))
                     val placeable = measurable.measure(
                         constraints.copy(
                             minWidth = minWidthPx,
-                            minHeight = classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height),
+                            minHeight = classicMinHeightPx.coerceAtMost(constraints.maxHeight),
                             maxHeight = finalMaxHeightPx,
-                            maxWidth = windowInfo.containerSize.width,
+                            maxWidth = constraints.maxWidth,
                         ),
                     )
                     val measuredSize = IntSize(placeable.width, placeable.height)

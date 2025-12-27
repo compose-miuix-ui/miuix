@@ -14,8 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -36,8 +35,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -145,9 +142,6 @@ fun WindowListPopup(
         popupContentSize = popupContentSize,
     )
 
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-
     Dialog(
         onDismissRequest = {
             requestDismiss()
@@ -155,13 +149,6 @@ fun WindowListPopup(
         properties = platformDialogProperties(),
     ) {
         RemovePlatformDialogDefaultEffects()
-
-        val windowWidth = remember(windowInfo, density) {
-            windowInfo.containerDpSize.width / density.density
-        }
-        val windowHeight = remember(windowInfo, density) {
-            windowInfo.containerDpSize.height / density.density
-        }
 
         AnimatedVisibility(
             visibleState = internalVisible,
@@ -171,23 +158,16 @@ fun WindowListPopup(
             val baseColor = MiuixTheme.colorScheme.windowDimming
             val dimColor = if (enableWindowDim) baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue)) else Color.Transparent
             Box(
-                modifier = Modifier.widthIn(min = windowWidth).heightIn(min = windowHeight).pointerInput(internalVisible.currentState) {
-                    detectTapGestures(
-                        onTap = {
-                            if (internalVisible.currentState) {
-                                requestDismiss()
-                            } else {
-                                outsideDismissDeferred.value = true
-                            }
-                        },
-                    )
-                }.background(dimColor),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(dimColor),
             )
         }
 
-        if (internalVisible.currentState || internalVisible.targetState || isAnimating) {
-            Box(
-                modifier = popupModifier.widthIn(min = windowWidth).heightIn(min = windowHeight).pointerInput(Unit) {
+        Box(
+            modifier = popupModifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
                             if (internalVisible.currentState) {
@@ -197,10 +177,11 @@ fun WindowListPopup(
                             }
                         },
                     )
-                }.layout { measurable, constraints ->
-                    val minWidthPx = minWidth.roundToPx().coerceAtMost(windowInfo.containerSize.width)
-                    val classicMinHeightPx = with(density) { (((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2) }
-                    val safeWindowMaxHeightPx = with(density) { 416.dp.roundToPx() }
+                }
+                .layout { measurable, constraints ->
+                    val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
+                    val classicMinHeightPx = ((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2
+                    val safeWindowMaxHeightPx = 416.dp.roundToPx()
                     val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
                     val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
                     val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
@@ -208,14 +189,14 @@ fun WindowListPopup(
                         maxHeight?.roundToPx() ?: Int.MAX_VALUE,
                         safeWindowMaxHeightPx,
                         sideConstrainedMax,
-                        windowInfo.containerSize.height,
-                    ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height))
+                        constraints.maxHeight,
+                    ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(constraints.maxHeight))
                     val placeable = measurable.measure(
                         constraints.copy(
                             minWidth = minWidthPx,
-                            minHeight = classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height),
+                            minHeight = classicMinHeightPx.coerceAtMost(constraints.maxHeight),
                             maxHeight = finalMaxHeightPx,
-                            maxWidth = windowInfo.containerSize.width,
+                            maxWidth = constraints.maxWidth,
                         ),
                     )
                     val measuredSize = IntSize(placeable.width, placeable.height)
@@ -233,38 +214,23 @@ fun WindowListPopup(
                         placeable.place(calculatedOffset)
                     }
                 },
+        ) {
+            ListPopupContent(
+                modifier = Modifier.graphicsLayer {
+                    this.alpha = animationProgress.value
+                },
+                popupContentSize = popupContentSize,
+                onPopupContentSizeChange = { popupContentSize = it },
+                animationProgress = { animationProgress.value },
+                popupLayoutInfo = layoutInfo.popupLayoutInfo,
+                localTransformOrigin = layoutInfo.localTransformOrigin,
             ) {
-                val popupAlphaAnim = remember { Animatable(0f) }
-                LaunchedEffect(internalVisible.targetState) {
-                    if (internalVisible.targetState) {
-                        popupAlphaAnim.animateTo(
-                            1f,
-                            tween(durationMillis = 150, easing = DecelerateEasing(1.5f)),
-                        )
-                    } else {
-                        popupAlphaAnim.animateTo(
-                            0f,
-                            tween(durationMillis = 300, easing = DecelerateEasing(1.5f)),
-                        )
-                    }
-                }
-
-                ListPopupContent(
-                    modifier = Modifier.graphicsLayer {
-                        this.alpha = popupAlphaAnim.value
-                    },
-                    popupContentSize = popupContentSize,
-                    onPopupContentSizeChange = { popupContentSize = it },
-                    animationProgress = { animationProgress.value },
-                    popupLayoutInfo = layoutInfo.popupLayoutInfo,
-                    localTransformOrigin = layoutInfo.localTransformOrigin,
-                ) {
-                    CompositionLocalProvider(LocalWindowListPopupState provides { requestDismiss() }) {
-                        content()
-                    }
+                CompositionLocalProvider(LocalWindowListPopupState provides { requestDismiss() }) {
+                    content()
                 }
             }
         }
+
         BackHandler(
             enabled = show.value,
         ) {

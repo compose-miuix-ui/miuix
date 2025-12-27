@@ -17,13 +17,11 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,8 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -47,7 +43,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
-import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
@@ -75,6 +70,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WindowBottomSheet(
@@ -144,81 +140,73 @@ fun WindowBottomSheet(
         properties = platformDialogProperties(),
     ) {
         RemovePlatformDialogDefaultEffects()
-        val windowInfo = LocalWindowInfo.current
-        val density = LocalDensity.current
-        val windowWidth by remember(windowInfo, density) {
-            derivedStateOf { windowInfo.containerDpSize.width / density.density }
-        }
-        val windowHeight by remember(windowInfo, density) {
-            derivedStateOf { windowInfo.containerDpSize.height / density.density }
-        }
 
         AnimatedVisibility(
             visibleState = internalVisible,
-            enter = DialogDimEnter,
-            exit = DialogDimExit,
+            enter = fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f))),
+            exit = fadeOut(animationSpec = tween(300, easing = DecelerateEasing(1.5f))),
         ) {
-            if (enableWindowDim) {
-                val baseColor = MiuixTheme.colorScheme.windowDimming
-                val dimColor = baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue))
-                Box(
-                    modifier = Modifier
-                        .widthIn(min = windowWidth, max = windowWidth)
-                        .heightIn(min = windowHeight, max = windowHeight)
-                        .pointerInput(internalVisible.currentState) {
-                            detectTapGestures(
-                                onTap = {
-                                    if (internalVisible.currentState) {
-                                        if (allowDismiss) requestDismiss()
-                                    } else {
-                                        outsideDismissDeferred.value = true
-                                    }
-                                },
-                            )
+            val baseColor = MiuixTheme.colorScheme.windowDimming
+            val dimColor = if (enableWindowDim) baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue)) else Color.Transparent
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(dimColor),
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(internalVisible.currentState) {
+                    detectTapGestures(
+                        onTap = {
+                            if (internalVisible.currentState) {
+                                requestDismiss()
+                            } else {
+                                outsideDismissDeferred.value = true
+                            }
+                        },
+                    )
+                },
+
+        ) {
+            AnimatedVisibility(
+                visibleState = internalVisible,
+                enter = rememberDefaultSheetEnterTransition(),
+                exit = rememberDefaultSheetExitTransition(),
+            ) {
+                SuperBottomSheetContent(
+                    modifier = modifier,
+                    title = title,
+                    leftAction = leftAction,
+                    rightAction = rightAction,
+                    backgroundColor = backgroundColor,
+                    cornerRadius = cornerRadius,
+                    sheetMaxWidth = sheetMaxWidth,
+                    outsideMargin = outsideMargin,
+                    insideMargin = insideMargin,
+                    defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+                    dragHandleColor = dragHandleColor,
+                    allowDismiss = allowDismiss,
+                    sheetHeightPx = sheetHeightPx,
+                    dragOffsetY = dragOffsetY,
+                    dimAlpha = dimAlpha,
+                    dragSnapChannel = dragSnapChannel,
+                    onDismissRequest = {
+                        if (internalVisible.currentState) {
+                            requestDismiss()
+                        } else {
+                            outsideDismissDeferred.value = true
                         }
-                        .background(dimColor),
+                    },
+                    content = {
+                        CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
+                            content()
+                        }
+                    },
                 )
             }
-        }
-
-        val enterTransition = rememberDefaultSheetEnterTransition()
-        val exitTransition = rememberDefaultSheetExitTransition()
-
-        AnimatedVisibility(
-            visibleState = internalVisible,
-            enter = enterTransition,
-            exit = exitTransition,
-        ) {
-            SuperBottomSheetContent(
-                modifier = modifier,
-                title = title,
-                leftAction = leftAction,
-                rightAction = rightAction,
-                backgroundColor = backgroundColor,
-                cornerRadius = cornerRadius,
-                sheetMaxWidth = sheetMaxWidth,
-                outsideMargin = outsideMargin,
-                insideMargin = insideMargin,
-                defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-                dragHandleColor = dragHandleColor,
-                allowDismiss = allowDismiss,
-                sheetHeightPx = sheetHeightPx,
-                dragOffsetY = dragOffsetY,
-                dimAlpha = dimAlpha,
-                dragSnapChannel = dragSnapChannel,
-                onDismissRequest = {
-                    if (internalVisible.currentState) {
-                        requestDismiss()
-                    } else {
-                        outsideDismissDeferred.value = true
-                    }
-                },
-                content = {
-                    CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
-                        content()
-                    }
-                },
-            )
         }
 
         PredictiveBackHandler(
@@ -293,12 +281,6 @@ private fun rememberDefaultSheetExitTransition(): ExitTransition = remember {
         animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
     )
 }
-
-private val DialogDimEnter: EnterTransition =
-    fadeIn(animationSpec = tween(300, easing = SinOutEasing))
-
-private val DialogDimExit: ExitTransition =
-    fadeOut(animationSpec = tween(300, easing = SinOutEasing))
 
 object WindowBottomSheetDefaults {
 

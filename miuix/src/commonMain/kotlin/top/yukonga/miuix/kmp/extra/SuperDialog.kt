@@ -96,12 +96,12 @@ fun SuperDialog(
     content: @Composable () -> Unit,
 ) {
     if (!show.value) return
-
     val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
     val imeBottom = imeInsets.getBottom(density)
@@ -180,11 +180,8 @@ internal fun SuperDialogContent(
     onDismissRequest: (() -> Unit)?,
     content: @Composable () -> Unit,
 ) {
-    val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
-    val windowHeight by remember(windowInfo, density) {
-        derivedStateOf { windowInfo.containerDpSize.height / density.density }
-    }
+    val windowHeight = windowInfo.containerDpSize.height
     val roundedCorner = getRoundedCorner()
     val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
         derivedStateOf {
@@ -290,18 +287,10 @@ internal fun SuperDialogContent(
 object SuperDialogDefaults {
     @Composable
     internal fun isLargeScreen(): Boolean {
-        val density = LocalDensity.current
         val windowInfo = LocalWindowInfo.current
-        val windowWidth by remember(windowInfo, density) {
-            derivedStateOf { windowInfo.containerDpSize.width / density.density }
-        }
-        val windowHeight by remember(windowInfo, density) {
-            derivedStateOf { windowInfo.containerDpSize.height / density.density }
-        }
-        val largeScreen by remember(windowWidth, windowHeight) {
-            derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
-        }
-        return largeScreen
+        val windowWidth = windowInfo.containerDpSize.width
+        val windowHeight = windowInfo.containerDpSize.height
+        return windowHeight >= 480.dp && windowWidth >= 840.dp
     }
 
     /**
