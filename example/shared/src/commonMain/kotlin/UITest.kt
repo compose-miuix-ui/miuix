@@ -546,8 +546,29 @@ private fun FloatingToolbar(
             AnimatedContent(
                 targetState = floatingToolbarOrientation,
             ) { orientation ->
+                val iconTint = MiuixTheme.colorScheme.onPrimary
                 val content = @Composable {
-                    FloatingToolbarActions()
+                    IconButton(onClick = { /* Action 1 */ }) {
+                        Icon(
+                            MiuixIcons.Edit,
+                            contentDescription = "Edit",
+                            tint = iconTint,
+                        )
+                    }
+                    IconButton(onClick = { /* Action 2 */ }) {
+                        Icon(
+                            MiuixIcons.Delete,
+                            contentDescription = "Delete",
+                            tint = iconTint,
+                        )
+                    }
+                    IconButton(onClick = { /* Action 3 */ }) {
+                        Icon(
+                            MiuixIcons.More,
+                            contentDescription = "More",
+                            tint = iconTint,
+                        )
+                    }
                 }
                 when (orientation) {
                     0 -> Row(
@@ -562,33 +583,6 @@ private fun FloatingToolbar(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun FloatingToolbarActions() {
-    val iconTint = MiuixTheme.colorScheme.onPrimary
-
-    IconButton(onClick = { /* Action 1 */ }) {
-        Icon(
-            MiuixIcons.Edit,
-            contentDescription = "Edit",
-            tint = iconTint,
-        )
-    }
-    IconButton(onClick = { /* Action 2 */ }) {
-        Icon(
-            MiuixIcons.Delete,
-            contentDescription = "Delete",
-            tint = iconTint,
-        )
-    }
-    IconButton(onClick = { /* Action 3 */ }) {
-        Icon(
-            MiuixIcons.More,
-            contentDescription = "More",
-            tint = iconTint,
-        )
     }
 }
 

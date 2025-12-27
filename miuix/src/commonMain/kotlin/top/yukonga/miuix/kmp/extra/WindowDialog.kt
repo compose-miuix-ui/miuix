@@ -51,9 +51,9 @@ import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
-import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
 
 /**
  * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
@@ -146,7 +146,7 @@ fun WindowDialog(
         },
         properties = platformDialogProperties(),
     ) {
-        removePlatformDialogDefaultEffects()
+        RemovePlatformDialogDefaultEffects()
         val windowSize = getWindowSize()
         val windowWidth by remember(windowSize, density) {
             derivedStateOf { windowSize.width.dp / density.density }

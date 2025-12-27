@@ -12,6 +12,7 @@ import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,14 +20,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -109,8 +109,7 @@ fun TopAppBar(
     )
 
     SideEffect {
-        // Sets the app bar's height offset to collapse the entire bar's height when content is
-        // scrolled.
+        // Sets the app bar's height offset to collapse the entire bar's height when content is scrolled.
         if (scrollBehavior?.state?.heightOffsetLimit != -expandedHeightPx) {
             scrollBehavior?.state?.heightOffsetLimit = -expandedHeightPx
         }
@@ -130,22 +129,19 @@ fun TopAppBar(
     // The surface's background color is animated as specified above.
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
-    Surface(
+    TopAppBarLayout(
+        modifier = modifier,
+        title = title,
         color = color,
-    ) {
-        TopAppBarLayout(
-            modifier = modifier,
-            title = title,
-            largeTitle = largeTitle ?: title,
-            navigationIcon = navigationIcon,
-            actions = actionsRow,
-            scrolledOffset = { scrollBehavior?.state?.heightOffset ?: 0f },
-            expandedHeightPx = expandedHeightPx,
-            horizontalPadding = horizontalPadding,
-            largeTitleHeight = largeTitleHeight,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        )
-    }
+        largeTitle = largeTitle ?: title,
+        navigationIcon = navigationIcon,
+        actions = actionsRow,
+        scrolledOffset = { scrollBehavior?.state?.heightOffset ?: 0f },
+        expandedHeightPx = expandedHeightPx,
+        horizontalPadding = horizontalPadding,
+        largeTitleHeight = largeTitleHeight,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+    )
 }
 
 /**
@@ -194,18 +190,15 @@ fun SmallTopAppBar(
     // The surface's background color is animated as specified above.
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
-    Surface(
+    SmallTopAppBarLayout(
+        modifier = modifier,
+        title = title,
         color = color,
-    ) {
-        SmallTopAppBarLayout(
-            modifier = modifier,
-            title = title,
-            navigationIcon = navigationIcon,
-            actions = actionsRow,
-            horizontalPadding = horizontalPadding,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        )
-    }
+        navigationIcon = navigationIcon,
+        actions = actionsRow,
+        horizontalPadding = horizontalPadding,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+    )
 }
 
 /**
@@ -549,25 +542,28 @@ private fun interface ScrolledOffset {
 }
 
 /**
- * The base [Layout] for [TopAppBar]. This function lays out a top app bar navigation icon
+ * The base [Layout] for [TopAppBar]. This function lays out a [TopAppBar] navigation icon
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
  * the actions are optional.
  *
- * @param modifier the modifier to be applied to the [TopAppBar].
- * @param title the top app bar title (header).
- * @param largeTitle the large title of the top app bar, if not specified, it will be the same as title.
+ * @param modifier the [Modifier] to be applied to this layout.
+ * @param title the [TopAppBar] title (header).
+ * @param color the background color of the [TopAppBar].
+ * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param scrolledOffset a function that provides the scroll offset of the top app bar.
- * @param expandedHeightPx the expanded height of the top app bar in pixels.
+ * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
+ * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
  * @param horizontalPadding the horizontal padding of the [TopAppBar]'s title & large title.
  * @param largeTitleHeight a mutable state that holds the height of the large title.
+ * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
  */
 @Composable
 private fun TopAppBarLayout(
     modifier: Modifier = Modifier,
     title: String,
-    largeTitle: String,
+    color: Color,
+    largeTitle: String = title,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     scrolledOffset: ScrolledOffset,
@@ -607,11 +603,6 @@ private fun TopAppBarLayout(
         targetValue = if (extOffset > 1f) 0f else 12f,
         animationSpec = tween(durationMillis = 250),
     )
-
-    val statusBarsInsets = WindowInsets.statusBars
-    val captionBarInsets = WindowInsets.captionBar
-    val displayCutoutInsets = WindowInsets.displayCutout
-    val navigationBarsInsets = WindowInsets.navigationBars
 
     Layout(
         {
@@ -663,17 +654,17 @@ private fun TopAppBarLayout(
             }
         },
         modifier = modifier
-            .windowInsetsPadding(statusBarsInsets.only(WindowInsetsSides.Top))
-            .windowInsetsPadding(captionBarInsets.only(WindowInsetsSides.Top))
+            .then(Modifier.background(color))
             .then(
                 if (defaultWindowInsetsPadding) {
                     Modifier
-                        .windowInsetsPadding(displayCutoutInsets.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(navigationBarsInsets.only(WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
                 } else {
                     Modifier
                 },
             )
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .clipToBounds()
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
@@ -761,12 +752,13 @@ private fun TopAppBarLayout(
 }
 
 /**
- * The base [Layout] for [SmallTopAppBar]. This function lays out a top app bar navigation icon
+ * The base [Layout] for [SmallTopAppBar]. This function lays out a [SmallTopAppBar] navigation icon
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
  * the actions are optional.
  *
- * @param modifier the modifier to be applied to the [SmallTopAppBar].
- * @param title the top app bar title (header).
+ * @param modifier the [Modifier] to be applied to this layout.
+ * @param title the [SmallTopAppBar] title (header).
+ * @param color the background color of the [SmallTopAppBar].
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param horizontalPadding the horizontal padding of the [SmallTopAppBar]'s title.
@@ -776,6 +768,7 @@ private fun TopAppBarLayout(
 private fun SmallTopAppBarLayout(
     modifier: Modifier = Modifier,
     title: String,
+    color: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     horizontalPadding: Dp,
@@ -785,26 +778,6 @@ private fun SmallTopAppBarLayout(
         Modifier
             .layoutId("title")
             .padding(horizontal = horizontalPadding)
-    }
-
-    val statusBarsInsets = WindowInsets.statusBars
-    val captionBarInsets = WindowInsets.captionBar
-    val displayCutoutInsets = WindowInsets.displayCutout
-    val navigationBarsInsets = WindowInsets.navigationBars
-
-    val layoutModifier = remember(defaultWindowInsetsPadding, statusBarsInsets, captionBarInsets) {
-        Modifier
-            .windowInsetsPadding(statusBarsInsets.only(WindowInsetsSides.Top))
-            .windowInsetsPadding(captionBarInsets.only(WindowInsetsSides.Top))
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(displayCutoutInsets.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(navigationBarsInsets.only(WindowInsetsSides.Horizontal))
-                } else {
-                    Modifier
-                },
-            )
     }
 
     Layout(
@@ -833,8 +806,19 @@ private fun SmallTopAppBarLayout(
             }
         },
         modifier = modifier
-            .then(layoutModifier)
+            .then(Modifier.background(color))
+            .then(
+                if (defaultWindowInsetsPadding) {
+                    Modifier
+                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                } else {
+                    Modifier
+                },
+            )
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .heightIn(max = 56.dp)
+            .clipToBounds()
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
             },

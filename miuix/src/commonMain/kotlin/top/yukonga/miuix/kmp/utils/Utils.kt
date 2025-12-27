@@ -56,4 +56,4 @@ expect fun platformDialogProperties(): DialogProperties
  * Miuix custom dialog animations and dim layer behave consistently across devices.
  */
 @Composable
-expect fun removePlatformDialogDefaultEffects()
+expect fun RemovePlatformDialogDefaultEffects()

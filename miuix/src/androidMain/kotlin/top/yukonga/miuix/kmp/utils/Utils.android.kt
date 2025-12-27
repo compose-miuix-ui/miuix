@@ -88,7 +88,7 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
 )
 
 @Composable
-actual fun removePlatformDialogDefaultEffects() {
+actual fun RemovePlatformDialogDefaultEffects() {
     val parent = LocalView.current.parent
     val provider = parent as? DialogWindowProvider
     val window = provider?.window

@@ -76,6 +76,7 @@ import top.yukonga.miuix.kmp.utils.getWindowSize
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SuperDialog].
  * @param content The [Composable] content of the [SuperDialog].
  */
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SuperDialog(
@@ -162,6 +163,7 @@ fun SuperDialog(
     }
 }
 
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun SuperDialogContent(
     modifier: Modifier = Modifier,
@@ -195,27 +197,8 @@ internal fun SuperDialogContent(
     }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
-    val rootBoxModifier = Modifier
-        .then(
-            if (defaultWindowInsetsPadding) {
-                Modifier
-                    .imePadding()
-                    .navigationBarsPadding()
-                    .captionBarPadding()
-            } else {
-                Modifier
-            },
-        )
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectTapGestures(
-                onTap = { currentOnDismiss?.invoke() },
-            )
-        }
-        .padding(horizontal = outsideMargin.width)
-        .padding(bottom = outsideMargin.height)
 
-    val columnModifier = modifier
+    val modifier = modifier
         .widthIn(max = 420.dp)
         .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
         .onGloballyPositioned { coordinates ->
@@ -256,8 +239,30 @@ internal fun SuperDialogContent(
         .background(backgroundColor)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
-    Box(modifier = rootBoxModifier) {
-        Column(modifier = columnModifier.align(contentAlignment)) {
+    Box(
+        modifier = Modifier
+            .then(
+                if (defaultWindowInsetsPadding) {
+                    Modifier
+                        .imePadding()
+                        .navigationBarsPadding()
+                        .captionBarPadding()
+                } else {
+                    Modifier
+                },
+            )
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { currentOnDismiss?.invoke() },
+                )
+            }
+            .padding(horizontal = outsideMargin.width)
+            .padding(bottom = outsideMargin.height),
+    ) {
+        Column(
+            modifier = modifier.align(contentAlignment),
+        ) {
             title?.let {
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),

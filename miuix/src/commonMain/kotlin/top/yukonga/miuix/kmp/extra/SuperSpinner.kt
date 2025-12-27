@@ -94,7 +94,7 @@ fun SuperSpinner(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
@@ -259,7 +259,7 @@ fun SuperSpinner(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
@@ -301,22 +301,21 @@ fun SuperSpinner(
                 selectedIndex = selectedIndex,
                 actionColor = actionColor,
             )
+            SuperSpinnerDialog(
+                items = items,
+                selectedIndex = selectedIndex,
+                title = title,
+                dialogButtonString = dialogButtonString,
+                popupModifier = popupModifier,
+                isDropdownExpanded = isDropdownExpanded,
+                hapticFeedback = hapticFeedback,
+                spinnerColors = spinnerColors,
+                onSelectedIndexChange = onSelectedIndexChange,
+            )
         },
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled,
-    )
-
-    SuperSpinnerDialog(
-        items = items,
-        selectedIndex = selectedIndex,
-        title = title,
-        dialogButtonString = dialogButtonString,
-        popupModifier = popupModifier,
-        isDropdownExpanded = isDropdownExpanded,
-        hapticFeedback = hapticFeedback,
-        spinnerColors = spinnerColors,
-        onSelectedIndexChange = onSelectedIndexChange,
     )
 }
 
@@ -330,7 +329,7 @@ private fun SuperSpinnerDialog(
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     SuperDialog(

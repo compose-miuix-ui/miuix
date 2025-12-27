@@ -82,7 +82,7 @@ fun WindowSpinner(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
@@ -248,7 +248,7 @@ fun WindowSpinner(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
@@ -290,22 +290,21 @@ fun WindowSpinner(
                 selectedIndex = selectedIndex,
                 actionColor = actionColor,
             )
+            WindowSpinnerDialog(
+                items = items,
+                selectedIndex = selectedIndex,
+                title = title,
+                dialogButtonString = dialogButtonString,
+                popupModifier = popupModifier,
+                isDropdownExpanded = isDropdownExpanded,
+                hapticFeedback = hapticFeedback,
+                spinnerColors = spinnerColors,
+                onSelectedIndexChange = onSelectedIndexChange,
+            )
         },
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled,
-    )
-
-    WindowSpinnerDialog(
-        items = items,
-        selectedIndex = selectedIndex,
-        title = title,
-        dialogButtonString = dialogButtonString,
-        popupModifier = popupModifier,
-        isDropdownExpanded = isDropdownExpanded,
-        hapticFeedback = hapticFeedback,
-        spinnerColors = spinnerColors,
-        onSelectedIndexChange = onSelectedIndexChange,
     )
 }
 
@@ -319,7 +318,7 @@ private fun WindowSpinnerDialog(
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     WindowDialog(

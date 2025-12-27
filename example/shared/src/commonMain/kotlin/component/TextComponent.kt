@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -95,445 +96,447 @@ fun TextComponent(
     superSwitchState: MutableState<Boolean>,
     superSwitchAnimState: MutableState<Boolean>,
 ) {
-    val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
-    val spinnerOptions = remember {
-        listOf(
-            SpinnerEntry(
-                icon = {
-                    Icon(
-                        RoundedRectanglePainter(),
-                        "Icon",
-                        Modifier.padding(end = 12.dp),
-                        Color(0xFFFF5B29),
-                    )
-                },
-                "Option 1",
-                "Red",
-            ),
-            SpinnerEntry(
-                icon = {
-                    Icon(
-                        RoundedRectanglePainter(),
-                        "Icon",
-                        Modifier.padding(end = 12.dp),
-                        Color(0xFF36D167),
-                    )
-                },
-                "Option 2",
-                "Green",
-            ),
-            SpinnerEntry(
-                icon = {
-                    Icon(
-                        RoundedRectanglePainter(),
-                        "Icon",
-                        Modifier.padding(end = 12.dp),
-                        Color(0xFF3482FF),
-                    )
-                },
-                "Option 3",
-                "Blue",
-            ),
-            SpinnerEntry(
-                icon = {
-                    Icon(
-                        RoundedRectanglePainter(),
-                        "Icon",
-                        Modifier.padding(end = 12.dp),
-                        Color(0xFFFFB21D),
-                    )
-                },
-                "Option 4",
-                "Yellow",
-            ),
-        )
-    }
+    Column {
+        val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
+        val spinnerOptions = remember {
+            listOf(
+                SpinnerEntry(
+                    icon = {
+                        Icon(
+                            RoundedRectanglePainter(),
+                            "Icon",
+                            Modifier.padding(end = 12.dp),
+                            Color(0xFFFF5B29),
+                        )
+                    },
+                    "Option 1",
+                    "Red",
+                ),
+                SpinnerEntry(
+                    icon = {
+                        Icon(
+                            RoundedRectanglePainter(),
+                            "Icon",
+                            Modifier.padding(end = 12.dp),
+                            Color(0xFF36D167),
+                        )
+                    },
+                    "Option 2",
+                    "Green",
+                ),
+                SpinnerEntry(
+                    icon = {
+                        Icon(
+                            RoundedRectanglePainter(),
+                            "Icon",
+                            Modifier.padding(end = 12.dp),
+                            Color(0xFF3482FF),
+                        )
+                    },
+                    "Option 3",
+                    "Blue",
+                ),
+                SpinnerEntry(
+                    icon = {
+                        Icon(
+                            RoundedRectanglePainter(),
+                            "Icon",
+                            Modifier.padding(end = 12.dp),
+                            Color(0xFFFFB21D),
+                        )
+                    },
+                    "Option 4",
+                    "Yellow",
+                ),
+            )
+        }
 
-    var volume by remember { mutableFloatStateOf(0.5f) }
-    val showVolumeDialog = remember { mutableStateOf(false) }
+        var volume by remember { mutableFloatStateOf(0.5f) }
+        val showVolumeDialog = remember { mutableStateOf(false) }
 
-    SmallTitle(text = "Basic Component")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        BasicComponent(
-            title = "Title",
-            summary = "Summary",
-            leftAction = {
-                Text(
-                    text = "Left",
-                    modifier = Modifier.padding(end = 8.dp),
-                )
-            },
-            rightActions = {
-                Text(text = "Right1")
-                Spacer(Modifier.width(8.dp))
-                Text(text = "Right2")
-            },
-            enabled = true,
-        )
-        BasicComponent(
-            title = "Title",
-            summary = "Summary",
-            leftAction = {
-                Text(
-                    text = "Left",
-                    modifier = Modifier.padding(end = 8.dp),
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                )
-            },
-            rightActions = {
-                Text(
-                    text = "Right1",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "Right2",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                )
-            },
-            enabled = false,
-        )
-    }
-
-    SmallTitle(text = "Checkbox")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        Row(
+        SmallTitle(text = "Basic Component")
+        Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
-            Checkbox(
-                checked = checkbox.value,
-                onCheckedChange = { checkbox.value = it },
+            BasicComponent(
+                title = "Title",
+                summary = "Summary",
+                leftAction = {
+                    Text(
+                        text = "Left",
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                },
+                rightActions = {
+                    Text(text = "Right1")
+                    Spacer(Modifier.width(8.dp))
+                    Text(text = "Right2")
+                },
+                enabled = true,
             )
-            Checkbox(
-                checked = checkboxTrue.value,
-                onCheckedChange = { checkboxTrue.value = it },
-                modifier = Modifier.padding(start = 8.dp),
-            )
-            Checkbox(
-                checked = false,
-                onCheckedChange = { },
-                modifier = Modifier.padding(start = 8.dp),
-                enabled = false,
-            )
-            Checkbox(
-                checked = true,
-                onCheckedChange = { },
-                modifier = Modifier.padding(start = 8.dp),
+            BasicComponent(
+                title = "Title",
+                summary = "Summary",
+                leftAction = {
+                    Text(
+                        text = "Left",
+                        modifier = Modifier.padding(end = 8.dp),
+                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                    )
+                },
+                rightActions = {
+                    Text(
+                        text = "Right1",
+                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Right2",
+                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                    )
+                },
                 enabled = false,
             )
         }
-        SuperCheckbox(
-            checkboxLocation = CheckboxLocation.Right,
-            title = "Checkbox",
-            checked = superRightCheckboxState.value,
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 6.dp),
-                    text = superRightCheckbox.value,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                )
-            },
-            onCheckedChange = {
-                superRightCheckboxState.value = it
-                superRightCheckbox.value = "$it"
-            },
-        )
-        SuperCheckbox(
-            title = "Checkbox",
-            summary = superCheckbox.value,
-            checked = superCheckboxState.value,
-            onCheckedChange = {
-                superCheckboxState.value = it
-                superCheckbox.value = "State: $it"
-            },
-        )
-        SuperCheckbox(
-            title = "Disabled Checkbox",
-            checked = true,
-            enabled = false,
-            onCheckedChange = {},
-        )
-    }
 
-    SmallTitle(text = "Switch")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        Row(
+        SmallTitle(text = "Checkbox")
+        Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
         ) {
-            Switch(
-                checked = switch.value,
-                onCheckedChange = { switch.value = it },
-            )
-            Switch(
-                checked = switchTrue.value,
-                onCheckedChange = { switchTrue.value = it },
-                modifier = Modifier.padding(start = 6.dp),
-            )
-            Switch(
-                checked = false,
-                onCheckedChange = { },
-                modifier = Modifier.padding(start = 6.dp),
-                enabled = false,
-            )
-            Switch(
-                checked = true,
-                onCheckedChange = { },
-                modifier = Modifier.padding(start = 6.dp),
-                enabled = false,
-            )
-        }
-        SuperSwitch(
-            title = "Switch",
-            summary = "Click to expand a Switch",
-            checked = superSwitchAnimState.value,
-            onCheckedChange = {
-                superSwitchAnimState.value = it
-            },
-        )
-
-        AnimatedVisibility(
-            visible = superSwitchAnimState.value,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
-        ) {
-            SuperSwitch(
-                title = "Switch",
-                checked = superSwitchState.value,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Checkbox(
+                    checked = checkbox.value,
+                    onCheckedChange = { checkbox.value = it },
+                )
+                Checkbox(
+                    checked = checkboxTrue.value,
+                    onCheckedChange = { checkboxTrue.value = it },
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+                Checkbox(
+                    checked = false,
+                    onCheckedChange = { },
+                    modifier = Modifier.padding(start = 8.dp),
+                    enabled = false,
+                )
+                Checkbox(
+                    checked = true,
+                    onCheckedChange = { },
+                    modifier = Modifier.padding(start = 8.dp),
+                    enabled = false,
+                )
+            }
+            SuperCheckbox(
+                checkboxLocation = CheckboxLocation.Right,
+                title = "Checkbox",
+                checked = superRightCheckboxState.value,
                 rightActions = {
                     Text(
                         modifier = Modifier.padding(end = 6.dp),
-                        text = superSwitch.value,
+                        text = superRightCheckbox.value,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 onCheckedChange = {
-                    superSwitchState.value = it
-                    superSwitch.value = "$it"
+                    superRightCheckboxState.value = it
+                    superRightCheckbox.value = "$it"
                 },
             )
+            SuperCheckbox(
+                title = "Checkbox",
+                summary = superCheckbox.value,
+                checked = superCheckboxState.value,
+                onCheckedChange = {
+                    superCheckboxState.value = it
+                    superCheckbox.value = "State: $it"
+                },
+            )
+            SuperCheckbox(
+                title = "Disabled Checkbox",
+                checked = true,
+                enabled = false,
+                onCheckedChange = {},
+            )
         }
-        SuperSwitch(
-            title = "Disabled Switch",
-            checked = true,
-            enabled = false,
-            onCheckedChange = {},
-        )
-    }
 
-    SmallTitle(text = "Arrow")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        SuperArrow(
-            title = "Arrow",
-            leftAction = {
-                Box(
-                    modifier = Modifier.padding(end = 8.dp),
-                ) {
-                    Icon(
-                        imageVector = MiuixIcons.Contacts,
-                        contentDescription = "Personal",
-                        tint = MiuixTheme.colorScheme.onBackground,
+        SmallTitle(text = "Switch")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Switch(
+                    checked = switch.value,
+                    onCheckedChange = { switch.value = it },
+                )
+                Switch(
+                    checked = switchTrue.value,
+                    onCheckedChange = { switchTrue.value = it },
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+                Switch(
+                    checked = false,
+                    onCheckedChange = { },
+                    modifier = Modifier.padding(start = 6.dp),
+                    enabled = false,
+                )
+                Switch(
+                    checked = true,
+                    onCheckedChange = { },
+                    modifier = Modifier.padding(start = 6.dp),
+                    enabled = false,
+                )
+            }
+            SuperSwitch(
+                title = "Switch",
+                summary = "Click to expand a Switch",
+                checked = superSwitchAnimState.value,
+                onCheckedChange = {
+                    superSwitchAnimState.value = it
+                },
+            )
+
+            AnimatedVisibility(
+                visible = superSwitchAnimState.value,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                SuperSwitch(
+                    title = "Switch",
+                    checked = superSwitchState.value,
+                    rightActions = {
+                        Text(
+                            modifier = Modifier.padding(end = 6.dp),
+                            text = superSwitch.value,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        )
+                    },
+                    onCheckedChange = {
+                        superSwitchState.value = it
+                        superSwitch.value = "$it"
+                    },
+                )
+            }
+            SuperSwitch(
+                title = "Disabled Switch",
+                checked = true,
+                enabled = false,
+                onCheckedChange = {},
+            )
+        }
+
+        SmallTitle(text = "Arrow")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            SuperArrow(
+                title = "Arrow",
+                leftAction = {
+                    Box(
+                        modifier = Modifier.padding(end = 8.dp),
+                    ) {
+                        Icon(
+                            imageVector = MiuixIcons.Contacts,
+                            contentDescription = "Personal",
+                            tint = MiuixTheme.colorScheme.onBackground,
+                        )
+                    }
+                },
+                rightActions = {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = "Right",
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
-                }
-            },
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = "Right",
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                )
-            },
-            onClick = {},
-        )
-        SuperArrow(
-            title = "Arrow + Slider + Dialog",
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = "${(volume * 100).toInt()}%",
-                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                )
-            },
-            onClick = { showVolumeDialog.value = true },
-            holdDownState = showVolumeDialog.value,
-            bottomAction = {
-                Slider(
-                    value = volume,
-                    onValueChange = { volume = it },
-                )
-            },
-        )
-        SuperArrow(
-            title = "Disabled Arrow",
-            rightActions = {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = "Right",
-                    color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                )
-            },
-            enabled = false,
-        )
-    }
+                },
+                onClick = {},
+            )
+            SuperArrow(
+                title = "Arrow + Slider + Dialog",
+                rightActions = {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = "${(volume * 100).toInt()}%",
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                    )
+                },
+                onClick = { showVolumeDialog.value = true },
+                holdDownState = showVolumeDialog.value,
+                bottomAction = {
+                    Slider(
+                        value = volume,
+                        onValueChange = { volume = it },
+                    )
+                },
+            )
+            SuperArrow(
+                title = "Disabled Arrow",
+                rightActions = {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = "Right",
+                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                    )
+                },
+                enabled = false,
+            )
+        }
 
-    SmallTitle(text = "Dialog")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        SuperArrow(
-            title = "SuperDialog",
-            summary = "Click to show a SuperDialog",
-            onClick = {
-                showSuperDialog.value = true
-            },
-            holdDownState = showSuperDialog.value,
-        )
-        SuperArrow(
-            title = "WindowDialog",
-            summary = "Click to show a WindowDialog",
-            onClick = {
-                showWindowDialog.value = true
-            },
-            holdDownState = showWindowDialog.value,
-        )
-    }
+        SmallTitle(text = "Dialog")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            SuperArrow(
+                title = "SuperDialog",
+                summary = "Click to show a SuperDialog",
+                onClick = {
+                    showSuperDialog.value = true
+                },
+                holdDownState = showSuperDialog.value,
+            )
+            SuperArrow(
+                title = "WindowDialog",
+                summary = "Click to show a WindowDialog",
+                onClick = {
+                    showWindowDialog.value = true
+                },
+                holdDownState = showWindowDialog.value,
+            )
+        }
 
-    SmallTitle(text = "BottomSheet")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        SuperArrow(
-            title = "SuperBottomSheet",
-            summary = "Click to show a SuperBottomSheet",
-            onClick = {
-                showSuperBottomSheet.value = true
-            },
-            holdDownState = showSuperBottomSheet.value,
-        )
-        SuperArrow(
-            title = "WindowBottomSheet",
-            summary = "Click to show a WindowBottomSheet",
-            onClick = {
-                showWindowBottomSheet.value = true
-            },
-            holdDownState = showWindowBottomSheet.value,
-        )
-    }
+        SmallTitle(text = "BottomSheet")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            SuperArrow(
+                title = "SuperBottomSheet",
+                summary = "Click to show a SuperBottomSheet",
+                onClick = {
+                    showSuperBottomSheet.value = true
+                },
+                holdDownState = showSuperBottomSheet.value,
+            )
+            SuperArrow(
+                title = "WindowBottomSheet",
+                summary = "Click to show a WindowBottomSheet",
+                onClick = {
+                    showWindowBottomSheet.value = true
+                },
+                holdDownState = showWindowBottomSheet.value,
+            )
+        }
 
-    SmallTitle(text = "Dropdown")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        SuperDropdown(
-            title = "SuperDropdown",
-            items = dropdownOptions,
-            selectedIndex = superDropdownOptionSelected.value,
-            onSelectedIndexChange = { newOption -> superDropdownOptionSelected.value = newOption },
-        )
-        WindowDropdown(
-            title = "WindowDropdown",
-            items = dropdownOptions,
-            selectedIndex = windowDropdownOptionSelected.value,
-            onSelectedIndexChange = { newOption -> windowDropdownOptionSelected.value = newOption },
-        )
-        SuperDropdown(
-            title = "Disabled SuperDropdown",
-            items = listOf("Option 3"),
-            selectedIndex = 0,
-            onSelectedIndexChange = {},
-            enabled = false,
-        )
-        WindowDropdown(
-            title = "Disabled WindowDropdown",
-            items = listOf("Option 4"),
-            selectedIndex = 0,
-            onSelectedIndexChange = {},
-            enabled = false,
-        )
-    }
+        SmallTitle(text = "Dropdown")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            SuperDropdown(
+                title = "SuperDropdown",
+                items = dropdownOptions,
+                selectedIndex = superDropdownOptionSelected.value,
+                onSelectedIndexChange = { newOption -> superDropdownOptionSelected.value = newOption },
+            )
+            WindowDropdown(
+                title = "WindowDropdown",
+                items = dropdownOptions,
+                selectedIndex = windowDropdownOptionSelected.value,
+                onSelectedIndexChange = { newOption -> windowDropdownOptionSelected.value = newOption },
+            )
+            SuperDropdown(
+                title = "Disabled SuperDropdown",
+                items = listOf("Option 3"),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
+            )
+            WindowDropdown(
+                title = "Disabled WindowDropdown",
+                items = listOf("Option 4"),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
+            )
+        }
 
-    SmallTitle(text = "Spinner")
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
-    ) {
-        SuperSpinner(
-            title = "SuperSpinner",
-            items = spinnerOptions,
-            selectedIndex = superSpinnerOptionSelected.value,
-            onSelectedIndexChange = { newOption -> superSpinnerOptionSelected.value = newOption },
-        )
-        WindowSpinner(
-            title = "WindowSpinner",
-            items = spinnerOptions,
-            selectedIndex = windowSpinnerOptionSelected.value,
-            onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
-        )
-        SuperSpinner(
-            title = "SuperSpinner",
-            summary = "As SuperDialog",
-            dialogButtonString = "Cancel",
-            items = spinnerOptions,
-            selectedIndex = superSpinnerOptionSelectedDialog.value,
-            onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
-        )
-        WindowSpinner(
-            title = "WindowSpinner",
-            summary = "As WindowDialog",
-            dialogButtonString = "Cancel",
-            items = spinnerOptions,
-            selectedIndex = windowSpinnerOptionSelectedDialog.value,
-            onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
-        )
-        SuperSpinner(
-            title = "Disabled SuperSpinner",
-            items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
-            selectedIndex = 0,
-            onSelectedIndexChange = {},
-            enabled = false,
-        )
-        WindowSpinner(
-            title = "Disabled WindowSpinner",
-            items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
-            selectedIndex = 0,
-            onSelectedIndexChange = {},
-            enabled = false,
-        )
-    }
+        SmallTitle(text = "Spinner")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            SuperSpinner(
+                title = "SuperSpinner",
+                items = spinnerOptions,
+                selectedIndex = superSpinnerOptionSelected.value,
+                onSelectedIndexChange = { newOption -> superSpinnerOptionSelected.value = newOption },
+            )
+            WindowSpinner(
+                title = "WindowSpinner",
+                items = spinnerOptions,
+                selectedIndex = windowSpinnerOptionSelected.value,
+                onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
+            )
+            SuperSpinner(
+                title = "SuperSpinner",
+                summary = "As SuperDialog",
+                dialogButtonString = "Cancel",
+                items = spinnerOptions,
+                selectedIndex = superSpinnerOptionSelectedDialog.value,
+                onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
+            )
+            WindowSpinner(
+                title = "WindowSpinner",
+                summary = "As WindowDialog",
+                dialogButtonString = "Cancel",
+                items = spinnerOptions,
+                selectedIndex = windowSpinnerOptionSelectedDialog.value,
+                onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
+            )
+            SuperSpinner(
+                title = "Disabled SuperSpinner",
+                items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
+            )
+            WindowSpinner(
+                title = "Disabled WindowSpinner",
+                items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
+            )
+        }
 
-    SuperDialog(showSuperDialog)
-    WindowDialog(showWindowDialog)
-    SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
-    SuperBottomSheet(showSuperBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
-    WindowBottomSheet(showWindowBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
+        SuperDialog(showSuperDialog)
+        WindowDialog(showWindowDialog)
+        SliderDialog(showVolumeDialog, volumeState = { volume }, onVolumeChange = { volume = it })
+        SuperBottomSheet(showSuperBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
+        WindowBottomSheet(showWindowBottomSheet, bottomSheetDropdownSelectedOption, bottomSheetSuperSwitchState)
+    }
 }
 
 @Composable

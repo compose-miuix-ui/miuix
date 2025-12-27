@@ -48,4 +48,4 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
 )
 
 @Composable
-actual fun removePlatformDialogDefaultEffects() {}
+actual fun RemovePlatformDialogDefaultEffects() {}

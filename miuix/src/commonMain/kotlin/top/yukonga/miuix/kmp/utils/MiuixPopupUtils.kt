@@ -323,76 +323,78 @@ class MiuixPopupUtils {
 
             val effectiveLargeScreen = largeScreen && dialogState.enableAutoLargeScreen
 
-            if (dialogState.enableWindowDim) {
-                AnimatedVisibility(
-                    visibleState = visibleState,
-                    modifier = Modifier.zIndex(dialogState.zIndex - 0.001f),
-                    enter = dialogState.dimEnterTransition ?: DialogDimEnter,
-                    exit = dialogState.dimExitTransition ?: DialogDimExit,
-                ) {
-                    val baseColor = MiuixTheme.colorScheme.windowDimming
-                    val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
-                        baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
-                    } ?: baseColor
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (dialogState.enableWindowDim) {
+                    AnimatedVisibility(
+                        visibleState = visibleState,
+                        modifier = Modifier.zIndex(dialogState.zIndex - 0.001f),
+                        enter = dialogState.dimEnterTransition ?: DialogDimEnter,
+                        exit = dialogState.dimExitTransition ?: DialogDimExit,
+                    ) {
+                        val baseColor = MiuixTheme.colorScheme.windowDimming
+                        val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
+                            baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
+                        } ?: baseColor
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        var i = 0
-                                        val n = event.changes.size
-                                        while (i < n) {
-                                            event.changes[i].consume()
-                                            i++
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            var i = 0
+                                            val n = event.changes.size
+                                            while (i < n) {
+                                                event.changes[i].consume()
+                                                i++
+                                            }
                                         }
                                     }
                                 }
+                                .background(dimColor),
+                        )
+                    }
+                } else {
+                    AnimatedVisibility(
+                        visibleState = visibleState,
+                        modifier = Modifier.zIndex(dialogState.zIndex - 0.002f),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            var i = 0
+                                            val n = event.changes.size
+                                            while (i < n) {
+                                                event.changes[i].consume()
+                                                i++
+                                            }
+                                        }
+                                    }
+                                },
+                        )
+                    }
+                }
+
+                AnimatedVisibility(
+                    visibleState = visibleState,
+                    modifier = Modifier.zIndex(dialogState.zIndex),
+                    enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(effectiveLargeScreen),
+                    exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen),
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        dialogState.content()
+                    }
+                    DisposableEffect(dialogState.showState) {
+                        onDispose {
+                            if (!dialogState.showState.value) {
+                                dialogState.onDismissFinished?.invoke()
+                                dialogStates.removeAll { it.showState === dialogState.showState }
                             }
-                            .background(dimColor),
-                    )
-                }
-            } else {
-                AnimatedVisibility(
-                    visibleState = visibleState,
-                    modifier = Modifier.zIndex(dialogState.zIndex - 0.002f),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        var i = 0
-                                        val n = event.changes.size
-                                        while (i < n) {
-                                            event.changes[i].consume()
-                                            i++
-                                        }
-                                    }
-                                }
-                            },
-                    )
-                }
-            }
-
-            AnimatedVisibility(
-                visibleState = visibleState,
-                modifier = Modifier.zIndex(dialogState.zIndex),
-                enter = dialogState.enterTransition ?: rememberDefaultDialogEnterTransition(effectiveLargeScreen),
-                exit = dialogState.exitTransition ?: rememberDefaultDialogExitTransition(effectiveLargeScreen),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    dialogState.content()
-                }
-                DisposableEffect(dialogState.showState) {
-                    onDispose {
-                        if (!dialogState.showState.value) {
-                            dialogState.onDismissFinished?.invoke()
-                            dialogStates.removeAll { it.showState === dialogState.showState }
                         }
                     }
                 }
@@ -429,73 +431,75 @@ class MiuixPopupUtils {
             }
             val popupStates = LocalPopupStates.current
 
-            if (popupState.enableWindowDim) {
-                AnimatedVisibility(
-                    visibleState = visibleState,
-                    modifier = Modifier.zIndex(popupState.zIndex - 0.001f),
-                    enter = popupState.dimEnterTransition ?: PopupDimEnter,
-                    exit = popupState.dimExitTransition ?: PopupDimExit,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        var i = 0
-                                        val n = event.changes.size
-                                        while (i < n) {
-                                            event.changes[i].consume()
-                                            i++
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (popupState.enableWindowDim) {
+                    AnimatedVisibility(
+                        visibleState = visibleState,
+                        modifier = Modifier.zIndex(popupState.zIndex - 0.001f),
+                        enter = popupState.dimEnterTransition ?: PopupDimEnter,
+                        exit = popupState.dimExitTransition ?: PopupDimExit,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            var i = 0
+                                            val n = event.changes.size
+                                            while (i < n) {
+                                                event.changes[i].consume()
+                                                i++
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            .background(MiuixTheme.colorScheme.windowDimming),
-                    )
-                }
-            } else {
-                AnimatedVisibility(
-                    visibleState = visibleState,
-                    modifier = Modifier.zIndex(popupState.zIndex - 0.002f),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        var i = 0
-                                        val n = event.changes.size
-                                        while (i < n) {
-                                            event.changes[i].consume()
-                                            i++
+                                .background(MiuixTheme.colorScheme.windowDimming),
+                        )
+                    }
+                } else {
+                    AnimatedVisibility(
+                        visibleState = visibleState,
+                        modifier = Modifier.zIndex(popupState.zIndex - 0.002f),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            var i = 0
+                                            val n = event.changes.size
+                                            while (i < n) {
+                                                event.changes[i].consume()
+                                                i++
+                                            }
                                         }
                                     }
-                                }
-                            },
-                    )
+                                },
+                        )
+                    }
                 }
-            }
 
-            AnimatedVisibility(
-                visibleState = visibleState,
-                modifier = Modifier.zIndex(popupState.zIndex),
-                enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(),
-                exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition(),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    popupState.content()
-                }
-                BackHandler(enabled = visibleState.currentState || visibleState.targetState) {
-                    popupState.showState.value = false
-                }
-                DisposableEffect(popupState.showState) {
-                    onDispose {
-                        if (!popupState.showState.value) {
-                            popupStates.removeAll { it.showState === popupState.showState }
+                AnimatedVisibility(
+                    visibleState = visibleState,
+                    modifier = Modifier.zIndex(popupState.zIndex),
+                    enter = popupState.enterTransition ?: rememberDefaultPopupEnterTransition(),
+                    exit = popupState.exitTransition ?: rememberDefaultPopupExitTransition(),
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        popupState.content()
+                    }
+                    BackHandler(enabled = visibleState.currentState || visibleState.targetState) {
+                        popupState.showState.value = false
+                    }
+                    DisposableEffect(popupState.showState) {
+                        onDispose {
+                            if (!popupState.showState.value) {
+                                popupStates.removeAll { it.showState === popupState.showState }
+                            }
                         }
                     }
                 }

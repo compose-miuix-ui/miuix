@@ -27,11 +27,7 @@ spotless {
                     "ktlint_compose_mutable-state-param-check" to "disabled",
                     "ktlint_compose_param-order-check" to "disabled",
                     "ktlint_compose_parameter-naming" to "disabled",
-                    "ktlint_compose_modifier-not-used-at-root" to "disabled",
-                    "ktlint_compose_lambda-param-event-trailing" to "disabled",
                     "ktlint_compose_modifier-naming" to "disabled",
-                    "ktlint_compose_multiple-emitters-check" to "disabled",
-                    "ktlint_compose_naming-check" to "disabled",
                 ),
             )
         licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$")

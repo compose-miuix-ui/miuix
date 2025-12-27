@@ -92,6 +92,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param content The [Composable] content of the [SuperBottomSheet].
  */
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SuperBottomSheet(
@@ -224,6 +225,7 @@ fun SuperBottomSheet(
     }
 }
 
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun SuperBottomSheetContent(
     modifier: Modifier = Modifier,
@@ -257,17 +259,18 @@ internal fun SuperBottomSheetContent(
     val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
-    val rootBoxModifier = Modifier
-        .pointerInput(Unit) {
-            detectTapGestures(
-                onTap = {
-                    currentOnDismiss?.invoke()
-                },
-            )
-        }
-        .fillMaxSize()
 
-    Box(modifier = rootBoxModifier) {
+    Box(
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        currentOnDismiss?.invoke()
+                    },
+                )
+            }
+            .fillMaxSize(),
+    ) {
         SuperBottomSheetColumn(
             modifier = modifier,
             title = title,
@@ -294,6 +297,7 @@ internal fun SuperBottomSheetContent(
     }
 }
 
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 private fun SuperBottomSheetColumn(
     modifier: Modifier = Modifier,

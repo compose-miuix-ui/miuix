@@ -49,9 +49,9 @@ import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
-import top.yukonga.miuix.kmp.utils.removePlatformDialogDefaultEffects
 
 /**
  * A popup with a list of items, rendered at window level without `Scaffold`.
@@ -155,7 +155,7 @@ fun WindowListPopup(
         },
         properties = platformDialogProperties(),
     ) {
-        removePlatformDialogDefaultEffects()
+        RemovePlatformDialogDefaultEffects()
 
         val windowWidth = remember(windowSize, density) {
             windowSize.width.dp / density.density

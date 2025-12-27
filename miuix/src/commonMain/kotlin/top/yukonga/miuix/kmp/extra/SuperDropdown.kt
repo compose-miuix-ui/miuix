@@ -64,7 +64,7 @@ fun SuperDropdown(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    onSelectedIndexChange: ((Int) -> Unit)?,
+    onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
