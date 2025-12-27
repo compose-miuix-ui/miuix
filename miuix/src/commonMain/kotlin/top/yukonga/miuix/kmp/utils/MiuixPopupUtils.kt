@@ -37,13 +37,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SuperDialog
@@ -62,6 +64,7 @@ class MiuixPopupUtils {
         var enterTransition by mutableStateOf<EnterTransition?>(null)
         var exitTransition by mutableStateOf<ExitTransition?>(null)
         var enableWindowDim by mutableStateOf(true)
+        var enableBackHandler by mutableStateOf(true)
         var dimEnterTransition by mutableStateOf<EnterTransition?>(null)
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
         var content by mutableStateOf<@Composable () -> Unit>({})
@@ -236,6 +239,7 @@ class MiuixPopupUtils {
             enterTransition: EnterTransition? = null,
             exitTransition: ExitTransition? = null,
             enableWindowDim: Boolean = true,
+            enableBackHandler: Boolean = true,
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
             content: (@Composable () -> Unit)? = null,
@@ -254,6 +258,7 @@ class MiuixPopupUtils {
             val latestEnter by rememberUpdatedState(enterTransition)
             val latestExit by rememberUpdatedState(exitTransition)
             val latestEnableDim by rememberUpdatedState(enableWindowDim)
+            val latestEnableBackHandler by rememberUpdatedState(enableBackHandler)
             val latestDimEnter by rememberUpdatedState(dimEnterTransition)
             val latestDimExit by rememberUpdatedState(dimExitTransition)
             val latestContent by rememberUpdatedState(content)
@@ -262,6 +267,7 @@ class MiuixPopupUtils {
                 state.enterTransition = latestEnter
                 state.exitTransition = latestExit
                 state.enableWindowDim = latestEnableDim
+                state.enableBackHandler = latestEnableBackHandler
                 state.dimEnterTransition = latestDimEnter
                 state.dimExitTransition = latestDimExit
                 state.content = latestContent
@@ -493,9 +499,6 @@ class MiuixPopupUtils {
                     Box(modifier = Modifier.fillMaxSize()) {
                         popupState.content()
                     }
-                    BackHandler(enabled = visibleState.currentState || visibleState.targetState) {
-                        popupState.showState.value = false
-                    }
                     DisposableEffect(popupState.showState) {
                         onDispose {
                             if (!popupState.showState.value) {
@@ -504,6 +507,15 @@ class MiuixPopupUtils {
                         }
                     }
                 }
+
+                val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+                NavigationBackHandler(
+                    state = navigationEventState,
+                    isBackEnabled = popupState.enableBackHandler && (visibleState.currentState || visibleState.targetState),
+                    onBackCompleted = {
+                        popupState.showState.value = false
+                    },
+                )
             }
         }
 

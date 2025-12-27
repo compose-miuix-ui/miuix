@@ -18,7 +18,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline.Generic
 import androidx.compose.ui.graphics.Outline.Rectangle
@@ -445,7 +444,7 @@ fun ListPopupContent(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val shadowColor = MiuixTheme.colorScheme.windowDimming
+    MiuixTheme.colorScheme.windowDimming
 
     val shape = remember(density) {
         ContinuousRoundedRectangle(16.dp)
@@ -466,32 +465,6 @@ fun ListPopupContent(
                 transformOrigin = localTransformOrigin
             },
     ) {
-        // Shadow Layer
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    val progress = animationProgress()
-                    val (showBelow, showAbove, _) = popupLayoutInfo
-
-                    scaleY = progress
-                    transformOrigin = when {
-                        showBelow -> TransformOrigin(0.5f, 0f)
-                        showAbove -> TransformOrigin(0.5f, 1f)
-                        else -> TransformOrigin(0.5f, 0.5f)
-                    }
-                }
-                .dropShadow(
-                    shape = shape,
-                    block = {
-                        this.radius = 70f
-                        this.alpha = 0.4f
-                        this.color = shadowColor
-                    },
-                ),
-        )
-
-        // Content Layer
         Box(
             modifier = Modifier
                 .graphicsLayer {

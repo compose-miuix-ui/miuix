@@ -32,13 +32,16 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -125,6 +128,13 @@ fun WindowBottomSheet(
         }
     }
 
+    val resetGesture: suspend () -> Unit = {
+        dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+            dimAlpha.floatValue = value
+        }
+    }
+
     LaunchedEffect(dragOffsetY) {
         for (target in dragSnapChannel) {
             dragOffsetY.snapTo(target)
@@ -140,6 +150,48 @@ fun WindowBottomSheet(
         properties = platformDialogProperties(),
     ) {
         RemovePlatformDialogDefaultEffects()
+
+        val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+        NavigationBackHandler(
+            state = navigationEventState,
+            isBackEnabled = show.value,
+            onBackCancelled = {
+                coroutineScope.launch {
+                    resetGesture()
+                }
+            },
+            onBackCompleted = {
+                if (allowDismiss) {
+                    currentOnDismissRequest?.invoke()
+                } else {
+                    coroutineScope.launch {
+                        resetGesture()
+                    }
+                }
+            },
+        )
+
+        LaunchedEffect(navigationEventState.transitionState, allowDismiss) {
+            val transitionState = navigationEventState.transitionState
+            if (
+                transitionState is NavigationEventTransitionState.InProgress &&
+                transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+            ) {
+                val maxOffset = if (sheetHeightPx.intValue > 0) {
+                    sheetHeightPx.intValue.toFloat()
+                } else {
+                    500f
+                }
+                val offset = transitionState.latestEvent.progress * maxOffset
+                val finalOffset = if (!allowDismiss) {
+                    offset * 0.1f
+                } else {
+                    offset
+                }
+                dragOffsetY.snapTo(finalOffset)
+                dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
+            }
+        }
 
         AnimatedVisibility(
             visibleState = internalVisible,
@@ -206,54 +258,6 @@ fun WindowBottomSheet(
                         }
                     },
                 )
-            }
-        }
-
-        PredictiveBackHandler(
-            enabled = show.value,
-        ) { progress ->
-            try {
-                progress.collect { event ->
-                    // Calculate the offset based on progress
-                    val maxOffset = if (sheetHeightPx.intValue > 0) {
-                        sheetHeightPx.intValue.toFloat()
-                    } else {
-                        500f
-                    }
-                    val offset = event.progress * maxOffset
-
-                    // Apply damping if dismiss is not allowed
-                    val finalOffset = if (!allowDismiss) {
-                        offset * 0.1f
-                    } else {
-                        offset
-                    }
-                    // Send target to snap channel
-                    dragSnapChannel.trySend(finalOffset)
-
-                    // Update dim alpha
-                    if (allowDismiss) {
-                        dimAlpha.floatValue = 1f - event.progress
-                    }
-                }
-                if (allowDismiss) {
-                    // Flow completed normally
-                    requestDismiss()
-                } else {
-                    // Reset to original position
-                    dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                    animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                        dimAlpha.floatValue = value
-                    }
-                }
-            } catch (_: CancellationException) {
-                // Flow cancelled
-                coroutineScope.launch {
-                    dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                    animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                        dimAlpha.floatValue = value
-                    }
-                }
             }
         }
 

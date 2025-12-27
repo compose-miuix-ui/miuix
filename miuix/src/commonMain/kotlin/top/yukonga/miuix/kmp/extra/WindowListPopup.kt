@@ -3,13 +3,10 @@
 
 package top.yukonga.miuix.kmp.extra
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -20,7 +17,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -28,8 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -40,6 +34,10 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupContent
@@ -85,7 +83,6 @@ fun WindowListPopup(
     if (!show.value && !internalVisible.currentState && !internalVisible.targetState && !isAnimating) return
 
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
 
     val dismissPending = remember { mutableStateOf(false) }
     val outsideDismissDeferred = remember { mutableStateOf(false) }
@@ -150,34 +147,44 @@ fun WindowListPopup(
     ) {
         RemovePlatformDialogDefaultEffects()
 
-        AnimatedVisibility(
-            visibleState = internalVisible,
-            enter = fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f))),
-            exit = fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f))),
-        ) {
-            val baseColor = MiuixTheme.colorScheme.windowDimming
-            val dimColor = if (enableWindowDim) baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue)) else Color.Transparent
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(dimColor),
-            )
+        val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+        NavigationBackHandler(
+            state = navigationEventState,
+            isBackEnabled = show.value,
+            onBackCompleted = {
+                currentOnDismissRequest?.invoke()
+            },
+        )
+
+        LaunchedEffect(navigationEventState.transitionState) {
+            val transitionState = navigationEventState.transitionState
+            if (
+                transitionState is NavigationEventTransitionState.InProgress &&
+                transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+            ) {
+                val progress = transitionState.latestEvent.progress
+                animationProgress.snapTo(1f - progress)
+            }
         }
 
         Box(
-            modifier = popupModifier
+            modifier = Modifier
                 .fillMaxSize()
+                .graphicsLayer {
+                    alpha = animationProgress.value
+                }
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
-                            if (internalVisible.currentState) {
-                                requestDismiss()
-                            } else {
-                                outsideDismissDeferred.value = true
-                            }
+                            currentOnDismissRequest?.invoke()
                         },
                     )
                 }
+                .background(MiuixTheme.colorScheme.windowDimming),
+        )
+        Box(
+            modifier = popupModifier
+                .fillMaxSize()
                 .layout { measurable, constraints ->
                     val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
                     val classicMinHeightPx = ((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2
@@ -216,9 +223,6 @@ fun WindowListPopup(
                 },
         ) {
             ListPopupContent(
-                modifier = Modifier.graphicsLayer {
-                    this.alpha = animationProgress.value
-                },
                 popupContentSize = popupContentSize,
                 onPopupContentSizeChange = { popupContentSize = it },
                 animationProgress = { animationProgress.value },
@@ -231,15 +235,6 @@ fun WindowListPopup(
             }
         }
 
-        BackHandler(
-            enabled = show.value,
-        ) {
-            if (internalVisible.currentState) {
-                requestDismiss()
-            } else {
-                outsideDismissDeferred.value = true
-            }
-        }
         LaunchedEffect(internalVisible.currentState, outsideDismissDeferred.value) {
             if (internalVisible.currentState && outsideDismissDeferred.value) {
                 outsideDismissDeferred.value = false

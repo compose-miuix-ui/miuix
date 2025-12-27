@@ -34,7 +34,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -49,6 +48,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -81,6 +83,7 @@ fun SearchBar(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
+    val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
     Column(
         modifier = modifier,
     ) {
@@ -111,9 +114,13 @@ fun SearchBar(
         }
     }
 
-    BackHandler(enabled = expanded) {
-        currentOnExpandedChange(false)
-    }
+    NavigationBackHandler(
+        state = navigationEventState,
+        isBackEnabled = expanded,
+        onBackCompleted = {
+            currentOnExpandedChange(false)
+        },
+    )
 }
 
 /**

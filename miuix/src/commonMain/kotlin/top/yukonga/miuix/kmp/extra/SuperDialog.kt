@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -37,7 +38,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -50,8 +50,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
@@ -96,11 +99,45 @@ fun SuperDialog(
     content: @Composable () -> Unit,
 ) {
     if (!show.value) return
+
     val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+
+    val resetGesture: suspend () -> Unit = {
+        backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
+        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+            dimAlpha.floatValue = value
+        }
+    }
+
+    val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = navigationEventState,
+        isBackEnabled = show.value,
+        onBackCancelled = {
+            coroutineScope.launch {
+                resetGesture()
+            }
+        },
+        onBackCompleted = {
+            currentOnDismissRequest?.invoke()
+        },
+    )
+
+    LaunchedEffect(navigationEventState.transitionState) {
+        val transitionState = navigationEventState.transitionState
+        if (
+            transitionState is NavigationEventTransitionState.InProgress &&
+            transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+        ) {
+            val progress = transitionState.latestEvent.progress
+            backProgress.snapTo(progress)
+            dimAlpha.floatValue = 1f - progress
+        }
+    }
 
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
@@ -139,27 +176,6 @@ fun SuperDialog(
             onDismissRequest = currentOnDismissRequest,
             content = content,
         )
-    }
-
-    PredictiveBackHandler(
-        enabled = show.value,
-    ) { progress ->
-        try {
-            progress.collect { event ->
-                backProgress.snapTo(event.progress)
-                dimAlpha.floatValue = 1f - event.progress
-            }
-            // Flow completed normally
-            currentOnDismissRequest?.invoke()
-        } catch (_: CancellationException) {
-            // Flow cancelled
-            coroutineScope.launch {
-                backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                    dimAlpha.floatValue = value
-                }
-            }
-        }
     }
 }
 

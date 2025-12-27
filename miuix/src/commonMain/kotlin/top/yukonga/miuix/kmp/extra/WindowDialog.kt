@@ -37,7 +37,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -45,6 +44,10 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
@@ -136,6 +139,13 @@ fun WindowDialog(
         }
     }
 
+    val resetGesture: suspend () -> Unit = {
+        backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
+        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+            dimAlpha.floatValue = value
+        }
+    }
+
     Dialog(
         onDismissRequest = {
             requestDismiss()
@@ -143,6 +153,32 @@ fun WindowDialog(
         properties = platformDialogProperties(),
     ) {
         RemovePlatformDialogDefaultEffects()
+
+        val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+        NavigationBackHandler(
+            state = navigationEventState,
+            isBackEnabled = show.value,
+            onBackCancelled = {
+                coroutineScope.launch {
+                    resetGesture()
+                }
+            },
+            onBackCompleted = {
+                currentOnDismissInternal?.invoke()
+            },
+        )
+
+        LaunchedEffect(navigationEventState.transitionState) {
+            val transitionState = navigationEventState.transitionState
+            if (
+                transitionState is NavigationEventTransitionState.InProgress &&
+                transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+            ) {
+                val progress = transitionState.latestEvent.progress
+                backProgress.snapTo(progress)
+                dimAlpha.floatValue = 1f - progress
+            }
+        }
 
         AnimatedVisibility(
             visibleState = internalVisible,
@@ -204,33 +240,6 @@ fun WindowDialog(
                         }
                     },
                 )
-            }
-        }
-
-        PredictiveBackHandler(
-            enabled = show.value,
-        ) { progress ->
-            try {
-                progress.collect { event ->
-                    backProgress.snapTo(event.progress)
-                    dimAlpha.floatValue = 1f - event.progress
-                }
-                // Flow completed normally
-                requestDismiss()
-            } catch (_: CancellationException) {
-                // Flow cancelled
-                coroutineScope.launch {
-                    backProgress.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                    animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                        dimAlpha.floatValue = value
-                    }
-                }
-            }
-        }
-        LaunchedEffect(internalVisible.currentState, outsideDismissDeferred.value) {
-            if (internalVisible.currentState && outsideDismissDeferred.value) {
-                outsideDismissDeferred.value = false
-                requestDismiss()
             }
         }
     }

@@ -44,7 +44,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -59,6 +58,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -67,7 +70,6 @@ import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
@@ -122,6 +124,58 @@ fun SuperBottomSheet(
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
 
+    val resetGesture: suspend () -> Unit = {
+        dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+            dimAlpha.floatValue = value
+        }
+    }
+
+    val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = navigationEventState,
+        isBackEnabled = show.value,
+        onBackCancelled = {
+            coroutineScope.launch {
+                resetGesture()
+            }
+        },
+        onBackCompleted = {
+            if (allowDismiss) {
+                currentOnDismissRequest?.invoke()
+            } else {
+                coroutineScope.launch {
+                    resetGesture()
+                }
+            }
+        },
+    )
+
+    LaunchedEffect(navigationEventState.transitionState, allowDismiss) {
+        val transitionState = navigationEventState.transitionState
+        if (
+            transitionState is NavigationEventTransitionState.InProgress &&
+            transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+        ) {
+            val maxOffset = if (sheetHeightPx.intValue > 0) {
+                sheetHeightPx.intValue.toFloat()
+            } else {
+                500f
+            }
+            val offset = transitionState.latestEvent.progress * maxOffset
+            val finalOffset = if (!allowDismiss) {
+                offset * 0.1f
+            } else {
+                offset
+            }
+            dragSnapChannel.trySend(finalOffset)
+
+            if (allowDismiss) {
+                dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
+            }
+        }
+    }
+
     LaunchedEffect(dragOffsetY) {
         for (target in dragSnapChannel) {
             dragOffsetY.snapTo(target)
@@ -173,54 +227,6 @@ fun SuperBottomSheet(
             onDismissRequest = currentOnDismissRequest,
             content = content,
         )
-    }
-
-    PredictiveBackHandler(
-        enabled = show.value,
-    ) { progress ->
-        try {
-            progress.collect { event ->
-                // Calculate the offset based on progress
-                val maxOffset = if (sheetHeightPx.intValue > 0) {
-                    sheetHeightPx.intValue.toFloat()
-                } else {
-                    500f
-                }
-                val offset = event.progress * maxOffset
-
-                // Apply damping if dismiss is not allowed
-                val finalOffset = if (!allowDismiss) {
-                    offset * 0.1f
-                } else {
-                    offset
-                }
-                // Send target to snap channel
-                dragSnapChannel.trySend(finalOffset)
-
-                // Update dim alpha
-                if (allowDismiss) {
-                    dimAlpha.floatValue = 1f - event.progress
-                }
-            }
-            if (allowDismiss) {
-                // Flow completed normally
-                currentOnDismissRequest?.invoke()
-            } else {
-                // Reset to original position
-                dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                    dimAlpha.floatValue = value
-                }
-            }
-        } catch (_: CancellationException) {
-            // Flow cancelled
-            coroutineScope.launch {
-                dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-                animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-                    dimAlpha.floatValue = value
-                }
-            }
-        }
     }
 }
 
