@@ -4,30 +4,11 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-
-@Composable
-@OptIn(ExperimentalComposeUiApi::class)
-actual fun getWindowSize(): WindowSize {
-    val window = LocalWindowInfo.current
-    val windowSize by remember(window) {
-        derivedStateOf {
-            WindowSize(
-                width = window.containerSize.width,
-                height = window.containerSize.height,
-            )
-        }
-    }
-    return windowSize
-}
 
 actual fun platform(): Platform = Platform.WasmJs
 
@@ -43,4 +24,5 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
 )
 
 @Composable
-actual fun RemovePlatformDialogDefaultEffects() {}
+actual fun RemovePlatformDialogDefaultEffects() {
+}

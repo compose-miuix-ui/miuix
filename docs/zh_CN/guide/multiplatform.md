@@ -40,33 +40,9 @@ when (platform()) {
 }
 ```
 
-## 窗口尺寸管理
-
-Miuix 提供了跨平台的窗口尺寸获取功能：
-
-```kotlin
-@Composable
-fun MyResponsiveContent() {
-    val windowSize = getWindowSize()
-    val width = windowSize.width
-    val height = windowSize.height
-    // 根据窗口尺寸调整 UI 布局
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        if (width > 600) {
-            Text("宽屏布局")
-        } else {
-            Text("窄屏布局")
-        }
-        Text("\n高度：$height")
-    }
-}
-```
-
 ## 设备圆角
 
-安卓设备的屏幕圆角不同且其他平台不存在屏幕圆角获取，您可以使用 `getRoundedCorner()` 函数获取设备的圆角大小（不存在时使用预设值）：
+安卓设备的屏幕圆角不同且其他平台不存在屏幕圆角获取功能，您可以使用 `getRoundedCorner()` 函数获取设备的圆角大小（不存在时使用预设值）：
 
 ```kotlin
 @Composable

@@ -23,7 +23,6 @@ spotless {
                     "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
                     "ktlint_compose_modifier-missing-check" to "disabled",
                     "ktlint_compose_compositionlocal-allowlist" to "disabled",
-                    "ktlint_compose_modifier-composed-check" to "disabled",
                     "ktlint_compose_mutable-state-param-check" to "disabled",
                     "ktlint_compose_param-order-check" to "disabled",
                     "ktlint_compose_parameter-naming" to "disabled",

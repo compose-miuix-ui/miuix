@@ -8,26 +8,35 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.LayoutModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidatePlacement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.RefreshState
 import kotlin.math.abs
 import kotlin.math.min
@@ -67,42 +76,113 @@ fun Modifier.overScrollHorizontal(
  * @param isEnabled Whether the overscroll effect is enabled. Default is enabled on Android and iOS only.
  */
 @Stable
-@Suppress("NAME_SHADOWING")
 fun Modifier.overScrollOutOfBound(
     isVertical: Boolean = true,
     nestedScrollToParent: Boolean = true,
     isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
-): Modifier = composed {
-    if (!isEnabled()) return@composed this
+): Modifier {
+    if (!isEnabled()) return this
 
-    val offsetThreshold = 1f
+    return this then OverscrollElement(
+        isVertical = isVertical,
+        nestedScrollToParent = nestedScrollToParent,
+    )
+}
 
-    val overScrollState = LocalOverScrollState.current
-    val pullToRefreshState = LocalPullToRefreshState.current
-    val currentNestedScrollToParent by rememberUpdatedState(nestedScrollToParent)
-    val currentIsVertical by rememberUpdatedState(isVertical)
+private data class OverscrollElement(
+    val isVertical: Boolean,
+    val nestedScrollToParent: Boolean,
+) : ModifierNodeElement<OverscrollNode>() {
+    override fun create(): OverscrollNode = OverscrollNode(
+        isVertical = isVertical,
+        nestedScrollToParent = nestedScrollToParent,
+    )
 
-    val windowSize = getWindowSize()
-    val scrollRange = with(LocalDensity.current) {
-        (if (isVertical) windowSize.height.toDp() else windowSize.width.toDp()).toPx()
+    override fun update(node: OverscrollNode) {
+        node.update(
+            isVertical = isVertical,
+            nestedScrollToParent = nestedScrollToParent,
+        )
+        node.invalidatePlacement()
     }
 
-    val dispatcher = remember { NestedScrollDispatcher() }
-    val coroutineScope = rememberCoroutineScope()
+    override fun InspectorInfo.inspectableProperties() {
+        name = "overScrollOutOfBound"
+        properties["isVertical"] = isVertical
+        properties["nestedScrollToParent"] = nestedScrollToParent
+    }
+}
 
-    var offset by remember { mutableFloatStateOf(0f) }
-    var rawTouchAccumulation by remember { mutableFloatStateOf(0f) }
+private class OverscrollNode(
+    var isVertical: Boolean,
+    var nestedScrollToParent: Boolean,
+) : DelegatingNode(),
+    CompositionLocalConsumerModifierNode,
+    LayoutModifierNode,
+    NestedScrollConnection {
+    private val density: Density
+        get() = currentValueOf(LocalDensity)
 
-    val springEngine = remember { SpringEngine() }
-    var animationJob by remember { mutableStateOf<Job?>(null) }
+    private val windowInfo: WindowInfo
+        get() = currentValueOf(LocalWindowInfo)
 
-    fun resetState() {
+    private val overScrollState: OverScrollState
+        get() = currentValueOf(LocalOverScrollState)
+
+    private val pullToRefreshState: PullToRefreshState?
+        get() = currentValueOf(LocalPullToRefreshState)
+
+    private val dispatcher = NestedScrollDispatcher()
+    private val springEngine = SpringEngine()
+    private var animationJob: Job? = null
+    private val offsetThreshold = 1f
+
+    var offset by mutableFloatStateOf(0f)
+        private set
+
+    private var rawTouchAccumulation = 0f
+    private var scrollRange: Float = 0f
+
+    override fun onAttach() {
+        super.onAttach()
+        updateScrollRange()
+        delegate(nestedScrollModifierNode(this, dispatcher))
+    }
+
+    fun update(
+        isVertical: Boolean,
+        nestedScrollToParent: Boolean,
+    ) {
+        var rangeChanged = false
+        if (this.isVertical != isVertical) {
+            rangeChanged = true
+        }
+
+        this.isVertical = isVertical
+        this.nestedScrollToParent = nestedScrollToParent
+
+        if (rangeChanged && isAttached) {
+            updateScrollRange()
+        }
+    }
+
+    private fun updateScrollRange() {
+        scrollRange = with(density) {
+            if (isVertical) {
+                windowInfo.containerDpSize.height.toPx()
+            } else {
+                windowInfo.containerDpSize.width.toPx()
+            }
+        }
+    }
+
+    private fun resetState() {
         offset = 0f
         rawTouchAccumulation = 0f
         overScrollState.isOverScrollActive = false
     }
 
-    fun startSpringAnimation(initialVelocity: Float = 0f) {
+    private fun startSpringAnimation(initialVelocity: Float = 0f) {
         if (abs(offset) <= offsetThreshold && initialVelocity == 0f) {
             resetState()
             return
@@ -145,173 +225,176 @@ fun Modifier.overScrollOutOfBound(
         }
     }
 
-    val nestedConnection = remember(scrollRange) {
-        object : NestedScrollConnection {
+    private fun shouldBypassForPullToRefresh(): Boolean {
+        // When pull-to-refresh is active (not Idle), always bypass.
+        return pullToRefreshState != null && pullToRefreshState?.refreshState != RefreshState.Idle && isVertical
+    }
 
-            private fun shouldBypassForPullToRefresh(): Boolean {
-                // When pull-to-refresh is active (not Idle), always bypass.
-                return pullToRefreshState != null && pullToRefreshState.refreshState != RefreshState.Idle && currentIsVertical
-            }
+    private fun applyDrag(delta: Float) {
+        if (delta == 0f) return
+        rawTouchAccumulation += delta
+        rawTouchAccumulation = rawTouchAccumulation.coerceIn(-scrollRange, scrollRange)
 
-            private fun applyDrag(delta: Float) {
-                if (delta == 0f) return
-                rawTouchAccumulation += delta
-                rawTouchAccumulation = rawTouchAccumulation.coerceIn(-scrollRange, scrollRange)
+        val normalized = min(abs(rawTouchAccumulation) / scrollRange, 1.0f)
+        val dampedDist = SpringMath.obtainDampingDistance(normalized, scrollRange)
+        offset = sign(rawTouchAccumulation) * dampedDist
+    }
 
-                val normalized = min(abs(rawTouchAccumulation) / scrollRange, 1.0f)
-                val dampedDist = SpringMath.obtainDampingDistance(normalized, scrollRange)
-                offset = sign(rawTouchAccumulation) * dampedDist
-            }
-
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val isActive = abs(offset) > offsetThreshold
-                if (overScrollState.isOverScrollActive != isActive) {
-                    overScrollState.isOverScrollActive = isActive
-                }
-
-                if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
-                    return dispatcher.dispatchPreScroll(available, source)
-                }
-
-                animationJob?.cancel()
-
-                val parentConsumed = if (currentNestedScrollToParent) {
-                    dispatcher.dispatchPreScroll(available, source)
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+        updateScrollRange()
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) {
+            placeable.placeWithLayer(0, 0) {
+                if (isVertical) {
+                    translationY = offset
                 } else {
-                    Offset.Zero
+                    translationX = offset
                 }
-
-                val realAvailable = available - parentConsumed
-                val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
-
-                if (abs(offset) <= offsetThreshold || sign(delta) == sign(rawTouchAccumulation)) {
-                    return parentConsumed
-                }
-
-                if (sign(delta) != sign(rawTouchAccumulation)) { // opposite direction
-                    val actualConsumed = if (abs(rawTouchAccumulation) <= abs(delta)) {
-                        -rawTouchAccumulation // can be fully consumed
-                    } else {
-                        delta
-                    }
-
-                    if (abs(rawTouchAccumulation) <= abs(delta)) {
-                        resetState() // reset directly after complete consumption
-                    } else {
-                        applyDrag(actualConsumed)
-                    }
-
-                    return if (currentIsVertical) {
-                        Offset(parentConsumed.x, actualConsumed + parentConsumed.y)
-                    } else {
-                        Offset(actualConsumed + parentConsumed.x, parentConsumed.y)
-                    }
-                }
-
-                applyDrag(delta)
-                return if (currentIsVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
-            }
-
-            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                val isActive = abs(offset) > offsetThreshold
-                if (overScrollState.isOverScrollActive != isActive) {
-                    overScrollState.isOverScrollActive = isActive
-                }
-
-                if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
-                    return dispatcher.dispatchPostScroll(consumed, available, source)
-                }
-
-                animationJob?.cancel()
-
-                val parentConsumed = if (currentNestedScrollToParent) {
-                    dispatcher.dispatchPostScroll(consumed, available, source)
-                } else {
-                    Offset.Zero
-                }
-
-                val realAvailable = available - parentConsumed
-                val delta = if (currentIsVertical) realAvailable.y else realAvailable.x
-
-                applyDrag(delta)
-                return if (currentIsVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
-            }
-
-            override suspend fun onPreFling(available: Velocity): Velocity {
-                val isActive = abs(offset) > offsetThreshold
-                if (overScrollState.isOverScrollActive != isActive) {
-                    overScrollState.isOverScrollActive = isActive
-                }
-
-                if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
-                    return dispatcher.dispatchPreFling(available)
-                }
-
-                animationJob?.cancel()
-
-                val parentConsumed = if (currentNestedScrollToParent) {
-                    dispatcher.dispatchPreFling(available)
-                } else {
-                    Velocity.Zero
-                }
-
-                val realAvailable = available - parentConsumed
-                val velocity = if (currentIsVertical) realAvailable.y else realAvailable.x
-
-                if (abs(offset) > offsetThreshold) {
-                    if (sign(velocity) != sign(offset)) {
-                        startSpringAnimation(velocity)
-                        // Optimize speed and feel to prevent violent throwing
-                        return parentConsumed + if (currentIsVertical) {
-                            Velocity(
-                                0f,
-                                realAvailable.y / 2.13333f,
-                            )
-                        } else {
-                            Velocity(realAvailable.x / 2.13333f, 0f)
-                        }
-                    } else {
-                        startSpringAnimation(velocity)
-                        return parentConsumed + if (currentIsVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
-                    }
-                }
-
-                return parentConsumed
-            }
-
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                val isActive = abs(offset) > offsetThreshold
-                if (overScrollState.isOverScrollActive != isActive) {
-                    overScrollState.isOverScrollActive = isActive
-                }
-
-                if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
-                    return dispatcher.dispatchPostFling(consumed, available)
-                }
-
-                animationJob?.cancel()
-
-                val parentConsumed = if (currentNestedScrollToParent) {
-                    dispatcher.dispatchPostFling(consumed, available)
-                } else {
-                    Velocity.Zero
-                }
-
-                val realAvailable = available - parentConsumed
-                val velocity = (if (currentIsVertical) realAvailable.y else realAvailable.x) / 1.53333f // attenuation speed
-                startSpringAnimation(velocity)
-
-                return parentConsumed + if (currentIsVertical) Velocity(0f, velocity) else Velocity(velocity, 0f)
+                clip = true
             }
         }
     }
 
-    this
-        .clipToBounds()
-        .nestedScroll(nestedConnection, dispatcher)
-        .graphicsLayer {
-            if (currentIsVertical) translationY = offset else translationX = offset
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val isActive = abs(offset) > offsetThreshold
+        if (overScrollState.isOverScrollActive != isActive) {
+            overScrollState.isOverScrollActive = isActive
         }
+
+        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
+            return dispatcher.dispatchPreScroll(available, source)
+        }
+
+        animationJob?.cancel()
+
+        val parentConsumed = if (nestedScrollToParent) {
+            dispatcher.dispatchPreScroll(available, source)
+        } else {
+            Offset.Zero
+        }
+
+        val realAvailable = available - parentConsumed
+        val delta = if (isVertical) realAvailable.y else realAvailable.x
+
+        if (abs(offset) <= offsetThreshold || sign(delta) == sign(rawTouchAccumulation)) {
+            return parentConsumed
+        }
+
+        if (sign(delta) != sign(rawTouchAccumulation)) { // opposite direction
+            val actualConsumed = if (abs(rawTouchAccumulation) <= abs(delta)) {
+                -rawTouchAccumulation // can be fully consumed
+            } else {
+                delta
+            }
+
+            if (abs(rawTouchAccumulation) <= abs(delta)) {
+                resetState() // reset directly after complete consumption
+            } else {
+                applyDrag(actualConsumed)
+            }
+
+            return if (isVertical) {
+                Offset(parentConsumed.x, actualConsumed + parentConsumed.y)
+            } else {
+                Offset(actualConsumed + parentConsumed.x, parentConsumed.y)
+            }
+        }
+
+        applyDrag(delta)
+        return if (isVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
+    }
+
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        val isActive = abs(offset) > offsetThreshold
+        if (overScrollState.isOverScrollActive != isActive) {
+            overScrollState.isOverScrollActive = isActive
+        }
+
+        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
+            return dispatcher.dispatchPostScroll(consumed, available, source)
+        }
+
+        animationJob?.cancel()
+
+        val parentConsumed = if (nestedScrollToParent) {
+            dispatcher.dispatchPostScroll(consumed, available, source)
+        } else {
+            Offset.Zero
+        }
+
+        val realAvailable = available - parentConsumed
+        val delta = if (isVertical) realAvailable.y else realAvailable.x
+
+        applyDrag(delta)
+        return if (isVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
+    }
+
+    override suspend fun onPreFling(available: Velocity): Velocity {
+        val isActive = abs(offset) > offsetThreshold
+        if (overScrollState.isOverScrollActive != isActive) {
+            overScrollState.isOverScrollActive = isActive
+        }
+
+        if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
+            return dispatcher.dispatchPreFling(available)
+        }
+
+        animationJob?.cancel()
+
+        val parentConsumed = if (nestedScrollToParent) {
+            dispatcher.dispatchPreFling(available)
+        } else {
+            Velocity.Zero
+        }
+
+        val realAvailable = available - parentConsumed
+        val velocity = if (isVertical) realAvailable.y else realAvailable.x
+
+        if (abs(offset) > offsetThreshold) {
+            if (sign(velocity) != sign(offset)) {
+                startSpringAnimation(velocity)
+                // Optimize speed and feel to prevent violent throwing
+                return parentConsumed + if (isVertical) {
+                    Velocity(
+                        0f,
+                        realAvailable.y / 2.13333f,
+                    )
+                } else {
+                    Velocity(realAvailable.x / 2.13333f, 0f)
+                }
+            } else {
+                startSpringAnimation(velocity)
+                return parentConsumed + if (isVertical) Velocity(0f, realAvailable.y) else Velocity(realAvailable.x, 0f)
+            }
+        }
+
+        return parentConsumed
+    }
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        val isActive = abs(offset) > offsetThreshold
+        if (overScrollState.isOverScrollActive != isActive) {
+            overScrollState.isOverScrollActive = isActive
+        }
+
+        if (shouldBypassForPullToRefresh() && !overScrollState.isOverScrollActive) {
+            return dispatcher.dispatchPostFling(consumed, available)
+        }
+
+        animationJob?.cancel()
+
+        val parentConsumed = if (nestedScrollToParent) {
+            dispatcher.dispatchPostFling(consumed, available)
+        } else {
+            Velocity.Zero
+        }
+
+        val realAvailable = available - parentConsumed
+        val velocity = (if (isVertical) realAvailable.y else realAvailable.x) / 1.53333f // attenuation speed
+        startSpringAnimation(velocity)
+
+        return parentConsumed + if (isVertical) Velocity(0f, velocity) else Velocity(velocity, 0f)
+    }
 }
 
 /**

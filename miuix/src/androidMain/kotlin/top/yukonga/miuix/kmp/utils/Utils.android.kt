@@ -9,10 +9,7 @@ import android.os.Build
 import android.view.RoundedCorner
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -20,33 +17,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import androidx.window.layout.WindowMetricsCalculator
-import kotlin.math.max
-import kotlin.math.min
-
-@Composable
-@SuppressLint("ConfigurationScreenWidthHeight")
-actual fun getWindowSize(): WindowSize {
-    val configuration = LocalConfiguration.current
-    val context = LocalContext.current
-    val windowMetrics = remember(configuration, context) {
-        WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-    }
-    val widthPx = windowMetrics.bounds.width()
-    val heightPx = windowMetrics.bounds.height()
-    val windowSize by remember(widthPx, heightPx, configuration) {
-        derivedStateOf {
-            val screenWidthDp = configuration.screenWidthDp
-            val screenHeightDp = configuration.screenHeightDp
-            if (screenWidthDp > screenHeightDp) {
-                WindowSize(max(widthPx, heightPx), min(widthPx, heightPx))
-            } else {
-                WindowSize(min(widthPx, heightPx), max(widthPx, heightPx))
-            }
-        }
-    }
-    return windowSize
-}
 
 actual fun platform(): Platform = Platform.Android
 
@@ -54,6 +24,7 @@ actual fun platform(): Platform = Platform.Android
 actual fun getRoundedCorner(): Dp = getSystemCornerRadius()
 
 // Represents a rounded corner of the display.
+@SuppressLint("NewApi")
 @Composable
 private fun getSystemCornerRadius(): Dp {
     val context = LocalContext.current

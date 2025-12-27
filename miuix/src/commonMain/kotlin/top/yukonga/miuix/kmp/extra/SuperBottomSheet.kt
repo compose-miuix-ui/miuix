@@ -52,6 +52,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -67,7 +68,6 @@ import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -248,9 +248,9 @@ internal fun SuperBottomSheetContent(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val windowSize = getWindowSize()
-    val windowHeight by remember(windowSize, density) {
-        derivedStateOf { windowSize.height.dp / density.density }
+    val windowInfo = LocalWindowInfo.current
+    val windowHeight by remember(windowInfo, density) {
+        derivedStateOf { windowInfo.containerDpSize.height / density.density }
     }
 
     val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()

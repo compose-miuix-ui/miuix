@@ -25,11 +25,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-
             implementation(libs.jetbrains.androidx.navigation)
+            implementation(libs.jetbrains.compose.foundation)
+            implementation(libs.jetbrains.compose.runtime)
+            implementation(libs.jetbrains.compose.ui)
             implementation(projects.miuix)
             implementation(projects.miuixIcons)
         }

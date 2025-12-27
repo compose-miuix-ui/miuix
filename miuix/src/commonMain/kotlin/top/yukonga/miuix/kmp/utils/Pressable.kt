@@ -32,7 +32,6 @@ import androidx.compose.ui.node.SemanticsModifierNode
 import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.invalidateSemantics
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.disabled
@@ -48,50 +47,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-
-/**
- * Configure component to receive press via accessibility "press" event.
- *
- * Add this modifier to the element to make it pressable within its bounds and show a default
- * indication when it's pressed.
- *
- * This version has no [MutableInteractionSource] or [Indication] parameters, the default indication
- * will use `SinkFeedback()`. To specify [MutableInteractionSource] or [Indication], use
- * the other overload.
- *
- * If you are only creating this clickable modifier inside composition, consider using the other
- * overload and explicitly passing `LocalIndication.current` for improved performance. For more
- * information see the documentation on the other overload.
- *
- *
- * @param enabled Controls the enabled state. When `false`, this modifier will appear
- *   disabled for accessibility services
- * @param role the type of user interface element. Accessibility services might use this to describe
- *   the element or do customizations
- * @param delay how long to wait before appearing 'pressed' (emitting [PressInteraction.Press]).
- *   If `null`, even if the animation is subsequently scrolled or consumed, a "pressed" appears directly.
- */
-@Stable
-fun Modifier.pressable(
-    enabled: Boolean = true,
-    role: Role? = null,
-    delay: Long? = TAP_INDICATION_DELAY,
-) = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "clickable"
-        properties["enabled"] = enabled
-        properties["role"] = role
-        properties["delay"] = delay
-    },
-) {
-    Modifier.pressable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = SinkFeedback(),
-        enabled = enabled,
-        role = role,
-        delay = delay,
-    )
-}
 
 /**
  * Configure component to receive press via accessibility "press" event.

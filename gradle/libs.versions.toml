@@ -9,7 +9,7 @@ kotlin = "2.2.21"
 spotless = "8.1.0"
 
 jetbrains-androidx-navigation = "2.9.1"
-jetbrains-compose-multiplatform = "1.9.3"
+jetbrains-compose-multiplatform = "1.10.0-rc02"
 jetbrains-compose-hotReload = "1.0.0"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
@@ -22,10 +22,13 @@ material-kolor = "4.0.5"
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidx-window" }
 jetbrains-androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrains-androidx-navigation" }
+jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose-multiplatform" }
+jetbrains-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose-multiplatform" }
+jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "jetbrains-compose-multiplatform" }
+jetbrains-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
 gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
-materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "material-kolor" }
 
 # Gradle Plugins

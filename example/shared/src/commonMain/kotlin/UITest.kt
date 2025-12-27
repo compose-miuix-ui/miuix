@@ -55,6 +55,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -86,7 +87,6 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.FPSMonitor
@@ -241,9 +241,10 @@ private fun WideScreenLayout(
     seedIndex: MutableState<Int>,
     padding: PaddingValues,
 ) {
+    val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
 
-    val windowWidth = getWindowSize().width
+    val windowWidth = windowInfo.containerSize.width
     var weight by remember(windowWidth) { mutableFloatStateOf(0.4f) }
     var potentialWeight by remember { mutableFloatStateOf(weight) }
     val dragState = rememberDraggableState { delta ->

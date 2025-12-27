@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -40,7 +41,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.WindowSize
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -255,20 +255,20 @@ data class ListPopupLayoutInfo(
 
 @Composable
 fun rememberListPopupLayoutInfo(
-    windowSize: WindowSize,
     alignment: PopupPositionProvider.Align,
     popupPositionProvider: PopupPositionProvider,
     parentBounds: IntRect,
     popupContentSize: IntSize,
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
     val displayCutout = WindowInsets.displayCutout
     val statusBars = WindowInsets.statusBars
     val navigationBars = WindowInsets.navigationBars
     val captionBar = WindowInsets.captionBar
 
-    val popupMargin = remember(windowSize, layoutDirection, density, popupPositionProvider) {
+    val popupMargin = remember(layoutDirection, density, popupPositionProvider) {
         with(density) {
             IntRect(
                 left = popupPositionProvider.getMargins().calculateLeftPadding(layoutDirection).roundToPx(),
@@ -280,7 +280,6 @@ fun rememberListPopupLayoutInfo(
     }
 
     val windowBounds = remember(
-        windowSize,
         layoutDirection,
         density,
         displayCutout,
@@ -292,13 +291,13 @@ fun rememberListPopupLayoutInfo(
             IntRect(
                 left = displayCutout.getLeft(this, layoutDirection),
                 top = statusBars.getTop(this),
-                right = windowSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = windowSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
+                right = windowInfo.containerSize.width - displayCutout.getRight(this, layoutDirection),
+                bottom = windowInfo.containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
             )
         }
     }
 
-    val predictedTransformOrigin = remember(windowSize, alignment, popupMargin, parentBounds) {
+    val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds) {
         val xInWindow = when (alignment) {
             PopupPositionProvider.Align.Right,
             PopupPositionProvider.Align.TopRight,
@@ -315,8 +314,8 @@ fun rememberListPopupLayoutInfo(
                 parentBounds.bottom + popupMargin.bottom
         }
         safeTransformOrigin(
-            xInWindow / windowSize.width.toFloat(),
-            yInWindow / windowSize.height.toFloat(),
+            xInWindow / windowInfo.containerSize.width.toFloat(),
+            yInWindow / windowInfo.containerSize.height.toFloat(),
         )
     }
 
@@ -376,7 +375,6 @@ fun rememberListPopupLayoutInfo(
 
     val effectiveTransformOrigin = remember(
         popupContentSize,
-        windowSize,
         alignment,
         layoutDirection,
         popupMargin,
@@ -406,8 +404,8 @@ fun rememberListPopupLayoutInfo(
             }
 
             safeTransformOrigin(
-                cornerX / windowSize.width.toFloat(),
-                cornerY / windowSize.height.toFloat(),
+                cornerX / windowInfo.containerSize.width.toFloat(),
+                cornerY / windowInfo.containerSize.height.toFloat(),
             )
         }
     }

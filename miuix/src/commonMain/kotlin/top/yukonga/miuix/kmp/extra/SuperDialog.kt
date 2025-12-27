@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -57,7 +58,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
-import top.yukonga.miuix.kmp.utils.getWindowSize
 
 /**
  * A dialog with a title, a summary, and other contents.
@@ -181,9 +181,9 @@ internal fun SuperDialogContent(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val windowSize = getWindowSize()
-    val windowHeight by remember(windowSize, density) {
-        derivedStateOf { windowSize.height.dp / density.density }
+    val windowInfo = LocalWindowInfo.current
+    val windowHeight by remember(windowInfo, density) {
+        derivedStateOf { windowInfo.containerDpSize.height / density.density }
     }
     val roundedCorner = getRoundedCorner()
     val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
@@ -291,12 +291,12 @@ object SuperDialogDefaults {
     @Composable
     internal fun isLargeScreen(): Boolean {
         val density = LocalDensity.current
-        val windowSize = getWindowSize()
-        val windowWidth by remember(windowSize, density) {
-            derivedStateOf { windowSize.width.dp / density.density }
+        val windowInfo = LocalWindowInfo.current
+        val windowWidth by remember(windowInfo, density) {
+            derivedStateOf { windowInfo.containerDpSize.width / density.density }
         }
-        val windowHeight by remember(windowSize, density) {
-            derivedStateOf { windowSize.height.dp / density.density }
+        val windowHeight by remember(windowInfo, density) {
+            derivedStateOf { windowInfo.containerDpSize.height / density.density }
         }
         val largeScreen by remember(windowWidth, windowHeight) {
             derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }

@@ -9,18 +9,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogProperties
 
 /**
- * Window size data class.
- */
-@Immutable
-data class WindowSize(val width: Int, val height: Int)
-
-/**
- * Returns the current window size.
- */
-@Composable
-expect fun getWindowSize(): WindowSize
-
-/**
  * Platform enum class.
  */
 enum class Platform {

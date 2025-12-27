@@ -38,6 +38,7 @@ import androidx.compose.ui.backhandler.PredictiveBackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,6 @@ import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
@@ -144,13 +144,13 @@ fun WindowBottomSheet(
         properties = platformDialogProperties(),
     ) {
         RemovePlatformDialogDefaultEffects()
-        val windowSize = getWindowSize()
+        val windowInfo = LocalWindowInfo.current
         val density = LocalDensity.current
-        val windowWidth by remember(windowSize, density) {
-            derivedStateOf { windowSize.width.dp / density.density }
+        val windowWidth by remember(windowInfo, density) {
+            derivedStateOf { windowInfo.containerDpSize.width / density.density }
         }
-        val windowHeight by remember(windowSize, density) {
-            derivedStateOf { windowSize.height.dp / density.density }
+        val windowHeight by remember(windowInfo, density) {
+            derivedStateOf { windowInfo.containerDpSize.height / density.density }
         }
 
         AnimatedVisibility(

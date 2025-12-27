@@ -198,8 +198,6 @@ TopAppBar(
 
 ### Combining Large and Small Titles
 
-You can use the BoxWithConstraints method provided by foundation or the [getWindowSize()](../guide/multiplatform.md#window-size-management) method provided by Miuix to get the current window size and decide whether to use a large title or a small title based on the window width.
-
 ```kotlin
 var useSmallTopBar by remember { mutableStateOf(false) }
 

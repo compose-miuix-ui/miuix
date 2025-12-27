@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -50,7 +51,6 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
@@ -118,36 +118,35 @@ fun WindowListPopup(
         }
     }
 
-    val windowSize = getWindowSize()
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
 
     Spacer(
-        modifier = Modifier
-            .onGloballyPositioned { childCoordinates ->
-                childCoordinates.parentLayoutCoordinates?.let { parentLayoutCoordinates ->
-                    val positionInWindow = parentLayoutCoordinates.positionInWindow()
-                    parentBounds = IntRect(
-                        left = positionInWindow.x.toInt(),
-                        top = positionInWindow.y.toInt(),
-                        right = positionInWindow.x.toInt() + parentLayoutCoordinates.size.width,
-                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height,
-                    )
-                }
-            },
+        modifier = Modifier.onGloballyPositioned { childCoordinates ->
+            childCoordinates.parentLayoutCoordinates?.let { parentLayoutCoordinates ->
+                val positionInWindow = parentLayoutCoordinates.positionInWindow()
+                parentBounds = IntRect(
+                    left = positionInWindow.x.toInt(),
+                    top = positionInWindow.y.toInt(),
+                    right = positionInWindow.x.toInt() + parentLayoutCoordinates.size.width,
+                    bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height,
+                )
+            }
+        },
     )
 
     if (parentBounds == IntRect.Zero) return
 
-    val density = LocalDensity.current
     var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
 
     val layoutInfo = rememberListPopupLayoutInfo(
-        windowSize = windowSize,
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = popupContentSize,
     )
+
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
 
     Dialog(
         onDismissRequest = {
@@ -157,11 +156,11 @@ fun WindowListPopup(
     ) {
         RemovePlatformDialogDefaultEffects()
 
-        val windowWidth = remember(windowSize, density) {
-            windowSize.width.dp / density.density
+        val windowWidth = remember(windowInfo, density) {
+            windowInfo.containerDpSize.width / density.density
         }
-        val windowHeight = remember(windowSize, density) {
-            windowSize.height.dp / density.density
+        val windowHeight = remember(windowInfo, density) {
+            windowInfo.containerDpSize.height / density.density
         }
 
         AnimatedVisibility(
@@ -172,76 +171,68 @@ fun WindowListPopup(
             val baseColor = MiuixTheme.colorScheme.windowDimming
             val dimColor = if (enableWindowDim) baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue)) else Color.Transparent
             Box(
-                modifier = Modifier
-                    .widthIn(min = windowWidth)
-                    .heightIn(min = windowHeight)
-                    .pointerInput(internalVisible.currentState) {
-                        detectTapGestures(
-                            onTap = {
-                                if (internalVisible.currentState) {
-                                    requestDismiss()
-                                } else {
-                                    outsideDismissDeferred.value = true
-                                }
-                            },
-                        )
-                    }
-                    .background(dimColor),
+                modifier = Modifier.widthIn(min = windowWidth).heightIn(min = windowHeight).pointerInput(internalVisible.currentState) {
+                    detectTapGestures(
+                        onTap = {
+                            if (internalVisible.currentState) {
+                                requestDismiss()
+                            } else {
+                                outsideDismissDeferred.value = true
+                            }
+                        },
+                    )
+                }.background(dimColor),
             )
         }
 
         if (internalVisible.currentState || internalVisible.targetState || isAnimating) {
             Box(
-                modifier = popupModifier
-                    .widthIn(min = windowWidth)
-                    .heightIn(min = windowHeight)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                if (internalVisible.currentState) {
-                                    requestDismiss()
-                                } else {
-                                    outsideDismissDeferred.value = true
-                                }
-                            },
-                        )
+                modifier = popupModifier.widthIn(min = windowWidth).heightIn(min = windowHeight).pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            if (internalVisible.currentState) {
+                                requestDismiss()
+                            } else {
+                                outsideDismissDeferred.value = true
+                            }
+                        },
+                    )
+                }.layout { measurable, constraints ->
+                    val minWidthPx = minWidth.roundToPx().coerceAtMost(windowInfo.containerSize.width)
+                    val classicMinHeightPx = with(density) { (((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2) }
+                    val safeWindowMaxHeightPx = with(density) { 416.dp.roundToPx() }
+                    val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
+                    val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
+                    val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
+                    val finalMaxHeightPx = listOf(
+                        maxHeight?.roundToPx() ?: Int.MAX_VALUE,
+                        safeWindowMaxHeightPx,
+                        sideConstrainedMax,
+                        windowInfo.containerSize.height,
+                    ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height))
+                    val placeable = measurable.measure(
+                        constraints.copy(
+                            minWidth = minWidthPx,
+                            minHeight = classicMinHeightPx.coerceAtMost(windowInfo.containerSize.height),
+                            maxHeight = finalMaxHeightPx,
+                            maxWidth = windowInfo.containerSize.width,
+                        ),
+                    )
+                    val measuredSize = IntSize(placeable.width, placeable.height)
+
+                    val calculatedOffset = popupPositionProvider.calculatePosition(
+                        parentBounds,
+                        layoutInfo.windowBounds,
+                        layoutDirection,
+                        measuredSize,
+                        layoutInfo.popupMargin,
+                        alignment,
+                    )
+
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        placeable.place(calculatedOffset)
                     }
-                    .layout { measurable, constraints ->
-                        val minWidthPx = minWidth.roundToPx().coerceAtMost(windowSize.width)
-                        val classicMinHeightPx = with(density) { (((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2) }
-                        val safeWindowMaxHeightPx = with(density) { 416.dp.roundToPx() }
-                        val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
-                        val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
-                        val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
-                        val finalMaxHeightPx = listOf(
-                            maxHeight?.roundToPx() ?: Int.MAX_VALUE,
-                            safeWindowMaxHeightPx,
-                            sideConstrainedMax,
-                            windowSize.height,
-                        ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(windowSize.height))
-                        val placeable = measurable.measure(
-                            constraints.copy(
-                                minWidth = minWidthPx,
-                                minHeight = classicMinHeightPx.coerceAtMost(windowSize.height),
-                                maxHeight = finalMaxHeightPx,
-                                maxWidth = windowSize.width,
-                            ),
-                        )
-                        val measuredSize = IntSize(placeable.width, placeable.height)
-
-                        val calculatedOffset = popupPositionProvider.calculatePosition(
-                            parentBounds,
-                            layoutInfo.windowBounds,
-                            layoutDirection,
-                            measuredSize,
-                            layoutInfo.popupMargin,
-                            alignment,
-                        )
-
-                        layout(constraints.maxWidth, constraints.maxHeight) {
-                            placeable.place(calculatedOffset)
-                        }
-                    },
+                },
             ) {
                 val popupAlphaAnim = remember { Animatable(0f) }
                 LaunchedEffect(internalVisible.targetState) {

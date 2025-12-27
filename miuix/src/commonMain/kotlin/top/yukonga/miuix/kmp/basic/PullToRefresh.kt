@@ -52,6 +52,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -66,7 +67,6 @@ import top.yukonga.miuix.kmp.utils.LocalOverScrollState
 import top.yukonga.miuix.kmp.utils.OverScrollState
 import top.yukonga.miuix.kmp.utils.SpringEngine
 import top.yukonga.miuix.kmp.utils.SpringMath
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -198,9 +198,9 @@ fun rememberPullToRefreshState(): PullToRefreshState {
     }
 
     // Update context-dependent properties on the state instance to ensure it's always current.
-    val windowSize = getWindowSize()
-    state.maxDragDistancePx = windowSize.height.toFloat()
-    state.refreshThresholdOffset = windowSize.height.toFloat() * MAX_DRAWRATIO * THRESHOLD_RADIO
+    val windowInfo = LocalWindowInfo.current
+    state.maxDragDistancePx = windowInfo.containerSize.height.toFloat()
+    state.refreshThresholdOffset = windowInfo.containerSize.height.toFloat() * MAX_DRAWRATIO * THRESHOLD_RADIO
 
     return state
 }

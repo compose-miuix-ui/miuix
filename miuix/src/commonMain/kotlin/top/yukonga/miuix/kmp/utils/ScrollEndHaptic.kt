@@ -3,15 +3,18 @@
 
 package top.yukonga.miuix.kmp.utils
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
@@ -27,10 +30,14 @@ private const val POST_FLING_CONSUMED_VELOCITY_THRESHOLD = 25.0f
  * @param hapticFeedback The [HapticFeedback] instance to perform feedback.
  * @param hapticFeedbackType The type of haptic feedback to perform.
  */
-private class ScrollEndHapticConnection(
-    private val hapticFeedback: HapticFeedback,
-    private val hapticFeedbackType: HapticFeedbackType,
-) : NestedScrollConnection {
+private class ScrollEndHapticNode(
+    private var hapticFeedbackType: HapticFeedbackType,
+) : DelegatingNode(),
+    CompositionLocalConsumerModifierNode,
+    NestedScrollConnection {
+
+    private val hapticFeedback: HapticFeedback
+        get() = currentValueOf(LocalHapticFeedback)
 
     private enum class ScrollEndHapticState {
         /** Not scrolled to the boundary. */
@@ -77,6 +84,29 @@ private class ScrollEndHapticConnection(
         }
         return Velocity.Zero
     }
+
+    override fun onAttach() {
+        delegate(nestedScrollModifierNode(this, null))
+    }
+
+    fun update(hapticFeedbackType: HapticFeedbackType) {
+        this.hapticFeedbackType = hapticFeedbackType
+    }
+}
+
+private data class ScrollEndHapticElement(
+    private val hapticFeedbackType: HapticFeedbackType,
+) : ModifierNodeElement<ScrollEndHapticNode>() {
+    override fun create() = ScrollEndHapticNode(hapticFeedbackType)
+
+    override fun update(node: ScrollEndHapticNode) {
+        node.update(hapticFeedbackType)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "scrollEndHaptic"
+        properties["hapticFeedbackType"] = hapticFeedbackType
+    }
 }
 
 /**
@@ -86,14 +116,4 @@ private class ScrollEndHapticConnection(
  */
 fun Modifier.scrollEndHaptic(
     hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.TextHandleMove,
-): Modifier = composed {
-    val haptic = LocalHapticFeedback.current
-
-    val connection = remember(haptic, hapticFeedbackType) {
-        ScrollEndHapticConnection(
-            hapticFeedback = haptic,
-            hapticFeedbackType = hapticFeedbackType,
-        )
-    }
-    Modifier.nestedScroll(connection)
-}
+): Modifier = this.then(ScrollEndHapticElement(hapticFeedbackType))

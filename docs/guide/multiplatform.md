@@ -40,30 +40,6 @@ when (platform()) {
 }
 ```
 
-## Window Size Management
-
-Miuix provides cross-platform functionality to retrieve window sizes:
-
-```kotlin
-@Composable
-fun MyResponsiveContent() {
-    val windowSize = getWindowSize()
-    val width = windowSize.width
-    val height = windowSize.height
-    // Adjust UI layout based on window size
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        if (width > 600) {
-            Text("Wide Layout")
-        } else {
-            Text("Narrow Layout")
-        }
-        Text("\nHeight: $height")
-    }
-}
-```
-
 ## Device Rounded Corners
 
 Android devices have varying screen corner radii, while other platforms may not have rounded corners. You can use the `getRoundedCorner()` function to retrieve the corner radius of the device (using a preset value if unavailable):

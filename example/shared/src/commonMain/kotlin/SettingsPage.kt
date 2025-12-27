@@ -503,8 +503,7 @@ fun AboutPage(
             }
             Text(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 48.dp),
-                text = "JDK Ver. " + VersionInfo.JDK_VERSION +
-                    "\nAPP Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                text = "App Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")" + "\nJDK Ver. " + VersionInfo.JDK_VERSION,
                 textAlign = TextAlign.Center,
             )
             Card(
