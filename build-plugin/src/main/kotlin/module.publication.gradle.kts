@@ -85,6 +85,11 @@ publishing {
                     name.set("焕晨HChen")
                     url.set("$githubUrl/HChenX")
                 }
+                developer {
+                    id.set("wxxsfxyzm")
+                    name.set("wxxsfxyzm")
+                    url.set("$githubUrl/wxxsfxyzm")
+                }
             }
         }
     }
