@@ -86,13 +86,13 @@ SuperDropdown(
 | items                 | List\<String>             | List of dropdown options          | -                                     | Yes      |
 | selectedIndex         | Int                       | Index of currently selected item  | -                                     | Yes      |
 | title                 | String                    | Title of the dropdown menu        | -                                     | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color configuration    | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Summary description of dropdown   | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration  | BasicComponentDefaults.summaryColor() | No       |
 | dropdownColors        | DropdownColors            | Color configuration for dropdown  | DropdownDefaults.dropdownColors()     | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content               | null                                  | No       |
 | bottomAction          | @Composable (() -> Unit)? | Custom bottom content             | null                                  | No       |
-| modifier              | Modifier                  | Modifier applied to the component | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding          | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum height of dropdown menu   | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive  | true                                  | No       |

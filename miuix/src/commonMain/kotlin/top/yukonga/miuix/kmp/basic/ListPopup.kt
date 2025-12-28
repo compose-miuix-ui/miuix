@@ -435,20 +435,17 @@ fun rememberListPopupLayoutInfo(
 
 @Composable
 fun ListPopupContent(
-    modifier: Modifier = Modifier,
     popupContentSize: IntSize,
     onPopupContentSizeChange: (IntSize) -> Unit,
     animationProgress: () -> Float,
     popupLayoutInfo: Triple<Boolean, Boolean, Boolean>,
     localTransformOrigin: TransformOrigin,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    MiuixTheme.colorScheme.windowDimming
 
-    val shape = remember(density) {
-        ContinuousRoundedRectangle(16.dp)
-    }
+    val shape = ContinuousRoundedRectangle(16.dp)
 
     Box(
         modifier = modifier

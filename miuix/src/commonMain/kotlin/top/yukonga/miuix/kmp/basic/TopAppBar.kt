@@ -130,16 +130,16 @@ fun TopAppBar(
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
     TopAppBarLayout(
-        modifier = modifier,
         title = title,
         color = color,
-        largeTitle = largeTitle ?: title,
         navigationIcon = navigationIcon,
         actions = actionsRow,
+        horizontalPadding = horizontalPadding,
         scrolledOffset = { scrollBehavior?.state?.heightOffset ?: 0f },
         expandedHeightPx = expandedHeightPx,
-        horizontalPadding = horizontalPadding,
         largeTitleHeight = largeTitleHeight,
+        modifier = modifier,
+        largeTitle = largeTitle ?: title,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
     )
 }
@@ -191,12 +191,12 @@ fun SmallTopAppBar(
     // The height of the app bar is determined by subtracting the bar's height offset from the
     // app bar's defined constant height value (i.e. the ContainerHeight token).
     SmallTopAppBarLayout(
-        modifier = modifier,
         title = title,
         color = color,
         navigationIcon = navigationIcon,
         actions = actionsRow,
         horizontalPadding = horizontalPadding,
+        modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
     )
 }
@@ -546,31 +546,31 @@ private fun interface ScrolledOffset {
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
  * the actions are optional.
  *
- * @param modifier the [Modifier] to be applied to this layout.
  * @param title the [TopAppBar] title (header).
  * @param color the background color of the [TopAppBar].
- * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
- * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
  * @param horizontalPadding the horizontal padding of the [TopAppBar]'s title & large title.
+ * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
  * @param largeTitleHeight a mutable state that holds the height of the large title.
+ * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
+ * @param modifier the [Modifier] to be applied to this layout.
+ * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
  */
 @Composable
 private fun TopAppBarLayout(
-    modifier: Modifier = Modifier,
     title: String,
     color: Color,
-    largeTitle: String = title,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
+    horizontalPadding: Dp,
     scrolledOffset: ScrolledOffset,
     expandedHeightPx: Float,
-    horizontalPadding: Dp,
     largeTitleHeight: MutableState<Int>,
-    defaultWindowInsetsPadding: Boolean,
+    modifier: Modifier = Modifier,
+    largeTitle: String = title,
+    defaultWindowInsetsPadding: Boolean = true,
 ) {
     // Subtract the scrolledOffset from the maxHeight. The scrolledOffset is expected to be
     // equal or smaller than zero.
@@ -756,23 +756,23 @@ private fun TopAppBarLayout(
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
  * the actions are optional.
  *
- * @param modifier the [Modifier] to be applied to this layout.
  * @param title the [SmallTopAppBar] title (header).
  * @param color the background color of the [SmallTopAppBar].
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param horizontalPadding the horizontal padding of the [SmallTopAppBar]'s title.
+ * @param modifier the [Modifier] to be applied to this layout.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [SmallTopAppBar].
  */
 @Composable
 private fun SmallTopAppBarLayout(
-    modifier: Modifier = Modifier,
     title: String,
     color: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     horizontalPadding: Dp,
-    defaultWindowInsetsPadding: Boolean,
+    modifier: Modifier = Modifier,
+    defaultWindowInsetsPadding: Boolean = true,
 ) {
     val titleModifier = remember(horizontalPadding) {
         Modifier

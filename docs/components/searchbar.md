@@ -47,8 +47,8 @@ SearchBar(
 | ------------------ | ---------------------------------- | ------------------------------------------------- | ------------------- | -------- |
 | inputField         | @Composable () -> Unit             | Search input field component                      | -                   | Yes      |
 | onExpandedChange   | (Boolean) -> Unit                  | Callback when expanded state changes              | -                   | Yes      |
-| insideMargin       | DpSize                             | Internal padding                                  | DpSize(12.dp, 0.dp) | No       |
 | modifier           | Modifier                           | Modifier applied to the search bar                | Modifier            | No       |
+| insideMargin       | DpSize                             | Internal padding                                  | DpSize(12.dp, 0.dp) | No       |
 | expanded           | Boolean                            | Whether to show search results                    | false               | No       |
 | outsideRightAction | @Composable (() -> Unit)?          | Action component shown on the right when expanded | null                | No       |
 | content            | @Composable ColumnScope.() -> Unit | Content shown when expanded                       | -                   | Yes      |
@@ -59,11 +59,11 @@ SearchBar(
 | ----------------- | ------------------------- | ------------------------------------ | -------------------- | -------- |
 | query             | String                    | Text content in search field         | -                    | Yes      |
 | onQueryChange     | (String) -> Unit          | Callback when text content changes   | -                    | Yes      |
-| label             | String                    | Placeholder text when empty          | ""                   | No       |
 | onSearch          | (String) -> Unit          | Callback when search is executed     | -                    | Yes      |
 | expanded          | Boolean                   | Whether in expanded state            | -                    | Yes      |
 | onExpandedChange  | (Boolean) -> Unit         | Callback when expanded state changes | -                    | Yes      |
 | modifier          | Modifier                  | Modifier applied to the input field  | Modifier             | No       |
+| label             | String                    | Placeholder text when empty          | ""                   | No       |
 | enabled           | Boolean                   | Whether search field is enabled      | true                 | No       |
 | leadingIcon       | @Composable (() -> Unit)? | Leading icon                         | default search icon  | No       |
 | trailingIcon      | @Composable (() -> Unit)? | Trailing icon                        | default clear button | No       |

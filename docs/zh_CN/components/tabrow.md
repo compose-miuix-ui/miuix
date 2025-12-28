@@ -45,19 +45,19 @@ TabRowWithContour(
 
 ### TabRow 属性
 
-| 属性名           | 类型             | 说明                 | 默认值                            | 是否必须 |
-| ---------------- | ---------------- | -------------------- | --------------------------------- | -------- |
-| tabs             | List\<String>    | 标签文本列表         | -                                 | 是       |
-| selectedTabIndex | Int              | 当前选中的标签索引   | -                                 | 是       |
-| modifier         | Modifier         | 应用于标签行的修饰符 | Modifier                          | 否       |
-| colors           | TabRowColors     | 标签行的颜色配置     | TabRowDefaults.tabRowColors()     | 否       |
-| minWidth         | Dp               | 每个标签的最小宽度   | TabRowDefaults.TabRowMinWidth     | 否       |
-| maxWidth         | Dp               | 每个标签的最大宽度   | TabRowDefaults.TabRowMaxWidth     | 否       |
-| height           | Dp               | 标签行的高度         | TabRowDefaults.TabRowHeight       | 否       |
-| cornerRadius     | Dp               | 标签的圆角半径       | TabRowDefaults.TabRowCornerRadius | 否       |
-| itemSpacing      | Dp               | 标签之间的间距       | 9.dp                              | 否       |
-| contentAlignment | Alignment        | 标签内容的对齐方式   | Alignment.Center                  | 否       |
-| onTabSelected    | ((Int) -> Unit)? | 标签选中时的回调函数 | null                              | 否       |
+| 属性名           | 类型          | 说明                 | 默认值                            | 是否必须 |
+| ---------------- | ------------- | -------------------- | --------------------------------- | -------- |
+| tabs             | List\<String> | 标签文本列表         | -                                 | 是       |
+| selectedTabIndex | Int           | 当前选中的标签索引   | -                                 | 是       |
+| onTabSelected    | (Int) -> Unit | 标签选中时的回调函数 | -                                 | 是       |
+| modifier         | Modifier      | 应用于标签行的修饰符 | Modifier                          | 否       |
+| colors           | TabRowColors  | 标签行的颜色配置     | TabRowDefaults.tabRowColors()     | 否       |
+| minWidth         | Dp            | 每个标签的最小宽度   | TabRowDefaults.TabRowMinWidth     | 否       |
+| maxWidth         | Dp            | 每个标签的最大宽度   | TabRowDefaults.TabRowMaxWidth     | 否       |
+| height           | Dp            | 标签行的高度         | TabRowDefaults.TabRowHeight       | 否       |
+| cornerRadius     | Dp            | 标签的圆角半径       | TabRowDefaults.TabRowCornerRadius | 否       |
+| itemSpacing      | Dp            | 标签之间的间距       | 9.dp                              | 否       |
+| contentAlignment | Alignment     | 标签内容的对齐方式   | Alignment.Center                  | 否       |
 
 ### TabRowWithContour 属性
 

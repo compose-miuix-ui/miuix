@@ -132,13 +132,13 @@ WindowSpinner(
 | items                 | List\<SpinnerEntry>       | 选项列表             | -                                     | 是       |
 | selectedIndex         | Int                       | 当前选中项的索引     | -                                     | 是       |
 | title                 | String                    | 选择器的标题         | -                                     | 是       |
+| modifier              | Modifier                  | 应用于组件的修饰符   | Modifier                              | 否       |
 | titleColor            | BasicComponentColors      | 标题文本的颜色配置   | BasicComponentDefaults.titleColor()   | 否       |
 | summary               | String?                   | 摘要说明             | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置   | BasicComponentDefaults.summaryColor() | 否       |
 | spinnerColors         | SpinnerColors             | 选择器的颜色配置     | SpinnerDefaults.spinnerColors()       | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容 | null                                  | 否       |
 | bottomAction          | @Composable (() -> Unit)? | 底部自定义内容       | null                                  | 否       |
-| modifier              | Modifier                  | 应用于组件的修饰符   | Modifier                              | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距   | BasicComponentDefaults.InsideMargin   | 否       |
 | maxHeight             | Dp?                       | 弹出框的最大高度     | null                                  | 否       |
 | enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
@@ -152,14 +152,14 @@ WindowSpinner(
 | items                 | List\<SpinnerEntry>       | 选项列表             | -                                     | 是       |
 | selectedIndex         | Int                       | 当前选中项的索引     | -                                     | 是       |
 | title                 | String                    | 选择器的标题         | -                                     | 是       |
+| dialogButtonString    | String                    | 对话框按钮的文本     | -                                     | 是       |
+| modifier              | Modifier                  | 应用于组件的修饰符   | Modifier                              | 否       |
+| popupModifier         | Modifier                  | 对话框弹出的修饰符   | Modifier                              | 否       |
 | titleColor            | BasicComponentColors      | 标题文本的颜色配置   | BasicComponentDefaults.titleColor()   | 否       |
 | summary               | String?                   | 摘要说明             | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置   | BasicComponentDefaults.summaryColor() | 否       |
 | spinnerColors         | SpinnerColors             | 选择器的颜色配置     | SpinnerDefaults.dialogSpinnerColors() | 否       |
 | leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容 | null                                  | 否       |
-| dialogButtonString    | String                    | 对话框按钮的文本     | -                                     | 是       |
-| popupModifier         | Modifier                  | 对话框弹出的修饰符   | Modifier                              | 否       |
-| modifier              | Modifier                  | 应用于组件的修饰符   | Modifier                              | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距   | BasicComponentDefaults.InsideMargin   | 否       |
 | enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中值   | true                                  | 否       |

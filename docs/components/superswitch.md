@@ -60,8 +60,9 @@ SuperSwitch(
 | Property Name   | Type                            | Description                          | Default Value                         | Required |
 | --------------- | ------------------------------- | ------------------------------------ | ------------------------------------- | -------- |
 | checked         | Boolean                         | Switch checked state                 | -                                     | Yes      |
-| onCheckedChange | ((Boolean) -> Unit)?            | Switch state change callback         | -                                     | No       |
+| onCheckedChange | (Boolean) -> Unit               | Switch state change callback         | -                                     | Yes      |
 | title           | String                          | Switch item title                    | -                                     | Yes      |
+| modifier        | Modifier                        | Component modifier                   | Modifier                              | No       |
 | titleColor      | BasicComponentColors            | Title text color configuration       | BasicComponentDefaults.titleColor()   | No       |
 | summary         | String?                         | Switch item summary                  | null                                  | No       |
 | summaryColor    | BasicComponentColors            | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No       |
@@ -69,7 +70,6 @@ SuperSwitch(
 | rightActions    | @Composable RowScope.() -> Unit | Custom right content (before switch) | {}                                    | No       |
 | bottomAction    | @Composable (() -> Unit)?       | Custom bottom content                | null                                  | No       |
 | switchColors    | SwitchColors                    | Switch control color configuration   | SwitchDefaults.switchColors()         | No       |
-| modifier        | Modifier                        | Component modifier                   | Modifier                              | No       |
 | insideMargin    | PaddingValues                   | Component internal content padding   | BasicComponentDefaults.InsideMargin   | No       |
 | holdDownState   | Boolean                         | Whether the component is held down   | false                                 | No       |
 | enabled         | Boolean                         | Component interactive state          | true                                  | No       |

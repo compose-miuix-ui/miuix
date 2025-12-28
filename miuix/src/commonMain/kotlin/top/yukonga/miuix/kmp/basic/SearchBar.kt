@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -64,20 +63,19 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param inputField the input field to input a query in the [SearchBar].
  * @param onExpandedChange the callback to be invoked when the [SearchBar]'s expanded state is
  *   changed.
- * @param insideMargin The margin inside the [SearchBar].
  * @param modifier the [Modifier] to be applied to the [SearchBar].
+ * @param insideMargin The margin inside the [SearchBar].
  * @param expanded whether the [SearchBar] is expanded and showing search results.
  * @param outsideRightAction the action to be shown at the right side of the [SearchBar] when it is
  *   expanded.
  * @param content the content to be shown when the [SearchBar] is expanded.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     inputField: @Composable () -> Unit,
     onExpandedChange: (Boolean) -> Unit,
-    insideMargin: DpSize = DpSize(12.dp, 0.dp),
     modifier: Modifier = Modifier,
+    insideMargin: DpSize = DpSize(12.dp, 0.dp),
     expanded: Boolean = false,
     outsideRightAction: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -129,13 +127,13 @@ fun SearchBar(
  * @param query the query text to be shown in the input field.
  * @param onQueryChange the callback to be invoked when the input service updates the query. An
  *   updated text comes as a parameter of the callback.
- * @param label the label to be shown when the input field is not focused.
  * @param onSearch the callback to be invoked when the input service triggers the
  *   [ImeAction.Search] action. The current [query] comes as a parameter of the callback.
  * @param expanded whether the search bar is expanded and showing search results.
  * @param onExpandedChange the callback to be invoked when the search bar's expanded state is
  *   changed.
  * @param modifier the [Modifier] to be applied to this input field.
+ * @param label the label to be shown when the input field is not focused.
  * @param enabled the enabled state of this input field. When `false`, this component will not
  *   respond to user input, and it will appear visually disabled and disabled to accessibility
  *   services.
@@ -150,11 +148,11 @@ fun SearchBar(
 fun InputField(
     query: String,
     onQueryChange: (String) -> Unit,
-    label: String = "",
     onSearch: (String) -> Unit,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = "",
     enabled: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,

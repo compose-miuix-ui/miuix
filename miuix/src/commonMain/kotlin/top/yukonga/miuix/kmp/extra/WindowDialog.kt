@@ -48,7 +48,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -216,7 +215,6 @@ fun WindowDialog(
                 exit = exitTransitionNullable ?: rememberDefaultDialogExitTransition(isLargeScreen),
             ) {
                 SuperDialogContent(
-                    modifier = modifier,
                     title = title,
                     titleColor = titleColor,
                     summary = summary,
@@ -234,6 +232,7 @@ fun WindowDialog(
                             outsideDismissDeferred.value = true
                         }
                     },
+                    modifier = modifier,
                     content = {
                         CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
                             content()

@@ -52,13 +52,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param items The list of [SpinnerEntry] to be shown in the [WindowSpinner].
  * @param selectedIndex The index of the selected item in the [WindowSpinner].
  * @param title The title of the [WindowSpinner].
+ * @param modifier The [Modifier] to be applied to the [WindowSpinner].
  * @param titleColor The color of the title of the [WindowSpinner].
  * @param summary The summary of the [WindowSpinner].
  * @param summaryColor The color of the summary of the [WindowSpinner].
  * @param spinnerColors The [SpinnerColors] of the [WindowSpinner].
  * @param leftAction The [Composable] content that on the left side of the [WindowSpinner].
  * @param bottomAction The [Composable] content at the bottom of the [WindowSpinner].
- * @param modifier The [Modifier] to be applied to the [WindowSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [WindowSpinner].
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowSpinner] is enabled.
@@ -71,13 +71,13 @@ fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
     leftAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
     enabled: Boolean = true,
@@ -170,8 +170,8 @@ private fun WindowSpinnerPopup(
                         entryCount = items.size,
                         isSelected = selectedIndex == index,
                         index = index,
-                        dialogMode = false,
                         spinnerColors = spinnerColors,
+                        dialogMode = false,
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
@@ -219,13 +219,13 @@ private fun RowScope.WindowSpinnerRightActions(
  * @param items the list of [SpinnerEntry] to be shown in the [WindowSpinner].
  * @param selectedIndex the index of the selected item in the [WindowSpinner].
  * @param title the title of the [WindowSpinner].
+ * @param dialogButtonString the string of the button in the dialog.
+ * @param modifier the [Modifier] to be applied to the [WindowSpinner].
+ * @param popupModifier the [Modifier] to be applied to the popup of the [WindowSpinner].
  * @param titleColor the color of the title of the [WindowSpinner].
  * @param summary the summary of the [WindowSpinner].
  * @param summaryColor the color of the summary of the [WindowSpinner].
  * @param leftAction the action to be shown at the left side of the [WindowSpinner].
- * @param dialogButtonString the string of the button in the dialog.
- * @param popupModifier the [Modifier] to be applied to the popup of the [WindowSpinner].
- * @param modifier the [Modifier] to be applied to the [WindowSpinner].
  * @param insideMargin the [PaddingValues] to be applied inside the [WindowSpinner].
  * @param enabled whether the [WindowSpinner] is enabled.
  * @param showValue whether to show the value of the [WindowSpinner].
@@ -237,14 +237,14 @@ fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
+    dialogButtonString: String,
+    modifier: Modifier = Modifier,
+    popupModifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.dialogSpinnerColors(),
     leftAction: @Composable (() -> Unit)? = null,
-    dialogButtonString: String,
-    popupModifier: Modifier = Modifier,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
@@ -295,10 +295,10 @@ fun WindowSpinner(
                 selectedIndex = selectedIndex,
                 title = title,
                 dialogButtonString = dialogButtonString,
-                popupModifier = popupModifier,
                 isDropdownExpanded = isDropdownExpanded,
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
+                popupModifier = popupModifier,
                 onSelectedIndexChange = onSelectedIndexChange,
             )
         },
@@ -314,10 +314,10 @@ private fun WindowSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    popupModifier: Modifier = Modifier,
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
+    popupModifier: Modifier = Modifier,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
@@ -340,8 +340,8 @@ private fun WindowSpinnerDialog(
                                 entryCount = items.size,
                                 isSelected = selectedIndex == index,
                                 index = index,
-                                dialogMode = true,
                                 spinnerColors = spinnerColors,
+                                dialogMode = true,
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)

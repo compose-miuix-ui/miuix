@@ -132,13 +132,13 @@ WindowSpinner(
 | items                 | List\<SpinnerEntry>       | List of spinner entries            | -                                     | Yes      |
 | selectedIndex         | Int                       | Index of currently selected item   | -                                     | Yes      |
 | title                 | String                    | Title of the spinner               | -                                     | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color configuration     | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Summary description                | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.spinnerColors()       | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content                | null                                  | No       |
 | bottomAction          | @Composable (() -> Unit)? | Custom bottom content              | null                                  | No       |
-| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum height of popup            | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
@@ -152,14 +152,14 @@ WindowSpinner(
 | items                 | List\<SpinnerEntry>       | List of spinner entries            | -                                     | Yes      |
 | selectedIndex         | Int                       | Index of currently selected item   | -                                     | Yes      |
 | title                 | String                    | Title of the spinner               | -                                     | Yes      |
+| dialogButtonString    | String                    | Text for the dialog button         | -                                     | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
+| popupModifier         | Modifier                  | Modifier for the popup dialog      | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color configuration     | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Summary description                | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.dialogSpinnerColors() | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content                | null                                  | No       |
-| dialogButtonString    | String                    | Text for the dialog button         | -                                     | Yes      |
-| popupModifier         | Modifier                  | Modifier for the popup dialog      | Modifier                              | No       |
-| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |

@@ -208,10 +208,7 @@ fun SuperBottomSheet(
         onDismissFinished = onDismissFinished,
     ) {
         SuperBottomSheetContent(
-            modifier = modifier,
             title = title,
-            leftAction = leftAction,
-            rightAction = rightAction,
             backgroundColor = backgroundColor,
             cornerRadius = cornerRadius,
             sheetMaxWidth = sheetMaxWidth,
@@ -225,6 +222,9 @@ fun SuperBottomSheet(
             dimAlpha = dimAlpha,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
+            modifier = modifier,
+            leftAction = leftAction,
+            rightAction = rightAction,
             content = content,
         )
     }
@@ -233,10 +233,7 @@ fun SuperBottomSheet(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun SuperBottomSheetContent(
-    modifier: Modifier = Modifier,
     title: String?,
-    leftAction: @Composable (() -> Unit)? = null,
-    rightAction: @Composable (() -> Unit)? = null,
     backgroundColor: Color,
     cornerRadius: Dp,
     sheetMaxWidth: Dp,
@@ -250,6 +247,9 @@ internal fun SuperBottomSheetContent(
     dimAlpha: MutableFloatState,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    leftAction: @Composable (() -> Unit)? = null,
+    rightAction: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
@@ -274,7 +274,6 @@ internal fun SuperBottomSheetContent(
             .fillMaxSize(),
     ) {
         SuperBottomSheetColumn(
-            modifier = modifier,
             title = title,
             leftAction = leftAction,
             rightAction = rightAction,
@@ -293,6 +292,7 @@ internal fun SuperBottomSheetContent(
             dimAlpha = dimAlpha,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = onDismissRequest,
+            modifier = modifier,
             content = content,
         )
     }
@@ -301,7 +301,6 @@ internal fun SuperBottomSheetContent(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 private fun SuperBottomSheetColumn(
-    modifier: Modifier = Modifier,
     title: String?,
     leftAction: @Composable (() -> Unit?)?,
     rightAction: @Composable (() -> Unit?)?,
@@ -320,6 +319,7 @@ private fun SuperBottomSheetColumn(
     dimAlpha: MutableFloatState,
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current

@@ -210,7 +210,6 @@ fun Slider(
         contentAlignment = Alignment.CenterStart,
     ) {
         SliderTrack(
-            modifier = Modifier.fillMaxWidth().height(height),
             shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
@@ -218,13 +217,14 @@ fun Slider(
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
             value = animatedValue,
-            thumbScale = thumbScale,
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = false,
-            reverseDirection = reverseDirection,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
+            thumbScale = thumbScale,
+            reverseDirection = reverseDirection,
+            modifier = Modifier.fillMaxWidth().height(height),
         )
     }
 }
@@ -379,7 +379,6 @@ fun VerticalSlider(
         contentAlignment = Alignment.BottomCenter,
     ) {
         SliderTrack(
-            modifier = Modifier.width(width).fillMaxHeight(),
             shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
@@ -387,13 +386,14 @@ fun VerticalSlider(
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
             value = animatedValue,
-            thumbScale = thumbScale,
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = true,
-            reverseDirection = reverseDirection,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
+            thumbScale = thumbScale,
+            reverseDirection = reverseDirection,
+            modifier = Modifier.width(width).fillMaxHeight(),
         )
     }
 }
@@ -667,7 +667,6 @@ fun RangeSlider(
         contentAlignment = Alignment.CenterStart,
     ) {
         RangeSliderTrack(
-            modifier = Modifier.fillMaxWidth().height(height),
             shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
@@ -682,6 +681,7 @@ fun RangeSlider(
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
+            modifier = Modifier.fillMaxWidth().height(height),
         )
     }
 }
@@ -691,7 +691,6 @@ fun RangeSlider(
  */
 @Composable
 private fun SliderTrack(
-    modifier: Modifier = Modifier,
     shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
@@ -699,13 +698,14 @@ private fun SliderTrack(
     keyPointColor: Color,
     keyPointForegroundColor: Color,
     value: Float,
-    thumbScale: Float = 1f,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     isVertical: Boolean,
-    reverseDirection: Boolean = false,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
+    thumbScale: Float,
+    reverseDirection: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
@@ -801,7 +801,6 @@ private fun SliderTrack(
  */
 @Composable
 private fun RangeSliderTrack(
-    modifier: Modifier = Modifier,
     shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
@@ -810,12 +809,13 @@ private fun RangeSliderTrack(
     keyPointForegroundColor: Color,
     valueStart: Float,
     valueEnd: Float,
-    startThumbScale: Float = 1f,
-    endThumbScale: Float = 1f,
+    startThumbScale: Float,
+    endThumbScale: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
+    modifier: Modifier = Modifier,
 ) {
     val backgroundAlpha by animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,

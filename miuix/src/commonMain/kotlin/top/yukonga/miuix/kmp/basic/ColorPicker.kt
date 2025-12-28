@@ -53,19 +53,19 @@ import kotlin.math.min
  *
  * @param initialColor The initial color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
+ * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
  * @param hapticEffect The haptic effect of the [ColorSlider].
  * @param colorSpace The color space to use for the picker.
- * @param modifier The modifier to be applied to the color picker.
  */
 @Composable
 fun ColorPicker(
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
     colorSpace: ColorSpace = ColorSpace.HSV,
-    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     when (colorSpace) {
@@ -116,17 +116,17 @@ fun ColorPicker(
  *
  * @param initialColor The initial color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
+ * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
  * @param hapticEffect The haptic effect of the [ColorSlider].
- * @param modifier The modifier to be applied to the color picker.
  */
 @Composable
 fun HsvColorPicker(
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -337,17 +337,17 @@ fun HsvAlphaSlider(
  *
  * @param initialColor The initial color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
+ * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
  * @param hapticEffect The haptic effect of the [ColorSlider].
- * @param modifier The modifier to be applied to the color picker.
  */
 @Composable
 fun OkHsvColorPicker(
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -562,17 +562,17 @@ fun OkHsvAlphaSlider(
  *
  * @param initialColor The initial color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
+ * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
  * @param hapticEffect The haptic effect of the [ColorSlider].
- * @param modifier The modifier to be applied to the color picker.
  */
 @Composable
 fun OkLabColorPicker(
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -661,16 +661,21 @@ fun OkLabColorPicker(
 }
 
 /**
- * A [OkLchColorPicker] component using OkLCH color space with perceptual adjustments.
- * OkLCH provides intuitive control with Lightness, Chroma, and Hue.
+ * A [OkLchColorPicker] component with Miuix style using OkLch color space.
+ *
+ * @param initialColor The initial color of the picker.
+ * @param onColorChanged The callback to be called when the color changes.
+ * @param modifier The modifier to be applied to the color picker.
+ * @param showPreview Whether to show a preview of the selected color.
+ * @param hapticEffect The haptic effect of the [ColorSlider].
  */
 @Composable
 fun OkLchColorPicker(
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
-    modifier: Modifier = Modifier,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
     var initialSetup by remember { mutableStateOf(true) }
@@ -1102,11 +1107,11 @@ private fun ColorSlider(
 
 @Composable
 private fun SliderIndicator(
-    modifier: Modifier = Modifier,
     value: Float,
     sliderWidth: Dp,
     sliderSizePx: Float,
     indicatorSize: Dp,
+    modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val indicatorOffsetXDp = with(density) {

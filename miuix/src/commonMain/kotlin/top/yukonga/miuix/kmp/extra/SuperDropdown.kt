@@ -34,13 +34,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param items The options of the [SuperDropdown].
  * @param selectedIndex The index of the selected option.
  * @param title The title of the [SuperDropdown].
+ * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param titleColor The color of the title.
  * @param summary The summary of the [SuperDropdown].
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [SuperDropdown].
  * @param leftAction The [Composable] content that on the left side of the [SuperDropdown].
  * @param bottomAction The [Composable] content at the bottom of the [SuperDropdown].
- * @param modifier The modifier to be applied to the [SuperDropdown].
  * @param insideMargin The margin inside the [SuperDropdown].
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperDropdown] is enabled.
@@ -53,13 +53,13 @@ fun SuperDropdown(
     items: List<String>,
     selectedIndex: Int,
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     leftAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
     enabled: Boolean = true,

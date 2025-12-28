@@ -24,7 +24,6 @@ spotless {
                     "ktlint_compose_modifier-missing-check" to "disabled",
                     "ktlint_compose_compositionlocal-allowlist" to "disabled",
                     "ktlint_compose_mutable-state-param-check" to "disabled",
-                    "ktlint_compose_param-order-check" to "disabled",
                     "ktlint_compose_parameter-naming" to "disabled",
                     "ktlint_compose_modifier-naming" to "disabled",
                 ),

@@ -36,16 +36,16 @@ import kotlin.math.sin
 /**
  * A [LinearProgressIndicator] with Miuix style.
  *
- * @param progress The current progress value between 0.0f and 1.0f, or null for indeterminate state.
  * @param modifier The modifier to be applied to the indicator.
+ * @param progress The current progress value between 0.0f and 1.0f, or null for indeterminate state.
  * @param colors The colors used for the indicator.
  * @param height The height of the indicator.
  */
 @Composable
 @NonRestartableComposable
 fun LinearProgressIndicator(
-    progress: Float? = null,
     modifier: Modifier = Modifier,
+    progress: Float? = null,
     colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(),
     height: Dp = ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight,
 ) {
@@ -206,8 +206,8 @@ fun LinearProgressIndicator(
 /**
  * A [CircularProgressIndicator] with Miuix style.
  *
- * @param progress The current progress value between 0.0f and 1.0f, or null for indeterminate state.
  * @param modifier The modifier to be applied to the indicator.
+ * @param progress The current progress value between 0.0f and 1.0f, or null for indeterminate state.
  * @param colors The colors used for the indicator.
  * @param strokeWidth The width of the circular stroke.
  * @param size The size (diameter) of the circular indicator.
@@ -215,8 +215,8 @@ fun LinearProgressIndicator(
 @Composable
 @NonRestartableComposable
 fun CircularProgressIndicator(
-    progress: Float? = null,
     modifier: Modifier = Modifier,
+    progress: Float? = null,
     colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(),
     strokeWidth: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth,
     size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize,

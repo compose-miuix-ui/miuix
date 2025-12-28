@@ -64,13 +64,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param items The list of [SpinnerEntry] to be shown in the [SuperSpinner].
  * @param selectedIndex The index of the selected item in the [SuperSpinner].
  * @param title The title of the [SuperSpinner].
+ * @param modifier The [Modifier] to be applied to the [SuperSpinner].
  * @param titleColor The color of the title of the [SuperSpinner].
  * @param summary The summary of the [SuperSpinner].
  * @param summaryColor The color of the summary of the [SuperSpinner].
  * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
  * @param leftAction The [Composable] content that on the left side of the [SuperSpinner].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSpinner].
- * @param modifier The [Modifier] to be applied to the [SuperSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperSpinner] is enabled.
@@ -83,13 +83,13 @@ fun SuperSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
     leftAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
     enabled: Boolean = true,
@@ -181,8 +181,8 @@ private fun SuperSpinnerPopup(
                         entryCount = items.size,
                         isSelected = selectedIndex == index,
                         index = index,
-                        dialogMode = false,
                         spinnerColors = spinnerColors,
+                        dialogMode = false,
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
@@ -230,13 +230,13 @@ private fun RowScope.SuperSpinnerRightActions(
  * @param items the list of [SpinnerEntry] to be shown in the [SuperSpinner].
  * @param selectedIndex the index of the selected item in the [SuperSpinner].
  * @param title the title of the [SuperSpinner].
+ * @param dialogButtonString the string of the button in the dialog.
+ * @param modifier the [Modifier] to be applied to the [SuperSpinner].
+ * @param popupModifier the [Modifier] to be applied to the popup of the [SuperSpinner].
  * @param titleColor the color of the title of the [SuperSpinner].
  * @param summary the summary of the [SuperSpinner].
  * @param summaryColor the color of the summary of the [SuperSpinner].
  * @param leftAction the action to be shown at the left side of the [SuperSpinner].
- * @param dialogButtonString the string of the button in the dialog.
- * @param popupModifier the [Modifier] to be applied to the popup of the [SuperSpinner].
- * @param modifier the [Modifier] to be applied to the [SuperSpinner].
  * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner].
  * @param enabled whether the [SuperSpinner] is enabled.
  * @param showValue whether to show the value of the [SuperSpinner].
@@ -248,14 +248,14 @@ fun SuperSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
     title: String,
+    dialogButtonString: String,
+    modifier: Modifier = Modifier,
+    popupModifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.dialogSpinnerColors(),
     leftAction: @Composable (() -> Unit)? = null,
-    dialogButtonString: String,
-    popupModifier: Modifier = Modifier,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
@@ -306,10 +306,10 @@ fun SuperSpinner(
                 selectedIndex = selectedIndex,
                 title = title,
                 dialogButtonString = dialogButtonString,
-                popupModifier = popupModifier,
                 isDropdownExpanded = isDropdownExpanded,
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
+                popupModifier = popupModifier,
                 onSelectedIndexChange = onSelectedIndexChange,
             )
         },
@@ -325,10 +325,10 @@ private fun SuperSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    popupModifier: Modifier = Modifier,
     isDropdownExpanded: MutableState<Boolean>,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
+    popupModifier: Modifier = Modifier,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
@@ -350,8 +350,8 @@ private fun SuperSpinnerDialog(
                                 entryCount = items.size,
                                 isSelected = selectedIndex == index,
                                 index = index,
-                                dialogMode = true,
                                 spinnerColors = spinnerColors,
+                                dialogMode = true,
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
@@ -404,8 +404,8 @@ fun SpinnerItemImpl(
     entryCount: Int,
     isSelected: Boolean,
     index: Int,
-    dialogMode: Boolean = false,
     spinnerColors: SpinnerColors,
+    dialogMode: Boolean = false,
     onSelectedIndexChange: (Int) -> Unit,
 ) {
     val additionalTopPadding = if (!dialogMode && index == 0) 20.dp else 12.dp

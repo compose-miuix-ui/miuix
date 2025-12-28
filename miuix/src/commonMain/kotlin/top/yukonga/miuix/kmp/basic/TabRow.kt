@@ -52,7 +52,8 @@ import kotlin.math.roundToInt
  * A [TabRow] with Miuix style.
  *
  * @param tabs The text to be displayed in the [TabRow].
- * @param selectedTabIndex The selected tab index of the [TabRow]
+ * @param selectedTabIndex The selected tab index of the [TabRow].
+ * @param onTabSelected The callback when a tab is selected.
  * @param modifier The modifier to be applied to the [TabRow].
  * @param colors The colors of the [TabRow].
  * @param minWidth The minimum width of the tab in [TabRow].
@@ -61,13 +62,13 @@ import kotlin.math.roundToInt
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
- * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
 @NonRestartableComposable
 fun TabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     colors: TabRowColors = TabRowDefaults.tabRowColors(),
     minWidth: Dp = TabRowDefaults.TabRowMinWidth,
@@ -76,7 +77,6 @@ fun TabRow(
     cornerRadius: Dp = TabRowDefaults.TabRowCornerRadius,
     itemSpacing: Dp = 9.dp,
     contentAlignment: Alignment = Alignment.Center,
-    onTabSelected: ((Int) -> Unit)? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
 
@@ -134,12 +134,11 @@ fun TabRow(
                 itemsIndexed(tabs) { index, tabText ->
                     TabItem(
                         text = tabText,
-                        color = colors.contentColor(selectedTabIndex == index),
                         isSelected = selectedTabIndex == index,
-                        onClick = { currentOnTabSelected?.invoke(index) },
-                        enabled = currentOnTabSelected != null,
+                        onClick = { currentOnTabSelected.invoke(index) },
                         shape = config.shape,
                         width = config.tabWidth,
+                        color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
                     )
                 }
@@ -152,7 +151,8 @@ fun TabRow(
  * A [TabRowWithContour] with Miuix style.
  *
  * @param tabs The text to be displayed in the [TabRow].
- * @param selectedTabIndex The selected tab index of the [TabRow]
+ * @param selectedTabIndex The selected tab index of the [TabRow].
+ * @param onTabSelected The callback when a tab is selected.
  * @param modifier The modifier to be applied to the [TabRow].
  * @param colors The colors of the [TabRow].
  * @param minWidth The minimum width of the tab in [TabRow].
@@ -161,13 +161,13 @@ fun TabRow(
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
- * @param onTabSelected The callback when a tab is selected.
  */
 @Composable
 @NonRestartableComposable
 fun TabRowWithContour(
     tabs: List<String>,
     selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     colors: TabRowColors = TabRowDefaults.tabRowColors(),
     minWidth: Dp = TabRowDefaults.TabRowWithContourMinWidth,
@@ -176,7 +176,6 @@ fun TabRowWithContour(
     cornerRadius: Dp = TabRowDefaults.TabRowWithContourCornerRadius,
     itemSpacing: Dp = 5.dp,
     contentAlignment: Alignment = Alignment.Center,
-    onTabSelected: ((Int) -> Unit)? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
@@ -241,12 +240,11 @@ fun TabRowWithContour(
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
                         text = tabText,
-                        color = colors.contentColor(selectedTabIndex == index),
                         isSelected = selectedTabIndex == index,
-                        onClick = { currentOnTabSelected?.invoke(index) },
-                        enabled = currentOnTabSelected != null,
+                        onClick = { currentOnTabSelected.invoke(index) },
                         shape = config.shape,
                         width = config.tabWidth,
+                        color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
                     )
                 }
@@ -258,12 +256,11 @@ fun TabRowWithContour(
 @Composable
 private fun TabItem(
     text: String,
-    color: Color = Color.Unspecified,
     isSelected: Boolean,
     onClick: () -> Unit,
-    enabled: Boolean,
     shape: ContinuousRoundedRectangle,
     width: Dp,
+    color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
@@ -272,7 +269,6 @@ private fun TabItem(
         onClick = {
             currentOnClick()
         },
-        enabled = enabled,
         color = Color.Transparent,
         modifier = Modifier
             .fillMaxHeight()
@@ -297,12 +293,11 @@ private fun TabItem(
 @Composable
 private fun TabItemWithContour(
     text: String,
-    color: Color = Color.Unspecified,
     isSelected: Boolean,
     onClick: () -> Unit,
-    enabled: Boolean,
     shape: ContinuousRoundedRectangle,
     width: Dp,
+    color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
@@ -311,7 +306,7 @@ private fun TabItemWithContour(
             .fillMaxHeight()
             .width(width)
             .clip(shape)
-            .clickable(enabled = enabled) {
+            .clickable {
                 currentOnClick()
             }
             .semantics { role = Role.Tab },

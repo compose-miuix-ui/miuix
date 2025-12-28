@@ -86,8 +86,8 @@ CircularProgressIndicator(progress = null)
 
 | Property Name | Type                    | Description                                    | Default Value                                                  | Required |
 | ------------- | ----------------------- | ---------------------------------------------- | -------------------------------------------------------------- | -------- |
-| progress      | Float?                  | Current progress value, null for indeterminate | null                                                           | No       |
 | modifier      | Modifier                | Modifier applied to the progress bar           | Modifier                                                       | No       |
+| progress      | Float?                  | Current progress value, null for indeterminate | null                                                           | No       |
 | colors        | ProgressIndicatorColors | Color configuration for the progress bar       | ProgressIndicatorDefaults.progressIndicatorColors()            | No       |
 | height        | Dp                      | Height of the progress bar                     | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | No       |
 
@@ -95,8 +95,8 @@ CircularProgressIndicator(progress = null)
 
 | Property Name | Type                    | Description                                    | Default Value                                                         | Required |
 | ------------- | ----------------------- | ---------------------------------------------- | --------------------------------------------------------------------- | -------- |
-| progress      | Float?                  | Current progress value, null for indeterminate | null                                                                  | No       |
 | modifier      | Modifier                | Modifier applied to the progress indicator     | Modifier                                                              | No       |
+| progress      | Float?                  | Current progress value, null for indeterminate | null                                                                  | No       |
 | colors        | ProgressIndicatorColors | Color configuration for the progress indicator | ProgressIndicatorDefaults.progressIndicatorColors()                   | No       |
 | strokeWidth   | Dp                      | Stroke width of the circular track             | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | No       |
 | size          | Dp                      | Size of the circular indicator                 | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | No       |

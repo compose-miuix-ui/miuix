@@ -37,6 +37,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 /**
  * A basic component with Miuix style. Widely used in other extension components.
  *
+ * @param modifier The modifier to be applied to the [BasicComponent].
  * @param title The title of the [BasicComponent].
  * @param titleColor The color of the title.
  * @param summary The summary of the [BasicComponent].
@@ -44,7 +45,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
  * @param rightActions The [Composable] content on the right side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
- * @param modifier The modifier to be applied to the [BasicComponent].
  * @param insideMargin The margin inside the [BasicComponent].
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
@@ -53,6 +53,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  */
 @Composable
 fun BasicComponent(
+    modifier: Modifier = Modifier,
     title: String? = null,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
@@ -60,7 +61,6 @@ fun BasicComponent(
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
@@ -99,10 +99,10 @@ fun BasicComponent(
 /**
  * A basic component with Miuix style. Widely used in other extension components.
  *
+ * @param modifier The modifier to be applied to the [BasicComponent].
  * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
  * @param rightActions The [Composable] content on the right side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
- * @param modifier The modifier to be applied to the [BasicComponent].
  * @param insideMargin The margin inside the [BasicComponent].
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
@@ -112,10 +112,10 @@ fun BasicComponent(
  */
 @Composable
 fun BasicComponent(
+    modifier: Modifier = Modifier,
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,

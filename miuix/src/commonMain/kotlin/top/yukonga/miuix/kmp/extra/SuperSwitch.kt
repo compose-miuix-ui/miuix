@@ -23,6 +23,7 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param checked The checked state of the [SuperSwitch].
  * @param onCheckedChange The callback when the checked state of the [SuperSwitch] is changed.
  * @param title The title of the [SuperSwitch].
+ * @param modifier The modifier to be applied to the [SuperSwitch].
  * @param titleColor The color of the title.
  * @param summary The summary of the [SuperSwitch].
  * @param summaryColor The color of the summary.
@@ -30,7 +31,6 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param rightActions The [Composable] content on the right side of the [SuperSwitch].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSwitch].
  * @param switchColors The [SwitchColors] of the [SuperSwitch].
- * @param modifier The modifier to be applied to the [SuperSwitch].
  * @param insideMargin The margin inside the [SuperSwitch].
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperSwitch] is clickable.
@@ -39,8 +39,9 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
 @NonRestartableComposable
 fun SuperSwitch(
     checked: Boolean,
-    onCheckedChange: ((Boolean) -> Unit)?,
+    onCheckedChange: (Boolean) -> Unit,
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
@@ -48,7 +49,6 @@ fun SuperSwitch(
     rightActions: @Composable RowScope.() -> Unit = {},
     bottomAction: (@Composable () -> Unit)? = null,
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     holdDownState: Boolean = false,
     enabled: Boolean = true,

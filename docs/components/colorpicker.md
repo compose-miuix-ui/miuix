@@ -61,9 +61,9 @@ ColorPicker(
 | -------------- | --------------------------------- | ----------------------------- | ---------------------------------- | -------- |
 | initialColor   | Color                             | Initial color                 | -                                  | Yes      |
 | onColorChanged | (Color) -> Unit                   | Callback for color changes    | -                                  | Yes      |
+| modifier       | Modifier                          | Modifier for the component    | Modifier                           | No       |
 | showPreview    | Boolean                           | Show color preview            | true                               | No       |
 | hapticEffect   | SliderDefaults.SliderHapticEffect | Slider haptic feedback effect | SliderDefaults.DefaultHapticEffect | No       |
-| modifier       | Modifier                          | Modifier for the component    | Modifier                           | No       |
 | colorSpace     | ColorSpace                        | Color space to use            | ColorSpace.HSV                     | No       |
 
 ## Individual Slider Components
@@ -77,8 +77,8 @@ var hue by remember { mutableStateOf(0f) }
 
 HueSlider(
     currentHue = hue,
-    onHueChanged = { newHue -> 
-        hue = newHue * 360f 
+    onHueChanged = { newHue ->
+        hue = newHue * 360f
     }
 )
 ```
@@ -133,6 +133,7 @@ AlphaSlider(
 ### Color Spaces
 
 ColorPicker supports multiple color spaces via `colorSpace`:
+
 - `ColorSpace.HSV` — classic HSV sliders (Hue, Saturation, Value, Alpha).
 - `ColorSpace.OKHSV` — perceptual HSV variant based on OkLCH, more uniform hue steps.
 - `ColorSpace.OKLAB` — OkLab sliders (Lightness, a, b, Alpha) for perceptual editing.
@@ -201,7 +202,7 @@ Use ColorPicker in a dialog to create a color selector:
 var showColorDialog = remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
-Scaffold { 
+Scaffold {
     TextButton(
         text = "Select Color",
         onClick = { showColorDialog.value = true }

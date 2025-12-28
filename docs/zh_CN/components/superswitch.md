@@ -60,8 +60,9 @@ SuperSwitch(
 | 属性名          | 类型                            | 说明                     | 默认值                                | 是否必须 |
 | --------------- | ------------------------------- | ------------------------ | ------------------------------------- | -------- |
 | checked         | Boolean                         | 开关的选中状态           | -                                     | 是       |
-| onCheckedChange | ((Boolean) -> Unit)?            | 开关状态变化时的回调     | -                                     | 否       |
+| onCheckedChange | Yes                             | 开关状态变化时的回调     | -                                     | 是       |
 | title           | String                          | 开关项的标题             | -                                     | 是       |
+| modifier        | Modifier                        | 应用于组件的修饰符       | Modifier                              | 否       |
 | titleColor      | BasicComponentColors            | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()   | 否       |
 | summary         | String?                         | 开关项的摘要说明         | null                                  | 否       |
 | summaryColor    | BasicComponentColors            | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
@@ -69,7 +70,6 @@ SuperSwitch(
 | rightActions    | @Composable RowScope.() -> Unit | 右侧自定义内容（开关前） | {}                                    | 否       |
 | bottomAction    | @Composable (() -> Unit)?       | 底部自定义内容           | null                                  | 否       |
 | switchColors    | SwitchColors                    | 开关控件的颜色配置       | SwitchDefaults.switchColors()         | 否       |
-| modifier        | Modifier                        | 应用于组件的修饰符       | Modifier                              | 否       |
 | insideMargin    | PaddingValues                   | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
 | holdDownState   | Boolean                         | 组件是否处于按下状态     | false                                 | 否       |
 | enabled         | Boolean                         | 组件是否可交互           | true                                  | 否       |

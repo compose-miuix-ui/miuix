@@ -44,13 +44,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @NonRestartableComposable
 fun SuperArrow(
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     leftAction: @Composable (() -> Unit)? = null,
     rightActions: @Composable RowScope.() -> Unit = {},
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,

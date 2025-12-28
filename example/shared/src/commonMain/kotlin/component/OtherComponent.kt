@@ -518,12 +518,13 @@ fun LazyListScope.otherComponent() {
         TabRow(
             tabs = tabTexts,
             selectedTabIndex = selectedTabIndex,
+            onTabSelected = {
+                selectedTabIndex = it
+            },
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-        ) {
-            selectedTabIndex = it
-        }
+        )
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -536,11 +537,12 @@ fun LazyListScope.otherComponent() {
             TabRowWithContour(
                 tabs = tabTexts1,
                 selectedTabIndex = pagerState.currentPage,
-            ) {
-                scope.launch {
-                    pagerState.animateScrollToPage(it)
-                }
-            }
+                onTabSelected = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(it)
+                    }
+                },
+            )
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier

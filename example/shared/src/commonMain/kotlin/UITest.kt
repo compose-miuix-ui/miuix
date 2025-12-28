@@ -389,14 +389,14 @@ private fun WideScreenContent(
         popupHost = { },
     ) { padding ->
         AppPager(
-            modifier = Modifier
-                .imePadding()
-                .padding(end = padding.calculateEndPadding(layoutDirection)),
             padding = PaddingValues(top = padding.calculateTopPadding()),
             uiState = uiState,
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
             seedIndex = seedIndex,
+            modifier = Modifier
+                .imePadding()
+                .padding(end = padding.calculateEndPadding(layoutDirection)),
         )
     }
 }
@@ -414,9 +414,9 @@ private fun CompactScreenLayout(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
                 uiState = uiState,
                 navigationItems = navigationItems,
+                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
             )
         },
         floatingActionButton = {
@@ -432,6 +432,11 @@ private fun CompactScreenLayout(
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
     ) { innerPadding ->
         AppPager(
+            padding = innerPadding,
+            uiState = uiState,
+            onUiStateChange = onUiStateChange,
+            colorMode = colorMode,
+            seedIndex = seedIndex,
             modifier = Modifier
                 .padding(
                     top = padding.calculateTopPadding(),
@@ -439,20 +444,15 @@ private fun CompactScreenLayout(
                     end = padding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .imePadding(),
-            padding = innerPadding,
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
         )
     }
 }
 
 @Composable
 private fun NavigationBar(
-    modifier: Modifier = Modifier,
     uiState: UIState,
     navigationItems: List<NavigationItem>,
+    modifier: Modifier = Modifier,
 ) {
     val page = LocalPagerState.current.targetPage
     val handlePageChange = LocalHandlePageChange.current
@@ -619,12 +619,12 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
 
 @Composable
 fun AppPager(
-    modifier: Modifier = Modifier,
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    modifier: Modifier = Modifier,
 ) {
     HorizontalPager(
         state = LocalPagerState.current,

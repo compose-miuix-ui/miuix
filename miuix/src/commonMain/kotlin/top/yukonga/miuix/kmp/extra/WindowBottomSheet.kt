@@ -42,7 +42,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
@@ -229,10 +228,7 @@ fun WindowBottomSheet(
                 exit = rememberDefaultSheetExitTransition(),
             ) {
                 SuperBottomSheetContent(
-                    modifier = modifier,
                     title = title,
-                    leftAction = leftAction,
-                    rightAction = rightAction,
                     backgroundColor = backgroundColor,
                     cornerRadius = cornerRadius,
                     sheetMaxWidth = sheetMaxWidth,
@@ -252,6 +248,9 @@ fun WindowBottomSheet(
                             outsideDismissDeferred.value = true
                         }
                     },
+                    modifier = modifier,
+                    leftAction = leftAction,
+                    rightAction = rightAction,
                     content = {
                         CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
                             content()

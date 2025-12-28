@@ -165,12 +165,12 @@ fun PullToRefresh(
         Box(modifier = boxModifier) {
             Column {
                 RefreshHeader(
-                    modifier = Modifier.offset(y = contentPadding.calculateTopPadding()),
                     pullToRefreshState = pullToRefreshState,
                     circleSize = circleSize,
                     color = color,
                     refreshTexts = refreshTexts,
                     refreshTextStyle = refreshTextStyle,
+                    modifier = Modifier.offset(y = contentPadding.calculateTopPadding()),
                 )
                 content()
             }
@@ -490,7 +490,8 @@ private fun createPullToRefreshConnection(
             }
 
             else -> {
-                val consumedByAppBar = topAppBarScrollBehavior?.nestedScrollConnection?.onPostScroll(consumed, available, source) ?: Offset.Zero
+                val consumedByAppBar =
+                    topAppBarScrollBehavior?.nestedScrollConnection?.onPostScroll(consumed, available, source) ?: Offset.Zero
                 val remaining = available - consumedByAppBar
                 val consumedByRefresh = pullToRefreshState
                     .getOrCreateNestedScrollConnection(overScrollState)
@@ -531,12 +532,12 @@ private fun createPullToRefreshConnection(
 
 @Composable
 private fun RefreshHeader(
-    modifier: Modifier = Modifier,
     pullToRefreshState: PullToRefreshState,
     circleSize: Dp,
     color: Color,
     refreshTexts: List<String>,
     refreshTextStyle: TextStyle,
+    modifier: Modifier = Modifier,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val density = LocalDensity.current
@@ -617,10 +618,10 @@ private fun RefreshHeader(
         verticalArrangement = Arrangement.Top,
     ) {
         RefreshIndicator(
-            modifier = Modifier.height(heightInfo.first),
             pullToRefreshState = pullToRefreshState,
             circleSize = circleSize,
             color = color,
+            modifier = Modifier.height(heightInfo.first),
         )
         Text(
             text = refreshDisplayInfo.first,
@@ -633,10 +634,10 @@ private fun RefreshHeader(
 
 @Composable
 private fun RefreshIndicator(
-    modifier: Modifier = Modifier,
     pullToRefreshState: PullToRefreshState,
     circleSize: Dp,
     color: Color,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),

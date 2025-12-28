@@ -86,7 +86,7 @@ val options = listOf(
         summary = "Fresh green"
     ),
     SpinnerEntry(
-        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) }, 
+        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
         title = "Yellow Theme",
         summary = "Bright yellow"
     )
@@ -150,13 +150,13 @@ Scaffold {
 | items                 | List\<SpinnerEntry>       | Options list                    | -                                     | Yes      |
 | selectedIndex         | Int                       | Current selected item index     | -                                     | Yes      |
 | title                 | String                    | Selector title                  | -                                     | Yes      |
+| modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color config         | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Selector description            | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content             | null                                  | No       |
 | bottomAction          | @Composable (() -> Unit)? | Custom bottom content           | null                                  | No       |
-| modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum dropdown height         | null                                  | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
@@ -170,14 +170,14 @@ Scaffold {
 | items                 | List\<SpinnerEntry>       | Options list                    | -                                     | Yes      |
 | selectedIndex         | Int                       | Current selected item index     | -                                     | Yes      |
 | title                 | String                    | Selector title                  | -                                     | Yes      |
+| dialogButtonString    | String                    | Dialog bottom button text       | -                                     | Yes      |
+| modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
+| popupModifier         | Modifier                  | Dialog popup modifier           | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color config         | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Selector description            | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.dialogSpinnerColors() | No       |
 | leftAction            | @Composable (() -> Unit)? | Custom left content             | null                                  | No       |
-| dialogButtonString    | String                    | Dialog bottom button text       | -                                     | Yes      |
-| popupModifier         | Modifier                  | Dialog popup modifier           | Modifier                              | No       |
-| modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |

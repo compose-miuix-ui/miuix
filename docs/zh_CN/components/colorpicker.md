@@ -61,9 +61,9 @@ ColorPicker(
 | -------------- | --------------------------------- | -------------------- | ---------------------------------- | -------- |
 | initialColor   | Color                             | 初始颜色             | -                                  | 是       |
 | onColorChanged | (Color) -> Unit                   | 颜色变化时的回调函数 | -                                  | 是       |
+| modifier       | Modifier                          | 应用于组件的修饰符   | Modifier                           | 否       |
 | showPreview    | Boolean                           | 是否显示颜色预览     | true                               | 否       |
 | hapticEffect   | SliderDefaults.SliderHapticEffect | 滑块的触觉反馈效果   | SliderDefaults.DefaultHapticEffect | 否       |
-| modifier       | Modifier                          | 应用于组件的修饰符   | Modifier                           | 否       |
 | colorSpace     | ColorSpace                        | 选择使用的颜色空间   | ColorSpace.HSV                     | 否       |
 
 ## 单独使用滑块组件

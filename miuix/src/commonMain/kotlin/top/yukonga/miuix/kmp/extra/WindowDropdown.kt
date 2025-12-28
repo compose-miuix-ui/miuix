@@ -34,13 +34,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param items The options of the [WindowDropdown].
  * @param selectedIndex The index of the selected option.
  * @param title The title of the [WindowDropdown].
+ * @param modifier The modifier to be applied to the [WindowDropdown].
  * @param titleColor The color of the title.
  * @param summary The summary of the [WindowDropdown].
  * @param summaryColor The color of the summary.
  * @param dropdownColors The [DropdownColors] of the [WindowDropdown].
  * @param leftAction The [Composable] content that on the left side of the [WindowDropdown].
  * @param bottomAction The [Composable] content at the bottom of the [WindowDropdown].
- * @param modifier The modifier to be applied to the [WindowDropdown].
  * @param insideMargin The margin inside the [WindowDropdown].
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowDropdown] is enabled.
@@ -53,13 +53,13 @@ fun WindowDropdown(
     items: List<String>,
     selectedIndex: Int,
     title: String,
+    modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     leftAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
     enabled: Boolean = true,

@@ -162,7 +162,6 @@ fun SuperDialog(
         onDismissFinished = onDismissFinished,
     ) {
         SuperDialogContent(
-            modifier = modifier,
             title = title,
             titleColor = titleColor,
             summary = summary,
@@ -174,6 +173,7 @@ fun SuperDialog(
             backProgress = backProgress,
             dialogHeightPx = dialogHeightPx,
             onDismissRequest = currentOnDismissRequest,
+            modifier = modifier,
             content = content,
         )
     }
@@ -182,7 +182,6 @@ fun SuperDialog(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun SuperDialogContent(
-    modifier: Modifier = Modifier,
     title: String?,
     titleColor: Color,
     summary: String?,
@@ -194,6 +193,7 @@ internal fun SuperDialogContent(
     backProgress: Animatable<Float, *>,
     dialogHeightPx: MutableState<Int>,
     onDismissRequest: (() -> Unit)?,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current

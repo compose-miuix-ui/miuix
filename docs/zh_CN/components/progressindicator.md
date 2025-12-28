@@ -89,8 +89,8 @@ CircularProgressIndicator(progress = null)
 
 | 属性名   | 类型                    | 说明                           | 默认值                                                         | 是否必须 |
 | -------- | ----------------------- | ------------------------------ | -------------------------------------------------------------- | -------- |
-| progress | Float?                  | 当前进度值，null表示不确定状态 | null                                                           | 否       |
 | modifier | Modifier                | 应用于进度条的修饰符           | Modifier                                                       | 否       |
+| progress | Float?                  | 当前进度值，null表示不确定状态 | null                                                           | 否       |
 | colors   | ProgressIndicatorColors | 进度条的颜色配置               | ProgressIndicatorDefaults.progressIndicatorColors()            | 否       |
 | height   | Dp                      | 进度条的高度                   | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | 否       |
 
@@ -98,8 +98,8 @@ CircularProgressIndicator(progress = null)
 
 | 属性名      | 类型                    | 说明                           | 默认值                                                                | 是否必须 |
 | ----------- | ----------------------- | ------------------------------ | --------------------------------------------------------------------- | -------- |
-| progress    | Float?                  | 当前进度值，null表示不确定状态 | null                                                                  | 否       |
 | modifier    | Modifier                | 应用于进度条的修饰符           | Modifier                                                              | 否       |
+| progress    | Float?                  | 当前进度值，null表示不确定状态 | null                                                                  | 否       |
 | colors      | ProgressIndicatorColors | 进度条的颜色配置               | ProgressIndicatorDefaults.progressIndicatorColors()                   | 否       |
 | strokeWidth | Dp                      | 环形进度条的描边宽度           | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | 否       |
 | size        | Dp                      | 环形进度条的大小               | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | 否       |

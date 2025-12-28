@@ -45,35 +45,35 @@ TabRowWithContour(
 
 ### TabRow Properties
 
-| Property Name    | Type             | Description                   | Default Value                     | Required |
-| ---------------- | ---------------- | ----------------------------- | --------------------------------- | -------- |
-| tabs             | List\<String>    | List of tab texts             | -                                 | Yes      |
-| selectedTabIndex | Int              | Current selected tab index    | -                                 | Yes      |
-| modifier         | Modifier         | Modifier for the tab row      | Modifier                          | No       |
-| colors           | TabRowColors     | Color configuration           | TabRowDefaults.tabRowColors()     | No       |
-| minWidth         | Dp               | Minimum width of each tab     | TabRowDefaults.TabRowMinWidth     | No       |
-| maxWidth         | Dp               | Maximum width of each tab     | TabRowDefaults.TabRowMaxWidth     | No       |
-| height           | Dp               | Height of the tab row         | TabRowDefaults.TabRowHeight       | No       |
-| cornerRadius     | Dp               | Corner radius of tabs         | TabRowDefaults.TabRowCornerRadius | No       |
-| itemSpacing      | Dp               | Spacing between tabs          | 9.dp                              | No       |
-| contentAlignment | Alignment        | Alignment of tab content      | Alignment.Center                  | No       |
-| onTabSelected    | ((Int) -> Unit)? | Callback when tab is selected | null                              | No       |
+| Property Name    | Type          | Description                   | Default Value                     | Required |
+| ---------------- | ------------- | ----------------------------- | --------------------------------- | -------- |
+| tabs             | List\<String> | List of tab texts             | -                                 | Yes      |
+| selectedTabIndex | Int           | Current selected tab index    | -                                 | Yes      |
+| onTabSelected    | (Int) -> Unit | Callback when tab is selected | -                                 | Yes      |
+| modifier         | Modifier      | Modifier for the tab row      | Modifier                          | No       |
+| colors           | TabRowColors  | Color configuration           | TabRowDefaults.tabRowColors()     | No       |
+| minWidth         | Dp            | Minimum width of each tab     | TabRowDefaults.TabRowMinWidth     | No       |
+| maxWidth         | Dp            | Maximum width of each tab     | TabRowDefaults.TabRowMaxWidth     | No       |
+| height           | Dp            | Height of the tab row         | TabRowDefaults.TabRowHeight       | No       |
+| cornerRadius     | Dp            | Corner radius of tabs         | TabRowDefaults.TabRowCornerRadius | No       |
+| itemSpacing      | Dp            | Spacing between tabs          | 9.dp                              | No       |
+| contentAlignment | Alignment     | Alignment of tab content      | Alignment.Center                  | No       |
 
 ### TabRowWithContour Properties
 
-| Property Name    | Type             | Description                   | Default Value                                | Required |
-| ---------------- | ---------------- | ----------------------------- | -------------------------------------------- | -------- |
-| tabs             | List\<String>    | List of tab texts             | -                                            | Yes      |
-| selectedTabIndex | Int              | Current selected tab index    | -                                            | Yes      |
-| modifier         | Modifier         | Modifier for the tab row      | Modifier                                     | No       |
-| colors           | TabRowColors     | Color configuration           | TabRowDefaults.tabRowColors()                | No       |
-| minWidth         | Dp               | Minimum width of each tab     | TabRowDefaults.TabRowWithContourMinWidth     | No       |
-| maxWidth         | Dp               | Maximum width of each tab     | TabRowDefaults.TabRowWithContourMaxWidth     | No       |
-| height           | Dp               | Height of the tab row         | TabRowDefaults.TabRowWithContourHeight       | No       |
-| cornerRadius     | Dp               | Corner radius of tabs         | TabRowDefaults.TabRowWithContourCornerRadius | No       |
-| itemSpacing      | Dp               | Spacing between tabs          | 5.dp                                         | No       |
-| contentAlignment | Alignment        | Alignment of tab content      | Alignment.Center                             | No       |
-| onTabSelected    | ((Int) -> Unit)? | Callback when tab is selected | null                                         | No       |
+| Property Name    | Type          | Description                   | Default Value                                | Required |
+| ---------------- | ------------- | ----------------------------- | -------------------------------------------- | -------- |
+| tabs             | List\<String> | List of tab texts             | -                                            | Yes      |
+| selectedTabIndex | Int           | Current selected tab index    | -                                            | Yes      |
+| onTabSelected    | (Int) -> Unit | Callback when tab is selected | -                                            | Yes      |
+| modifier         | Modifier      | Modifier for the tab row      | Modifier                                     | No       |
+| colors           | TabRowColors  | Color configuration           | TabRowDefaults.tabRowColors()                | No       |
+| minWidth         | Dp            | Minimum width of each tab     | TabRowDefaults.TabRowWithContourMinWidth     | No       |
+| maxWidth         | Dp            | Maximum width of each tab     | TabRowDefaults.TabRowWithContourMaxWidth     | No       |
+| height           | Dp            | Height of the tab row         | TabRowDefaults.TabRowWithContourHeight       | No       |
+| cornerRadius     | Dp            | Corner radius of tabs         | TabRowDefaults.TabRowWithContourCornerRadius | No       |
+| itemSpacing      | Dp            | Spacing between tabs          | 5.dp                                         | No       |
+| contentAlignment | Alignment     | Alignment of tab content      | Alignment.Center                             | No       |
 
 ### TabRowDefaults Object
 
