@@ -56,11 +56,11 @@ fun SuperCheckboxDemo() {
                     onCheckedChange = { notificationsEnabled = it },
                 )
                 SuperCheckbox(
-                    title = "Right Checkbox",
-                    summary = "Checkbox is on the right side",
+                    title = "End Checkbox",
+                    summary = "Checkbox is on the end side",
                     checked = rightChecked,
                     onCheckedChange = { rightChecked = it },
-                    checkboxLocation = CheckboxLocation.Right,
+                    checkboxLocation = CheckboxLocation.End,
                 )
                 SuperCheckbox(
                     title = "Disabled Checkbox",

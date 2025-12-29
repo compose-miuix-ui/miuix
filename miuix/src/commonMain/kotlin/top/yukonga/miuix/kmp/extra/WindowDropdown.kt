@@ -137,7 +137,7 @@ private fun WindowDropdownPopup(
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     WindowListPopup(
         show = isDropdownExpanded,
-        alignment = PopupPositionProvider.Align.Right,
+        alignment = PopupPositionProvider.Align.End,
         onDismissRequest = {
             isDropdownExpanded.value = false
         },

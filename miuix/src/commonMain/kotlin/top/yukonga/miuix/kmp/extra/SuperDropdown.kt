@@ -137,7 +137,7 @@ private fun SuperDropdownPopup(
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     SuperListPopup(
         show = isDropdownExpanded,
-        alignment = PopupPositionProvider.Align.Right,
+        alignment = PopupPositionProvider.Align.End,
         onDismissRequest = {
             isDropdownExpanded.value = false
         },

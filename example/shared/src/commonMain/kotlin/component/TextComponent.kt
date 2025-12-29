@@ -253,10 +253,10 @@ fun TextComponent(
                 )
             }
             SuperCheckbox(
-                checkboxLocation = CheckboxLocation.Right,
+                checkboxLocation = CheckboxLocation.End,
                 title = "Checkbox",
                 checked = superRightCheckboxState.value,
-                rightActions = {
+                endActions = {
                     Text(
                         modifier = Modifier.padding(end = 6.dp),
                         text = superRightCheckbox.value,

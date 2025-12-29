@@ -56,33 +56,33 @@ SuperCheckbox(
 
 ## 复选框位置
 
-SuperCheckbox 支持将复选框放置在左侧或右侧：
+SuperCheckbox 支持将复选框放置在起始端或结束端：
 
-### 左侧复选框（默认）
+### 起始端复选框（默认）
 
 ```kotlin
-var leftChecked by remember { mutableStateOf(false) }
+var startChecked by remember { mutableStateOf(false) }
 
 SuperCheckbox(
-    title = "左侧复选框",
-    summary = "复选框位于左侧（默认）",
-    checked = leftChecked,
-    onCheckedChange = { leftChecked = it },
-    checkboxLocation = CheckboxLocation.Left // 默认值
+    title = "起始端复选框",
+    summary = "复选框位于起始端（默认）",
+    checked = startChecked,
+    onCheckedChange = { startChecked = it },
+    checkboxLocation = CheckboxLocation.Start // 默认值
 )
 ```
 
-### 右侧复选框
+### 结束端复选框
 
 ```kotlin
-var rightChecked by remember { mutableStateOf(false) }
+var endChecked by remember { mutableStateOf(false) }
 
 SuperCheckbox(
-    title = "右侧复选框",
-    summary = "复选框位于右侧",
-    checked = rightChecked,
-    onCheckedChange = { rightChecked = it },
-    checkboxLocation = CheckboxLocation.Right
+    title = "结束端复选框",
+    summary = "复选框位于结束端",
+    checked = endChecked,
+    onCheckedChange = { endChecked = it },
+    checkboxLocation = CheckboxLocation.End
 )
 ```
 
@@ -100,8 +100,8 @@ SuperCheckbox(
 | summary          | String?                         | 复选框项的摘要说明         | null                                  | 否       |
 | summaryColor     | BasicComponentColors            | 摘要文本的颜色配置         | BasicComponentDefaults.summaryColor() | 否       |
 | checkboxColors   | CheckboxColors                  | 复选框控件的颜色配置       | CheckboxDefaults.checkboxColors()     | 否       |
-| rightActions     | @Composable RowScope.() -> Unit | 右侧自定义内容（复选框前） | {}                                    | 否       |
-| checkboxLocation | CheckboxLocation                | 复选框的位置               | CheckboxLocation.Left                 | 否       |
+| endActions       | @Composable RowScope.() -> Unit | 复选框前的自定义内容       | {}                                    | 否       |
+| checkboxLocation | CheckboxLocation                | 复选框的位置               | CheckboxLocation.Start                | 否       |
 | bottomAction     | @Composable (() -> Unit)?       | 底部自定义内容             | null                                  | 否       |
 | holdDownState    | Boolean                         | 组件是否处于按下状态       | false                                 | 否       |
 | insideMargin     | PaddingValues                   | 组件内部内容的边距         | BasicComponentDefaults.InsideMargin   | 否       |
@@ -119,7 +119,7 @@ SuperCheckbox(
     summary = "定期备份您的数据",
     checked = backupEnabled,
     onCheckedChange = { backupEnabled = it },
-    rightActions = {
+    endActions = {
         Text(
             text = if (backupEnabled) "已启用" else "未启用",
             color = MiuixTheme.colorScheme.onSurfaceVariantActions,

@@ -46,7 +46,7 @@ fun WindowListPopupDemo() {
                 )
                 WindowListPopup(
                     show = showPopup,
-                    alignment = PopupPositionProvider.Align.TopLeft,
+                    alignment = PopupPositionProvider.Align.TopStart,
                     onDismissRequest = { showPopup.value = false },
                 ) {
                     val dismiss = LocalWindowListPopupState.current

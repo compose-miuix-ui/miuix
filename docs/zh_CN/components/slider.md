@@ -93,7 +93,7 @@ Slider(
 | valueRange            | ClosedFloatingPointRange\<Float\> | 滑块可以采用的值范围。传递的值将被强制限制在此范围内                                                             | 0f..1f                             | 否       |
 | steps                 | Int                               | 离散值的数量。如果为 0，滑块将连续运行。必须非负                                                                 | 0                                  | 否       |
 | onValueChangeFinished | (() -> Unit)?                     | 值变化结束时调用                                                                                                 | null                               | 否       |
-| reverseDirection      | Boolean                           | 控制滑块的方向。false 时从左到右增加,true 时从右到左增加(适用于 RTL 布局)                                        | false                              | 否       |
+| reverseDirection      | Boolean                           | 控制滑块的方向。默认 false，方向跟随 LayoutDirection (LTR 时从左到右，RTL 时从右到左)。为 true 时反转方向。                                      | false                              | 否       |
 | height                | Dp                                | 滑块的高度                                                                                                       | SliderDefaults.MinHeight           | 否       |
 | colors                | SliderColors                      | 滑块的颜色配置                                                                                                   | SliderDefaults.sliderColors()      | 否       |
 | hapticEffect          | SliderDefaults.SliderHapticEffect | 滑块的触感反馈类型                                                                                               | SliderDefaults.DefaultHapticEffect | 否       |

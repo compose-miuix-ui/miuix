@@ -30,8 +30,8 @@ import top.yukonga.miuix.kmp.basic.CheckboxDefaults
  * @param summary The summary of the [SuperCheckbox].
  * @param summaryColor The color of the summary.
  * @param checkboxColors The [CheckboxColors] of the [SuperCheckbox].
- * @param rightActions The [Composable] content that on the right side of the [SuperCheckbox].
- * @param checkboxLocation The location of checkbox, [CheckboxLocation.Left] or [CheckboxLocation.Right].
+ * @param endActions The [Composable] content that on the end side of the [SuperCheckbox].
+ * @param checkboxLocation The location of checkbox, [CheckboxLocation.Start] or [CheckboxLocation.End].
  * @param bottomAction The [Composable] content at the bottom of the [SuperCheckbox].
  * @param insideMargin The margin inside the [SuperCheckbox].
  * @param holdDownState Used to determine whether it is in the pressed state.
@@ -48,17 +48,17 @@ fun SuperCheckbox(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     checkboxColors: CheckboxColors = CheckboxDefaults.checkboxColors(),
-    rightActions: @Composable RowScope.() -> Unit = {},
-    checkboxLocation: CheckboxLocation = CheckboxLocation.Left,
+    endActions: @Composable RowScope.() -> Unit = {},
+    checkboxLocation: CheckboxLocation = CheckboxLocation.Start,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val leftActionComposable = if (checkboxLocation == CheckboxLocation.Left) {
+    val startActionComposable = if (checkboxLocation == CheckboxLocation.Start) {
         @Composable {
-            SuperCheckboxLeftAction(
+            SuperCheckboxStartAction(
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
@@ -77,10 +77,10 @@ fun SuperCheckbox(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftActionComposable,
+        leftAction = startActionComposable,
         rightActions = {
             SuperCheckboxRightActions(
-                rightActions = rightActions,
+                endActions = endActions,
                 checkboxLocation = checkboxLocation,
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
@@ -98,7 +98,7 @@ fun SuperCheckbox(
 }
 
 @Composable
-private fun SuperCheckboxLeftAction(
+private fun SuperCheckboxStartAction(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
@@ -116,15 +116,15 @@ private fun SuperCheckboxLeftAction(
 
 @Composable
 private fun RowScope.SuperCheckboxRightActions(
-    rightActions: @Composable RowScope.() -> Unit,
+    endActions: @Composable RowScope.() -> Unit,
     checkboxLocation: CheckboxLocation,
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     checkboxColors: CheckboxColors,
 ) {
-    rightActions()
-    if (checkboxLocation == CheckboxLocation.Right) {
+    endActions()
+    if (checkboxLocation == CheckboxLocation.End) {
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -135,6 +135,6 @@ private fun RowScope.SuperCheckboxRightActions(
 }
 
 enum class CheckboxLocation {
-    Left,
-    Right,
+    Start,
+    End,
 }

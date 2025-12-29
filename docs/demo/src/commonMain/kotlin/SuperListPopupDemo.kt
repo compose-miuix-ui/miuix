@@ -47,7 +47,7 @@ fun SuperListPopupDemo() {
                     )
                     SuperListPopup(
                         show = showPopup,
-                        alignment = PopupPositionProvider.Align.TopLeft,
+                        alignment = PopupPositionProvider.Align.TopStart,
                         onDismissRequest = { showPopup.value = false }, // Close the popup menu
                     ) {
                         ListPopupColumn {

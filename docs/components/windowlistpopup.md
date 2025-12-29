@@ -39,7 +39,7 @@ Box {
     )
     WindowListPopup(
         show = showPopup,
-        alignment = PopupPositionProvider.Align.Left,
+        alignment = PopupPositionProvider.Align.Start,
         onDismissRequest = { showPopup.value = false }
     ) {
         val dismiss = LocalWindowListPopupState.current
@@ -70,7 +70,7 @@ Box {
 | show                  | MutableState\<Boolean>      | Controls the visibility state of the popup.                      | -                                          |
 | popupModifier         | Modifier                    | Modifier applied to the popup container.                         | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | Provides position calculation logic for the popup.               | ListPopupDefaults.DropdownPositionProvider |
-| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.     | PopupPositionProvider.Align.Right          |
+| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.     | PopupPositionProvider.Align.End            |
 | enableWindowDim       | Boolean                     | Whether to dim the background when popup is shown.               | true                                       |
 | onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside) | null                                       |
 | maxHeight             | Dp?                         | Maximum height of the popup content.                             | null                                       |
@@ -87,12 +87,12 @@ Box {
 
 | Value       | Description                                         |
 | ----------- | --------------------------------------------------- |
-| Left        | Aligns the popup to the left of the anchor.         |
-| Right       | Aligns the popup to the right of the anchor.        |
-| TopLeft     | Aligns the popup to the top-left of the anchor.     |
-| TopRight    | Aligns the popup to the top-right of the anchor.    |
-| BottomLeft  | Aligns the popup to the bottom-left of the anchor.  |
-| BottomRight | Aligns the popup to the bottom-right of the anchor. |
+| Start       | Aligns the popup to the start of the anchor.        |
+| End         | Aligns the popup to the end of the anchor.          |
+| TopStart    | Aligns the popup to the top-start of the anchor.    |
+| TopEnd      | Aligns the popup to the top-end of the anchor.      |
+| BottomStart | Aligns the popup to the bottom-start of the anchor. |
+| BottomEnd   | Aligns the popup to the bottom-end of the anchor.   |
 
 ### LocalWindowListPopupState
 

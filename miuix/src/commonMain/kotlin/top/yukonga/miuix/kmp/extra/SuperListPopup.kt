@@ -66,7 +66,7 @@ fun SuperListPopup(
     show: MutableState<Boolean>,
     popupModifier: Modifier = Modifier,
     popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
-    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Right,
+    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,

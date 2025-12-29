@@ -45,7 +45,7 @@ Scaffold {
         )
         SuperListPopup(
             show = showPopup,
-            alignment = PopupPositionProvider.Align.Left,
+            alignment = PopupPositionProvider.Align.Start,
             onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
         ) {
             ListPopupColumn {
@@ -78,8 +78,8 @@ var showPopup = remember { mutableStateOf(false) }
 
 SuperListPopup(
     show = showPopup,
-    onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
-    alignment = PopupPositionProvider.Align.Left
+    onDismissRequest = { showPopup.value = false }, // 关闭弹窗菜单
+    alignment = PopupPositionProvider.Align.Start
 ) {
     ListPopupColumn {
         // 自定义内容
@@ -112,7 +112,7 @@ SuperListPopup(
 | show                  | MutableState\<Boolean>      | 控制弹窗的显示状态                   | -                                          |
 | popupModifier         | Modifier                    | 应用于弹窗容器的修饰符               | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | 提供弹窗的位置计算逻辑               | ListPopupDefaults.DropdownPositionProvider |
-| alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.Right          |
+| alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.End            |
 | enableWindowDim       | Boolean                     | 是否在弹窗显示时使背景变暗           | true                                       |
 | shadowElevation       | Dp                          | 弹窗阴影的高度                       | 11.dp                                      |
 | onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
@@ -130,10 +130,10 @@ SuperListPopup(
 
 | 值          | 说明                     |
 | ----------- | ------------------------ |
-| Left        | 将弹窗对齐到锚点的左侧   |
-| Right       | 将弹窗对齐到锚点的右侧   |
-| TopLeft     | 将弹窗对齐到锚点的左上角 |
-| TopRight    | 将弹窗对齐到锚点的右上角 |
-| BottomLeft  | 将弹窗对齐到锚点的左下角 |
-| BottomRight | 将弹窗对齐到锚点的右下角 |
+| Start       | 将弹窗对齐到锚点的起始端 |
+| End         | 将弹窗对齐到锚点的结束端 |
+| TopStart    | 将弹窗对齐到锚点的顶部起始端 |
+| TopEnd      | 将弹窗对齐到锚点的顶部结束端 |
+| BottomStart | 将弹窗对齐到锚点的底部起始端 |
+| BottomEnd   | 将弹窗对齐到锚点的底部结束端 |
 

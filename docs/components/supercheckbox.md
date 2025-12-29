@@ -56,33 +56,33 @@ SuperCheckbox(
 
 ## Checkbox Position
 
-SuperCheckbox supports placing the checkbox on the left or right side:
+SuperCheckbox supports placing the checkbox on the start or end side:
 
-### Left Checkbox (Default)
+### Start Checkbox (Default)
 
 ```kotlin
-var leftChecked by remember { mutableStateOf(false) }
+var startChecked by remember { mutableStateOf(false) }
 
 SuperCheckbox(
-    title = "Left Checkbox",
-    summary = "Checkbox is on the left side (default)",
-    checked = leftChecked,
-    onCheckedChange = { leftChecked = it },
-    checkboxLocation = CheckboxLocation.Left // Default value
+    title = "Start Checkbox",
+    summary = "Checkbox is on the start side (default)",
+    checked = startChecked,
+    onCheckedChange = { startChecked = it },
+    checkboxLocation = CheckboxLocation.Start // Default value
 )
 ```
 
-### Right Checkbox
+### End Checkbox
 
 ```kotlin
-var rightChecked by remember { mutableStateOf(false) }
+var endChecked by remember { mutableStateOf(false) }
 
 SuperCheckbox(
-    title = "Right Checkbox",
-    summary = "Checkbox is on the right side",
-    checked = rightChecked,
-    onCheckedChange = { rightChecked = it },
-    checkboxLocation = CheckboxLocation.Right
+    title = "End Checkbox",
+    summary = "Checkbox is on the end side",
+    checked = endChecked,
+    onCheckedChange = { endChecked = it },
+    checkboxLocation = CheckboxLocation.End
 )
 ```
 
@@ -100,8 +100,8 @@ SuperCheckbox(
 | summary          | String?                         | Summary description                  | null                                  | No       |
 | summaryColor     | BasicComponentColors            | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No       |
 | checkboxColors   | CheckboxColors                  | Checkbox control color configuration | CheckboxDefaults.checkboxColors()     | No       |
-| rightActions     | @Composable RowScope.() -> Unit | Custom content before checkbox       | {}                                    | No       |
-| checkboxLocation | CheckboxLocation                | Checkbox position                    | CheckboxLocation.Left                 | No       |
+| endActions       | @Composable RowScope.() -> Unit | Custom content before checkbox       | {}                                    | No       |
+| checkboxLocation | CheckboxLocation                | Checkbox position                    | CheckboxLocation.Start                | No       |
 | bottomAction     | @Composable (() -> Unit)?       | Custom bottom content                | null                                  | No       |
 | holdDownState    | Boolean                         | Whether the component is held down   | false                                 | No       |
 | insideMargin     | PaddingValues                   | Internal content padding             | BasicComponentDefaults.InsideMargin   | No       |
@@ -119,7 +119,7 @@ SuperCheckbox(
     summary = "Periodically backup your data",
     checked = backupEnabled,
     onCheckedChange = { backupEnabled = it },
-    rightActions = {
+    endActions = {
         Text(
             text = if (backupEnabled) "Enabled" else "Disabled",
             color = MiuixTheme.colorScheme.onSurfaceVariantActions,

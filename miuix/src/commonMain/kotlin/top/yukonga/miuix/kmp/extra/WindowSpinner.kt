@@ -155,7 +155,7 @@ private fun WindowSpinnerPopup(
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     WindowListPopup(
         show = isDropdownExpanded,
-        alignment = PopupPositionProvider.Align.Right,
+        alignment = PopupPositionProvider.Align.End,
         onDismissRequest = {
             isDropdownExpanded.value = false
         },

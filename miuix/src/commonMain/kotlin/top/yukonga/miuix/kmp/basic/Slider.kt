@@ -41,12 +41,14 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
@@ -99,6 +101,8 @@ fun Slider(
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
 
     val hapticFeedback = LocalHapticFeedback.current
+    val layoutDirection = LocalLayoutDirection.current
+    val effectiveReverseDirection = if (layoutDirection == LayoutDirection.Rtl) !reverseDirection else reverseDirection
     val onValueChangeState by rememberUpdatedState(onValueChange)
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -149,7 +153,7 @@ fun Slider(
                     Modifier
                         .pointerInput(
                             enabled,
-                            reverseDirection,
+                            effectiveReverseDirection,
                             valueRange,
                             steps,
                             magnetThreshold,
@@ -162,7 +166,7 @@ fun Slider(
                                     dragOffset = offset.x
 
                                     val visualFraction = horizontalVisualFraction(offset.x, size.width, size.height)
-                                    val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
+                                    val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChangeState(calculatedValue)
                                     hapticState.reset(calculatedValue)
@@ -172,7 +176,7 @@ fun Slider(
                                     dragOffset += dragAmount
 
                                     val visualFraction = horizontalVisualFraction(dragOffset, size.width, size.height)
-                                    val fractionForValue = if (reverseDirection) 1f - visualFraction else visualFraction
+                                    val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
                                     val calculatedValue = fractionToValue(fractionForValue)
                                     onValueChangeState(calculatedValue)
                                     hapticState.handleHapticFeedback(
@@ -223,7 +227,7 @@ fun Slider(
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
             thumbScale = thumbScale,
-            reverseDirection = reverseDirection,
+            reverseDirection = effectiveReverseDirection,
             modifier = Modifier.fillMaxWidth().height(height),
         )
     }
@@ -441,6 +445,8 @@ fun RangeSlider(
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
 
     val hapticFeedback = LocalHapticFeedback.current
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
     val onValueChangeState by rememberUpdatedState(onValueChange)
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
     var startDragOffset by remember { mutableFloatStateOf(0f) }
@@ -506,6 +512,7 @@ fun RangeSlider(
                     Modifier
                         .pointerInput(
                             enabled,
+                            isRtl,
                             valueRange,
                             steps,
                             magnetThreshold,
@@ -520,8 +527,10 @@ fun RangeSlider(
                                         (currentStartValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val endFraction =
                                         (currentEndValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val startPos = thumbRadius + startFraction * availableWidth
-                                    val endPos = thumbRadius + endFraction * availableWidth
+                                    val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
+                                    val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
+                                    val startPos = thumbRadius + effectiveStartFraction * availableWidth
+                                    val endPos = thumbRadius + effectiveEndFraction * availableWidth
 
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
@@ -574,9 +583,11 @@ fun RangeSlider(
                                         lastDraggedIsStart = true
                                         val tentativeStartOffset = startDragOffset + dragAmount
                                         val visualFractionStart = horizontalVisualFraction(tentativeStartOffset, size.width, size.height)
-                                        val newStart = fractionToValueRange(visualFractionStart).coerceAtMost(currentEndValue)
+                                        val fractionForValue = if (isRtl) 1f - visualFractionStart else visualFractionStart
+                                        val newStart = fractionToValueRange(fractionForValue).coerceAtMost(currentEndValue)
+                                        val crossCondition = if (isRtl) dragAmount < 0f else dragAmount > 0f
 
-                                        if (newStart >= currentEndValue && dragAmount > 0f && currentStartValue == currentEndValue) {
+                                        if (newStart >= currentEndValue && crossCondition && currentStartValue == currentEndValue) {
                                             isDraggingStart = false
                                             isDraggingEnd = true
 
@@ -585,7 +596,8 @@ fun RangeSlider(
                                             hapticState.inheritEndKeyPoint()
 
                                             val visualFractionEnd = horizontalVisualFraction(endDragOffset, size.width, size.height)
-                                            val newEnd = fractionToValueRange(visualFractionEnd).coerceAtLeast(currentStartValue)
+                                            val fractionForValueEnd = if (isRtl) 1f - visualFractionEnd else visualFractionEnd
+                                            val newEnd = fractionToValueRange(fractionForValueEnd).coerceAtLeast(currentStartValue)
                                             currentEndValue = newEnd
                                             onValueChangeState(currentStartValue..newEnd)
                                             hapticState.handleEndHapticFeedback(
@@ -613,9 +625,11 @@ fun RangeSlider(
                                         lastDraggedIsStart = false
                                         val tentativeEndOffset = endDragOffset + dragAmount
                                         val visualFractionEnd = horizontalVisualFraction(tentativeEndOffset, size.width, size.height)
-                                        val newEnd = fractionToValueRange(visualFractionEnd).coerceAtLeast(currentStartValue)
+                                        val fractionForValue = if (isRtl) 1f - visualFractionEnd else visualFractionEnd
+                                        val newEnd = fractionToValueRange(fractionForValue).coerceAtLeast(currentStartValue)
+                                        val crossCondition = if (isRtl) dragAmount > 0f else dragAmount < 0f
 
-                                        if (newEnd <= currentStartValue && dragAmount < 0f && currentStartValue == currentEndValue) {
+                                        if (newEnd <= currentStartValue && crossCondition && currentStartValue == currentEndValue) {
                                             isDraggingEnd = false
                                             isDraggingStart = true
                                             startDragOffset = tentativeEndOffset
@@ -623,7 +637,8 @@ fun RangeSlider(
                                             hapticState.inheritStartKeyPoint()
 
                                             val visualFractionStart = horizontalVisualFraction(startDragOffset, size.width, size.height)
-                                            val newStart = fractionToValueRange(visualFractionStart).coerceAtMost(currentEndValue)
+                                            val fractionForValueStart = if (isRtl) 1f - visualFractionStart else visualFractionStart
+                                            val newStart = fractionToValueRange(fractionForValueStart).coerceAtMost(currentEndValue)
                                             currentStartValue = newStart
                                             onValueChangeState(newStart..currentEndValue)
                                             hapticState.handleStartHapticFeedback(
@@ -681,6 +696,7 @@ fun RangeSlider(
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
+            isRtl = isRtl,
             modifier = Modifier.fillMaxWidth().height(height),
         )
     }
@@ -764,11 +780,13 @@ private fun SliderTrack(
             val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
             val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
             val centerX = thumbRadius + effectiveFraction * availableWidth
+            val startX = if (reverseDirection) barWidth else 0f
+            val endX = centerX
 
             drawLine(
                 color = foregroundColor,
-                start = Offset(0f, barHeight / 2f),
-                end = Offset(centerX, barHeight / 2f),
+                start = Offset(startX, barHeight / 2f),
+                end = Offset(endX, barHeight / 2f),
                 strokeWidth = barHeight,
                 cap = StrokeCap.Round,
             )
@@ -779,7 +797,8 @@ private fun SliderTrack(
                     val stepFraction = stepFractions[i]
                     val effectiveStep = if (reverseDirection) 1f - stepFraction else stepFraction
                     val x = thumbRadius + effectiveStep * availableWidth
-                    val kpColor = if (x <= centerX) keyPointForegroundColor else keyPointColor
+                    val isSelected = if (reverseDirection) x >= centerX else x <= centerX
+                    val kpColor = if (isSelected) keyPointForegroundColor else keyPointColor
                     drawCircle(
                         color = kpColor,
                         radius = keyPointRadius,
@@ -815,6 +834,7 @@ private fun RangeSliderTrack(
     isDragging: Boolean,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
+    isRtl: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val backgroundAlpha by animateFloatAsState(
@@ -838,8 +858,10 @@ private fun RangeSliderTrack(
         val endFraction = (valueEnd - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val thumbRadius = barHeight / 2f
         val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
-        val startX = thumbRadius + startFraction * availableWidth
-        val endX = thumbRadius + endFraction * availableWidth
+        val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
+        val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
+        val startX = thumbRadius + effectiveStartFraction * availableWidth
+        val endX = thumbRadius + effectiveEndFraction * availableWidth
 
         val centerY = barHeight / 2f
 
@@ -855,8 +877,10 @@ private fun RangeSliderTrack(
             val keyPointRadius = SliderDefaults.KeyPointRadius.toPx()
             for (i in stepFractions.indices) {
                 val stepFraction = stepFractions[i]
-                val x = thumbRadius + stepFraction * availableWidth
-                val kpColor = if (x in startX..endX) keyPointForegroundColor else keyPointColor
+                val effectiveStep = if (isRtl) 1f - stepFraction else stepFraction
+                val x = thumbRadius + effectiveStep * availableWidth
+                val isSelected = if (isRtl) x in endX..startX else x in startX..endX
+                val kpColor = if (isSelected) keyPointForegroundColor else keyPointColor
                 drawCircle(
                     color = kpColor,
                     radius = keyPointRadius,

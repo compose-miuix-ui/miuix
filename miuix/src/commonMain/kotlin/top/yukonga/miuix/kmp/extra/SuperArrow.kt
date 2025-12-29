@@ -17,6 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
@@ -87,9 +90,13 @@ private fun RowScope.SuperArrowRightActions(
     val tintFilter by remember(enabled, actionColors) {
         derivedStateOf { ColorFilter.tint(actionColors.color(enabled = enabled)) }
     }
+    val layoutDirection = LocalLayoutDirection.current
     Image(
         modifier = Modifier
-            .size(width = 10.dp, height = 16.dp),
+            .size(width = 10.dp, height = 16.dp)
+            .graphicsLayer {
+                scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
+            },
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = tintFilter,

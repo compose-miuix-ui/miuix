@@ -43,7 +43,7 @@ Box {
     )
     WindowListPopup(
         show = showPopup,
-        alignment = PopupPositionProvider.Align.Left,
+        alignment = PopupPositionProvider.Align.Start,
         onDismissRequest = { showPopup.value = false }
     ) {
         val dismiss = LocalWindowListPopupState.current
@@ -92,13 +92,12 @@ Box {
 
 | 值          | 说明                     |
 | ----------- | ------------------------ |
-| Left        | 将弹窗对齐到锚点的左侧   |
-| Right       | 将弹窗对齐到锚点的右侧   |
-| TopLeft     | 将弹窗对齐到锚点的左上角 |
-| TopRight    | 将弹窗对齐到锚点的右上角 |
-| BottomLeft  | 将弹窗对齐到锚点的左下角 |
-| BottomRight | 将弹窗对齐到锚点的右下角 |
-
+| Start       | 将弹窗对齐到锚点的起始端 |
+| End         | 将弹窗对齐到锚点的结束端 |
+| TopStart    | 将弹窗对齐到锚点的顶部起始端 |
+| TopEnd      | 将弹窗对齐到锚点的顶部结束端 |
+| BottomStart | 将弹窗对齐到锚点的底部起始端 |
+| BottomEnd   | 将弹窗对齐到锚点的底部结束端 |
 
 ### LocalWindowListPopupState
 

@@ -52,6 +52,18 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.min
 
+private fun PopupPositionProvider.Align.resolve(layoutDirection: LayoutDirection): PopupPositionProvider.Align {
+    if (layoutDirection == LayoutDirection.Ltr) return this
+    return when (this) {
+        PopupPositionProvider.Align.Start -> PopupPositionProvider.Align.End
+        PopupPositionProvider.Align.End -> PopupPositionProvider.Align.Start
+        PopupPositionProvider.Align.TopStart -> PopupPositionProvider.Align.TopEnd
+        PopupPositionProvider.Align.TopEnd -> PopupPositionProvider.Align.TopStart
+        PopupPositionProvider.Align.BottomStart -> PopupPositionProvider.Align.BottomEnd
+        PopupPositionProvider.Align.BottomEnd -> PopupPositionProvider.Align.BottomStart
+    }
+}
+
 private const val MAX_ITEMS_FOR_WIDTH = 8
 private const val MAX_ITEMS_FOR_HEIGHT = 8
 
@@ -155,12 +167,12 @@ interface PopupPositionProvider {
      * Position relative to the window, not relative to the anchor!
      */
     enum class Align {
-        Left,
-        Right,
-        TopLeft,
-        TopRight,
-        BottomLeft,
-        BottomRight,
+        Start,
+        End,
+        TopStart,
+        TopEnd,
+        BottomStart,
+        BottomEnd,
     }
 }
 
@@ -174,7 +186,7 @@ object ListPopupDefaults {
             popupMargin: IntRect,
             alignment: PopupPositionProvider.Align,
         ): IntOffset {
-            val offsetX = if (alignment == PopupPositionProvider.Align.Right) {
+            val offsetX = if (alignment.resolve(layoutDirection) == PopupPositionProvider.Align.End) {
                 anchorBounds.right - popupContentSize.width - popupMargin.right
             } else {
                 anchorBounds.left + popupMargin.left
@@ -214,30 +226,30 @@ object ListPopupDefaults {
         ): IntOffset {
             val offsetX: Int
             val offsetY: Int
-            when (alignment) {
-                PopupPositionProvider.Align.TopLeft -> {
+            when (alignment.resolve(layoutDirection)) {
+                PopupPositionProvider.Align.TopStart -> {
                     offsetX = anchorBounds.left + popupMargin.left
                     offsetY = anchorBounds.bottom + popupMargin.top
                 }
 
-                PopupPositionProvider.Align.TopRight -> {
+                PopupPositionProvider.Align.TopEnd -> {
                     offsetX = anchorBounds.right - popupContentSize.width - popupMargin.right
                     offsetY = anchorBounds.bottom + popupMargin.top
                 }
 
-                PopupPositionProvider.Align.BottomLeft -> {
+                PopupPositionProvider.Align.BottomStart -> {
                     offsetX = anchorBounds.left + popupMargin.left
                     offsetY = anchorBounds.top - popupContentSize.height - popupMargin.bottom
                 }
 
-                PopupPositionProvider.Align.BottomRight -> {
+                PopupPositionProvider.Align.BottomEnd -> {
                     offsetX = anchorBounds.right - popupContentSize.width - popupMargin.right
                     offsetY = anchorBounds.top - popupContentSize.height - popupMargin.bottom
                 }
 
                 else -> {
                     // Fallback
-                    offsetX = if (alignment == PopupPositionProvider.Align.Right) {
+                    offsetX = if (alignment.resolve(layoutDirection) == PopupPositionProvider.Align.End) {
                         anchorBounds.right - popupContentSize.width - popupMargin.right
                     } else {
                         anchorBounds.left + popupMargin.left
@@ -331,17 +343,17 @@ fun rememberListPopupLayoutInfo(
         }
     }
 
-    val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds) {
-        val xInWindow = when (alignment) {
-            PopupPositionProvider.Align.Right,
-            PopupPositionProvider.Align.TopRight,
-            PopupPositionProvider.Align.BottomRight,
+    val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds, layoutDirection) {
+        val xInWindow = when (alignment.resolve(layoutDirection)) {
+            PopupPositionProvider.Align.End,
+            PopupPositionProvider.Align.TopEnd,
+            PopupPositionProvider.Align.BottomEnd,
             -> parentBounds.right - popupMargin.right
 
             else -> parentBounds.left + popupMargin.left
         }
-        val yInWindow = when (alignment) {
-            PopupPositionProvider.Align.BottomRight, PopupPositionProvider.Align.BottomLeft ->
+        val yInWindow = when (alignment.resolve(layoutDirection)) {
+            PopupPositionProvider.Align.BottomEnd, PopupPositionProvider.Align.BottomStart ->
                 parentBounds.top - popupMargin.bottom
 
             else ->
@@ -382,12 +394,13 @@ fun rememberListPopupLayoutInfo(
         parentBounds,
         alignment,
         calculatedOffset,
+        layoutDirection,
     ) {
         if (popupContentSize == IntSize.Zero) {
-            val isRightAligned = when (alignment) {
-                PopupPositionProvider.Align.Right,
-                PopupPositionProvider.Align.TopRight,
-                PopupPositionProvider.Align.BottomRight,
+            val isRightAligned = when (alignment.resolve(layoutDirection)) {
+                PopupPositionProvider.Align.End,
+                PopupPositionProvider.Align.TopEnd,
+                PopupPositionProvider.Align.BottomEnd,
                 -> true
 
                 else -> false
