@@ -7,7 +7,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -71,6 +72,8 @@ fun Switch(
     val hapticFeedback = LocalHapticFeedback.current
     var hasVibrated by remember { mutableStateOf(false) }
     var hasVibratedOnce by remember { mutableStateOf(false) }
+    var rawDragOffset by remember { mutableFloatStateOf(0f) }
+    var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
 
     val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
 
@@ -156,106 +159,58 @@ fun Switch(
                 .drawBehind {
                     drawCircle(color = thumbColor)
                 }
-                .pointerInput(checked, enabled) {
-                    if (!enabled) return@pointerInput
-                    awaitPointerEventScope {
-                        while (true) {
-                            val down = awaitFirstDown()
-
-                            var startedDrag = false
-                            val dragInteraction = DragInteraction.Start()
-                            var lastPosition = down.position
-                            val pointerId = down.id
-
-                            var accumulatedX = 0f
-                            var accumulatedY = 0f
-                            var rawDragOffset = 0f
-
-                            while (true) {
-                                val event = awaitPointerEvent()
-                                var idx = -1
-                                val total = event.changes.size
-                                var j = 0
-                                while (j < total) {
-                                    if (event.changes[j].id == pointerId) {
-                                        idx = j
-                                        break
-                                    }
-                                    j++
-                                }
-                                val change = if (idx >= 0) event.changes[idx] else event.changes[0]
-
-                                if (!change.pressed) {
-                                    if (startedDrag) {
-                                        if (dragOffset.absoluteValue > 21f / 2) currentOnCheckedChange?.invoke(!checked)
-                                        if (!hasVibratedOnce && dragOffset.absoluteValue >= 1f) {
-                                            if ((checked && dragOffset <= -11f) || (!checked && dragOffset <= 10f)) {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                            } else if ((checked && dragOffset >= -10f) || (!checked && dragOffset >= 11f)) {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                            }
-                                        }
-                                        interactionSource.tryEmit(DragInteraction.Stop(dragInteraction))
-                                    }
-                                    dragOffset = 0f
-                                    break
+                .then(
+                    if (enabled) {
+                        Modifier.draggable(
+                            orientation = Orientation.Horizontal,
+                            state = rememberDraggableState { dragAmount ->
+                                rawDragOffset += dragAmount / 2f
+                                dragOffset = if (checked) {
+                                    rawDragOffset.coerceIn(-21f, 0f)
+                                } else {
+                                    rawDragOffset.coerceIn(0f, 21f)
                                 }
 
-                                val dx = change.position.x - lastPosition.x
-                                val dy = change.position.y - lastPosition.y
-                                lastPosition = change.position
-
-                                accumulatedX += dx
-                                accumulatedY += dy
-
-                                if (!startedDrag) {
-                                    val absX = accumulatedX.absoluteValue
-                                    val absY = accumulatedY.absoluteValue
-                                    val touchSlop = viewConfiguration.touchSlop
-
-                                    if (absY > touchSlop && absY > absX) {
-                                        dragOffset = 0f
-                                        break
-                                    }
-
-                                    if (absX > touchSlop) {
-                                        startedDrag = true
-                                        interactionSource.tryEmit(dragInteraction)
+                                if (dragOffset in -11f..-10f || dragOffset in 10f..11f) {
+                                    hasVibratedOnce = false
+                                } else if (dragOffset in -20f..-1f || dragOffset in 1f..20f) {
+                                    hasVibrated = false
+                                } else if (!hasVibrated) {
+                                    if ((checked && dragOffset == -21f) || (!checked && dragOffset == 0f)) {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
                                         hasVibrated = true
-                                        hasVibratedOnce = false
+                                        hasVibratedOnce = true
+                                    } else if ((checked && dragOffset == 0f) || (!checked && dragOffset == 21f)) {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                        hasVibrated = true
+                                        hasVibratedOnce = true
                                     }
                                 }
-
-                                if (startedDrag) {
-                                    rawDragOffset += dx / 2
-
-                                    dragOffset = if (checked) {
-                                        rawDragOffset.coerceIn(-21f, 0f)
-                                    } else {
-                                        rawDragOffset.coerceIn(0f, 21f)
-                                    }
-                                    change.consume()
-
-                                    if (dragOffset in -11f..-10f || dragOffset in 10f..11f) {
-                                        hasVibratedOnce = false
-                                    } else if (dragOffset in -20f..-1f || dragOffset in 1f..20f) {
-                                        hasVibrated = false
-                                    } else if (!hasVibrated) {
-                                        if ((checked && dragOffset == -21f) || (!checked && dragOffset == 0f)) {
-                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                            hasVibrated = true
-                                            hasVibratedOnce = true
-                                        } else if ((checked && dragOffset == 0f) || (!checked && dragOffset == 21f)) {
-                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                            hasVibrated = true
-                                            hasVibratedOnce = true
-                                        }
+                            },
+                            onDragStarted = { _ ->
+                                currentDragInteraction = DragInteraction.Start().also { interactionSource.tryEmit(it) }
+                                hasVibrated = true
+                                hasVibratedOnce = false
+                                rawDragOffset = 0f
+                            },
+                            onDragStopped = {
+                                if (dragOffset.absoluteValue > 21f / 2f) currentOnCheckedChange?.invoke(!checked)
+                                if (!hasVibratedOnce && dragOffset.absoluteValue >= 1f) {
+                                    if ((checked && dragOffset <= -11f) || (!checked && dragOffset <= 10f)) {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                                    } else if ((checked && dragOffset >= -10f) || (!checked && dragOffset >= 11f)) {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
                                     }
                                 }
-                            }
-                        }
-                    }
-                },
+                                currentDragInteraction?.let { interactionSource.tryEmit(DragInteraction.Stop(it)) }
+                                dragOffset = 0f
+                                rawDragOffset = 0f
+                            },
+                        )
+                    } else {
+                        Modifier
+                    },
+                ),
         )
     }
 }

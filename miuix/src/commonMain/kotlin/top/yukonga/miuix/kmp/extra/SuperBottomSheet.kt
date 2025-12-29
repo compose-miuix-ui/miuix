@@ -11,8 +11,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -48,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -420,7 +421,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
-    val velocityTracker = remember { VelocityTracker() }
+    val density = LocalDensity.current
 
     Box(
         modifier = Modifier
@@ -464,117 +465,79 @@ private fun DragHandleArea(
                     },
                 )
             }
-            .pointerInput(allowDismiss) {
-                detectVerticalDragGestures(
-                    onDragStart = {
-                        coroutineScope.launch {
-                            dragStartOffset.floatValue = dragOffsetY.value
-                            // No need to snap; just ensure we cancel any running animations implicitly
-                            velocityTracker.resetTracking()
-                            // Animate press effect
-                            isPressing.floatValue = 1f
-                            launch {
-                                pressScale.animateTo(
-                                    targetValue = 1.15f,
-                                    animationSpec = tween(durationMillis = 100),
-                                )
-                            }
-                            launch {
-                                pressWidth.animateTo(
-                                    targetValue = 55f,
-                                    animationSpec = tween(durationMillis = 100),
+            .draggable(
+                orientation = Orientation.Vertical,
+                state = rememberDraggableState { dragAmount ->
+                    val newOffset = dragOffsetY.value + dragAmount
+                    val finalOffset = if (newOffset < 0) {
+                        val dampingFactor = 0.1f
+                        val dampedAmount = dragAmount * dampingFactor
+                        (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                    } else if (newOffset >= 0 && !allowDismiss) {
+                        val dampingFactor = 0.1f
+                        val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
+                        (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
+                    } else {
+                        newOffset
+                    }
+
+                    dragSnapChannel.trySend(finalOffset)
+
+                    val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
+                    val alpha = if (finalOffset >= 0 && allowDismiss) {
+                        1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
+                    } else {
+                        1f
+                    }
+                    dimAlpha.floatValue = alpha
+                },
+                onDragStarted = {
+                    dragStartOffset.floatValue = dragOffsetY.value
+                    isPressing.floatValue = 1f
+                    coroutineScope.launch {
+                        pressScale.animateTo(1.15f, animationSpec = tween(durationMillis = 100))
+                    }
+                    coroutineScope.launch {
+                        pressWidth.animateTo(55f, animationSpec = tween(durationMillis = 100))
+                    }
+                },
+                onDragStopped = {
+                    isPressing.floatValue = 0f
+                    coroutineScope.launch {
+                        pressScale.animateTo(1f, animationSpec = tween(durationMillis = 150))
+                    }
+                    coroutineScope.launch {
+                        pressWidth.animateTo(45f, animationSpec = tween(durationMillis = 150))
+                    }
+
+                    val currentOffset = dragOffsetY.value
+                    val dragDelta = currentOffset - dragStartOffset.floatValue
+                    val dismissThresholdPx = with(density) { 150.dp.toPx() }
+
+                    when {
+                        allowDismiss && (dragDelta >= dismissThresholdPx) -> {
+                            onDismissRequest?.invoke()
+                            val windowHeightPx = with(density) { windowHeight.toPx() }
+                            coroutineScope.launch {
+                                dragOffsetY.animateTo(
+                                    targetValue = windowHeightPx,
+                                    animationSpec = tween(durationMillis = 250),
                                 )
                             }
                         }
-                    },
-                    onDragEnd = {
-                        coroutineScope.launch {
-                            // Reset press effect
-                            isPressing.floatValue = 0f
-                            launch {
-                                pressScale.animateTo(
-                                    targetValue = 1f,
-                                    animationSpec = tween(durationMillis = 150),
+
+                        else -> {
+                            coroutineScope.launch {
+                                dragOffsetY.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = tween(durationMillis = 250),
                                 )
                             }
-                            launch {
-                                pressWidth.animateTo(
-                                    targetValue = 45f,
-                                    animationSpec = tween(durationMillis = 150),
-                                )
-                            }
-
-                            val currentOffset = dragOffsetY.value
-                            val dragDelta = currentOffset - dragStartOffset.floatValue
-                            val velocity = velocityTracker.calculateVelocity().y
-                            val velocityThreshold = 500f
-                            val dismissThresholdPx = 150.dp.toPx()
-
-                            when {
-                                // Dragged far enough down or has strong downward velocity -> dismiss
-                                allowDismiss && (dragDelta >= dismissThresholdPx || (velocity < -velocityThreshold && dragDelta > 0)) -> {
-                                    onDismissRequest?.invoke()
-                                    val windowHeightPx = windowHeight.value * density
-                                    dragOffsetY.animateTo(
-                                        targetValue = windowHeightPx,
-                                        animationSpec = tween(durationMillis = 250),
-                                    )
-                                }
-
-                                // Has strong upward velocity -> continue to expand
-                                velocity > velocityThreshold -> {
-                                    dragOffsetY.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = tween(durationMillis = 250),
-                                    )
-                                    dimAlpha.floatValue = 1f
-                                }
-
-                                // Not dragged far enough -> reset to original position
-                                else -> {
-                                    dragOffsetY.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = tween(durationMillis = 250),
-                                    )
-                                    dimAlpha.floatValue = 1f
-                                }
-                            }
+                            dimAlpha.floatValue = 1f
                         }
-                    },
-                    onVerticalDrag = { change, dragAmount ->
-                        change.consume()
-                        velocityTracker.addPosition(change.uptimeMillis, change.position)
-                        // Update drag offset with damping
-                        val newOffset = dragOffsetY.value + dragAmount
-
-                        val finalOffset = if (newOffset < 0) {
-                            // Dragging UP
-                            val dampingFactor = 0.1f
-                            val dampedAmount = dragAmount * dampingFactor
-                            (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
-                        } else if (newOffset >= 0 && !allowDismiss) {
-                            // Dragging DOWN but dismiss not allowed
-                            val dampingFactor = 0.1f
-                            val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
-                            (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
-                        } else {
-                            // Normal dragging
-                            newOffset
-                        }
-
-                        // Send target to snap channel
-                        dragSnapChannel.trySend(finalOffset)
-
-                        val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
-                        val alpha = if (finalOffset >= 0 && allowDismiss) {
-                            1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
-                        } else {
-                            1f
-                        }
-                        dimAlpha.floatValue = alpha
-                    },
-                )
-            },
+                    }
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         // Drag handle indicator

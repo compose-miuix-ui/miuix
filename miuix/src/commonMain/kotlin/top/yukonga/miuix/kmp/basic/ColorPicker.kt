@@ -4,7 +4,9 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -31,7 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
@@ -1048,6 +1050,8 @@ private fun ColorSlider(
     val sliderHeightPx = with(density) { sliderHeightDp.toPx() }
     val hapticFeedback = LocalHapticFeedback.current
     val hapticState = remember { SliderHapticState() }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var sliderWidthPxState by remember { mutableFloatStateOf(0f) }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -1074,26 +1078,26 @@ private fun ColorSlider(
                     )
                 }
             }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragStart = { offset ->
-                        val newValue =
-                            handleSliderInteraction(offset.x, size.width.toFloat(), sliderHeightPx)
-                        onValueChangedState.value(newValue)
-                        hapticState.reset(newValue)
-                    },
-                    onHorizontalDrag = { change, _ ->
-                        change.consume()
-                        val newValue = handleSliderInteraction(
-                            change.position.x,
-                            size.width.toFloat(),
-                            sliderHeightPx,
-                        ).coerceIn(0f, 1f)
-                        onValueChangedState.value(newValue)
-                        hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
-                    },
-                )
-            },
+            .onSizeChanged { sliderWidthPxState = it.width.toFloat() }
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    dragOffset += delta
+                    val newValue = handleSliderInteraction(
+                        dragOffset,
+                        sliderWidthPxState,
+                        sliderHeightPx,
+                    ).coerceIn(0f, 1f)
+                    onValueChangedState.value(newValue)
+                    hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
+                },
+                onDragStarted = { offset ->
+                    dragOffset = offset.x
+                    val newValue = handleSliderInteraction(offset.x, sliderWidthPxState, sliderHeightPx)
+                    onValueChangedState.value(newValue)
+                    hapticState.reset(newValue)
+                },
+            ),
     ) {
         SliderIndicator(
             modifier = Modifier.align(Alignment.CenterStart),
