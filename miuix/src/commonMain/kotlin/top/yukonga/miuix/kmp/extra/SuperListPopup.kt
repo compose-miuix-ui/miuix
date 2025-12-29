@@ -181,24 +181,14 @@ fun SuperListPopup(
                         )
                     }
                     .layout { measurable, constraints ->
-                        val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
-                        val classicMinHeightPx = ((16.dp.roundToPx() * 2) + 50.dp.roundToPx()) * 2
-                        val safeWindowMaxHeightPx = 416.dp.roundToPx()
-                        val availableBelow = layoutInfo.windowBounds.bottom - parentBounds.bottom - layoutInfo.popupMargin.bottom
-                        val availableAbove = parentBounds.top - layoutInfo.windowBounds.top - layoutInfo.popupMargin.top
-                        val sideConstrainedMax = maxOf(availableBelow, availableAbove).coerceAtLeast(0)
-                        val finalMaxHeightPx = listOf(
-                            maxHeight?.roundToPx() ?: Int.MAX_VALUE,
-                            safeWindowMaxHeightPx,
-                            sideConstrainedMax,
-                            constraints.maxHeight,
-                        ).min().coerceAtLeast(classicMinHeightPx.coerceAtMost(constraints.maxHeight))
                         val placeable = measurable.measure(
                             constraints.copy(
-                                minWidth = minWidthPx,
-                                minHeight = classicMinHeightPx.coerceAtMost(constraints.maxHeight),
-                                maxHeight = finalMaxHeightPx,
+                                maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
+                                    ?: (layoutInfo.windowBounds.height - layoutInfo.popupMargin.top - layoutInfo.popupMargin.bottom)
+                                        .coerceAtLeast(50.dp.roundToPx()),
+                                minHeight = if (50.dp.roundToPx() <= constraints.maxHeight) 50.dp.roundToPx() else constraints.maxHeight,
                                 maxWidth = constraints.maxWidth,
+                                minWidth = minWidth.roundToPx().coerceAtMost(constraints.maxWidth),
                             ),
                         )
                         val measuredSize = IntSize(placeable.width, placeable.height)
