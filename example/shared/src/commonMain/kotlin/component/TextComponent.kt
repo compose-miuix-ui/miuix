@@ -98,6 +98,23 @@ fun TextComponent(
 ) {
     Column {
         val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
+        val dropdownLongOptions =
+            remember {
+                listOf(
+                    "Option 1",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    "Option 5",
+                    "Option 6",
+                    "Option 7",
+                    "Option 8",
+                    "Option 9",
+                    "Option 10",
+                    "Option 11",
+                    "Option 12",
+                )
+            }
         val spinnerOptions = remember {
             listOf(
                 SpinnerEntry(
@@ -461,7 +478,7 @@ fun TextComponent(
             )
             WindowDropdown(
                 title = "WindowDropdown",
-                items = dropdownOptions,
+                items = dropdownLongOptions,
                 selectedIndex = windowDropdownOptionSelected.value,
                 onSelectedIndexChange = { newOption -> windowDropdownOptionSelected.value = newOption },
             )

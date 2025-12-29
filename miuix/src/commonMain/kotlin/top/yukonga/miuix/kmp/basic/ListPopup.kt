@@ -5,10 +5,12 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
@@ -27,12 +29,19 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -56,38 +65,64 @@ fun ListPopupColumn(
 ) {
     val scrollState = rememberScrollState()
 
-    Layout(
-        content = content,
-        modifier = Modifier.verticalScroll(scrollState),
-    ) { measurables, constraints ->
-        constraints.copy(minWidth = 200.dp.roundToPx(), maxWidth = 288.dp.roundToPx(), minHeight = 0)
+    val measurePolicy = remember {
+        object : MeasurePolicy {
+            override fun MeasureScope.measure(
+                measurables: List<Measurable>,
+                constraints: Constraints,
+            ): MeasureResult {
+                var maxWidth = 0
+                measurables.take(min(MAX_ITEMS_FOR_WIDTH, measurables.size)).forEach { measurable ->
+                    val w = measurable.maxIntrinsicWidth(constraints.maxHeight)
+                    if (w > maxWidth) maxWidth = w
+                }
+                val listWidth = maxWidth.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx())
 
-        // Measure pass to find the widest item
-        var maxWidth = 0
-        measurables.take(min(MAX_ITEMS_FOR_WIDTH, measurables.size)).forEach { measurable ->
-            val w = measurable.maxIntrinsicWidth(constraints.maxHeight)
-            if (w > maxWidth) maxWidth = w
-        }
-        val listWidth = maxWidth.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx())
+                val childConstraints = constraints.copy(minWidth = listWidth, maxWidth = listWidth, minHeight = 0)
 
-        val childConstraints = constraints.copy(minWidth = listWidth, maxWidth = listWidth, minHeight = 0)
+                val placeables = ArrayList<Placeable>(measurables.size)
+                measurables.forEach { measurable ->
+                    val p = measurable.measure(childConstraints)
+                    placeables.add(p)
+                }
+                val listHeight = placeables.sumOf { it.height }
 
-        // Actual measure and layout pass
-        val placeables = ArrayList<Placeable>(measurables.size)
-        measurables.forEach { measurable ->
-            val p = measurable.measure(childConstraints)
-            placeables.add(p)
-        }
-        val listHeight = placeables.take(min(MAX_ITEMS_FOR_HEIGHT, placeables.size)).sumOf { it.height }
+                return layout(listWidth, listHeight) {
+                    var currentY = 0
+                    placeables.forEach { p ->
+                        p.placeRelative(0, currentY)
+                        currentY += p.height
+                    }
+                }
+            }
 
-        layout(listWidth, min(constraints.maxHeight, listHeight)) {
-            var currentY = 0
-            placeables.forEach { p ->
-                p.placeRelative(0, currentY)
-                currentY += p.height
+            override fun IntrinsicMeasureScope.minIntrinsicHeight(
+                measurables: List<IntrinsicMeasurable>,
+                width: Int,
+            ): Int {
+                var maxWidth = 0
+                measurables.take(min(MAX_ITEMS_FOR_WIDTH, measurables.size)).forEach { measurable ->
+                    val w = measurable.maxIntrinsicWidth(Int.MAX_VALUE)
+                    if (w > maxWidth) maxWidth = w
+                }
+                val listWidth = maxWidth.coerceIn(200.dp.roundToPx(), 288.dp.roundToPx())
+
+                var height = 0
+                measurables.take(min(MAX_ITEMS_FOR_HEIGHT, measurables.size)).forEach { m ->
+                    height += m.minIntrinsicHeight(listWidth)
+                }
+                return height
             }
         }
     }
+
+    Layout(
+        content = content,
+        modifier = Modifier
+            .height(IntrinsicSize.Min)
+            .verticalScroll(scrollState),
+        measurePolicy = measurePolicy,
+    )
 }
 
 @Stable
