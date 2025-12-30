@@ -12,8 +12,6 @@ plugins {
     id("module.publication")
 }
 
-description = "An extended icon library for Miuix"
-
 kotlin {
     withSourcesJar(true)
 

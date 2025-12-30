@@ -21,7 +21,6 @@ jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foun
 jetbrains-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "jetbrains-compose-multiplatform" }
-jetbrains-compose-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
 gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "material-kolor" }
