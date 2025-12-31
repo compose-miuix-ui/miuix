@@ -39,6 +39,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import top.yukonga.miuix.kmp.theme.LocalColors
@@ -78,7 +79,7 @@ fun Switch(
     val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
-    val thumbOffset by animateDpAsState(
+    val thumbOffsetState = animateDpAsState(
         targetValue = if (checked) {
             if (!enabled) {
                 25.dp
@@ -99,7 +100,7 @@ fun Switch(
         animationSpec = springSpec,
     )
 
-    val thumbSize by animateDpAsState(
+    val thumbSizeState = animateDpAsState(
         targetValue = if (!enabled) {
             20.dp
         } else if (isPressed || isDragged || isHovered) {
@@ -110,11 +111,11 @@ fun Switch(
         animationSpec = springSpec,
     )
 
-    val thumbColor by animateColorAsState(
+    val thumbColorState = animateColorAsState(
         if (checked) colors.checkedThumbColor(enabled) else colors.uncheckedThumbColor(enabled),
     )
 
-    val backgroundColor by animateColorAsState(
+    val backgroundColorState = animateColorAsState(
         if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
         animationSpec = tween(durationMillis = 200),
     )
@@ -143,7 +144,7 @@ fun Switch(
             .size(49.dp, 28.dp)
             .clip(ContinuousCapsule)
             .drawBehind {
-                drawRect(backgroundColor)
+                drawRect(backgroundColorState.value)
             }
             .hoverable(
                 interactionSource = interactionSource,
@@ -154,10 +155,10 @@ fun Switch(
         Box(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .offset(x = thumbOffset)
-                .size(thumbSize)
+                .offset { IntOffset(thumbOffsetState.value.roundToPx(), 0) }
+                .size(thumbSizeState.value)
                 .drawBehind {
-                    drawCircle(color = thumbColor)
+                    drawCircle(color = thumbColorState.value)
                 }
                 .then(
                     if (enabled) {

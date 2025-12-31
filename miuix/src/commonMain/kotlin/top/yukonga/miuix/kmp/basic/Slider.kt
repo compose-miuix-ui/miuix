@@ -15,7 +15,6 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,6 +42,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -111,13 +112,13 @@ fun Slider(
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
+    var isHoveringThumb by remember { mutableStateOf(false) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     val shape = remember(height) { ContinuousRoundedRectangle(height) }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
@@ -128,8 +129,9 @@ fun Slider(
     }
     val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
-    val animatedValue by animateFloatAsState(coercedValue, progressAnimationSpec)
-    val thumbScale by animateFloatAsState(if (isPressed || isHovered || isDragging) 1.127f else 1f, thumbScaleAnimationSpec)
+    val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
+    val animatedValue by animatedValueState
+    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, thumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -162,6 +164,31 @@ fun Slider(
                         .onSizeChanged {
                             layoutWidth = it.width
                             layoutHeight = it.height
+                        }
+                        .pointerInput(layoutWidth, layoutHeight, effectiveReverseDirection, valueRange) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Exit) {
+                                        isHoveringThumb = false
+                                        continue
+                                    }
+                                    val position = event.changes.last().position
+                                    val thumbRadius = layoutHeight / 2f
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val fraction =
+                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
+                                    val thumbX = thumbRadius + effectiveFraction * availableWidth
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
+                                    val isOver = abs(position.x - thumbX) <= hitRadius
+                                    if (isHoveringThumb != isOver) {
+                                        isHoveringThumb = isOver
+                                    }
+                                }
+                            }
                         }
                         .hoverable(
                             interactionSource = interactionSource,
@@ -284,13 +311,13 @@ fun VerticalSlider(
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
+    var isHoveringThumb by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     val shape = remember(width) { ContinuousRoundedRectangle(width) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
@@ -301,8 +328,9 @@ fun VerticalSlider(
     }
     val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
-    val animatedValue by animateFloatAsState(coercedValue, progressAnimationSpec)
-    val thumbScale by animateFloatAsState(if (isPressed || isHovered || isDragging) 1.127f else 1f, thumbScaleAnimationSpec)
+    val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
+    val animatedValue by animatedValueState
+    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, thumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -335,6 +363,31 @@ fun VerticalSlider(
                         .onSizeChanged {
                             layoutWidth = it.width
                             layoutHeight = it.height
+                        }
+                        .pointerInput(layoutWidth, layoutHeight, reverseDirection, valueRange) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Exit) {
+                                        isHoveringThumb = false
+                                        continue
+                                    }
+                                    val position = event.changes.last().position
+                                    val thumbRadius = layoutWidth / 2f
+                                    val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val fraction =
+                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val effectiveFraction = if (reverseDirection) fraction else 1f - fraction
+                                    val thumbY = thumbRadius + effectiveFraction * availableHeight
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
+                                    val isOver = abs(position.y - thumbY) <= hitRadius
+                                    if (isHoveringThumb != isOver) {
+                                        isHoveringThumb = isOver
+                                    }
+                                }
+                            }
                         }
                         .draggable(
                             orientation = Orientation.Vertical,
@@ -457,6 +510,8 @@ fun RangeSlider(
     var endDragOffset by remember { mutableFloatStateOf(0f) }
     var isDraggingStart by remember { mutableStateOf(false) }
     var isDraggingEnd by remember { mutableStateOf(false) }
+    var isHoveringStartThumb by remember { mutableStateOf(false) }
+    var isHoveringEndThumb by remember { mutableStateOf(false) }
     val isDragging = isDraggingStart || isDraggingEnd
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
@@ -465,7 +520,6 @@ fun RangeSlider(
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
 
     var currentStartValue by remember { mutableFloatStateOf(value.start) }
     var currentEndValue by remember { mutableFloatStateOf(value.endInclusive) }
@@ -485,10 +539,15 @@ fun RangeSlider(
     }
     val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
-    val animatedStartValue by animateFloatAsState(coercedStart, progressAnimationSpec)
-    val animatedEndValue by animateFloatAsState(coercedEnd, progressAnimationSpec)
-    val startThumbScale by animateFloatAsState(if (isDraggingStart || isPressed || isHovered) 1.127f else 1f, thumbScaleAnimationSpec)
-    val endThumbScale by animateFloatAsState(if (isDraggingEnd || isPressed || isHovered) 1.127f else 1f, thumbScaleAnimationSpec)
+    val animatedStartValueState = animateFloatAsState(coercedStart, progressAnimationSpec)
+    val animatedEndValueState = animateFloatAsState(coercedEnd, progressAnimationSpec)
+    val animatedStartValue by animatedStartValueState
+    val animatedEndValue by animatedEndValueState
+    val startThumbScale by animateFloatAsState(
+        if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
+        thumbScaleAnimationSpec,
+    )
+    val endThumbScale by animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, thumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -521,6 +580,42 @@ fun RangeSlider(
                         .onSizeChanged {
                             layoutWidth = it.width
                             layoutHeight = it.height
+                        }
+                        .pointerInput(layoutWidth, layoutHeight, isRtl, valueRange) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Exit) {
+                                        isHoveringStartThumb = false
+                                        isHoveringEndThumb = false
+                                        continue
+                                    }
+                                    val position = event.changes.last().position
+                                    val thumbRadius = layoutHeight / 2f
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val startFraction =
+                                        (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val endFraction =
+                                        (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
+                                    val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
+                                    val startThumbX = thumbRadius + effectiveStartFraction * availableWidth
+                                    val endThumbX = thumbRadius + effectiveEndFraction * availableWidth
+
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
+                                    val isOverStart = abs(position.x - startThumbX) <= hitRadius
+                                    val isOverEnd = abs(position.x - endThumbX) <= hitRadius
+
+                                    if (isHoveringStartThumb != isOverStart) {
+                                        isHoveringStartThumb = isOverStart
+                                    }
+                                    if (isHoveringEndThumb != isOverEnd) {
+                                        isHoveringEndThumb = isOverEnd
+                                    }
+                                }
+                            }
                         }
                         .hoverable(interactionSource = interactionSource, enabled = enabled)
                         .draggable(
@@ -737,8 +832,7 @@ private fun SliderTrack(
             .clip(shape)
             .background(backgroundColor)
             .drawBehind {
-                val overlay = Color.Black.copy(alpha = backgroundAlpha)
-                drawRect(overlay)
+                drawRect(Color.Black, alpha = backgroundAlpha)
             },
     ) {
         val barHeight = size.height
@@ -784,12 +878,11 @@ private fun SliderTrack(
             val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
             val centerX = thumbRadius + effectiveFraction * availableWidth
             val startX = if (reverseDirection) barWidth else 0f
-            val endX = centerX
 
             drawLine(
                 color = foregroundColor,
                 start = Offset(startX, barHeight / 2f),
-                end = Offset(endX, barHeight / 2f),
+                end = Offset(centerX, barHeight / 2f),
                 strokeWidth = barHeight,
                 cap = StrokeCap.Round,
             )
@@ -851,8 +944,7 @@ private fun RangeSliderTrack(
             .clip(shape)
             .background(backgroundColor)
             .drawBehind {
-                val overlay = Color.Black.copy(alpha = backgroundAlpha)
-                drawRect(overlay)
+                drawRect(Color.Black, alpha = backgroundAlpha)
             },
     ) {
         val barHeight = size.height

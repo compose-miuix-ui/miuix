@@ -40,7 +40,12 @@ class MiuixIndication(
 
     override fun hashCode(): Int = color.hashCode()
 
-    override fun equals(other: Any?) = other === this
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is MiuixIndication) return false
+        if (color != other.color) return false
+        return true
+    }
 
     private class MiuixIndicationInstance(
         private val interactionSource: InteractionSource,
@@ -123,7 +128,7 @@ class MiuixIndication(
             // Draw content
             drawContent()
             // Draw foreground
-            drawRect(color = color.copy(alpha = animatedAlpha.value), size = size)
+            drawRect(color = color, alpha = animatedAlpha.value, size = size)
         }
     }
 }

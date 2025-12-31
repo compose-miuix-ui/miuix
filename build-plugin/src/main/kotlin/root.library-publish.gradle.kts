@@ -1,10 +1,8 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-val isRelease = project.hasProperty("release")
-
 val versionSuffix = when {
-    isRelease -> ""
+    project.hasProperty("release") -> ""
     project.hasProperty("alpha") -> {
         val v = project.property("alpha")?.toString()
         if (v.isNullOrBlank()) "-alpha" else "-alpha$v"
