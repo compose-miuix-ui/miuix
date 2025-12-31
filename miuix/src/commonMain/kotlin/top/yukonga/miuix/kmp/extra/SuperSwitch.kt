@@ -27,8 +27,8 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param titleColor The color of the title.
  * @param summary The summary of the [SuperSwitch].
  * @param summaryColor The color of the summary.
- * @param leftAction The [Composable] content that on the left side of the [SuperSwitch].
- * @param rightActions The [Composable] content on the right side of the [SuperSwitch].
+ * @param startAction The [Composable] content that on the start side of the [SuperSwitch].
+ * @param endActions The [Composable] content on the end side of the [SuperSwitch].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSwitch].
  * @param switchColors The [SwitchColors] of the [SuperSwitch].
  * @param insideMargin The margin inside the [SuperSwitch].
@@ -45,8 +45,8 @@ fun SuperSwitch(
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    leftAction: @Composable (() -> Unit)? = null,
-    rightActions: @Composable RowScope.() -> Unit = {},
+    startAction: @Composable (() -> Unit)? = null,
+    endActions: @Composable RowScope.() -> Unit = {},
     bottomAction: (@Composable () -> Unit)? = null,
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
@@ -61,10 +61,10 @@ fun SuperSwitch(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            SuperSwitchRightActions(
-                rightActions = rightActions,
+        startAction = startAction,
+        endActions = {
+            SuperSwitchEndActions(
+                endActions = endActions,
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
@@ -81,14 +81,14 @@ fun SuperSwitch(
 }
 
 @Composable
-private fun RowScope.SuperSwitchRightActions(
-    rightActions: @Composable RowScope.() -> Unit,
+private fun RowScope.SuperSwitchEndActions(
+    endActions: @Composable RowScope.() -> Unit,
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     switchColors: SwitchColors,
 ) {
-    rightActions()
+    endActions()
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,

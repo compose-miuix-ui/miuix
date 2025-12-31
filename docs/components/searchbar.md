@@ -50,7 +50,7 @@ SearchBar(
 | modifier           | Modifier                           | Modifier applied to the search bar                | Modifier            | No       |
 | insideMargin       | DpSize                             | Internal padding                                  | DpSize(12.dp, 0.dp) | No       |
 | expanded           | Boolean                            | Whether to show search results                    | false               | No       |
-| outsideRightAction | @Composable (() -> Unit)?          | Action component shown on the right when expanded | null                | No       |
+| outsideEndAction   | @Composable (() -> Unit)?          | Action component shown on the end when expanded   | null                | No       |
 | content            | @Composable ColumnScope.() -> Unit | Content shown when expanded                       | -                   | Yes      |
 
 ### InputField Properties
@@ -155,7 +155,7 @@ SearchBar(
     },
     expanded = expanded,
     onExpandedChange = { expanded = it },
-    outsideRightAction = {
+    outsideEndAction = {
         Text(
             modifier = Modifier
                 .padding(start = 12.dp)

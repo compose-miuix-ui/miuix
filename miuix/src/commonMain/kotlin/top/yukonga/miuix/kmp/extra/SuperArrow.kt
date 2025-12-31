@@ -35,8 +35,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param titleColor The color of the title.
  * @param summary The summary of the [SuperArrow].
  * @param summaryColor The color of the summary.
- * @param leftAction The [Composable] content that on the left side of the [SuperArrow].
- * @param rightActions The [Composable] content on the right side of the [SuperArrow].
+ * @param startAction The [Composable] content that on the start side of the [SuperArrow].
+ * @param endActions The [Composable] content on the end side of the [SuperArrow].
  * @param bottomAction The [Composable] content at the bottom of the [SuperArrow].
  * @param modifier The modifier to be applied to the [SuperArrow].
  * @param insideMargin The margin inside the [SuperArrow].
@@ -51,8 +51,8 @@ fun SuperArrow(
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    leftAction: @Composable (() -> Unit)? = null,
-    rightActions: @Composable RowScope.() -> Unit = {},
+    startAction: @Composable (() -> Unit)? = null,
+    endActions: @Composable RowScope.() -> Unit = {},
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -66,10 +66,10 @@ fun SuperArrow(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            SuperArrowRightActions(
-                rightActions = rightActions,
+        startAction = startAction,
+        endActions = {
+            SuperArrowEndActions(
+                endActions = endActions,
                 enabled = enabled,
             )
         },
@@ -81,12 +81,12 @@ fun SuperArrow(
 }
 
 @Composable
-private fun RowScope.SuperArrowRightActions(
-    rightActions: @Composable RowScope.() -> Unit,
+private fun RowScope.SuperArrowEndActions(
+    endActions: @Composable RowScope.() -> Unit,
     enabled: Boolean,
 ) {
-    rightActions()
-    val actionColors = SuperArrowDefaults.rightActionColors()
+    endActions()
+    val actionColors = SuperArrowDefaults.endActionColors()
     val tintFilter by remember(enabled, actionColors) {
         derivedStateOf { ColorFilter.tint(actionColors.color(enabled = enabled)) }
     }
@@ -108,14 +108,14 @@ object SuperArrowDefaults {
      * The default color of the arrow.
      */
     @Composable
-    fun rightActionColors() = RightActionColors(
+    fun endActionColors() = EndActionColors(
         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
         disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
     )
 }
 
 @Immutable
-data class RightActionColors(
+data class EndActionColors(
     private val color: Color,
     private val disabledColor: Color,
 ) {

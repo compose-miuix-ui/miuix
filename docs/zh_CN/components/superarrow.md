@@ -82,8 +82,8 @@ Scaffold {
 | titleColor    | BasicComponentColors            | 标题文本的颜色配置         | BasicComponentDefaults.titleColor()   | 否       |
 | summary       | String?                         | 箭头项的摘要说明           | null                                  | 否       |
 | summaryColor  | BasicComponentColors            | 摘要文本的颜色配置         | BasicComponentDefaults.summaryColor() | 否       |
-| leftAction    | @Composable (() -> Unit)?       | 左侧自定义内容             | null                                  | 否       |
-| rightActions  | @Composable RowScope.() -> Unit | 右侧自定义内容插槽（slot） | {}                                    | 否       |
+| startAction   | @Composable (() -> Unit)?       | 左侧自定义内容             | null                                  | 否       |
+| endActions    | @Composable RowScope.() -> Unit | 右侧自定义内容插槽（slot） | {}                                    | 否       |
 | bottomAction  | @Composable (() -> Unit)?       | 底部自定义内容             | null                                  | 否       |
 | insideMargin  | PaddingValues                   | 组件内部内容的边距         | BasicComponentDefaults.InsideMargin   | 否       |
 | onClick       | (() -> Unit)?                   | 点击时触发的回调           | null                                  | 否       |
@@ -94,11 +94,11 @@ Scaffold {
 
 SuperArrowDefaults 对象提供右侧箭头图标的默认颜色配置。
 
-#### 方法
+#### SuperArrowDefaults 方法
 
 | 方法名            | 类型              | 说明                                   |
 | ----------------- | ----------------- | -------------------------------------- |
-| rightActionColors | RightActionColors | 返回用于右侧箭头图标的着色（tint）配置 |
+| endActionColors   | EndActionColors   | 返回用于右侧箭头图标的着色（tint）配置 |
 
 ### 箭头着色说明
 
@@ -114,7 +114,7 @@ SuperArrowDefaults 对象提供右侧箭头图标的默认颜色配置。
 SuperArrow(
     title = "个人信息",
     summary = "查看和修改您的个人资料",
-    leftAction = {
+    startAction = {
         Icon(
             imageVector = MiuixIcons.Contacts,
             contentDescription = "个人图标",
@@ -126,13 +126,13 @@ SuperArrow(
 )
 ```
 
-### 带右侧文本（使用 rightActions 插槽）
+### 带右侧操作
 
 ```kotlin
 SuperArrow(
     title = "存储空间",
     summary = "管理应用存储空间",
-    rightActions = {
+    endActions = {
         Text("12.5 GB")
     },
     onClick = { /* 处理点击事件 */ }
@@ -149,7 +149,7 @@ Scaffold {
 SuperArrow(
     title = "语言设置",
     summary = "选择应用显示语言",
-    rightActions = {
+    endActions = {
         Text(language)
     },
     onClick = { showDialog.value = true },

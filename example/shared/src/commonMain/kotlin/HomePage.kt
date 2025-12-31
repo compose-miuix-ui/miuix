@@ -160,7 +160,7 @@ fun MainPage(
                             label = "Search",
                         )
                     },
-                    outsideRightAction = {
+                    outsideEndAction = {
                         Text(
                             modifier = Modifier
                                 .padding(end = 12.dp)

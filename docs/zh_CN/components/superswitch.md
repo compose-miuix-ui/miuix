@@ -57,22 +57,22 @@ SuperSwitch(
 
 ### SuperSwitch 属性
 
-| 属性名          | 类型                            | 说明                     | 默认值                                | 是否必须 |
-| --------------- | ------------------------------- | ------------------------ | ------------------------------------- | -------- |
-| checked         | Boolean                         | 开关的选中状态           | -                                     | 是       |
-| onCheckedChange | Yes                             | 开关状态变化时的回调     | -                                     | 是       |
-| title           | String                          | 开关项的标题             | -                                     | 是       |
-| modifier        | Modifier                        | 应用于组件的修饰符       | Modifier                              | 否       |
-| titleColor      | BasicComponentColors            | 标题文本的颜色配置       | BasicComponentDefaults.titleColor()   | 否       |
-| summary         | String?                         | 开关项的摘要说明         | null                                  | 否       |
-| summaryColor    | BasicComponentColors            | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
-| leftAction      | @Composable (() -> Unit)?       | 左侧自定义内容           | null                                  | 否       |
-| rightActions    | @Composable RowScope.() -> Unit | 右侧自定义内容（开关前） | {}                                    | 否       |
-| bottomAction    | @Composable (() -> Unit)?       | 底部自定义内容           | null                                  | 否       |
-| switchColors    | SwitchColors                    | 开关控件的颜色配置       | SwitchDefaults.switchColors()         | 否       |
-| insideMargin    | PaddingValues                   | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
-| holdDownState   | Boolean                         | 组件是否处于按下状态     | false                                 | 否       |
-| enabled         | Boolean                         | 组件是否可交互           | true                                  | 否       |
+| 属性名          | 类型                            | 说明                          | 默认值                                | 是否必须 |
+| --------------- | ------------------------------- | ----------------------------- | ------------------------------------- | -------- |
+| checked         | Boolean                         | 开关的选中状态                | -                                     | 是       |
+| onCheckedChange | Yes                             | 开关状态变化时的回调          | -                                     | 是       |
+| title           | String                          | 开关项的标题                  | -                                     | 是       |
+| modifier        | Modifier                        | 应用于组件的修饰符            | Modifier                              | 否       |
+| titleColor      | BasicComponentColors            | 标题文本的颜色配置            | BasicComponentDefaults.titleColor()   | 否       |
+| summary         | String?                         | 开关项的摘要说明              | null                                  | 否       |
+| summaryColor    | BasicComponentColors            | 摘要文本的颜色配置            | BasicComponentDefaults.summaryColor() | 否       |
+| startAction     | @Composable (() -> Unit)?       | 左侧显示的自定义内容          | null                                  | 否       |
+| endActions      | @Composable RowScope.() -> Unit | 右侧显示的自定义内容（开关前）| {}                                    | 否       |
+| bottomAction    | @Composable (() -> Unit)?       | 底部显示的自定义内容          | null                                  | 否       |
+| switchColors    | SwitchColors                    | 开关控件的颜色配置            | SwitchDefaults.switchColors()         | 否       |
+| insideMargin    | PaddingValues                   | 组件内部内容的边距            | BasicComponentDefaults.InsideMargin   | 否       |
+| holdDownState   | Boolean                         | 组件是否处于按下状态          | false                                 | 否       |
+| enabled         | Boolean                         | 组件是否可交互                | true                                  | 否       |
 
 ## 进阶用法
 
@@ -86,7 +86,7 @@ SuperSwitch(
     summary = "启用以允许测试",
     checked = enabled,
     onCheckedChange = { enabled = it },
-    leftAction = {
+    startAction = {
         Icon(
             imageVector = MiuixIcons.Sort,
             contentDescription = "命令图标",
@@ -97,7 +97,7 @@ SuperSwitch(
 )
 ```
 
-### 带右侧额外内容
+### 带右侧操作
 
 ```kotlin
 var locationEnabled by remember { mutableStateOf(false) }
@@ -107,7 +107,7 @@ SuperSwitch(
     summary = "允许应用获取位置信息",
     checked = locationEnabled,
     onCheckedChange = { locationEnabled = it },
-    rightActions = {
+    endActions = {
         Text(
             text = if (locationEnabled) "已开启" else "已关闭",
             color = MiuixTheme.colorScheme.onSurfaceVariantActions,

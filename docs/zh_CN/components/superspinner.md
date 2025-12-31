@@ -145,8 +145,8 @@ Scaffold {
 | summary               | String?                   | 选择器的摘要说明     | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置   | BasicComponentDefaults.summaryColor() | 否       |
 | spinnerColors         | SpinnerColors             | 选择器的颜色配置     | SpinnerDefaults.spinnerColors()       | 否       |
-| leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容 | null                                  | 否       |
-| bottomAction          | @Composable (() -> Unit)? | 底部自定义内容       | null                                  | 否       |
+| startAction           | @Composable (() -> Unit)? | 左侧显示的自定义内容 | null                                  | 否       |
+| bottomAction          | @Composable (() -> Unit)? | 底部显示的自定义内容 | null                                  | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距   | BasicComponentDefaults.InsideMargin   | 否       |
 | maxHeight             | Dp?                       | 下拉菜单的最大高度   | null                                  | 否       |
 | enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
@@ -167,7 +167,8 @@ Scaffold {
 | summary               | String?                   | 选择器的摘要说明         | null                                  | 否       |
 | summaryColor          | BasicComponentColors      | 摘要文本的颜色配置       | BasicComponentDefaults.summaryColor() | 否       |
 | spinnerColors         | SpinnerColors             | 选择器的颜色配置         | SpinnerDefaults.dialogSpinnerColors() | 否       |
-| leftAction            | @Composable (() -> Unit)? | 左侧显示的自定义内容     | null                                  | 否       |
+| startAction           | @Composable (() -> Unit)? | 左侧显示的自定义内容     | null                                  | 否       |
+| bottomAction          | @Composable (() -> Unit)? | 底部显示的自定义内容     | null                                  | 否       |
 | insideMargin          | PaddingValues             | 组件内部内容的边距       | BasicComponentDefaults.InsideMargin   | 否       |
 | enabled               | Boolean                   | 组件是否可交互           | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中的值     | true                                  | 否       |

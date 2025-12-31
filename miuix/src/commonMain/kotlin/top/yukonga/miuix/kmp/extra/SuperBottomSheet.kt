@@ -79,8 +79,8 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  * @param show The show state of the [SuperBottomSheet].
  * @param modifier The modifier to be applied to the [SuperBottomSheet].
  * @param title Optional title to display at the top of the [SuperBottomSheet].
- * @param leftAction Optional [Composable] to display on the left side of the title (e.g. a close button).
- * @param rightAction Optional [Composable] to display on the right side of the title (e.g. a submit button).
+ * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
+ * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [SuperBottomSheet].
  * @param enableWindowDim Whether to dim the window behind the [SuperBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [SuperBottomSheet].
@@ -101,8 +101,8 @@ fun SuperBottomSheet(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     title: String? = null,
-    leftAction: @Composable (() -> Unit)? = null,
-    rightAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endAction: @Composable (() -> Unit)? = null,
     backgroundColor: Color = SuperBottomSheetDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
     cornerRadius: Dp = SuperBottomSheetDefaults.cornerRadius,
@@ -224,8 +224,8 @@ fun SuperBottomSheet(
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
             modifier = modifier,
-            leftAction = leftAction,
-            rightAction = rightAction,
+            startAction = startAction,
+            endAction = endAction,
             content = content,
         )
     }
@@ -249,8 +249,8 @@ internal fun SuperBottomSheetContent(
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    leftAction: @Composable (() -> Unit)? = null,
-    rightAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endAction: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
@@ -276,8 +276,8 @@ internal fun SuperBottomSheetContent(
     ) {
         SuperBottomSheetColumn(
             title = title,
-            leftAction = leftAction,
-            rightAction = rightAction,
+            startAction = startAction,
+            endAction = endAction,
             backgroundColor = backgroundColor,
             cornerRadius = cornerRadius,
             sheetMaxWidth = sheetMaxWidth,
@@ -303,8 +303,8 @@ internal fun SuperBottomSheetContent(
 @Composable
 private fun SuperBottomSheetColumn(
     title: String?,
-    leftAction: @Composable (() -> Unit?)?,
-    rightAction: @Composable (() -> Unit?)?,
+    startAction: @Composable (() -> Unit?)?,
+    endAction: @Composable (() -> Unit?)?,
     backgroundColor: Color,
     cornerRadius: Dp,
     sheetMaxWidth: Dp,
@@ -395,8 +395,8 @@ private fun SuperBottomSheetColumn(
             // Title and actions
             TitleAndActionsRow(
                 title = title,
-                leftAction = leftAction,
-                rightAction = rightAction,
+                startAction = startAction,
+                endAction = endAction,
             )
 
             // Content
@@ -559,20 +559,20 @@ private fun DragHandleArea(
 @Composable
 private fun TitleAndActionsRow(
     title: String?,
-    leftAction: @Composable (() -> Unit?)?,
-    rightAction: @Composable (() -> Unit?)?,
+    startAction: @Composable (() -> Unit?)?,
+    endAction: @Composable (() -> Unit?)?,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 6.dp, bottom = 12.dp),
     ) {
-        // left action (e.g. close button)
+        // Start action (e.g. close button)
         Box(modifier = Modifier.align(Alignment.CenterStart)) {
-            leftAction?.invoke()
+            startAction?.invoke()
         }
 
-        // title text
+        // Title text
         title?.let {
             Text(
                 text = it,
@@ -584,9 +584,9 @@ private fun TitleAndActionsRow(
             )
         }
 
-        // right action (e.g. submit button)
+        // End action (e.g. submit button)
         Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            rightAction?.invoke()
+            endAction?.invoke()
         }
     }
 }

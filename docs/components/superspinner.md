@@ -155,8 +155,8 @@ Scaffold {
 | summary               | String?                   | Selector description            | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
-| leftAction            | @Composable (() -> Unit)? | Custom left content             | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom content           | null                                  | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content       | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content      | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum dropdown height         | null                                  | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
@@ -177,7 +177,8 @@ Scaffold {
 | summary               | String?                   | Selector description            | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.dialogSpinnerColors() | No       |
-| leftAction            | @Composable (() -> Unit)? | Custom left content             | null                                  | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content       | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content      | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |

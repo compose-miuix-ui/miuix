@@ -82,8 +82,8 @@ WindowDropdown(
 | summary               | String?                   | Summary description of dropdown    | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
 | dropdownColors        | DropdownColors            | Color configuration for dropdown   | DropdownDefaults.dropdownColors()     | No       |
-| leftAction            | @Composable (() -> Unit)? | Custom left content                | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom content              | null                                  | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content          | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content         | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum height of dropdown menu    | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |

@@ -66,7 +66,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param modifier the [Modifier] to be applied to the [SearchBar].
  * @param insideMargin The margin inside the [SearchBar].
  * @param expanded whether the [SearchBar] is expanded and showing search results.
- * @param outsideRightAction the action to be shown at the right side of the [SearchBar] when it is
+ * @param outsideEndAction the action to be shown at the end side of the [SearchBar] when it is
  *   expanded.
  * @param content the content to be shown when the [SearchBar] is expanded.
  */
@@ -77,7 +77,7 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     insideMargin: DpSize = DpSize(12.dp, 0.dp),
     expanded: Boolean = false,
-    outsideRightAction: @Composable (() -> Unit)? = null,
+    outsideEndAction: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
@@ -101,7 +101,7 @@ fun SearchBar(
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
             ) {
-                outsideRightAction?.invoke()
+                outsideEndAction?.invoke()
             }
         }
 

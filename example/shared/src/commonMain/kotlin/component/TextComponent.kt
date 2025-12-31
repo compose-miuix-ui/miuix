@@ -90,8 +90,8 @@ fun TextComponent(
     windowSpinnerOptionSelectedDialog: MutableState<Int>,
     superCheckbox: MutableState<String>,
     superCheckboxState: MutableState<Boolean>,
-    superRightCheckbox: MutableState<String>,
-    superRightCheckboxState: MutableState<Boolean>,
+    superEndCheckbox: MutableState<String>,
+    superEndCheckboxState: MutableState<Boolean>,
     superSwitch: MutableState<String>,
     superSwitchState: MutableState<Boolean>,
     superSwitchAnimState: MutableState<Boolean>,
@@ -180,37 +180,37 @@ fun TextComponent(
             BasicComponent(
                 title = "Title",
                 summary = "Summary",
-                leftAction = {
+                startAction = {
                     Text(
-                        text = "Left",
+                        text = "Start",
                         modifier = Modifier.padding(end = 8.dp),
                     )
                 },
-                rightActions = {
-                    Text(text = "Right1")
+                endActions = {
+                    Text(text = "End1")
                     Spacer(Modifier.width(8.dp))
-                    Text(text = "Right2")
+                    Text(text = "End2")
                 },
                 enabled = true,
             )
             BasicComponent(
                 title = "Title",
                 summary = "Summary",
-                leftAction = {
+                startAction = {
                     Text(
-                        text = "Left",
+                        text = "Start",
                         modifier = Modifier.padding(end = 8.dp),
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
-                rightActions = {
+                endActions = {
                     Text(
-                        text = "Right1",
+                        text = "End1",
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Right2",
+                        text = "End2",
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
@@ -255,17 +255,17 @@ fun TextComponent(
             SuperCheckbox(
                 checkboxLocation = CheckboxLocation.End,
                 title = "Checkbox",
-                checked = superRightCheckboxState.value,
+                checked = superEndCheckboxState.value,
                 endActions = {
                     Text(
                         modifier = Modifier.padding(end = 6.dp),
-                        text = superRightCheckbox.value,
+                        text = superEndCheckbox.value,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 onCheckedChange = {
-                    superRightCheckboxState.value = it
-                    superRightCheckbox.value = "$it"
+                    superEndCheckboxState.value = it
+                    superEndCheckbox.value = "$it"
                 },
             )
             SuperCheckbox(
@@ -336,7 +336,7 @@ fun TextComponent(
                 SuperSwitch(
                     title = "Switch",
                     checked = superSwitchState.value,
-                    rightActions = {
+                    endActions = {
                         Text(
                             modifier = Modifier.padding(end = 6.dp),
                             text = superSwitch.value,
@@ -365,7 +365,7 @@ fun TextComponent(
         ) {
             SuperArrow(
                 title = "Arrow",
-                leftAction = {
+                startAction = {
                     Box(
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
@@ -376,10 +376,10 @@ fun TextComponent(
                         )
                     }
                 },
-                rightActions = {
+                endActions = {
                     Text(
                         modifier = Modifier.padding(end = 8.dp),
-                        text = "Right",
+                        text = "End",
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
@@ -387,7 +387,7 @@ fun TextComponent(
             )
             SuperArrow(
                 title = "Arrow + Slider + Dialog",
-                rightActions = {
+                endActions = {
                     Text(
                         modifier = Modifier.padding(end = 8.dp),
                         text = "${(volume * 100).toInt()}%",
@@ -405,10 +405,10 @@ fun TextComponent(
             )
             SuperArrow(
                 title = "Disabled Arrow",
-                rightActions = {
+                endActions = {
                     Text(
                         modifier = Modifier.padding(end = 8.dp),
-                        text = "Right",
+                        text = "End",
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
@@ -691,7 +691,7 @@ fun SuperBottomSheet(
         onDismissRequest = {
             showBottomSheet.value = false
         },
-        leftAction = {
+        startAction = {
             IconButton(
                 onClick = { showBottomSheet.value = false },
             ) {
@@ -702,7 +702,7 @@ fun SuperBottomSheet(
                 )
             }
         },
-        rightAction = {
+        endAction = {
             IconButton(
                 onClick = { showBottomSheet.value = false },
             ) {
@@ -767,7 +767,7 @@ fun WindowBottomSheet(
         onDismissRequest = {
             showBottomSheet.value = false
         },
-        leftAction = {
+        startAction = {
             IconButton(
                 onClick = { state?.invoke() },
             ) {
@@ -778,7 +778,7 @@ fun WindowBottomSheet(
                 )
             }
         },
-        rightAction = {
+        endAction = {
             IconButton(
                 onClick = { state?.invoke() },
             ) {

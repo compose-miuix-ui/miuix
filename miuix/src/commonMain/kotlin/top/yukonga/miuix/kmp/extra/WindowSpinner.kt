@@ -57,7 +57,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [WindowSpinner].
  * @param summaryColor The color of the summary of the [WindowSpinner].
  * @param spinnerColors The [SpinnerColors] of the [WindowSpinner].
- * @param leftAction The [Composable] content that on the left side of the [WindowSpinner].
+ * @param startAction The [Composable] content that on the start side of the [WindowSpinner].
  * @param bottomAction The [Composable] content at the bottom of the [WindowSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [WindowSpinner].
  * @param maxHeight The maximum height of the [WindowListPopup].
@@ -76,7 +76,7 @@ fun WindowSpinner(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
-    leftAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -114,9 +114,9 @@ fun WindowSpinner(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            WindowSpinnerRightActions(
+        startAction = startAction,
+        endActions = {
+            WindowSpinnerEndActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -184,7 +184,7 @@ private fun WindowSpinnerPopup(
 }
 
 @Composable
-private fun RowScope.WindowSpinnerRightActions(
+private fun RowScope.WindowSpinnerEndActions(
     showValue: Boolean,
     itemsNotEmpty: Boolean,
     items: List<SpinnerEntry>,
@@ -225,7 +225,8 @@ private fun RowScope.WindowSpinnerRightActions(
  * @param titleColor the color of the title of the [WindowSpinner].
  * @param summary the summary of the [WindowSpinner].
  * @param summaryColor the color of the summary of the [WindowSpinner].
- * @param leftAction the action to be shown at the left side of the [WindowSpinner].
+ * @param startAction the action to be shown at the start side of the [WindowSpinner].
+ * @param bottomAction The [Composable] content at the bottom of the [WindowSpinner].
  * @param insideMargin the [PaddingValues] to be applied inside the [WindowSpinner].
  * @param enabled whether the [WindowSpinner] is enabled.
  * @param showValue whether to show the value of the [WindowSpinner].
@@ -244,7 +245,8 @@ fun WindowSpinner(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.dialogSpinnerColors(),
-    leftAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
@@ -281,9 +283,9 @@ fun WindowSpinner(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            WindowSpinnerRightActions(
+        startAction = startAction,
+        endActions = {
+            WindowSpinnerEndActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -302,6 +304,7 @@ fun WindowSpinner(
                 onSelectedIndexChange = onSelectedIndexChange,
             )
         },
+        bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled,

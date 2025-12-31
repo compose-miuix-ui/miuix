@@ -59,8 +59,8 @@ Scaffold {
 | show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                          | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                   | No       |
 | title                      | String?                   | Bottom sheet title                                             | null                                       | No       |
-| leftAction                 | @Composable (() -> Unit)? | Optional composable for left action (e.g., close button)       | null                                       | No       |
-| rightAction                | @Composable (() -> Unit)? | Optional composable for right action (e.g., submit button)     | null                                       | No       |
+| startAction                | @Composable (() -> Unit)? | Optional composable for start action (e.g., close button)      | null                                       | No       |
+| endAction                  | @Composable (() -> Unit)? | Optional composable for end action (e.g., submit button)       | null                                       | No       |
 | backgroundColor            | Color                     | Bottom sheet background color                                  | SuperBottomSheetDefaults.backgroundColor() | No       |
 | enableWindowDim            | Boolean                   | Whether to enable dimming layer                                | true                                       | No       |
 | cornerRadius               | Dp                        | Corner radius of the top corners                               | SuperBottomSheetDefaults.cornerRadius      | No       |
@@ -78,7 +78,7 @@ Scaffold {
 
 The SuperBottomSheetDefaults object provides default settings for the SuperBottomSheet component.
 
-#### Properties
+#### SuperBottomSheetDefaults Properties
 
 | Property Name | Type   | Description                          |
 | ------------- | ------ | ------------------------------------ |
@@ -87,7 +87,7 @@ The SuperBottomSheetDefaults object provides default settings for the SuperBotto
 | outsideMargin | DpSize | Default bottom sheet external margin |
 | insideMargin  | DpSize | Default bottom sheet internal margin |
 
-#### Functions
+#### SuperBottomSheetDefaults Functions
 
 | Function Name     | Return Type | Description                      |
 | ----------------- | ----------- | -------------------------------- |
@@ -210,13 +210,13 @@ Scaffold {
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Action Sheet",
-        leftAction = {
+        startAction = {
             TextButton(
                 text = "Cancel",
                 onClick = { showBottomSheet.value = false }
             )
         },
-        rightAction = {
+        endAction = {
             TextButton(
                 text = "Confirm",
                 onClick = { 
@@ -230,7 +230,7 @@ Scaffold {
     ) {
         Text("Content with custom header actions")
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Left and right action buttons are displayed in the header")
+        Text("Start and end action buttons are displayed in the header")
     }
 }
 ```

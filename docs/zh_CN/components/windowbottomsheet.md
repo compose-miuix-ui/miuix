@@ -63,8 +63,8 @@ WindowBottomSheet(
 | show                       | MutableState\<Boolean>    | 控制底部抽屉显示状态的状态对象               | -                                           | 是       |
 | modifier                   | Modifier                  | 应用于底部抽屉的修饰符                       | Modifier                                    | 否       |
 | title                      | String?                   | 底部抽屉的标题                               | null                                        | 否       |
-| leftAction                 | @Composable (() -> Unit)? | 可选的左侧操作按钮(例如关闭按钮)             | null                                        | 否       |
-| rightAction                | @Composable (() -> Unit)? | 可选的右侧操作按钮(例如提交按钮)             | null                                        | 否       |
+| startAction                | @Composable (() -> Unit)? | 可选的左侧操作按钮(例如关闭按钮)             | null                                        | 否       |
+| endAction                  | @Composable (() -> Unit)? | 可选的右侧操作按钮(例如提交按钮)             | null                                        | 否       |
 | backgroundColor            | Color                     | 底部抽屉背景色                               | WindowBottomSheetDefaults.backgroundColor() | 否       |
 | enableWindowDim            | Boolean                   | 是否启用遮罩层                               | true                                        | 否       |
 | cornerRadius               | Dp                        | 顶部圆角半径                                 | WindowBottomSheetDefaults.cornerRadius      | 否       |
@@ -80,7 +80,7 @@ WindowBottomSheet(
 
 ### WindowBottomSheetDefaults
 
-#### 属性
+#### WindowBottomSheetDefaults 属性
 
 | 属性名        | 类型   | 说明                  |
 | ------------- | ------ | --------------------- |
@@ -89,7 +89,7 @@ WindowBottomSheet(
 | outsideMargin | DpSize | 底部抽屉外部默认边距  |
 | insideMargin  | DpSize | 底部抽屉内部默认边距  |
 
-#### 函数
+#### WindowBottomSheetDefaults 函数
 
 | 函数名            | 返回类型 | 说明                   |
 | ----------------- | -------- | ---------------------- |

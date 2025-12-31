@@ -42,8 +42,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param titleColor The color of the title.
  * @param summary The summary of the [BasicComponent].
  * @param summaryColor The color of the summary.
- * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
- * @param rightActions The [Composable] content on the right side of the [BasicComponent].
+ * @param startAction The [Composable] content that on the start side of the [BasicComponent].
+ * @param endActions The [Composable] content on the end side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
  * @param insideMargin The margin inside the [BasicComponent].
  * @param onClick The callback when the [BasicComponent] is clicked.
@@ -58,8 +58,8 @@ fun BasicComponent(
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    leftAction: @Composable (() -> Unit)? = null,
-    rightActions: @Composable (RowScope.() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -68,8 +68,8 @@ fun BasicComponent(
     interactionSource: MutableInteractionSource? = null,
 ) {
     BasicComponent(
-        leftAction = leftAction,
-        rightActions = rightActions,
+        startAction = startAction,
+        endActions = endActions,
         bottomAction = bottomAction,
         modifier = modifier,
         insideMargin = insideMargin,
@@ -100,8 +100,8 @@ fun BasicComponent(
  * A basic component with Miuix style. Widely used in other extension components.
  *
  * @param modifier The modifier to be applied to the [BasicComponent].
- * @param leftAction The [Composable] content that on the left side of the [BasicComponent].
- * @param rightActions The [Composable] content on the right side of the [BasicComponent].
+ * @param startAction The [Composable] content that on the start side of the [BasicComponent].
+ * @param endActions The [Composable] content on the end side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
  * @param insideMargin The margin inside the [BasicComponent].
  * @param onClick The callback when the [BasicComponent] is clicked.
@@ -113,8 +113,8 @@ fun BasicComponent(
 @Composable
 fun BasicComponent(
     modifier: Modifier = Modifier,
-    leftAction: @Composable (() -> Unit)? = null,
-    rightActions: @Composable (RowScope.() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -168,7 +168,7 @@ fun BasicComponent(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            leftAction?.let { it() }
+            startAction?.let { it() }
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -176,9 +176,9 @@ fun BasicComponent(
                 content = content,
             )
 
-            if (rightActions != null) {
+            if (endActions != null) {
                 Spacer(modifier = Modifier.width(8.dp))
-                rightActions()
+                endActions()
             }
         }
 

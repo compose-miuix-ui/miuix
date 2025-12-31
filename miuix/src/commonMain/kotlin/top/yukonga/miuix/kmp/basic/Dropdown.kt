@@ -30,7 +30,7 @@ import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun RowScope.DropdownRightActions(
+fun RowScope.DropdownEndActions(
     showValue: Boolean,
     itemsNotEmpty: Boolean,
     items: List<String>,

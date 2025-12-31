@@ -69,7 +69,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param summary The summary of the [SuperSpinner].
  * @param summaryColor The color of the summary of the [SuperSpinner].
  * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
- * @param leftAction The [Composable] content that on the left side of the [SuperSpinner].
+ * @param startAction The [Composable] content that on the start side of the [SuperSpinner].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSpinner].
  * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
  * @param maxHeight The maximum height of the [SuperListPopup].
@@ -88,7 +88,7 @@ fun SuperSpinner(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
-    leftAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     maxHeight: Dp? = null,
@@ -126,9 +126,9 @@ fun SuperSpinner(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            SuperSpinnerRightActions(
+        startAction = startAction,
+        endActions = {
+            SuperSpinnerEndActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -195,7 +195,7 @@ private fun SuperSpinnerPopup(
 }
 
 @Composable
-private fun RowScope.SuperSpinnerRightActions(
+private fun RowScope.SuperSpinnerEndActions(
     showValue: Boolean,
     itemsNotEmpty: Boolean,
     items: List<SpinnerEntry>,
@@ -236,7 +236,8 @@ private fun RowScope.SuperSpinnerRightActions(
  * @param titleColor the color of the title of the [SuperSpinner].
  * @param summary the summary of the [SuperSpinner].
  * @param summaryColor the color of the summary of the [SuperSpinner].
- * @param leftAction the action to be shown at the left side of the [SuperSpinner].
+ * @param startAction the action to be shown at the start side of the [SuperSpinner].
+ * @param bottomAction the action to be shown at the bottom of the [SuperSpinner].
  * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner].
  * @param enabled whether the [SuperSpinner] is enabled.
  * @param showValue whether to show the value of the [SuperSpinner].
@@ -255,7 +256,8 @@ fun SuperSpinner(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     spinnerColors: SpinnerColors = SpinnerDefaults.dialogSpinnerColors(),
-    leftAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
@@ -292,9 +294,9 @@ fun SuperSpinner(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = leftAction,
-        rightActions = {
-            SuperSpinnerRightActions(
+        startAction = startAction,
+        endActions = {
+            SuperSpinnerEndActions(
                 showValue = showValue,
                 itemsNotEmpty = itemsNotEmpty,
                 items = items,
@@ -313,6 +315,7 @@ fun SuperSpinner(
                 onSelectedIndexChange = onSelectedIndexChange,
             )
         },
+        bottomAction = bottomAction,
         onClick = handleClick,
         holdDownState = isDropdownExpanded.value,
         enabled = actualEnabled,

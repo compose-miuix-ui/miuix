@@ -137,8 +137,8 @@ WindowSpinner(
 | summary               | String?                   | Summary description                | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.spinnerColors()       | No       |
-| leftAction            | @Composable (() -> Unit)? | Custom left content                | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom content              | null                                  | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content          | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content         | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | maxHeight             | Dp?                       | Maximum height of popup            | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
@@ -159,7 +159,8 @@ WindowSpinner(
 | summary               | String?                   | Summary description                | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
 | spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.dialogSpinnerColors() | No       |
-| leftAction            | @Composable (() -> Unit)? | Custom left content                | null                                  | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content          | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content         | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |

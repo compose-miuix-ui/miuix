@@ -57,8 +57,8 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param show The show state of the [WindowBottomSheet].
  * @param modifier The modifier to be applied to the [WindowBottomSheet].
  * @param title Optional title to display at the top of the [WindowBottomSheet].
- * @param leftAction Optional [Composable] to display on the left side of the title (e.g. a close button).
- * @param rightAction Optional [Composable] to display on the right side of the title (e.g. a submit button).
+ * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
+ * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [WindowBottomSheet].
  * @param enableWindowDim Whether to dim the window behind the [WindowBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [WindowBottomSheet].
@@ -79,8 +79,8 @@ fun WindowBottomSheet(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     title: String? = null,
-    leftAction: @Composable (() -> Unit)? = null,
-    rightAction: @Composable (() -> Unit)? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endAction: @Composable (() -> Unit)? = null,
     backgroundColor: Color = WindowBottomSheetDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
     cornerRadius: Dp = WindowBottomSheetDefaults.cornerRadius,
@@ -249,8 +249,8 @@ fun WindowBottomSheet(
                         }
                     },
                     modifier = modifier,
-                    leftAction = leftAction,
-                    rightAction = rightAction,
+                    startAction = startAction,
+                    endAction = endAction,
                     content = {
                         CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
                             content()

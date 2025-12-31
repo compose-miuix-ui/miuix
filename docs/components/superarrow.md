@@ -82,8 +82,8 @@ Scaffold {
 | titleColor    | BasicComponentColors            | Title text color configuration   | BasicComponentDefaults.titleColor()   | No       |
 | summary       | String?                         | Arrow item summary description   | null                                  | No       |
 | summaryColor  | BasicComponentColors            | Summary text color configuration | BasicComponentDefaults.summaryColor() | No       |
-| leftAction    | @Composable (() -> Unit)?       | Custom left content              | null                                  | No       |
-| rightActions  | @Composable RowScope.() -> Unit | Custom right-side content (slot) | {}                                    | No       |
+| startAction   | @Composable (() -> Unit)?       | Custom start side content        | null                                  | No       |
+| endActions    | @Composable RowScope.() -> Unit | Custom end side content (slot)   | {}                                    | No       |
 | bottomAction  | @Composable (() -> Unit)?       | Custom bottom content            | null                                  | No       |
 | insideMargin  | PaddingValues                   | Internal content padding         | BasicComponentDefaults.InsideMargin   | No       |
 | onClick       | (() -> Unit)?                   | Callback triggered on click      | null                                  | No       |
@@ -94,11 +94,11 @@ Scaffold {
 
 The SuperArrowDefaults object provides default color configuration for the trailing arrow icon.
 
-#### Methods
+#### SuperArrowDefaults Methods
 
 | Method Name       | Type              | Description                                         |
 | ----------------- | ----------------- | --------------------------------------------------- |
-| rightActionColors | RightActionColors | Returns tint colors used by the trailing arrow icon |
+| endActionColors   | EndActionColors   | Returns tint colors used by the trailing arrow icon |
 
 ### Arrow Tint
 
@@ -108,13 +108,13 @@ The SuperArrowDefaults object provides default color configuration for the trail
 
 ## Advanced Usage
 
-### With Left Icon
+### With Start Icon
 
 ```kotlin
 SuperArrow(
     title = "Personal Information",
     summary = "View and edit your profile",
-    leftAction = {
+    startAction = {
         Icon(
             imageVector = MiuixIcons.Contacts,
             contentDescription = "Personal Icon",
@@ -126,13 +126,13 @@ SuperArrow(
 )
 ```
 
-### With Right Actions (Text)
+### With End Actions
 
 ```kotlin
 SuperArrow(
     title = "Storage Space",
     summary = "Manage app storage space",
-    rightActions = {
+    endActions = {
         Text("12.5 GB")
     },
     onClick = { /* Handle click event */ }
@@ -149,7 +149,7 @@ Scaffold {
 SuperArrow(
     title = "Language Settings",
     summary = "Select app display language",
-    rightActions = {
+    endActions = {
         Text(language)
     },
     onClick = { showDialog.value = true },

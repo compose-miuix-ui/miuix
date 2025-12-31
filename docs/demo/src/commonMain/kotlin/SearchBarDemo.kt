@@ -56,7 +56,7 @@ fun SearchBarDemo() {
                         label = "Search",
                     )
                 },
-                outsideRightAction = {
+                outsideEndAction = {
                     Text(
                         modifier = Modifier
                             .clickable(

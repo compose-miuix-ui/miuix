@@ -514,7 +514,7 @@ fun AboutPage(
             ) {
                 SuperArrow(
                     title = "View Source",
-                    rightActions = {
+                    endActions = {
                         Text(
                             modifier = Modifier.padding(end = 8.dp),
                             text = "GitHub",
@@ -525,7 +525,7 @@ fun AboutPage(
                 )
                 SuperArrow(
                     title = "Join Group",
-                    rightActions = {
+                    endActions = {
                         Text(
                             modifier = Modifier.padding(end = 8.dp),
                             text = "Telegram",

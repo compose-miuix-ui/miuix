@@ -63,8 +63,8 @@ WindowBottomSheet(
 | show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                           | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                    | No       |
 | title                      | String?                   | Bottom sheet title                                             | null                                        | No       |
-| leftAction                 | @Composable (() -> Unit)? | Optional composable for left action (e.g., close button)       | null                                        | No       |
-| rightAction                | @Composable (() -> Unit)? | Optional composable for right action (e.g., submit button)     | null                                        | No       |
+| startAction                | @Composable (() -> Unit)? | Optional composable for start action (e.g., close button)      | null                                        | No       |
+| endAction                  | @Composable (() -> Unit)? | Optional composable for end action (e.g., submit button)       | null                                        | No       |
 | backgroundColor            | Color                     | Bottom sheet background color                                  | WindowBottomSheetDefaults.backgroundColor() | No       |
 | enableWindowDim            | Boolean                   | Whether to enable dimming layer                                | true                                        | No       |
 | cornerRadius               | Dp                        | Corner radius of the top corners                               | WindowBottomSheetDefaults.cornerRadius      | No       |
@@ -78,9 +78,25 @@ WindowBottomSheet(
 | allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                        | No       |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                           | Yes      |
 
-### WindowBottomSheetDefaults
+### WindowBottomSheetDefaults Object
 
-`WindowBottomSheetDefaults` provides the default appearance and layout values for `WindowBottomSheet` (based on `SuperBottomSheetDefaults`, with adjustments for window-level behavior).
+The WindowBottomSheetDefaults object provides default settings for the SuperBottomSheet component.
+
+#### WindowBottomSheetDefaults Properties
+
+| Property Name | Type   | Description                          |
+| ------------- | ------ | ------------------------------------ |
+| cornerRadius  | Dp     | Default corner radius (28.dp)        |
+| maxWidth      | Dp     | Default maximum width (640.dp)       |
+| outsideMargin | DpSize | Default bottom sheet external margin |
+| insideMargin  | DpSize | Default bottom sheet internal margin |
+
+#### WindowBottomSheetDefaults Functions
+
+| Function Name     | Return Type | Description                      |
+| ----------------- | ----------- | -------------------------------- |
+| backgroundColor() | Color       | Get default background color     |
+| dragHandleColor() | Color       | Get default drag indicator color |
 
 ## Advanced Usage
 

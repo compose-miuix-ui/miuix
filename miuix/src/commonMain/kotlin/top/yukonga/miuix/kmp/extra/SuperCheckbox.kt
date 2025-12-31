@@ -77,9 +77,9 @@ fun SuperCheckbox(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        leftAction = startActionComposable,
-        rightActions = {
-            SuperCheckboxRightActions(
+        startAction = startActionComposable,
+        endActions = {
+            SuperCheckboxEndActions(
                 endActions = endActions,
                 checkboxLocation = checkboxLocation,
                 checked = checked,
@@ -115,7 +115,7 @@ private fun SuperCheckboxStartAction(
 }
 
 @Composable
-private fun RowScope.SuperCheckboxRightActions(
+private fun RowScope.SuperCheckboxEndActions(
     endActions: @Composable RowScope.() -> Unit,
     checkboxLocation: CheckboxLocation,
     checked: Boolean,

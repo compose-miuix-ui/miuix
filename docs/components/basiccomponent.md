@@ -1,6 +1,6 @@
 # BasicComponent
 
-`BasicComponent` is a foundational standard component in Miuix. It provides customizable content areas on the left and right sides, along with a title and summary, making it suitable for building list items, settings items, and other UI elements.
+`BasicComponent` is a foundational standard component in Miuix. It provides customizable content areas on the start and end sides, along with a title and summary, making it suitable for building list items, settings items, and other UI elements.
 
 This project builds upon it to provide some extended components, enabling developers to quickly create UI components that conform to design specifications. See the usage of [Extended Components](../components/#extended-components) for details.
 
@@ -37,13 +37,13 @@ BasicComponent(
 )
 ```
 
-### Component with Left Icon
+### With Start Icon
 
 ```kotlin
 BasicComponent(
     title = "Nickname",
     summary = "A brief introduction",
-    leftAction = {
+    startAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
             imageVector = MiuixIcons.Contacts,
@@ -55,14 +55,14 @@ BasicComponent(
 )
 ```
 
-### Component with Right Actions
+### With End Actions
 
 ```kotlin
 var isFlightMode by remember { mutableStateOf(false) }
 
 BasicComponent(
     title = "Flight Mode",
-    rightActions = {
+    endActions = {
         Switch(
             checked = isFlightMode,
             onCheckedChange = { isFlightMode = it }
@@ -94,8 +94,8 @@ BasicComponent(
 | titleColor        | BasicComponentColors               | Title color configuration                             | BasicComponentDefaults.titleColor()   | No       |
 | summary           | String?                            | Summary of the component                              | null                                  | No       |
 | summaryColor      | BasicComponentColors               | Summary color configuration                           | BasicComponentDefaults.summaryColor() | No       |
-| leftAction        | @Composable (() -> Unit)?          | Composable content on the left side of the component  | null                                  | No       |
-| rightActions      | @Composable (RowScope.() -> Unit)? | Composable content on the right side of the component | null                                  | No       |
+| startAction       | @Composable (() -> Unit)?          | Composable content on the start side of the component | null                                  | No       |
+| endActions        | @Composable (RowScope.() -> Unit)? | Composable content on the end side of the component   | null                                  | No       |
 | bottomAction      | @Composable (() -> Unit)?          | Composable content at the bottom of the component     | null                                  | No       |
 | insideMargin      | PaddingValues                      | Internal padding of the component                     | BasicComponentDefaults.InsideMargin   | No       |
 | onClick           | (() -> Unit)?                      | Callback triggered when the component is clicked      | null                                  | No       |
@@ -107,13 +107,13 @@ BasicComponent(
 
 The BasicComponentDefaults object provides default values and color configurations for the BasicComponent.
 
-#### Constants
+#### BasicComponentDefaults Constants
 
 | Constant Name | Type          | Description                       | Default Value        |
 | ------------- | ------------- | --------------------------------- | -------------------- |
 | InsideMargin  | PaddingValues | Internal padding of the component | PaddingValues(16.dp) |
 
-#### Methods
+#### BasicComponentDefaults Methods
 
 | Method Name    | Type                 | Description                         |
 | -------------- | -------------------- | ----------------------------------- |
@@ -137,7 +137,7 @@ Used to configure the color states of the component.
 BasicComponent(
     title = "Volume",
     summary = "Media Volume: 70%",
-    leftAction = {
+    startAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
             imageVector = MiuixIcons.Play,
@@ -145,7 +145,7 @@ BasicComponent(
             tint = MiuixTheme.colorScheme.onBackground
         )
     },
-    rightActions = {
+    endActions = {
         IconButton(onClick = { /* Decrease volume */ }) {
             Icon(
                 imageVector = MiuixIcons.Remove,

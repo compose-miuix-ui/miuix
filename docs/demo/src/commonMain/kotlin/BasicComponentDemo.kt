@@ -51,7 +51,7 @@ fun BasicComponentDemo() {
                 BasicComponent(
                     title = "Nickname",
                     summary = "A brief introduction",
-                    leftAction = {
+                    startAction = {
                         Icon(
                             modifier = Modifier.padding(end = 16.dp),
                             imageVector = MiuixIcons.Contacts,

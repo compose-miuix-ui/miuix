@@ -50,7 +50,7 @@ SearchBar(
 | modifier           | Modifier                           | 应用于搜索栏的修饰符       | Modifier            | 否       |
 | insideMargin       | DpSize                             | 内部边距                   | DpSize(12.dp, 0.dp) | 否       |
 | expanded           | Boolean                            | 是否展开显示搜索结果       | false               | 否       |
-| outsideRightAction | @Composable (() -> Unit)?          | 展开时显示在右侧的操作组件 | null                | 否       |
+| outsideEndAction.  | @Composable (() -> Unit)?          | 展开时显示在右侧的操作组件 | null                | 否       |
 | content            | @Composable ColumnScope.() -> Unit | 展开时显示的内容           | -                   | 是       |
 
 ### InputField 属性
@@ -155,7 +155,7 @@ SearchBar(
     },
     expanded = expanded,
     onExpandedChange = { expanded = it },
-    outsideRightAction = {
+    outsideEndAction = {
         Text(
             modifier = Modifier
                 .padding(start = 12.dp)

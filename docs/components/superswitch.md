@@ -57,26 +57,26 @@ SuperSwitch(
 
 ### SuperSwitch Properties
 
-| Property Name   | Type                            | Description                          | Default Value                         | Required |
-| --------------- | ------------------------------- | ------------------------------------ | ------------------------------------- | -------- |
-| checked         | Boolean                         | Switch checked state                 | -                                     | Yes      |
-| onCheckedChange | (Boolean) -> Unit               | Switch state change callback         | -                                     | Yes      |
-| title           | String                          | Switch item title                    | -                                     | Yes      |
-| modifier        | Modifier                        | Component modifier                   | Modifier                              | No       |
-| titleColor      | BasicComponentColors            | Title text color configuration       | BasicComponentDefaults.titleColor()   | No       |
-| summary         | String?                         | Switch item summary                  | null                                  | No       |
-| summaryColor    | BasicComponentColors            | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No       |
-| leftAction      | @Composable (() -> Unit)?       | Custom left content                  | null                                  | No       |
-| rightActions    | @Composable RowScope.() -> Unit | Custom right content (before switch) | {}                                    | No       |
-| bottomAction    | @Composable (() -> Unit)?       | Custom bottom content                | null                                  | No       |
-| switchColors    | SwitchColors                    | Switch control color configuration   | SwitchDefaults.switchColors()         | No       |
-| insideMargin    | PaddingValues                   | Component internal content padding   | BasicComponentDefaults.InsideMargin   | No       |
-| holdDownState   | Boolean                         | Whether the component is held down   | false                                 | No       |
-| enabled         | Boolean                         | Component interactive state          | true                                  | No       |
+| Property Name   | Type                            | Description                             | Default Value                         | Required |
+| --------------- | ------------------------------- | --------------------------------------- | ------------------------------------- | -------- |
+| checked         | Boolean                         | Switch checked state                    | -                                     | Yes      |
+| onCheckedChange | (Boolean) -> Unit               | Switch state change callback            | -                                     | Yes      |
+| title           | String                          | Switch item title                       | -                                     | Yes      |
+| modifier        | Modifier                        | Component modifier                      | Modifier                              | No       |
+| titleColor      | BasicComponentColors            | Title text color configuration          | BasicComponentDefaults.titleColor()   | No       |
+| summary         | String?                         | Switch item summary                     | null                                  | No       |
+| summaryColor    | BasicComponentColors            | Summary text color configuration        | BasicComponentDefaults.summaryColor() | No       |
+| startAction     | @Composable (() -> Unit)?       | Custom start side content               | null                                  | No       |
+| endActions      | @Composable RowScope.() -> Unit | Custom end side content (before switch) | {}                                    | No       |
+| bottomAction    | @Composable (() -> Unit)?       | Custom bottom side content              | null                                  | No       |
+| switchColors    | SwitchColors                    | Switch control color configuration      | SwitchDefaults.switchColors()         | No       |
+| insideMargin    | PaddingValues                   | Component internal content padding      | BasicComponentDefaults.InsideMargin   | No       |
+| holdDownState   | Boolean                         | Whether the component is held down      | false                                 | No       |
+| enabled         | Boolean                         | Component interactive state             | true                                  | No       |
 
 ## Advanced Usage
 
-### With Left Icon
+### With Start Icon
 
 ```kotlin
 var enabled by remember { mutableStateOf(false) }
@@ -86,7 +86,7 @@ SuperSwitch(
     summary = "Enable to allow testing",
     checked = enabled,
     onCheckedChange = { enabled = it },
-    leftAction = {
+    startAction = {
         Icon(
             imageVector = MiuixIcons.Sort,
             contentDescription = "Command Icon",
@@ -97,7 +97,7 @@ SuperSwitch(
 )
 ```
 
-### With Right Additional Content
+### With End Actions
 
 ```kotlin
 var locationEnabled by remember { mutableStateOf(false) }
@@ -107,7 +107,7 @@ SuperSwitch(
     summary = "Allow apps to access location information",
     checked = locationEnabled,
     onCheckedChange = { locationEnabled = it },
-    rightActions = {
+    endActions = {
         Text(
             text = if (locationEnabled) "Enabled" else "Disabled",
             color = MiuixTheme.colorScheme.onSurfaceVariantActions,

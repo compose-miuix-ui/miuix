@@ -43,7 +43,7 @@ BasicComponent(
 BasicComponent(
     title = "昵称",
     summary = "一段简介",
-    leftAction = {
+    startAction = {
         Icon(
             modifier = Modifier.padding(end = 16.dp),
             imageVector = MiuixIcons.Contacts,
@@ -62,7 +62,7 @@ var isFlightMode by remember { mutableStateOf(false) }
 
 BasicComponent(
     title = "飞行模式",
-    rightActions = {
+    endActions = {
         Switch(
             checked = isFlightMode,
             onCheckedChange = { isFlightMode = it }
@@ -94,8 +94,8 @@ BasicComponent(
 | titleColor        | BasicComponentColors               | 标题颜色配置         | BasicComponentDefaults.titleColor()   | 否       |
 | summary           | String?                            | 组件摘要             | null                                  | 否       |
 | summaryColor      | BasicComponentColors               | 摘要颜色配置         | BasicComponentDefaults.summaryColor() | 否       |
-| leftAction        | @Composable (() -> Unit)?          | 组件左侧的可组合内容 | null                                  | 否       |
-| rightActions      | @Composable (RowScope.() -> Unit)? | 组件右侧的可组合内容 | null                                  | 否       |
+| startAction       | @Composable (() -> Unit)?          | 组件左侧的可组合内容 | null                                  | 否       |
+| endActions        | @Composable (RowScope.() -> Unit)? | 组件右侧的可组合内容 | null                                  | 否       |
 | bottomAction      | @Composable (() -> Unit)?          | 组件底部的可组合内容 | null                                  | 否       |
 | insideMargin      | PaddingValues                      | 组件内部边距         | BasicComponentDefaults.InsideMargin   | 否       |
 | onClick           | (() -> Unit)?                      | 点击组件时触发的回调 | null                                  | 否       |
@@ -107,13 +107,13 @@ BasicComponent(
 
 BasicComponentDefaults 对象提供了 BasicComponent 组件的默认值和颜色配置。
 
-#### 常量
+#### BasicComponentDefaults 常量
 
 | 常量名       | 类型          | 说明           | 默认值               |
 | ------------ | ------------- | -------------- | -------------------- |
 | InsideMargin | PaddingValues | 组件的内部边距 | PaddingValues(16.dp) |
 
-#### 方法
+#### BasicComponentDefaults 方法
 
 | 方法名         | 类型                 | 说明             |
 | -------------- | -------------------- | ---------------- |
@@ -137,7 +137,7 @@ BasicComponentDefaults 对象提供了 BasicComponent 组件的默认值和颜�
 BasicComponent(
     title = "音量",
     summary = "媒体音量：70%",
-        leftAction = {
+        startAction = {
         Icon(
         modifier = Modifier.padding(end = 16.dp),
             imageVector = MiuixIcons.Play,
@@ -145,7 +145,7 @@ BasicComponent(
             tint = MiuixTheme.colorScheme.onBackground
         )
     },
-    rightActions = {
+    endActions = {
         IconButton(onClick = { /* 减小音量 */ }) {
             Icon(
                 imageVector = MiuixIcons.Remove,
