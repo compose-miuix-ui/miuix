@@ -34,8 +34,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
@@ -190,6 +192,8 @@ private fun PaletteCanvas(
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
     val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
 
     var sizePx by remember { mutableStateOf(IntSize.Zero) }
 
@@ -197,11 +201,11 @@ private fun PaletteCanvas(
         modifier = Modifier
             .clip(shape)
             .onGloballyPositioned { sizePx = it.size }
-            .pointerInput(rows, hueColumns, includeGrayColumn) {
+            .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     if (sizePx.width == 0 || sizePx.height == 0) return@awaitEachGesture
-                    val (r0, c0) = pointToCell(down.position, sizePx, rows, totalColumns)
+                    val (r0, c0) = pointToCell(down.position, sizePx, rows, totalColumns, isRtl)
                     onSelectState.value(r0, c0)
 
                     val pointerId = down.id
@@ -209,7 +213,7 @@ private fun PaletteCanvas(
                         val event = awaitPointerEvent()
                         val change = event.changes.find { it.id == pointerId } ?: event.changes.firstOrNull() ?: break
                         if (!change.pressed) break
-                        val (r, c) = pointToCell(change.position, sizePx, rows, totalColumns)
+                        val (r, c) = pointToCell(change.position, sizePx, rows, totalColumns, isRtl)
                         onSelectState.value(r, c)
                         change.consume()
                     }
@@ -224,6 +228,7 @@ private fun PaletteCanvas(
             includeGrayColumn = includeGrayColumn,
             rowSV = rowSV,
             grayV = grayV,
+            isRtl = isRtl,
         )
 
         if (sizePx.width > 0 && sizePx.height > 0) {
@@ -231,11 +236,11 @@ private fun PaletteCanvas(
             val h = sizePx.height
             val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
             val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-            val left = colEdges[selectedCol]
-            val right = colEdges[selectedCol + 1]
+            val start = colEdges[selectedCol]
+            val end = colEdges[selectedCol + 1]
             val top = rowEdges[selectedRow]
             val bottom = rowEdges[selectedRow + 1]
-            val cxPx = (left + right) / 2f
+            val cxPx = (start + end) / 2f
             val cyPx = (top + bottom) / 2f
 
             val indicatorSize = indicatorRadius * 2
@@ -291,6 +296,7 @@ private fun PaletteGrid(
     includeGrayColumn: Boolean,
     rowSV: List<Pair<Float, Float>>,
     grayV: List<Float>,
+    isRtl: Boolean,
 ) {
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
     Canvas(Modifier.fillMaxSize()) {
@@ -305,10 +311,11 @@ private fun PaletteGrid(
             val bottom = rowEdges[r + 1].toFloat()
             val cellH = bottom - top
             for (c in 0 until totalColumns) {
-                val left = colEdges[c].toFloat()
-                val right = colEdges[c + 1].toFloat()
-                val cellW = right - left
+                val start = colEdges[c].toFloat()
+                val end = colEdges[c + 1].toFloat()
+                val cellW = end - start
                 val color = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
+                val left = if (isRtl) size.width - end else start
                 drawRect(
                     color = color,
                     topLeft = Offset(left, top),
@@ -367,10 +374,11 @@ private fun cellColor(
     }
 }
 
-private fun pointToCell(pos: Offset, size: IntSize, rows: Int, totalColumns: Int): Pair<Int, Int> {
+private fun pointToCell(pos: Offset, size: IntSize, rows: Int, totalColumns: Int, isRtl: Boolean): Pair<Int, Int> {
     val x = pos.x.coerceIn(0f, size.width.toFloat() - 1)
     val y = pos.y.coerceIn(0f, size.height.toFloat() - 1)
-    val col = ((x / size.width) * totalColumns).toInt().coerceIn(0, totalColumns - 1)
+    var col = ((x / size.width) * totalColumns).toInt().coerceIn(0, totalColumns - 1)
+    if (isRtl) col = totalColumns - 1 - col
     val row = ((y / size.height) * rows).toInt().coerceIn(0, rows - 1)
     return row to col
 }
@@ -422,5 +430,3 @@ private fun indexOfNearestRowSV(targetS: Float, targetV: Float, rowSV: List<Pair
     }
     return idx
 }
-
-private fun sq(v: Float) = v * v

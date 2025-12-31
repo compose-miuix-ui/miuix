@@ -162,7 +162,7 @@ fun Checkbox(
                 val viewportCenterX = viewportSize / 2
                 val viewportCenterY = viewportSize / 2
 
-                val leftPoint = Offset(
+                val startPoint = Offset(
                     centerX + ((5f - viewportCenterX) / viewportSize * size.width),
                     centerY + ((9.4f - viewportCenterY) / viewportSize * size.height),
                 )
@@ -170,18 +170,18 @@ fun Checkbox(
                     centerX + ((10.3f - viewportCenterX) / viewportSize * size.width),
                     centerY + ((14.9f - viewportCenterY) / viewportSize * size.height),
                 )
-                val rightPoint = Offset(
+                val endPoint = Offset(
                     centerX + ((17.9f - viewportCenterX) / viewportSize * size.width),
                     centerY + ((5.1f - viewportCenterY) / viewportSize * size.height),
                 )
 
-                val firstSegmentLength = (middlePoint - leftPoint).getDistance()
-                val secondSegmentLength = (rightPoint - middlePoint).getDistance()
+                val firstSegmentLength = (middlePoint - startPoint).getDistance()
+                val secondSegmentLength = (endPoint - middlePoint).getDistance()
 
                 val cache = CheckmarkCache(
-                    leftPoint,
+                    startPoint,
                     middlePoint,
-                    rightPoint,
+                    endPoint,
                     firstSegmentLength,
                     secondSegmentLength,
                     strokeWidth,
@@ -204,9 +204,9 @@ fun Checkbox(
 }
 
 private data class CheckmarkCache(
-    val leftPoint: Offset,
+    val startPoint: Offset,
     val middlePoint: Offset,
-    val rightPoint: Offset,
+    val endPoint: Offset,
     val firstSegmentLength: Float,
     val secondSegmentLength: Float,
     val strokeWidth: Float,
@@ -231,10 +231,10 @@ private fun DrawScope.drawTrimmedCheckmark(
         val segStartRatio = (startDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
         val segEndRatio = (endDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
 
-        val startX = cache.leftPoint.x + (cache.middlePoint.x - cache.leftPoint.x) * segStartRatio
-        val startY = cache.leftPoint.y + (cache.middlePoint.y - cache.leftPoint.y) * segStartRatio
-        val endX = cache.leftPoint.x + (cache.middlePoint.x - cache.leftPoint.x) * segEndRatio
-        val endY = cache.leftPoint.y + (cache.middlePoint.y - cache.leftPoint.y) * segEndRatio
+        val startX = cache.startPoint.x + (cache.middlePoint.x - cache.startPoint.x) * segStartRatio
+        val startY = cache.startPoint.y + (cache.middlePoint.y - cache.startPoint.y) * segStartRatio
+        val endX = cache.startPoint.x + (cache.middlePoint.x - cache.startPoint.x) * segEndRatio
+        val endY = cache.startPoint.y + (cache.middlePoint.y - cache.startPoint.y) * segEndRatio
 
         path.moveTo(startX, startY)
         path.lineTo(endX, endY)
@@ -244,10 +244,10 @@ private fun DrawScope.drawTrimmedCheckmark(
         val segStartRatio = ((startDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
         val segEndRatio = ((endDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
 
-        val startX = cache.middlePoint.x + (cache.rightPoint.x - cache.middlePoint.x) * segStartRatio
-        val startY = cache.middlePoint.y + (cache.rightPoint.y - cache.middlePoint.y) * segStartRatio
-        val endX = cache.middlePoint.x + (cache.rightPoint.x - cache.middlePoint.x) * segEndRatio
-        val endY = cache.middlePoint.y + (cache.rightPoint.y - cache.middlePoint.y) * segEndRatio
+        val startX = cache.middlePoint.x + (cache.endPoint.x - cache.middlePoint.x) * segStartRatio
+        val startY = cache.middlePoint.y + (cache.endPoint.y - cache.middlePoint.y) * segStartRatio
+        val endX = cache.middlePoint.x + (cache.endPoint.x - cache.middlePoint.x) * segEndRatio
+        val endY = cache.middlePoint.y + (cache.endPoint.y - cache.middlePoint.y) * segEndRatio
 
         if (startDistance < cache.firstSegmentLength) {
             path.lineTo(endX, endY)

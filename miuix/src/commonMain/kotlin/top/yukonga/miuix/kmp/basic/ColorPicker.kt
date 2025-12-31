@@ -36,7 +36,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mocharealm.gaze.capsule.ContinuousCapsule
 import top.yukonga.miuix.kmp.color.api.toHsv
@@ -1052,6 +1054,8 @@ private fun ColorSlider(
     val hapticState = remember { SliderHapticState() }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var sliderWidthPxState by remember { mutableFloatStateOf(0f) }
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
 
     BoxWithConstraints(
         modifier = Modifier
@@ -1062,7 +1066,7 @@ private fun ColorSlider(
                 val widthPx = size.width
                 val halfSliderHeightPx = sliderHeightDp.toPx() / 2f
                 val gradientBrush = Brush.horizontalGradient(
-                    colors = drawBrushColors,
+                    colors = if (isRtl) drawBrushColors.reversed() else drawBrushColors,
                     startX = halfSliderHeightPx,
                     endX = widthPx - halfSliderHeightPx,
                     tileMode = TileMode.Clamp,
@@ -1082,7 +1086,8 @@ private fun ColorSlider(
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
-                    dragOffset += delta
+                    val d = if (isRtl) -delta else delta
+                    dragOffset += d
                     val newValue = handleSliderInteraction(
                         dragOffset,
                         sliderWidthPxState,
@@ -1092,8 +1097,9 @@ private fun ColorSlider(
                     hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
                 },
                 onDragStarted = { offset ->
-                    dragOffset = offset.x
-                    val newValue = handleSliderInteraction(offset.x, sliderWidthPxState, sliderHeightPx)
+                    val x = if (isRtl) sliderWidthPxState - offset.x else offset.x
+                    dragOffset = x
+                    val newValue = handleSliderInteraction(x, sliderWidthPxState, sliderHeightPx)
                     onValueChangedState.value(newValue)
                     hapticState.reset(newValue)
                 },
