@@ -40,8 +40,6 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.foundation)
-            implementation(libs.jetbrains.compose.runtime)
-            implementation(libs.jetbrains.compose.ui)
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.gaze.capsule) // Capsule for Multiplatform

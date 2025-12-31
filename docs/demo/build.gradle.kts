@@ -27,8 +27,6 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.jetbrains.androidx.navigation)
             implementation(libs.jetbrains.compose.foundation)
-            implementation(libs.jetbrains.compose.runtime)
-            implementation(libs.jetbrains.compose.ui)
             implementation(projects.miuix)
             implementation(projects.miuixIcons)
         }
