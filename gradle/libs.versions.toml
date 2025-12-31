@@ -1,7 +1,7 @@
 [versions]
 android-gradle-plugin = "8.13.2"
 androidx-activity = "1.12.2"
-gaze-capsule = "2.1.1-patch2"
+gaze-capsule = "2.1.1"
 jetbrains-androidx-navigation = "2.9.1"
 jetbrains-androidx-navigationevent = "1.0.0-rc02"
 jetbrains-compose-multiplatform = "1.10.0-rc02"
