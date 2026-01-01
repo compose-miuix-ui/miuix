@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -166,22 +167,28 @@ fun Slider(
                             layoutHeight = it.height
                         }
                         .pointerInput(layoutWidth, layoutHeight, effectiveReverseDirection, valueRange) {
+                            val thumbRadius = layoutHeight / 2f
+                            val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                            val knobRadius = thumbRadius * 0.72f
+                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
-                                    if (event.type == PointerEventType.Exit) {
+                                    val change = event.changes.last()
+
+                                    if (event.type == PointerEventType.Exit ||
+                                        event.type == PointerEventType.Release ||
+                                        change.type != PointerType.Mouse
+                                    ) {
                                         isHoveringThumb = false
                                         continue
                                     }
-                                    val position = event.changes.last().position
-                                    val thumbRadius = layoutHeight / 2f
-                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                                    val fraction =
-                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+
+                                    val position = change.position
+                                    val fraction = (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
                                     val thumbX = thumbRadius + effectiveFraction * availableWidth
-                                    val knobRadius = thumbRadius * 0.72f
-                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val isOver = abs(position.x - thumbX) <= hitRadius
                                     if (isHoveringThumb != isOver) {
@@ -365,22 +372,29 @@ fun VerticalSlider(
                             layoutHeight = it.height
                         }
                         .pointerInput(layoutWidth, layoutHeight, reverseDirection, valueRange) {
+                            val thumbRadius = layoutWidth / 2f
+                            val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+                            val knobRadius = thumbRadius * 0.72f
+                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
-                                    if (event.type == PointerEventType.Exit) {
+                                    val change = event.changes.last()
+
+                                    if (event.type == PointerEventType.Exit ||
+                                        event.type == PointerEventType.Release ||
+                                        change.type != PointerType.Mouse
+                                    ) {
                                         isHoveringThumb = false
                                         continue
                                     }
-                                    val position = event.changes.last().position
-                                    val thumbRadius = layoutWidth / 2f
-                                    val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+
+                                    val position = change.position
                                     val fraction =
                                         (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveFraction = if (reverseDirection) fraction else 1f - fraction
                                     val thumbY = thumbRadius + effectiveFraction * availableHeight
-                                    val knobRadius = thumbRadius * 0.72f
-                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val isOver = abs(position.y - thumbY) <= hitRadius
                                     if (isHoveringThumb != isOver) {
@@ -582,28 +596,32 @@ fun RangeSlider(
                             layoutHeight = it.height
                         }
                         .pointerInput(layoutWidth, layoutHeight, isRtl, valueRange) {
+                            val thumbRadius = layoutHeight / 2f
+                            val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                            val knobRadius = thumbRadius * 0.72f
+                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
+
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
-                                    if (event.type == PointerEventType.Exit) {
+                                    val change = event.changes.last()
+
+                                    if (event.type == PointerEventType.Exit ||
+                                        event.type == PointerEventType.Release ||
+                                        change.type != PointerType.Mouse
+                                    ) {
                                         isHoveringStartThumb = false
                                         isHoveringEndThumb = false
                                         continue
                                     }
-                                    val position = event.changes.last().position
-                                    val thumbRadius = layoutHeight / 2f
-                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                                    val startFraction =
-                                        (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val endFraction =
-                                        (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+
+                                    val position = change.position
+                                    val startFraction = (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val endFraction = (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
                                     val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
                                     val startThumbX = thumbRadius + effectiveStartFraction * availableWidth
                                     val endThumbX = thumbRadius + effectiveEndFraction * availableWidth
-
-                                    val knobRadius = thumbRadius * 0.72f
-                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val isOverStart = abs(position.x - startThumbX) <= hitRadius
                                     val isOverEnd = abs(position.x - endThumbX) <= hitRadius
