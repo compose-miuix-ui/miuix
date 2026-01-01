@@ -179,7 +179,9 @@ private class OverscrollNode(
     private fun resetState() {
         offset = 0f
         rawTouchAccumulation = 0f
-        overScrollState.isOverScrollActive = false
+        if (isAttached) {
+            overScrollState.isOverScrollActive = false
+        }
     }
 
     private fun startSpringAnimation(initialVelocity: Float = 0f) {
