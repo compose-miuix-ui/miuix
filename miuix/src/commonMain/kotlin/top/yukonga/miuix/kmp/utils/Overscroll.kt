@@ -258,6 +258,7 @@ private class OverscrollNode(
     }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        if (!isAttached) return Offset.Zero
         val isActive = abs(offset) > offsetThreshold
         if (overScrollState.isOverScrollActive != isActive) {
             overScrollState.isOverScrollActive = isActive
@@ -307,6 +308,7 @@ private class OverscrollNode(
     }
 
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        if (!isAttached) return Offset.Zero
         val isActive = abs(offset) > offsetThreshold
         if (overScrollState.isOverScrollActive != isActive) {
             overScrollState.isOverScrollActive = isActive
@@ -332,6 +334,7 @@ private class OverscrollNode(
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
+        if (!isAttached) return Velocity.Zero
         val isActive = abs(offset) > offsetThreshold
         if (overScrollState.isOverScrollActive != isActive) {
             overScrollState.isOverScrollActive = isActive
@@ -374,6 +377,7 @@ private class OverscrollNode(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        if (!isAttached) return Velocity.Zero
         val isActive = abs(offset) > offsetThreshold
         if (overScrollState.isOverScrollActive != isActive) {
             overScrollState.isOverScrollActive = isActive
