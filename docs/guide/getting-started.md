@@ -53,18 +53,14 @@ dependencies {
 
 ```kotlin
 implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-iosx64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-macosx64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
 // Optional: Add miuix-icons
 implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-iosx64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-macosx64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
