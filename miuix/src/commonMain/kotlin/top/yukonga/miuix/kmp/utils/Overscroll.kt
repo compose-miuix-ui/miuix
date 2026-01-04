@@ -149,6 +149,11 @@ private class OverscrollNode(
         delegate(nestedScrollModifierNode(this, dispatcher))
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        resetState()
+    }
+
     fun update(
         isVertical: Boolean,
         nestedScrollToParent: Boolean,

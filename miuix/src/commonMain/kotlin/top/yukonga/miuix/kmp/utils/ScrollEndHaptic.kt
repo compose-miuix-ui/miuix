@@ -91,6 +91,11 @@ private class ScrollEndHapticNode(
         delegate(nestedScrollModifierNode(this, null))
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        scrollEndHapticState = ScrollEndHapticState.Idle
+    }
+
     fun update(hapticFeedbackType: HapticFeedbackType) {
         this.hapticFeedbackType = hapticFeedbackType
     }
