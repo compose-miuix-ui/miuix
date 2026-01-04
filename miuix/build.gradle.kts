@@ -38,8 +38,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(libs.jetbrains.compose.foundation)
+
             implementation(libs.jetbrains.androidx.navigationevent)
-            implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.gaze.capsule) // Capsule for Multiplatform

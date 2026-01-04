@@ -26,7 +26,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.jetbrains.androidx.navigation)
-            implementation(libs.jetbrains.compose.foundation)
             implementation(projects.miuix)
             implementation(projects.miuixIcons)
         }

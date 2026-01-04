@@ -54,7 +54,6 @@ kotlin {
         commonMain {
             kotlin.srcDir(generatedSrcDir.resolve("kotlin").absolutePath)
             dependencies {
-                api(libs.jetbrains.compose.foundation)
                 api(libs.jetbrains.compose.components.resources)
                 implementation(libs.jetbrains.androidx.navigation)
                 implementation(projects.miuix)
