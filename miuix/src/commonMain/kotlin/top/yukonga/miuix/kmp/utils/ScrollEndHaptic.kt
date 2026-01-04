@@ -55,6 +55,7 @@ private class ScrollEndHapticNode(
     private fun Float.filter(tolerance: Float): Boolean = abs(this) < tolerance
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        if (!isAttached) return Offset.Zero
         // Reset state when scrolling from a boundary into content.
         if (scrollEndHapticState == ScrollEndHapticState.TopBoundaryHit && available.y < -PRE_SCROLL_RESET_THRESHOLD) {
             scrollEndHapticState = ScrollEndHapticState.Idle
@@ -65,6 +66,7 @@ private class ScrollEndHapticNode(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        if (!isAttached) return Velocity.Zero
         // Flinging beyond the top boundary.
         if (available.y > POST_FLING_AVAILABLE_VELOCITY_THRESHOLD && !consumed.y.filter(POST_FLING_CONSUMED_VELOCITY_THRESHOLD)) {
             if (scrollEndHapticState != ScrollEndHapticState.TopBoundaryHit) {
