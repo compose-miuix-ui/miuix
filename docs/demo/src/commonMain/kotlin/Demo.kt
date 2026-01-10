@@ -12,13 +12,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -81,45 +82,55 @@ private val availableComponents = listOf(
 
 @Composable
 private fun DemoSelection() {
-    val navController = rememberNavController()
-    NavHost(
-        navController = navController,
-        startDestination = "home",
-    ) {
-        composable("home") {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MiuixTheme.colorScheme.background),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
-                        .widthIn(max = 600.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+    val backStack = remember { mutableStateListOf<NavKey>(DemoScreen.Home) }
+    val entryProvider = remember(backStack) {
+        entryProvider<NavKey> {
+            entry(DemoScreen.Home) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MiuixTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    availableComponents.forEach { demo ->
-                        TextButton(
-                            text = demo.name,
-                            onClick = { navController.navigate(demo.id) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.textButtonColorsPrimary(),
-                        )
+                    Column(
+                        Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                            .widthIn(max = 600.dp)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        availableComponents.forEach { demo ->
+                            TextButton(
+                                text = demo.name,
+                                onClick = { backStack.add(DemoScreen.Component(demo.id)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.textButtonColorsPrimary(),
+                            )
+                        }
+                    }
+                }
+            }
+
+            availableComponents.forEach { component ->
+                entry(DemoScreen.Component(component.id)) {
+                    Column {
+                        component.demo()
                     }
                 }
             }
         }
-
-        availableComponents.forEach { component ->
-            composable(component.id) {
-                Column {
-                    component.demo()
-                }
-            }
-        }
     }
+
+    NavDisplay(
+        backStack = backStack,
+        entryProvider = entryProvider,
+        onBack = { backStack.removeLast() },
+    )
+}
+
+private sealed interface DemoScreen : NavKey {
+    data object Home : DemoScreen
+    data class Component(val id: String) : DemoScreen
 }

@@ -1,13 +1,15 @@
 [versions]
 android-gradle-plugin = "8.13.2"
 androidx-activity = "1.12.2"
+androidx-collection = "1.5.0"
+androidx-navigation3 = "1.1.0-alpha01"
 gaze-capsule = "2.1.1-patch2"
-jetbrains-androidx-navigation = "2.9.1"
 jetbrains-androidx-navigationevent = "1.0.0-rc02"
 jetbrains-compose-multiplatform = "1.10.0-rc02"
 jetbrains-compose-hotReload = "1.0.0"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
+jetbrains-lifecycle = "2.10.0-alpha07"
 kotlin = "2.2.21"
 material-kolor = "4.0.5"
 spotless = "8.1.0"
@@ -15,11 +17,14 @@ spotless = "8.1.0"
 [libraries]
 # Libraries
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-jetbrains-androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrains-androidx-navigation" }
+androidx-collection = { module = "androidx.collection:collection", version.ref = "androidx-collection" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "androidx-navigation3" }
 jetbrains-androidx-navigationevent = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "jetbrains-androidx-navigationevent" }
 jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
+jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
+jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
 gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "material-kolor" }
 

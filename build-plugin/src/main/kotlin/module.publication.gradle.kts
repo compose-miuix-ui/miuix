@@ -21,6 +21,7 @@ val projectUrl = "$githubUrl/$owner/$repository"
 val projectPackagesUrl = "$githubPkgUrl/$owner/$repository"
 val miuixDescription = "A UI library for Compose Multiplatform"
 val miuixIconsDescription = "An extended icon library for Miuix"
+val miuixNavigation3UiDescription = "A navigation3 UI library for Miuix"
 
 val localPropertiesFile = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -50,7 +51,13 @@ publishing {
         // Provide artifacts information required
         pom {
             name.set(project.name)
-            description.set(if (project.name.contains("icon", ignoreCase = true)) miuixIconsDescription else miuixDescription)
+            description.set(
+                when (project.name) {
+                    "miuix-icons" -> miuixIconsDescription
+                    "miuix-navigation3-ui" -> miuixNavigation3UiDescription
+                    else -> miuixDescription
+                }
+            )
             url.set(projectUrl)
             licenses {
                 license {

@@ -42,6 +42,7 @@ includeBuild("build-plugin")
 
 include(":miuix")
 include(":miuix-icons")
+include(":miuix-navigation3-ui")
 
 include(":example:shared")
 include(":example:android")

@@ -38,8 +38,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.compose.foundation)
             implementation(projects.miuix)
+            implementation(libs.jetbrains.compose.foundation)
         }
     }
 }

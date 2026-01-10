@@ -44,6 +44,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,6 +59,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -148,6 +152,11 @@ data class UIState(
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
 
+private sealed interface Screen : NavKey {
+    data object Home : Screen
+    data object About : Screen
+}
+
 @Composable
 fun UITest(
     colorMode: MutableState<Int>,
@@ -169,6 +178,7 @@ fun UITest(
     }
 
     var uiState by remember { mutableStateOf(UIState()) }
+    val backStack = remember { mutableStateListOf<NavKey>(Screen.Home) }
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
             coroutineScope.launch {
@@ -198,24 +208,49 @@ fun UITest(
             uiState = uiState.copy(isWideScreen = isWideScreen)
             uiState = uiState.copy(enableOverScroll = enableOverScroll)
 
-            if (isWideScreen) {
-                WideScreenLayout(
-                    uiState = uiState,
-                    onUiStateChange = { uiState = it },
-                    colorMode = colorMode,
-                    seedIndex = seedIndex,
-                    padding = padding,
-                )
-            } else {
-                CompactScreenLayout(
-                    navigationItems = navigationItems,
-                    uiState = uiState,
-                    onUiStateChange = { uiState = it },
-                    colorMode = colorMode,
-                    seedIndex = seedIndex,
-                    padding = padding,
-                )
+            val entryProvider = remember(backStack, uiState, colorMode, seedIndex, padding, navigationItems) {
+                entryProvider<NavKey> {
+                    entry(Screen.Home) {
+                        if (isWideScreen) {
+                            WideScreenLayout(
+                                uiState = uiState,
+                                onUiStateChange = { uiState = it },
+                                colorMode = colorMode,
+                                seedIndex = seedIndex,
+                                padding = padding,
+                                navToAbout = { backStack.add(Screen.About) },
+                            )
+                        } else {
+                            CompactScreenLayout(
+                                navigationItems = navigationItems,
+                                uiState = uiState,
+                                onUiStateChange = { uiState = it },
+                                colorMode = colorMode,
+                                seedIndex = seedIndex,
+                                padding = padding,
+                                navToAbout = { backStack.add(Screen.About) },
+                            )
+                        }
+                    }
+                    entry(Screen.About) {
+                        AboutScreen(
+                            padding = padding,
+                            showTopAppBar = uiState.showTopAppBar,
+                            isWideScreen = uiState.isWideScreen,
+                            enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                            enableOverScroll = uiState.enableOverScroll,
+                            onBack = { backStack.removeLast() },
+                        )
+                    }
+                }
             }
+
+            NavDisplay(
+                backStack = backStack,
+                entryProvider = entryProvider,
+                modifier = Modifier.fillMaxHeight(),
+                onBack = { backStack.removeLast() },
+            )
         }
     }
 
@@ -240,6 +275,7 @@ private fun WideScreenLayout(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     padding: PaddingValues,
+    navToAbout: () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
@@ -291,6 +327,7 @@ private fun WideScreenLayout(
                     colorMode = colorMode,
                     seedIndex = seedIndex,
                     layoutDirection = layoutDirection,
+                    navToAbout = navToAbout,
                 )
             }
         }
@@ -364,6 +401,7 @@ private fun WideScreenContent(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     layoutDirection: LayoutDirection,
+    navToAbout: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -397,6 +435,7 @@ private fun WideScreenContent(
             modifier = Modifier
                 .imePadding()
                 .padding(end = padding.calculateEndPadding(layoutDirection)),
+            navToAbout = navToAbout,
         )
     }
 }
@@ -409,6 +448,7 @@ private fun CompactScreenLayout(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     padding: PaddingValues,
+    navToAbout: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -444,6 +484,7 @@ private fun CompactScreenLayout(
                     end = padding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .imePadding(),
+            navToAbout = navToAbout,
         )
     }
 }
@@ -625,6 +666,7 @@ fun AppPager(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     modifier: Modifier = Modifier,
+    navToAbout: () -> Unit,
 ) {
     HorizontalPager(
         state = LocalPagerState.current,
@@ -699,6 +741,7 @@ fun AppPager(
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode,
                     seedIndex = seedIndex,
+                    navToAbout = navToAbout,
                 )
             }
         },

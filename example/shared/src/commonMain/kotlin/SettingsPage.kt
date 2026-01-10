@@ -2,12 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -43,9 +37,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import misc.VersionInfo
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
@@ -109,162 +100,130 @@ fun SettingsPage(
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    navToAbout: () -> Unit,
 ) {
-    val navController = rememberNavController()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
-    NavHost(
-        navController = navController,
-        startDestination = "settings",
-        modifier = Modifier.fillMaxHeight(),
-        enterTransition = {
-            slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-            )
-        },
-        exitTransition = {
-            slideOutHorizontally(
-                targetOffsetX = { -it / 5 },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-            ) + fadeOut(
-                animationSpec = tween(durationMillis = 500),
-                targetAlpha = 0.5f,
-            )
-        },
-        popEnterTransition = {
-            slideInHorizontally(
-                initialOffsetX = { -it / 5 },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-            ) + fadeIn(
-                animationSpec = tween(durationMillis = 500),
-                initialAlpha = 0.5f,
-            )
-        },
-        popExitTransition = {
-            slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-            )
-        },
-    ) {
-        composable("settings") {
-            Scaffold(
-                topBar = {
-                    if (showTopAppBar) {
-                        if (isWideScreen) {
-                            SmallTopAppBar(
-                                title = "Settings",
-                                scrollBehavior = topAppBarScrollBehavior,
-                                defaultWindowInsetsPadding = false,
-                            )
-                        } else {
-                            TopAppBar(
-                                title = "Settings",
-                                scrollBehavior = topAppBarScrollBehavior,
-                            )
-                        }
-                    }
-                },
-                popupHost = {},
-            ) { innerPadding ->
-                SettingsContent(
-                    padding = PaddingValues(
-                        top = innerPadding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding(),
-                    ),
-                    showFPSMonitor = showFPSMonitor,
-                    onShowFPSMonitorChange = onShowFPSMonitorChange,
-                    showTopAppBar = showTopAppBar,
-                    onShowTopAppBarChange = onShowTopAppBarChange,
-                    showNavigationBar = showNavigationBar,
-                    onShowNavigationBarChange = onShowNavigationBarChange,
-                    useFloatingNavigationBar = useFloatingNavigationBar,
-                    onUseFloatingNavigationBarChange = onUseFloatingNavigationBarChange,
-                    floatingNavigationBarMode = floatingNavigationBarMode,
-                    onFloatingNavigationBarModeChange = onFloatingNavigationBarModeChange,
-                    floatingNavigationBarPosition = floatingNavigationBarPosition,
-                    onFloatingNavigationBarPositionChange = onFloatingNavigationBarPositionChange,
-                    showFloatingToolbar = showFloatingToolbar,
-                    onShowFloatingToolbarChange = onShowFloatingToolbarChange,
-                    floatingToolbarPosition = floatingToolbarPosition,
-                    onFloatingToolbarPositionChange = onFloatingToolbarPositionChange,
-                    floatingToolbarOrientation = floatingToolbarOrientation,
-                    onFloatingToolbarOrientationChange = onFloatingToolbarOrientationChange,
-                    showFloatingActionButton = showFloatingActionButton,
-                    onShowFloatingActionButtonChange = onShowFloatingActionButtonChange,
-                    fabPosition = fabPosition,
-                    onFabPositionChange = onFabPositionChange,
-                    enablePageUserScroll = enablePageUserScroll,
-                    onEnablePageUserScrollChange = onEnablePageUserScrollChange,
-                    topAppBarScrollBehavior = topAppBarScrollBehavior,
-                    enableScrollEndHaptic = enableScrollEndHaptic,
-                    onScrollEndHapticChange = onScrollEndHapticChange,
-                    enableOverScroll = enableOverScroll,
-                    colorMode = colorMode,
-                    seedIndex = seedIndex,
-                    isWideScreen = isWideScreen,
-                    navToAbout = { navController.navigate("about") },
-                )
+    Scaffold(
+        topBar = {
+            if (showTopAppBar) {
+                if (isWideScreen) {
+                    SmallTopAppBar(
+                        title = "Settings",
+                        scrollBehavior = topAppBarScrollBehavior,
+                        defaultWindowInsetsPadding = false,
+                    )
+                } else {
+                    TopAppBar(
+                        title = "Settings",
+                        scrollBehavior = topAppBarScrollBehavior,
+                    )
+                }
             }
-        }
-        composable("about") {
-            Scaffold(
-                topBar = {
-                    if (showTopAppBar) {
-                        if (isWideScreen) {
-                            SmallTopAppBar(
-                                title = "About",
-                                scrollBehavior = topAppBarScrollBehavior,
-                                defaultWindowInsetsPadding = false,
-                                navigationIcon = {
-                                    BackNavigationIcon(
-                                        modifier = Modifier.padding(start = 16.dp),
-                                        onClick = {
-                                            navController.popBackStack()
-                                        },
-                                    )
-                                },
-                                actions = {
-                                    AboutTopBarActionsWithSuperListPopup()
-                                    AboutTopBarActionsWithWindowListPopup()
-                                },
+        },
+        popupHost = {},
+    ) { innerPadding ->
+        SettingsContent(
+            padding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding(),
+            ),
+            showFPSMonitor = showFPSMonitor,
+            onShowFPSMonitorChange = onShowFPSMonitorChange,
+            showTopAppBar = showTopAppBar,
+            onShowTopAppBarChange = onShowTopAppBarChange,
+            showNavigationBar = showNavigationBar,
+            onShowNavigationBarChange = onShowNavigationBarChange,
+            useFloatingNavigationBar = useFloatingNavigationBar,
+            onUseFloatingNavigationBarChange = onUseFloatingNavigationBarChange,
+            floatingNavigationBarMode = floatingNavigationBarMode,
+            onFloatingNavigationBarModeChange = onFloatingNavigationBarModeChange,
+            floatingNavigationBarPosition = floatingNavigationBarPosition,
+            onFloatingNavigationBarPositionChange = onFloatingNavigationBarPositionChange,
+            showFloatingToolbar = showFloatingToolbar,
+            onShowFloatingToolbarChange = onShowFloatingToolbarChange,
+            floatingToolbarPosition = floatingToolbarPosition,
+            onFloatingToolbarPositionChange = onFloatingToolbarPositionChange,
+            floatingToolbarOrientation = floatingToolbarOrientation,
+            onFloatingToolbarOrientationChange = onFloatingToolbarOrientationChange,
+            showFloatingActionButton = showFloatingActionButton,
+            onShowFloatingActionButtonChange = onShowFloatingActionButtonChange,
+            fabPosition = fabPosition,
+            onFabPositionChange = onFabPositionChange,
+            enablePageUserScroll = enablePageUserScroll,
+            onEnablePageUserScrollChange = onEnablePageUserScrollChange,
+            topAppBarScrollBehavior = topAppBarScrollBehavior,
+            enableScrollEndHaptic = enableScrollEndHaptic,
+            onScrollEndHapticChange = onScrollEndHapticChange,
+            enableOverScroll = enableOverScroll,
+            colorMode = colorMode,
+            seedIndex = seedIndex,
+            isWideScreen = isWideScreen,
+            navToAbout = navToAbout,
+        )
+    }
+}
+
+@Composable
+fun AboutScreen(
+    padding: PaddingValues,
+    showTopAppBar: Boolean,
+    isWideScreen: Boolean,
+    enableScrollEndHaptic: Boolean,
+    enableOverScroll: Boolean,
+    onBack: () -> Unit,
+) {
+    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    Scaffold(
+        topBar = {
+            if (showTopAppBar) {
+                if (isWideScreen) {
+                    SmallTopAppBar(
+                        title = "About",
+                        scrollBehavior = topAppBarScrollBehavior,
+                        defaultWindowInsetsPadding = false,
+                        navigationIcon = {
+                            BackNavigationIcon(
+                                modifier = Modifier.padding(start = 16.dp),
+                                onClick = onBack,
                             )
-                        } else {
-                            TopAppBar(
-                                title = "About",
-                                scrollBehavior = topAppBarScrollBehavior,
-                                navigationIcon = {
-                                    BackNavigationIcon(
-                                        modifier = Modifier.padding(start = 16.dp),
-                                        onClick = {
-                                            navController.popBackStack()
-                                        },
-                                    )
-                                },
-                                actions = {
-                                    AboutTopBarActionsWithSuperListPopup()
-                                    AboutTopBarActionsWithWindowListPopup()
-                                },
+                        },
+                        actions = {
+                            AboutTopBarActionsWithSuperListPopup()
+                            AboutTopBarActionsWithWindowListPopup()
+                        },
+                    )
+                } else {
+                    TopAppBar(
+                        title = "About",
+                        scrollBehavior = topAppBarScrollBehavior,
+                        navigationIcon = {
+                            BackNavigationIcon(
+                                modifier = Modifier.padding(start = 16.dp),
+                                onClick = onBack,
                             )
-                        }
-                    }
-                },
-                popupHost = {},
-            ) { innerPadding ->
-                AboutPage(
-                    padding = PaddingValues(
-                        top = innerPadding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding(),
-                    ),
-                    topAppBarScrollBehavior = topAppBarScrollBehavior,
-                    showTopAppBar = showTopAppBar,
-                    enableScrollEndHaptic = enableScrollEndHaptic,
-                    enableOverScroll = enableOverScroll,
-                    isWideScreen = isWideScreen,
-                )
+                        },
+                        actions = {
+                            AboutTopBarActionsWithSuperListPopup()
+                            AboutTopBarActionsWithWindowListPopup()
+                        },
+                    )
+                }
             }
-        }
+        },
+        popupHost = {},
+    ) { innerPadding ->
+        AboutPage(
+            padding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding(),
+            ),
+            topAppBarScrollBehavior = topAppBarScrollBehavior,
+            showTopAppBar = showTopAppBar,
+            enableScrollEndHaptic = enableScrollEndHaptic,
+            enableOverScroll = enableOverScroll,
+            isWideScreen = isWideScreen,
+        )
     }
 }
 
