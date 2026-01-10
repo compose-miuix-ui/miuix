@@ -55,8 +55,8 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
@@ -189,8 +189,7 @@ fun AboutScreen(
                             )
                         },
                         actions = {
-                            AboutTopBarActionsWithSuperListPopup()
-                            AboutTopBarActionsWithWindowListPopup()
+                            AboutTopBarActions()
                         },
                     )
                 } else {
@@ -204,8 +203,7 @@ fun AboutScreen(
                             )
                         },
                         actions = {
-                            AboutTopBarActionsWithSuperListPopup()
-                            AboutTopBarActionsWithWindowListPopup()
+                            AboutTopBarActions()
                         },
                     )
                 }
@@ -287,7 +285,7 @@ fun SettingsContent(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    padding.calculateBottomPadding() + 12.dp
+                        padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },
@@ -436,7 +434,7 @@ fun AboutPage(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    padding.calculateBottomPadding() + 12.dp
+                        padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },
@@ -499,7 +497,7 @@ fun AboutPage(
             ) {
                 val list = listOf("Apache-2.0", "Apache-2.0", "Apache-2.0")
                 var selectedIndex by remember { mutableIntStateOf(0) }
-                SuperDropdown(
+                WindowDropdown(
                     title = "License",
                     items = list,
                     selectedIndex = selectedIndex,
@@ -534,52 +532,7 @@ fun BackNavigationIcon(
 }
 
 @Composable
-fun AboutTopBarActionsWithSuperListPopup() {
-    val showTopPopup = remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val hapticFeedback = LocalHapticFeedback.current
-    IconButton(
-        modifier = Modifier.padding(end = 16.dp),
-        onClick = { showTopPopup.value = true },
-        holdDownState = showTopPopup.value,
-    ) {
-        Icon(
-            imageVector = MiuixIcons.Edit,
-            contentDescription = "SuperListPopup",
-            tint = colorScheme.onBackground,
-        )
-    }
-    SuperListPopup(
-        show = showTopPopup,
-        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopEnd,
-        onDismissRequest = {
-            showTopPopup.value = false
-        },
-    ) {
-        val items = listOf("Super 1", "Super 2", "Super 3")
-        ListPopupColumn {
-            items.forEachIndexed { index, string ->
-                key(index) {
-                    DropdownImpl(
-                        text = string,
-                        optionSize = items.size,
-                        isSelected = selectedIndex == index,
-                        onSelectedIndexChange = { selectedIdx ->
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                            selectedIndex = selectedIdx
-                            showTopPopup.value = false
-                        },
-                        index = index,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AboutTopBarActionsWithWindowListPopup() {
+fun AboutTopBarActions() {
     val showTopPopup = remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
