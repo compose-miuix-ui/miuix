@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.captionBarPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -194,6 +196,7 @@ internal fun SuperDialogContent(
     dialogHeightPx: MutableState<Int>,
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    topInset: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
@@ -210,6 +213,15 @@ internal fun SuperDialogContent(
     }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
+
+    val calculatedTopInset = if (topInset != null) {
+        topInset
+    } else {
+        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+        maxOf(statusBars, captionBar, displayCutout)
+    }
 
     val modifier = modifier
         .widthIn(max = 420.dp)
@@ -228,7 +240,7 @@ internal fun SuperDialogContent(
                 }
             } else {
                 val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
                 val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
                     derivedStateOf {
                         bottomPadding + outsideMargin.height
@@ -271,7 +283,7 @@ internal fun SuperDialogContent(
                 )
             }
             .padding(horizontal = outsideMargin.width)
-            .padding(bottom = outsideMargin.height),
+            .padding(top = calculatedTopInset, bottom = outsideMargin.height),
     ) {
         Column(
             modifier = modifier.align(contentAlignment),

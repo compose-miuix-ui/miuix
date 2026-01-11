@@ -236,7 +236,7 @@ fun WindowBottomSheet(
                     )
                 },
 
-        ) {
+            ) {
             AnimatedVisibility(
                 visibleState = internalVisible,
                 enter = rememberDefaultSheetEnterTransition(),
