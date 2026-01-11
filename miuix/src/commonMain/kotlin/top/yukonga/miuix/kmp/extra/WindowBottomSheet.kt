@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
+ * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -97,6 +98,7 @@ fun WindowBottomSheet(
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = WindowBottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
+    enableNestedScroll: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
@@ -263,6 +265,7 @@ fun WindowBottomSheet(
                     },
                     modifier = modifier,
                     topInset = safeTopInset,
+                    enableNestedScroll = enableNestedScroll,
                     startAction = startAction,
                     endAction = endAction,
                     content = {
