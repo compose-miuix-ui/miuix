@@ -35,6 +35,7 @@ export default defineConfig({
                         { text: "Text Styles", link: "/guide/textstyles" },
                         { text: "Icon System", link: "/guide/icons" },
                         { text: "Utility Functions", link: "/guide/utils" },
+                        { text: "Navigation3 Support", link: "/guide/navigation3" },
                         { text: "Platform Support", link: "/guide/multiplatform" },
                         { text: "Best Practices", link: "/guide/best-practices" },
                     ],

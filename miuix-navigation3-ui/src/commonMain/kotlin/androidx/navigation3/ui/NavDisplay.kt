@@ -892,7 +892,7 @@ fun <T : Any> defaultTransitionSpec():
     )
 }
 
-/** Default [transitionSpec] for pop navigation to be used by [NavDisplay]. */
+/** Default [popTransitionSpec] for pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     slideInHorizontally(
@@ -907,7 +907,7 @@ fun <T : Any> defaultPopTransitionSpec():
     )
 }
 
-/** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
+/** Default [predictivePopTransitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPredictivePopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
     slideInHorizontally(
