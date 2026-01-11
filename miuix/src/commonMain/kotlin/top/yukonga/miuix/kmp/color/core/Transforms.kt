@@ -442,8 +442,8 @@ object Transforms {
     fun generateHsvHueColors(): List<Color> {
         val steps = 36
         return (0 until steps).map { i ->
-            val hue = i.toDouble() / steps.toDouble() * 360.0
-            Hsv(hue, 100.0, 100.0).toColor()
+            val hue = i.toFloat() / steps.toFloat() * 360f
+            Hsv(hue, 100f, 100f).toColor()
         }
     }
 
