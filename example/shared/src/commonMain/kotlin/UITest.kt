@@ -259,7 +259,6 @@ fun UITest(
             NavDisplay(
                 backStack = backStack,
                 entryProvider = entryProvider,
-                modifier = Modifier.fillMaxHeight(),
                 onBack = { backStack.removeLast() },
             )
         }

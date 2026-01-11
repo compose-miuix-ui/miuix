@@ -31,14 +31,14 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -189,8 +190,6 @@ object NavDisplay {
  * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
  *   [NavEntry]s.
  * @param entryProvider lambda used to construct each possible [NavEntry]
- * @sample androidx.navigation3.ui.samples.SceneNav
- * @sample androidx.navigation3.ui.samples.SceneNavSharedElementSample
  */
 @Deprecated(
     message = "Deprecated in favor of NavDisplay that supports sharedTransitionScope",
@@ -275,9 +274,6 @@ fun <T : Any> NavDisplay(
  * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
  *   [NavEntry]s.
  * @param entryProvider lambda used to construct each possible [NavEntry]
- * @sample androidx.navigation3.ui.samples.SceneNav
- * @sample androidx.navigation3.ui.samples.SceneNavSharedEntrySample
- * @sample androidx.navigation3.ui.samples.SceneNavSharedElementSample
  */
 @Composable
 fun <T : Any> NavDisplay(
@@ -370,8 +366,6 @@ fun <T : Any> NavDisplay(
  * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
  *   [NavEntry]s.
  * @param onBack a callback for handling system back press.
- * @sample androidx.navigation3.ui.samples.MultipleBackStackSample
- * @sample androidx.navigation3.ui.samples.ConcatenatedBackStackSample
  * @see [rememberDecoratedNavEntries]
  */
 @Deprecated(
@@ -453,9 +447,6 @@ fun <T : Any> NavDisplay(
  * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
  *   [NavEntry]s.
  * @param onBack a callback for handling system back press.
- * @sample androidx.navigation3.ui.samples.MultipleBackStackSample
- * @sample androidx.navigation3.ui.samples.ConcatenatedBackStackSample
- * @sample androidx.navigation3.ui.samples.SceneNavSharedEntrySample
  * @see [rememberDecoratedNavEntries]
  */
 @Composable
@@ -533,7 +524,6 @@ fun <T : Any> NavDisplay(
  * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
  * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
  *   [NavEntry]s.
- * @sample androidx.navigation3.scene.samples.SceneStateSample
  * @see [rememberSceneState]
  */
 @Composable
@@ -585,20 +575,49 @@ fun <T : Any> NavDisplay(
         }
 
     // Track currently rendered Scenes and their ZIndices
-    val sceneMap = remember { mutableStateMapOf<Any, Scene<T>>() }
-    val zIndices = remember { mutableObjectFloatMapOf<Any>() }
-    val initialKey = transition.currentState.let { it::class to it.key to it.entries }
-    val targetKey = transition.targetState.let { it::class to it.key to it.entries }
-    val initialZIndex = zIndices.getOrPut(initialKey) { 0f }
+    val sceneMap = remember { mutableStateMapOf<SceneKey, Scene<T>>() }
+    val zIndices = remember { mutableObjectFloatMapOf<SceneKey>() }
+
+    // Cache stable keys per Scene instance during transitions and gestures.
+    val sceneKeyCache = remember { mutableMapOf<Scene<T>, SceneKey>() }
+    fun sceneKeyOf(target: Scene<T>): SceneKey = sceneKeyCache.getOrPut(target) { target.createSceneKey() }
+
+    // Explicit invalidation signal for rebuilding sceneToExcludedEntryMap.
+    var excludedMapVersion by remember { mutableStateOf(0) }
+
+    val initialScene = transition.currentState
+    val targetScene = transition.targetState
+
+    val initialKey = sceneKeyOf(initialScene)
+    val targetKey = sceneKeyOf(targetScene)
+
+    var didMutateKeys = false
+    val initialZIndex = run {
+        val hadInitial = zIndices.containsKey(initialKey)
+        val value = zIndices.getOrPut(initialKey) { 0f }
+        if (!hadInitial) didMutateKeys = true
+        value
+    }
     val targetZIndex =
         when {
             initialKey == targetKey -> initialZIndex
+            inPredictiveBack && transition.currentState == previousScene -> initialZIndex + 1f
             isPop || inPredictiveBack -> initialZIndex - 1f
             else -> initialZIndex + 1f
         }
-    sceneMap[targetKey] = transition.targetState
-    sceneMap[initialKey] = transition.currentState
-    zIndices[targetKey] = targetZIndex
+    if (sceneMap[targetKey] !== targetScene) {
+        sceneMap[targetKey] = targetScene
+        didMutateKeys = true
+    }
+    if (sceneMap[initialKey] !== initialScene) {
+        sceneMap[initialKey] = initialScene
+        didMutateKeys = true
+    }
+    if (!zIndices.containsKey(targetKey) || zIndices[targetKey] != targetZIndex) {
+        zIndices[targetKey] = targetZIndex
+        didMutateKeys = true
+    }
+    if (didMutateKeys) excludedMapVersion += 1
 
     val overlayScenes = sceneState.overlayScenes
 
@@ -606,20 +625,20 @@ fun <T : Any> NavDisplay(
     // using the z-index of each screen to always show the entry on the topmost screen
     // The map is Pair<KCLass<Scene<T>, Scene.key> to a Set of NavEntry.key values
     val sceneToExcludedEntryMap =
-        remember(sceneMap.entries.toList(), overlayScenes.toList(), zIndices.toString(), transition.currentState, transition.targetState) {
+        remember(excludedMapVersion, overlayScenes) {
             buildMap {
                 val scenes = mutableListOf<Scene<T>>()
                 // Ensure we include the current and target scenes from the transition, even if
                 // they haven't been fully synchronized to sceneMap yet.
                 val relevantScenes = sceneMap.values.toMutableSet().apply {
-                    add(transition.currentState)
-                    add(transition.targetState)
+                    add(initialScene)
+                    add(targetScene)
                 }
 
                 // First sort the non-overlay scenes by z-order in descending order.
                 relevantScenes
                     .sortedByDescending { scene ->
-                        val key = scene::class to scene.key to scene.entries
+                        val key = sceneKeyOf(scene)
                         if (zIndices.containsKey(key)) zIndices[key] else 0f
                     }
                     .forEach { if (!scenes.contains(it)) scenes.add(it) }
@@ -652,7 +671,7 @@ fun <T : Any> NavDisplay(
                             coveredEntries.add(entry)
                         }
                     }
-                    put(scene::class to scene.key to scene.entries, excludedKeys)
+                    put(sceneKeyOf(scene), excludedKeys)
                 }
             }
         }
@@ -694,16 +713,23 @@ fun <T : Any> NavDisplay(
             isPop = newIsPop
 
             // Cleanup stale scenes from interrupted transitions
-            val currentKey = transitionState.currentState.let { it::class to it.key to it.entries }
-            val targetKey = scene.let { it::class to it.key to it.entries }
-            val activeTargetKey = transitionState.targetState.let { it::class to it.key to it.entries }
+            val currentKey = sceneKeyOf(transitionState.currentState)
+            val targetKey = sceneKeyOf(scene)
+            val activeTargetKey = sceneKeyOf(transitionState.targetState)
             // Creating a copy to avoid ConcurrentModificationException
+            val sceneMapSizeBefore = sceneMap.size
             sceneMap.keys.toList().forEach { key ->
                 if (key != currentKey && key != targetKey && key != activeTargetKey) {
                     sceneMap.remove(key)
                 }
             }
+            val sceneMapSizeAfter = sceneMap.size
+            val zIndicesSizeBefore = zIndices.size
             zIndices.removeIf { key, _ -> key != currentKey && key != targetKey && key != activeTargetKey }
+            val zIndicesSizeAfter = zIndices.size
+            if (sceneMapSizeBefore != sceneMapSizeAfter || zIndicesSizeBefore != zIndicesSizeAfter) {
+                excludedMapVersion += 1
+            }
 
             if (transitionState.currentState != scene) {
                 transitionState.animateTo(scene)
@@ -734,14 +760,34 @@ fun <T : Any> NavDisplay(
             }
 
             // Cleanup after animation settles
-            val settledKey = scene.let { it::class to it.key to it.entries }
+            val settledKey = sceneKeyOf(scene)
             // Creating a copy to avoid ConcurrentModificationException
+            val sceneMapSizeBeforeSettle = sceneMap.size
             sceneMap.keys.toList().forEach { key ->
                 if (key != settledKey) {
                     sceneMap.remove(key)
                 }
             }
+            val sceneMapSizeAfterSettle = sceneMap.size
+            val zIndicesSizeBeforeSettle = zIndices.size
             zIndices.removeIf { key, _ -> key != settledKey }
+            val zIndicesSizeAfterSettle = zIndices.size
+            if (sceneMapSizeBeforeSettle != sceneMapSizeAfterSettle ||
+                zIndicesSizeBeforeSettle != zIndicesSizeAfterSettle
+            ) {
+                excludedMapVersion += 1
+            }
+
+            // Drop cached keys for scenes that can no longer be referenced after this update.
+            run {
+                val activeScenes = buildSet {
+                    add(transitionState.currentState)
+                    add(transitionState.targetState)
+                    add(scene)
+                    overlayScenes.fastForEach { add(it) }
+                }
+                sceneKeyCache.keys.retainAll(activeScenes)
+            }
 
             currentEntries = sceneState.entries
         }
@@ -767,10 +813,9 @@ fun <T : Any> NavDisplay(
     }
 
     transition.AnimatedContent(
-        contentKey = { scene -> scene::class to scene.key to scene.entries },
+        contentKey = { target -> sceneKeyOf(target) },
         contentAlignment = contentAlignment,
-        modifier = Modifier.background(Color.Black)
-            .then(modifier),
+        modifier = modifier,
         transitionSpec = {
             ContentTransform(
                 targetContentEnter = contentTransform(this).targetContentEnter,
@@ -793,28 +838,35 @@ fun <T : Any> NavDisplay(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(targetScene::class to targetScene.key to targetScene.entries) { emptySet() },
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
-            val corner = if (Platform.Android == platform()) getRoundedCorner() else 0.dp
-            val shape = ContinuousRoundedRectangle(topStart = corner, bottomStart = corner)
-            val isEntryInterruption = inPredictiveBack && transition.currentState == previousScene
-            val isTopLayer = if (!isEntryInterruption && (isPop || inPredictiveBack)) {
-                targetScene == transition.currentState
-            } else {
-                targetScene == transition.targetState
-            }
-            val roundedModifier = if (!isSettled && isTopLayer) {
-                Modifier.clip(shape)
-            } else {
-                Modifier
+            val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
+            val shape = remember(corner) {
+                ContinuousRoundedRectangle(topStart = corner, bottomStart = corner)
             }
 
+            val targetKey = sceneKeyOf(targetScene)
+            val targetZ = if (zIndices.containsKey(targetKey)) zIndices[targetKey] else 0f
+
+            val isTopLayer = if (!isSettled) {
+                val otherScene = if (targetScene == transition.targetState) transition.currentState else transition.targetState
+                val otherKey = sceneKeyOf(otherScene)
+                val otherZ = if (zIndices.containsKey(otherKey)) zIndices[otherKey] else 0f
+                targetZ > otherZ
+            } else {
+                false
+            }
+
+            val roundedModifier = if (isTopLayer) Modifier.clip(shape) else Modifier
+
             val blockInputModifier = if (!isSettled && targetScene != transition.targetState) {
-                Modifier.pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                            event.changes.fastForEach { it.consume() }
+                remember {
+                    Modifier.pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                                event.changes.fastForEach { it.consume() }
+                            }
                         }
                     }
                 }
@@ -822,8 +874,31 @@ fun <T : Any> NavDisplay(
                 Modifier
             }
 
-            androidx.compose.foundation.layout.Box(modifier = roundedModifier.then(blockInputModifier)) {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .then(roundedModifier)
+                    .then(blockInputModifier)
+            ) {
                 targetScene.content()
+
+                val dimAlpha by transition.animateFloat(
+                    transitionSpec = { tween(durationMillis = 500, easing = NavAnimationEasing) },
+                    label = "dimAlpha"
+                ) { state ->
+                    val stateKey = sceneKeyOf(state)
+                    val stateZ = if (zIndices.containsKey(stateKey)) zIndices[stateKey] else 0f
+                    if (stateZ > targetZ) 0.4f else 0f
+                }
+
+                val showDim = dimAlpha > 0f && (!isSettled || targetScene != transition.currentState)
+                if (showDim) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { alpha = dimAlpha }
+                            .background(Color.Black)
+                    )
+                }
             }
         }
     }
@@ -832,7 +907,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(overlayScene::class to overlayScene.key to overlayScene.entries) { emptySet() }
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() }
         ) {
             overlayScene.content.invoke()
         }
@@ -880,9 +955,6 @@ fun <T : Any> defaultTransitionSpec():
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { -it / 5 },
         animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) + fadeOut(
-        animationSpec = tween(durationMillis = 500),
-        targetAlpha = 0.5f,
     )
 }
 
@@ -892,9 +964,6 @@ fun <T : Any> defaultPopTransitionSpec():
     slideInHorizontally(
         initialOffsetX = { -it / 5 },
         animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) + fadeIn(
-        animationSpec = tween(durationMillis = 500),
-        initialAlpha = 0.3f,
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { it },
         animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
@@ -907,9 +976,6 @@ fun <T : Any> defaultPredictivePopTransitionSpec():
     slideInHorizontally(
         initialOffsetX = { -it / 5 },
         animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) + fadeIn(
-        animationSpec = tween(durationMillis = 500),
-        initialAlpha = 0.3f,
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { it },
         animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
@@ -918,3 +984,20 @@ fun <T : Any> defaultPredictivePopTransitionSpec():
 
 /** Default easing for navigation animations. */
 private val NavAnimationEasing: Easing = NavTransitionEasing(0.8f, 0.95f)
+
+/** Stable identity for Scene instances within NavDisplay. */
+private data class SceneKey(
+    val sceneClass: Any,
+    val key: Any?,
+    val entryContentKeys: List<Any>,
+)
+
+/** Create a stable key for a Scene based on its class, public key, and entry content keys. */
+private fun <T : Any> Scene<T>.createSceneKey(): SceneKey =
+    SceneKey(
+        sceneClass = this::class,
+        key = this.key,
+        entryContentKeys = buildList(entries.size) {
+            entries.fastForEach { entry -> add(entry.contentKey) }
+        },
+    )
