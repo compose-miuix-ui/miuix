@@ -41,7 +41,7 @@ fun ColorPaletteDemo() {
             val miuixColor = MiuixTheme.colorScheme.primary
             var selectedColor by remember { mutableStateOf(miuixColor) }
             ColorPalette(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
             )
         }

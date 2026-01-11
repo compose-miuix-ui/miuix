@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -565,6 +566,11 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "ColorPicker (HSV)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
+        var colorHex by remember(selectedColor) {
+            mutableStateOf(
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
+            )
+        }
 
         Card(
             modifier = Modifier
@@ -578,8 +584,7 @@ fun LazyListScope.otherComponent() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                    text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
                         "${(round(selectedColor.alpha * 100) / 100.0)}",
@@ -587,9 +592,29 @@ fun LazyListScope.otherComponent() {
                 )
             }
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 showPreview = false,
+            )
+            TextField(
+                value = colorHex,
+                onValueChange = { newHex ->
+                    if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
+                        colorHex = newHex.uppercase()
+                        if (newHex.length == 8) {
+                            val newColor = Color(colorHex.toUInt(16).toInt())
+                            selectedColor = newColor
+                        }
+                    }
+                },
+                leadingIcon = {
+                    Text(
+                        "HEX: #",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -598,6 +623,11 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "ColorPicker (OKHSV)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
+        var colorHex by remember(selectedColor) {
+            mutableStateOf(
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
+            )
+        }
 
         Card(
             modifier = Modifier
@@ -612,8 +642,7 @@ fun LazyListScope.otherComponent() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                    text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
                         "${(round(selectedColor.alpha * 100) / 100.0)}",
@@ -621,10 +650,30 @@ fun LazyListScope.otherComponent() {
                 )
             }
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKHSV,
                 showPreview = false,
+            )
+            TextField(
+                value = colorHex,
+                onValueChange = { newHex ->
+                    if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
+                        colorHex = newHex.uppercase()
+                        if (newHex.length == 8) {
+                            val newColor = Color(colorHex.toUInt(16).toInt())
+                            selectedColor = newColor
+                        }
+                    }
+                },
+                leadingIcon = {
+                    Text(
+                        "HEX: #",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -633,6 +682,11 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "ColorPicker (OKLAB)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
+        var colorHex by remember(selectedColor) {
+            mutableStateOf(
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
+            )
+        }
 
         Card(
             modifier = Modifier
@@ -646,8 +700,7 @@ fun LazyListScope.otherComponent() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                    text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
                         "${(round(selectedColor.alpha * 100) / 100.0)}",
@@ -655,10 +708,30 @@ fun LazyListScope.otherComponent() {
                 )
             }
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKLAB,
                 showPreview = false,
+            )
+            TextField(
+                value = colorHex,
+                onValueChange = { newHex ->
+                    if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
+                        colorHex = newHex.uppercase()
+                        if (newHex.length == 8) {
+                            val newColor = Color(colorHex.toUInt(16).toInt())
+                            selectedColor = newColor
+                        }
+                    }
+                },
+                leadingIcon = {
+                    Text(
+                        "HEX: #",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -667,6 +740,11 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "ColorPicker (OKLCH)")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
+        var colorHex by remember(selectedColor) {
+            mutableStateOf(
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
+            )
+        }
 
         Card(
             modifier = Modifier
@@ -681,8 +759,7 @@ fun LazyListScope.otherComponent() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                    text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
                         "${(round(selectedColor.alpha * 100) / 100.0)}",
@@ -690,10 +767,30 @@ fun LazyListScope.otherComponent() {
                 )
             }
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 colorSpace = ColorSpace.OKLCH,
                 showPreview = false,
+            )
+            TextField(
+                value = colorHex,
+                onValueChange = { newHex ->
+                    if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
+                        colorHex = newHex.uppercase()
+                        if (newHex.length == 8) {
+                            val newColor = Color(colorHex.toUInt(16).toInt())
+                            selectedColor = newColor
+                        }
+                    }
+                },
+                leadingIcon = {
+                    Text(
+                        "HEX: #",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -702,6 +799,11 @@ fun LazyListScope.otherComponent() {
         SmallTitle(text = "ColorPalette")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
+        var colorHex by remember(selectedColor) {
+            mutableStateOf(
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
+            )
+        }
 
         Card(
             modifier = Modifier
@@ -715,8 +817,7 @@ fun LazyListScope.otherComponent() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HEX: #${selectedColor.toArgb().toHexString(HexFormat.UpperCase)}" +
-                        "\nRGBA: ${(selectedColor.red * 255).toInt()}, " +
+                    text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
                         "${(round(selectedColor.alpha * 100) / 100.0)}",
@@ -724,9 +825,29 @@ fun LazyListScope.otherComponent() {
                 )
             }
             ColorPalette(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 showPreview = false,
+            )
+            TextField(
+                value = colorHex,
+                onValueChange = { newHex ->
+                    if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
+                        colorHex = newHex.uppercase()
+                        if (newHex.length == 8) {
+                            val newColor = Color(colorHex.toUInt(16).toInt())
+                            selectedColor = newColor
+                        }
+                    }
+                },
+                leadingIcon = {
+                    Text(
+                        "HEX: #",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }

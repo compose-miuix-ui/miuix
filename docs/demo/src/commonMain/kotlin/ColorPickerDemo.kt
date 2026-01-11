@@ -42,7 +42,7 @@ fun ColorPickerDemo() {
             val miuixColor = MiuixTheme.colorScheme.primary
             var selectedColor by remember { mutableStateOf(miuixColor) }
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it },
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
             )

@@ -1,6 +1,8 @@
 # ColorPicker
 
-`ColorPicker` is a color selection component in Miuix that allows users to pick colors by adjusting hue, saturation, brightness, and transparency. The component provides an intuitive slider interface with haptic feedback and real-time color preview.
+`ColorPicker` is a color selection component in Miuix that allows users to pick colors by adjusting
+hue, saturation, brightness, and transparency. The component provides an intuitive slider interface
+with haptic feedback and real-time color preview.
 
 <div style="position: relative; max-width: 700px; height: 260px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=colorPicker" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -20,7 +22,7 @@ The ColorPicker component enables users to select custom colors:
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 ColorPicker(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     }
@@ -31,11 +33,12 @@ ColorPicker(
 
 ### Without Color Preview
 
-By default, ColorPicker displays a preview of the currently selected color. If you don't want to show the default color preview, set `showPreview` to `false`:
+By default, ColorPicker displays a preview of the currently selected color. If you don't want to
+show the default color preview, set `showPreview` to `false`:
 
 ```kotlin
 ColorPicker(
-    initialColor = Color.Blue,
+    color = Color.Blue,
     onColorChanged = { /* Handle color change */ },
     showPreview = false
 )
@@ -43,11 +46,12 @@ ColorPicker(
 
 ## Haptic Feedback
 
-ColorPicker supports haptic feedback, which can be customized using the `hapticEffect` parameter. See [SliderHapticEffect](../components/slider#sliderhapticeffect) for details.
+ColorPicker supports haptic feedback, which can be customized using the `hapticEffect` parameter.
+See [SliderHapticEffect](../components/slider#sliderhapticeffect) for details.
 
 ```kotlin
 ColorPicker(
-    initialColor = Color.Green,
+    color = Color.Green,
     onColorChanged = { /* Handle color change */ },
     hapticEffect = SliderHapticEffect.Step
 )
@@ -58,8 +62,8 @@ ColorPicker(
 ### ColorPicker Properties
 
 | Property Name  | Type                              | Description                   | Default Value                      | Required |
-| -------------- | --------------------------------- | ----------------------------- | ---------------------------------- | -------- |
-| initialColor   | Color                             | Initial color                 | -                                  | Yes      |
+|----------------|-----------------------------------|-------------------------------|------------------------------------|----------|
+| color          | Color                             | Current color                 | -                                  | Yes      |
 | onColorChanged | (Color) -> Unit                   | Callback for color changes    | -                                  | Yes      |
 | modifier       | Modifier                          | Modifier for the component    | Modifier                           | No       |
 | showPreview    | Boolean                           | Show color preview            | true                               | No       |
@@ -137,13 +141,14 @@ ColorPicker supports multiple color spaces via `colorSpace`:
 - `ColorSpace.HSV` — classic HSV sliders (Hue, Saturation, Value, Alpha).
 - `ColorSpace.OKHSV` — perceptual HSV variant based on OkLCH, more uniform hue steps.
 - `ColorSpace.OKLAB` — OkLab sliders (Lightness, a, b, Alpha) for perceptual editing.
-- `ColorSpace.OKLCH` — OkLCH sliders (Lightness, Chroma, Hue, Alpha). Chroma is clamped to typical sRGB gamut.
+- `ColorSpace.OKLCH` — OkLCH sliders (Lightness, Chroma, Hue, Alpha). Chroma is clamped to typical
+  sRGB gamut.
 
 Example: use the OKLCH color space
 
 ```kotlin
 ColorPicker(
-    initialColor = Color(0xFF4CAF50),
+    color = Color(0xFF4CAF50),
     onColorChanged = { /* Handle color change */ },
     colorSpace = ColorSpace.OKLCH
 )
@@ -157,7 +162,7 @@ Combine with other input controls to create a color selection form:
 var currentColor by remember { mutableStateOf(Color.Red) }
 var hexValue by remember(currentColor) {
     mutableStateOf(
-            "#${(currentColor.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
+        "#${(currentColor.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
                 (currentColor.green * 255).toInt().toString(16).padStart(2, '0').uppercase() +
                 (currentColor.blue * 255).toInt().toString(16).padStart(2, '0').uppercase()
     )
@@ -175,7 +180,7 @@ Surface {
         )
         Spacer(modifier = Modifier.height(16.dp))
         ColorPicker(
-            initialColor = currentColor,
+            color = currentColor,
             onColorChanged = {
                 currentColor = it
                 hexValue = "#${(it.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
@@ -214,7 +219,7 @@ Scaffold {
     ) {
         Column {
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
