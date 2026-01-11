@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -55,7 +56,7 @@ import kotlin.math.min
 /**
  * A [ColorPicker] component with Miuix style that supports multiple color spaces.
  *
- * @param initialColor The initial color of the picker.
+ * @param color The color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
  * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
@@ -64,7 +65,7 @@ import kotlin.math.min
  */
 @Composable
 fun ColorPicker(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     showPreview: Boolean = true,
@@ -75,7 +76,7 @@ fun ColorPicker(
     when (colorSpace) {
         ColorSpace.OKHSV -> {
             OkHsvColorPicker(
-                initialColor = initialColor,
+                color = color,
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
@@ -85,7 +86,7 @@ fun ColorPicker(
 
         ColorSpace.OKLAB -> {
             OkLabColorPicker(
-                initialColor = initialColor,
+                color = color,
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
@@ -95,7 +96,7 @@ fun ColorPicker(
 
         ColorSpace.OKLCH -> {
             OkLchColorPicker(
-                initialColor = initialColor,
+                color = color,
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
@@ -105,7 +106,7 @@ fun ColorPicker(
 
         else -> {
             HsvColorPicker(
-                initialColor = initialColor,
+                color = color,
                 onColorChanged = currentOnColorChanged,
                 showPreview = showPreview,
                 hapticEffect = hapticEffect,
@@ -118,7 +119,7 @@ fun ColorPicker(
 /**
  * A [HsvColorPicker] component with Miuix style using HSV color space.
  *
- * @param initialColor The initial color of the picker.
+ * @param color The color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
  * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
@@ -126,20 +127,21 @@ fun ColorPicker(
  */
 @Composable
 fun HsvColorPicker(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    var initialSetup by remember { mutableStateOf(true) }
-    var currentHue by remember { mutableFloatStateOf(0f) }
-    var currentSaturation by remember { mutableFloatStateOf(0f) }
-    var currentValue by remember { mutableFloatStateOf(0f) }
-    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
-    val selectedColor = remember(currentHue, currentSaturation, currentValue, currentAlpha) {
+    // Initialize basic values, execute only once.
+    val hsv = remember { color.toHsv() }
+    var currentHue by remember { mutableFloatStateOf(hsv.h.toFloat()) }
+    var currentSaturation by remember { mutableFloatStateOf((hsv.s / 100.0).toFloat()) }
+    var currentValue by remember { mutableFloatStateOf((hsv.v / 100.0).toFloat()) }
+    var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
+    var selectedColor = remember {
         Hsv(
             h = currentHue.toDouble(),
             s = (currentSaturation * 100.0),
@@ -147,20 +149,34 @@ fun HsvColorPicker(
         ).toColor(currentAlpha)
     }
 
-    LaunchedEffect(initialColor) {
-        if (initialSetup) {
-            val hsv = initialColor.toHsv()
+    var doNotCallback by remember { mutableStateOf(false) }
+    var isProgrammaticChange by remember { mutableStateOf(false) }
+
+    LaunchedEffect(color) {
+        if (!isProgrammaticChange) {
+            doNotCallback = true
+            val hsv = color.toHsv()
             currentHue = hsv.h.toFloat()
             currentSaturation = (hsv.s / 100.0).toFloat()
             currentValue = (hsv.v / 100.0).toFloat()
-            currentAlpha = initialColor.alpha
-            initialSetup = false
+            currentAlpha = color.alpha
+            doNotCallback = false
         }
+        isProgrammaticChange = false
     }
 
-    LaunchedEffect(selectedColor) {
-        if (!initialSetup) {
-            currentOnColorChanged(selectedColor)
+    LaunchedEffect(currentHue, currentSaturation, currentValue, currentAlpha) {
+        selectedColor = Hsv(
+            h = currentHue.toDouble(),
+            s = (currentSaturation * 100.0),
+            v = (currentValue * 100.0),
+        ).toColor(currentAlpha)
+
+        if (!doNotCallback) {
+            if (selectedColor.toArgb() != color.toArgb()) {
+                isProgrammaticChange = true
+                currentOnColorChanged(selectedColor)
+            }
         }
     }
 
@@ -339,7 +355,7 @@ fun HsvAlphaSlider(
  * A [OkHsvColorPicker] component with Miuix style using OkHSV color space based on OkLab.
  * OkHSV provides better perceptual uniformity than traditional HSV.
  *
- * @param initialColor The initial color of the picker.
+ * @param color The color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
  * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
@@ -347,20 +363,21 @@ fun HsvAlphaSlider(
  */
 @Composable
 fun OkHsvColorPicker(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    var initialSetup by remember { mutableStateOf(true) }
-    var currentH by remember { mutableFloatStateOf(0f) }
-    var currentS by remember { mutableFloatStateOf(0f) }
-    var currentV by remember { mutableFloatStateOf(0f) }
-    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
-    val selectedColor = remember(currentH, currentS, currentV, currentAlpha) {
+    // Initialize basic values, execute only once.
+    val okhsv = remember { Transforms.colorToOkhsv(color) }
+    var currentH by remember { mutableFloatStateOf(okhsv[0]) }
+    var currentS by remember { mutableFloatStateOf(okhsv[1]) }
+    var currentV by remember { mutableFloatStateOf(okhsv[2]) }
+    var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
+    var selectedColor = remember {
         OkHsv(
             h = currentH,
             s = currentS,
@@ -368,20 +385,34 @@ fun OkHsvColorPicker(
         ).toColor(currentAlpha)
     }
 
-    LaunchedEffect(initialColor) {
-        if (initialSetup) {
-            val okhsv = Transforms.colorToOkhsv(initialColor)
+    var doNotCallback by remember { mutableStateOf(false) }
+    var isProgrammaticChange by remember { mutableStateOf(false) }
+
+    LaunchedEffect(color) {
+        if (!isProgrammaticChange) {
+            doNotCallback = true
+            val okhsv = Transforms.colorToOkhsv(color)
             currentH = okhsv[0]
             currentS = okhsv[1]
             currentV = okhsv[2]
-            currentAlpha = initialColor.alpha
-            initialSetup = false
+            currentAlpha = color.alpha
+            doNotCallback = false
         }
+        isProgrammaticChange = false
     }
 
-    LaunchedEffect(selectedColor) {
-        if (!initialSetup) {
-            currentOnColorChanged(selectedColor)
+    LaunchedEffect(currentH, currentS, currentV, currentAlpha) {
+        selectedColor = OkHsv(
+            h = currentH,
+            s = currentS,
+            v = currentV,
+        ).toColor(currentAlpha)
+
+        if (!doNotCallback) {
+            if (selectedColor.toArgb() != color.toArgb()) {
+                isProgrammaticChange = true
+                currentOnColorChanged(selectedColor)
+            }
         }
     }
 
@@ -564,7 +595,7 @@ fun OkHsvAlphaSlider(
 /**
  * A [OkLabColorPicker] component with Miuix style using OkLab color space.
  *
- * @param initialColor The initial color of the picker.
+ * @param color The color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
  * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
@@ -572,20 +603,21 @@ fun OkHsvAlphaSlider(
  */
 @Composable
 fun OkLabColorPicker(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    var initialSetup by remember { mutableStateOf(true) }
-    var currentL by remember { mutableFloatStateOf(0f) }
-    var currentA by remember { mutableFloatStateOf(0f) }
-    var currentB by remember { mutableFloatStateOf(0f) }
-    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
-    val selectedColor = remember(currentL, currentA, currentB, currentAlpha) {
+    // Initialize basic values, execute only once.
+    val ok = remember { color.toOkLab() }
+    var currentL by remember { mutableFloatStateOf((ok.l / 100.0).toFloat()) }
+    var currentA by remember { mutableFloatStateOf(((ok.a / 100.0) * 0.4).toFloat()) }
+    var currentB by remember { mutableFloatStateOf(((ok.b / 100.0) * 0.4).toFloat()) }
+    var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
+    var selectedColor = remember {
         OkLab(
             l = (currentL * 100.0),
             a = (currentA / 0.4 * 100.0),
@@ -593,20 +625,34 @@ fun OkLabColorPicker(
         ).toColor(currentAlpha)
     }
 
-    LaunchedEffect(initialColor) {
-        if (initialSetup) {
-            val ok = initialColor.toOkLab()
+    var doNotCallback by remember { mutableStateOf(false) }
+    var isProgrammaticChange by remember { mutableStateOf(false) }
+
+    LaunchedEffect(color) {
+        if (!isProgrammaticChange) {
+            doNotCallback = true
+            val ok = color.toOkLab()
             currentL = (ok.l / 100.0).toFloat()
             currentA = ((ok.a / 100.0) * 0.4).toFloat()
             currentB = ((ok.b / 100.0) * 0.4).toFloat()
-            currentAlpha = initialColor.alpha
-            initialSetup = false
+            currentAlpha = color.alpha
+            doNotCallback = false
         }
+        isProgrammaticChange = false
     }
 
-    LaunchedEffect(selectedColor) {
-        if (!initialSetup) {
-            currentOnColorChanged(selectedColor)
+    LaunchedEffect(currentL, currentA, currentB, currentAlpha) {
+        selectedColor = OkLab(
+            l = (currentL * 100.0),
+            a = (currentA / 0.4 * 100.0),
+            b = (currentB / 0.4 * 100.0),
+        ).toColor(currentAlpha)
+
+        if (!doNotCallback) {
+            if (selectedColor.toArgb() != color.toArgb()) {
+                isProgrammaticChange = true
+                currentOnColorChanged(selectedColor)
+            }
         }
     }
 
@@ -667,7 +713,7 @@ fun OkLabColorPicker(
 /**
  * A [OkLchColorPicker] component with Miuix style using OkLch color space.
  *
- * @param initialColor The initial color of the picker.
+ * @param color The color of the picker.
  * @param onColorChanged The callback to be called when the color changes.
  * @param modifier The modifier to be applied to the color picker.
  * @param showPreview Whether to show a preview of the selected color.
@@ -675,20 +721,21 @@ fun OkLabColorPicker(
  */
 @Composable
 fun OkLchColorPicker(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     showPreview: Boolean = true,
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    var initialSetup by remember { mutableStateOf(true) }
-    var currentL by remember { mutableFloatStateOf(0f) } // 0..1
-    var currentC by remember { mutableFloatStateOf(0f) } // proportion 0..1 (scaled to 0..0.4 internally)
-    var currentH by remember { mutableFloatStateOf(0f) } // normalized 0..1 (scaled to 360)
-    var currentAlpha by remember { mutableFloatStateOf(1f) }
 
-    val selectedColor = remember(currentL, currentC, currentH, currentAlpha) {
+    // Initialize basic values, execute only once.
+    val oklch = remember { color.toOkLch() }
+    var currentL by remember { mutableFloatStateOf((oklch.l / 100.0).toFloat()) } // 0..1
+    var currentC by remember { mutableFloatStateOf((oklch.c / 100.0).toFloat()) } // proportion 0..1 (scaled to 0..0.4 internally)
+    var currentH by remember { mutableFloatStateOf((oklch.h / 360.0).toFloat()) } // normalized 0..1 (scaled to 360)
+    var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
+    var selectedColor = remember {
         OkLch(
             l = (currentL * 100.0),
             c = (currentC * 100.0),
@@ -696,20 +743,34 @@ fun OkLchColorPicker(
         ).toColor(currentAlpha)
     }
 
-    LaunchedEffect(initialColor) {
-        if (initialSetup) {
-            val oklch = initialColor.toOkLch()
+    var doNotCallback by remember { mutableStateOf(false) }
+    var isProgrammaticChange by remember { mutableStateOf(false) }
+
+    LaunchedEffect(color) {
+        if (!isProgrammaticChange) {
+            doNotCallback = true
+            val oklch = color.toOkLch()
             currentL = (oklch.l / 100.0).toFloat()
             currentC = (oklch.c / 100.0).toFloat()
             currentH = (oklch.h / 360.0).toFloat()
-            currentAlpha = initialColor.alpha
-            initialSetup = false
+            currentAlpha = color.alpha
+            doNotCallback = false
         }
+        isProgrammaticChange = false
     }
 
-    LaunchedEffect(selectedColor) {
-        if (!initialSetup) {
-            currentOnColorChanged(selectedColor)
+    LaunchedEffect(currentL, currentC, currentH, currentAlpha) {
+        selectedColor = OkLch(
+            l = (currentL * 100.0),
+            c = (currentC * 100.0),
+            h = (currentH * 360.0),
+        ).toColor(currentAlpha)
+
+        if (!doNotCallback) {
+            if (selectedColor.toArgb() != color.toArgb()) {
+                isProgrammaticChange = true
+                currentOnColorChanged(selectedColor)
+            }
         }
     }
 

@@ -51,7 +51,7 @@ import kotlin.math.roundToInt
 /**
  * A color palette component that allows users to select colors from a grid of HSV values.
  *
- * @param initialColor The initial color to display in the palette.
+ * @param color The color to display in the palette.
  * @param onColorChanged Callback invoked when the selected color changes.
  * @param modifier Modifier for styling the palette.
  * @param rows Number of rows in the color grid.
@@ -63,7 +63,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun ColorPalette(
-    initialColor: Color,
+    color: Color,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier,
     rows: Int = 7,
@@ -80,17 +80,17 @@ fun ColorPalette(
 
     var selectedRow by remember { mutableIntStateOf(0) }
     var selectedCol by remember { mutableIntStateOf(0) }
-    var alpha by remember { mutableStateOf(initialColor.alpha.coerceIn(0f, 1f)) }
+    var alpha by remember { mutableStateOf(color.alpha.coerceIn(0f, 1f)) }
     var lastEmittedColor by remember { mutableStateOf<Color?>(null) }
     var lastAcceptedHSV by remember { mutableStateOf<Triple<Float, Float, Float>?>(null) }
-    LaunchedEffect(initialColor, rows, hueColumns, includeGrayColumn) {
-        val hsvInit = initialColor.toHsv()
+    LaunchedEffect(color, rows, hueColumns, includeGrayColumn) {
+        val hsvInit = color.toHsv()
         val h = hsvInit.h.toFloat()
         val s = (hsvInit.s / 100.0).toFloat()
         val v = (hsvInit.v / 100.0).toFloat()
         val currentHSV = Triple(h, s, v)
         if (lastAcceptedHSV?.let { hsvEqualApprox(it, currentHSV) } == true) {
-            alpha = initialColor.alpha
+            alpha = color.alpha
             lastAcceptedHSV = currentHSV
             return@LaunchedEffect
         }
@@ -109,7 +109,7 @@ fun ColorPalette(
         }
         selectedCol = col
         selectedRow = row
-        alpha = initialColor.alpha
+        alpha = color.alpha
         lastAcceptedHSV = currentHSV
     }
 
@@ -126,7 +126,7 @@ fun ColorPalette(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(ContinuousCapsule)
-                    .background(lastEmittedColor ?: initialColor),
+                    .background(lastEmittedColor ?: color),
             )
         }
 
