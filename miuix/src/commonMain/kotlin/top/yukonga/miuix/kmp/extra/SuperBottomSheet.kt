@@ -249,17 +249,13 @@ internal fun SuperBottomSheetContent(
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    topInset: Dp? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-
-    val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-    val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
@@ -287,7 +283,7 @@ internal fun SuperBottomSheetContent(
             dragHandleColor = dragHandleColor,
             allowDismiss = allowDismiss,
             windowHeight = windowHeight,
-            statusBarHeight = statusBarHeight,
+            topInset = topInset,
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
@@ -314,7 +310,7 @@ private fun SuperBottomSheetColumn(
     dragHandleColor: Color,
     allowDismiss: Boolean,
     windowHeight: Dp,
-    statusBarHeight: Dp,
+    topInset: Dp?,
     sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
@@ -325,6 +321,15 @@ private fun SuperBottomSheetColumn(
 ) {
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
+
+    val calculatedTopInset = if (topInset != null) {
+        topInset
+    } else {
+        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+        maxOf(statusBars, captionBar, displayCutout)
+    }
 
     // Calculate the overscroll offset for background fill
     val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
@@ -359,7 +364,7 @@ private fun SuperBottomSheetColumn(
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .heightIn(max = windowHeight - statusBarHeight)
+                .heightIn(max = windowHeight - calculatedTopInset)
                 .onGloballyPositioned { coordinates ->
                     sheetHeightPx.intValue = coordinates.size.height
                 }
