@@ -20,7 +20,7 @@ ColorPicker 组件可以让用户选择自定义颜色：
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 ColorPicker(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     }
@@ -31,11 +31,12 @@ ColorPicker(
 
 ### 不带颜色预览
 
-默认情况下，ColorPicker 会显示当前选择的颜色预览，如果不想显示默认的颜色预览，可以将 `showPreview` 设置为 `false`：
+默认情况下，ColorPicker 会显示当前选择的颜色预览，如果不想显示默认的颜色预览，可以将 `showPreview` 设置为
+`false`：
 
 ```kotlin
 ColorPicker(
-    initialColor = Color.Blue,
+    color = Color.Blue,
     onColorChanged = { /* 处理颜色变化 */ },
     showPreview = false
 )
@@ -43,11 +44,12 @@ ColorPicker(
 
 ## 触觉反馈
 
-ColorPicker 支持触觉反馈，可以通过 `hapticEffect` 参数自定义反馈效果，详见 [SliderHapticEffect](../components/slider#sliderhapticeffect)。
+ColorPicker 支持触觉反馈，可以通过 `hapticEffect`
+参数自定义反馈效果，详见 [SliderHapticEffect](../components/slider#sliderhapticeffect)。
 
 ```kotlin
 ColorPicker(
-    initialColor = Color.Green,
+    color = Color.Green,
     onColorChanged = { /* 处理颜色变化 */ },
     hapticEffect = SliderHapticEffect.Step
 )
@@ -57,14 +59,14 @@ ColorPicker(
 
 ### ColorPicker 属性
 
-| 属性名         | 类型                              | 说明                 | 默认值                             | 是否必须 |
-| -------------- | --------------------------------- | -------------------- | ---------------------------------- | -------- |
-| initialColor   | Color                             | 初始颜色             | -                                  | 是       |
-| onColorChanged | (Color) -> Unit                   | 颜色变化时的回调函数 | -                                  | 是       |
-| modifier       | Modifier                          | 应用于组件的修饰符   | Modifier                           | 否       |
-| showPreview    | Boolean                           | 是否显示颜色预览     | true                               | 否       |
-| hapticEffect   | SliderDefaults.SliderHapticEffect | 滑块的触觉反馈效果   | SliderDefaults.DefaultHapticEffect | 否       |
-| colorSpace     | ColorSpace                        | 选择使用的颜色空间   | ColorSpace.HSV                     | 否       |
+| 属性名            | 类型                                | 说明         | 默认值                                | 是否必须 |
+|----------------|-----------------------------------|------------|------------------------------------|------|
+| color          | Color                             | 当前颜色       | -                                  | 是    |
+| onColorChanged | (Color) -> Unit                   | 颜色变化时的回调函数 | -                                  | 是    |
+| modifier       | Modifier                          | 应用于组件的修饰符  | Modifier                           | 否    |
+| showPreview    | Boolean                           | 是否显示颜色预览   | true                               | 否    |
+| hapticEffect   | SliderDefaults.SliderHapticEffect | 滑块的触觉反馈效果  | SliderDefaults.DefaultHapticEffect | 否    |
+| colorSpace     | ColorSpace                        | 选择使用的颜色空间  | ColorSpace.HSV                     | 否    |
 
 ## 单独使用滑块组件
 
@@ -77,8 +79,8 @@ var hue by remember { mutableStateOf(0f) }
 
 HueSlider(
     currentHue = hue,
-    onHueChanged = { newHue -> 
-        hue = newHue * 360f 
+    onHueChanged = { newHue ->
+        hue = newHue * 360f
     }
 )
 ```
@@ -133,6 +135,7 @@ AlphaSlider(
 ### 颜色空间
 
 ColorPicker 通过 `colorSpace` 支持多种颜色空间：
+
 - `ColorSpace.HSV` — 经典 HSV 滑条（色相、饱和度、明度、透明度）。
 - `ColorSpace.OKHSV` — 基于 OkLCH 的感知 HSV 变体，色相步进更均匀。
 - `ColorSpace.OKLAB` — OkLab 滑条（亮度 L、a、b、透明度），更符合人眼的感知。
@@ -142,7 +145,7 @@ ColorPicker 通过 `colorSpace` 支持多种颜色空间：
 
 ```kotlin
 ColorPicker(
-    initialColor = Color(0xFF4CAF50),
+    color = Color(0xFF4CAF50),
     onColorChanged = { /* 处理颜色变化 */ },
     colorSpace = ColorSpace.OKLCH
 )
@@ -156,7 +159,7 @@ ColorPicker(
 var currentColor by remember { mutableStateOf(Color.Red) }
 var hexValue by remember(currentColor) {
     mutableStateOf(
-            "#${(currentColor.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
+        "#${(currentColor.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
                 (currentColor.green * 255).toInt().toString(16).padStart(2, '0').uppercase() +
                 (currentColor.blue * 255).toInt().toString(16).padStart(2, '0').uppercase()
     )
@@ -174,7 +177,7 @@ Surface {
         )
         Spacer(modifier = Modifier.height(16.dp))
         ColorPicker(
-            initialColor = currentColor,
+            color = currentColor,
             onColorChanged = {
                 currentColor = it
                 hexValue = "#${(it.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
@@ -201,7 +204,7 @@ Surface {
 var showColorDialog = remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
-Scaffold { 
+Scaffold {
     TextButton(
         text = "选择颜色",
         onClick = { showColorDialog.value = true }
@@ -213,7 +216,7 @@ Scaffold {
     ) {
         Column {
             ColorPicker(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it }
             )
             Spacer(modifier = Modifier.height(16.dp))

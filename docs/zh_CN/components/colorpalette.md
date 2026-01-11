@@ -1,6 +1,7 @@
 # ColorPalette 调色盘
 
-ColorPalette 是一个 HSV 带有透明度滑条的网格调色盘组件，可选在右侧显示灰度列。实现采用单 Canvas 渲染、拖拽过程最小重组，支持实时颜色预览。
+ColorPalette 是一个 HSV 带有透明度滑条的网格调色盘组件，可选在右侧显示灰度列。实现采用单 Canvas
+渲染、拖拽过程最小重组，支持实时颜色预览。
 
 <div style="position: relative; max-width: 700px; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=colorPalette" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -18,7 +19,7 @@ import top.yukonga.miuix.kmp.basic.ColorPalette
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 ColorPalette(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     }
@@ -33,7 +34,7 @@ ColorPalette(
 
 ```kotlin
 ColorPalette(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     },
@@ -47,7 +48,7 @@ ColorPalette(
 
 ```kotlin
 ColorPalette(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     },
@@ -63,7 +64,7 @@ ColorPalette(
 
 ```kotlin
 ColorPalette(
-    initialColor = selectedColor,
+    color = selectedColor,
     onColorChanged = { newColor ->
         selectedColor = newColor
     },
@@ -76,17 +77,17 @@ ColorPalette(
 
 ## 属性
 
-| 属性              | 类型            | 说明                                        | 默认   | 必填 |
-| ----------------- | --------------- | ------------------------------------------- | ------ | ---- |
-| initialColor      | Color           | 初始颜色                                    | -      | 是   |
-| onColorChanged    | (Color) -> Unit | 颜色变化回调                                | -      | 是   |
-| modifier          | Modifier        | 组件修饰符                                  | Modifier | 否 |
-| rows              | Int             | 网格行数（上亮低饱和 → 下暗高饱和）         | 7      | 否   |
-| hueColumns        | Int             | 色相列数                                    | 12     | 否   |
-| includeGrayColumn | Boolean         | 是否显示右侧灰度列                          | true   | 否   |
-| showPreview       | Boolean         | 是否显示顶部颜色预览面板                    | true   | 否   |
-| cornerRadius      | Dp              | 容器圆角                                    | 16.dp  | 否   |
-| indicatorRadius   | Dp              | 选中指示器半径                              | 10.dp  | 否   |
+| 属性                | 类型              | 说明                  | 默认       | 必填 |
+|-------------------|-----------------|---------------------|----------|----|
+| color             | Color           | 当前颜色                | -        | 是  |
+| onColorChanged    | (Color) -> Unit | 颜色变化回调              | -        | 是  |
+| modifier          | Modifier        | 组件修饰符               | Modifier | 否  |
+| rows              | Int             | 网格行数（上亮低饱和 → 下暗高饱和） | 7        | 否  |
+| hueColumns        | Int             | 色相列数                | 12       | 否  |
+| includeGrayColumn | Boolean         | 是否显示右侧灰度列           | true     | 否  |
+| showPreview       | Boolean         | 是否显示顶部颜色预览面板        | true     | 否  |
+| cornerRadius      | Dp              | 容器圆角                | 16.dp    | 否  |
+| indicatorRadius   | Dp              | 选中指示器半径             | 10.dp    | 否  |
 
 ## 进阶用法
 
@@ -99,8 +100,8 @@ var currentColor by remember { mutableStateOf(Color(0xFF2196F3)) }
 var hexValue by remember(currentColor) {
     mutableStateOf(
         "#${(currentColor.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
-            (currentColor.green * 255).toInt().toString(16).padStart(2, '0').uppercase() +
-            (currentColor.blue * 255).toInt().toString(16).padStart(2, '0').uppercase()
+                (currentColor.green * 255).toInt().toString(16).padStart(2, '0').uppercase() +
+                (currentColor.blue * 255).toInt().toString(16).padStart(2, '0').uppercase()
     )
 }
 
@@ -116,7 +117,7 @@ Surface {
         )
         Spacer(modifier = Modifier.height(16.dp))
         ColorPalette(
-            initialColor = currentColor,
+            color = currentColor,
             onColorChanged = {
                 currentColor = it
                 hexValue = "#${(it.red * 255).toInt().toString(16).padStart(2, '0').uppercase()}" +
@@ -155,7 +156,7 @@ Scaffold {
     ) {
         Column {
             ColorPalette(
-                initialColor = selectedColor,
+                color = selectedColor,
                 onColorChanged = { selectedColor = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
