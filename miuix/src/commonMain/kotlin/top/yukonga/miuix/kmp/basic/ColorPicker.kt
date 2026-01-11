@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -141,42 +141,31 @@ fun HsvColorPicker(
     var currentSaturation by remember { mutableFloatStateOf((hsv.s / 100.0).toFloat()) }
     var currentValue by remember { mutableFloatStateOf((hsv.v / 100.0).toFloat()) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
-    var selectedColor = remember {
-        Hsv(
-            h = currentHue.toDouble(),
-            s = (currentSaturation * 100.0),
-            v = (currentValue * 100.0),
-        ).toColor(currentAlpha)
+
+    val selectedColor by remember {
+        derivedStateOf {
+            Hsv(
+                h = currentHue.toDouble(),
+                s = (currentSaturation * 100.0),
+                v = (currentValue * 100.0),
+            ).toColor(currentAlpha)
+        }
     }
 
-    var doNotCallback by remember { mutableStateOf(false) }
-    var isProgrammaticChange by remember { mutableStateOf(false) }
-
-    LaunchedEffect(color) {
-        if (!isProgrammaticChange) {
-            doNotCallback = true
+    SideEffect {
+        if (color.toArgb() != selectedColor.toArgb()) {
             val hsv = color.toHsv()
             currentHue = hsv.h.toFloat()
             currentSaturation = (hsv.s / 100.0).toFloat()
             currentValue = (hsv.v / 100.0).toFloat()
             currentAlpha = color.alpha
-            doNotCallback = false
         }
-        isProgrammaticChange = false
     }
 
-    LaunchedEffect(currentHue, currentSaturation, currentValue, currentAlpha) {
-        selectedColor = Hsv(
-            h = currentHue.toDouble(),
-            s = (currentSaturation * 100.0),
-            v = (currentValue * 100.0),
-        ).toColor(currentAlpha)
-
-        if (!doNotCallback) {
-            if (selectedColor.toArgb() != color.toArgb()) {
-                isProgrammaticChange = true
-                currentOnColorChanged(selectedColor)
-            }
+    fun notifyUserColorChanged() {
+        val newColor = selectedColor
+        if (newColor.toArgb() != color.toArgb()) {
+            currentOnColorChanged(newColor)
         }
     }
 
@@ -198,7 +187,10 @@ fun HsvColorPicker(
         // Hue selection
         HsvHueSlider(
             currentHue = currentHue,
-            onHueChanged = { newHue -> currentHue = newHue * 360f },
+            onHueChanged = { newHue ->
+                currentHue = newHue * 360f
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -206,7 +198,10 @@ fun HsvColorPicker(
         HsvSaturationSlider(
             currentHue = currentHue,
             currentSaturation = currentSaturation,
-            onSaturationChanged = { currentSaturation = it },
+            onSaturationChanged = {
+                currentSaturation = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -215,7 +210,10 @@ fun HsvColorPicker(
             currentHue = currentHue,
             currentSaturation = currentSaturation,
             currentValue = currentValue,
-            onValueChanged = { currentValue = it },
+            onValueChanged = {
+                currentValue = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -225,7 +223,10 @@ fun HsvColorPicker(
             currentSaturation = currentSaturation,
             currentValue = currentValue,
             currentAlpha = currentAlpha,
-            onAlphaChanged = { currentAlpha = it },
+            onAlphaChanged = {
+                currentAlpha = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
     }
@@ -377,42 +378,31 @@ fun OkHsvColorPicker(
     var currentS by remember { mutableFloatStateOf(okhsv[1]) }
     var currentV by remember { mutableFloatStateOf(okhsv[2]) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
-    var selectedColor = remember {
-        OkHsv(
-            h = currentH,
-            s = currentS,
-            v = currentV,
-        ).toColor(currentAlpha)
+
+    val selectedColor by remember {
+        derivedStateOf {
+            OkHsv(
+                h = currentH,
+                s = currentS,
+                v = currentV,
+            ).toColor(currentAlpha)
+        }
     }
 
-    var doNotCallback by remember { mutableStateOf(false) }
-    var isProgrammaticChange by remember { mutableStateOf(false) }
-
-    LaunchedEffect(color) {
-        if (!isProgrammaticChange) {
-            doNotCallback = true
+    SideEffect {
+        if (color.toArgb() != selectedColor.toArgb()) {
             val okhsv = Transforms.colorToOkhsv(color)
             currentH = okhsv[0]
             currentS = okhsv[1]
             currentV = okhsv[2]
             currentAlpha = color.alpha
-            doNotCallback = false
         }
-        isProgrammaticChange = false
     }
 
-    LaunchedEffect(currentH, currentS, currentV, currentAlpha) {
-        selectedColor = OkHsv(
-            h = currentH,
-            s = currentS,
-            v = currentV,
-        ).toColor(currentAlpha)
-
-        if (!doNotCallback) {
-            if (selectedColor.toArgb() != color.toArgb()) {
-                isProgrammaticChange = true
-                currentOnColorChanged(selectedColor)
-            }
+    fun notifyUserColorChanged() {
+        val newColor = selectedColor
+        if (newColor.toArgb() != color.toArgb()) {
+            currentOnColorChanged(newColor)
         }
     }
 
@@ -434,7 +424,10 @@ fun OkHsvColorPicker(
         // Hue selection (OkHSV)
         OkHsvHueSlider(
             currentH = currentH,
-            onHueChanged = { currentH = it },
+            onHueChanged = {
+                currentH = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -442,7 +435,10 @@ fun OkHsvColorPicker(
         OkHsvSaturationSlider(
             currentH = currentH,
             currentS = currentS,
-            onSaturationChanged = { currentS = it },
+            onSaturationChanged = {
+                currentS = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -451,7 +447,10 @@ fun OkHsvColorPicker(
             currentH = currentH,
             currentS = currentS,
             currentV = currentV,
-            onValueChanged = { currentV = it },
+            onValueChanged = {
+                currentV = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -461,7 +460,10 @@ fun OkHsvColorPicker(
             currentS = currentS,
             currentV = currentV,
             currentAlpha = currentAlpha,
-            onAlphaChanged = { currentAlpha = it },
+            onAlphaChanged = {
+                currentAlpha = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
     }
@@ -617,42 +619,31 @@ fun OkLabColorPicker(
     var currentA by remember { mutableFloatStateOf(((ok.a / 100.0) * 0.4).toFloat()) }
     var currentB by remember { mutableFloatStateOf(((ok.b / 100.0) * 0.4).toFloat()) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
-    var selectedColor = remember {
-        OkLab(
-            l = (currentL * 100.0),
-            a = (currentA / 0.4 * 100.0),
-            b = (currentB / 0.4 * 100.0),
-        ).toColor(currentAlpha)
+
+    val selectedColor by remember {
+        derivedStateOf {
+            OkLab(
+                l = (currentL * 100.0),
+                a = (currentA / 0.4 * 100.0),
+                b = (currentB / 0.4 * 100.0),
+            ).toColor(currentAlpha)
+        }
     }
 
-    var doNotCallback by remember { mutableStateOf(false) }
-    var isProgrammaticChange by remember { mutableStateOf(false) }
-
-    LaunchedEffect(color) {
-        if (!isProgrammaticChange) {
-            doNotCallback = true
+    SideEffect {
+        if (color.toArgb() != selectedColor.toArgb()) {
             val ok = color.toOkLab()
             currentL = (ok.l / 100.0).toFloat()
             currentA = ((ok.a / 100.0) * 0.4).toFloat()
             currentB = ((ok.b / 100.0) * 0.4).toFloat()
             currentAlpha = color.alpha
-            doNotCallback = false
         }
-        isProgrammaticChange = false
     }
 
-    LaunchedEffect(currentL, currentA, currentB, currentAlpha) {
-        selectedColor = OkLab(
-            l = (currentL * 100.0),
-            a = (currentA / 0.4 * 100.0),
-            b = (currentB / 0.4 * 100.0),
-        ).toColor(currentAlpha)
-
-        if (!doNotCallback) {
-            if (selectedColor.toArgb() != color.toArgb()) {
-                isProgrammaticChange = true
-                currentOnColorChanged(selectedColor)
-            }
+    fun notifyUserColorChanged() {
+        val newColor = selectedColor
+        if (newColor.toArgb() != color.toArgb()) {
+            currentOnColorChanged(newColor)
         }
     }
 
@@ -676,7 +667,10 @@ fun OkLabColorPicker(
             currentL = currentL,
             currentA = currentA,
             currentB = currentB,
-            onLightnessChanged = { currentL = it },
+            onLightnessChanged = {
+                currentL = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -685,7 +679,10 @@ fun OkLabColorPicker(
             currentL = currentL,
             currentA = currentA,
             currentB = currentB,
-            onAChanged = { currentA = it },
+            onAChanged = {
+                currentA = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -694,7 +691,10 @@ fun OkLabColorPicker(
             currentL = currentL,
             currentA = currentA,
             currentB = currentB,
-            onBChanged = { currentB = it },
+            onBChanged = {
+                currentB = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -704,7 +704,10 @@ fun OkLabColorPicker(
             currentA = currentA,
             currentB = currentB,
             currentAlpha = currentAlpha,
-            onAlphaChanged = { currentAlpha = it },
+            onAlphaChanged = {
+                currentAlpha = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
     }
@@ -735,42 +738,31 @@ fun OkLchColorPicker(
     var currentC by remember { mutableFloatStateOf((oklch.c / 100.0).toFloat()) } // proportion 0..1 (scaled to 0..0.4 internally)
     var currentH by remember { mutableFloatStateOf((oklch.h / 360.0).toFloat()) } // normalized 0..1 (scaled to 360)
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
-    var selectedColor = remember {
-        OkLch(
-            l = (currentL * 100.0),
-            c = (currentC * 100.0),
-            h = (currentH * 360.0),
-        ).toColor(currentAlpha)
+
+    val selectedColor by remember {
+        derivedStateOf {
+            OkLch(
+                l = (currentL * 100.0),
+                c = (currentC * 100.0),
+                h = (currentH * 360.0),
+            ).toColor(currentAlpha)
+        }
     }
 
-    var doNotCallback by remember { mutableStateOf(false) }
-    var isProgrammaticChange by remember { mutableStateOf(false) }
-
-    LaunchedEffect(color) {
-        if (!isProgrammaticChange) {
-            doNotCallback = true
+    SideEffect {
+        if (color.toArgb() != selectedColor.toArgb()) {
             val oklch = color.toOkLch()
             currentL = (oklch.l / 100.0).toFloat()
             currentC = (oklch.c / 100.0).toFloat()
             currentH = (oklch.h / 360.0).toFloat()
             currentAlpha = color.alpha
-            doNotCallback = false
         }
-        isProgrammaticChange = false
     }
 
-    LaunchedEffect(currentL, currentC, currentH, currentAlpha) {
-        selectedColor = OkLch(
-            l = (currentL * 100.0),
-            c = (currentC * 100.0),
-            h = (currentH * 360.0),
-        ).toColor(currentAlpha)
-
-        if (!doNotCallback) {
-            if (selectedColor.toArgb() != color.toArgb()) {
-                isProgrammaticChange = true
-                currentOnColorChanged(selectedColor)
-            }
+    fun notifyUserColorChanged() {
+        val newColor = selectedColor
+        if (newColor.toArgb() != color.toArgb()) {
+            currentOnColorChanged(newColor)
         }
     }
 
@@ -794,7 +786,10 @@ fun OkLchColorPicker(
             currentL = currentL,
             currentC = currentC,
             currentH = currentH,
-            onHueChanged = { currentH = it },
+            onHueChanged = {
+                currentH = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -803,7 +798,10 @@ fun OkLchColorPicker(
             currentL = currentL,
             currentC = currentC,
             currentH = currentH,
-            onLightnessChanged = { currentL = it },
+            onLightnessChanged = {
+                currentL = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -812,7 +810,10 @@ fun OkLchColorPicker(
             currentL = currentL,
             currentC = currentC,
             currentH = currentH,
-            onChromaChanged = { currentC = it },
+            onChromaChanged = {
+                currentC = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
 
@@ -822,7 +823,10 @@ fun OkLchColorPicker(
             currentC = currentC,
             currentH = currentH,
             currentAlpha = currentAlpha,
-            onAlphaChanged = { currentAlpha = it },
+            onAlphaChanged = {
+                currentAlpha = it
+                notifyUserColorChanged()
+            },
             hapticEffect = hapticEffect,
         )
     }

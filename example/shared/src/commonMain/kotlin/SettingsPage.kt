@@ -285,7 +285,7 @@ fun SettingsContent(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
+                    padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },
@@ -434,7 +434,7 @@ fun AboutPage(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
+                    padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },

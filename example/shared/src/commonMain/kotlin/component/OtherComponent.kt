@@ -568,7 +568,7 @@ fun LazyListScope.otherComponent() {
         var selectedColor by remember { mutableStateOf(miuixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
             )
         }
 
@@ -585,9 +585,9 @@ fun LazyListScope.otherComponent() {
             ) {
                 Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -611,10 +611,10 @@ fun LazyListScope.otherComponent() {
                     Text(
                         "HEX: #",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -625,7 +625,7 @@ fun LazyListScope.otherComponent() {
         var selectedColor by remember { mutableStateOf(miuixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
             )
         }
 
@@ -643,9 +643,9 @@ fun LazyListScope.otherComponent() {
             ) {
                 Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -670,10 +670,10 @@ fun LazyListScope.otherComponent() {
                     Text(
                         "HEX: #",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -684,7 +684,7 @@ fun LazyListScope.otherComponent() {
         var selectedColor by remember { mutableStateOf(miuixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
             )
         }
 
@@ -701,9 +701,9 @@ fun LazyListScope.otherComponent() {
             ) {
                 Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -728,10 +728,10 @@ fun LazyListScope.otherComponent() {
                     Text(
                         "HEX: #",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -742,7 +742,7 @@ fun LazyListScope.otherComponent() {
         var selectedColor by remember { mutableStateOf(miuixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
             )
         }
 
@@ -760,9 +760,9 @@ fun LazyListScope.otherComponent() {
             ) {
                 Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -787,10 +787,10 @@ fun LazyListScope.otherComponent() {
                     Text(
                         "HEX: #",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -801,7 +801,7 @@ fun LazyListScope.otherComponent() {
         var selectedColor by remember { mutableStateOf(miuixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
             )
         }
 
@@ -818,9 +818,9 @@ fun LazyListScope.otherComponent() {
             ) {
                 Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
-                            "${(selectedColor.green * 255).toInt()}, " +
-                            "${(selectedColor.blue * 255).toInt()}, " +
-                            "${(round(selectedColor.alpha * 100) / 100.0)}",
+                        "${(selectedColor.green * 255).toInt()}, " +
+                        "${(selectedColor.blue * 255).toInt()}, " +
+                        "${(round(selectedColor.alpha * 100) / 100.0)}",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -844,10 +844,10 @@ fun LazyListScope.otherComponent() {
                     Text(
                         "HEX: #",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
