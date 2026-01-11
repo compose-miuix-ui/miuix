@@ -376,9 +376,9 @@ private fun SuperBottomSheetColumn(
                 val windowHeightPx = with(density) { windowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
-                        (velocity > velocityThresholdPx) ||
-                                (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
-                        )
+                    (velocity > velocityThresholdPx) ||
+                        (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
+                    )
 
                 if (shouldDismiss) {
                     if (currentOffset >= windowHeightPx) {

@@ -219,7 +219,7 @@ fun WindowDialog(
                     )
                 },
 
-            ) {
+        ) {
             AnimatedVisibility(
                 visibleState = internalVisible,
                 enter = rememberDefaultDialogEnterTransition(isLargeScreen),
