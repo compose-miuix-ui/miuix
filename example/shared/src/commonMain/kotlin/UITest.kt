@@ -40,6 +40,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -151,10 +152,12 @@ data class UIState(
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
+val LocalBackStack = compositionLocalOf<MutableList<NavKey>> { error("No backstack") }
 
-private sealed interface Screen : NavKey {
+sealed interface Screen : NavKey {
     data object Home : Screen
     data object About : Screen
+    data class NavTestPage(val id: String) : Screen
 }
 
 @Composable
@@ -194,6 +197,7 @@ fun UITest(
     CompositionLocalProvider(
         LocalPagerState provides pagerState,
         LocalHandlePageChange provides handlePageChange,
+        LocalBackStack provides backStack,
     ) {
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize(),
@@ -205,35 +209,42 @@ fun UITest(
 
             val isWideScreen = isDefinitelyWide || isWideByShape
 
-            uiState = uiState.copy(isWideScreen = isWideScreen)
-            uiState = uiState.copy(enableOverScroll = enableOverScroll)
+            LaunchedEffect(isWideScreen) {
+                if (uiState.isWideScreen != isWideScreen) {
+                    uiState = uiState.copy(isWideScreen = isWideScreen)
+                }
+            }
+            LaunchedEffect(enableOverScroll) {
+                if (uiState.enableOverScroll != enableOverScroll) {
+                    uiState = uiState.copy(enableOverScroll = enableOverScroll)
+                }
+            }
 
-            val entryProvider = remember(backStack, uiState, colorMode, seedIndex, padding, navigationItems) {
+            val entryProvider = remember(backStack, uiState, colorMode, seedIndex) {
                 entryProvider<NavKey> {
                     entry(Screen.Home) {
-                        if (isWideScreen) {
-                            WideScreenLayout(
-                                uiState = uiState,
-                                onUiStateChange = { uiState = it },
-                                colorMode = colorMode,
-                                seedIndex = seedIndex,
-                                padding = padding,
-                                navToAbout = { backStack.add(Screen.About) },
-                            )
-                        } else {
-                            CompactScreenLayout(
-                                navigationItems = navigationItems,
-                                uiState = uiState,
-                                onUiStateChange = { uiState = it },
-                                colorMode = colorMode,
-                                seedIndex = seedIndex,
-                                padding = padding,
-                                navToAbout = { backStack.add(Screen.About) },
-                            )
-                        }
+                        Home(
+                            uiState = uiState,
+                            onUiStateChange = { uiState = it },
+                            colorMode = colorMode,
+                            seedIndex = seedIndex,
+                            padding = padding,
+                            navigationItems = navigationItems,
+                            navToAbout = { backStack.add(Screen.About) },
+                        )
                     }
                     entry(Screen.About) {
-                        AboutScreen(
+                        AboutPage(
+                            padding = padding,
+                            showTopAppBar = uiState.showTopAppBar,
+                            isWideScreen = uiState.isWideScreen,
+                            enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                            enableOverScroll = uiState.enableOverScroll,
+                            onBack = { backStack.removeLast() },
+                        )
+                    }
+                    entry<Screen.NavTestPage> {
+                        NavTestPage(
                             padding = padding,
                             showTopAppBar = uiState.showTopAppBar,
                             isWideScreen = uiState.isWideScreen,
@@ -264,6 +275,38 @@ fun UITest(
                 .statusBarsPadding()
                 .captionBarPadding()
                 .padding(all = 12.dp),
+        )
+    }
+}
+
+@Composable
+private fun Home(
+    uiState: UIState,
+    onUiStateChange: (UIState) -> Unit,
+    colorMode: MutableState<Int>,
+    seedIndex: MutableState<Int>,
+    padding: PaddingValues,
+    navigationItems: List<NavigationItem>,
+    navToAbout: () -> Unit,
+) {
+    if (uiState.isWideScreen) {
+        WideScreenLayout(
+            uiState = uiState,
+            onUiStateChange = onUiStateChange,
+            colorMode = colorMode,
+            seedIndex = seedIndex,
+            padding = padding,
+            navToAbout = navToAbout,
+        )
+    } else {
+        CompactScreenLayout(
+            navigationItems = navigationItems,
+            uiState = uiState,
+            onUiStateChange = onUiStateChange,
+            colorMode = colorMode,
+            seedIndex = seedIndex,
+            padding = padding,
+            navToAbout = navToAbout,
         )
     }
 }
@@ -344,10 +387,9 @@ private fun WideScreenPanel(
     val handlePageChange = LocalHandlePageChange.current
     Scaffold(
         modifier = Modifier
-            .padding(start = 18.dp, end = 12.dp)
+            .padding(start = 18.dp, end = 12.dp, bottom = 12.dp)
             .fillMaxSize(),
-        contentWindowInsets =
-        WindowInsets.systemBars.union(
+        contentWindowInsets = WindowInsets.systemBars.union(
             WindowInsets.displayCutout.exclude(
                 WindowInsets.displayCutout.only(WindowInsetsSides.End),
             ),

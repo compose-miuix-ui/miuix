@@ -2,70 +2,34 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import misc.VersionInfo
-import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.DropdownImpl
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.extra.WindowDropdown
-import top.yukonga.miuix.kmp.extra.WindowListPopup
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
-import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import kotlin.random.Random
 
 @Composable
 fun SettingsPage(
@@ -160,67 +124,6 @@ fun SettingsPage(
             seedIndex = seedIndex,
             isWideScreen = isWideScreen,
             navToAbout = navToAbout,
-        )
-    }
-}
-
-@Composable
-fun AboutScreen(
-    padding: PaddingValues,
-    showTopAppBar: Boolean,
-    isWideScreen: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
-    onBack: () -> Unit,
-) {
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
-    Scaffold(
-        topBar = {
-            if (showTopAppBar) {
-                if (isWideScreen) {
-                    SmallTopAppBar(
-                        title = "About",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        defaultWindowInsetsPadding = false,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
-                            )
-                        },
-                        actions = {
-                            AboutTopBarActions()
-                        },
-                    )
-                } else {
-                    TopAppBar(
-                        title = "About",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
-                            )
-                        },
-                        actions = {
-                            AboutTopBarActions()
-                        },
-                    )
-                }
-            }
-        },
-        popupHost = {},
-    ) { innerPadding ->
-        AboutPage(
-            padding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding(),
-            ),
-            topAppBarScrollBehavior = topAppBarScrollBehavior,
-            showTopAppBar = showTopAppBar,
-            enableScrollEndHaptic = enableScrollEndHaptic,
-            enableOverScroll = enableOverScroll,
-            isWideScreen = isWideScreen,
         )
     }
 }
@@ -397,181 +300,25 @@ fun SettingsContent(
                 }
             }
             Card(
+                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+            ) {
+                val backStack = LocalBackStack.current
+                SuperArrow(
+                    title = "NavTest",
+                    summary = "Navigate to a NavTestPage.",
+                    onClick = {
+                        backStack.add(Screen.NavTestPage(Random.nextLong().toString()))
+                    },
+                )
+            }
+            Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {
                 SuperArrow(
                     title = "About",
-                    summary = "About this app",
+                    summary = "About this example App.",
                     onClick = navToAbout,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun AboutPage(
-    padding: PaddingValues,
-    topAppBarScrollBehavior: ScrollBehavior,
-    showTopAppBar: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
-    isWideScreen: Boolean,
-) {
-    val uriHandler = LocalUriHandler.current
-    LazyColumn(
-        modifier = Modifier
-            .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical(
-                isEnabled = { enableOverScroll },
-            )
-            .background(colorScheme.surface)
-            .then(
-                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-            )
-            .fillMaxHeight(),
-        contentPadding = PaddingValues(
-            top = padding.calculateTopPadding(),
-            bottom = if (isWideScreen) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    padding.calculateBottomPadding() + 12.dp
-            } else {
-                padding.calculateBottomPadding() + 12.dp
-            },
-        ),
-        overscrollEffect = null,
-    ) {
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 72.dp, bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White),
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_launcher),
-                        contentDescription = "App Logo",
-                    )
-                }
-            }
-            Text(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 48.dp),
-                text = "App Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")" + "\nJDK Ver. " + VersionInfo.JDK_VERSION,
-                textAlign = TextAlign.Center,
-            )
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp),
-            ) {
-                SuperArrow(
-                    title = "View Source",
-                    endActions = {
-                        Text(
-                            modifier = Modifier.padding(end = 8.dp),
-                            text = "GitHub",
-                            color = colorScheme.onSurfaceVariantActions,
-                        )
-                    },
-                    onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
-                )
-                SuperArrow(
-                    title = "Join Group",
-                    endActions = {
-                        Text(
-                            modifier = Modifier.padding(end = 8.dp),
-                            text = "Telegram",
-                            color = colorScheme.onSurfaceVariantActions,
-                        )
-                    },
-                    onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
-                )
-            }
-            Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp),
-            ) {
-                val list = listOf("Apache-2.0", "Apache-2.0", "Apache-2.0")
-                var selectedIndex by remember { mutableIntStateOf(0) }
-                WindowDropdown(
-                    title = "License",
-                    items = list,
-                    selectedIndex = selectedIndex,
-                    onSelectedIndexChange = {
-                        selectedIndex = it
-                    },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BackNavigationIcon(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val layoutDirection = LocalLayoutDirection.current
-    IconButton(
-        modifier = modifier,
-        onClick = onClick,
-    ) {
-        Icon(
-            modifier = Modifier.graphicsLayer {
-                if (layoutDirection == LayoutDirection.Rtl) scaleX = -1f
-            },
-            imageVector = MiuixIcons.Back,
-            contentDescription = null,
-            tint = colorScheme.onBackground,
-        )
-    }
-}
-
-@Composable
-fun AboutTopBarActions() {
-    val showTopPopup = remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val hapticFeedback = LocalHapticFeedback.current
-    IconButton(
-        modifier = Modifier.padding(end = 16.dp),
-        onClick = { showTopPopup.value = true },
-        holdDownState = showTopPopup.value,
-    ) {
-        Icon(
-            imageVector = MiuixIcons.Edit,
-            contentDescription = "WindowListPopup",
-            tint = colorScheme.onBackground,
-        )
-    }
-    WindowListPopup(
-        show = showTopPopup,
-        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopEnd,
-        onDismissRequest = {
-            showTopPopup.value = false
-        },
-    ) {
-        val state = LocalWindowListPopupState.current
-        val items = listOf("Window 1", "Window 2", "Window 3")
-        ListPopupColumn {
-            items.forEachIndexed { index, string ->
-                key(index) {
-                    DropdownImpl(
-                        text = string,
-                        optionSize = items.size,
-                        isSelected = selectedIndex == index,
-                        onSelectedIndexChange = { selectedIdx ->
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                            selectedIndex = selectedIdx
-                            state.invoke()
-                        },
-                        index = index,
-                    )
-                }
             }
         }
     }
