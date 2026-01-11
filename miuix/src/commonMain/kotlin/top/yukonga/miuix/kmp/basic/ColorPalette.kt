@@ -85,9 +85,9 @@ fun ColorPalette(
     var lastAcceptedHSV by remember { mutableStateOf<Triple<Float, Float, Float>?>(null) }
     LaunchedEffect(color, rows, hueColumns, includeGrayColumn) {
         val hsvInit = color.toHsv()
-        val h = hsvInit.h.toFloat()
-        val s = (hsvInit.s / 100.0).toFloat()
-        val v = (hsvInit.v / 100.0).toFloat()
+        val h = hsvInit.h
+        val s = hsvInit.s / 100f
+        val v = hsvInit.v / 100f
         val currentHSV = Triple(h, s, v)
         if (lastAcceptedHSV?.let { hsvEqualApprox(it, currentHSV) } == true) {
             alpha = color.alpha
@@ -148,16 +148,16 @@ fun ColorPalette(
                 selectedRow = r
                 selectedCol = c
                 val newColor = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn).copy(alpha = alpha)
-                lastAcceptedHSV = newColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                lastAcceptedHSV = newColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             },
         )
 
         val hsvBase = baseColor.toHsv()
-        val h = hsvBase.h.toFloat()
-        val s = (hsvBase.s / 100.0).toFloat()
-        val v = (hsvBase.v / 100.0).toFloat()
+        val h = hsvBase.h
+        val s = hsvBase.s / 100f
+        val v = hsvBase.v / 100f
 
         HsvAlphaSlider(
             currentHue = h,
@@ -168,7 +168,7 @@ fun ColorPalette(
                 alpha = it
                 val newColor = baseColor.copy(alpha = it)
                 lastAcceptedHSV =
-                    baseColor.toHsv().let { Triple(it.h.toFloat(), (it.s / 100.0).toFloat(), (it.v / 100.0).toFloat()) }
+                    baseColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             },
@@ -366,11 +366,11 @@ private fun cellColor(
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
     val (s, v) = rowSV[row]
     return if (includeGrayColumn && col == totalColumns - 1) {
-        Hsv(0.0, 0.0, (grayV[row] * 100.0)).toColor()
+        Hsv(0f, 0f, grayV[row] * 100f).toColor()
     } else {
         val step = 360f / hueColumns
         val h = (col * step) % 360f
-        Hsv(h.toDouble(), (s * 100.0), (v * 100.0)).toColor()
+        Hsv(h, s * 100f, v * 100f).toColor()
     }
 }
 

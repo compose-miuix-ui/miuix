@@ -20,6 +20,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -137,27 +138,37 @@ fun HsvColorPicker(
 
     // Initialize basic values, execute only once.
     val hsv = remember { color.toHsv() }
-    var currentHue by remember { mutableFloatStateOf(hsv.h.toFloat()) }
-    var currentSaturation by remember { mutableFloatStateOf((hsv.s / 100.0).toFloat()) }
-    var currentValue by remember { mutableFloatStateOf((hsv.v / 100.0).toFloat()) }
+    var currentHue by remember { mutableFloatStateOf(hsv.h) }
+    var currentSaturation by remember { mutableFloatStateOf(hsv.s / 100f) }
+    var currentValue by remember { mutableFloatStateOf(hsv.v / 100f) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
 
+    var lastAppliedExternalColorArgb by remember {
+        mutableStateOf(color.toArgb())
+    }
     val selectedColor by remember {
         derivedStateOf {
             Hsv(
-                h = currentHue.toDouble(),
-                s = (currentSaturation * 100.0),
-                v = (currentValue * 100.0),
+                h = currentHue,
+                s = currentSaturation * 100f,
+                v = currentValue * 100f,
             ).toColor(currentAlpha)
         }
     }
 
     SideEffect {
-        if (color.toArgb() != selectedColor.toArgb()) {
+        val externalArgb = color.toArgb()
+        val internalArgb = selectedColor.toArgb()
+
+        if (
+            externalArgb != lastAppliedExternalColorArgb &&
+            externalArgb != internalArgb
+        ) {
+            lastAppliedExternalColorArgb = externalArgb
             val hsv = color.toHsv()
-            currentHue = hsv.h.toFloat()
-            currentSaturation = (hsv.s / 100.0).toFloat()
-            currentValue = (hsv.v / 100.0).toFloat()
+            currentHue = hsv.h
+            currentSaturation = hsv.s / 100f
+            currentValue = hsv.v / 100f
             currentAlpha = color.alpha
         }
     }
@@ -275,8 +286,8 @@ fun HsvSaturationSlider(
 ) {
     val saturationColors = remember(currentHue) {
         listOf(
-            Hsv(currentHue.toDouble(), 0.0, 100.0).toColor(1f),
-            Hsv(currentHue.toDouble(), 100.0, 100.0).toColor(1f),
+            Hsv(currentHue, 0f, 100f).toColor(1f),
+            Hsv(currentHue, 100f, 100f).toColor(1f),
         )
     }
     ColorSlider(
@@ -306,7 +317,7 @@ fun HsvValueSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val valueColors = remember(currentHue, currentSaturation) {
-        listOf(Color.Black, Hsv(currentHue.toDouble(), (currentSaturation * 100.0), 100.0).toColor())
+        listOf(Color.Black, Hsv(currentHue, currentSaturation * 100f, 100f).toColor())
     }
     ColorSlider(
         value = currentValue,
@@ -337,7 +348,7 @@ fun HsvAlphaSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val alphaColors = remember(currentHue, currentSaturation, currentValue) {
-        val baseColor = Hsv(currentHue.toDouble(), (currentSaturation * 100.0), (currentValue * 100.0)).toColor()
+        val baseColor = Hsv(currentHue, currentSaturation * 100f, currentValue * 100f).toColor()
         listOf(baseColor.copy(alpha = 0f), baseColor.copy(alpha = 1f))
     }
 
@@ -379,6 +390,9 @@ fun OkHsvColorPicker(
     var currentV by remember { mutableFloatStateOf(okhsv[2]) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
 
+    var lastAppliedExternalColorArgb by remember {
+        mutableStateOf(color.toArgb())
+    }
     val selectedColor by remember {
         derivedStateOf {
             OkHsv(
@@ -390,7 +404,14 @@ fun OkHsvColorPicker(
     }
 
     SideEffect {
-        if (color.toArgb() != selectedColor.toArgb()) {
+        val externalArgb = color.toArgb()
+        val internalArgb = selectedColor.toArgb()
+
+        if (
+            externalArgb != lastAppliedExternalColorArgb &&
+            externalArgb != internalArgb
+        ) {
+            lastAppliedExternalColorArgb = externalArgb
             val okhsv = Transforms.colorToOkhsv(color)
             currentH = okhsv[0]
             currentS = okhsv[1]
@@ -615,27 +636,37 @@ fun OkLabColorPicker(
 
     // Initialize basic values, execute only once.
     val ok = remember { color.toOkLab() }
-    var currentL by remember { mutableFloatStateOf((ok.l / 100.0).toFloat()) }
-    var currentA by remember { mutableFloatStateOf(((ok.a / 100.0) * 0.4).toFloat()) }
-    var currentB by remember { mutableFloatStateOf(((ok.b / 100.0) * 0.4).toFloat()) }
+    var currentL by remember { mutableFloatStateOf(ok.l / 100f) }
+    var currentA by remember { mutableFloatStateOf(((ok.a / 100f) * 0.4f)) }
+    var currentB by remember { mutableFloatStateOf(((ok.b / 100f) * 0.4f)) }
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
 
+    var lastAppliedExternalColorArgb by remember {
+        mutableStateOf(color.toArgb())
+    }
     val selectedColor by remember {
         derivedStateOf {
             OkLab(
-                l = (currentL * 100.0),
-                a = (currentA / 0.4 * 100.0),
-                b = (currentB / 0.4 * 100.0),
+                l = currentL * 100f,
+                a = (currentA / 0.4f) * 100f,
+                b = (currentB / 0.4f) * 100f,
             ).toColor(currentAlpha)
         }
     }
 
     SideEffect {
-        if (color.toArgb() != selectedColor.toArgb()) {
+        val externalArgb = color.toArgb()
+        val internalArgb = selectedColor.toArgb()
+
+        if (
+            externalArgb != lastAppliedExternalColorArgb &&
+            externalArgb != internalArgb
+        ) {
+            lastAppliedExternalColorArgb = externalArgb
             val ok = color.toOkLab()
-            currentL = (ok.l / 100.0).toFloat()
-            currentA = ((ok.a / 100.0) * 0.4).toFloat()
-            currentB = ((ok.b / 100.0) * 0.4).toFloat()
+            currentL = ok.l / 100f
+            currentA = (ok.a / 100f) * 0.4f
+            currentB = (ok.b / 100f) * 0.4f
             currentAlpha = color.alpha
         }
     }
@@ -734,27 +765,37 @@ fun OkLchColorPicker(
 
     // Initialize basic values, execute only once.
     val oklch = remember { color.toOkLch() }
-    var currentL by remember { mutableFloatStateOf((oklch.l / 100.0).toFloat()) } // 0..1
-    var currentC by remember { mutableFloatStateOf((oklch.c / 100.0).toFloat()) } // proportion 0..1 (scaled to 0..0.4 internally)
-    var currentH by remember { mutableFloatStateOf((oklch.h / 360.0).toFloat()) } // normalized 0..1 (scaled to 360)
+    var currentL by remember { mutableFloatStateOf(oklch.l / 100f) } // 0..1
+    var currentC by remember { mutableFloatStateOf(oklch.c / 100f) } // proportion 0..1 (scaled to 0..0.4 internally)
+    var currentH by remember { mutableFloatStateOf(oklch.h / 360f) } // normalized 0..1 (scaled to 360)
     var currentAlpha by remember { mutableFloatStateOf(color.alpha) }
 
+    var lastAppliedExternalColorArgb by remember {
+        mutableStateOf(color.toArgb())
+    }
     val selectedColor by remember {
         derivedStateOf {
             OkLch(
-                l = (currentL * 100.0),
-                c = (currentC * 100.0),
-                h = (currentH * 360.0),
+                l = currentL * 100f,
+                c = currentC * 100f,
+                h = currentH * 360f,
             ).toColor(currentAlpha)
         }
     }
 
     SideEffect {
-        if (color.toArgb() != selectedColor.toArgb()) {
+        val externalArgb = color.toArgb()
+        val internalArgb = selectedColor.toArgb()
+
+        if (
+            externalArgb != lastAppliedExternalColorArgb &&
+            externalArgb != internalArgb
+        ) {
+            lastAppliedExternalColorArgb = externalArgb
             val oklch = color.toOkLch()
-            currentL = (oklch.l / 100.0).toFloat()
-            currentC = (oklch.c / 100.0).toFloat()
-            currentH = (oklch.h / 360.0).toFloat()
+            currentL = oklch.l / 100f
+            currentC = oklch.c / 100f
+            currentH = oklch.h / 360f
             currentAlpha = color.alpha
         }
     }
@@ -948,9 +989,9 @@ fun OkLabLightnessSlider(
         (0..steps).map { i ->
             val l = i.toFloat() / steps.toFloat()
             OkLab(
-                l = l * 100.0,
-                a = (currentA / 0.4 * 100.0),
-                b = (currentB / 0.4 * 100.0),
+                l = l * 100f,
+                a = (currentA / 0.4f) * 100f,
+                b = (currentB / 0.4f) * 100f,
             ).toColor()
         }
     }
@@ -981,9 +1022,9 @@ fun OkLabAChannelSlider(
         (0..steps).map { i ->
             val a = minA + (maxA - minA) * i.toFloat() / steps.toFloat()
             OkLab(
-                l = currentL * 100.0,
-                a = (a / 0.4 * 100.0),
-                b = (currentB / 0.4 * 100.0),
+                l = currentL * 100f,
+                a = (a / 0.4f) * 100f,
+                b = (currentB / 0.4f) * 100f,
             ).toColor()
         }
     }
@@ -1016,9 +1057,9 @@ fun OkLabBChannelSlider(
         (0..steps).map { i ->
             val b = minB + (maxB - minB) * i.toFloat() / steps.toFloat()
             OkLab(
-                l = currentL * 100.0,
-                a = (currentA / 0.4 * 100.0),
-                b = (b / 0.4 * 100.0),
+                l = currentL * 100f,
+                a = (currentA / 0.4f) * 100f,
+                b = (b / 0.4f) * 100f,
             ).toColor()
         }
     }
@@ -1047,9 +1088,9 @@ fun OkLabAlphaSlider(
 ) {
     val alphaColors = remember(currentL, currentA, currentB) {
         val baseColor = OkLab(
-            l = currentL * 100.0,
-            a = (currentA / 0.4 * 100.0),
-            b = (currentB / 0.4 * 100.0),
+            l = currentL * 100f,
+            a = (currentA / 0.4f) * 100f,
+            b = (currentB / 0.4f) * 100f,
         ).toColor()
         listOf(baseColor.copy(alpha = 0f), baseColor.copy(alpha = 1f))
     }

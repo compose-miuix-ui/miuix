@@ -8,15 +8,15 @@ import top.yukonga.miuix.kmp.color.core.Transforms
 
 /**
  * OkLCH representation with normalized, user-friendly ranges.
- * - `l`: 0.0..100.0 (lightness percent)
- * - `c`: 0.0..100.0 (chroma percent, mapped to internal [0.0, 0.4])
- * - `h`: hue in degrees [0, 360)
+ * - `l`: 0..100 (lightness percent)
+ * - `c`: 0..100 (chroma percent, mapped to internal [0.0, 0.4])
+ * - `h`: hue in degrees [0, 360]
  */
-data class OkLch(val l: Double, val c: Double, val h: Double) {
+data class OkLch(val l: Float, val c: Float, val h: Float) {
     fun toColor(alpha: Float = 1f): Color {
-        val lN = (l / 100.0).coerceIn(0.0, 1.0).toFloat()
-        val cN = ((c / 100.0) * 0.4).toFloat().coerceIn(0f, 0.4f)
-        val hDeg = (((h % 360.0) + 360.0) % 360.0).toFloat()
+        val lN = (l / 100f).coerceIn(0f, 1f)
+        val cN = ((c / 100f) * 0.4f).coerceIn(0f, 0.4f)
+        val hDeg = (((h % 360f) + 360f) % 360f)
         return Transforms.oklchToColor(lN, cN, hDeg, alpha)
     }
 }
