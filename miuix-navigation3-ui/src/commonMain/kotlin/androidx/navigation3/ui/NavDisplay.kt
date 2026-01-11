@@ -28,7 +28,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.rememberTransition
@@ -60,6 +60,7 @@ import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
+import androidx.navigation3.animation.NavTransitionEasing
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
@@ -84,7 +85,6 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
@@ -597,6 +597,7 @@ fun <T : Any> NavDisplay(
             else -> initialZIndex + 1f
         }
     sceneMap[targetKey] = transition.targetState
+    sceneMap[initialKey] = transition.currentState
     zIndices[targetKey] = targetZIndex
 
     val overlayScenes = sceneState.overlayScenes
@@ -605,13 +606,22 @@ fun <T : Any> NavDisplay(
     // using the z-index of each screen to always show the entry on the topmost screen
     // The map is Pair<KCLass<Scene<T>, Scene.key> to a Set of NavEntry.key values
     val sceneToExcludedEntryMap =
-        remember(sceneMap.entries.toList(), overlayScenes.toList(), zIndices.toString()) {
+        remember(sceneMap.entries.toList(), overlayScenes.toList(), zIndices.toString(), transition.currentState, transition.targetState) {
             buildMap {
                 val scenes = mutableListOf<Scene<T>>()
+                // Ensure we include the current and target scenes from the transition, even if
+                // they haven't been fully synchronized to sceneMap yet.
+                val relevantScenes = sceneMap.values.toMutableSet().apply {
+                    add(transition.currentState)
+                    add(transition.targetState)
+                }
+
                 // First sort the non-overlay scenes by z-order in descending order.
-                sceneMap.entries
-                    .sortedByDescending { zIndices[it.key] }
-                    .map { it.value }
+                relevantScenes
+                    .sortedByDescending { scene ->
+                        val key = scene::class to scene.key to scene.entries
+                        if (zIndices.containsKey(key)) zIndices[key] else 0f
+                    }
                     .forEach { if (!scenes.contains(it)) scenes.add(it) }
 
                 // At this point we have a list in this order
@@ -678,73 +688,62 @@ fun <T : Any> NavDisplay(
             }
         }
     } else {
-        val channel = remember { Channel<Pair<Scene<T>, List<NavEntry<T>>>>(Channel.UNLIMITED) }
         LaunchedEffect(scene, sceneState.entries) {
-            channel.trySend(scene to sceneState.entries)
-        }
-        LaunchedEffect(channel) {
-            for ((targetScene, targetEntries) in channel) {
-                // Determine direction
-                val newIsPop = isPop(
-                    currentEntries.map { it.contentKey },
-                    targetEntries.map { it.contentKey }
-                )
-                isPop = newIsPop
+            // Determine direction
+            val newIsPop = isPop(currentEntries, sceneState.entries)
+            isPop = newIsPop
 
-                if (transitionState.currentState != targetScene) {
-                    // We are animating to the final state for regular navigate forward and regular pop
-                    transitionState.animateTo(targetScene)
-                } else {
-                    // Predictive Back has either been completed or cancelled
-                    // so now we need to seekTo+snapTo the final state
+            // Cleanup stale scenes from interrupted transitions
+            val currentKey = transitionState.currentState.let { it::class to it.key to it.entries }
+            val targetKey = scene.let { it::class to it.key to it.entries }
+            val activeTargetKey = transitionState.targetState.let { it::class to it.key to it.entries }
+            // Creating a copy to avoid ConcurrentModificationException
+            sceneMap.keys.toList().forEach { key ->
+                if (key != currentKey && key != targetKey && key != activeTargetKey) {
+                    sceneMap.remove(key)
+                }
+            }
+            zIndices.removeIf { key, _ -> key != currentKey && key != targetKey && key != activeTargetKey }
 
-                    // convert from nanoseconds to milliseconds
-                    val totalDuration = transition.totalDurationNanos / 1000000
-                    // Which way we have to seek depends on whether the
-                    // Predictive Back was completed or cancelled
-                    val predictiveBackCompleted = transition.targetState == targetScene
-                    val (finalFraction, remainingDuration) =
-                        if (predictiveBackCompleted) {
-                            // If it completed, animate to the state we were
-                            // already seeking to with the remaining duration
-                            1f to ((1f - transitionState.fraction) * totalDuration).toInt()
-                        } else {
-                            // It it got cancelled, animate back to the
-                            // initial state, reversing what we seeked to
-                            0f to (transitionState.fraction * totalDuration).toInt()
-                        }
+            if (transitionState.currentState != scene) {
+                transitionState.animateTo(scene)
+            } else {
+                // Predictive Back has been cancelled
+                // so now we need to seekTo+snapTo the final state
+
+                // convert from nanoseconds to milliseconds
+                val totalDuration = transition.totalDurationNanos / 1000000
+
+                // It it got cancelled, animate back to the
+                // initial state, reversing what we seeked to
+                if (transition.targetState != scene) {
+                    val remainingDuration = (transitionState.fraction * totalDuration).toInt()
                     animate(
                         transitionState.fraction,
-                        finalFraction,
+                        0f,
                         animationSpec = tween(remainingDuration),
                     ) { value, _ ->
                         this@LaunchedEffect.launch {
-                            if (value != finalFraction) {
-                                // Seek the transition towards the finalFraction
-                                transitionState.seekTo(value)
-                            }
-                            if (value == finalFraction) {
-                                // Once the animation finishes, we need to snap to the right state.
-                                transitionState.snapTo(targetScene)
-                            }
+                            // Seek the transition towards the finalFraction
+                            transitionState.seekTo(value, transition.targetState)
                         }
                     }
                 }
-
-                // Cleanup after animation settles
-                val settledKey = targetScene.let { it::class to it.key to it.entries }
-                // Creating a copy to avoid ConcurrentModificationException
-                @Suppress("ListIterator")
-                sceneMap.keys.toList().forEach { key ->
-                    if (key != settledKey) {
-                        sceneMap.remove(key)
-                    }
-                }
-                // Creating a copy to avoid ConcurrentModificationException
-                zIndices.removeIf { key, _ -> key != settledKey }
-
-                currentEntries = targetEntries
+                // Once the animation finishes, we need to snap to the right state.
+                transitionState.snapTo(scene)
             }
+
+            // Cleanup after animation settles
+            val settledKey = scene.let { it::class to it.key to it.entries }
+            // Creating a copy to avoid ConcurrentModificationException
+            sceneMap.keys.toList().forEach { key ->
+                if (key != settledKey) {
+                    sceneMap.remove(key)
+                }
+            }
+            zIndices.removeIf { key, _ -> key != settledKey }
+
+            currentEntries = sceneState.entries
         }
     }
 
@@ -794,9 +793,10 @@ fun <T : Any> NavDisplay(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getValue(targetScene::class to targetScene.key to targetScene.entries),
+                    sceneToExcludedEntryMap.getOrElse(targetScene::class to targetScene.key to targetScene.entries) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform()) getRoundedCorner() else 0.dp
+            val shape = ContinuousRoundedRectangle(topStart = corner, bottomStart = corner)
             val isEntryInterruption = inPredictiveBack && transition.currentState == previousScene
             val isTopLayer = if (!isEntryInterruption && (isPop || inPredictiveBack)) {
                 targetScene == transition.currentState
@@ -804,13 +804,7 @@ fun <T : Any> NavDisplay(
                 targetScene == transition.targetState
             }
             val roundedModifier = if (!isSettled && isTopLayer) {
-                Modifier
-                    .clip(
-                        ContinuousRoundedRectangle(
-                            topStart = corner,
-                            bottomStart = corner
-                        )
-                    )
+                Modifier.clip(shape)
             } else {
                 Modifier
             }
@@ -838,21 +832,21 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getValue(overlayScene::class to overlayScene.key to overlayScene.entries)
+                    sceneToExcludedEntryMap.getOrElse(overlayScene::class to overlayScene.key to overlayScene.entries) { emptySet() }
         ) {
             overlayScene.content.invoke()
         }
     }
 }
 
-private fun <T : Any> isPop(oldBackStack: List<T>, newBackStack: List<T>): Boolean {
+private fun <T : Any> isPop(oldBackStack: List<NavEntry<T>>, newBackStack: List<NavEntry<T>>): Boolean {
     // entire stack replaced
-    if (oldBackStack.first() != newBackStack.first()) return false
+    if (oldBackStack.first().contentKey != newBackStack.first().contentKey) return false
     // navigated
     if (newBackStack.size > oldBackStack.size) return false
 
     val divergingIndex =
-        newBackStack.indices.firstOrNull { index -> newBackStack[index] != oldBackStack[index] }
+        newBackStack.indices.firstOrNull { index -> newBackStack[index].contentKey != oldBackStack[index].contentKey }
     // if newBackStack never diverged from oldBackStack, then it is a clean subset of the oldStack
     // and is a pop
     return divergingIndex == null && newBackStack.size != oldBackStack.size
@@ -882,10 +876,10 @@ fun <T : Any> defaultTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     slideInHorizontally(
         initialOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     ) + fadeOut(
         animationSpec = tween(durationMillis = 500),
         targetAlpha = 0.5f,
@@ -897,13 +891,13 @@ fun <T : Any> defaultPopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     slideInHorizontally(
         initialOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     ) + fadeIn(
         animationSpec = tween(durationMillis = 500),
         initialAlpha = 0.3f,
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     )
 }
 
@@ -912,12 +906,15 @@ fun <T : Any> defaultPredictivePopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
     slideInHorizontally(
         initialOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     ) + fadeIn(
         animationSpec = tween(durationMillis = 500),
         initialAlpha = 0.3f,
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
     )
 }
+
+/** Default easing for navigation animations. */
+private val NavAnimationEasing: Easing = NavTransitionEasing(0.8f, 0.95f)
