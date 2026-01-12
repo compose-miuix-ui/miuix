@@ -465,13 +465,6 @@ private fun SuperBottomSheetColumn(
                         return available
                     }
 
-                    val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
-                    val alpha = if (newOffset >= 0) {
-                        1f - (newOffset / thresholdPx).coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    dimAlpha.floatValue = alpha
                     return available
                 }
                 return Offset.Zero
@@ -641,7 +634,8 @@ private fun DragHandleArea(
                         (dragOffsetY.value + dragAmount * 0.1f).coerceAtMost(0f)
                     } else if (newOffset >= 0 && !allowDismiss) {
                         // Damping down if not dismissible
-                        (dragOffsetY.value + dragAmount * 0.1f).coerceAtLeast(0f)
+                        val dampedAmount = if (dragAmount > 0) dragAmount * 0.1f else dragAmount
+                        (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
                     } else {
                         newOffset
                     }
