@@ -365,6 +365,18 @@ private fun SuperBottomSheetColumn(
         }
     }
 
+    val updateDimAlpha = remember(allowDismiss) {
+        { offset: Float ->
+            val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
+            val alpha = if (offset >= 0 && allowDismiss) {
+                1f - (offset / thresholdPx).coerceIn(0f, 1f)
+            } else {
+                1f
+            }
+            dimAlpha.floatValue = alpha
+        }
+    }
+
     // Settlement logic
     val performSettle: suspend (Float) -> Unit = remember(allowDismiss, density, windowHeight) {
         { velocity ->
@@ -426,6 +438,7 @@ private fun SuperBottomSheetColumn(
                     val consumedY = dragOffsetY.value - newOffset
                     if (consumedY != 0f) {
                         dragSnapChannel.trySend(newOffset)
+                        updateDimAlpha(newOffset)
                         return Offset(0f, consumedY * -1f)
                     }
                 }
@@ -438,12 +451,11 @@ private fun SuperBottomSheetColumn(
                 val delta = available.y
                 if (delta > 0) {
                     // If dismissal is disabled, return zero to trigger content overscroll
-                    if (!allowDismiss) {
-                        return Offset.Zero
-                    }
+                    if (!allowDismiss) return Offset.Zero
 
                     val newOffset = calculateNewOffset(dragOffsetY.value, delta)
                     dragSnapChannel.trySend(newOffset)
+                    updateDimAlpha(newOffset)
 
                     // Dismiss immediately if dragged beyond window height
                     val windowHeightPx = with(density) { windowHeight.toPx() }
@@ -547,11 +559,10 @@ private fun SuperBottomSheetColumn(
                 dragHandleColor = dragHandleColor,
                 allowDismiss = allowDismiss,
                 dragOffsetY = dragOffsetY,
-                dimAlpha = dimAlpha,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
-                sheetHeightPx = sheetHeightPx,
-                onSettle = performSettle, // Pass the same settle logic to the handle
+                onSettle = performSettle,
+                onUpdateAlpha = updateDimAlpha,
             )
 
             // Title and actions
@@ -572,11 +583,10 @@ private fun DragHandleArea(
     dragHandleColor: Color,
     allowDismiss: Boolean,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableFloatState,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    sheetHeightPx: MutableIntState,
-    onSettle: suspend (velocity: Float) -> Unit, // Callback for settlement
+    onSettle: suspend (velocity: Float) -> Unit,
+    onUpdateAlpha: (Float) -> Unit,
 ) {
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
@@ -637,14 +647,7 @@ private fun DragHandleArea(
                     }
 
                     dragSnapChannel.trySend(finalOffset)
-
-                    val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
-                    val alpha = if (finalOffset >= 0 && allowDismiss) {
-                        1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    dimAlpha.floatValue = alpha
+                    onUpdateAlpha(finalOffset)
                 },
                 onDragStarted = {
                     isPressing.floatValue = 1f
