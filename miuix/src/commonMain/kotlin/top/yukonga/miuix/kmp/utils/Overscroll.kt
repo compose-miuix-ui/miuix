@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
@@ -83,10 +84,14 @@ fun Modifier.overScrollOutOfBound(
 ): Modifier {
     if (!isEnabled()) return this
 
-    return this then OverscrollElement(
-        isVertical = isVertical,
-        nestedScrollToParent = nestedScrollToParent,
-    )
+    return this
+        .clipToBounds()
+        .then(
+            OverscrollElement(
+                isVertical = isVertical,
+                nestedScrollToParent = nestedScrollToParent,
+            ),
+        )
 }
 
 private data class OverscrollElement(
