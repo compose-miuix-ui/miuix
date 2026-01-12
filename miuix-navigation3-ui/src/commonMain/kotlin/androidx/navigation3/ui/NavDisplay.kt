@@ -555,8 +555,14 @@ fun <T : Any> NavDisplay(
     val transition = rememberTransition(transitionState, label = "scene")
 
     // Transition Handling
-    var currentEntries by remember { mutableStateOf(sceneState.entries) }
-    var isPop by remember { mutableStateOf(false) }
+    val currentEntriesState = remember { mutableStateOf(sceneState.entries) }
+    val isPopState = remember { mutableStateOf(false) }
+
+    if (currentEntriesState.value != sceneState.entries) {
+        isPopState.value = isPop(currentEntriesState.value, sceneState.entries)
+        currentEntriesState.value = sceneState.entries
+    }
+    val isPop = isPopState.value
 
     // Set up Gesture Back tracking
     val previousScene = sceneState.previousScenes.lastOrNull()
@@ -591,30 +597,31 @@ fun <T : Any> NavDisplay(
     val initialKey = sceneKeyOf(initialScene)
     val targetKey = sceneKeyOf(targetScene)
 
-    var didMutateKeys = false
-    val initialZIndex = run {
-        val hadInitial = zIndices.containsKey(initialKey)
-        val value = zIndices.getOrPut(initialKey) { 0f }
-        if (!hadInitial) didMutateKeys = true
-        value
+    // Update Z-Indices based on absolute position in the stack
+    val currentScenes = remember(sceneState) {
+        sceneState.previousScenes + sceneState.currentScene + sceneState.overlayScenes
     }
-    val targetZIndex =
-        when {
-            initialKey == targetKey -> initialZIndex
-            inPredictiveBack && transition.currentState == previousScene -> initialZIndex + 1f
-            isPop || inPredictiveBack -> initialZIndex - 1f
-            else -> initialZIndex + 1f
+
+    var didMutateKeys = false
+    currentScenes.forEachIndexed { index, scene ->
+        val key = sceneKeyOf(scene)
+        if (!zIndices.containsKey(key) || zIndices[key] != index.toFloat()) {
+            zIndices[key] = index.toFloat()
+            didMutateKeys = true
         }
+    }
+
+    val initialZIndex = zIndices.getOrElse(initialKey) { 0f }
+    val targetZIndex = zIndices.getOrElse(targetKey) {
+        currentScenes.indexOf(targetScene).let { if (it != -1) it.toFloat() else 0f }
+    }
+
     if (sceneMap[targetKey] !== targetScene) {
         sceneMap[targetKey] = targetScene
         didMutateKeys = true
     }
     if (sceneMap[initialKey] !== initialScene) {
         sceneMap[initialKey] = initialScene
-        didMutateKeys = true
-    }
-    if (!zIndices.containsKey(targetKey) || zIndices[targetKey] != targetZIndex) {
-        zIndices[targetKey] = targetZIndex
         didMutateKeys = true
     }
     if (didMutateKeys) excludedMapVersion += 1
@@ -708,10 +715,6 @@ fun <T : Any> NavDisplay(
         }
     } else {
         LaunchedEffect(scene, sceneState.entries) {
-            // Determine direction
-            val newIsPop = isPop(currentEntries, sceneState.entries)
-            isPop = newIsPop
-
             // Cleanup stale scenes from interrupted transitions
             val currentKey = sceneKeyOf(transitionState.currentState)
             val targetKey = sceneKeyOf(scene)
@@ -788,8 +791,6 @@ fun <T : Any> NavDisplay(
                 }
                 sceneKeyCache.keys.retainAll(activeScenes)
             }
-
-            currentEntries = sceneState.entries
         }
     }
 
@@ -820,7 +821,7 @@ fun <T : Any> NavDisplay(
             ContentTransform(
                 targetContentEnter = contentTransform(this).targetContentEnter,
                 initialContentExit = contentTransform(this).initialContentExit,
-                // z-index increases during navigate and decreases during pop.
+                // z-index increases based on stack position.
                 targetContentZIndex = targetZIndex,
                 sizeTransform = sizeTransform,
             )
@@ -845,19 +846,18 @@ fun <T : Any> NavDisplay(
                 ContinuousRoundedRectangle(topStart = corner, bottomStart = corner)
             }
 
-            val targetKey = sceneKeyOf(targetScene)
-            val targetZ = if (zIndices.containsKey(targetKey)) zIndices[targetKey] else 0f
+            val myKey = sceneKeyOf(targetScene)
+            val myIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == myKey }
+            val effectiveIndex = if (myIndex == -1) Int.MAX_VALUE else myIndex
 
-            val isTopLayer = if (!isSettled) {
-                val otherScene = if (targetScene == transition.targetState) transition.currentState else transition.targetState
-                val otherKey = sceneKeyOf(otherScene)
-                val otherZ = if (zIndices.containsKey(otherKey)) zIndices[otherKey] else 0f
-                targetZ > otherZ
-            } else {
-                false
-            }
+            val transitionTargetKey = sceneKeyOf(transition.targetState)
+            val targetIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == transitionTargetKey }
+            val effectiveTargetIndex = if (targetIndex == -1) Int.MAX_VALUE else targetIndex
 
-            val roundedModifier = if (isTopLayer) Modifier.clip(shape) else Modifier
+            val shouldDim = effectiveIndex < effectiveTargetIndex
+            val showCorner = effectiveIndex > 0 && !isSettled
+
+            val roundedModifier = if (showCorner) Modifier.clip(shape) else Modifier
 
             val blockInputModifier = if (!isSettled && targetScene != transition.targetState) {
                 remember {
@@ -886,11 +886,13 @@ fun <T : Any> NavDisplay(
                     label = "dimAlpha"
                 ) { state ->
                     val stateKey = sceneKeyOf(state)
-                    val stateZ = if (zIndices.containsKey(stateKey)) zIndices[stateKey] else 0f
-                    if (stateZ > targetZ) 0.4f else 0f
+                    val stateIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == stateKey }
+                    val effectiveStateIndex = if (stateIndex == -1) Int.MAX_VALUE else stateIndex
+
+                    if (effectiveIndex < effectiveStateIndex) 0.4f else 0f
                 }
 
-                val showDim = dimAlpha > 0f && (!isSettled || targetScene != transition.currentState)
+                val showDim = dimAlpha > 0f && (shouldDim || !isSettled)
                 if (showDim) {
                     androidx.compose.foundation.layout.Box(
                         modifier = Modifier
