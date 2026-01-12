@@ -37,6 +37,9 @@ kotlin {
     }
 
     sourceSets {
+        androidMain.dependencies {
+            implementation(libs.androidx.activity)
+        }
         commonMain.dependencies {
             implementation(projects.miuix)
             implementation(libs.androidx.collection)
