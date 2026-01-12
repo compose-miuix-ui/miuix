@@ -55,7 +55,7 @@ Scaffold {
 ### SuperBottomSheet Properties
 
 | Property Name              | Type                      | Description                                                    | Default Value                              | Required |
-| -------------------------- | ------------------------- | -------------------------------------------------------------- | ------------------------------------------ | -------- |
+| -------------------------- | ------------------------- |----------------------------------------------------------------| ------------------------------------------ |----------|
 | show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                          | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                   | No       |
 | title                      | String?                   | Bottom sheet title                                             | null                                       | No       |
@@ -72,6 +72,7 @@ Scaffold {
 | defaultWindowInsetsPadding | Boolean                   | Whether to apply default window insets padding                 | true                                       | No       |
 | dragHandleColor            | Color                     | Drag indicator color                                           | SuperBottomSheetDefaults.dragHandleColor() | No       |
 | allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                       | No       |
+| enableNestedScroll         | Boolean                   | Whether to enable nested scrolling for the content             | true                                       | No       |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                          | Yes      |
 
 ### SuperBottomSheetDefaults Object

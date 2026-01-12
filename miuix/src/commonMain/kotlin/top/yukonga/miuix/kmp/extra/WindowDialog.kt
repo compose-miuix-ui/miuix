@@ -21,8 +21,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -92,6 +96,13 @@ fun WindowDialog(
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
+
+    val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
+        maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
+    }
 
     if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
 
@@ -233,6 +244,7 @@ fun WindowDialog(
                         }
                     },
                     modifier = modifier,
+                    topInset = safeTopInset,
                     content = {
                         CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
                             content()

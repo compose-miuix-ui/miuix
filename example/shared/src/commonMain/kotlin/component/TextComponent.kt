@@ -11,6 +11,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -69,6 +70,8 @@ import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun TextComponent(
@@ -684,10 +687,15 @@ fun SuperBottomSheet(
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>,
 ) {
+    val allowDismiss = remember { mutableStateOf(true) }
+    val enableNestedScroll = remember { mutableStateOf(true) }
+
     val dropdownOptions = listOf("Option 1", "Option 2")
     SuperBottomSheet(
         title = "BottomSheet",
         show = showBottomSheet,
+        allowDismiss = allowDismiss.value,
+        enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
             showBottomSheet.value = false
         },
@@ -714,7 +722,34 @@ fun SuperBottomSheet(
             }
         },
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+                .scrollEndHaptic()
+                .overScrollVertical(),
+            overscrollEffect = null,
+        ) {
+            item {
+                SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
+                Card(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.secondaryContainer,
+                    ),
+                ) {
+                    SuperSwitch(
+                        title = "Allow Dismiss",
+                        summary = "Drag or Back to dismiss",
+                        checked = allowDismiss.value,
+                        onCheckedChange = { allowDismiss.value = it },
+                    )
+                    SuperSwitch(
+                        title = "Enable NestedScroll",
+                        summary = "Scroll content vs Drag sheet",
+                        checked = enableNestedScroll.value,
+                        onCheckedChange = { enableNestedScroll.value = it },
+                    )
+                }
+            }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }
                 Slider(
@@ -759,11 +794,16 @@ fun WindowBottomSheet(
     bottomSheetDropdownSelectedOption: MutableState<Int>,
     bottomSheetSuperSwitchState: MutableState<Boolean>,
 ) {
+    val allowDismiss = remember { mutableStateOf(true) }
+    val enableNestedScroll = remember { mutableStateOf(true) }
+
     val dropdownOptions = listOf("Option 1", "Option 2")
     var state: (() -> Unit)? = null
     WindowBottomSheet(
         title = "WindowBottomSheet",
         show = showBottomSheet,
+        allowDismiss = allowDismiss.value,
+        enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
             showBottomSheet.value = false
         },
@@ -791,7 +831,34 @@ fun WindowBottomSheet(
         },
     ) {
         state = LocalWindowBottomSheetState.current
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+                .scrollEndHaptic()
+                .overScrollVertical(),
+            overscrollEffect = null,
+        ) {
+            item {
+                SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
+                Card(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.secondaryContainer,
+                    ),
+                ) {
+                    SuperSwitch(
+                        title = "Allow Dismiss",
+                        summary = "Drag or Back to dismiss",
+                        checked = allowDismiss.value,
+                        onCheckedChange = { allowDismiss.value = it },
+                    )
+                    SuperSwitch(
+                        title = "Enable NestedScroll",
+                        summary = "Scroll content vs Drag sheet",
+                        checked = enableNestedScroll.value,
+                        onCheckedChange = { enableNestedScroll.value = it },
+                    )
+                }
+            }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }
                 Slider(

@@ -72,6 +72,7 @@ Scaffold {
 | defaultWindowInsetsPadding | Boolean                   | 是否应用默认窗口插入内边距                   | true                                       | 否       |
 | dragHandleColor            | Color                     | 拖拽指示器的颜色                             | SuperBottomSheetDefaults.dragHandleColor() | 否       |
 | allowDismiss               | Boolean                   | 是否允许通过拖拽或返回手势关闭抽屉           | true                                       | 否       |
+| enableNestedScroll         | Boolean                   | 是否允许内容嵌套滚动                         | true                                       | 否       |
 | content                    | @Composable () -> Unit    | 底部抽屉的内容                               | -                                          | 是       |
 
 ### SuperBottomSheetDefaults

@@ -40,6 +40,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -47,8 +48,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -57,6 +62,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigationevent.NavigationEventInfo
@@ -92,6 +98,7 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
+ * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param content The [Composable] content of the [SuperBottomSheet].
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -114,6 +121,7 @@ fun SuperBottomSheet(
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = SuperBottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
+    enableNestedScroll: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     if (!show.value) return
@@ -226,6 +234,7 @@ fun SuperBottomSheet(
             modifier = modifier,
             startAction = startAction,
             endAction = endAction,
+            enableNestedScroll = enableNestedScroll,
             content = content,
         )
     }
@@ -249,17 +258,14 @@ internal fun SuperBottomSheetContent(
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    topInset: Dp? = null,
+    enableNestedScroll: Boolean = true,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-
-    val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-    val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val statusBarHeight = remember { maxOf(statusBars, captionBar, displayCutout) }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
@@ -287,7 +293,8 @@ internal fun SuperBottomSheetContent(
             dragHandleColor = dragHandleColor,
             allowDismiss = allowDismiss,
             windowHeight = windowHeight,
-            statusBarHeight = statusBarHeight,
+            topInset = topInset,
+            enableNestedScroll = enableNestedScroll,
             sheetHeightPx = sheetHeightPx,
             dragOffsetY = dragOffsetY,
             dimAlpha = dimAlpha,
@@ -314,7 +321,8 @@ private fun SuperBottomSheetColumn(
     dragHandleColor: Color,
     allowDismiss: Boolean,
     windowHeight: Dp,
-    statusBarHeight: Dp,
+    topInset: Dp?,
+    enableNestedScroll: Boolean,
     sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
     dimAlpha: MutableFloatState,
@@ -325,6 +333,165 @@ private fun SuperBottomSheetColumn(
 ) {
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
+
+    val isSettling = remember { mutableStateOf(false) }
+
+    // Calculate inset top padding
+    val calculatedTopInset = if (topInset != null) {
+        topInset
+    } else {
+        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+        maxOf(statusBars, captionBar, displayCutout)
+    }
+
+    // Calculate damping effect
+    val calculateNewOffset = remember(allowDismiss) {
+        { current: Float, delta: Float ->
+            val newOffset = current + delta
+            if (newOffset < 0) {
+                // Damping for upward drag
+                val dampingFactor = 0.1f
+                (current + delta * dampingFactor).coerceAtMost(0f)
+            } else if (newOffset >= 0 && !allowDismiss) {
+                // Damping for downward drag if not dismissible
+                val dampingFactor = 0.1f
+                val dampedAmount = if (delta > 0) delta * dampingFactor else delta
+                (current + dampedAmount).coerceAtLeast(0f)
+            } else {
+                newOffset
+            }
+        }
+    }
+
+    val updateDimAlpha = remember(allowDismiss) {
+        { offset: Float ->
+            val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
+            val alpha = if (offset >= 0 && allowDismiss) {
+                1f - (offset / thresholdPx).coerceIn(0f, 1f)
+            } else {
+                1f
+            }
+            dimAlpha.floatValue = alpha
+        }
+    }
+
+    // Settlement logic
+    val performSettle: suspend (Float) -> Unit = remember(allowDismiss, density, windowHeight) {
+        { velocity ->
+            if (!isSettling.value) {
+                isSettling.value = true
+                val currentOffset = dragOffsetY.value
+                val dismissThresholdPx = with(density) { 150.dp.toPx() }
+                val velocityThresholdPx = with(density) { 1000.dp.toPx() }
+                val windowHeightPx = with(density) { windowHeight.toPx() }
+
+                val shouldDismiss = allowDismiss && (
+                    (velocity > velocityThresholdPx) ||
+                        (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
+                    )
+
+                if (shouldDismiss) {
+                    if (currentOffset >= windowHeightPx) {
+                        onDismissRequest?.invoke()
+                    } else {
+                        try {
+                            dragOffsetY.animateTo(
+                                targetValue = windowHeightPx,
+                                animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
+                                initialVelocity = velocity,
+                            )
+                            onDismissRequest?.invoke()
+                        } catch (_: Exception) {
+                            // ignore
+                        }
+                    }
+                } else {
+                    // Restore position
+                    // Ignore downward velocity if dismissal is disabled to prevent the sheet from being
+                    // pushed down, while preserving upward velocity for a quicker snap back.
+                    val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
+
+                    dragOffsetY.animateTo(
+                        targetValue = 0f,
+                        animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
+                        initialVelocity = effectiveVelocity,
+                    )
+                    dimAlpha.floatValue = 1f
+                    isSettling.value = false
+                }
+            }
+        }
+    }
+
+    // Nested scroll logic
+    val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, windowHeight) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (!enableNestedScroll || isSettling.value) return Offset.Zero
+
+                val delta = available.y
+                // If the sheet is offset, prioritize restoring its position
+                if (delta < 0 && dragOffsetY.value > 0) {
+                    val newOffset = calculateNewOffset(dragOffsetY.value, delta).coerceAtLeast(0f)
+                    val consumedY = dragOffsetY.value - newOffset
+                    if (consumedY != 0f) {
+                        dragSnapChannel.trySend(newOffset)
+                        updateDimAlpha(newOffset)
+                        return Offset(0f, consumedY * -1f)
+                    }
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (!enableNestedScroll || isSettling.value) return Offset.Zero
+
+                val delta = available.y
+                if (delta > 0) {
+                    // If dismissal is disabled, return zero to trigger content overscroll
+                    if (!allowDismiss) return Offset.Zero
+
+                    val newOffset = calculateNewOffset(dragOffsetY.value, delta)
+                    dragSnapChannel.trySend(newOffset)
+                    updateDimAlpha(newOffset)
+
+                    // Dismiss immediately if dragged beyond window height
+                    val windowHeightPx = with(density) { windowHeight.toPx() }
+                    if (newOffset > windowHeightPx) {
+                        isSettling.value = true
+                        onDismissRequest?.invoke()
+                        return available
+                    }
+
+                    return available
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+
+                // Take over fling if the sheet is offset
+                if (dragOffsetY.value > 0) {
+                    performSettle(available.y)
+                    return available
+                }
+                return Velocity.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+
+                if (dragOffsetY.value > 0) {
+                    performSettle(available.y)
+                    return available
+                }
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
 
     // Calculate the overscroll offset for background fill
     val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
@@ -356,10 +523,11 @@ private fun SuperBottomSheetColumn(
                 .pointerInput(Unit) {
                     detectTapGestures { /* Consume click to prevent dismissal */ }
                 }
+                .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .heightIn(max = windowHeight - statusBarHeight)
+                .heightIn(max = windowHeight - calculatedTopInset)
                 .onGloballyPositioned { coordinates ->
                     sheetHeightPx.intValue = coordinates.size.height
                 }
@@ -383,13 +551,11 @@ private fun SuperBottomSheetColumn(
             DragHandleArea(
                 dragHandleColor = dragHandleColor,
                 allowDismiss = allowDismiss,
-                windowHeight = windowHeight,
-                sheetHeightPx = sheetHeightPx,
                 dragOffsetY = dragOffsetY,
-                dimAlpha = dimAlpha,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
-                onDismissRequest = onDismissRequest,
+                onSettle = performSettle,
+                onUpdateAlpha = updateDimAlpha,
             )
 
             // Title and actions
@@ -409,19 +575,15 @@ private fun SuperBottomSheetColumn(
 private fun DragHandleArea(
     dragHandleColor: Color,
     allowDismiss: Boolean,
-    windowHeight: Dp,
-    sheetHeightPx: MutableIntState,
     dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableFloatState,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    onDismissRequest: (() -> Unit)?,
+    onSettle: suspend (velocity: Float) -> Unit,
+    onUpdateAlpha: (Float) -> Unit,
 ) {
-    val dragStartOffset = remember { mutableFloatStateOf(0f) }
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
-    val density = LocalDensity.current
 
     Box(
         modifier = Modifier
@@ -430,7 +592,6 @@ private fun DragHandleArea(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
-                        // Provide immediate press feedback even before dragging
                         isPressing.floatValue = 1f
                         coroutineScope.launch {
                             pressScale.animateTo(
@@ -445,7 +606,6 @@ private fun DragHandleArea(
                             )
                         }
 
-                        // Wait for release; if released without drag, reset here.
                         val released = tryAwaitRelease()
                         if (released) {
                             isPressing.floatValue = 0f
@@ -470,29 +630,20 @@ private fun DragHandleArea(
                 state = rememberDraggableState { dragAmount ->
                     val newOffset = dragOffsetY.value + dragAmount
                     val finalOffset = if (newOffset < 0) {
-                        val dampingFactor = 0.1f
-                        val dampedAmount = dragAmount * dampingFactor
-                        (dragOffsetY.value + dampedAmount).coerceAtMost(0f)
+                        // Damping up
+                        (dragOffsetY.value + dragAmount * 0.1f).coerceAtMost(0f)
                     } else if (newOffset >= 0 && !allowDismiss) {
-                        val dampingFactor = 0.1f
-                        val dampedAmount = if (dragAmount > 0) dragAmount * dampingFactor else dragAmount
+                        // Damping down if not dismissible
+                        val dampedAmount = if (dragAmount > 0) dragAmount * 0.1f else dragAmount
                         (dragOffsetY.value + dampedAmount).coerceAtLeast(0f)
                     } else {
                         newOffset
                     }
 
                     dragSnapChannel.trySend(finalOffset)
-
-                    val thresholdPx = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
-                    val alpha = if (finalOffset >= 0 && allowDismiss) {
-                        1f - (finalOffset / thresholdPx).coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    dimAlpha.floatValue = alpha
+                    onUpdateAlpha(finalOffset)
                 },
                 onDragStarted = {
-                    dragStartOffset.floatValue = dragOffsetY.value
                     isPressing.floatValue = 1f
                     coroutineScope.launch {
                         pressScale.animateTo(1.15f, animationSpec = tween(durationMillis = 100))
@@ -501,7 +652,7 @@ private fun DragHandleArea(
                         pressWidth.animateTo(55f, animationSpec = tween(durationMillis = 100))
                     }
                 },
-                onDragStopped = {
+                onDragStopped = { velocity ->
                     isPressing.floatValue = 0f
                     coroutineScope.launch {
                         pressScale.animateTo(1f, animationSpec = tween(durationMillis = 150))
@@ -510,37 +661,14 @@ private fun DragHandleArea(
                         pressWidth.animateTo(45f, animationSpec = tween(durationMillis = 150))
                     }
 
-                    val currentOffset = dragOffsetY.value
-                    val dragDelta = currentOffset - dragStartOffset.floatValue
-                    val dismissThresholdPx = with(density) { 150.dp.toPx() }
-
-                    when {
-                        allowDismiss && (dragDelta >= dismissThresholdPx) -> {
-                            onDismissRequest?.invoke()
-                            val windowHeightPx = with(density) { windowHeight.toPx() }
-                            coroutineScope.launch {
-                                dragOffsetY.animateTo(
-                                    targetValue = windowHeightPx,
-                                    animationSpec = tween(durationMillis = 250),
-                                )
-                            }
-                        }
-
-                        else -> {
-                            coroutineScope.launch {
-                                dragOffsetY.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 250),
-                                )
-                            }
-                            dimAlpha.floatValue = 1f
-                        }
+                    // Delegate the settle logic to the shared function
+                    coroutineScope.launch {
+                        onSettle(velocity)
                     }
                 },
             ),
         contentAlignment = Alignment.Center,
     ) {
-        // Drag handle indicator
         val handleAlpha = lerp(0.2f, 0.35f, isPressing.floatValue)
 
         Box(

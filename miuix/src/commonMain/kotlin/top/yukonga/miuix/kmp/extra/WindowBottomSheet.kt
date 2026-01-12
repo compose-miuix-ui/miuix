@@ -17,7 +17,12 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +75,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
+ * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -92,9 +98,18 @@ fun WindowBottomSheet(
     defaultWindowInsetsPadding: Boolean = true,
     dragHandleColor: Color = WindowBottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
+    enableNestedScroll: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { MutableTransitionState(false) }
+
+    val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
+    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+
+    val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
+        maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
+    }
 
     if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
 
@@ -249,6 +264,8 @@ fun WindowBottomSheet(
                         }
                     },
                     modifier = modifier,
+                    topInset = safeTopInset,
+                    enableNestedScroll = enableNestedScroll,
                     startAction = startAction,
                     endAction = endAction,
                     content = {
