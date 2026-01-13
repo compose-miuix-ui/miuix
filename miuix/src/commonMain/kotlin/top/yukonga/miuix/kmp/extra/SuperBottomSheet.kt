@@ -521,7 +521,7 @@ private fun SuperBottomSheetColumn(
         Column(
             modifier = modifier
                 .pointerInput(Unit) {
-                    detectTapGestures { /* Consume click to prevent dismissal */ }
+                    detectTapGestures { /* Consume click */ }
                 }
                 .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)

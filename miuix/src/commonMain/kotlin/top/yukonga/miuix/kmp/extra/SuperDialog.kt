@@ -258,7 +258,7 @@ internal fun SuperDialogContent(
             },
         )
         .pointerInput(Unit) {
-            detectTapGestures { /* Consume click to prevent dismissal */ }
+            detectTapGestures { /* Consume click */ }
         }
         .clip(ContinuousRoundedRectangle(bottomCornerRadius))
         .background(backgroundColor)

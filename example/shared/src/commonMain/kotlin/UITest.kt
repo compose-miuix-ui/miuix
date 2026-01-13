@@ -74,6 +74,8 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -272,7 +274,14 @@ private fun Home(
     navToAbout: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    Scaffold {
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            if (uiState.isWideScreen) {
+                SnackbarHost(state = snackbarHostState)
+            }
+        },
+    ) {
         SupportingPaneScaffold(
             main = {
                 if (uiState.isWideScreen) {
@@ -281,6 +290,7 @@ private fun Home(
                         onUiStateChange = onUiStateChange,
                         colorMode = colorMode,
                         seedIndex = seedIndex,
+                        snackbarHostState = snackbarHostState,
                         layoutDirection = layoutDirection,
                         navToAbout = navToAbout,
                     )
@@ -291,6 +301,7 @@ private fun Home(
                         onUiStateChange = onUiStateChange,
                         colorMode = colorMode,
                         seedIndex = seedIndex,
+                        snackbarHostState = snackbarHostState,
                         padding = padding,
                         navToAbout = navToAbout,
                     )
@@ -374,6 +385,7 @@ private fun WideScreenContent(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
     navToAbout: () -> Unit,
 ) {
@@ -401,6 +413,7 @@ private fun WideScreenContent(
         popupHost = { },
     ) { padding ->
         AppPager(
+            snackbarHostState = snackbarHostState,
             padding = PaddingValues(top = padding.calculateTopPadding()),
             uiState = uiState,
             onUiStateChange = onUiStateChange,
@@ -421,6 +434,7 @@ private fun CompactScreenLayout(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
     navToAbout: () -> Unit,
 ) {
@@ -444,8 +458,14 @@ private fun CompactScreenLayout(
             )
         },
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
+        snackbarHost = {
+            if (!uiState.isWideScreen) {
+                SnackbarHost(state = snackbarHostState)
+            }
+        },
     ) { innerPadding ->
         AppPager(
+            snackbarHostState = snackbarHostState,
             padding = innerPadding,
             uiState = uiState,
             onUiStateChange = onUiStateChange,
@@ -634,6 +654,7 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
 
 @Composable
 fun AppPager(
+    snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
@@ -652,6 +673,7 @@ fun AppPager(
         pageContent = { page ->
             when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(
+                    snackbarHostState = snackbarHostState,
                     padding = padding,
                     enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                     enableOverScroll = uiState.enableOverScroll,

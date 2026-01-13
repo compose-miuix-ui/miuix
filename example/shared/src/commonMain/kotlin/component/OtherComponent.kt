@@ -56,6 +56,9 @@ import top.yukonga.miuix.kmp.basic.RangeSlider
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
@@ -66,7 +69,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import kotlin.math.round
 
-fun LazyListScope.otherComponent() {
+fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
     item(key = "button") {
         var buttonText by remember { mutableStateOf("Cancel") }
         var submitButtonText by remember { mutableStateOf("Submit") }
@@ -119,6 +122,132 @@ fun LazyListScope.otherComponent() {
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
             )
+        }
+    }
+
+    item(key = "snackbar") {
+        SmallTitle(text = "Snackbar")
+        val scope = rememberCoroutineScope()
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .padding(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        text = "Short",
+                        onClick = {
+                            scope.launch {
+                                hostState.showSnackbar("This is a short message")
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        text = "Long",
+                        onClick = {
+                            scope.launch {
+                                hostState.showSnackbar(
+                                    message = "This is a long message to display more text content",
+                                    duration = SnackbarDuration.Long,
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        text = "Custom (2s)",
+                        onClick = {
+                            scope.launch {
+                                hostState.showSnackbar(
+                                    message = "This message will last for 2 seconds",
+                                    duration = SnackbarDuration.Custom(2000L),
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    var text by remember { mutableStateOf("Action") }
+                    TextButton(
+                        text = text,
+                        onClick = {
+                            scope.launch {
+                                text = "Action: Alive"
+                                val result = hostState.showSnackbar(
+                                    message = "This message has an action",
+                                    actionLabel = "Undo",
+                                    duration = SnackbarDuration.Short,
+                                )
+                                text = when (result) {
+                                    SnackbarResult.ActionPerformed -> "Action: Undo"
+                                    else -> "Action: Expired"
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        text = "Dismissible",
+                        onClick = {
+                            scope.launch {
+                                hostState.showSnackbar(
+                                    message = "This message can be removed via the close button",
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Long,
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        text = "Indefinite",
+                        onClick = {
+                            scope.launch {
+                                hostState.showSnackbar(
+                                    message = "Indefinite message, dismiss manually",
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Indefinite,
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        text = "Dismiss",
+                        onClick = {
+                            scope.launch {
+                                hostState.oldestSnackbarData()?.dismiss()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
     }
 
