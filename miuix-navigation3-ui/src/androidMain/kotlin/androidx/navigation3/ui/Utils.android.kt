@@ -8,11 +8,9 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun isInMultiWindowMode(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        val activity = LocalActivity.current
-        activity?.isInMultiWindowMode == true
-    } else {
-        false
-    }
+actual fun isInMultiWindowMode(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    val activity = LocalActivity.current
+    activity?.isInMultiWindowMode == true
+} else {
+    false
 }

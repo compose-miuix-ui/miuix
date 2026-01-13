@@ -119,7 +119,7 @@ fun NavTestPage(
                     modifier = Modifier.padding(12.dp),
                 ) {
                     SuperArrow(
-                        title = "Push another Test Page",
+                        title = "Push another NavTest Page",
                         onClick = { backStack.add(Screen.NavTestPage(Random.nextLong().toString())) },
                     )
                 }

@@ -1,22 +1,6 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/*
- * Copyright 2025 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package androidx.navigation3.scene
 
 import androidx.compose.runtime.Composable
@@ -38,21 +22,17 @@ internal data class SinglePaneScene<T : Any>(
         other as SinglePaneScene<*>
 
         return key == other.key &&
-                entry == other.entry &&
-                previousEntries == other.previousEntries &&
-                entries == other.entries
+            entry == other.entry &&
+            previousEntries == other.previousEntries &&
+            entries == other.entries
     }
 
-    override fun hashCode(): Int {
-        return key.hashCode() * 31 +
-                entry.hashCode() * 31 +
-                previousEntries.hashCode() * 31 +
-                entries.hashCode() * 31
-    }
+    override fun hashCode(): Int = key.hashCode() * 31 +
+        entry.hashCode() * 31 +
+        previousEntries.hashCode() * 31 +
+        entries.hashCode() * 31
 
-    override fun toString(): String {
-        return "SinglePaneScene(key=$key, entry=$entry, previousEntries=$previousEntries, entries=$entries)"
-    }
+    override fun toString(): String = "SinglePaneScene(key=$key, entry=$entry, previousEntries=$previousEntries, entries=$entries)"
 }
 
 /**
@@ -61,13 +41,11 @@ internal data class SinglePaneScene<T : Any>(
  */
 class SinglePaneSceneStrategy<T : Any> : SceneStrategy<T> {
 
-    override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T> {
-        return SinglePaneScene(
-            key = entries.last().contentKey,
-            entry = entries.last(),
-            previousEntries = entries.dropLast(1),
-        )
-    }
+    override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T> = SinglePaneScene(
+        key = entries.last().contentKey,
+        entry = entries.last(),
+        previousEntries = entries.dropLast(1),
+    )
 }
 
 internal fun <T : Any> SceneStrategy<T>.calculateSceneWithSinglePaneFallback(

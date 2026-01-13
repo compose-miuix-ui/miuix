@@ -305,7 +305,7 @@ fun SettingsContent(
                 val backStack = LocalBackStack.current
                 SuperArrow(
                     title = "NavTest",
-                    summary = "Navigate to a NavTestPage.",
+                    summary = "Navigate to a NavTest Page.",
                     onClick = {
                         backStack.add(Screen.NavTestPage(Random.nextLong().toString()))
                     },

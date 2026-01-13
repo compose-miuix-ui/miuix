@@ -1,22 +1,6 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/*
- * Copyright 2025 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:JvmName("NavDisplayKt")
 @file:JvmMultifileClass
 
@@ -43,6 +27,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -108,7 +93,7 @@ object NavDisplay {
      *   is null, the transition will fallback to the transition set on the [NavDisplay]
      */
     fun transitionSpec(
-        transitionSpec: AnimatedContentTransitionScope<Scene<*>>.() -> ContentTransform?
+        transitionSpec: AnimatedContentTransitionScope<Scene<*>>.() -> ContentTransform?,
     ): Map<String, Any> = mapOf(TRANSITION_SPEC to transitionSpec)
 
     /**
@@ -125,7 +110,7 @@ object NavDisplay {
      *   this is null, the transition will fallback to the transition set on the [NavDisplay]
      */
     fun popTransitionSpec(
-        popTransitionSpec: AnimatedContentTransitionScope<Scene<*>>.() -> ContentTransform?
+        popTransitionSpec: AnimatedContentTransitionScope<Scene<*>>.() -> ContentTransform?,
     ): Map<String, Any> = mapOf(POP_TRANSITION_SPEC to popTransitionSpec)
 
     /**
@@ -143,10 +128,9 @@ object NavDisplay {
      *   the transition set on the [NavDisplay]
      */
     fun predictivePopTransitionSpec(
-        predictivePopTransitionSpec:
-        AnimatedContentTransitionScope<Scene<*>>.(
-            @NavigationEvent.SwipeEdge Int
-        ) -> ContentTransform?
+        predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<*>>.(
+            @NavigationEvent.SwipeEdge Int,
+        ) -> ContentTransform?,
     ): Map<String, Any> = mapOf(PREDICTIVE_POP_TRANSITION_SPEC to predictivePopTransitionSpec)
 
     internal const val TRANSITION_SPEC = "transitionSpec"
@@ -212,9 +196,8 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec:
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int
+    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
+        @NavigationEvent.SwipeEdge Int,
     ) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
     entryProvider: (key: T) -> NavEntry<T>,
@@ -299,9 +282,8 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec:
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int
+    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
+        @NavigationEvent.SwipeEdge Int,
     ) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
     onBack: () -> Unit,
@@ -375,9 +357,8 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec:
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int
+    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
+        @NavigationEvent.SwipeEdge Int,
     ) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
 ) {
@@ -427,7 +408,7 @@ fun <T : Any> NavDisplay(
     fun sceneKeyOf(target: Scene<T>): SceneKey = sceneKeyCache.getOrPut(target) { target.createSceneKey() }
 
     // Explicit invalidation signal for rebuilding sceneToExcludedEntryMap.
-    var excludedMapVersion by remember { mutableStateOf(0) }
+    var excludedMapVersion by remember { mutableIntStateOf(0) }
 
     val initialScene = transition.currentState
     val targetScene = transition.targetState
@@ -671,13 +652,13 @@ fun <T : Any> NavDisplay(
         val isSettled = transition.currentState == transition.targetState
         val sceneLifecycleOwner =
             rememberLifecycleOwner(
-                maxLifecycle = if (isSettled) Lifecycle.State.RESUMED else Lifecycle.State.STARTED
+                maxLifecycle = if (isSettled) Lifecycle.State.RESUMED else Lifecycle.State.STARTED,
             )
         CompositionLocalProvider(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
+                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
             val shape = remember(corner) {
@@ -715,13 +696,13 @@ fun <T : Any> NavDisplay(
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .then(roundedModifier)
-                    .then(blockInputModifier)
+                    .then(blockInputModifier),
             ) {
                 targetScene.content()
 
                 val dimAlpha by transition.animateFloat(
                     transitionSpec = { tween(durationMillis = 550, easing = NavAnimationEasing) },
-                    label = "dimAlpha"
+                    label = "dimAlpha",
                 ) { state ->
                     val stateKey = sceneKeyOf(state)
                     val stateIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == stateKey }
@@ -736,7 +717,7 @@ fun <T : Any> NavDisplay(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer { alpha = dimAlpha }
-                            .background(Color.Black)
+                            .background(Color.Black),
                     )
                 }
             }
@@ -765,7 +746,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() }
+                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }
@@ -787,62 +768,59 @@ private fun <T : Any> isPop(oldBackStack: List<T>, newBackStack: List<T>): Boole
 
 @Suppress("UNCHECKED_CAST")
 private fun <T : Any> Scene<T>.contentTransform(
-    key: String
-): (AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform)? {
-    return metadata[key] as? AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform
-}
+    key: String,
+): (AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform)? = metadata[key] as? AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform
 
 @Suppress("UNCHECKED_CAST")
-private fun <T : Any> Scene<T>.predictivePopSpec():
-        (AnimatedContentTransitionScope<Scene<T>>.(
-            @NavigationEvent.SwipeEdge Int
-        ) -> ContentTransform)? {
-    return metadata[PREDICTIVE_POP_TRANSITION_SPEC]
-            as?
-            AnimatedContentTransitionScope<Scene<T>>.(
-                @NavigationEvent.SwipeEdge Int
-            ) -> ContentTransform
-}
+private fun <T : Any> Scene<T>.predictivePopSpec(): (
+    AnimatedContentTransitionScope<Scene<T>>.(
+        @NavigationEvent.SwipeEdge Int,
+    ) -> ContentTransform
+)? = metadata[PREDICTIVE_POP_TRANSITION_SPEC]
+    as?
+    AnimatedContentTransitionScope<Scene<T>>.(
+        @NavigationEvent.SwipeEdge Int,
+    ) -> ContentTransform
 
 /** Default [transitionSpec] for forward navigation to be used by [NavDisplay]. */
-fun <T : Any> defaultTransitionSpec():
-        AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
+fun <T : Any> defaultTransitionSpec(): AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        ), slideOutHorizontally(
+        ),
+        slideOutHorizontally(
             targetOffsetX = { -it / 4 },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        )
+        ),
     )
 }
 
 /** Default [transitionSpec] for pop navigation to be used by [NavDisplay]. */
-fun <T : Any> defaultPopTransitionSpec():
-        AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
+fun <T : Any> defaultPopTransitionSpec(): AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { -it / 4 },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        ), slideOutHorizontally(
+        ),
+        slideOutHorizontally(
             targetOffsetX = { it },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        )
+        ),
     )
 }
 
 /** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
-fun <T : Any> defaultPredictivePopTransitionSpec():
-        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
+fun <T : Any> defaultPredictivePopTransitionSpec(): AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { -it / 4 },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        ), slideOutHorizontally(
+        ),
+        slideOutHorizontally(
             targetOffsetX = { it },
             animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        )
+        ),
     )
 }
 
@@ -857,11 +835,10 @@ private data class SceneKey(
 )
 
 /** Create a stable key for a Scene based on its class, public key, and entry content keys. */
-private fun <T : Any> Scene<T>.createSceneKey(): SceneKey =
-    SceneKey(
-        sceneClass = this::class,
-        key = this.key,
-        entryContentKeys = buildList(entries.size) {
-            entries.fastForEach { entry -> add(entry.contentKey) }
-        },
-    )
+private fun <T : Any> Scene<T>.createSceneKey(): SceneKey = SceneKey(
+    sceneClass = this::class,
+    key = this.key,
+    entryContentKeys = buildList(entries.size) {
+        entries.fastForEach { entry -> add(entry.contentKey) }
+    },
+)

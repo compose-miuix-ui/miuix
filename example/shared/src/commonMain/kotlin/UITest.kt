@@ -10,12 +10,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,9 +52,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.adaptive.SupportingPaneScaffold
+import androidx.navigation3.adaptive.utils.shouldShowSplitPane
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -80,7 +76,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -97,9 +92,6 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.FPSMonitor
 
 private object UIConstants {
-    val WIDE_SCREEN_THRESHOLD = 840.dp
-    val MEDIUM_WIDTH_THRESHOLD = 600.dp
-    const val PORTRAIT_ASPECT_RATIO_THRESHOLD = 1.2f
     const val MAIN_PAGE_INDEX = 0
     const val ICON_PAGE_INDEX = 1
     const val COLOR_PAGE_INDEX = 2
@@ -199,69 +191,60 @@ fun UITest(
         LocalHandlePageChange provides handlePageChange,
         LocalBackStack provides backStack,
     ) {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
+        val isWideScreen = shouldShowSplitPane()
 
-            val isWideByShape =
-                maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD && (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
-
-            val isWideScreen = isDefinitelyWide || isWideByShape
-
-            LaunchedEffect(isWideScreen) {
-                if (uiState.isWideScreen != isWideScreen) {
-                    uiState = uiState.copy(isWideScreen = isWideScreen)
-                }
+        LaunchedEffect(isWideScreen) {
+            if (uiState.isWideScreen != isWideScreen) {
+                uiState = uiState.copy(isWideScreen = isWideScreen)
             }
-            LaunchedEffect(enableOverScroll) {
-                if (uiState.enableOverScroll != enableOverScroll) {
-                    uiState = uiState.copy(enableOverScroll = enableOverScroll)
-                }
-            }
-
-            val entryProvider = remember(backStack, uiState, colorMode, seedIndex) {
-                entryProvider<NavKey> {
-                    entry(Screen.Home) {
-                        Home(
-                            uiState = uiState,
-                            onUiStateChange = { uiState = it },
-                            colorMode = colorMode,
-                            seedIndex = seedIndex,
-                            padding = padding,
-                            navigationItems = navigationItems,
-                            navToAbout = { backStack.add(Screen.About) },
-                        )
-                    }
-                    entry(Screen.About) {
-                        AboutPage(
-                            padding = padding,
-                            showTopAppBar = uiState.showTopAppBar,
-                            isWideScreen = uiState.isWideScreen,
-                            enableScrollEndHaptic = uiState.enableScrollEndHaptic,
-                            enableOverScroll = uiState.enableOverScroll,
-                            onBack = { backStack.removeLast() },
-                        )
-                    }
-                    entry<Screen.NavTestPage> {
-                        NavTestPage(
-                            padding = padding,
-                            showTopAppBar = uiState.showTopAppBar,
-                            isWideScreen = uiState.isWideScreen,
-                            enableScrollEndHaptic = uiState.enableScrollEndHaptic,
-                            enableOverScroll = uiState.enableOverScroll,
-                            onBack = { backStack.removeLast() },
-                        )
-                    }
-                }
-            }
-
-            NavDisplay(
-                backStack = backStack,
-                entryProvider = entryProvider,
-                onBack = { backStack.removeLast() },
-            )
         }
+        LaunchedEffect(enableOverScroll) {
+            if (uiState.enableOverScroll != enableOverScroll) {
+                uiState = uiState.copy(enableOverScroll = enableOverScroll)
+            }
+        }
+
+        val entryProvider = remember(backStack, uiState, colorMode, seedIndex) {
+            entryProvider<NavKey> {
+                entry(Screen.Home) {
+                    Home(
+                        uiState = uiState,
+                        onUiStateChange = { uiState = it },
+                        colorMode = colorMode,
+                        seedIndex = seedIndex,
+                        padding = padding,
+                        navigationItems = navigationItems,
+                        navToAbout = { backStack.add(Screen.About) },
+                    )
+                }
+                entry(Screen.About) {
+                    AboutPage(
+                        padding = padding,
+                        showTopAppBar = uiState.showTopAppBar,
+                        isWideScreen = uiState.isWideScreen,
+                        enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                        enableOverScroll = uiState.enableOverScroll,
+                        onBack = { backStack.removeLast() },
+                    )
+                }
+                entry<Screen.NavTestPage> {
+                    NavTestPage(
+                        padding = padding,
+                        showTopAppBar = uiState.showTopAppBar,
+                        isWideScreen = uiState.isWideScreen,
+                        enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                        enableOverScroll = uiState.enableOverScroll,
+                        onBack = { backStack.removeLast() },
+                    )
+                }
+            }
+        }
+
+        NavDisplay(
+            backStack = backStack,
+            entryProvider = entryProvider,
+            onBack = { backStack.removeLast() },
+        )
     }
 
     AnimatedVisibility(
@@ -288,81 +271,10 @@ private fun Home(
     navigationItems: List<NavigationItem>,
     navToAbout: () -> Unit,
 ) {
-    if (uiState.isWideScreen) {
-        WideScreenLayout(
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
-            padding = padding,
-            navToAbout = navToAbout,
-        )
-    } else {
-        CompactScreenLayout(
-            navigationItems = navigationItems,
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
-            padding = padding,
-            navToAbout = navToAbout,
-        )
-    }
-}
-
-@Composable
-private fun WideScreenLayout(
-    uiState: UIState,
-    onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>,
-    seedIndex: MutableState<Int>,
-    padding: PaddingValues,
-    navToAbout: () -> Unit,
-) {
-    val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
-
-    val windowWidth = windowInfo.containerSize.width
-    var weight by remember(windowWidth) { mutableFloatStateOf(0.4f) }
-    var potentialWeight by remember { mutableFloatStateOf(weight) }
-    val dragState = rememberDraggableState { delta ->
-        val nextPotentialWeight = potentialWeight + delta / windowWidth
-        potentialWeight = nextPotentialWeight
-        val clampedWeight = nextPotentialWeight.coerceIn(0.2f, 0.5f)
-        if (clampedWeight == nextPotentialWeight) {
-            weight = clampedWeight
-        }
-    }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        val barScrollBehavior = MiuixScrollBehavior()
-        Row(
-            modifier = Modifier.background(MiuixTheme.colorScheme.surface)
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding(),
-                    start = padding.calculateStartPadding(layoutDirection),
-                    end = padding.calculateEndPadding(layoutDirection),
-                ),
-        ) {
-            Box(modifier = Modifier.weight(weight)) {
-                WideScreenPanel(
-                    barScrollBehavior = barScrollBehavior,
-                    uiState = uiState,
-                    layoutDirection = layoutDirection,
-                )
-            }
-            VerticalDivider(
-                modifier = Modifier
-                    .draggable(
-                        state = dragState,
-                        orientation = Orientation.Horizontal,
-                    )
-                    .padding(horizontal = 6.dp),
-            )
-            Box(modifier = Modifier.weight(1f - weight)) {
+    SupportingPaneScaffold(
+        main = {
+            if (uiState.isWideScreen) {
                 WideScreenContent(
                     uiState = uiState,
                     onUiStateChange = onUiStateChange,
@@ -371,9 +283,27 @@ private fun WideScreenLayout(
                     layoutDirection = layoutDirection,
                     navToAbout = navToAbout,
                 )
+            } else {
+                CompactScreenLayout(
+                    navigationItems = navigationItems,
+                    uiState = uiState,
+                    onUiStateChange = onUiStateChange,
+                    colorMode = colorMode,
+                    seedIndex = seedIndex,
+                    padding = padding,
+                    navToAbout = navToAbout,
+                )
             }
-        }
-    }
+        },
+        supporting = {
+            val barScrollBehavior = MiuixScrollBehavior()
+            WideScreenPanel(
+                barScrollBehavior = barScrollBehavior,
+                uiState = uiState,
+                layoutDirection = layoutDirection,
+            )
+        },
+    )
 }
 
 @Composable
@@ -386,7 +316,7 @@ private fun WideScreenPanel(
     val handlePageChange = LocalHandlePageChange.current
     Scaffold(
         modifier = Modifier
-            .padding(start = 18.dp, end = 12.dp, bottom = 12.dp)
+            .padding(start = 18.dp, end = 12.dp)
             .fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars.union(
             WindowInsets.displayCutout.exclude(
@@ -413,6 +343,7 @@ private fun WideScreenPanel(
                 )
                 .nestedScroll(barScrollBehavior.nestedScrollConnection)
                 .fillMaxHeight(),
+            contentPadding = PaddingValues(bottom = 12.dp),
         ) {
             item {
                 Card(

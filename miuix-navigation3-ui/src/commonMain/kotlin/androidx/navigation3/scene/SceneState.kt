@@ -1,22 +1,6 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/*
- * Copyright 2025 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package androidx.navigation3.scene
 
 import androidx.compose.animation.SharedTransitionScope
@@ -48,14 +32,12 @@ fun <T : Any> rememberSceneState(
     entries: List<NavEntry<T>>,
     sceneStrategy: SceneStrategy<T>,
     onBack: () -> Unit,
-): SceneState<T> {
-    return rememberSceneState(
-        entries = entries,
-        sceneStrategy = sceneStrategy,
-        sharedTransitionScope = null,
-        onBack = onBack,
-    )
-}
+): SceneState<T> = rememberSceneState(
+    entries = entries,
+    sceneStrategy = sceneStrategy,
+    sharedTransitionScope = null,
+    onBack = onBack,
+)
 
 /**
  * Returns a [SceneState] that is remembered across compositions based on the parameters.
@@ -102,13 +84,13 @@ fun <T : Any> rememberSceneState(
                 // `currentOnBack` invokes the *latest* `onBack` lambda. The outer
                 // `remember` block intentionally skips `onBack` as a key to avoid
                 // recalculating all scenes when just the `onBack` instance changes.
-                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() }
+                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() },
             )
 
         // Calculate the single scene based on the sceneStrategy and start the list there.
         val allScenes =
             mutableListOf(
-                sceneStrategy.calculateSceneWithSinglePaneFallback(scope, decoratedEntries)
+                sceneStrategy.calculateSceneWithSinglePaneFallback(scope, decoratedEntries),
             )
 
         // find all of the OverlayScenes
@@ -181,19 +163,15 @@ internal constructor(
         other as SceneState<*>
 
         return entries == other.entries &&
-                overlayScenes == other.overlayScenes &&
-                currentScene == other.currentScene &&
-                previousScenes == other.previousScenes
+            overlayScenes == other.overlayScenes &&
+            currentScene == other.currentScene &&
+            previousScenes == other.previousScenes
     }
 
-    override fun hashCode(): Int {
-        return entries.hashCode() * 31 +
-                overlayScenes.hashCode() * 31 +
-                currentScene.hashCode() * 31 +
-                previousScenes.hashCode() * 31
-    }
+    override fun hashCode(): Int = entries.hashCode() * 31 +
+        overlayScenes.hashCode() * 31 +
+        currentScene.hashCode() * 31 +
+        previousScenes.hashCode() * 31
 
-    override fun toString(): String {
-        return "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
-    }
+    override fun toString(): String = "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
 }

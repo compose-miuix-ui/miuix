@@ -56,9 +56,10 @@ kotlin {
             dependencies {
                 api(projects.miuix)
                 api(libs.jetbrains.compose.components.resources)
-                implementation(libs.androidx.navigation3.runtime)
-                implementation(projects.miuixNavigation3Ui)
                 implementation(projects.miuixIcons)
+                implementation(projects.miuixNavigation3Ui)
+                implementation(projects.miuixNavigation3Adaptive)
+                implementation(libs.androidx.navigation3.runtime)
             }
         }
 
