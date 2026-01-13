@@ -22,6 +22,7 @@ val projectPackagesUrl = "$githubPkgUrl/$owner/$repository"
 val miuixDescription = "A UI library for Compose Multiplatform"
 val miuixIconsDescription = "An extended icon library for Miuix"
 val miuixNavigation3UiDescription = "A navigation3 UI library for Miuix"
+val miuixNavigation3AdaptiveDescription = "A navigation3 adaptive library for Miuix"
 
 val localPropertiesFile = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -55,6 +56,7 @@ publishing {
                 when (project.name) {
                     "miuix-icons" -> miuixIconsDescription
                     "miuix-navigation3-ui" -> miuixNavigation3UiDescription
+                    "miuix-navigation3-adaptive" -> miuixNavigation3AdaptiveDescription
                     else -> miuixDescription
                 }
             )
