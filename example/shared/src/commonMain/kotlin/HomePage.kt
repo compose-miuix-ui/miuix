@@ -32,6 +32,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -40,6 +41,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MainPage(
+    snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
@@ -197,7 +199,7 @@ fun MainPage(
                 item(key = "textComponent") {
                     textComponent()
                 }
-                otherComponent()
+                otherComponent(snackbarHostState)
             }
         }
     }
