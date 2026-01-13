@@ -199,23 +199,20 @@ class SnackbarHostState {
             data
         }
 
-        val timeout: Long? = when (duration) {
+        val timeout: Long = when (duration) {
             SnackbarDuration.Short -> 4000L
             SnackbarDuration.Long -> 10000L
             is SnackbarDuration.Custom -> duration.durationMillis
-            SnackbarDuration.Indefinite -> null
+            SnackbarDuration.Indefinite -> Long.MAX_VALUE
         }
 
         return coroutineScope {
-            val job = timeout?.let { nonNullTimeout ->
-                launch {
-                    delay(nonNullTimeout)
-                    data.dismiss()
-                }
+            val job = launch {
+                delay(timeout)
+                data.dismiss()
             }
-            val r = result.await()
-            job?.cancel()
-            r
+            job.cancel()
+            result.await()
         }
     }
 
