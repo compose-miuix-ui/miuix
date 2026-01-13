@@ -241,7 +241,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         text = "Dismiss",
                         onClick = {
                             scope.launch {
-                                hostState.oldestSnackbarData?.dismiss()
+                                hostState.oldestSnackbarData()?.dismiss()
                             }
                         },
                         modifier = Modifier.weight(1f),

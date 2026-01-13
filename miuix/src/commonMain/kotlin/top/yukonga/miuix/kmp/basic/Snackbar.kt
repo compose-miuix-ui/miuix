@@ -123,11 +123,13 @@ interface SnackbarData {
 class SnackbarHostState {
     private val entries = mutableStateListOf<SnackbarEntry>()
     internal val currentSnackbars: List<SnackbarEntry> get() = entries
-    val newestSnackbarData: SnackbarData?
-        get() = entries.firstOrNull { it.visible }?.data
+    suspend fun newestSnackbarData(): SnackbarData? = mutex.withLock {
+        entries.firstOrNull { it.visible }?.data
+    }
 
-    val oldestSnackbarData: SnackbarData?
-        get() = entries.lastOrNull { it.visible }?.data
+    suspend fun oldestSnackbarData(): SnackbarData? = mutex.withLock {
+        entries.lastOrNull { it.visible }?.data
+    }
 
     private val mutex = Mutex()
     private var idCounter = 0L
@@ -154,41 +156,43 @@ class SnackbarHostState {
         duration: SnackbarDuration = SnackbarDuration.Short,
     ): SnackbarResult {
         val result = CompletableDeferred<SnackbarResult>()
-        val currentId = mutex.withLock { ++idCounter }
         val visuals = SnackbarVisuals(message, actionLabel, withDismissAction, duration)
 
-        val data = object : SnackbarData {
-            override val visuals = visuals
-            private val mutex = Mutex()
-            private var completed = false
+        val data = mutex.withLock {
+            val currentId = ++idCounter
+            val data = object : SnackbarData {
+                override val visuals = visuals
+                private val snackbarMutex = Mutex()
+                private var completed = false
 
-            override suspend fun dismiss() {
-                mutex.withLock {
-                    if (completed) return
-                    completed = true
+                override suspend fun dismiss() {
+                    snackbarMutex.withLock {
+                        if (completed) return
+                        completed = true
+                    }
+                    if (!result.isCompleted) result.complete(SnackbarResult.Dismissed)
+                    clear()
                 }
-                if (!result.isCompleted) result.complete(SnackbarResult.Dismissed)
-                clear()
-            }
 
-            override suspend fun performAction() {
-                mutex.withLock {
-                    if (completed) return
-                    completed = true
+                override suspend fun performAction() {
+                    snackbarMutex.withLock {
+                        if (completed) return
+                        completed = true
+                    }
+                    if (!result.isCompleted) result.complete(SnackbarResult.ActionPerformed)
+                    clear()
                 }
-                if (!result.isCompleted) result.complete(SnackbarResult.ActionPerformed)
-                clear()
-            }
 
-            private fun clear() {
-                val index = entries.indexOfFirst { it.id == currentId }
-                if (index != -1) entries[index] = entries[index].copy(visible = false)
+                private suspend fun clear() {
+                    this@SnackbarHostState.mutex.withLock {
+                        val index = entries.indexOfFirst { it.id == currentId }
+                        if (index != -1) entries[index] = entries[index].copy(visible = false)
+                    }
+                }
             }
-        }
-
-        val entry = SnackbarEntry(currentId, data)
-        mutex.withLock {
+            val entry = SnackbarEntry(currentId, data)
             entries.add(0, entry)
+            data
         }
 
         val timeout = when (duration) {
