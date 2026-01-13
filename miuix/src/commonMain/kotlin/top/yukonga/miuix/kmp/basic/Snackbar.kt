@@ -211,8 +211,9 @@ class SnackbarHostState {
                 delay(timeout)
                 data.dismiss()
             }
+            val r = result.await()
             job.cancel()
-            result.await()
+            r
         }
     }
 
