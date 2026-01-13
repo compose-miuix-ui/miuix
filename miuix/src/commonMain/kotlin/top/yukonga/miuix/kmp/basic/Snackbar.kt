@@ -185,7 +185,9 @@ class SnackbarHostState {
         }
 
         val entry = SnackbarEntry(currentId, data)
-        entries.add(0, entry)
+        mutex.withLock {
+            entries.add(0, entry)
+        }
 
         val timeout = when (duration) {
             SnackbarDuration.Short -> 4000L
