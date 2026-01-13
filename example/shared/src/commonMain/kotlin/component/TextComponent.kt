@@ -697,7 +697,9 @@ fun SuperBottomSheet(
         allowDismiss = allowDismiss.value,
         enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
-            showBottomSheet.value = false
+            if (allowDismiss.value) {
+                showBottomSheet.value = false
+            }
         },
         startAction = {
             IconButton(
@@ -805,7 +807,9 @@ fun WindowBottomSheet(
         allowDismiss = allowDismiss.value,
         enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
-            showBottomSheet.value = false
+            if (allowDismiss.value) {
+                showBottomSheet.value = false
+            }
         },
         startAction = {
             IconButton(
