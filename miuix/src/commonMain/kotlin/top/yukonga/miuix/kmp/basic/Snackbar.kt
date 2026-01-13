@@ -70,7 +70,11 @@ sealed interface SnackbarDuration {
     data object Indefinite : SnackbarDuration
 
     /** Show the Snackbar for a custom period of time. */
-    data class Custom(val durationMillis: kotlin.Long) : SnackbarDuration
+    data class Custom(val durationMillis: kotlin.Long) : SnackbarDuration {
+        init {
+            require(durationMillis > 0) { "durationMillis must be greater than 0" }
+        }
+    }
 }
 
 /**
