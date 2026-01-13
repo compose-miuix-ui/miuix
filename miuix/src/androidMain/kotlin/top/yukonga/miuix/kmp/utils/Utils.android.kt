@@ -58,16 +58,21 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     decorFitsSystemWindows = false,
 )
 
-@SuppressLint("NewApi")
 @Composable
 actual fun RemovePlatformDialogDefaultEffects() {
     val parent = LocalView.current.parent
     DisposableEffect(parent) {
         val provider = parent as? DialogWindowProvider
         val window = provider?.window
-        window?.setWindowAnimations(0)
-        window?.setDimAmount(0f)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CUPCAKE) {
+            window?.setWindowAnimations(0)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            window?.setDimAmount(0f)
+        }
         window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        onDispose { }
+        onDispose {
+            // No-op
+        }
     }
 }

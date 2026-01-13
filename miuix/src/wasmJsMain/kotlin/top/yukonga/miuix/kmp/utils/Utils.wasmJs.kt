@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -15,7 +14,6 @@ actual fun platform(): Platform = Platform.WasmJs
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
@@ -25,4 +23,5 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
 
 @Composable
 actual fun RemovePlatformDialogDefaultEffects() {
+    // No-op for WasmJs
 }
