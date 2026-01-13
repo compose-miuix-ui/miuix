@@ -132,8 +132,10 @@ class SnackbarHostState {
     private val mutex = Mutex()
     private var idCounter = 0L
 
-    internal fun removeEntry(entry: SnackbarEntry) {
-        entries.remove(entry)
+    internal suspend fun removeEntry(entry: SnackbarEntry) {
+        mutex.withLock {
+            entries.remove(entry)
+        }
     }
 
     /**
