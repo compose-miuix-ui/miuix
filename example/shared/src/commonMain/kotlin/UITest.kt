@@ -463,6 +463,7 @@ private fun CompactScreenLayout(
                 SnackbarHost(state = snackbarHostState)
             }
         },
+        popupHost = { },
     ) { innerPadding ->
         AppPager(
             snackbarHostState = snackbarHostState,

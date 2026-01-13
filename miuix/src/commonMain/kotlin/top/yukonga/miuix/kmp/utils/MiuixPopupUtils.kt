@@ -524,18 +524,6 @@ class MiuixPopupUtils {
          */
         @Composable
         fun MiuixPopupHost() {
-            val density = LocalDensity.current
-            val windowInfo = LocalWindowInfo.current
-            val windowWidth by remember(windowInfo, density) {
-                derivedStateOf { windowInfo.containerDpSize.width / density.density }
-            }
-            val windowHeight by remember(windowInfo, density) {
-                derivedStateOf { windowInfo.containerDpSize.height / density.density }
-            }
-            val largeScreen by remember(windowWidth, windowHeight) {
-                derivedStateOf { (windowHeight >= 480.dp && windowWidth >= 840.dp) }
-            }
-
             val dialogStates = LocalDialogStates.current
             val popupStates = LocalPopupStates.current
 
@@ -543,7 +531,7 @@ class MiuixPopupUtils {
                 key(state.showState) {
                     DialogEntry(
                         dialogState = state,
-                        largeScreen = largeScreen,
+                        largeScreen = isLargeScreen(),
                     )
                 }
             }
@@ -575,6 +563,14 @@ class MiuixPopupUtils {
             }
         }
     }
+}
+
+@Composable
+internal fun isLargeScreen(): Boolean {
+    val windowInfo = LocalWindowInfo.current
+    val windowWidth = windowInfo.containerDpSize.width
+    val windowHeight = windowInfo.containerDpSize.height
+    return windowHeight >= 480.dp && windowWidth >= 840.dp
 }
 
 internal val LocalPopupStates = staticCompositionLocalOf { mutableStateListOf<MiuixPopupUtils.PopupState>() }
