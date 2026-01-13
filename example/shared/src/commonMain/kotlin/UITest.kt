@@ -272,38 +272,40 @@ private fun Home(
     navToAbout: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    SupportingPaneScaffold(
-        main = {
-            if (uiState.isWideScreen) {
-                WideScreenContent(
+    Scaffold {
+        SupportingPaneScaffold(
+            main = {
+                if (uiState.isWideScreen) {
+                    WideScreenContent(
+                        uiState = uiState,
+                        onUiStateChange = onUiStateChange,
+                        colorMode = colorMode,
+                        seedIndex = seedIndex,
+                        layoutDirection = layoutDirection,
+                        navToAbout = navToAbout,
+                    )
+                } else {
+                    CompactScreenLayout(
+                        navigationItems = navigationItems,
+                        uiState = uiState,
+                        onUiStateChange = onUiStateChange,
+                        colorMode = colorMode,
+                        seedIndex = seedIndex,
+                        padding = padding,
+                        navToAbout = navToAbout,
+                    )
+                }
+            },
+            supporting = {
+                val barScrollBehavior = MiuixScrollBehavior()
+                WideScreenPanel(
+                    barScrollBehavior = barScrollBehavior,
                     uiState = uiState,
-                    onUiStateChange = onUiStateChange,
-                    colorMode = colorMode,
-                    seedIndex = seedIndex,
                     layoutDirection = layoutDirection,
-                    navToAbout = navToAbout,
                 )
-            } else {
-                CompactScreenLayout(
-                    navigationItems = navigationItems,
-                    uiState = uiState,
-                    onUiStateChange = onUiStateChange,
-                    colorMode = colorMode,
-                    seedIndex = seedIndex,
-                    padding = padding,
-                    navToAbout = navToAbout,
-                )
-            }
-        },
-        supporting = {
-            val barScrollBehavior = MiuixScrollBehavior()
-            WideScreenPanel(
-                barScrollBehavior = barScrollBehavior,
-                uiState = uiState,
-                layoutDirection = layoutDirection,
-            )
-        },
-    )
+            },
+        )
+    }
 }
 
 @Composable

@@ -3,7 +3,6 @@
 
 package androidx.navigation3.adaptive
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,7 +23,6 @@ import androidx.navigation3.adaptive.utils.shouldShowThreePanes
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
 import top.yukonga.miuix.kmp.basic.VerticalDivider
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 internal sealed interface ThreePaneScaffoldType {
     data object ListDetail : ThreePaneScaffoldType
@@ -112,8 +110,7 @@ private fun ListDetailContent(
 
     Row(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MiuixTheme.colorScheme.surface),
+            .fillMaxSize(),
     ) {
         if (showTwoPanes || showThreePanes) {
             Box(modifier = Modifier.weight(0.4f)) {
@@ -149,8 +146,7 @@ private fun SupportingPaneContent(
 
     Row(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MiuixTheme.colorScheme.surface),
+            .fillMaxSize(),
     ) {
         if (showTwoPanes || showThreePanes) {
             Box(modifier = Modifier.weight(if (enableThreePanes) 0.25f else 0.3f)) {
