@@ -347,7 +347,7 @@ fun Snackbar(
                 val onDismiss by rememberUpdatedState(data::dismiss)
                 Icon(
                     imageVector = MiuixIcons.Basic.SearchCleanup,
-                    contentDescription = null,
+                    contentDescription = "Dismiss",
                     tint = colors.dismissActionContentColor,
                     modifier = Modifier
                         .padding(start = 8.dp)
