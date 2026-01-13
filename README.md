@@ -5,7 +5,7 @@ A UI library for Compose Multiplatform.
 > This library is experimental. APIs may change without notice.
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-7F52FF)](https://kotlinlang.org/)
-[![Compose Multiplatform](https://img.shields.io/badge/compose-1.9.3-4285F4)](https://www.jetbrains.com/compose-multiplatform)
+[![Compose Multiplatform](https://img.shields.io/badge/compose-1.10.0-4285F4)](https://www.jetbrains.com/compose-multiplatform)
 [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 [![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
 

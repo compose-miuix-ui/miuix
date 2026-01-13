@@ -6,7 +6,6 @@ androidx-navigation3 = "1.1.0-alpha01"
 gaze-capsule = "2.1.1-patch2"
 jetbrains-androidx-navigationevent = "1.0.0"
 jetbrains-compose-multiplatform = "1.10.0"
-jetbrains-compose-hotReload = "1.0.0"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
@@ -35,6 +34,5 @@ android-application-gradle-plugin = { module = "com.android.application:com.andr
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "jetbrains-compose-multiplatform" }
 kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-hot-reload-gradle-plugin = { module = "org.jetbrains.compose.hot-reload:hot-reload-gradle-plugin", version.ref = "jetbrains-compose-hotReload" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "jetbrains-dokka" }
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
