@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.scene.DialogSceneStrategy.Companion.dialog
 
 /** An [OverlayScene] that renders an [entry] within a [Dialog]. */
 internal class DialogScene<T : Any>(
@@ -47,19 +48,20 @@ internal class DialogScene<T : Any>(
         other as DialogScene<*>
 
         return key == other.key &&
-            previousEntries == other.previousEntries &&
-            overlaidEntries == other.overlaidEntries &&
-            entry == other.entry &&
-            dialogProperties == other.dialogProperties
+                previousEntries == other.previousEntries &&
+                overlaidEntries == other.overlaidEntries &&
+                entry == other.entry &&
+                dialogProperties == other.dialogProperties
     }
 
     override fun hashCode(): Int = key.hashCode() * 31 +
-        previousEntries.hashCode() * 31 +
-        overlaidEntries.hashCode() * 31 +
-        entry.hashCode() * 31 +
-        dialogProperties.hashCode() * 31
+            previousEntries.hashCode() * 31 +
+            overlaidEntries.hashCode() * 31 +
+            entry.hashCode() * 31 +
+            dialogProperties.hashCode() * 31
 
-    override fun toString(): String = "DialogScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries, dialogProperties=$dialogProperties)"
+    override fun toString(): String =
+        "DialogScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries, dialogProperties=$dialogProperties)"
 }
 
 /**
@@ -68,9 +70,9 @@ internal class DialogScene<T : Any>(
  *
  * This strategy should always be added before any non-overlay scene strategies.
  */
-public class DialogSceneStrategy<T : Any> : SceneStrategy<T> {
+class DialogSceneStrategy<T : Any> : SceneStrategy<T> {
 
-    public override fun SceneStrategyScope<T>.calculateScene(
+    override fun SceneStrategyScope<T>.calculateScene(
         entries: List<NavEntry<T>>,
     ): Scene<T>? {
         val lastEntry = entries.lastOrNull()
@@ -87,14 +89,14 @@ public class DialogSceneStrategy<T : Any> : SceneStrategy<T> {
         }
     }
 
-    public companion object {
+    companion object {
         /**
          * Function to be called on the [NavEntry.metadata] to mark this entry as something that
          * should be displayed within a [Dialog].
          *
          * @param dialogProperties properties that should be passed to the containing [Dialog].
          */
-        public fun dialog(
+        fun dialog(
             dialogProperties: DialogProperties = DialogProperties(),
         ): Map<String, Any> = mapOf(DIALOG_KEY to dialogProperties)
 

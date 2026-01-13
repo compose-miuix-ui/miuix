@@ -28,7 +28,7 @@ import androidx.navigation3.runtime.NavEntry
  * This Scope should be provided to the [SceneStrategy.calculateScene] function to create Scenes.
  */
 @Immutable
-public class SceneStrategyScope<T : Any>
+class SceneStrategyScope<T : Any>
 internal constructor(
     /**
      * A callback that should be connected to any internal handling of system back done by the
@@ -41,7 +41,7 @@ internal constructor(
      *
      * @sample androidx.navigation3.scene.samples.SceneStrategyOnBackSample
      */
-    public val onBack: () -> Unit,
+    val onBack: () -> Unit
 ) {
     /**
      * Construct a [SceneStrategyScope] suitable for calling [SceneStrategy.calculateScene] in
@@ -52,7 +52,7 @@ internal constructor(
      * [SceneStrategyScope] suitable for a Scene that closely mirror real scenarios and be passed to
      * [androidx.navigation3.ui.NavDisplay].
      */
-    public constructor() : this(onBack = {})
+    constructor() : this(onBack = {})
 }
 
 /**
@@ -62,7 +62,7 @@ internal constructor(
  * instead to delegate to another strategy.
  */
 @Immutable
-public fun interface SceneStrategy<T : Any> {
+fun interface SceneStrategy<T : Any> {
     /**
      * Given a [SceneStrategyScope], calculate whether this [SceneStrategy] should take on the task
      * of rendering one or more of the entries in the scope.
@@ -74,23 +74,57 @@ public fun interface SceneStrategy<T : Any> {
      * @param entries The entries on the back stack that should be considered valid to render via a
      *   returned Scene.
      */
-    public fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>?
+    fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>?
+
+    /**
+     * Given a [SceneStrategyScope], calculate whether this [SceneStrategy] should take on the task
+     * of rendering along with the given [Scene] in the scope.
+     *
+     * This will always return a non-null [Scene] where if a [SceneStrategy] does not want to use
+     * the given scene it should just return it.
+     *
+     * @param scene The scene that should be considered valid to render via a returned Scene.
+     */
+    fun SceneStrategyScope<T>.calculateScene(scene: Scene<T>): Scene<T> = scene
 
     /**
      * Chains this [SceneStrategy] with another [sceneStrategy] to return a combined
-     * [SceneStrategy].
+     * [SceneStrategy]. For the returned [SceneStrategy], the [calculateScene] that takes entries
+     * will be use the first non-null result from the calculation, while the [calculateScene] that
+     * takes scenes will be called for every [SceneStrategy] in the chain.
+     *
+     * For [SceneStrategy]s that wish to be calculated with another scene, the calling
+     * [SceneStrategy] is first and the given [SceneStrategy] receives the result of the
+     * calculation. This means that the result is cumulative, with each consecutive [SceneStrategy]
+     * using the result of the previous one.
      */
-    public infix fun then(sceneStrategy: SceneStrategy<T>): SceneStrategy<T> {
+    infix fun then(sceneStrategy: SceneStrategy<T>): SceneStrategy<T> {
         val firstStrategy = this
-        return SceneStrategy { entries ->
-            with(firstStrategy) {
-                // with original scene strategy
-                calculateScene(entries)
-            }
-                ?: with(sceneStrategy) {
-                    // the chained scene strategy
+        return object : SceneStrategy<T> {
+            override fun SceneStrategyScope<T>.calculateScene(
+                entries: List<NavEntry<T>>
+            ): Scene<T>? =
+                with(firstStrategy) {
+                    // with original scene strategy
                     calculateScene(entries)
                 }
+                    ?: with(sceneStrategy) {
+                        // the chained scene strategy
+                        calculateScene(entries)
+                    }
+
+            override fun SceneStrategyScope<T>.calculateScene(scene: Scene<T>): Scene<T> {
+                val newScene =
+                    with(firstStrategy) {
+                        // with original scene strategy
+                        calculateScene(scene)
+                    }
+
+                return with(sceneStrategy) {
+                    // the chained scene strategy
+                    calculateScene(newScene)
+                }
+            }
         }
     }
 }

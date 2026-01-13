@@ -30,8 +30,9 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 /** Returns a [SharedEntryInSceneNavEntryDecorator] that is remembered across recompositions. */
 @Composable
 internal fun <T : Any> rememberSharedEntryInSceneNavEntryDecorator(
-    sharedTransitionScope: SharedTransitionScope,
-): SharedEntryInSceneNavEntryDecorator<T> = remember(sharedTransitionScope) { SharedEntryInSceneNavEntryDecorator(sharedTransitionScope) }
+    sharedTransitionScope: SharedTransitionScope
+): SharedEntryInSceneNavEntryDecorator<T> =
+    remember(sharedTransitionScope) { SharedEntryInSceneNavEntryDecorator(sharedTransitionScope) }
 
 /**
  * A [NavEntryDecorator] that wraps each entry in a [Modifier.sharedElement] to allow nav displays
@@ -40,18 +41,19 @@ internal fun <T : Any> rememberSharedEntryInSceneNavEntryDecorator(
  * This should be wrapped around the [SceneSetupNavEntryDecorator].
  */
 internal class SharedEntryInSceneNavEntryDecorator<T : Any>(
-    sharedTransitionScope: SharedTransitionScope,
-) : NavEntryDecorator<T>(
-    decorate = { entry ->
-        with(sharedTransitionScope) {
-            Box(
-                Modifier.sharedElement(
-                    rememberSharedContentState(entry.contentKey),
-                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                ),
-            ) {
-                entry.Content()
+    sharedTransitionScope: SharedTransitionScope
+) :
+    NavEntryDecorator<T>(
+        decorate = { entry ->
+            with(sharedTransitionScope) {
+                Box(
+                    Modifier.sharedElement(
+                        rememberSharedContentState(entry.contentKey),
+                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                    )
+                ) {
+                    entry.Content()
+                }
             }
         }
-    },
-)
+    )

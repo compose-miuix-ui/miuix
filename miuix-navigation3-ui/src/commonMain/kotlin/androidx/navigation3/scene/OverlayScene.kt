@@ -32,7 +32,7 @@ import androidx.navigation3.runtime.NavEntry
  * first strategy. This may result in multiple instances of the same [OverlayScene] to be shown
  * simultaneously, making a unique [key] even more important.
  */
-public interface OverlayScene<T : Any> : Scene<T> {
+interface OverlayScene<T : Any> : Scene<T> {
 
     /**
      * The [androidx.navigation3.runtime.NavEntry]s that should be handled by another [Scene] that
@@ -40,5 +40,5 @@ public interface OverlayScene<T : Any> : Scene<T> {
      *
      * This *must* always be a non-empty list to correctly display entries below the overlay.
      */
-    public val overlaidEntries: List<NavEntry<T>>
+    val overlaidEntries: List<NavEntry<T>>
 }

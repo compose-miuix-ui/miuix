@@ -23,12 +23,12 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 /** Internal util to use compose ui's fastX iterator apis whenever possible */
-internal fun <T> List<T>.fastAnyOrAny(predicate: (T) -> Boolean): Boolean = if (this is RandomAccess) {
-    this.fastAny(predicate)
-} else {
-    @Suppress("ListIterator")
-    this.any(predicate)
-}
+internal fun <T> List<T>.fastAnyOrAny(predicate: (T) -> Boolean): Boolean =
+    if (this is RandomAccess) {
+        this.fastAny(predicate)
+    } else {
+        @Suppress("ListIterator") this.any(predicate)
+    }
 
 /** Helpers copied from compose:ui:ui-util to prevent adding dep on ui-util */
 @Suppress("BanInlineOptIn")

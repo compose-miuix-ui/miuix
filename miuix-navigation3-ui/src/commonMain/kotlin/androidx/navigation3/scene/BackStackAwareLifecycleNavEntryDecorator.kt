@@ -40,7 +40,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
  */
 @Composable
 internal fun <T : Any> rememberBackStackAwareLifecycleNavEntryDecorator(
-    entries: List<NavEntry<T>>,
+    entries: List<NavEntry<T>>
 ): NavEntryDecorator<T> {
     val updatedEntries by rememberUpdatedState(entries)
     return NavEntryDecorator { entry ->

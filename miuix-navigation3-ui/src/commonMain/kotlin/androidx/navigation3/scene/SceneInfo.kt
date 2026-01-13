@@ -32,7 +32,7 @@ import androidx.navigationevent.NavigationEventInfo
  * @property scene The scene whose state is used by the NavigationEvent
  */
 @Immutable
-public class SceneInfo<T : Any>(public val scene: Scene<T>) : NavigationEventInfo() {
+class SceneInfo<T : Any>(val scene: Scene<T>) : NavigationEventInfo() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -43,7 +43,11 @@ public class SceneInfo<T : Any>(public val scene: Scene<T>) : NavigationEventInf
         return scene == other.scene
     }
 
-    override fun hashCode(): Int = scene.hashCode()
+    override fun hashCode(): Int {
+        return scene.hashCode()
+    }
 
-    override fun toString(): String = "SceneInfo(scene=$scene)"
+    override fun toString(): String {
+        return "SceneInfo(scene=$scene)"
+    }
 }

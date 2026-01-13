@@ -36,7 +36,6 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -48,6 +47,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +86,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
@@ -184,89 +185,6 @@ object NavDisplay {
  *   of the given back stack if it is a [MutableList], otherwise you should provide this parameter.
  * @param entryDecorators list of [NavEntryDecorator] to add information to the entry content
  * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
- * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
- * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
- * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
- *   [NavEntry]s.
- * @param entryProvider lambda used to construct each possible [NavEntry]
- */
-@Deprecated(
-    message = "Deprecated in favor of NavDisplay that supports sharedTransitionScope",
-    level = DeprecationLevel.HIDDEN,
-)
-@Composable
-fun <T : Any> NavDisplay(
-    backStack: List<T>,
-    modifier: Modifier = Modifier,
-    contentAlignment: Alignment = Alignment.TopStart,
-    onBack: () -> Unit = {
-        if (backStack is MutableList<T>) {
-            backStack.removeLastOrNull()
-        }
-    },
-    entryDecorators: List<NavEntryDecorator<T>> =
-        listOf(rememberSaveableStateHolderNavEntryDecorator()),
-    sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
-    sizeTransform: SizeTransform? = null,
-    transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
-        defaultTransitionSpec(),
-    popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
-        defaultPopTransitionSpec(),
-    predictivePopTransitionSpec:
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int
-    ) -> ContentTransform =
-        defaultPredictivePopTransitionSpec(),
-    entryProvider: (key: T) -> NavEntry<T>,
-) {
-    NavDisplay(
-        backStack = backStack,
-        modifier = modifier,
-        contentAlignment = contentAlignment,
-        onBack = onBack,
-        entryDecorators = entryDecorators,
-        sceneStrategy = sceneStrategy,
-        sharedTransitionScope = null,
-        sizeTransform = sizeTransform,
-        transitionSpec = transitionSpec,
-        popTransitionSpec = popTransitionSpec,
-        predictivePopTransitionSpec = predictivePopTransitionSpec,
-        entryProvider = entryProvider,
-    )
-}
-
-/**
- * A nav display that renders and animates between different [Scene]s, each of which can render one
- * or more [NavEntry]s.
- *
- * The [Scene]s are calculated with the given [SceneStrategy], which may be an assembled delegated
- * chain of [SceneStrategy]s. If no [Scene] is calculated, the fallback will be to a
- * [SinglePaneSceneStrategy].
- *
- * It is allowable for different [Scene]s to render the same [NavEntry]s, perhaps on some conditions
- * as determined by the [sceneStrategy] based on window size, form factor, other arbitrary logic.
- *
- * If this happens, and these [Scene]s are rendered at the same time due to animation or predictive
- * back, then the content for the [NavEntry] will only be rendered in the most recent [Scene] that
- * is the target for being the current scene as determined by [sceneStrategy]. This enforces a
- * unique invocation of each [NavEntry], even if it is displayable by two different [Scene]s.
- *
- * By default, AnimatedContent transitions are prioritized in this order:
- * ```
- * transitioning [NavEntry.metadata] > current [Scene.metadata] > NavDisplay defaults
- * ```
- *
- * However, a [Scene.metadata] does have the ability to override [NavEntry.metadata]. Nevertheless,
- * the final fallback will always be the NavDisplay's default transitions.
- *
- * @param backStack the collection of keys that represents the state that needs to be handled
- * @param modifier the modifier to be applied to the layout.
- * @param contentAlignment The [Alignment] of the [AnimatedContent]
- * @param onBack a callback for handling system back press. By default, this pops a single item off
- *   of the given back stack if it is a [MutableList], otherwise you should provide this parameter.
- * @param entryDecorators list of [NavEntryDecorator] to add information to the entry content
- * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
  * @param sharedTransitionScope the [SharedTransitionScope] to allow transitions between scenes.
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
@@ -314,86 +232,6 @@ fun <T : Any> NavDisplay(
         entries = entries,
         sceneStrategy = sceneStrategy,
         sharedTransitionScope = sharedTransitionScope,
-        modifier = modifier,
-        contentAlignment = contentAlignment,
-        sizeTransform = sizeTransform,
-        transitionSpec = transitionSpec,
-        popTransitionSpec = popTransitionSpec,
-        predictivePopTransitionSpec = predictivePopTransitionSpec,
-        onBack = onBack,
-    )
-}
-
-/**
- * A nav display that renders and animates between different [Scene]s, each of which can render one
- * or more [NavEntry]s.
- *
- * The [Scene]s are calculated with the given [SceneStrategy], which may be an assembled delegated
- * chain of [SceneStrategy]s. If no [Scene] is calculated, the fallback will be to a
- * [SinglePaneSceneStrategy].
- *
- * It is allowable for different [Scene]s to render the same [NavEntry]s, perhaps on some conditions
- * as determined by the [sceneStrategy] based on window size, form factor, other arbitrary logic.
- *
- * If this happens, and these [Scene]s are rendered at the same time due to animation or predictive
- * back, then the content for the [NavEntry] will only be rendered in the most recent [Scene] that
- * is the target for being the current scene as determined by [sceneStrategy]. This enforces a
- * unique invocation of each [NavEntry], even if it is displayable by two different [Scene]s.
- *
- * By default, AnimatedContent transitions are prioritized in this order:
- * ```
- * transitioning [NavEntry.metadata] > current [Scene.metadata] > NavDisplay defaults
- * ```
- *
- * However, a [Scene.metadata] does have the ability to override [NavEntry.metadata]. Nevertheless,
- * the final fallback will always be the NavDisplay's default transitions.
- *
- * **WHEN TO USE** This overload can be used when you need to switch between different backStacks
- * and each with their own separate decorator states, or when you want to concatenate backStacks and
- * their states to form a larger backstack.
- *
- * **HOW TO USE** The [entries] can first be created via [rememberDecoratedNavEntries] in order to
- * associate a backStack with a particular set of states.
- *
- * @param entries the list of [NavEntry] built from a backStack. The entries can be created from a
- *   backStack decorated with [NavEntryDecorator] via [rememberDecoratedNavEntries].
- * @param modifier the modifier to be applied to the layout.
- * @param contentAlignment The [Alignment] of the [AnimatedContent]
- * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
- * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
- * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
- * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
- *   [NavEntry]s.
- * @param onBack a callback for handling system back press.
- * @see [rememberDecoratedNavEntries]
- */
-@Deprecated(
-    message = "Deprecated in favor of NavDisplay that supports sharedTransitionScope",
-    level = DeprecationLevel.HIDDEN,
-)
-@Composable
-fun <T : Any> NavDisplay(
-    entries: List<NavEntry<T>>,
-    modifier: Modifier = Modifier,
-    contentAlignment: Alignment = Alignment.TopStart,
-    sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
-    sizeTransform: SizeTransform? = null,
-    transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
-        defaultTransitionSpec(),
-    popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
-        defaultPopTransitionSpec(),
-    predictivePopTransitionSpec:
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int
-    ) -> ContentTransform =
-        defaultPredictivePopTransitionSpec(),
-    onBack: () -> Unit,
-) {
-    NavDisplay(
-        entries = entries,
-        sceneStrategy = sceneStrategy,
-        sharedTransitionScope = null,
         modifier = modifier,
         contentAlignment = contentAlignment,
         sizeTransform = sizeTransform,
@@ -882,14 +720,14 @@ fun <T : Any> NavDisplay(
                 targetScene.content()
 
                 val dimAlpha by transition.animateFloat(
-                    transitionSpec = { tween(durationMillis = 500, easing = NavAnimationEasing) },
+                    transitionSpec = { tween(durationMillis = 550, easing = NavAnimationEasing) },
                     label = "dimAlpha"
                 ) { state ->
                     val stateKey = sceneKeyOf(state)
                     val stateIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == stateKey }
                     val effectiveStateIndex = if (stateIndex == -1) Int.MAX_VALUE else stateIndex
 
-                    if (effectiveIndex < effectiveStateIndex) 0.4f else 0f
+                    if (effectiveIndex < effectiveStateIndex) 0.5f else 0f
                 }
 
                 val showDim = dimAlpha > 0f && (shouldDim || !isSettled)
@@ -905,6 +743,24 @@ fun <T : Any> NavDisplay(
         }
     }
 
+    // Clean-up scene book-keeping once the transition is finished
+    LaunchedEffect(transition) {
+        snapshotFlow { transition.isRunning }
+            .filter { !it }
+            .collect {
+                val targetKey = transition.targetState::class to transition.targetState.key
+                // Creating a copy to avoid ConcurrentModificationException
+                @Suppress("ListIterator")
+                sceneMap.keys.toList().forEach { key ->
+                    if (key != targetKey) {
+                        sceneMap.remove(key)
+                    }
+                }
+                // Creating a copy to avoid ConcurrentModificationException
+                zIndices.removeIf { key, _ -> key != targetKey }
+            }
+    }
+
     // Show all OverlayScene instances above the AnimatedContent
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
@@ -916,14 +772,14 @@ fun <T : Any> NavDisplay(
     }
 }
 
-private fun <T : Any> isPop(oldBackStack: List<NavEntry<T>>, newBackStack: List<NavEntry<T>>): Boolean {
+private fun <T : Any> isPop(oldBackStack: List<T>, newBackStack: List<T>): Boolean {
     // entire stack replaced
-    if (oldBackStack.first().contentKey != newBackStack.first().contentKey) return false
+    if (oldBackStack.first() != newBackStack.first()) return false
     // navigated
     if (newBackStack.size > oldBackStack.size) return false
 
     val divergingIndex =
-        newBackStack.indices.firstOrNull { index -> newBackStack[index].contentKey != oldBackStack[index].contentKey }
+        newBackStack.indices.firstOrNull { index -> newBackStack[index] != oldBackStack[index] }
     // if newBackStack never diverged from oldBackStack, then it is a clean subset of the oldStack
     // and is a pop
     return divergingIndex == null && newBackStack.size != oldBackStack.size
@@ -951,36 +807,42 @@ private fun <T : Any> Scene<T>.predictivePopSpec():
 /** Default [transitionSpec] for forward navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
-    slideInHorizontally(
-        initialOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) togetherWith slideOutHorizontally(
-        targetOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+    ContentTransform(
+        slideInHorizontally(
+            initialOffsetX = { it },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        ), slideOutHorizontally(
+            targetOffsetX = { -it / 4 },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        )
     )
 }
 
-/** Default [popTransitionSpec] for pop navigation to be used by [NavDisplay]. */
+/** Default [transitionSpec] for pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
-    slideInHorizontally(
-        initialOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) togetherWith slideOutHorizontally(
-        targetOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+    ContentTransform(
+        slideInHorizontally(
+            initialOffsetX = { -it / 4 },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        ), slideOutHorizontally(
+            targetOffsetX = { it },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        )
     )
 }
 
-/** Default [predictivePopTransitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
+/** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPredictivePopTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
-    slideInHorizontally(
-        initialOffsetX = { -it / 5 },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-    ) togetherWith slideOutHorizontally(
-        targetOffsetX = { it },
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+    ContentTransform(
+        slideInHorizontally(
+            initialOffsetX = { -it / 4 },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        ), slideOutHorizontally(
+            targetOffsetX = { it },
+            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        )
     )
 }
 

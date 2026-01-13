@@ -44,16 +44,18 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
-public fun <T : Any> rememberSceneState(
+fun <T : Any> rememberSceneState(
     entries: List<NavEntry<T>>,
     sceneStrategy: SceneStrategy<T>,
     onBack: () -> Unit,
-): SceneState<T> = rememberSceneState(
-    entries = entries,
-    sceneStrategy = sceneStrategy,
-    sharedTransitionScope = null,
-    onBack = onBack,
-)
+): SceneState<T> {
+    return rememberSceneState(
+        entries = entries,
+        sceneStrategy = sceneStrategy,
+        sharedTransitionScope = null,
+        onBack = onBack,
+    )
+}
 
 /**
  * Returns a [SceneState] that is remembered across compositions based on the parameters.
@@ -68,7 +70,7 @@ public fun <T : Any> rememberSceneState(
  * @sample androidx.navigation3.scene.samples.SceneStateSample
  */
 @Composable
-public fun <T : Any> rememberSceneState(
+fun <T : Any> rememberSceneState(
     entries: List<NavEntry<T>>,
     sceneStrategy: SceneStrategy<T>,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -100,13 +102,13 @@ public fun <T : Any> rememberSceneState(
                 // `currentOnBack` invokes the *latest* `onBack` lambda. The outer
                 // `remember` block intentionally skips `onBack` as a key to avoid
                 // recalculating all scenes when just the `onBack` instance changes.
-                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() },
+                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() }
             )
 
         // Calculate the single scene based on the sceneStrategy and start the list there.
         val allScenes =
             mutableListOf(
-                sceneStrategy.calculateSceneWithSinglePaneFallback(scope, decoratedEntries),
+                sceneStrategy.calculateSceneWithSinglePaneFallback(scope, decoratedEntries)
             )
 
         // find all of the OverlayScenes
@@ -165,12 +167,12 @@ public fun <T : Any> rememberSceneState(
  * @param previousScenes the list of all of the previous scenes before the currentScene
  */
 @Immutable
-public class SceneState<T : Any>
+class SceneState<T : Any>
 internal constructor(
-    public val entries: List<NavEntry<T>>,
-    public val overlayScenes: List<OverlayScene<T>>,
-    public val currentScene: Scene<T>,
-    public val previousScenes: List<Scene<T>>,
+    val entries: List<NavEntry<T>>,
+    val overlayScenes: List<OverlayScene<T>>,
+    val currentScene: Scene<T>,
+    val previousScenes: List<Scene<T>>,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -179,15 +181,19 @@ internal constructor(
         other as SceneState<*>
 
         return entries == other.entries &&
-            overlayScenes == other.overlayScenes &&
-            currentScene == other.currentScene &&
-            previousScenes == other.previousScenes
+                overlayScenes == other.overlayScenes &&
+                currentScene == other.currentScene &&
+                previousScenes == other.previousScenes
     }
 
-    override fun hashCode(): Int = entries.hashCode() * 31 +
-        overlayScenes.hashCode() * 31 +
-        currentScene.hashCode() * 31 +
-        previousScenes.hashCode() * 31
+    override fun hashCode(): Int {
+        return entries.hashCode() * 31 +
+                overlayScenes.hashCode() * 31 +
+                currentScene.hashCode() * 31 +
+                previousScenes.hashCode() * 31
+    }
 
-    override fun toString(): String = "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
+    override fun toString(): String {
+        return "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
+    }
 }
