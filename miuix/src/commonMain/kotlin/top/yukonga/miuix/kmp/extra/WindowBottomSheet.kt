@@ -137,7 +137,6 @@ fun WindowBottomSheet(
     val requestDismiss: () -> Unit = remember {
         {
             dismissPending.value = true
-            internalVisible.targetState = false
             currentOnDismissRequest?.invoke()
         }
     }
