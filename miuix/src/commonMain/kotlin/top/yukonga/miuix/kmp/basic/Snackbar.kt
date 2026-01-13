@@ -291,7 +291,7 @@ fun Snackbar(
                     radius = 1.dp,
                     spread = 0.6.dp,
                     color = MiuixTheme.colorScheme.dividerLine,
-                    offset = DpOffset(x = 0.dp, 1.dp),
+                    offset = DpOffset(x = 0.dp, y = 1.dp),
                 ),
             )
             .pointerInput(Unit) {
