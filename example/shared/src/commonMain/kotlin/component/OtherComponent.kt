@@ -69,7 +69,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import kotlin.math.round
 
-fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
+fun LazyListScope.otherComponent(snackbarHostState: SnackbarHostState) {
     item(key = "button") {
         var buttonText by remember { mutableStateOf("Cancel") }
         var submitButtonText by remember { mutableStateOf("Submit") }
@@ -144,10 +144,33 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TextButton(
+                        text = "Dismiss oldest",
+                        onClick = {
+                            scope.launch {
+                                snackbarHostState.oldestSnackbarData()?.dismiss()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        text = "Dismiss newest",
+                        onClick = {
+                            scope.launch {
+                                snackbarHostState.newestSnackbarData()?.dismiss()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
                         text = "Short (4s)",
                         onClick = {
                             scope.launch {
-                                hostState.showSnackbar("This is a short message")
+                                snackbarHostState.showSnackbar("This is a short message")
                             }
                         },
                         modifier = Modifier.weight(1f),
@@ -156,7 +179,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         text = "Long (10s)",
                         onClick = {
                             scope.launch {
-                                hostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = "This is a long message to display more text content",
                                     duration = SnackbarDuration.Long,
                                 )
@@ -173,7 +196,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         text = "Custom (2s)",
                         onClick = {
                             scope.launch {
-                                hostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = "This message will last for 2 seconds",
                                     duration = SnackbarDuration.Custom(2000L),
                                 )
@@ -187,7 +210,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         onClick = {
                             scope.launch {
                                 text = "Action: Alive"
-                                val result = hostState.showSnackbar(
+                                val result = snackbarHostState.showSnackbar(
                                     message = "This message has an action",
                                     actionLabel = "Undo",
                                     duration = SnackbarDuration.Short,
@@ -210,7 +233,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         text = "Dismissible",
                         onClick = {
                             scope.launch {
-                                hostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = "This message can be removed via the close button",
                                     withDismissAction = true,
                                     duration = SnackbarDuration.Long,
@@ -223,25 +246,11 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         text = "Indefinite",
                         onClick = {
                             scope.launch {
-                                hostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = "Indefinite message, dismiss manually",
                                     withDismissAction = true,
                                     duration = SnackbarDuration.Indefinite,
                                 )
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    TextButton(
-                        text = "Dismiss",
-                        onClick = {
-                            scope.launch {
-                                hostState.oldestSnackbarData()?.dismiss()
                             }
                         },
                         modifier = Modifier.weight(1f),

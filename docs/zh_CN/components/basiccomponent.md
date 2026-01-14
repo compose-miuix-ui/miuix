@@ -71,6 +71,35 @@ BasicComponent(
 )
 ```
 
+### 自定义内容变体
+
+除了带标题和摘要的形式外，BasicComponent 还提供了一个接收自定义内容的重载。当你希望完全掌控组件内部布局，但仍复用容器与交互效果时，可以使用该形式：
+
+```kotlin
+BasicComponent(
+    startAction = {
+        Icon(
+            modifier = Modifier.padding(end = 16.dp),
+            imageVector = MiuixIcons.Contacts,
+            contentDescription = "头像图标",
+            tint = MiuixTheme.colorScheme.onBackground
+        )
+    },
+    endActions = {
+        Text("详情")
+    }
+) {
+    Text(
+        text = "自定义标题",
+        style = MiuixTheme.textStyles.headline1
+    )
+    Text(
+        text = "自定义内容说明",
+        style = MiuixTheme.textStyles.body2
+    )
+}
+```
+
 ## 组件状态
 
 ### 禁用状态
@@ -85,7 +114,7 @@ BasicComponent(
 
 ## 属性
 
-### BasicComponent 属性
+### BasicComponent 属性（标题和摘要变体）
 
 | 属性名            | 类型                               | 说明                 | 默认值                                | 是否必须 |
 | ----------------- | ---------------------------------- | -------------------- | ------------------------------------- | -------- |
@@ -102,6 +131,21 @@ BasicComponent(
 | holdDownState     | Boolean                            | 组件是否处于按下状态 | false                                 | 否       |
 | enabled           | Boolean                            | 组件是否可用         | true                                  | 否       |
 | interactionSource | MutableInteractionSource?          | 组件的交互源         | null                                  | 否       |
+
+### BasicComponent 属性（自定义内容变体）
+
+| 属性名            | 类型                               | 说明                 | 默认值                              | 是否必须 |
+| ----------------- | ---------------------------------- | -------------------- | ----------------------------------- | -------- |
+| modifier          | Modifier                           | 应用于组件的修饰符   | Modifier                            | 否       |
+| startAction       | @Composable (() -> Unit)?          | 组件左侧的可组合内容 | null                                | 否       |
+| endActions        | @Composable (RowScope.() -> Unit)? | 组件右侧的可组合内容 | null                                | 否       |
+| bottomAction      | @Composable (() -> Unit)?          | 组件底部的可组合内容 | null                                | 否       |
+| insideMargin      | PaddingValues                      | 组件内部边距         | BasicComponentDefaults.InsideMargin | 否       |
+| onClick           | (() -> Unit)?                      | 点击组件时触发的回调 | null                                | 否       |
+| holdDownState     | Boolean                            | 组件是否处于按下状态 | false                               | 否       |
+| enabled           | Boolean                            | 组件是否可用         | true                                | 否       |
+| interactionSource | MutableInteractionSource?          | 组件的交互源         | null                                | 否       |
+| content           | @Composable ColumnScope.() -> Unit | 组件内部的可组合内容 | -                                   | 是       |
 
 ### BasicComponentDefaults 对象
 

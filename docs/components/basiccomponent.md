@@ -71,6 +71,35 @@ BasicComponent(
 )
 ```
 
+### Custom Content Variant
+
+In addition to the title and summary variant, BasicComponent also provides an overload that accepts custom content. This is useful when you want full control over the layout inside the component while still reusing the container and interactions:
+
+```kotlin
+BasicComponent(
+    startAction = {
+        Icon(
+            modifier = Modifier.padding(end = 16.dp),
+            imageVector = MiuixIcons.Contacts,
+            contentDescription = "Avatar Icon",
+            tint = MiuixTheme.colorScheme.onBackground
+        )
+    },
+    endActions = {
+        Text("Details")
+    }
+) {
+    Text(
+        text = "Custom Title",
+        style = MiuixTheme.textStyles.headline1
+    )
+    Text(
+        text = "Custom content description",
+        style = MiuixTheme.textStyles.body2
+    )
+}
+```
+
 ## Component States
 
 ### Disabled State
@@ -85,7 +114,7 @@ BasicComponent(
 
 ## Properties
 
-### BasicComponent Properties
+### BasicComponent Properties (title and summary variant)
 
 | Property Name     | Type                               | Description                                           | Default Value                         | Required |
 | ----------------- | ---------------------------------- | ----------------------------------------------------- | ------------------------------------- | -------- |
@@ -102,6 +131,21 @@ BasicComponent(
 | holdDownState     | Boolean                            | Whether the component is in the pressed state         | false                                 | No       |
 | enabled           | Boolean                            | Whether the component is enabled                      | true                                  | No       |
 | interactionSource | MutableInteractionSource?          | Interaction source of the component                   | null                                  | No       |
+
+### BasicComponent Properties (custom content variant)
+
+| Property Name     | Type                               | Description                                           | Default Value                       | Required |
+| ----------------- | ---------------------------------- | ----------------------------------------------------- | ----------------------------------- | -------- |
+| modifier          | Modifier                           | Modifier for the component                            | Modifier                            | No       |
+| startAction       | @Composable (() -> Unit)?          | Composable content on the start side of the component | null                                | No       |
+| endActions        | @Composable (RowScope.() -> Unit)? | Composable content on the end side of the component   | null                                | No       |
+| bottomAction      | @Composable (() -> Unit)?          | Composable content at the bottom of the component     | null                                | No       |
+| insideMargin      | PaddingValues                      | Internal padding of the component                     | BasicComponentDefaults.InsideMargin | No       |
+| onClick           | (() -> Unit)?                      | Callback triggered when the component is clicked      | null                                | No       |
+| holdDownState     | Boolean                            | Whether the component is in the pressed state         | false                               | No       |
+| enabled           | Boolean                            | Whether the component is enabled                      | true                                | No       |
+| interactionSource | MutableInteractionSource?          | Interaction source of the component                   | null                                | No       |
+| content           | @Composable ColumnScope.() -> Unit | Composable content of the component                   | -                                   | Yes      |
 
 ### BasicComponentDefaults Object
 

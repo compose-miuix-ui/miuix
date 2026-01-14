@@ -31,6 +31,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [Checkbox](../components/checkbox)                         | 多选控件               | 多项选择、条款同意   |
 | [Slider](../components/slider)                             | 调节值的滑动控件       | 音量调节、范围选择   |
 | [ProgressIndicator](../components/progressindicator)       | 展示操作进度状态       | 加载中、进度展示     |
+| [Snackbar](../components/snackbar)                         | 底部临时消息条组件     | 状态提示、操作结果   |
 | [Icon](../components/icon)                                 | 图标展示组件           | 图标按钮、状态指示   |
 | [FloatingActionButton](../components/floatingactionbutton) | 悬浮操作按钮           | 主要操作、快捷功能   |
 | [FloatingToolbar](../components/floatingtoolbar)           | 悬浮工具栏             | 快捷操作、信息展示   |
