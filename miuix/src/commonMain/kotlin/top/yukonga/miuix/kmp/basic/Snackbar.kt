@@ -40,6 +40,8 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.AccessibilityManager
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -47,11 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -199,21 +203,14 @@ class SnackbarHostState {
             data
         }
 
-        val timeout: Long = when (duration) {
-            SnackbarDuration.Short -> 4000L
-            SnackbarDuration.Long -> 10000L
-            is SnackbarDuration.Custom -> duration.durationMillis
-            SnackbarDuration.Indefinite -> Long.MAX_VALUE
-        }
-
         return coroutineScope {
-            val job = launch {
-                delay(timeout)
-                data.dismiss()
+            try {
+                result.await()
+            } finally {
+                withContext(NonCancellable) {
+                    data.dismiss()
+                }
             }
-            val r = result.await()
-            job.cancel()
-            r
         }
     }
 
@@ -222,6 +219,30 @@ class SnackbarHostState {
         val id: Long,
         val data: SnackbarData,
         val visible: Boolean = true,
+    )
+}
+
+/**
+ * Convert [SnackbarDuration] to milliseconds, taking into account accessibility settings.
+ */
+internal fun SnackbarDuration.toMillis(
+    hasAction: Boolean,
+    accessibilityManager: AccessibilityManager?,
+): Long {
+    val original = when (this) {
+        SnackbarDuration.Indefinite -> Long.MAX_VALUE
+        SnackbarDuration.Long -> 10000L
+        SnackbarDuration.Short -> 4000L
+        is SnackbarDuration.Custom -> durationMillis
+    }
+    if (accessibilityManager == null) {
+        return original
+    }
+    return accessibilityManager.calculateRecommendedTimeoutMillis(
+        originalTimeoutMillis = original,
+        containsIcons = true,
+        containsText = true,
+        containsControls = hasAction,
     )
 }
 
@@ -241,16 +262,27 @@ fun SnackbarHost(
     Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
         LazyColumn(
             reverseLayout = true,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(bottom = 12.dp),
         ) {
             itemsIndexed(state.currentSnackbars, key = { _, entry -> entry.id }) { index, entry ->
                 val visibleState = remember { MutableTransitionState(false) }
+                val accessibilityManager = LocalAccessibilityManager.current
+
                 visibleState.targetState = entry.visible
 
                 if (!visibleState.targetState && visibleState.isIdle) {
                     LaunchedEffect(entry) { state.removeEntry(entry) }
+                }
+
+                LaunchedEffect(entry) {
+                    val duration = entry.data.visuals.duration.toMillis(
+                        entry.data.visuals.actionLabel != null,
+                        accessibilityManager,
+                    )
+                    delay(duration)
+                    entry.data.dismiss()
                 }
 
                 AnimatedVisibility(
@@ -294,7 +326,7 @@ fun Snackbar(
 
     Surface(
         modifier = modifier
-            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .padding(horizontal = 12.dp, vertical = 4.dp)
             .dropShadow(
                 shape = shape,
                 shadow = Shadow(
