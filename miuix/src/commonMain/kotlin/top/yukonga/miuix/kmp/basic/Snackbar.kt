@@ -49,13 +49,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -166,7 +163,7 @@ class SnackbarHostState {
         val result = CompletableDeferred<SnackbarResult>()
         val visuals = SnackbarVisuals(message, actionLabel, withDismissAction, duration)
 
-        val data = mutex.withLock {
+        mutex.withLock {
             val currentId = ++idCounter
             val data = object : SnackbarData {
                 override val visuals = visuals
@@ -200,18 +197,9 @@ class SnackbarHostState {
             }
             val entry = SnackbarEntry(currentId, data)
             entries.add(0, entry)
-            data
         }
 
-        return coroutineScope {
-            try {
-                result.await()
-            } finally {
-                withContext(NonCancellable) {
-                    data.dismiss()
-                }
-            }
-        }
+        return result.await()
     }
 
     @Immutable

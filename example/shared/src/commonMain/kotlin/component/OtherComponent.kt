@@ -144,7 +144,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TextButton(
-                        text = "Short",
+                        text = "Short (4s)",
                         onClick = {
                             scope.launch {
                                 hostState.showSnackbar("This is a short message")
@@ -153,7 +153,7 @@ fun LazyListScope.otherComponent(hostState: SnackbarHostState) {
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(
-                        text = "Long",
+                        text = "Long (10s)",
                         onClick = {
                             scope.launch {
                                 hostState.showSnackbar(
