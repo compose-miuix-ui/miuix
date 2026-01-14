@@ -2,7 +2,7 @@
 android-gradle-plugin = "8.13.2"
 androidx-activity = "1.12.2"
 androidx-collection = "1.5.0"
-androidx-navigation3 = "1.1.0-alpha01"
+androidx-navigation3 = "1.1.0-alpha02"
 gaze-capsule = "2.1.1-patch2"
 jetbrains-androidx-navigationevent = "1.0.0"
 jetbrains-compose-multiplatform = "1.10.0"
