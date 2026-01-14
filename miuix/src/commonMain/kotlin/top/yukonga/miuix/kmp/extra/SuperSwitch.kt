@@ -4,12 +4,17 @@
 package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
@@ -63,8 +68,16 @@ fun SuperSwitch(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(end = 8.dp)
+                    .align(Alignment.CenterVertically)
+                    .weight(1f, fill = false),
+            ) {
+                endActions()
+            }
             SuperSwitchEndActions(
-                endActions = endActions,
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
@@ -81,14 +94,12 @@ fun SuperSwitch(
 }
 
 @Composable
-private fun RowScope.SuperSwitchEndActions(
-    endActions: @Composable RowScope.() -> Unit,
+private fun SuperSwitchEndActions(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     switchColors: SwitchColors,
 ) {
-    endActions()
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,

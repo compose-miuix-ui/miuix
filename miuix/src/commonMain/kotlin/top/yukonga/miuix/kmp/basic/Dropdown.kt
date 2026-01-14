@@ -21,8 +21,6 @@ import androidx.compose.ui.graphics.BlendModeColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
@@ -30,28 +28,11 @@ import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun RowScope.DropdownEndActions(
-    showValue: Boolean,
-    itemsNotEmpty: Boolean,
-    items: List<String>,
-    selectedIndex: Int,
+fun RowScope.DropdownArrowEndAction(
     actionColor: Color,
 ) {
-    if (showValue && itemsNotEmpty) {
-        Text(
-            modifier = Modifier.widthIn(max = 130.dp),
-            text = items[selectedIndex],
-            fontSize = MiuixTheme.textStyles.body2.fontSize,
-            color = actionColor,
-            textAlign = TextAlign.End,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-        )
-    }
-
     Image(
         modifier = Modifier
-            .padding(start = 8.dp)
             .size(10.dp, 16.dp)
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowUpDown,

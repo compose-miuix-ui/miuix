@@ -4,14 +4,17 @@
 package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
@@ -56,14 +59,13 @@ fun SuperCheckbox(
     enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val startActionComposable = if (checkboxLocation == CheckboxLocation.Start) {
+    val startAction = if (checkboxLocation == CheckboxLocation.Start) {
         @Composable {
             SuperCheckboxStartAction(
                 checked = checked,
                 onCheckedChange = currentOnCheckedChange,
                 enabled = enabled,
                 checkboxColors = checkboxColors,
-                insideMargin = insideMargin,
             )
         }
     } else {
@@ -77,16 +79,25 @@ fun SuperCheckbox(
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        startAction = startActionComposable,
+        startAction = startAction,
         endActions = {
-            SuperCheckboxEndActions(
-                endActions = endActions,
-                checkboxLocation = checkboxLocation,
-                checked = checked,
-                onCheckedChange = currentOnCheckedChange,
-                enabled = enabled,
-                checkboxColors = checkboxColors,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(end = 8.dp)
+                    .align(Alignment.CenterVertically)
+                    .weight(1f, fill = false),
+            ) {
+                endActions()
+            }
+            if (checkboxLocation == CheckboxLocation.End) {
+                SuperCheckboxEndAction(
+                    checked = checked,
+                    onCheckedChange = currentOnCheckedChange,
+                    enabled = enabled,
+                    checkboxColors = checkboxColors,
+                )
+            }
         },
         bottomAction = bottomAction,
         onClick = {
@@ -103,10 +114,10 @@ private fun SuperCheckboxStartAction(
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     checkboxColors: CheckboxColors,
-    insideMargin: PaddingValues,
 ) {
     Checkbox(
-        modifier = Modifier.padding(end = insideMargin.calculateLeftPadding(LayoutDirection.Ltr)),
+        modifier = Modifier
+            .padding(end = 8.dp),
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,
@@ -115,23 +126,18 @@ private fun SuperCheckboxStartAction(
 }
 
 @Composable
-private fun RowScope.SuperCheckboxEndActions(
-    endActions: @Composable RowScope.() -> Unit,
-    checkboxLocation: CheckboxLocation,
+private fun SuperCheckboxEndAction(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     enabled: Boolean,
     checkboxColors: CheckboxColors,
 ) {
-    endActions()
-    if (checkboxLocation == CheckboxLocation.End) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled,
-            colors = checkboxColors,
-        )
-    }
+    Checkbox(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
+        colors = checkboxColors,
+    )
 }
 
 enum class CheckboxLocation {

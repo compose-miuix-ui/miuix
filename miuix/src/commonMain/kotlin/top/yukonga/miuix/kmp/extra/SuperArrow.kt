@@ -5,7 +5,10 @@ package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -14,6 +17,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -68,8 +72,16 @@ fun SuperArrow(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            SuperArrowEndActions(
-                endActions = endActions,
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(end = 8.dp)
+                    .align(Alignment.CenterVertically)
+                    .weight(1f, fill = false),
+            ) {
+                endActions()
+            }
+            SuperArrowEndAction(
                 enabled = enabled,
             )
         },
@@ -81,11 +93,9 @@ fun SuperArrow(
 }
 
 @Composable
-private fun RowScope.SuperArrowEndActions(
-    endActions: @Composable RowScope.() -> Unit,
+private fun RowScope.SuperArrowEndAction(
     enabled: Boolean,
 ) {
-    endActions()
     val actionColors = SuperArrowDefaults.endActionColors()
     val tintFilter by remember(enabled, actionColors) {
         derivedStateOf { ColorFilter.tint(actionColors.color(enabled = enabled)) }
@@ -96,7 +106,8 @@ private fun RowScope.SuperArrowEndActions(
             .size(width = 10.dp, height = 16.dp)
             .graphicsLayer {
                 scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            },
+            }
+            .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = tintFilter,

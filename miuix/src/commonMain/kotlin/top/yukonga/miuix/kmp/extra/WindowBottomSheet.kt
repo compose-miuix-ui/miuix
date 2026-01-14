@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -79,7 +78,6 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WindowBottomSheet(
     show: MutableState<Boolean>,

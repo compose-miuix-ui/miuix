@@ -105,17 +105,17 @@ fun TextComponent(
             remember {
                 listOf(
                     "Option 1",
-                    "Option 2",
-                    "Option 3",
-                    "Option 4",
-                    "Option 5",
-                    "Option 6",
-                    "Option 7",
-                    "Option 8",
-                    "Option 9",
-                    "Option 10",
-                    "Option 11",
-                    "Option 12",
+                    "Long Option 2",
+                    "Long Long Option 3",
+                    "Long Long Long Option 4",
+                    "Long Long Long Long Option 5",
+                    "Long Long Long Long Long Option 6",
+                    "Long Long Long Long Long Long Option 7",
+                    "Long Long Long Long Long Long Long Option 8",
+                    "Long Long Long Long Long Long Long Long Option 9",
+                    "Long Long Long Long Long Long Long Long Long Option 10",
+                    "Long Long Long Long Long Long Long Long Long Long Option 11",
+                    "Long Long Long Long Long Long Long Long Long Long Long Option 12",
                 )
             }
         val spinnerOptions = remember {
@@ -186,7 +186,6 @@ fun TextComponent(
                 startAction = {
                     Text(
                         text = "Start",
-                        modifier = Modifier.padding(end = 8.dp),
                     )
                 },
                 endActions = {
@@ -202,7 +201,6 @@ fun TextComponent(
                 startAction = {
                     Text(
                         text = "Start",
-                        modifier = Modifier.padding(end = 8.dp),
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
@@ -261,7 +259,6 @@ fun TextComponent(
                 checked = superEndCheckboxState.value,
                 endActions = {
                     Text(
-                        modifier = Modifier.padding(end = 6.dp),
                         text = superEndCheckbox.value,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
@@ -341,7 +338,6 @@ fun TextComponent(
                     checked = superSwitchState.value,
                     endActions = {
                         Text(
-                            modifier = Modifier.padding(end = 6.dp),
                             text = superSwitch.value,
                             color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                         )
@@ -381,7 +377,6 @@ fun TextComponent(
                 },
                 endActions = {
                     Text(
-                        modifier = Modifier.padding(end = 8.dp),
                         text = "End",
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
@@ -392,7 +387,6 @@ fun TextComponent(
                 title = "Arrow + Slider + Dialog",
                 endActions = {
                     Text(
-                        modifier = Modifier.padding(end = 8.dp),
                         text = "${(volume * 100).toInt()}%",
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
@@ -410,7 +404,6 @@ fun TextComponent(
                 title = "Disabled Arrow",
                 endActions = {
                     Text(
-                        modifier = Modifier.padding(end = 8.dp),
                         text = "End",
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
@@ -487,14 +480,14 @@ fun TextComponent(
             )
             SuperDropdown(
                 title = "Disabled SuperDropdown",
-                items = listOf("Option 3"),
+                items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,
             )
             WindowDropdown(
                 title = "Disabled WindowDropdown",
-                items = listOf("Option 4"),
+                items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,

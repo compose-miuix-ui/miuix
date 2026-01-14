@@ -3,12 +3,15 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +27,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -34,6 +38,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperArrow
@@ -116,11 +121,124 @@ fun NavTestPage(
         ) {
             item {
                 Card(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier
+                        .padding(all = 12.dp),
                 ) {
                     SuperArrow(
                         title = "Push another NavTest Page",
                         onClick = { backStack.add(Screen.NavTestPage(Random.nextLong().toString())) },
+                    )
+                }
+            }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp),
+                ) {
+                    BasicComponent(
+                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Start",
+                            )
+                        },
+                        endActions = {
+                            Text(text = "End1")
+                            Spacer(Modifier.width(8.dp))
+                            Text(text = "End2")
+                        },
+                        enabled = true,
+                    )
+                    BasicComponent(
+                        title = "Title",
+                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                        startAction = {
+                            Text(
+                                text = "Start",
+                            )
+                        },
+                        endActions = {
+                            Text(text = "End1")
+                            Spacer(Modifier.width(8.dp))
+                            Text(text = "End2")
+                        },
+                        enabled = true,
+                    )
+                    BasicComponent(
+                        title = "Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
+                            )
+                        },
+                        endActions = {
+                            Text(text = "End1")
+                            Spacer(Modifier.width(8.dp))
+                            Text(text = "End2")
+                        },
+                        enabled = true,
+                    )
+                    BasicComponent(
+                        title = "Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Start",
+                            )
+                        },
+                        endActions = {
+                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
+                        },
+                        enabled = true,
+                    )
+                    BasicComponent(
+                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
+                            )
+                        },
+                        endActions = {
+                            Row {
+                                Text(text = "End")
+                            }
+                        },
+                        enabled = true,
+                    )
+                    BasicComponent(
+                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Start",
+                            )
+                        },
+                        endActions = {
+                            Row {
+                                Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
+                            }
+                        },
+                        enabled = true,
+                    )
+
+                    BasicComponent(
+                        title = "Title",
+                        summary = "Summary",
+                        startAction = {
+                            Text(
+                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
+                            )
+                        },
+                        endActions = {
+                            Row {
+                                Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
+                            }
+                        },
+                        enabled = true,
                     )
                 }
             }

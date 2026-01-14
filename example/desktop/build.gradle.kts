@@ -39,7 +39,3 @@ compose.desktop {
         }
     }
 }
-
-tasks.named<JavaExec>("hotRunDesktop") {
-    jvmArgs("-Dapp.mode=hot")
-}

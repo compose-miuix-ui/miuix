@@ -61,7 +61,7 @@ fun MainPage(
     val switch = remember { mutableStateOf(false) }
     val switchTrue = remember { mutableStateOf(true) }
     val superDropdownOptionSelected = remember { mutableIntStateOf(0) }
-    val windowDropdownOptionSelected = remember { mutableIntStateOf(1) }
+    val windowDropdownOptionSelected = remember { mutableIntStateOf(0) }
     val superSpinnerOptionSelected = remember { mutableIntStateOf(0) }
     val windowSpinnerOptionSelected = remember { mutableIntStateOf(1) }
     val superSpinnerOptionSelectedDialog = remember { mutableIntStateOf(2) }

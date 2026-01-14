@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -63,7 +62,6 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param minWidth The minimum width of the [WindowListPopup].
  * @param content The [Composable] content of the [WindowListPopup]. You should use the [ListPopupColumn] in general.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WindowListPopup(
     show: MutableState<Boolean>,

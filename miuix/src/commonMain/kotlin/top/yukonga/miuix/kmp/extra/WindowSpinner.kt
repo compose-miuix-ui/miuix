@@ -3,14 +3,11 @@
 
 package top.yukonga.miuix.kmp.extra
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -23,27 +20,23 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -116,11 +109,20 @@ fun WindowSpinner(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            WindowSpinnerEndActions(
-                showValue = showValue,
-                itemsNotEmpty = itemsNotEmpty,
-                items = items,
-                selectedIndex = selectedIndex,
+            if (showValue && itemsNotEmpty) {
+                Text(
+                    text = items[selectedIndex].title ?: "",
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(end = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .weight(1f, fill = false),
+                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                    color = actionColor,
+                    textAlign = TextAlign.End,
+                )
+            }
+            DropdownArrowEndAction(
                 actionColor = actionColor,
             )
             if (itemsNotEmpty) {
@@ -181,36 +183,6 @@ private fun WindowSpinnerPopup(
             }
         }
     }
-}
-
-@Composable
-private fun RowScope.WindowSpinnerEndActions(
-    showValue: Boolean,
-    itemsNotEmpty: Boolean,
-    items: List<SpinnerEntry>,
-    selectedIndex: Int,
-    actionColor: Color,
-) {
-    if (showValue && itemsNotEmpty) {
-        Text(
-            modifier = Modifier.widthIn(max = 130.dp),
-            text = items[selectedIndex].title ?: "",
-            fontSize = MiuixTheme.textStyles.body2.fontSize,
-            color = actionColor,
-            textAlign = TextAlign.End,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-        )
-    }
-    Image(
-        modifier = Modifier
-            .padding(start = 8.dp)
-            .size(10.dp, 16.dp)
-            .align(Alignment.CenterVertically),
-        imageVector = MiuixIcons.Basic.ArrowUpDown,
-        colorFilter = ColorFilter.tint(actionColor),
-        contentDescription = null,
-    )
 }
 
 /**
@@ -285,11 +257,20 @@ fun WindowSpinner(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            WindowSpinnerEndActions(
-                showValue = showValue,
-                itemsNotEmpty = itemsNotEmpty,
-                items = items,
-                selectedIndex = selectedIndex,
+            if (showValue && itemsNotEmpty) {
+                Text(
+                    text = items[selectedIndex].title ?: "",
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(end = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .weight(1f, fill = false),
+                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                    color = actionColor,
+                    textAlign = TextAlign.End,
+                )
+            }
+            DropdownArrowEndAction(
                 actionColor = actionColor,
             )
             WindowSpinnerDialog(
