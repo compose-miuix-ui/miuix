@@ -384,7 +384,7 @@ private fun SuperBottomSheetColumn(
                 isSettling.value = true
                 val currentOffset = dragOffsetY.value
                 val dismissThresholdPx = with(density) { 150.dp.toPx() }
-                val velocityThresholdPx = with(density) { 1000.dp.toPx() }
+                val velocityThresholdPx = with(density) { 800.dp.toPx() }
                 val windowHeightPx = with(density) { windowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
@@ -397,12 +397,23 @@ private fun SuperBottomSheetColumn(
                         onDismissRequest?.invoke()
                     } else {
                         try {
-                            val duration = if (velocity > velocityThresholdPx) 150 else 200
+                            val remainingDistance = windowHeightPx - currentOffset
+
+                            val calculatedDuration = if (velocity > 100f) {
+                                ((remainingDistance * 2) / velocity * 1000).toInt()
+                            } else {
+                                300 // Fallback duration for slow drag past threshold without fling
+                            }
+
+                            val targetDuration = calculatedDuration.coerceIn(150, 450)
 
                             dragOffsetY.animateTo(
                                 targetValue = windowHeightPx,
-                                animationSpec = tween(durationMillis = duration, easing = DecelerateEasing(1f)),
-                                initialVelocity = velocity,
+                                animationSpec = tween(
+                                    durationMillis = targetDuration,
+                                    easing = DecelerateEasing(1f),
+                                ),
+                                initialVelocity = velocity, // Pass the actual touch velocity
                             ) {
                                 // Update alpha during animation frames
                                 updateDimAlpha(value)
