@@ -148,7 +148,7 @@ fun SuperDialog(
     val exitTransition: ExitTransition? = remember(isLargeScreen, imeBottom) {
         if (!isLargeScreen && imeBottom > 0) {
             slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
+                targetOffsetY = { it },
                 animationSpec = tween(350, easing = DecelerateEasing(0.8f)),
             )
         } else {

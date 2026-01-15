@@ -3,20 +3,10 @@
 
 package top.yukonga.miuix.kmp.extra
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -38,11 +28,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -93,8 +86,6 @@ fun WindowDialog(
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val internalVisible = remember { MutableTransitionState(false) }
-
     val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
     val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
@@ -102,7 +93,10 @@ fun WindowDialog(
         maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
     }
 
-    if (!show.value && !internalVisible.currentState && !internalVisible.targetState) return
+    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
+    var isAnimating by remember { mutableStateOf(false) }
+
+    if (!show.value && !isAnimating && animationProgress.value == 0f) return
 
     val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
@@ -111,37 +105,46 @@ fun WindowDialog(
 
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
-    val imeBottom = imeInsets.getBottom(density)
     val isLargeScreen = WindowDialogDefaults.isLargeScreen()
-    val exitTransitionNullable: ExitTransition? = remember(isLargeScreen, imeBottom) {
-        if (!isLargeScreen && imeBottom > 0) {
-            slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
-                animationSpec = tween(350, easing = DecelerateEasing(0.8f)),
-            )
-        } else {
-            null
-        }
-    }
+    val windowInfo = LocalWindowInfo.current
+    val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
 
-    val dismissPending = remember { mutableStateOf(false) }
-    val outsideDismissDeferred = remember { mutableStateOf(false) }
     val currentOnDismissInternal by rememberUpdatedState(onDismissRequest)
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(internalVisible.currentState, show.value) {
-        if (!internalVisible.currentState && !show.value) {
+    LaunchedEffect(show.value) {
+        if (!show.value) {
+            if (imeInsets.getBottom(density) > 0) {
+                keyboardController?.hide()
+            }
+        }
+        isAnimating = true
+        val target = if (show.value) 1f else 0f
+        animationProgress.animateTo(
+            targetValue = target,
+            animationSpec = if (show.value) {
+                if (isLargeScreen) {
+                    tween(durationMillis = 300, easing = DecelerateEasing(1.5f))
+                } else {
+                    spring(dampingRatio = 0.86f, stiffness = 450f, visibilityThreshold = 0.0001f)
+                }
+            } else {
+                if (isLargeScreen) {
+                    tween(durationMillis = 200, easing = DecelerateEasing(1.5f))
+                } else {
+                    tween(durationMillis = 150, easing = DecelerateEasing(0.8f))
+                }
+            },
+        )
+        isAnimating = false
+        if (!show.value && animationProgress.value == 0f) {
             currentOnDismissFinished?.invoke()
         }
     }
 
-    LaunchedEffect(show.value) {
-        internalVisible.targetState = show.value
-    }
-
     val requestDismiss: () -> Unit = remember {
         {
-            dismissPending.value = true
             currentOnDismissInternal?.invoke()
         }
     }
@@ -171,7 +174,7 @@ fun WindowDialog(
                 }
             },
             onBackCompleted = {
-                currentOnDismissInternal?.invoke()
+                requestDismiss()
             },
         )
 
@@ -187,103 +190,61 @@ fun WindowDialog(
             }
         }
 
-        AnimatedVisibility(
-            visibleState = internalVisible,
-            enter = fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f))),
-            exit = fadeOut(animationSpec = tween(260, easing = DecelerateEasing(1.5f))),
-        ) {
-            val baseColor = MiuixTheme.colorScheme.windowDimming
-            val dimColor = baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue))
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(dimColor),
-            )
-        }
+        val progress = animationProgress.value
+        val baseColor = MiuixTheme.colorScheme.windowDimming
+        val dimColor = baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue * progress))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(dimColor),
+        )
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(internalVisible.currentState) {
+                .pointerInput(show.value) {
                     detectTapGestures(
                         onTap = {
-                            if (internalVisible.currentState) {
-                                requestDismiss()
-                            } else {
-                                outsideDismissDeferred.value = true
-                            }
+                            requestDismiss()
                         },
                     )
                 },
 
-        ) {
-            AnimatedVisibility(
-                visibleState = internalVisible,
-                enter = rememberDefaultDialogEnterTransition(isLargeScreen),
-                exit = exitTransitionNullable ?: rememberDefaultDialogExitTransition(isLargeScreen),
             ) {
-                SuperDialogContent(
-                    title = title,
-                    titleColor = titleColor,
-                    summary = summary,
-                    summaryColor = summaryColor,
-                    backgroundColor = backgroundColor,
-                    outsideMargin = outsideMargin,
-                    insideMargin = insideMargin,
-                    defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-                    backProgress = backProgress,
-                    dialogHeightPx = dialogHeightPx,
-                    onDismissRequest = {
-                        if (internalVisible.currentState) {
-                            requestDismiss()
-                        } else {
-                            outsideDismissDeferred.value = true
-                        }
-                    },
-                    modifier = modifier,
-                    topInset = safeTopInset,
-                    content = {
-                        CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
-                            content()
-                        }
-                    },
-                )
+            val contentModifier = modifier.graphicsLayer {
+                if (isLargeScreen) {
+                    val scale = 0.8f + 0.2f * progress
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                } else {
+                    translationY = (1f - progress) * windowHeightPx
+                    alpha = 1f
+                }
             }
+            SuperDialogContent(
+                title = title,
+                titleColor = titleColor,
+                summary = summary,
+                summaryColor = summaryColor,
+                backgroundColor = backgroundColor,
+                outsideMargin = outsideMargin,
+                insideMargin = insideMargin,
+                defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+                backProgress = backProgress,
+                dialogHeightPx = dialogHeightPx,
+                onDismissRequest = {
+                    requestDismiss()
+                },
+                modifier = contentModifier,
+                topInset = safeTopInset,
+                content = {
+                    CompositionLocalProvider(LocalWindowDialogState provides { requestDismiss() }) {
+                        content()
+                    }
+                },
+            )
         }
-    }
-}
-
-@Composable
-private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
-    if (largeScreen) {
-        fadeIn(
-            animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f),
-        ) + scaleIn(
-            initialScale = 0.8f,
-            animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f),
-        )
-    } else {
-        slideInVertically(
-            initialOffsetY = { fullHeight -> fullHeight },
-            animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f),
-        )
-    }
-}
-
-@Composable
-private fun rememberDefaultDialogExitTransition(largeScreen: Boolean): ExitTransition = remember(largeScreen) {
-    if (largeScreen) {
-        fadeOut(
-            animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
-        ) + scaleOut(
-            targetScale = 0.8f,
-            animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
-        )
-    } else {
-        slideOutVertically(
-            targetOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
-        )
     }
 }
 

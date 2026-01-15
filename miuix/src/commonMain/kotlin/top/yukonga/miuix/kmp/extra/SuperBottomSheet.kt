@@ -194,7 +194,7 @@ fun SuperBottomSheet(
     @Composable
     fun rememberDefaultSheetEnterTransition(): EnterTransition = remember {
         slideInVertically(
-            initialOffsetY = { fullHeight -> fullHeight },
+            initialOffsetY = { it },
             animationSpec = tween(450, easing = DecelerateEasing(1.5f)),
         )
     }
@@ -202,7 +202,7 @@ fun SuperBottomSheet(
     @Composable
     fun rememberDefaultSheetExitTransition(): ExitTransition = remember {
         slideOutVertically(
-            targetOffsetY = { fullHeight -> fullHeight },
+            targetOffsetY = { it },
             animationSpec = tween(450, easing = DecelerateEasing(0.8f)),
         )
     }

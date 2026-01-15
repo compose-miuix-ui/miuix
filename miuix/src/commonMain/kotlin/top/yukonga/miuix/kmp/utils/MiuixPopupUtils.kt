@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -95,7 +94,7 @@ class MiuixPopupUtils {
             fadeOut(animationSpec = tween(260, easing = DecelerateEasing(1.5f)))
 
         private val PopupDimEnter: EnterTransition =
-            fadeIn(animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f))
+            fadeIn(animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f))
         private val PopupDimExit: ExitTransition =
             fadeOut(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
 
@@ -103,15 +102,15 @@ class MiuixPopupUtils {
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
             if (largeScreen) {
                 fadeIn(
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f),
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.0001f),
                 ) + scaleIn(
                     initialScale = 0.8f,
-                    animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f),
+                    animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f, visibilityThreshold = 0.0001f),
                 )
             } else {
                 slideInVertically(
-                    initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f),
+                    initialOffsetY = { it },
+                    animationSpec = spring(dampingRatio = 0.86f, stiffness = 450f),
                 )
             }
         }
@@ -127,7 +126,7 @@ class MiuixPopupUtils {
                 )
             } else {
                 slideOutVertically(
-                    targetOffsetY = { fullHeight -> fullHeight },
+                    targetOffsetY = { it },
                     animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
                 )
             }
