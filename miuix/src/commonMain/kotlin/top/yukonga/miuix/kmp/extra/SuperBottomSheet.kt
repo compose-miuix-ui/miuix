@@ -397,11 +397,16 @@ private fun SuperBottomSheetColumn(
                         onDismissRequest?.invoke()
                     } else {
                         try {
+                            val duration = if (velocity > velocityThresholdPx) 150 else 200
+
                             dragOffsetY.animateTo(
                                 targetValue = windowHeightPx,
-                                animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
+                                animationSpec = tween(durationMillis = duration, easing = DecelerateEasing(1f)),
                                 initialVelocity = velocity,
-                            )
+                            ) {
+                                // Update alpha during animation frames
+                                updateDimAlpha(value)
+                            }
                             onDismissRequest?.invoke()
                         } catch (_: Exception) {
                             // ignore
@@ -417,7 +422,10 @@ private fun SuperBottomSheetColumn(
                         targetValue = 0f,
                         animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
                         initialVelocity = effectiveVelocity,
-                    )
+                    ) {
+                        // Update alpha during animation frames to ensure it restores to 1f smoothly
+                        updateDimAlpha(value)
+                    }
                     dimAlpha.floatValue = 1f
                     isSettling.value = false
                 }
