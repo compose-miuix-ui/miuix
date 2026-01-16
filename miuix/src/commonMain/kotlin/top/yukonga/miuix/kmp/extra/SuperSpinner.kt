@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -130,7 +129,6 @@ fun SuperSpinner(
                 Text(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(end = 8.dp)
                         .align(Alignment.CenterVertically)
                         .weight(1f, fill = false),
@@ -277,7 +275,6 @@ fun SuperSpinner(
                 Text(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(end = 8.dp)
                         .align(Alignment.CenterVertically)
                         .weight(1f, fill = false),

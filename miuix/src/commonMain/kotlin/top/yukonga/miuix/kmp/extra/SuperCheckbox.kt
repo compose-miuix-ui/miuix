@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.extra
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
@@ -83,7 +82,6 @@ fun SuperCheckbox(
         endActions = {
             Row(
                 modifier = Modifier
-                    .fillMaxHeight()
                     .padding(end = 8.dp)
                     .align(Alignment.CenterVertically)
                     .weight(1f, fill = false),
