@@ -165,7 +165,7 @@ fun SuperBottomSheet(
             val offset = transitionState.latestEvent.progress * maxOffset
             val finalOffset = if (!allowDismiss) offset * 0.1f else offset
             dragSnapChannel.trySend(finalOffset)
-            dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
+            if (allowDismiss) dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
         }
     }
 
@@ -319,6 +319,7 @@ internal fun SuperBottomSheetContent(
                         } else {
                             val remainingDistance = windowHeightPx - currentOffset
                             val calculatedDuration = if (velocity > 100f) {
+                                // Calculate duration assuming constant deceleration: time = 2 * distance / velocity.
                                 ((remainingDistance * 2) / velocity * 1000).toInt()
                             } else {
                                 300
@@ -495,7 +496,7 @@ private fun SuperBottomSheetColumn(
     nestedScrollConnection: NestedScrollConnection,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    onSettle: suspend (velocity: Float) -> Unit,
+    onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -545,7 +546,7 @@ private fun SuperBottomSheetColumn(
                 dragOffsetY = dragOffsetY,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
-                onSettle = { velocity -> coroutineScope.launch { onSettle(velocity) } },
+                onSettle = onSettle,
                 onUpdateAlpha = onUpdateAlpha,
             )
 
@@ -567,7 +568,7 @@ private fun DragHandleArea(
     dragOffsetY: Animatable<Float, *>,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    onSettle: suspend (velocity: Float) -> Unit,
+    onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
 ) {
     val isPressing = remember { mutableFloatStateOf(0f) }
@@ -651,9 +652,7 @@ private fun DragHandleArea(
                     }
 
                     // Delegate the settle logic to the shared function
-                    coroutineScope.launch {
-                        onSettle(velocity)
-                    }
+                    onSettle(velocity)
                 },
             ),
         contentAlignment = Alignment.Center,
