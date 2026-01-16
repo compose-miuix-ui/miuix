@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -108,7 +107,6 @@ fun SuperDropdown(
                 Text(
                     text = items[selectedIndex],
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(end = 8.dp)
                         .align(Alignment.CenterVertically)
                         .weight(1f, fill = false),
