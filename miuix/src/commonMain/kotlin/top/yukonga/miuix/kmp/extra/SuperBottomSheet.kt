@@ -71,12 +71,14 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
@@ -144,51 +146,31 @@ fun SuperBottomSheet(
     NavigationBackHandler(
         state = navigationEventState,
         isBackEnabled = show.value,
-        onBackCancelled = {
-            coroutineScope.launch {
-                resetGesture()
-            }
-        },
+        onBackCancelled = { coroutineScope.launch { resetGesture() } },
         onBackCompleted = {
             if (allowDismiss) {
                 currentOnDismissRequest?.invoke()
             } else {
-                coroutineScope.launch {
-                    resetGesture()
-                }
+                coroutineScope.launch { resetGesture() }
             }
         },
     )
 
     LaunchedEffect(navigationEventState.transitionState, allowDismiss) {
         val transitionState = navigationEventState.transitionState
-        if (
-            transitionState is NavigationEventTransitionState.InProgress &&
+        if (transitionState is NavigationEventTransitionState.InProgress &&
             transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
         ) {
-            val maxOffset = if (sheetHeightPx.intValue > 0) {
-                sheetHeightPx.intValue.toFloat()
-            } else {
-                500f
-            }
+            val maxOffset = if (sheetHeightPx.intValue > 0) sheetHeightPx.intValue.toFloat() else 500f
             val offset = transitionState.latestEvent.progress * maxOffset
-            val finalOffset = if (!allowDismiss) {
-                offset * 0.1f
-            } else {
-                offset
-            }
+            val finalOffset = if (!allowDismiss) offset * 0.1f else offset
             dragSnapChannel.trySend(finalOffset)
-
-            if (allowDismiss) {
-                dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
-            }
+            if (allowDismiss) dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
         }
     }
 
     LaunchedEffect(dragOffsetY) {
-        for (target in dragSnapChannel) {
-            dragOffsetY.snapTo(target)
-        }
+        for (target in dragSnapChannel) dragOffsetY.snapTo(target)
     }
 
     @Composable
@@ -216,6 +198,10 @@ fun SuperBottomSheet(
         dimAlpha = dimAlpha,
         onDismissFinished = onDismissFinished,
     ) {
+        val layoutModifier = modifier.graphicsLayer {
+            translationY = dragOffsetY.value
+        }
+
         SuperBottomSheetContent(
             title = title,
             backgroundColor = backgroundColor,
@@ -231,7 +217,7 @@ fun SuperBottomSheet(
             dimAlpha = dimAlpha,
             dragSnapChannel = dragSnapChannel,
             onDismissRequest = currentOnDismissRequest,
-            modifier = modifier,
+            modifier = layoutModifier,
             startAction = startAction,
             endAction = endAction,
             enableNestedScroll = enableNestedScroll,
@@ -264,79 +250,15 @@ internal fun SuperBottomSheetContent(
     endAction: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
+    val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-
-    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
-
-    Box(
-        modifier = Modifier
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        currentOnDismiss?.invoke()
-                    },
-                )
-            }
-            .fillMaxSize(),
-    ) {
-        SuperBottomSheetColumn(
-            title = title,
-            startAction = startAction,
-            endAction = endAction,
-            backgroundColor = backgroundColor,
-            cornerRadius = cornerRadius,
-            sheetMaxWidth = sheetMaxWidth,
-            outsideMargin = outsideMargin,
-            insideMargin = insideMargin,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            dragHandleColor = dragHandleColor,
-            allowDismiss = allowDismiss,
-            windowHeight = windowHeight,
-            topInset = topInset,
-            enableNestedScroll = enableNestedScroll,
-            sheetHeightPx = sheetHeightPx,
-            dragOffsetY = dragOffsetY,
-            dimAlpha = dimAlpha,
-            dragSnapChannel = dragSnapChannel,
-            onDismissRequest = onDismissRequest,
-            modifier = modifier,
-            content = content,
-        )
-    }
-}
-
-@Suppress("ktlint:compose:modifier-not-used-at-root")
-@Composable
-private fun SuperBottomSheetColumn(
-    title: String?,
-    startAction: @Composable (() -> Unit?)?,
-    endAction: @Composable (() -> Unit?)?,
-    backgroundColor: Color,
-    cornerRadius: Dp,
-    sheetMaxWidth: Dp,
-    outsideMargin: DpSize,
-    insideMargin: DpSize,
-    defaultWindowInsetsPadding: Boolean,
-    dragHandleColor: Color,
-    allowDismiss: Boolean,
-    windowHeight: Dp,
-    topInset: Dp?,
-    enableNestedScroll: Boolean,
-    sheetHeightPx: MutableIntState,
-    dragOffsetY: Animatable<Float, *>,
-    dimAlpha: MutableFloatState,
-    dragSnapChannel: Channel<Float>,
-    onDismissRequest: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
 
+    val settlingJob = remember { mutableStateOf<Job?>(null) }
     val isSettling = remember { mutableStateOf(false) }
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
-    // Calculate inset top padding
     val calculatedTopInset = if (topInset != null) {
         topInset
     } else {
@@ -346,16 +268,13 @@ private fun SuperBottomSheetColumn(
         maxOf(statusBars, captionBar, displayCutout)
     }
 
-    // Calculate damping effect
     val calculateNewOffset = remember(allowDismiss) {
         { current: Float, delta: Float ->
             val newOffset = current + delta
             if (newOffset < 0) {
-                // Damping for upward drag
                 val dampingFactor = 0.1f
                 (current + delta * dampingFactor).coerceAtMost(0f)
             } else if (newOffset >= 0 && !allowDismiss) {
-                // Damping for downward drag if not dismissible
                 val dampingFactor = 0.1f
                 val dampedAmount = if (delta > 0) delta * dampingFactor else delta
                 (current + dampedAmount).coerceAtLeast(0f)
@@ -378,13 +297,14 @@ private fun SuperBottomSheetColumn(
     }
 
     // Settlement logic
-    val performSettle: suspend (Float) -> Unit = remember(allowDismiss, density, windowHeight) {
+    val performSettle: (Float) -> Unit = remember(allowDismiss, density, windowHeight) {
         { velocity ->
-            if (!isSettling.value) {
-                isSettling.value = true
+            settlingJob.value?.cancel()
+            isSettling.value = true
+            settlingJob.value = coroutineScope.launch {
                 val currentOffset = dragOffsetY.value
                 val dismissThresholdPx = with(density) { 150.dp.toPx() }
-                val velocityThresholdPx = with(density) { 1000.dp.toPx() }
+                val velocityThresholdPx = with(density) { 800.dp.toPx() }
                 val windowHeightPx = with(density) { windowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
@@ -392,41 +312,47 @@ private fun SuperBottomSheetColumn(
                         (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
                     )
 
-                if (shouldDismiss) {
-                    if (currentOffset >= windowHeightPx) {
-                        onDismissRequest?.invoke()
-                    } else {
-                        try {
-                            val duration = if (velocity > velocityThresholdPx) 150 else 200
+                try {
+                    if (shouldDismiss) {
+                        if (currentOffset >= windowHeightPx) {
+                            onDismissRequest?.invoke()
+                        } else {
+                            val remainingDistance = windowHeightPx - currentOffset
+                            val calculatedDuration = if (velocity > 100f) {
+                                // Calculate duration assuming constant deceleration: time = 2 * distance / velocity.
+                                ((remainingDistance * 2) / velocity * 1000).toInt()
+                            } else {
+                                300
+                            }
+                            val targetDuration = calculatedDuration.coerceIn(150, 450)
 
                             dragOffsetY.animateTo(
                                 targetValue = windowHeightPx,
-                                animationSpec = tween(durationMillis = duration, easing = DecelerateEasing(1f)),
+                                animationSpec = tween(
+                                    durationMillis = targetDuration,
+                                    easing = DecelerateEasing(1f),
+                                ),
                                 initialVelocity = velocity,
                             ) {
-                                // Update alpha during animation frames
                                 updateDimAlpha(value)
                             }
                             onDismissRequest?.invoke()
-                        } catch (_: Exception) {
-                            // ignore
                         }
+                    } else {
+                        val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
+                        dragOffsetY.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
+                            initialVelocity = effectiveVelocity,
+                        ) {
+                            updateDimAlpha(value)
+                        }
+                        dimAlpha.floatValue = 1f
                     }
-                } else {
-                    // Restore position
-                    // Ignore downward velocity if dismissal is disabled to prevent the sheet from being
-                    // pushed down, while preserving upward velocity for a quicker snap back.
-                    val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
-
-                    dragOffsetY.animateTo(
-                        targetValue = 0f,
-                        animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
-                        initialVelocity = effectiveVelocity,
-                    ) {
-                        // Update alpha during animation frames to ensure it restores to 1f smoothly
-                        updateDimAlpha(value)
-                    }
-                    dimAlpha.floatValue = 1f
+                } catch (_: CancellationException) {
+                    // Animation is interrupted
+                } finally {
+                    // Reset state after animation completes
                     isSettling.value = false
                 }
             }
@@ -437,7 +363,13 @@ private fun SuperBottomSheetColumn(
     val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, windowHeight) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (!enableNestedScroll || isSettling.value) return Offset.Zero
+                if (!enableNestedScroll) return Offset.Zero
+
+                // Allow interruption whenever settling
+                if (isSettling.value) {
+                    settlingJob.value?.cancel()
+                    isSettling.value = false
+                }
 
                 val delta = available.y
                 // If the sheet is offset, prioritize restoring its position
@@ -454,12 +386,16 @@ private fun SuperBottomSheetColumn(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                if (!enableNestedScroll || isSettling.value) return Offset.Zero
+                if (!enableNestedScroll) return Offset.Zero
 
                 val delta = available.y
                 if (delta > 0) {
-                    // If dismissal is disabled, return zero to trigger content overscroll
                     if (!allowDismiss) return Offset.Zero
+
+                    if (isSettling.value) {
+                        settlingJob.value?.cancel()
+                        isSettling.value = false
+                    }
 
                     val newOffset = calculateNewOffset(dragOffsetY.value, delta)
                     dragSnapChannel.trySend(newOffset)
@@ -468,8 +404,7 @@ private fun SuperBottomSheetColumn(
                     // Dismiss immediately if dragged beyond window height
                     val windowHeightPx = with(density) { windowHeight.toPx() }
                     if (newOffset > windowHeightPx) {
-                        isSettling.value = true
-                        onDismissRequest?.invoke()
+                        performSettle(0f)
                         return available
                     }
 
@@ -501,16 +436,77 @@ private fun SuperBottomSheetColumn(
         }
     }
 
-    // Calculate the overscroll offset for background fill
-    val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
-    val overscrollOffsetPx by remember {
-        derivedStateOf {
-            (-dragOffsetYValue).coerceAtLeast(0f)
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { currentOnDismissRequest?.invoke() },
+                )
+            },
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        SuperBottomSheetColumn(
+            title = title,
+            startAction = startAction,
+            endAction = endAction,
+            backgroundColor = backgroundColor,
+            cornerRadius = cornerRadius,
+            sheetMaxWidth = sheetMaxWidth,
+            outsideMargin = outsideMargin,
+            insideMargin = insideMargin,
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            dragHandleColor = dragHandleColor,
+            allowDismiss = allowDismiss,
+            windowHeight = windowHeight,
+            topInset = calculatedTopInset,
+            enableNestedScroll = enableNestedScroll,
+            sheetHeightPx = sheetHeightPx,
+            dragOffsetY = dragOffsetY,
+            nestedScrollConnection = nestedScrollConnection,
+            coroutineScope = coroutineScope,
+            dragSnapChannel = dragSnapChannel,
+            onSettle = performSettle,
+            onUpdateAlpha = updateDimAlpha,
+            modifier = modifier,
+            content = content,
+        )
     }
+}
+
+@Suppress("ktlint:compose:modifier-not-used-at-root")
+@Composable
+private fun SuperBottomSheetColumn(
+    title: String?,
+    startAction: @Composable (() -> Unit?)?,
+    endAction: @Composable (() -> Unit?)?,
+    backgroundColor: Color,
+    cornerRadius: Dp,
+    sheetMaxWidth: Dp,
+    outsideMargin: DpSize,
+    insideMargin: DpSize,
+    defaultWindowInsetsPadding: Boolean,
+    dragHandleColor: Color,
+    allowDismiss: Boolean,
+    windowHeight: Dp,
+    topInset: Dp,
+    enableNestedScroll: Boolean,
+    sheetHeightPx: MutableIntState,
+    dragOffsetY: Animatable<Float, *>,
+    nestedScrollConnection: NestedScrollConnection,
+    coroutineScope: CoroutineScope,
+    dragSnapChannel: Channel<Float>,
+    onSettle: (velocity: Float) -> Unit,
+    onUpdateAlpha: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val density = LocalDensity.current
+    val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
+    val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetYValue).coerceAtLeast(0f) } }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
         // Background fill for the area revealed when dragging up (overscroll effect)
@@ -528,52 +524,38 @@ private fun SuperBottomSheetColumn(
 
         Column(
             modifier = modifier
-                .pointerInput(Unit) {
-                    detectTapGestures { /* Consume click */ }
-                }
+                .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
                 .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .heightIn(max = windowHeight - calculatedTopInset)
+                .heightIn(max = windowHeight - topInset)
                 .onGloballyPositioned { coordinates ->
                     sheetHeightPx.intValue = coordinates.size.height
                 }
-                .graphicsLayer {
-                    translationY = dragOffsetY.value
-                }
-                .then(
-                    if (defaultWindowInsetsPadding) {
-                        Modifier.imePadding()
-                    } else {
-                        Modifier
-                    },
-                )
+                .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
                 .clip(ContinuousRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
         ) {
-            // Drag handle area
             DragHandleArea(
                 dragHandleColor = dragHandleColor,
                 allowDismiss = allowDismiss,
                 dragOffsetY = dragOffsetY,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
-                onSettle = performSettle,
-                onUpdateAlpha = updateDimAlpha,
+                onSettle = onSettle,
+                onUpdateAlpha = onUpdateAlpha,
             )
 
-            // Title and actions
             TitleAndActionsRow(
                 title = title,
                 startAction = startAction,
                 endAction = endAction,
             )
 
-            // Content
             content()
         }
     }
@@ -586,7 +568,7 @@ private fun DragHandleArea(
     dragOffsetY: Animatable<Float, *>,
     coroutineScope: CoroutineScope,
     dragSnapChannel: Channel<Float>,
-    onSettle: suspend (velocity: Float) -> Unit,
+    onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
 ) {
     val isPressing = remember { mutableFloatStateOf(0f) }
@@ -670,9 +652,7 @@ private fun DragHandleArea(
                     }
 
                     // Delegate the settle logic to the shared function
-                    coroutineScope.launch {
-                        onSettle(velocity)
-                    }
+                    onSettle(velocity)
                 },
             ),
         contentAlignment = Alignment.Center,

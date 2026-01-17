@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -106,6 +108,8 @@ fun WindowBottomSheet(
 
     if (!show.value && !isAnimating && animationProgress.value == 0f) return
 
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dragOffsetY = remember { Animatable(0f) }
@@ -122,7 +126,7 @@ fun WindowBottomSheet(
             animationSpec = if (show.value) {
                 tween(durationMillis = 450, easing = DecelerateEasing(1.5f))
             } else {
-                tween(durationMillis = 250, easing = DecelerateEasing(0.8f))
+                tween(durationMillis = 450, easing = DecelerateEasing(0.8f))
             },
         )
         isAnimating = false
@@ -197,7 +201,7 @@ fun WindowBottomSheet(
                 } else {
                     offset
                 }
-                dragOffsetY.snapTo(finalOffset)
+                dragSnapChannel.trySend(finalOffset)
                 dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
             }
         }
@@ -227,10 +231,14 @@ fun WindowBottomSheet(
                         },
                     )
                 },
-
-            ) {
+        ) {
             val sheetModifier = modifier.graphicsLayer {
-                val baseOffset = sheetHeightPx.intValue.toFloat().takeIf { it > 0 } ?: 0f
+                val currentHeight = sheetHeightPx.intValue.toFloat()
+                val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
+
+                // If height is 0 (not measured yet), use windowHeight to keep it off-screen
+                val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
+
                 translationY = baseOffset * (1f - progress) + dragOffsetY.value
                 alpha = 1f
             }
