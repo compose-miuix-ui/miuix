@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -74,7 +73,6 @@ fun SuperArrow(
         endActions = {
             Row(
                 modifier = Modifier
-                    .fillMaxHeight()
                     .padding(end = 8.dp)
                     .align(Alignment.CenterVertically)
                     .weight(1f, fill = false),

@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -113,7 +112,6 @@ fun WindowSpinner(
                 Text(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(end = 8.dp)
                         .align(Alignment.CenterVertically)
                         .weight(1f, fill = false),
@@ -261,7 +259,6 @@ fun WindowSpinner(
                 Text(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
-                        .fillMaxHeight()
                         .padding(end = 8.dp)
                         .align(Alignment.CenterVertically)
                         .weight(1f, fill = false),

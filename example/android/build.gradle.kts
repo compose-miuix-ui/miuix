@@ -4,7 +4,6 @@
 import java.util.Properties
 
 plugins {
-    kotlin("android") // Removed after the release of AGP 9.0.0
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -51,11 +50,6 @@ android {
             }
         }
     }
-    base {
-        archivesName.set(
-            "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})",
-        )
-    }
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -79,4 +73,10 @@ androidComponents {
         it.packaging.resources.excludes
             .add("**")
     }
+}
+
+base {
+    archivesName.set(
+        "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})",
+    )
 }
