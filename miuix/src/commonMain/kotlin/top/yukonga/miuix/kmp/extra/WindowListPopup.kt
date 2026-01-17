@@ -91,7 +91,7 @@ fun WindowListPopup(
             isAnimating = true
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f),
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f),
             )
         } else {
             animationProgress.animateTo(
