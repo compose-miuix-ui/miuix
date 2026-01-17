@@ -210,7 +210,7 @@ fun WindowDialog(
                     )
                 },
 
-            ) {
+        ) {
             val contentModifier = modifier.graphicsLayer {
                 if (isLargeScreen) {
                     val scale = 0.8f + 0.2f * progress
