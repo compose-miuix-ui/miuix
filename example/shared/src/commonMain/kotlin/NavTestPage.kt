@@ -3,7 +3,6 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -24,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -112,8 +111,7 @@ fun NavTestPage(
                 start = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
                 end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
                 bottom = if (isWideScreen) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
                 } else {
                     padding.calculateBottomPadding() + 12.dp
                 },
@@ -136,107 +134,118 @@ fun NavTestPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp),
                 ) {
-                    BasicComponent(
+                    SuperArrow(
                         title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Start",
-                            )
+                            Text(text = "Start")
                         },
                         endActions = {
-                            Text(text = "End1")
+                            Text(text = "End1", textAlign = TextAlign.End)
                             Spacer(Modifier.width(8.dp))
-                            Text(text = "End2")
+                            Text(text = "End2", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-                    BasicComponent(
+                    SuperArrow(
                         title = "Title",
                         summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
                         startAction = {
-                            Text(
-                                text = "Start",
-                            )
+                            Text(text = "Start")
                         },
                         endActions = {
-                            Text(text = "End1")
+                            Text(text = "End1", textAlign = TextAlign.End)
                             Spacer(Modifier.width(8.dp))
-                            Text(text = "End2")
+                            Text(text = "End2", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-                    BasicComponent(
+                    SuperArrow(
                         title = "Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
-                            )
+                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
                         },
                         endActions = {
-                            Text(text = "End1")
+                            Text(text = "End1", textAlign = TextAlign.End)
                             Spacer(Modifier.width(8.dp))
-                            Text(text = "End2")
+                            Text(text = "End2", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-                    BasicComponent(
+                    SuperArrow(
                         title = "Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Start",
-                            )
+                            Text(text = "Start")
                         },
                         endActions = {
-                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
+                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-                    BasicComponent(
+                    SuperArrow(
                         title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
-                            )
+                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
                         },
                         endActions = {
-                            Row {
-                                Text(text = "End")
-                            }
+                            Text(text = "End", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-                    BasicComponent(
+                    SuperArrow(
                         title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Start",
-                            )
+                            Text(text = "Start")
                         },
                         endActions = {
-                            Row {
-                                Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
-                            }
+                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
-
-                    BasicComponent(
+                    SuperArrow(
                         title = "Title",
                         summary = "Summary",
                         startAction = {
-                            Text(
-                                text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start",
-                            )
+                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
                         },
                         endActions = {
-                            Row {
-                                Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End")
-                            }
+                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                        },
+                        enabled = true,
+                    )
+                    SuperArrow(
+                        title = "Title",
+                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                        endActions = {
+                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                        },
+                        enabled = true,
+                    )
+                    SuperArrow(
+                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                        endActions = {
+                            Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
+                        },
+                        enabled = true,
+                    )
+                    SuperArrow(
+                        title = "Long Title Long Title Long Title Long Title",
+                        summary = "Summary",
+                        endActions = {
+                            Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
+                        },
+                        enabled = true,
+                    )
+                    SuperArrow(
+                        title = "Title",
+                        summary = "Long Summary Long Summary Long Summary Long Summary",
+                        endActions = {
+                            Text(text = "Long End Long End", textAlign = TextAlign.End)
                         },
                         enabled = true,
                     )
