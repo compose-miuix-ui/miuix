@@ -201,15 +201,14 @@ internal fun SuperDialogContent(
 ) {
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-    val roundedCorner = getRoundedCorner()
-    val bottomCornerRadius by remember(roundedCorner, outsideMargin.width) {
-        derivedStateOf {
-            if (roundedCorner != 0.dp) roundedCorner - outsideMargin.width else 32.dp
-        }
-    }
     val isLargeScreen = SuperDialogDefaults.isLargeScreen()
-    val contentAlignment by remember(isLargeScreen) {
-        derivedStateOf { if (isLargeScreen) Alignment.Center else Alignment.BottomCenter }
+    val contentAlignment = remember(isLargeScreen) {
+        if (isLargeScreen) Alignment.Center else Alignment.BottomCenter
+    }
+    val roundedCorner = getRoundedCorner()
+    val bottomCornerRadius = remember(roundedCorner, outsideMargin.width, isLargeScreen) {
+        val offset = if (isLargeScreen) 0.dp else outsideMargin.width
+        (roundedCorner - offset).coerceAtLeast(32.dp)
     }
 
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
