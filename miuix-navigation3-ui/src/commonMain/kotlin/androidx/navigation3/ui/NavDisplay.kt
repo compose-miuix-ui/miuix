@@ -140,8 +140,12 @@ object NavDisplay {
 /**
  * Class to define the transition for predictive back.
  *
- * @param animationSpec the [FiniteAnimationSpec] to be used when committing the predictive back gesture.
- * @param contentTransform the [ContentTransform] to be used when popping from backStack with predictive back gesture.
+ * @param animationSpec the [FiniteAnimationSpec] to be used when committing the predictive back
+ *   gesture.
+ * @param contentTransform function that, given the [AnimatedContentTransitionScope] for the
+ *   current [Scene] and the swipe edge direction (see [NavigationEvent.SwipeEdge]), returns the
+ *   [ContentTransform] to be used when popping from the back stack with a predictive back
+ *   gesture.
  */
 data class PredictivePopTransitionSpec(
     val animationSpec: FiniteAnimationSpec<Float>,
