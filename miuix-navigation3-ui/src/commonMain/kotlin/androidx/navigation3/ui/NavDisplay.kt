@@ -563,8 +563,6 @@ fun <T : Any> NavDisplay(
                 if (transitionState.targetState == scene) {
                     // Predictive Back has been committed
                     // so now we need to animate to the final state
-                    val totalDuration = transition.totalDurationNanos / 1000000
-                    ((1f - transitionState.fraction) * totalDuration).toInt()
                     // Resolve the PredictiveBackTransition
                     val predictiveTransition = (transition.targetState as? Scene<*>)
                         ?.metadata
