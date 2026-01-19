@@ -273,8 +273,7 @@ fun <T : Any> NavDisplay(
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
  * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [PredictivePopTransitionSpec] when popping with predictive back
- *   [NavEntry]s.
+ * @param predictivePopTransitionSpec Default [PredictivePopTransitionSpec] when popping [NavEntry]s with predictive back.
  * @param onBack a callback for handling system back press.
  * @see [rememberDecoratedNavEntries]
  */
