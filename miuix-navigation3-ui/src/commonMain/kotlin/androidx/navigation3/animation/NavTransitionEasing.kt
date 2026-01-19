@@ -5,7 +5,9 @@ package androidx.navigation3.animation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.runtime.Immutable
+import kotlin.compareTo
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
@@ -36,7 +38,7 @@ internal class NavTransitionEasing(
         return (decay * (-cos(w * t) + c2 * sin(w * t)) + 1.0).toFloat()
     }
 
-    fun inverseTransform(fraction: Float): Float {
+    fun inverseTransform(fraction: Float, tolerance: Float = 1e-6f): Float {
         if (fraction <= 0f) return 0f
         if (fraction >= 1f) return 1f
 
@@ -47,6 +49,8 @@ internal class NavTransitionEasing(
         repeat(16) {
             mid = (low + high) / 2f
             val value = transform(mid)
+            if (abs(value - fraction) < tolerance) return mid
+
             if (value < fraction) {
                 low = mid
             } else {

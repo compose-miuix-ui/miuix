@@ -683,7 +683,7 @@ fun <T : Any> NavDisplay(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
+                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
             val shape = remember(corner) {
@@ -771,7 +771,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
+                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }
@@ -825,22 +825,21 @@ fun <T : Any> defaultPopTransitionSpec(): AnimatedContentTransitionScope<Scene<T
 }
 
 /** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
-fun defaultPredictivePopTransitionSpec(): PredictivePopTransitionSpec =
-    PredictivePopTransitionSpec(
-        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        contentTransform = {
-            ContentTransform(
-                slideInHorizontally(
-                    initialOffsetX = { -it / 4 },
-                    animationSpec = tween(durationMillis = 550, easing = LinearEasing),
-                ),
-                slideOutHorizontally(
-                    targetOffsetX = { it },
-                    animationSpec = tween(durationMillis = 550, easing = LinearEasing),
-                ),
-            )
-        }
-    )
+fun defaultPredictivePopTransitionSpec(): PredictivePopTransitionSpec = PredictivePopTransitionSpec(
+    animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+    contentTransform = {
+        ContentTransform(
+            slideInHorizontally(
+                initialOffsetX = { -it / 4 },
+                animationSpec = tween(durationMillis = 550, easing = LinearEasing),
+            ),
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(durationMillis = 550, easing = LinearEasing),
+            ),
+        )
+    },
+)
 
 /** Default easing for navigation animations. */
 private val NavAnimationEasing = NavTransitionEasing(0.8f, 0.95f)
