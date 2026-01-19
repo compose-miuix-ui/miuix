@@ -563,10 +563,9 @@ fun <T : Any> NavDisplay(
                     // Predictive Back has been committed
                     // so now we need to animate to the final state
                     // Resolve the PredictiveBackTransition
-                    val predictiveTransition = (transition.targetState as? Scene<*>)
-                        ?.metadata
-                        ?.get(PREDICTIVE_POP_TRANSITION_SPEC) as? PredictivePopTransitionSpec
-                        ?: predictivePopTransitionSpec
+                    val predictiveTransition =
+                        transitionScene.metadata[PREDICTIVE_POP_TRANSITION_SPEC] as? PredictivePopTransitionSpec
+                            ?: predictivePopTransitionSpec
 
                     transitionState.animateTo(
                         scene,
