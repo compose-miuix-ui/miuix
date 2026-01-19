@@ -12,7 +12,8 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloat
@@ -116,27 +117,36 @@ object NavDisplay {
     /**
      * Function to be called on the [NavEntry.metadata] or [Scene.metadata] to notify the
      * [NavDisplay] that, when popping from backstack using a Predictive back gesture, the content
-     * should be animated using the provided [ContentTransform].
+     * should be animated using the provided [predictivePopTransitionSpec].
      *
      * **IMPORTANT** [NavDisplay] only looks at the [Scene.metadata] to determine the
      * [predictivePopTransitionSpec], it is the responsibility of the [Scene.metadata] to decide
      * which [predictivePopTransitionSpec] to return, whether that be from the [NavEntry.metadata]
      * or something custom.
      *
-     * @param predictivePopTransitionSpec the [ContentTransform] to be used when popping from
+     * @param predictivePopTransitionSpec the [predictivePopTransitionSpec] to be used when popping from
      *   backStack with predictive back gesture. If this is null, the transition will fallback to
      *   the transition set on the [NavDisplay]
      */
     fun predictivePopTransitionSpec(
-        predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<*>>.(
-            @NavigationEvent.SwipeEdge Int,
-        ) -> ContentTransform?,
+        predictivePopTransitionSpec: PredictivePopTransitionSpec,
     ): Map<String, Any> = mapOf(PREDICTIVE_POP_TRANSITION_SPEC to predictivePopTransitionSpec)
 
     internal const val TRANSITION_SPEC = "transitionSpec"
     internal const val POP_TRANSITION_SPEC = "popTransitionSpec"
     internal const val PREDICTIVE_POP_TRANSITION_SPEC = "predictivePopTransitionSpec"
 }
+
+/**
+ * Class to define the transition for predictive back.
+ *
+ * @param animationSpec the [FiniteAnimationSpec] to be used when committing the predictive back gesture.
+ * @param contentTransform the [ContentTransform] to be used when popping from backStack with predictive back gesture.
+ */
+data class PredictivePopTransitionSpec(
+    val animationSpec: FiniteAnimationSpec<Float>,
+    val contentTransform: AnimatedContentTransitionScope<Scene<*>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform,
+)
 
 /**
  * A nav display that renders and animates between different [Scene]s, each of which can render one
@@ -173,7 +183,7 @@ object NavDisplay {
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
  * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
+ * @param predictivePopTransitionSpec Default [predictivePopTransitionSpec] when popping with predictive back
  *   [NavEntry]s.
  * @param entryProvider lambda used to construct each possible [NavEntry]
  */
@@ -196,9 +206,7 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int,
-    ) -> ContentTransform =
+    predictivePopTransitionSpec: PredictivePopTransitionSpec =
         defaultPredictivePopTransitionSpec(),
     entryProvider: (key: T) -> NavEntry<T>,
 ) {
@@ -265,7 +273,7 @@ fun <T : Any> NavDisplay(
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
  * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
+ * @param predictivePopTransitionSpec Default [predictivePopTransitionSpec] when popping with predictive back
  *   [NavEntry]s.
  * @param onBack a callback for handling system back press.
  * @see [rememberDecoratedNavEntries]
@@ -282,9 +290,7 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int,
-    ) -> ContentTransform =
+    predictivePopTransitionSpec: PredictivePopTransitionSpec =
         defaultPredictivePopTransitionSpec(),
     onBack: () -> Unit,
 ) {
@@ -342,7 +348,7 @@ fun <T : Any> NavDisplay(
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
  * @param popTransitionSpec Default [ContentTransform] when popping [NavEntry]s.
- * @param predictivePopTransitionSpec Default [ContentTransform] when popping with predictive back
+ * @param predictivePopTransitionSpec Default [predictivePopTransitionSpec] when popping with predictive back
  *   [NavEntry]s.
  * @see [rememberSceneState]
  */
@@ -357,9 +363,7 @@ fun <T : Any> NavDisplay(
         defaultTransitionSpec(),
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
-    predictivePopTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int,
-    ) -> ContentTransform =
+    predictivePopTransitionSpec: PredictivePopTransitionSpec =
         defaultPredictivePopTransitionSpec(),
 ) {
     // Calculate current Scene and set up transitions
@@ -525,7 +529,9 @@ fun <T : Any> NavDisplay(
             if (transition.currentState == previousScene) {
                 // Interrupting entry: A -> B
                 // Scale progress to match the partial entry state
-                val targetFraction = entryInterruptionFraction * (1f - progress)
+                val startPhysical = NavAnimationEasing.transform(entryInterruptionFraction)
+                val targetPhysical = startPhysical * (1f - progress)
+                val targetFraction = NavAnimationEasing.inverseTransform(targetPhysical)
                 transitionState.seekTo(targetFraction, scene)
             } else {
                 // Standard back: B -> A
@@ -554,7 +560,24 @@ fun <T : Any> NavDisplay(
             }
 
             if (transitionState.currentState != scene) {
-                transitionState.animateTo(scene)
+                if (transitionState.targetState == scene) {
+                    // Predictive Back has been committed
+                    // so now we need to animate to the final state
+                    val totalDuration = transition.totalDurationNanos / 1000000
+                    ((1f - transitionState.fraction) * totalDuration).toInt()
+                    // Resolve the PredictiveBackTransition
+                    val predictiveTransition = (transition.targetState as? Scene<*>)
+                        ?.metadata
+                        ?.get(PREDICTIVE_POP_TRANSITION_SPEC) as? PredictivePopTransitionSpec
+                        ?: predictivePopTransitionSpec
+
+                    transitionState.animateTo(
+                        scene,
+                        animationSpec = predictiveTransition.animationSpec,
+                    )
+                } else {
+                    transitionState.animateTo(scene)
+                }
             } else {
                 // Predictive Back has been cancelled
                 // so now we need to seekTo+snapTo the final state
@@ -569,7 +592,7 @@ fun <T : Any> NavDisplay(
                     animate(
                         transitionState.fraction,
                         0f,
-                        animationSpec = tween(remainingDuration),
+                        animationSpec = tween(remainingDuration, easing = NavAnimationEasing),
                     ) { value, _ ->
                         this@LaunchedEffect.launch {
                             // Seek the transition towards the finalFraction
@@ -616,8 +639,10 @@ fun <T : Any> NavDisplay(
     val contentTransform: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
         when {
             inPredictiveBack -> {
-                transitionScene.predictivePopSpec()?.invoke(this, swipeEdge)
-                    ?: predictivePopTransitionSpec(swipeEdge)
+                val predictiveTransition = transitionScene.metadata[PREDICTIVE_POP_TRANSITION_SPEC] as? PredictivePopTransitionSpec
+                    ?: predictivePopTransitionSpec
+                @Suppress("UNCHECKED_CAST")
+                predictiveTransition.contentTransform.invoke(this as AnimatedContentTransitionScope<Scene<*>>, swipeEdge)
             }
 
             isPop -> {
@@ -658,7 +683,7 @@ fun <T : Any> NavDisplay(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
             LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
             val shape = remember(corner) {
@@ -746,7 +771,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }
@@ -770,17 +795,6 @@ private fun <T : Any> isPop(oldBackStack: List<T>, newBackStack: List<T>): Boole
 private fun <T : Any> Scene<T>.contentTransform(
     key: String,
 ): (AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform)? = metadata[key] as? AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform
-
-@Suppress("UNCHECKED_CAST")
-private fun <T : Any> Scene<T>.predictivePopSpec(): (
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int,
-    ) -> ContentTransform
-)? = metadata[PREDICTIVE_POP_TRANSITION_SPEC]
-    as?
-    AnimatedContentTransitionScope<Scene<T>>.(
-        @NavigationEvent.SwipeEdge Int,
-    ) -> ContentTransform
 
 /** Default [transitionSpec] for forward navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultTransitionSpec(): AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
@@ -811,21 +825,25 @@ fun <T : Any> defaultPopTransitionSpec(): AnimatedContentTransitionScope<Scene<T
 }
 
 /** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
-fun <T : Any> defaultPredictivePopTransitionSpec(): AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
-    ContentTransform(
-        slideInHorizontally(
-            initialOffsetX = { -it / 4 },
-            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        ),
-        slideOutHorizontally(
-            targetOffsetX = { it },
-            animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
-        ),
+fun defaultPredictivePopTransitionSpec(): PredictivePopTransitionSpec =
+    PredictivePopTransitionSpec(
+        animationSpec = tween(durationMillis = 500, easing = NavAnimationEasing),
+        contentTransform = {
+            ContentTransform(
+                slideInHorizontally(
+                    initialOffsetX = { -it / 4 },
+                    animationSpec = tween(durationMillis = 550, easing = LinearEasing),
+                ),
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(durationMillis = 550, easing = LinearEasing),
+                ),
+            )
+        }
     )
-}
 
 /** Default easing for navigation animations. */
-private val NavAnimationEasing: Easing = NavTransitionEasing(0.8f, 0.95f)
+private val NavAnimationEasing = NavTransitionEasing(0.8f, 0.95f)
 
 /** Stable identity for Scene instances within NavDisplay. */
 private data class SceneKey(

@@ -35,4 +35,24 @@ internal class NavTransitionEasing(
         val decay = exp(r * t)
         return (decay * (-cos(w * t) + c2 * sin(w * t)) + 1.0).toFloat()
     }
+
+    fun inverseTransform(fraction: Float): Float {
+        if (fraction <= 0f) return 0f
+        if (fraction >= 1f) return 1f
+
+        var low = 0f
+        var high = 1f
+        var mid = 0f
+
+        repeat(16) {
+            mid = (low + high) / 2f
+            val value = transform(mid)
+            if (value < fraction) {
+                low = mid
+            } else {
+                high = mid
+            }
+        }
+        return mid
+    }
 }
