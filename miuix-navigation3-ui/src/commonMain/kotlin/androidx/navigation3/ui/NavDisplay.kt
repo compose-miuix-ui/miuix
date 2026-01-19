@@ -125,8 +125,8 @@ object NavDisplay {
      * or something custom.
      *
      * @param predictivePopTransitionSpec the [PredictivePopTransitionSpec] to be used when popping from
-     *   backStack with predictive back gesture. If this is null, the transition will fallback to
-     *   the transition set on the [NavDisplay]
+     *   backStack with predictive back gesture. If not specified in [Scene.metadata], the transition
+     *   will fallback to the default transition set on the [NavDisplay].
      */
     fun predictivePopTransitionSpec(
         predictivePopTransitionSpec: PredictivePopTransitionSpec,
