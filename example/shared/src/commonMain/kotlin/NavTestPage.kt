@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import navigation3.LocalNavigator
+import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -51,6 +53,7 @@ import kotlin.random.Random
 
 @Composable
 fun NavTestPage(
+    index: Int,
     padding: PaddingValues,
     showTopAppBar: Boolean,
     isWideScreen: Boolean,
@@ -58,14 +61,14 @@ fun NavTestPage(
     enableOverScroll: Boolean,
     onBack: () -> Unit,
 ) {
-    val backStack = LocalBackStack.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val rememberIndex by remember { mutableIntStateOf(index) }
     Scaffold(
         topBar = {
             if (showTopAppBar) {
                 if (isWideScreen) {
                     SmallTopAppBar(
-                        title = "NavTest",
+                        title = "NavTest $rememberIndex",
                         scrollBehavior = topAppBarScrollBehavior,
                         navigationIcon = {
                             BackNavigationIcon(
@@ -79,7 +82,7 @@ fun NavTestPage(
                     )
                 } else {
                     TopAppBar(
-                        title = "NavTest",
+                        title = "NavTest $rememberIndex",
                         scrollBehavior = topAppBarScrollBehavior,
                         navigationIcon = {
                             BackNavigationIcon(
@@ -122,9 +125,10 @@ fun NavTestPage(
                     modifier = Modifier
                         .padding(all = 12.dp),
                 ) {
+                    val navigator = LocalNavigator.current
                     SuperArrow(
                         title = "Push another NavTest Page",
-                        onClick = { backStack.add(Screen.NavTestPage(Random.nextLong().toString())) },
+                        onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                     )
                 }
             }

@@ -35,6 +35,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // Optional: Add miuix-navigation3-ui for navigation3 support
             implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
+            // Optional: Add miuix-navigation3-adaptive for navigation3 adaptive support
+            implementation("top.yukonga.miuix.kmp:miuix-navigation3-adaptive:<version>")
             // Other dependencies...
         }
         // Other sourceSets...

@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import navigation3.LocalNavigator
+import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -64,7 +66,6 @@ fun SettingsPage(
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
-    navToAbout: () -> Unit,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
@@ -123,7 +124,6 @@ fun SettingsPage(
             colorMode = colorMode,
             seedIndex = seedIndex,
             isWideScreen = isWideScreen,
-            navToAbout = navToAbout,
         )
     }
 }
@@ -162,7 +162,6 @@ fun SettingsContent(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     isWideScreen: Boolean,
-    navToAbout: () -> Unit,
 ) {
     val floatingNavigationBarModeOptions = remember { listOf("IconOnly", "IconAndText", "TextOnly") }
     val floatingNavigationBarPositionOptions = remember { listOf("Center", "Start", "End") }
@@ -302,22 +301,23 @@ fun SettingsContent(
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             ) {
-                val backStack = LocalBackStack.current
+                val navigator = LocalNavigator.current
                 SuperArrow(
                     title = "NavTest",
                     summary = "Navigate to a NavTest Page.",
                     onClick = {
-                        backStack.add(Screen.NavTestPage(Random.nextLong().toString()))
+                        navigator.push(Route.NavTest(Random.nextLong().toString()))
                     },
                 )
             }
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {
+                val navigator = LocalNavigator.current
                 SuperArrow(
                     title = "About",
                     summary = "About this example App.",
-                    onClick = navToAbout,
+                    onClick = { navigator.push(Route.About) },
                 )
             }
         }

@@ -60,6 +60,9 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
+import navigation3.LocalNavigator
+import navigation3.Navigator
+import navigation3.Route
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FabPosition
@@ -146,13 +149,6 @@ data class UIState(
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
-val LocalBackStack = compositionLocalOf<MutableList<NavKey>> { error("No backstack") }
-
-sealed interface Screen : NavKey {
-    data object Home : Screen
-    data object About : Screen
-    data class NavTestPage(val id: String) : Screen
-}
 
 @Composable
 fun UITest(
@@ -175,7 +171,8 @@ fun UITest(
     }
 
     var uiState by remember { mutableStateOf(UIState()) }
-    val backStack = remember { mutableStateListOf<NavKey>(Screen.Home) }
+    val backStack = remember { mutableStateListOf<NavKey>().apply { add(Route.Main) } }
+    val navigator = remember(backStack) { Navigator(backStack) }
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
             coroutineScope.launch {
@@ -191,7 +188,7 @@ fun UITest(
     CompositionLocalProvider(
         LocalPagerState provides pagerState,
         LocalHandlePageChange provides handlePageChange,
-        LocalBackStack provides backStack,
+        LocalNavigator provides navigator,
     ) {
         val isWideScreen = shouldShowSplitPane()
 
@@ -208,7 +205,7 @@ fun UITest(
 
         val entryProvider = remember(backStack, uiState, colorMode, seedIndex) {
             entryProvider<NavKey> {
-                entry(Screen.Home) {
+                entry<Route.Main> {
                     Home(
                         uiState = uiState,
                         onUiStateChange = { uiState = it },
@@ -216,27 +213,28 @@ fun UITest(
                         seedIndex = seedIndex,
                         padding = padding,
                         navigationItems = navigationItems,
-                        navToAbout = { backStack.add(Screen.About) },
                     )
                 }
-                entry(Screen.About) {
+                entry<Route.About> {
                     AboutPage(
                         padding = padding,
                         showTopAppBar = uiState.showTopAppBar,
                         isWideScreen = uiState.isWideScreen,
                         enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                         enableOverScroll = uiState.enableOverScroll,
-                        onBack = { backStack.removeLast() },
+                        onBack = { navigator.pop() },
                     )
                 }
-                entry<Screen.NavTestPage> {
+                entry<Route.NavTest> { route ->
+                    val index = backStack.filterIsInstance<Route.NavTest>().indexOf(route) + 1
                     NavTestPage(
+                        index = index,
                         padding = padding,
                         showTopAppBar = uiState.showTopAppBar,
                         isWideScreen = uiState.isWideScreen,
                         enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                         enableOverScroll = uiState.enableOverScroll,
-                        onBack = { backStack.removeLast() },
+                        onBack = { navigator.pop() },
                     )
                 }
             }
@@ -245,7 +243,7 @@ fun UITest(
         NavDisplay(
             backStack = backStack,
             entryProvider = entryProvider,
-            onBack = { backStack.removeLast() },
+            onBack = { navigator.pop() },
         )
     }
 
@@ -271,7 +269,6 @@ private fun Home(
     seedIndex: MutableState<Int>,
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
-    navToAbout: () -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -292,7 +289,6 @@ private fun Home(
                         seedIndex = seedIndex,
                         snackbarHostState = snackbarHostState,
                         layoutDirection = layoutDirection,
-                        navToAbout = navToAbout,
                     )
                 } else {
                     CompactScreenLayout(
@@ -303,7 +299,6 @@ private fun Home(
                         seedIndex = seedIndex,
                         snackbarHostState = snackbarHostState,
                         padding = padding,
-                        navToAbout = navToAbout,
                     )
                 }
             },
@@ -387,7 +382,6 @@ private fun WideScreenContent(
     seedIndex: MutableState<Int>,
     snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
-    navToAbout: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -422,7 +416,6 @@ private fun WideScreenContent(
             modifier = Modifier
                 .imePadding()
                 .padding(end = padding.calculateEndPadding(layoutDirection)),
-            navToAbout = navToAbout,
         )
     }
 }
@@ -436,7 +429,6 @@ private fun CompactScreenLayout(
     seedIndex: MutableState<Int>,
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
-    navToAbout: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -479,7 +471,6 @@ private fun CompactScreenLayout(
                     end = padding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .imePadding(),
-            navToAbout = navToAbout,
         )
     }
 }
@@ -662,7 +653,6 @@ fun AppPager(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     modifier: Modifier = Modifier,
-    navToAbout: () -> Unit,
 ) {
     HorizontalPager(
         state = LocalPagerState.current,
@@ -738,7 +728,6 @@ fun AppPager(
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode,
                     seedIndex = seedIndex,
-                    navToAbout = navToAbout,
                 )
             }
         },
