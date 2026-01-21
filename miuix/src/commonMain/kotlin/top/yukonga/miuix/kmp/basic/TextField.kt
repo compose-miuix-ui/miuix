@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
@@ -161,20 +162,23 @@ fun TextField(
         inputTransformation = inputTransformation,
         outputTransformation = outputTransformation,
         scrollState = scrollState,
-        decorator = @Composable { innerTextField ->
-            TextFieldDecorationBox(
-                label = label,
-                labelFontSize = labelFontSize,
-                labelColor = labelColor,
-                labelState = labelState,
-                finalModifier = finalModifier,
-                paddingModifier = paddingModifier,
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon,
-                labelAnim = labelAnim,
-                insideMargin = insideMargin,
-                innerTextField = innerTextField,
-            )
+        decorator = object : TextFieldDecorator {
+            @Composable
+            override fun Decoration(innerTextField: @Composable () -> Unit) {
+                TextFieldDecorationBox(
+                    label = label,
+                    labelFontSize = labelFontSize,
+                    labelColor = labelColor,
+                    labelState = labelState,
+                    finalModifier = finalModifier,
+                    paddingModifier = paddingModifier,
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    labelAnim = labelAnim,
+                    insideMargin = insideMargin,
+                    innerTextField = innerTextField,
+                )
+            }
         },
     )
 }

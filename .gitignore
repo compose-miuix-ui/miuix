@@ -32,6 +32,7 @@ captures
 local.properties
 xcuserdata
 .kotlin
+.konan_cache
 *.lock
 convention-plugins/bin
 docs/node_modules
