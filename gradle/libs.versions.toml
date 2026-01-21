@@ -10,7 +10,7 @@ jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.1.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
 kotlin = "2.3.0"
-material-kolor = "4.0.5"
+material-kolor = "4.1.0"
 spotless = "8.1.0"
 
 [libraries]
