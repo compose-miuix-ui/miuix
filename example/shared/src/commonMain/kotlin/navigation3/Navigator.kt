@@ -3,7 +3,6 @@
 
 package navigation3
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -85,11 +84,4 @@ class Navigator(
     }
 
     private fun ensureChannel(key: String): MutableSharedFlow<Any> = resultBus.getOrPut(key) { MutableSharedFlow(replay = 1, extraBufferCapacity = 0) }
-}
-
-/**
- * CompositionLocal to provide the Navigator instance.
- */
-val LocalNavigator = staticCompositionLocalOf<Navigator> {
-    error("No Navigator provided")
 }

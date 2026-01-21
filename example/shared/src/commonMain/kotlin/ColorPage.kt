@@ -49,6 +49,7 @@ fun ColorPage(
     showTopAppBar: Boolean,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+
     Scaffold(
         topBar = {
             if (showTopAppBar) {
@@ -70,21 +71,14 @@ fun ColorPage(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .then(
-                    if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
-                )
-                .overScrollVertical(
-                    isEnabled = { enableOverScroll },
-                )
-                .then(
-                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-                )
+                .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+                .overScrollVertical(isEnabled = { enableOverScroll })
+                .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 bottom = if (isWideScreen) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
                 } else {
                     padding.calculateBottomPadding() + 12.dp
                 },

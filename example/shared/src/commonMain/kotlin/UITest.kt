@@ -38,13 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -60,7 +60,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
-import navigation3.LocalNavigator
 import navigation3.Navigator
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -147,8 +146,9 @@ data class UIState(
     val isWideScreen: Boolean = false,
 )
 
-val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
-val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
+val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator found!") }
+val LocalPagerState = staticCompositionLocalOf<PagerState> { error("No pager state") }
+val LocalHandlePageChange = staticCompositionLocalOf<(Int) -> Unit> { error("No handle page change") }
 
 @Composable
 fun UITest(
@@ -222,7 +222,15 @@ fun UITest(
                         isWideScreen = uiState.isWideScreen,
                         enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                         enableOverScroll = uiState.enableOverScroll,
-                        onBack = { navigator.pop() },
+                    )
+                }
+                entry<Route.License> {
+                    LicensePage(
+                        padding = padding,
+                        showTopAppBar = uiState.showTopAppBar,
+                        enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                        enableOverScroll = uiState.enableOverScroll,
+                        isWideScreen = uiState.isWideScreen,
                     )
                 }
                 entry<Route.NavTest> { route ->
@@ -234,7 +242,6 @@ fun UITest(
                         isWideScreen = uiState.isWideScreen,
                         enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                         enableOverScroll = uiState.enableOverScroll,
-                        onBack = { navigator.pop() },
                     )
                 }
             }

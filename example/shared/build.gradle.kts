@@ -4,10 +4,11 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("com.android.kotlin.multiplatform.library")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.multiplatform")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
 val generatedSrcDir =
@@ -60,6 +61,7 @@ kotlin {
                 implementation(projects.miuixNavigation3Ui)
                 implementation(projects.miuixNavigation3Adaptive)
                 implementation(libs.androidx.navigation3.runtime)
+                implementation(libs.aboutlibraries.core)
             }
         }
 
@@ -145,6 +147,12 @@ val generateVersionInfo by tasks.registering {
                     )
             iosPlist.writeText(updatedContent)
         }
+    }
+}
+
+aboutLibraries {
+    export {
+        outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json")
     }
 }
 

@@ -20,6 +20,7 @@ fun App(
     enableOverScroll: Boolean = platform() == Platform.Android || platform() == Platform.IOS,
 ) {
     val keyColor = keyColorFor(seedIndex.value)
+
     AppTheme(colorMode = colorMode.value, keyColor = keyColor) {
         UITest(
             colorMode = colorMode,

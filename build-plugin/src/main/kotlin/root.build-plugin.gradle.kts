@@ -15,21 +15,15 @@ fun Project.configureJvmToolchain() {
 allprojects {
     apply(plugin = "module.spotless")
 
+    plugins.withId("com.android.application") {
+        configureJvmToolchain()
+    }
+
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         configureJvmToolchain()
     }
 
     plugins.withId("org.jetbrains.kotlin.jvm") {
         configureJvmToolchain()
-    }
-
-    plugins.withId("org.jetbrains.kotlin.android") {
-        var configured = false
-        pluginManager.withPlugin("com.android.application") {
-            if (!configured) {
-                configureJvmToolchain()
-                configured = true
-            }
-        }
     }
 }

@@ -1,6 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.All
@@ -39,6 +41,7 @@ fun IconsPage(
     showTopAppBar: Boolean,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+
     Scaffold(
         topBar = {
             if (showTopAppBar) {
@@ -63,15 +66,12 @@ fun IconsPage(
             modifier = Modifier
                 .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
                 .overScrollVertical(isEnabled = { enableOverScroll })
-                .then(
-                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-                )
+                .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 bottom = if (isWideScreen) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        padding.calculateBottomPadding() + 12.dp
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
                 } else {
                     padding.calculateBottomPadding() + 12.dp
                 },

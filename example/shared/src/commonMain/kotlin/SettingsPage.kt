@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import navigation3.LocalNavigator
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -163,6 +162,7 @@ fun SettingsContent(
     seedIndex: MutableState<Int>,
     isWideScreen: Boolean,
 ) {
+    val navigator = LocalNavigator.current
     val floatingNavigationBarModeOptions = remember { listOf("IconOnly", "IconAndText", "TextOnly") }
     val floatingNavigationBarPositionOptions = remember { listOf("Center", "Start", "End") }
     val floatingToolbarPositionOptions =
@@ -175,19 +175,13 @@ fun SettingsContent(
     LazyColumn(
         modifier = Modifier
             .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical(
-                isEnabled = { enableOverScroll },
-            )
-            .background(colorScheme.surface)
-            .then(
-                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-            )
+            .overScrollVertical(isEnabled = { enableOverScroll })
+            .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
             bottom = if (isWideScreen) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    padding.calculateBottomPadding() + 12.dp
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },
@@ -301,22 +295,18 @@ fun SettingsContent(
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             ) {
-                val navigator = LocalNavigator.current
                 SuperArrow(
                     title = "NavTest",
-                    summary = "Navigate to a NavTest Page.",
-                    onClick = {
-                        navigator.push(Route.NavTest(Random.nextLong().toString()))
-                    },
+                    summary = "Navigate to a NavTest Page",
+                    onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                 )
             }
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {
-                val navigator = LocalNavigator.current
                 SuperArrow(
                     title = "About",
-                    summary = "About this example App.",
+                    summary = "About this example App",
                     onClick = { navigator.push(Route.About) },
                 )
             }

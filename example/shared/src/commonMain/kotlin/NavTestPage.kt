@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import navigation3.LocalNavigator
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
@@ -59,10 +59,11 @@ fun NavTestPage(
     isWideScreen: Boolean,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
-    onBack: () -> Unit,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val navigator = LocalNavigator.current
     val rememberIndex by remember { mutableIntStateOf(index) }
+
     Scaffold(
         topBar = {
             if (showTopAppBar) {
@@ -73,7 +74,7 @@ fun NavTestPage(
                         navigationIcon = {
                             BackNavigationIcon(
                                 modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
+                                onClick = { navigator.pop() },
                             )
                         },
                         actions = {
@@ -87,7 +88,7 @@ fun NavTestPage(
                         navigationIcon = {
                             BackNavigationIcon(
                                 modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
+                                onClick = { navigator.pop() },
                             )
                         },
                         actions = {
@@ -100,15 +101,10 @@ fun NavTestPage(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
                 .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-                .overScrollVertical(
-                    isEnabled = { enableOverScroll },
-                )
-                .background(colorScheme.surface)
-                .then(
-                    if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-                ),
+                .overScrollVertical(isEnabled = { enableOverScroll })
+                .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
+                .fillMaxHeight(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 start = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
@@ -184,7 +180,10 @@ fun NavTestPage(
                             Text(text = "Start")
                         },
                         endActions = {
-                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            Text(
+                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                textAlign = TextAlign.End,
+                            )
                         },
                         enabled = true,
                     )
@@ -206,7 +205,10 @@ fun NavTestPage(
                             Text(text = "Start")
                         },
                         endActions = {
-                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            Text(
+                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                textAlign = TextAlign.End,
+                            )
                         },
                         enabled = true,
                     )
@@ -217,7 +219,10 @@ fun NavTestPage(
                             Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
                         },
                         endActions = {
-                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            Text(
+                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                textAlign = TextAlign.End,
+                            )
                         },
                         enabled = true,
                     )
@@ -225,7 +230,10 @@ fun NavTestPage(
                         title = "Title",
                         summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
                         endActions = {
-                            Text(text = "Long End Long End Long End Long End Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            Text(
+                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                textAlign = TextAlign.End,
+                            )
                         },
                         enabled = true,
                     )

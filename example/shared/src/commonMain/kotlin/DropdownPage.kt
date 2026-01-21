@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
@@ -91,18 +92,14 @@ fun DropdownPage(
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .then(
-                        if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
-                    )
-                    .overScrollVertical(
-                        isEnabled = { enableOverScroll },
-                    )
+                    .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+                    .overScrollVertical(isEnabled = { enableOverScroll })
+                    .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding() + 12.dp,
                     bottom = if (isWideScreen) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            padding.calculateBottomPadding() + 12.dp
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
                     } else {
                         padding.calculateBottomPadding() + 12.dp
                     },

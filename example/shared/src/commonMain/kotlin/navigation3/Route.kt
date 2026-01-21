@@ -18,5 +18,8 @@ sealed interface Route : NavKey {
     data object About : Route
 
     @Serializable
+    data object License : Route
+
+    @Serializable
     data class NavTest(val id: String) : Route
 }

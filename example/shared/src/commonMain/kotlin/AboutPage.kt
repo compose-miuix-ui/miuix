@@ -17,10 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +28,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import misc.VersionInfo
+import navigation3.Route
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -41,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -56,9 +52,9 @@ fun AboutPage(
     isWideScreen: Boolean,
     enableScrollEndHaptic: Boolean,
     enableOverScroll: Boolean,
-    onBack: () -> Unit,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val navigator = LocalNavigator.current
     Scaffold(
         topBar = {
             if (showTopAppBar) {
@@ -69,7 +65,7 @@ fun AboutPage(
                         navigationIcon = {
                             BackNavigationIcon(
                                 modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
+                                onClick = { navigator.pop() },
                             )
                         },
                     )
@@ -80,7 +76,7 @@ fun AboutPage(
                         navigationIcon = {
                             BackNavigationIcon(
                                 modifier = Modifier.padding(start = 16.dp),
-                                onClick = onBack,
+                                onClick = { navigator.pop() },
                             )
                         },
                     )
@@ -113,24 +109,20 @@ fun AboutPage(
     isWideScreen: Boolean,
 ) {
     val uriHandler = LocalUriHandler.current
+    val navigator = LocalNavigator.current
+
     LazyColumn(
         modifier = Modifier
             .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical(
-                isEnabled = { enableOverScroll },
-            )
-            .background(colorScheme.surface)
-            .then(
-                if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier,
-            )
+            .overScrollVertical(isEnabled = { enableOverScroll })
+            .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
             start = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             bottom = if (isWideScreen) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    padding.calculateBottomPadding() + 12.dp
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
             } else {
                 padding.calculateBottomPadding() + 12.dp
             },
@@ -196,17 +188,26 @@ fun AboutPage(
                 )
             }
             Card(
-                modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp),
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 12.dp),
             ) {
-                val list = listOf("Apache-2.0", "Apache-2.0", "Apache-2.0")
-                var selectedIndex by remember { mutableIntStateOf(0) }
-                WindowDropdown(
+                SuperArrow(
                     title = "License",
-                    items = list,
-                    selectedIndex = selectedIndex,
-                    onSelectedIndexChange = {
-                        selectedIndex = it
+                    endActions = {
+                        Text(
+                            modifier = Modifier.padding(end = 8.dp),
+                            text = "Apache-2.0",
+                            color = colorScheme.onSurfaceVariantActions,
+                        )
                     },
+                    onClick = {
+                        uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    },
+                )
+                SuperArrow(
+                    title = "Third Party Licenses",
+                    onClick = { navigator.push(Route.License) },
                 )
             }
         }

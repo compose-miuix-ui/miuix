@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 plugins {
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.multiplatform")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
 kotlin {
