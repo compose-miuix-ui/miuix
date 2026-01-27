@@ -43,11 +43,11 @@ kotlin {
             implementation(projects.miuix)
             implementation(libs.androidx.collection)
             implementation(libs.androidx.navigation3.runtime)
-            implementation(libs.gaze.capsule)
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.lifecycle.runtime.compose)
+            implementation(libs.kyant.shapes)
         }
 
         val skikoMain by creating {

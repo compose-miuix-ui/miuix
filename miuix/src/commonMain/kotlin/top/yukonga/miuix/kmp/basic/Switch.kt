@@ -41,7 +41,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousCapsule
+import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
@@ -142,7 +142,7 @@ fun Switch(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
             .size(49.dp, 28.dp)
-            .clip(ContinuousCapsule)
+            .clip(Capsule)
             .drawBehind {
                 drawRect(backgroundColorState.value)
             }

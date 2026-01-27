@@ -41,7 +41,7 @@ Since this component is typically used for the most common actions, it does not 
 | -------------------------- | ---------------------- | ----------------------------------- | ------------------------------ | -------- |
 | onClick                    | () -> Unit             | Callback triggered when clicked     | -                              | Yes      |
 | modifier                   | Modifier               | Modifier applied to the button      | Modifier                       | No       |
-| shape                      | Shape                  | Shape of the button                 | ContinuousCapsule              | No       |
+| shape                      | Shape                  | Shape of the button                 | Capsule              | No       |
 | containerColor             | Color                  | Background color of the button      | MiuixTheme.colorScheme.primary | No       |
 | shadowElevation            | Dp                     | Shadow elevation of the button      | 4.dp                           | No       |
 | minWidth                   | Dp                     | Minimum width of the button         | 60.dp                          | No       |

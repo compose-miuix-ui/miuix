@@ -71,7 +71,7 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
@@ -682,13 +682,10 @@ fun <T : Any> NavDisplay(
         CompositionLocalProvider(
             LocalLifecycleOwner provides sceneLifecycleOwner,
             LocalNavAnimatedContentScope provides this,
-            LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
+            LocalEntriesToExcludeFromCurrentScene provides sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
-            val shape = remember(corner) {
-                ContinuousRoundedRectangle(topStart = corner, bottomStart = corner)
-            }
+            val shape = remember(corner) { RoundedRectangle(topStart = corner, bottomStart = corner) }
 
             val myKey = sceneKeyOf(targetScene)
             val myIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == myKey }
@@ -771,7 +768,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }

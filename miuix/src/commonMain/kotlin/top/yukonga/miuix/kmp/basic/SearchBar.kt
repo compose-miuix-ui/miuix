@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.mocharealm.gaze.capsule.ContinuousCapsule
+import com.kyant.shapes.Capsule
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
@@ -184,7 +184,7 @@ fun InputField(
             ) {
                 Icon(
                     modifier = Modifier
-                        .clip(ContinuousCapsule)
+                        .clip(Capsule)
                         .clickable { currentOnQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
@@ -228,7 +228,7 @@ fun InputField(
                 modifier = Modifier
                     .background(
                         color = MiuixTheme.colorScheme.surfaceContainerHigh,
-                        shape = ContinuousCapsule,
+                        shape = Capsule,
                     ),
                 contentAlignment = Alignment.CenterStart,
             ) {

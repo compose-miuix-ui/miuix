@@ -6,7 +6,7 @@ about-libraries = "14.0.0-b02"
 androidx-activity = "1.12.2"
 androidx-collection = "1.5.0"
 androidx-navigation3 = "1.1.0-alpha02"
-gaze-capsule = "2.1.1-patch2"
+kyant-shapes = "1.0.4"
 jetbrains-androidx-navigationevent = "1.0.0"
 jetbrains-compose-multiplatform = "1.10.0"
 jetbrains-compose-window-size = "1.9.0"
@@ -31,7 +31,7 @@ jetbrains-compose-components-resources = { module = "org.jetbrains.compose.compo
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
-gaze-capsule = { module = "com.mocharealm.gaze:capsule", version.ref = "gaze-capsule" }
+kyant-shapes = { module = "io.github.kyant0:shapes", version.ref = "kyant-shapes" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
 
 [plugins]

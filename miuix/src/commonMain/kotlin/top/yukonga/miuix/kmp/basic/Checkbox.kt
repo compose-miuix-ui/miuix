@@ -36,7 +36,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousCapsule
+import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.pressable
@@ -153,7 +153,7 @@ fun Checkbox(
                 enabled = enabled,
                 delay = null,
             )
-            .clip(ContinuousCapsule)
+            .clip(Capsule)
             .drawWithCache {
                 val viewportSize = 23f
                 val strokeWidth = size.width * 0.09f

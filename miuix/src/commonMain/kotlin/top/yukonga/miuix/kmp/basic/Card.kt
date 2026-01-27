@@ -25,8 +25,8 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
-import com.mocharealm.gaze.capsule.continuities.G1Continuity
+import com.kyant.shapes.RoundedCornerStyle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -152,8 +152,8 @@ private fun BasicCard(
     cornerRadius: Dp = CardDefaults.CornerRadius,
     content: @Composable () -> Unit,
 ) {
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
-    val clipShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius, G1Continuity) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val clipShape = remember(cornerRadius) { RoundedRectangle(cornerRadius, RoundedCornerStyle.Circular) }
 
     CompositionLocalProvider(
         LocalContentColor provides colors.contentColor,

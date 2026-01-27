@@ -43,7 +43,7 @@ kotlin {
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
 
-            implementation(libs.gaze.capsule) // Capsule for Multiplatform
+            implementation(libs.kyant.shapes) // Capsule for Multiplatform
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }
 

@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousCapsule
+import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.api.toOkLab
 import top.yukonga.miuix.kmp.color.api.toOkLch
@@ -190,7 +190,7 @@ fun HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(ContinuousCapsule)
+                    .clip(Capsule)
                     .background(selectedColor),
             )
         }
@@ -437,7 +437,7 @@ fun OkHsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(ContinuousCapsule)
+                    .clip(Capsule)
                     .background(selectedColor),
             )
         }
@@ -688,7 +688,7 @@ fun OkLabColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(ContinuousCapsule)
+                    .clip(Capsule)
                     .background(selectedColor),
             )
         }
@@ -817,7 +817,7 @@ fun OkLchColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(ContinuousCapsule)
+                    .clip(Capsule)
                     .background(selectedColor),
             )
         }
@@ -1165,7 +1165,7 @@ private fun ColorSlider(
 
     BoxWithConstraints(
         modifier = Modifier
-            .clip(ContinuousCapsule)
+            .clip(Capsule)
             .then(modifier)
             .height(sliderHeightDp)
             .drawWithCache {

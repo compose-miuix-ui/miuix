@@ -23,7 +23,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -53,7 +53,7 @@ fun Button(
     content: @Composable RowScope.() -> Unit,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
     Surface(
         onClick = currentOnClick,
@@ -100,7 +100,7 @@ fun TextButton(
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
     val textColor = remember(enabled, colors) { if (enabled) colors.textColor else colors.disabledTextColor }
     Surface(

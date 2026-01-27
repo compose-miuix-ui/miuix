@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 
@@ -118,7 +118,7 @@ fun Slider(
     var layoutHeight by remember { mutableIntStateOf(0) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(height) { ContinuousRoundedRectangle(height) }
+    val shape = remember(height) { RoundedRectangle(height) }
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
@@ -321,7 +321,7 @@ fun VerticalSlider(
     var isHoveringThumb by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(width) { ContinuousRoundedRectangle(width) }
+    val shape = remember(width) { RoundedRectangle(width) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -529,7 +529,7 @@ fun RangeSlider(
     val isDragging = isDraggingStart || isDraggingEnd
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = remember(height) { ContinuousRoundedRectangle(height) }
+    val shape = remember(height) { RoundedRectangle(height) }
     var lastDraggedIsStart by remember { mutableStateOf(true) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }

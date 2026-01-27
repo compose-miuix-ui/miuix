@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -217,7 +217,7 @@ fun TabRowWithContour(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(ContinuousRoundedRectangle(cornerRadius + contourPadding))
+                .clip(RoundedRectangle(cornerRadius + contourPadding))
                 .background(color = colors.backgroundColor(false))
                 .padding(contourPadding),
         ) {
@@ -258,7 +258,7 @@ private fun TabItem(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    shape: ContinuousRoundedRectangle,
+    shape: RoundedRectangle,
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
@@ -295,7 +295,7 @@ private fun TabItemWithContour(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    shape: ContinuousRoundedRectangle,
+    shape: RoundedRectangle,
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
@@ -327,7 +327,7 @@ private fun TabItemWithContour(
  */
 private data class TabRowConfig(
     val tabWidth: Dp,
-    val shape: ContinuousRoundedRectangle,
+    val shape: RoundedRectangle,
     val listState: androidx.compose.foundation.lazy.LazyListState,
 )
 
@@ -348,7 +348,7 @@ private fun rememberTabRowConfig(
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
 
     return TabRowConfig(tabWidth, shape, listState)
 }

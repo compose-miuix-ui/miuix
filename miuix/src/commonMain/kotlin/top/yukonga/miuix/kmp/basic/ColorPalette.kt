@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.mocharealm.gaze.capsule.ContinuousCapsule
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.Capsule
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
 import kotlin.math.abs
@@ -125,7 +125,7 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(ContinuousCapsule)
+                    .clip(Capsule)
                     .background(lastEmittedColor ?: color),
             )
         }
@@ -191,7 +191,7 @@ private fun PaletteCanvas(
 ) {
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 

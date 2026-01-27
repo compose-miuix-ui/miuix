@@ -69,7 +69,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -308,9 +308,9 @@ internal fun SuperBottomSheetContent(
                 val windowHeightPx = with(density) { windowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
-                    (velocity > velocityThresholdPx) ||
-                        (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
-                    )
+                        (velocity > velocityThresholdPx) ||
+                                (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
+                        )
 
                 try {
                     if (shouldDismiss) {
@@ -535,7 +535,7 @@ private fun SuperBottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .clip(ContinuousRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
+                .clip(RoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
@@ -666,7 +666,7 @@ private fun DragHandleArea(
                 .graphicsLayer {
                     scaleY = pressScale.value
                 }
-                .clip(ContinuousRoundedRectangle(2.dp))
+                .clip(RoundedRectangle(2.dp))
                 .background(dragHandleColor.copy(alpha = handleAlpha)),
         )
     }

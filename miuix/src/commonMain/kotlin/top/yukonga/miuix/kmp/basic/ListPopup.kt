@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.min
@@ -348,7 +348,7 @@ fun rememberListPopupLayoutInfo(
             PopupPositionProvider.Align.End,
             PopupPositionProvider.Align.TopEnd,
             PopupPositionProvider.Align.BottomEnd,
-            -> parentBounds.right - popupMargin.right
+                -> parentBounds.right - popupMargin.right
 
             else -> parentBounds.left + popupMargin.left
         }
@@ -401,7 +401,7 @@ fun rememberListPopupLayoutInfo(
                 PopupPositionProvider.Align.End,
                 PopupPositionProvider.Align.TopEnd,
                 PopupPositionProvider.Align.BottomEnd,
-                -> true
+                    -> true
 
                 else -> false
             }
@@ -493,7 +493,7 @@ fun ListPopupContent(
 ) {
     val density = LocalDensity.current
 
-    val shape = ContinuousRoundedRectangle(16.dp)
+    val shape = RoundedRectangle(16.dp)
 
     Box(
         modifier = modifier

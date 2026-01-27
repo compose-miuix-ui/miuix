@@ -19,7 +19,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -46,7 +46,7 @@ fun FloatingToolbar(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val roundedCornerShape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val roundedCornerShape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
     val clipRequired = cornerRadius > 0.dp

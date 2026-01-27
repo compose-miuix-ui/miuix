@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -308,7 +308,7 @@ fun Snackbar(
     colors: SnackbarColors = SnackbarDefaults.snackbarColors(),
     insideMargin: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
 ) {
-    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val visuals = data.visuals
     val scope = rememberCoroutineScope()
 

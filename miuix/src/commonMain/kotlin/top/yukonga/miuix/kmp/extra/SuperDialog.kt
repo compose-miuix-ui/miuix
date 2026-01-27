@@ -56,7 +56,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
@@ -239,7 +239,7 @@ internal fun SuperDialogContent(
                 }
             } else {
                 val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
                 val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
                     derivedStateOf {
                         bottomPadding + outsideMargin.height
@@ -259,7 +259,7 @@ internal fun SuperDialogContent(
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
         }
-        .clip(ContinuousRoundedRectangle(bottomCornerRadius))
+        .clip(RoundedRectangle(bottomCornerRadius))
         .background(backgroundColor)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
