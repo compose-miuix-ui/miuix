@@ -14,7 +14,7 @@ jetbrains-dokka = "2.2.0-Beta"
 jetbrains-compose-hotReload = "1.0.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
 materialKolor = "4.1.0"
-spotless = "8.2.0"
+spotless = "8.2.1"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
