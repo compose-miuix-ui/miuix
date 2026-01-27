@@ -29,7 +29,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: Build Docs
         run: |
-          ./gradlew :miuix:dokkaGenerate
+          ./gradlew :miuix:dokkaGenerate -Prelease
           mkdir -p ./docs/public/dokka
           mv ./miuix/build/dokka/html/* ./docs/public/dokka
           ./gradlew :docs:demo:jsBrowserDistribution

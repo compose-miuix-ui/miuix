@@ -239,7 +239,7 @@ internal fun SuperDialogContent(
                 }
             } else {
                 val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
                 val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
                     derivedStateOf {
                         bottomPadding + outsideMargin.height

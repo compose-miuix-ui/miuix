@@ -308,9 +308,9 @@ internal fun SuperBottomSheetContent(
                 val windowHeightPx = with(density) { windowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
-                        (velocity > velocityThresholdPx) ||
-                                (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
-                        )
+                    (velocity > velocityThresholdPx) ||
+                        (currentOffset > dismissThresholdPx && velocity > -velocityThresholdPx)
+                    )
 
                 try {
                     if (shouldDismiss) {

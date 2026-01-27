@@ -348,7 +348,7 @@ fun rememberListPopupLayoutInfo(
             PopupPositionProvider.Align.End,
             PopupPositionProvider.Align.TopEnd,
             PopupPositionProvider.Align.BottomEnd,
-                -> parentBounds.right - popupMargin.right
+            -> parentBounds.right - popupMargin.right
 
             else -> parentBounds.left + popupMargin.left
         }
@@ -401,7 +401,7 @@ fun rememberListPopupLayoutInfo(
                 PopupPositionProvider.Align.End,
                 PopupPositionProvider.Align.TopEnd,
                 PopupPositionProvider.Align.BottomEnd,
-                    -> true
+                -> true
 
                 else -> false
             }

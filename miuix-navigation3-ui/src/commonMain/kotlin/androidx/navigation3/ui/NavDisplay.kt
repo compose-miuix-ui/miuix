@@ -768,7 +768,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
+                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }
