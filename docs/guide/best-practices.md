@@ -28,3 +28,7 @@ The example application of this project itself demonstrates how to build interfa
 ### Payload-Dumper-Compose
 
 [Payload-Dumper-Compose](https://github.com/rcmiku/Payload-Dumper-Compose) is an Android system image extraction tool based on Jetpack Compose.
+
+### Lyricon
+
+[Lyricon](https://github.com/proify/lyricon) is a Xposed module that extends the status bar lyrics for the Android system.
