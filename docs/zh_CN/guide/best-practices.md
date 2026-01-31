@@ -28,3 +28,7 @@
 ### Payload-Dumper-Compose
 
 [Payload-Dumper-Compose](https://github.com/rcmiku/Payload-Dumper-Compose) 是一个基于 Jetpack Compose 的安卓系统镜像提取工具。
+
+### 词幕
+
+[Lyricon](https://github.com/proify/lyricon) 是一个为安卓系统扩展状态栏歌词的 Xposed 模块。
