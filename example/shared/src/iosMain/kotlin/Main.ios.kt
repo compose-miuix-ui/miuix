@@ -10,7 +10,7 @@ import platform.UIKit.UIViewController
 fun main(): UIViewController = ComposeUIViewController(
     configure = {
         parallelRendering = true
-    }
+    },
 ) {
     App()
 }
