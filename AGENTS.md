@@ -13,7 +13,7 @@
 
 **Miuix** is a UI component library built with **Compose Multiplatform**.
 
-- **Supported Platforms**: Android, iOS, Desktop (JVM), MacOS, Web (Wasm/JS).
+- **Supported Platforms**: Android, iOS, Desktop (JVM), macOS, Web (Wasm/JS).
 
 ---
 
