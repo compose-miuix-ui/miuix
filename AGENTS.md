@@ -108,7 +108,7 @@ The project uses **AndroidX Navigation 3** (alpha) ported to KMP. Key modules:
 ## Git Commit
 
 - Mirror existing history style: `<scope>: <summary>` with a short lowercase scope tied to the touched area (e.g., `library`, `docs`, `example`). Keep the summary concise, sentence case, and avoid trailing period.
-- For doc-related changes use `docs`; for build-related changes use `build`; for fix-related changes use `fix`; for dependency-related changes use `fix(deps)`; for gradle-related changes use `chore(deps)`.
+- For doc-related changes use `docs`; for build-related changes use `build`; for code fixes use `fix`; for general dependency updates use `fix(deps)`; for Gradle/build-tool dependency or configuration updates use `chore(deps)`.
 - Keep subject lines brief (target ≤ 72 characters); briefly describe specific modifications in the body.
 - If referencing a PR/issue, append `(#1234)` at the end as seen in history.
 - Before committing, glance at recent `git log --oneline` to stay consistent with current prefixes and capitalization used in this repo.
