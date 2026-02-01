@@ -23,6 +23,7 @@ kotlin {
         androidResources.enable = true
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
         compileSdk = BuildConfig.COMPILE_SDK
+        minSdk = BuildConfig.MIN_SDK
         namespace = BuildConfig.APPLICATION_SHARED_ID
     }
 

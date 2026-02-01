@@ -17,14 +17,14 @@ dependencies {
 android {
     buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
     compileSdk = BuildConfig.COMPILE_SDK
-    namespace = BuildConfig.APPLICATION_ID
     defaultConfig {
-        targetSdk = BuildConfig.TARGET_SDK
-        minSdk = BuildConfig.MIN_SDK
         applicationId = BuildConfig.APPLICATION_ID
+        minSdk = BuildConfig.MIN_SDK
+        targetSdk = BuildConfig.TARGET_SDK
         versionName = BuildConfig.APPLICATION_VERSION_NAME
         versionCode = BuildConfig.APPLICATION_VERSION_CODE
     }
+    namespace = BuildConfig.APPLICATION_ID
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
     val keystorePath = properties.getProperty("KEYSTORE_PATH") ?: System.getenv("KEYSTORE_PATH")
