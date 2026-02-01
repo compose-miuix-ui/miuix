@@ -2,7 +2,7 @@
 
 ## Agent Quick Start
 
-- For significant features or refactors, sketch an Plan first; keep it updated as you work.
+- For significant features or refactors, sketch a Plan first; keep it updated as you work.
 - Default to `rg` for searching and keep edits ASCII unless the file already uses non-ASCII.
 - Run the component-specific checks below before handing work off; do not skip failing steps.
 - Use Context7 to pull library/API docs when you touch unfamiliar Compose/Android/JVM/Js/WasmJs/Swift APIs or deps.
