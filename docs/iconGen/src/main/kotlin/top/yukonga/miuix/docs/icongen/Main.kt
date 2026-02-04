@@ -298,7 +298,7 @@ fun main(args: Array<String>) {
                 val light = variants["Light"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
                 val regular = variants["Regular"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
                 val heavy = variants["Heavy"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
-                sb.append("| `$name`` | $light | $regular | $heavy |\n")
+                sb.append("| `$name` | $light | $regular | $heavy |\n")
             }
             return sb.toString()
         }
