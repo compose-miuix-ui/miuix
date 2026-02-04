@@ -93,7 +93,7 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
     val disabledPrimarySlider = blendColors(roles.primary, baseSurface, 0.38f)
 
     // Secondary colors with proper blending
-    val secondary = blendColors(roles.secondary, baseSurface, 0.38f)
+    val secondaryBlended = blendColors(roles.secondary, baseSurface, 0.38f)
     val secondaryVariant = blendColors(roles.primary, baseSurface, 0.24f)
     val onSecondaryVariant = blendColors(roles.secondary, secondaryVariant, 1.0f)
 
@@ -139,7 +139,7 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         disabledPrimarySlider = disabledPrimarySlider,
         primaryContainer = roles.primaryContainer,
         onPrimaryContainer = roles.onPrimaryContainer,
-        secondary = secondary,
+        secondary = secondaryBlended,
         onSecondary = roles.onSecondary,
         secondaryVariant = secondaryVariant,
         onSecondaryVariant = onSecondaryVariant,
