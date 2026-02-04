@@ -4,6 +4,8 @@
 package top.yukonga.miuix.kmp.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import com.materialkolor.hct.Hct
 
 /**
  * A data class representing the Monet color roles.
@@ -38,88 +40,88 @@ internal data class MonetRoles(
     val onSurfaceVariant: Color,
 )
 
-/** Composites a foreground color over a background color using alpha blending.
+/**
+ * Creates a new color by adjusting the tone of the base color.
  *
- * @param fg The foreground color.
- * @param bg The background color.
- * @return The resulting color after compositing.
+ * @param base The base color to adjust.
+ * @param tone The target tone value (0-100).
+ * @return A new color with the adjusted tone.
  */
-private fun compositeOver(fg: Color, bg: Color): Color {
-    val fa = fg.alpha
-    val ba = bg.alpha
-    val outA = fa + ba * (1f - fa)
-    if (outA == 0f) return Color(0f, 0f, 0f, 0f)
-    val r = (fg.red * fa + bg.red * ba * (1f - fa)) / outA
-    val g = (fg.green * fa + bg.green * ba * (1f - fa)) / outA
-    val b = (fg.blue * fa + bg.blue * ba * (1f - fa)) / outA
-    return Color(r, g, b, outA)
+private fun adjustTone(base: Color, tone: Double): Color {
+    val hct = Hct.fromInt(base.toArgb())
+    val adjusted = Hct.from(hct.hue, hct.chroma, tone)
+    return Color(adjusted.toInt())
 }
 
-/** Composites a foreground color over a background color and returns an opaque color.
+/**
+ * Blends two colors with a given ratio, maintaining full opacity.
  *
- * @param fg The foreground color.
- * @param bg The background color.
- * @return The resulting opaque color after compositing.
+ * @param foreground The foreground color.
+ * @param background The background color.
+ * @param ratio The blend ratio (0.0 = background, 1.0 = foreground).
+ * @return The blended opaque color.
  */
-private fun opaqueOver(fg: Color, bg: Color): Color {
-    val c = compositeOver(fg, bg)
-    return Color(c.red, c.green, c.blue, 1f)
+private fun blendColors(foreground: Color, background: Color, ratio: Float): Color {
+    val r = foreground.red * ratio + background.red * (1f - ratio)
+    val g = foreground.green * ratio + background.green * (1f - ratio)
+    val b = foreground.blue * ratio + background.blue * (1f - ratio)
+    return Color(r, g, b, 1f)
 }
-
-/** Ensures that the foreground color is opaque over the background color.
- *
- * @param fg The foreground color.
- * @param bg The background color.
- * @return The resulting opaque color.
- */
-private fun ensureOpaqueOver(fg: Color, bg: Color): Color = if (fg.alpha >= 1f) fg else opaqueOver(fg, bg)
 
 /** Maps Monet color roles to MIUIX color scheme.
  *
- * This function flattens colors with alpha transparency over appropriate background colors
- * to ensure all colors in the resulting [Colors] are opaque.
+ * This function uses direct color calculations based on tone adjustments and color blending
+ * to create a cohesive color scheme that follows Material Design 3 principles.
  *
  * @param roles The Monet color roles.
  * @param dark Whether the color scheme is for dark mode.
  * @return The mapped MIUIX [Colors].
  */
 internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): Colors {
+    // Base colors from roles
     val baseSurface = roles.surface
     val baseSurfaceContainer = roles.surfaceContainer
-    val baseSurfaceContainerHigh = roles.surfaceContainerHigh
 
-    // Flatten secondaryContainer/onSecondaryContainer on surface
-    val secondaryContainerOpaque = ensureOpaqueOver(roles.secondaryContainer, baseSurface)
-    val onSecondaryContainerOpaque = ensureOpaqueOver(roles.onSecondaryContainer, secondaryContainerOpaque)
+    // For disabled states, blend colors directly instead of using alpha compositing
+    // This produces cleaner, more predictable colors
+    val disabledPrimary = blendColors(roles.primary, baseSurface, 0.38f)
+    val disabledOnPrimary = blendColors(roles.onPrimary, disabledPrimary, 0.38f)
 
-    // Flatten secondaryVariant/onSecondaryVariant on surface
-    val secondaryVariantSource = roles.primary.copy(alpha = 0.24f)
-    val secondaryVariantOpaque = ensureOpaqueOver(secondaryVariantSource, baseSurface)
-    val onSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary, secondaryVariantOpaque)
+    val disabledPrimaryButton = blendColors(roles.primary, baseSurface, 0.38f)
+    val disabledOnPrimaryButton = blendColors(roles.onPrimary, disabledPrimaryButton, 0.6f)
 
-    // Flatten all other alpha usages to opaque
-    val disabledPrimaryOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
-    val disabledOnPrimaryOpaque = ensureOpaqueOver(roles.onPrimary.copy(alpha = 0.38f), disabledPrimaryOpaque)
+    val disabledPrimarySlider = blendColors(roles.primary, baseSurface, 0.38f)
 
-    val disabledPrimaryButtonOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
-    val disabledOnPrimaryButtonOpaque = ensureOpaqueOver(roles.onPrimary.copy(alpha = 0.6f), disabledPrimaryButtonOpaque)
+    // Secondary colors with proper blending
+    val secondary = blendColors(roles.secondary, baseSurface, 0.38f)
+    val secondaryVariant = blendColors(roles.primary, baseSurface, 0.24f)
+    val onSecondaryVariant = blendColors(roles.secondary, secondaryVariant, 1.0f)
 
-    val disabledPrimarySliderOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
+    val disabledSecondary = blendColors(roles.secondary, baseSurface, 0.24f)
+    val disabledOnSecondary = blendColors(roles.onSecondary, disabledSecondary, 0.42f)
 
-    val secondaryOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.38f), baseSurface)
+    val disabledSecondaryVariant = blendColors(roles.secondary, baseSurface, 0.12f)
+    val disabledOnSecondaryVariant = blendColors(roles.secondary, disabledSecondaryVariant, 0.24f)
 
-    val disabledSecondaryOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.24f), baseSurface)
-    val disabledOnSecondaryOpaque = ensureOpaqueOver(roles.onSecondary.copy(alpha = 0.42f), disabledSecondaryOpaque)
+    // Surface text colors with proper opacity simulation through blending
+    val onSurfaceSecondary = blendColors(roles.onSurface, baseSurface, 0.8f)
+    val onSurfaceVariantSummary = blendColors(roles.onSurface, baseSurfaceContainer, 0.6f)
+    val onSurfaceVariantActions = blendColors(roles.onSurface, baseSurfaceContainer, 0.6f)
+    val onSurfaceContainerVariant = blendColors(roles.onSurfaceVariant, baseSurfaceContainer, 0.6f)
 
-    val disabledSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.12f), baseSurface)
-    val disabledOnSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.24f), disabledSecondaryVariantOpaque)
+    // Use tone adjustment for onSurfaceContainerHigh to maintain proper contrast
+    val onSurfaceContainerHigh = if (dark) {
+        adjustTone(roles.onSurface, 65.0)
+    } else {
+        adjustTone(roles.onSurface, 60.0)
+    }
 
-    val onSurfaceSecondaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurface)
-    val onSurfaceVariantSummaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.6f), baseSurfaceContainer)
-    val onSurfaceVariantActionsOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.6f), baseSurfaceContainer)
-
-    val onSurfaceContainerVariantOpaque = ensureOpaqueOver(roles.onSurfaceVariant.copy(alpha = 0.6f), baseSurfaceContainer)
-    val onSurfaceContainerHighOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurfaceContainerHigh)
+    // Use tone adjustment for disabled surface text
+    val disabledOnSurface = if (dark) {
+        adjustTone(roles.onSurface, 40.0)
+    } else {
+        adjustTone(roles.onSurface, 60.0)
+    }
 
     return Colors(
         primary = roles.primary,
@@ -130,25 +132,25 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         onError = roles.onError,
         errorContainer = roles.errorContainer,
         onErrorContainer = roles.onErrorContainer,
-        disabledPrimary = disabledPrimaryOpaque,
-        disabledOnPrimary = disabledOnPrimaryOpaque,
-        disabledPrimaryButton = disabledPrimaryButtonOpaque,
-        disabledOnPrimaryButton = disabledOnPrimaryButtonOpaque,
-        disabledPrimarySlider = disabledPrimarySliderOpaque,
+        disabledPrimary = disabledPrimary,
+        disabledOnPrimary = disabledOnPrimary,
+        disabledPrimaryButton = disabledPrimaryButton,
+        disabledOnPrimaryButton = disabledOnPrimaryButton,
+        disabledPrimarySlider = disabledPrimarySlider,
         primaryContainer = roles.primaryContainer,
         onPrimaryContainer = roles.onPrimaryContainer,
-        secondary = secondaryOpaque,
+        secondary = secondary,
         onSecondary = roles.onSecondary,
-        secondaryVariant = secondaryVariantOpaque,
-        onSecondaryVariant = onSecondaryVariantOpaque,
-        disabledSecondary = disabledSecondaryOpaque,
-        disabledOnSecondary = disabledOnSecondaryOpaque,
-        disabledSecondaryVariant = disabledSecondaryVariantOpaque,
-        disabledOnSecondaryVariant = disabledOnSecondaryVariantOpaque,
-        secondaryContainer = secondaryContainerOpaque,
-        onSecondaryContainer = onSecondaryContainerOpaque,
-        secondaryContainerVariant = secondaryContainerOpaque,
-        onSecondaryContainerVariant = onSecondaryContainerOpaque,
+        secondaryVariant = secondaryVariant,
+        onSecondaryVariant = onSecondaryVariant,
+        disabledSecondary = disabledSecondary,
+        disabledOnSecondary = disabledOnSecondary,
+        disabledSecondaryVariant = disabledSecondaryVariant,
+        disabledOnSecondaryVariant = disabledOnSecondaryVariant,
+        secondaryContainer = roles.secondaryContainer,
+        onSecondaryContainer = roles.onSecondaryContainer,
+        secondaryContainerVariant = roles.secondaryContainer,
+        onSecondaryContainerVariant = roles.onSecondaryContainer,
         tertiaryContainer = roles.tertiaryContainer,
         onTertiaryContainer = roles.onTertiaryContainer,
         tertiaryContainerVariant = roles.onTertiaryContainer,
@@ -158,22 +160,22 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         surface = roles.surface,
         onSurface = roles.onSurface,
         surfaceVariant = roles.surfaceVariant,
-        onSurfaceSecondary = onSurfaceSecondaryOpaque,
-        onSurfaceVariantSummary = onSurfaceVariantSummaryOpaque,
-        onSurfaceVariantActions = onSurfaceVariantActionsOpaque,
-        disabledOnSurface = roles.onSurface,
+        onSurfaceSecondary = onSurfaceSecondary,
+        onSurfaceVariantSummary = onSurfaceVariantSummary,
+        onSurfaceVariantActions = onSurfaceVariantActions,
+        disabledOnSurface = disabledOnSurface,
         surfaceContainer = roles.surfaceContainer,
         onSurfaceContainer = roles.onSurface,
-        onSurfaceContainerVariant = onSurfaceContainerVariantOpaque,
+        onSurfaceContainerVariant = onSurfaceContainerVariant,
         surfaceContainerHigh = roles.surfaceContainerHigh,
-        onSurfaceContainerHigh = onSurfaceContainerHighOpaque,
+        onSurfaceContainerHigh = onSurfaceContainerHigh,
         surfaceContainerHighest = roles.surfaceContainerHighest,
         onSurfaceContainerHighest = roles.onSurface,
         outline = roles.outline,
         dividerLine = roles.outlineVariant,
         windowDimming = if (dark) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.3f),
-        sliderKeyPoint = onSecondaryContainerOpaque,
+        sliderKeyPoint = roles.onSecondaryContainer,
         sliderKeyPointForeground = roles.onPrimary,
-        sliderBackground = secondaryVariantOpaque,
+        sliderBackground = secondaryVariant,
     )
 }
