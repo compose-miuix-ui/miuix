@@ -283,6 +283,7 @@ private fun TabItem(
                 text = text,
                 color = color,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                fontSize = MiuixTheme.textStyles.body1.fontSize,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -316,6 +317,7 @@ private fun TabItemWithContour(
             text = text,
             color = color,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = MiuixTheme.textStyles.body2.fontSize,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
