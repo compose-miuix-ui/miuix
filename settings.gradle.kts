@@ -35,6 +35,10 @@ dependencyResolutionManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 include(":miuix")
 include(":miuix-icons")
 include(":miuix-navigation3-ui")

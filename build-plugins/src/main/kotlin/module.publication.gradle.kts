@@ -91,29 +91,9 @@ publishing {
             }
             developers {
                 developer {
-                    id.set("YuKongA")
-                    name.set("YuKongA")
-                    url.set("$githubUrl/YuKongA")
-                }
-                developer {
-                    id.set("HowieHChen")
-                    name.set("Howie")
-                    url.set("$githubUrl/HowieHChen")
-                }
-                developer {
-                    id.set("Voemp")
-                    name.set("Voemp")
-                    url.set("$githubUrl/Voemp")
-                }
-                developer {
-                    id.set("HChenX")
-                    name.set("焕晨HChen")
-                    url.set("$githubUrl/HChenX")
-                }
-                developer {
-                    id.set("wxxsfxyzm")
-                    name.set("wxxsfxyzm")
-                    url.set("$githubUrl/wxxsfxyzm")
+                    id.set("compose-miuix-ui")
+                    name.set("compose-miuix-ui")
+                    url.set("$githubUrl/compose-miuix-ui")
                 }
             }
         }
