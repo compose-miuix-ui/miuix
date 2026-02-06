@@ -1,6 +1,6 @@
 [versions]
 agp = "9.0.0"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 
 about-libraries = "14.0.0-b02"
 androidx-activity = "1.12.3"
