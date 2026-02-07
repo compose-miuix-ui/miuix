@@ -32,3 +32,7 @@
 ### 词幕
 
 [Lyricon](https://github.com/proify/lyricon) 是一个为安卓系统扩展状态栏歌词的 Xposed 模块。
+
+### InstallerX Revived
+
+[InstallerX Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) 是一款现代化的 Android 包安装器，支持切换 Material 3/Miuix 设计风格，全面兼容各类文件格式，并可通过 Shizuku 或 Root 实现高级安装功能。
