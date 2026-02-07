@@ -32,3 +32,7 @@ The example application of this project itself demonstrates how to build interfa
 ### Lyricon
 
 [Lyricon](https://github.com/proify/lyricon) is a Xposed module that extends the status bar lyrics for the Android system.
+
+### InstallerX Revived
+
+[InstallerX Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) is a modern Android package installer featuring switchable Material 3/Miuix aesthetics, universal support for file formats, and advanced installation capabilities via Shizuku or Root.
