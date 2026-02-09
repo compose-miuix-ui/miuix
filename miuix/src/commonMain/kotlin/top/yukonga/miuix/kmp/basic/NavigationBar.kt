@@ -110,9 +110,9 @@ fun NavigationBar(
 
                 val tint = when {
                     isPressed -> if (isSelected) {
-                        onSurfaceContainerColor.copy(alpha = 0.6f)
+                        onSurfaceContainerColor.copy(alpha = 0.5f)
                     } else {
-                        onSurfaceContainerVariantColor.copy(alpha = 0.6f)
+                        onSurfaceContainerVariantColor.copy(alpha = 0.5f)
                     }
 
                     isSelected -> onSurfaceContainerColor
@@ -136,15 +136,16 @@ fun NavigationBar(
                             )
                         },
                     horizontalAlignment = CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
                 ) {
                     Image(
-                        modifier = Modifier.size(32.dp).padding(top = 6.dp),
+                        modifier = Modifier.padding(top = 8.dp).size(26.dp),
                         imageVector = item.icon,
                         contentDescription = item.label,
                         colorFilter = ColorFilter.tint(tint),
                     )
                     Text(
-                        modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 12.dp else 0.dp),
+                        modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp),
                         text = item.label,
                         color = tint,
                         textAlign = TextAlign.Center,
