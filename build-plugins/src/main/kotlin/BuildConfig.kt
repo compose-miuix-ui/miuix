@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 object BuildConfig {
-    const val LIBRARY_VERSION = "0.8.0"
+    const val LIBRARY_VERSION = "0.8.1"
     const val LIBRARY_ID = "top.yukonga.miuix.kmp"
     const val APPLICATION_NAME = "Miuix"
     const val APPLICATION_VERSION_NAME = "1.0.8"
