@@ -3,7 +3,7 @@ agp = "9.0.0"
 kotlin = "2.3.10"
 
 about-libraries = "14.0.0-b02"
-androidx-activity = "1.12.3"
+androidx-activity = "1.12.4"
 androidx-collection = "1.5.0"
 androidx-navigation3 = "1.1.0-alpha03"
 kyant-shapes = "1.0.4"
