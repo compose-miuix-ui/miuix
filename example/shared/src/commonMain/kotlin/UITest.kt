@@ -15,22 +15,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -48,14 +39,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.adaptive.SupportingPaneScaffold
-import androidx.navigation3.adaptive.utils.shouldShowSplitPane
+import androidx.navigation3.adaptive.utils.shouldShowTwoPanes
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
@@ -63,8 +51,6 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import navigation3.Navigator
 import navigation3.Route
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
@@ -72,15 +58,12 @@ import top.yukonga.miuix.kmp.basic.FloatingNavigationBarMode
 import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -92,8 +75,6 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.FPSMonitor
 
 private object UIConstants {
@@ -191,7 +172,7 @@ fun UITest(
         LocalHandlePageChange provides handlePageChange,
         LocalNavigator provides navigator,
     ) {
-        val isWideScreen = shouldShowSplitPane()
+        val isWideScreen = shouldShowTwoPanes()
 
         LaunchedEffect(isWideScreen) {
             if (uiState.isWideScreen != isWideScreen) {
@@ -282,166 +263,7 @@ private fun Home(
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
 ) {
-    val layoutDirection = LocalLayoutDirection.current
     val snackbarHostState = remember { SnackbarHostState() }
-    Scaffold(
-        snackbarHost = {
-            if (uiState.isWideScreen) {
-                SnackbarHost(state = snackbarHostState)
-            }
-        },
-    ) {
-        SupportingPaneScaffold(
-            main = {
-                if (uiState.isWideScreen) {
-                    WideScreenContent(
-                        uiState = uiState,
-                        onUiStateChange = onUiStateChange,
-                        colorMode = colorMode,
-                        seedIndex = seedIndex,
-                        snackbarHostState = snackbarHostState,
-                        layoutDirection = layoutDirection,
-                    )
-                } else {
-                    CompactScreenLayout(
-                        navigationItems = navigationItems,
-                        uiState = uiState,
-                        onUiStateChange = onUiStateChange,
-                        colorMode = colorMode,
-                        seedIndex = seedIndex,
-                        snackbarHostState = snackbarHostState,
-                        padding = padding,
-                    )
-                }
-            },
-            supporting = {
-                val barScrollBehavior = MiuixScrollBehavior()
-                WideScreenPanel(
-                    barScrollBehavior = barScrollBehavior,
-                    uiState = uiState,
-                    layoutDirection = layoutDirection,
-                )
-            },
-        )
-    }
-}
-
-@Composable
-private fun WideScreenPanel(
-    barScrollBehavior: ScrollBehavior,
-    uiState: UIState,
-    layoutDirection: LayoutDirection,
-) {
-    val page = LocalPagerState.current.targetPage
-    val handlePageChange = LocalHandlePageChange.current
-    Scaffold(
-        modifier = Modifier
-            .padding(start = 18.dp, end = 12.dp)
-            .fillMaxSize(),
-        contentWindowInsets = WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.End),
-            ),
-        ),
-        topBar = {
-            TopAppBar(
-                title = "Miuix",
-                horizontalPadding = 12.dp,
-                scrollBehavior = barScrollBehavior,
-            )
-        },
-        popupHost = { },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .then(
-                    if (uiState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
-                )
-                .padding(start = padding.calculateStartPadding(layoutDirection))
-                .overScrollVertical(
-                    isEnabled = { uiState.enableOverScroll },
-                )
-                .nestedScroll(barScrollBehavior.nestedScrollConnection)
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(bottom = 12.dp),
-        ) {
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(
-                            top = 12.dp + padding.calculateTopPadding(),
-                            bottom = padding.calculateBottomPadding(),
-                        ),
-                ) {
-                    UIConstants.PAGE_TITLES.forEachIndexed { index, title ->
-                        BasicComponent(
-                            title = title,
-                            onClick = { handlePageChange(index) },
-                            holdDownState = page == index,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WideScreenContent(
-    uiState: UIState,
-    onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>,
-    seedIndex: MutableState<Int>,
-    snackbarHostState: SnackbarHostState,
-    layoutDirection: LayoutDirection,
-) {
-    Scaffold(
-        modifier = Modifier
-            .padding(end = 6.dp)
-            .fillMaxSize(),
-        contentWindowInsets =
-        WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Start),
-            ),
-        ),
-        floatingActionButton = {
-            FloatingActionButton(show = uiState.showFloatingActionButton)
-        },
-        floatingActionButtonPosition = uiState.floatingActionButtonPosition.toFabPosition(),
-        floatingToolbar = {
-            FloatingToolbar(
-                showFloatingToolbar = uiState.showFloatingToolbar,
-                floatingToolbarOrientation = uiState.floatingToolbarOrientation,
-            )
-        },
-        floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
-        popupHost = { },
-    ) { padding ->
-        AppPager(
-            snackbarHostState = snackbarHostState,
-            padding = PaddingValues(top = padding.calculateTopPadding()),
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
-            modifier = Modifier
-                .imePadding()
-                .padding(end = padding.calculateEndPadding(layoutDirection)),
-        )
-    }
-}
-
-@Composable
-private fun CompactScreenLayout(
-    navigationItems: List<NavigationItem>,
-    uiState: UIState,
-    onUiStateChange: (UIState) -> Unit,
-    colorMode: MutableState<Int>,
-    seedIndex: MutableState<Int>,
-    snackbarHostState: SnackbarHostState,
-    padding: PaddingValues,
-) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -463,27 +285,29 @@ private fun CompactScreenLayout(
         },
         floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
         snackbarHost = {
-            if (!uiState.isWideScreen) {
-                SnackbarHost(state = snackbarHostState)
-            }
+            SnackbarHost(state = snackbarHostState)
         },
-        popupHost = { },
     ) { innerPadding ->
-        AppPager(
-            snackbarHostState = snackbarHostState,
-            padding = innerPadding,
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
-            modifier = Modifier
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    start = padding.calculateStartPadding(LocalLayoutDirection.current),
-                    end = padding.calculateEndPadding(LocalLayoutDirection.current),
-                )
-                .imePadding(),
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            AppPager(
+                snackbarHostState = snackbarHostState,
+                padding = innerPadding,
+                uiState = uiState,
+                onUiStateChange = onUiStateChange,
+                colorMode = colorMode,
+                seedIndex = seedIndex,
+                modifier = Modifier
+                    .padding(
+                        top = padding.calculateTopPadding(),
+                        start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                        end = padding.calculateEndPadding(LocalLayoutDirection.current),
+                    )
+                    .imePadding(),
+            )
+        }
     }
 }
 
@@ -497,13 +321,13 @@ private fun NavigationBar(
     val handlePageChange = LocalHandlePageChange.current
     AnimatedVisibility(
         visible = uiState.showNavigationBar,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn() + if (uiState.isWideScreen) expandHorizontally() else expandVertically(),
+        exit = fadeOut() + if (uiState.isWideScreen) shrinkHorizontally() else shrinkVertically(),
     ) {
         AnimatedVisibility(
             visible = !uiState.useFloatingNavigationBar,
-            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+            enter = fadeIn() + if (uiState.isWideScreen) expandHorizontally(expandFrom = Alignment.Start) else expandVertically(expandFrom = Alignment.Top),
+            exit = fadeOut() + if (uiState.isWideScreen) shrinkHorizontally(shrinkTowards = Alignment.Start) else shrinkVertically(shrinkTowards = Alignment.Top),
         ) {
             Box(
                 modifier = Modifier
@@ -530,8 +354,8 @@ private fun NavigationBar(
         }
         AnimatedVisibility(
             visible = uiState.useFloatingNavigationBar,
-            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+            enter = fadeIn() + if (uiState.isWideScreen) expandHorizontally(expandFrom = Alignment.Start) else expandVertically(expandFrom = Alignment.Top),
+            exit = fadeOut() + if (uiState.isWideScreen) shrinkHorizontally(shrinkTowards = Alignment.Start) else shrinkVertically(shrinkTowards = Alignment.Top),
         ) {
             Box(
                 modifier = modifier,
