@@ -5,7 +5,6 @@ package androidx.navigation3.animation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.runtime.Immutable
-import kotlin.compareTo
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos

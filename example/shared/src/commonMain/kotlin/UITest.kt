@@ -58,6 +58,7 @@ import androidx.navigation3.adaptive.SupportingPaneScaffold
 import androidx.navigation3.adaptive.utils.shouldShowSplitPane
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import navigation3.Navigator
@@ -247,9 +248,13 @@ fun UITest(
             }
         }
 
-        NavDisplay(
+        val entries = rememberDecoratedNavEntries(
             backStack = backStack,
             entryProvider = entryProvider,
+        )
+
+        NavDisplay(
+            entries = entries,
             onBack = { navigator.pop() },
         )
     }

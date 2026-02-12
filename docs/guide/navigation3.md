@@ -48,7 +48,7 @@ fun App() {
     }
 
     val entries = rememberDecoratedNavEntries(
-        backstack = backStack,
+        backStack = backStack,
         entryProvider = entryProvider
     )
 

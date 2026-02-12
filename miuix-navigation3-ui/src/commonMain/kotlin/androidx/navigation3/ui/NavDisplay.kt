@@ -1,6 +1,22 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+ * Copyright 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 @file:JvmName("NavDisplayKt")
 @file:JvmMultifileClass
 
@@ -16,12 +32,12 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -54,6 +70,7 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.LocalEntriesToExcludeFromCurrentScene
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneDecoratorStrategy
 import androidx.navigation3.scene.SceneInfo
 import androidx.navigation3.scene.SceneState
 import androidx.navigation3.scene.SceneStrategy
@@ -183,6 +200,7 @@ data class PredictivePopTransitionSpec(
  *   of the given back stack if it is a [MutableList], otherwise you should provide this parameter.
  * @param entryDecorators list of [NavEntryDecorator] to add information to the entry content
  * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
+ * @param sceneDecoratorStrategies list of [SceneDecoratorStrategy] to add content to the scene.
  * @param sharedTransitionScope the [SharedTransitionScope] to allow transitions between scenes.
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
@@ -204,6 +222,7 @@ fun <T : Any> NavDisplay(
     entryDecorators: List<NavEntryDecorator<T>> =
         listOf(rememberSaveableStateHolderNavEntryDecorator()),
     sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
+    sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>> = emptyList(),
     sharedTransitionScope: SharedTransitionScope? = null,
     sizeTransform: SizeTransform? = null,
     transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
@@ -226,6 +245,7 @@ fun <T : Any> NavDisplay(
     NavDisplay(
         entries = entries,
         sceneStrategy = sceneStrategy,
+        sceneDecoratorStrategies = sceneDecoratorStrategies,
         sharedTransitionScope = sharedTransitionScope,
         modifier = modifier,
         contentAlignment = contentAlignment,
@@ -273,6 +293,7 @@ fun <T : Any> NavDisplay(
  * @param modifier the modifier to be applied to the layout.
  * @param contentAlignment The [Alignment] of the [AnimatedContent]
  * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
+ * @param sceneDecoratorStrategies list of [SceneDecoratorStrategy] to add content to the scene.
  * @param sharedTransitionScope the [SharedTransitionScope] to allow transitions between scenes.
  * @param sizeTransform the [SizeTransform] for the [AnimatedContent].
  * @param transitionSpec Default [ContentTransform] when navigating to [NavEntry]s.
@@ -287,6 +308,7 @@ fun <T : Any> NavDisplay(
     modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
     sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
+    sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>> = emptyList(),
     sharedTransitionScope: SharedTransitionScope? = null,
     sizeTransform: SizeTransform? = null,
     transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
@@ -299,7 +321,14 @@ fun <T : Any> NavDisplay(
 ) {
     require(entries.isNotEmpty()) { "NavDisplay entries cannot be empty" }
 
-    val sceneState = rememberSceneState(entries, sceneStrategy, sharedTransitionScope, onBack)
+    val sceneState =
+        rememberSceneState(
+            entries,
+            sceneStrategy,
+            sceneDecoratorStrategies,
+            sharedTransitionScope,
+            onBack,
+        )
     val scene = sceneState.currentScene
 
     // Predictive Back Handling
@@ -695,7 +724,12 @@ fun <T : Any> NavDisplay(
             val targetIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == transitionTargetKey }
             val effectiveTargetIndex = if (targetIndex == -1) Int.MAX_VALUE else targetIndex
 
-            val shouldDim = effectiveIndex < effectiveTargetIndex
+            val transitionCurrentKey = sceneKeyOf(transition.currentState)
+            val currentIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == transitionCurrentKey }
+            val effectiveCurrentIndex = if (currentIndex == -1) Int.MAX_VALUE else currentIndex
+
+            val topIndex = maxOf(effectiveTargetIndex, effectiveCurrentIndex)
+            val shouldDim = effectiveIndex < topIndex
             val showCorner = effectiveIndex > 0 && !isSettled
 
             val roundedModifier = if (showCorner) Modifier.clip(shape) else Modifier
@@ -715,27 +749,28 @@ fun <T : Any> NavDisplay(
                 Modifier
             }
 
-            androidx.compose.foundation.layout.Box(
+            val dimAlpha = if (shouldDim) {
+                if (effectiveTargetIndex > effectiveCurrentIndex) {
+                    transitionState.fraction * 0.5f
+                } else if (effectiveTargetIndex < effectiveCurrentIndex) {
+                    (1f - transitionState.fraction) * 0.5f
+                } else {
+                    0.5f
+                }
+            } else {
+                0f
+            }
+            val showDim = dimAlpha > 0.001f && !isSettled
+
+            Box(
                 modifier = Modifier
                     .then(roundedModifier)
                     .then(blockInputModifier),
             ) {
                 targetScene.content()
 
-                val dimAlpha by transition.animateFloat(
-                    transitionSpec = { tween(durationMillis = 550, easing = NavAnimationEasing) },
-                    label = "dimAlpha",
-                ) { state ->
-                    val stateKey = sceneKeyOf(state)
-                    val stateIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == stateKey }
-                    val effectiveStateIndex = if (stateIndex == -1) Int.MAX_VALUE else stateIndex
-
-                    if (effectiveIndex < effectiveStateIndex) 0.5f else 0f
-                }
-
-                val showDim = dimAlpha > 0f && (shouldDim || !isSettled)
                 if (showDim) {
-                    androidx.compose.foundation.layout.Box(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer { alpha = dimAlpha }
@@ -768,7 +803,7 @@ fun <T : Any> NavDisplay(
     overlayScenes.fastForEachReversed { overlayScene ->
         CompositionLocalProvider(
             LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
+                    sceneToExcludedEntryMap.getOrElse(sceneKeyOf(overlayScene)) { emptySet() },
         ) {
             overlayScene.content.invoke()
         }
