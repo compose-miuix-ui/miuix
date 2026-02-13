@@ -6,7 +6,7 @@
     "medium-zoom": "^1.1.0",
     "vitepress": "^1.6.4",
     "vitepress-plugin-comment-with-giscus": "^1.1.15",
-    "vue": "^3.5.26"
+    "vue": "^3.5.28"
   },
   "scripts": {
     "docs:dev": "vitepress dev --host",

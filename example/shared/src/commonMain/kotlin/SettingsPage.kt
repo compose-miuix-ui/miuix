@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -27,7 +26,6 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import kotlin.random.Random
@@ -41,6 +39,10 @@ fun SettingsPage(
     onShowTopAppBarChange: (Boolean) -> Unit,
     showNavigationBar: Boolean,
     onShowNavigationBarChange: (Boolean) -> Unit,
+    navigationBarMode: Int,
+    onNavigationBarModeChange: (Int) -> Unit,
+    navigationRailMode: Int,
+    onNavigationRailModeChange: (Int) -> Unit,
     useFloatingNavigationBar: Boolean,
     onUseFloatingNavigationBarChange: (Boolean) -> Unit,
     floatingNavigationBarMode: Int,
@@ -98,6 +100,10 @@ fun SettingsPage(
             onShowTopAppBarChange = onShowTopAppBarChange,
             showNavigationBar = showNavigationBar,
             onShowNavigationBarChange = onShowNavigationBarChange,
+            navigationBarMode = navigationBarMode,
+            onNavigationBarModeChange = onNavigationBarModeChange,
+            navigationRailMode = navigationRailMode,
+            onNavigationRailModeChange = onNavigationRailModeChange,
             useFloatingNavigationBar = useFloatingNavigationBar,
             onUseFloatingNavigationBarChange = onUseFloatingNavigationBarChange,
             floatingNavigationBarMode = floatingNavigationBarMode,
@@ -136,6 +142,10 @@ fun SettingsContent(
     onShowTopAppBarChange: (Boolean) -> Unit,
     showNavigationBar: Boolean,
     onShowNavigationBarChange: (Boolean) -> Unit,
+    navigationBarMode: Int,
+    onNavigationBarModeChange: (Int) -> Unit,
+    navigationRailMode: Int,
+    onNavigationRailModeChange: (Int) -> Unit,
     useFloatingNavigationBar: Boolean,
     onUseFloatingNavigationBarChange: (Boolean) -> Unit,
     floatingNavigationBarMode: Int,
@@ -163,7 +173,7 @@ fun SettingsContent(
     isWideScreen: Boolean,
 ) {
     val navigator = LocalNavigator.current
-    val floatingNavigationBarModeOptions = remember { listOf("IconOnly", "IconAndText", "TextOnly") }
+    val navigationDisplayModeOptions = remember { listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel") }
     val floatingNavigationBarPositionOptions = remember { listOf("Center", "Start", "End") }
     val floatingToolbarPositionOptions =
         remember { listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter") }
@@ -203,11 +213,26 @@ fun SettingsContent(
                     onCheckedChange = onShowTopAppBarChange,
                 )
                 SuperSwitch(
-                    title = "Show NavigationBar",
+                    title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",
                     checked = showNavigationBar,
-                    enabled = !isWideScreen,
                     onCheckedChange = onShowNavigationBarChange,
                 )
+                AnimatedVisibility(visible = showNavigationBar && !isWideScreen && !useFloatingNavigationBar) {
+                    SuperDropdown(
+                        title = "NavigationBar Mode",
+                        items = navigationDisplayModeOptions,
+                        selectedIndex = navigationBarMode,
+                        onSelectedIndexChange = onNavigationBarModeChange,
+                    )
+                }
+                AnimatedVisibility(visible = showNavigationBar && isWideScreen) {
+                    SuperDropdown(
+                        title = "NavigationRail Mode",
+                        items = navigationDisplayModeOptions,
+                        selectedIndex = navigationRailMode,
+                        onSelectedIndexChange = onNavigationRailModeChange,
+                    )
+                }
                 AnimatedVisibility(visible = showNavigationBar && !isWideScreen) {
                     Column {
                         SuperSwitch(
@@ -219,7 +244,7 @@ fun SettingsContent(
                             Column {
                                 SuperDropdown(
                                     title = "FloatingNavigationBar Mode",
-                                    items = floatingNavigationBarModeOptions,
+                                    items = navigationDisplayModeOptions,
                                     selectedIndex = floatingNavigationBarMode,
                                     onSelectedIndexChange = onFloatingNavigationBarModeChange,
                                 )

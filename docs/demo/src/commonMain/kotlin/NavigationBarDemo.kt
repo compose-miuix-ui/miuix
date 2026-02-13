@@ -22,8 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarMode
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
@@ -65,11 +67,16 @@ fun NavigationBarDemo() {
                 ) {
                     Scaffold(
                         bottomBar = {
-                            NavigationBar(
-                                items = items,
-                                selected = selectedIndex1,
-                                onClick = { selectedIndex1 = it },
-                            )
+                            NavigationBar {
+                                items.forEachIndexed { index, item ->
+                                    NavigationBarItem(
+                                        selected = selectedIndex1 == index,
+                                        onClick = { selectedIndex1 = index },
+                                        icon = item.icon,
+                                        label = item.label,
+                                    )
+                                }
+                            }
                         },
                     ) { paddingValues ->
                         Box(
@@ -91,11 +98,17 @@ fun NavigationBarDemo() {
                     Scaffold(
                         bottomBar = {
                             FloatingNavigationBar(
-                                items = items,
-                                selected = selectedIndex2,
-                                onClick = { selectedIndex2 = it },
-                                mode = FloatingNavigationBarMode.IconOnly, // Show icons only
-                            )
+                                mode = NavigationDisplayMode.IconOnly, // Show icons only
+                            ) {
+                                items.forEachIndexed { index, item ->
+                                    FloatingNavigationBarItem(
+                                        selected = selectedIndex2 == index,
+                                        onClick = { selectedIndex2 = index },
+                                        icon = item.icon,
+                                        label = item.label,
+                                    )
+                                }
+                            }
                         },
                     ) { paddingValues ->
                         Box(

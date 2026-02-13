@@ -1,12 +1,15 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -20,13 +23,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
@@ -35,7 +35,7 @@ import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun ScaffoldDemo() {
+fun NavigationRailDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -45,7 +45,7 @@ fun ScaffoldDemo() {
         Column(
             Modifier
                 .padding(16.dp)
-                .widthIn(max = 600.dp)
+                .widthIn(max = 800.dp) // Wider for Rail
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -57,17 +57,20 @@ fun ScaffoldDemo() {
                 NavigationItem("Settings", MiuixIcons.Settings),
             )
             var selectedIndex by remember { mutableIntStateOf(0) }
-            Card {
-                Scaffold(
-                    topBar = {
-                        SmallTopAppBar(
-                            title = "SmallTopAppBar",
-                        )
-                    },
-                    bottomBar = {
-                        NavigationBar {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.height(400.dp),
+            ) {
+                Card(
+                    modifier = Modifier.weight(0.5f).fillMaxHeight(),
+                ) {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        NavigationRail(
+                            mode = NavigationDisplayMode.IconAndText,
+                        ) {
                             items.forEachIndexed { index, item ->
-                                NavigationBarItem(
+                                NavigationRailItem(
                                     selected = selectedIndex == index,
                                     onClick = { selectedIndex = index },
                                     icon = item.icon,
@@ -75,31 +78,18 @@ fun ScaffoldDemo() {
                                 )
                             }
                         }
-                    },
-                    floatingActionButton = {
-                        FloatingActionButton(
-                            onClick = {
-                                // Handle FAB click
-                            },
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Icon(
-                                imageVector = MiuixIcons.Contacts,
-                                contentDescription = "Personal",
-                                tint = Color.White,
+                            Text(
+                                text = "Current: ${pages[selectedIndex]}",
+                                style = MiuixTheme.textStyles.title1,
                             )
                         }
-                    },
-                ) { paddingValues ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "Current: ${pages[selectedIndex]}",
-                            style = MiuixTheme.textStyles.title1,
-                        )
                     }
                 }
             }

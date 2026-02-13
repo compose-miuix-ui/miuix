@@ -19,6 +19,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [Surface](../components/surface)                           | 基础容器组件           | 内容展示、背景容器   |
 | [TopAppBar](../components/topappbar)                       | 应用顶部的导航栏       | 页面标题、主要操作   |
 | [NavigationBar](../components/navigationbar)               | 底部导航组件           | 主要页面切换         |
+| [NavigationRail](../components/navigationrail)             | 侧边导航组件           | 主要页面切换（大屏）  |
 | [TabRow](../components/tabrow)                             | 水平标签页切换栏       | 内容分类浏览         |
 | [Card](../components/card)                                 | 包含相关信息的容器     | 信息展示、内容分组   |
 | [BasicComponent](../components/basiccomponent)             | 通用基础组件           | 自定义组件开发       |

@@ -46,6 +46,7 @@ private val availableComponents = listOf(
     AvailableComponent("Surface", "surface") { SurfaceDemo() },
     AvailableComponent("TopAppBar", "topAppBar") { TopAppBarDemo() },
     AvailableComponent("NavigationBar", "navigationBar") { NavigationBarDemo() },
+    AvailableComponent("NavigationRail", "navigationRail") { NavigationRailDemo() },
     AvailableComponent("TabRow", "tabRow") { TabRowDemo() },
     AvailableComponent("Card", "card") { CardDemo() },
     AvailableComponent("BasicComponent", "basicComponent") { BasicComponentDemo() },

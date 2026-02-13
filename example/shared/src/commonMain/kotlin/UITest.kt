@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
@@ -30,7 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -48,13 +46,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.adaptive.SupportingPaneScaffold
 import androidx.navigation3.adaptive.utils.shouldShowSplitPane
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -63,24 +59,23 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import navigation3.Navigator
 import navigation3.Route
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarMode
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -92,8 +87,6 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.FPSMonitor
 
 private object UIConstants {
@@ -118,21 +111,12 @@ enum class FloatingNavigationBarAlignment(val value: Int) {
     }
 }
 
-enum class FloatingNavigationBarDisplayMode(val value: Int) {
-    IconOnly(0),
-    IconAndText(1),
-    TextOnly(2),
-    ;
-
-    companion object {
-        fun fromInt(value: Int) = entries.find { it.value == value } ?: IconOnly
-    }
-}
-
 data class UIState(
     val showFPSMonitor: Boolean = false,
     val showTopAppBar: Boolean = true,
     val showNavigationBar: Boolean = true,
+    val navigationBarMode: Int = 0,
+    val navigationRailMode: Int = 0,
     val useFloatingNavigationBar: Boolean = false,
     val floatingNavigationBarMode: Int = 0,
     val floatingNavigationBarPosition: Int = 0,
@@ -291,103 +275,33 @@ private fun Home(
             }
         },
     ) {
-        SupportingPaneScaffold(
-            main = {
-                if (uiState.isWideScreen) {
-                    WideScreenContent(
-                        uiState = uiState,
-                        onUiStateChange = onUiStateChange,
-                        colorMode = colorMode,
-                        seedIndex = seedIndex,
-                        snackbarHostState = snackbarHostState,
-                        layoutDirection = layoutDirection,
-                    )
-                } else {
-                    CompactScreenLayout(
-                        navigationItems = navigationItems,
-                        uiState = uiState,
-                        onUiStateChange = onUiStateChange,
-                        colorMode = colorMode,
-                        seedIndex = seedIndex,
-                        snackbarHostState = snackbarHostState,
-                        padding = padding,
-                    )
-                }
-            },
-            supporting = {
-                val barScrollBehavior = MiuixScrollBehavior()
-                WideScreenPanel(
-                    barScrollBehavior = barScrollBehavior,
-                    uiState = uiState,
-                    layoutDirection = layoutDirection,
-                )
-            },
-        )
-    }
-}
-
-@Composable
-private fun WideScreenPanel(
-    barScrollBehavior: ScrollBehavior,
-    uiState: UIState,
-    layoutDirection: LayoutDirection,
-) {
-    val page = LocalPagerState.current.targetPage
-    val handlePageChange = LocalHandlePageChange.current
-    Scaffold(
-        modifier = Modifier
-            .padding(start = 18.dp, end = 12.dp)
-            .fillMaxSize(),
-        contentWindowInsets = WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.End),
-            ),
-        ),
-        topBar = {
-            TopAppBar(
-                title = "Miuix",
-                horizontalPadding = 12.dp,
-                scrollBehavior = barScrollBehavior,
+        if (uiState.isWideScreen) {
+            WideScreenContent(
+                navigationItems = navigationItems,
+                uiState = uiState,
+                onUiStateChange = onUiStateChange,
+                colorMode = colorMode,
+                seedIndex = seedIndex,
+                snackbarHostState = snackbarHostState,
+                layoutDirection = layoutDirection,
             )
-        },
-        popupHost = { },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .then(
-                    if (uiState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier,
-                )
-                .padding(start = padding.calculateStartPadding(layoutDirection))
-                .overScrollVertical(
-                    isEnabled = { uiState.enableOverScroll },
-                )
-                .nestedScroll(barScrollBehavior.nestedScrollConnection)
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(bottom = 12.dp),
-        ) {
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(
-                            top = 12.dp + padding.calculateTopPadding(),
-                            bottom = padding.calculateBottomPadding(),
-                        ),
-                ) {
-                    UIConstants.PAGE_TITLES.forEachIndexed { index, title ->
-                        BasicComponent(
-                            title = title,
-                            onClick = { handlePageChange(index) },
-                            holdDownState = page == index,
-                        )
-                    }
-                }
-            }
+        } else {
+            CompactScreenLayout(
+                navigationItems = navigationItems,
+                uiState = uiState,
+                onUiStateChange = onUiStateChange,
+                colorMode = colorMode,
+                seedIndex = seedIndex,
+                snackbarHostState = snackbarHostState,
+                padding = padding,
+            )
         }
     }
 }
 
 @Composable
 private fun WideScreenContent(
+    navigationItems: List<NavigationItem>,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
@@ -395,40 +309,58 @@ private fun WideScreenContent(
     snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
 ) {
-    Scaffold(
-        modifier = Modifier
-            .padding(end = 6.dp)
-            .fillMaxSize(),
-        contentWindowInsets =
-        WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Start),
-            ),
-        ),
-        floatingActionButton = {
-            FloatingActionButton(show = uiState.showFloatingActionButton)
-        },
-        floatingActionButtonPosition = uiState.floatingActionButtonPosition.toFabPosition(),
-        floatingToolbar = {
-            FloatingToolbar(
-                showFloatingToolbar = uiState.showFloatingToolbar,
-                floatingToolbarOrientation = uiState.floatingToolbarOrientation,
-            )
-        },
-        floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
-        popupHost = { },
-    ) { padding ->
-        AppPager(
-            snackbarHostState = snackbarHostState,
-            padding = PaddingValues(top = padding.calculateTopPadding()),
-            uiState = uiState,
-            onUiStateChange = onUiStateChange,
-            colorMode = colorMode,
-            seedIndex = seedIndex,
+    val page = LocalPagerState.current.targetPage
+    val handlePageChange = LocalHandlePageChange.current
+    Row {
+        if (uiState.showNavigationBar) {
+            NavigationRail(
+                modifier = Modifier.background(MiuixTheme.colorScheme.surface),
+                mode = NavigationDisplayMode.entries[uiState.navigationRailMode],
+            ) {
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationRailItem(
+                        selected = page == index,
+                        onClick = { handlePageChange(index) },
+                        icon = item.icon,
+                        label = item.label,
+                    )
+                }
+            }
+        }
+        Scaffold(
             modifier = Modifier
-                .imePadding()
-                .padding(end = padding.calculateEndPadding(layoutDirection)),
-        )
+                .fillMaxSize(),
+            contentWindowInsets =
+            WindowInsets.systemBars.union(
+                WindowInsets.displayCutout.exclude(
+                    WindowInsets.displayCutout.only(WindowInsetsSides.Start),
+                ),
+            ),
+            floatingActionButton = {
+                FloatingActionButton(show = uiState.showFloatingActionButton)
+            },
+            floatingActionButtonPosition = uiState.floatingActionButtonPosition.toFabPosition(),
+            floatingToolbar = {
+                FloatingToolbar(
+                    showFloatingToolbar = uiState.showFloatingToolbar,
+                    floatingToolbarOrientation = uiState.floatingToolbarOrientation,
+                )
+            },
+            floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
+            popupHost = { },
+        ) { padding ->
+            AppPager(
+                snackbarHostState = snackbarHostState,
+                padding = PaddingValues(top = padding.calculateTopPadding()),
+                uiState = uiState,
+                onUiStateChange = onUiStateChange,
+                colorMode = colorMode,
+                seedIndex = seedIndex,
+                modifier = Modifier
+                    .imePadding()
+                    .padding(end = padding.calculateEndPadding(layoutDirection)),
+            )
+        }
     }
 }
 
@@ -522,10 +454,17 @@ private fun NavigationBar(
             ) {
                 NavigationBar(
                     modifier = Modifier,
-                    items = navigationItems,
-                    selected = page,
-                    onClick = handlePageChange,
-                )
+                    mode = NavigationDisplayMode.entries[uiState.navigationBarMode],
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            selected = page == index,
+                            onClick = { handlePageChange(index) },
+                            icon = item.icon,
+                            label = item.label,
+                        )
+                    }
+                }
             }
         }
         AnimatedVisibility(
@@ -537,13 +476,19 @@ private fun NavigationBar(
                 modifier = modifier,
             ) {
                 FloatingNavigationBar(
-                    items = navigationItems,
-                    selected = page,
-                    mode = FloatingNavigationBarDisplayMode.fromInt(uiState.floatingNavigationBarMode).toMode(),
+                    mode = NavigationDisplayMode.entries[uiState.floatingNavigationBarMode],
                     horizontalAlignment = FloatingNavigationBarAlignment.fromInt(uiState.floatingNavigationBarPosition)
                         .toAlignment(),
-                    onClick = handlePageChange,
-                )
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        FloatingNavigationBarItem(
+                            selected = page == index,
+                            onClick = { handlePageChange(index) },
+                            icon = item.icon,
+                            label = item.label,
+                        )
+                    }
+                }
             }
         }
     }
@@ -644,12 +589,6 @@ private fun Int.toToolbarPosition(): ToolbarPosition = when (this) {
     else -> ToolbarPosition.BottomCenter
 }
 
-private fun FloatingNavigationBarDisplayMode.toMode(): FloatingNavigationBarMode = when (this) {
-    FloatingNavigationBarDisplayMode.IconOnly -> FloatingNavigationBarMode.IconOnly
-    FloatingNavigationBarDisplayMode.IconAndText -> FloatingNavigationBarMode.IconAndText
-    FloatingNavigationBarDisplayMode.TextOnly -> FloatingNavigationBarMode.TextOnly
-}
-
 private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal = when (this) {
     FloatingNavigationBarAlignment.Center -> CenterHorizontally
     FloatingNavigationBarAlignment.Start -> Alignment.Start
@@ -716,6 +655,10 @@ fun AppPager(
                     onShowTopAppBarChange = { onUiStateChange(uiState.copy(showTopAppBar = it)) },
                     showNavigationBar = uiState.showNavigationBar,
                     onShowNavigationBarChange = { onUiStateChange(uiState.copy(showNavigationBar = it)) },
+                    navigationBarMode = uiState.navigationBarMode,
+                    onNavigationBarModeChange = { onUiStateChange(uiState.copy(navigationBarMode = it)) },
+                    navigationRailMode = uiState.navigationRailMode,
+                    onNavigationRailModeChange = { onUiStateChange(uiState.copy(navigationRailMode = it)) },
                     showFloatingToolbar = uiState.showFloatingToolbar,
                     onShowFloatingToolbarChange = { onUiStateChange(uiState.copy(showFloatingToolbar = it)) },
                     useFloatingNavigationBar = uiState.useFloatingNavigationBar,

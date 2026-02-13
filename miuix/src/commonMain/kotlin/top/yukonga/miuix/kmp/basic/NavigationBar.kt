@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -26,10 +28,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -55,26 +58,22 @@ import top.yukonga.miuix.kmp.utils.platform
 /**
  * A [NavigationBar] that with 2 to 5 items.
  *
- * @param items The items of the [NavigationBar].
- * @param selected The selected index of the [NavigationBar].
- * @param onClick The callback when the item of the [NavigationBar] is clicked.
  * @param modifier The modifier to be applied to the [NavigationBar].
  * @param color The color of the [NavigationBar].
  * @param showDivider Whether to show the divider line between the [NavigationBar] and the content.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationBar].
+ * @param mode The mode for displaying items in the [NavigationBar]. It can show icons, text or both.
+ * @param content The content of the [NavigationBar], usually [NavigationBarItem]s.
  */
 @Composable
 fun NavigationBar(
-    items: List<NavigationItem>,
-    selected: Int,
-    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
+    mode: NavigationDisplayMode = NavigationDisplayMode.IconAndText,
+    content: @Composable RowScope.() -> Unit,
 ) {
-    require(items.size in 2..5) { "BottomBar must have between 2 and 5 items" }
-
     val captionBarPaddings = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues()
     val captionBarBottomPaddingValue = captionBarPaddings.calculateBottomPadding()
 
@@ -83,7 +82,6 @@ fun NavigationBar(
         animationSpec = tween(durationMillis = 300),
     )
 
-    val currentOnClick by rememberUpdatedState(onClick)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -97,62 +95,8 @@ fun NavigationBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val platform = platform()
-            val itemHeight = if (platform != Platform.IOS) 64.dp else 48.dp
-            val itemWeight = 1f / items.size
-
-            items.forEachIndexed { index, item ->
-                val isSelected = selected == index
-                var isPressed by remember { mutableStateOf(false) }
-
-                val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-                val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
-
-                val tint = when {
-                    isPressed -> if (isSelected) {
-                        onSurfaceContainerColor.copy(alpha = 0.5f)
-                    } else {
-                        onSurfaceContainerVariantColor.copy(alpha = 0.5f)
-                    }
-
-                    isSelected -> onSurfaceContainerColor
-
-                    else -> onSurfaceContainerVariantColor
-                }
-                val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-
-                Column(
-                    modifier = Modifier
-                        .height(itemHeight)
-                        .weight(itemWeight)
-                        .pointerInput(index) {
-                            detectTapGestures(
-                                onPress = {
-                                    isPressed = true
-                                    tryAwaitRelease()
-                                    isPressed = false
-                                },
-                                onTap = { currentOnClick(index) },
-                            )
-                        },
-                    horizontalAlignment = CenterHorizontally,
-                    verticalArrangement = Arrangement.Top,
-                ) {
-                    Image(
-                        modifier = Modifier.padding(top = 8.dp).size(26.dp),
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                    Text(
-                        modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp),
-                        text = item.label,
-                        color = tint,
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        fontWeight = fontWeight,
-                    )
-                }
+            CompositionLocalProvider(LocalNavigationDisplayMode provides mode) {
+                content()
             }
         }
         if (defaultWindowInsetsPadding) {
@@ -168,11 +112,139 @@ fun NavigationBar(
 }
 
 /**
+ * A [NavigationBarItem] that is suitable for [NavigationBar].
+ *
+ * @param selected Whether the item is selected.
+ * @param onClick The callback when the item is clicked.
+ * @param icon The icon of the item.
+ * @param label The label of the item.
+ * @param modifier The modifier to be applied to the [NavigationBarItem].
+ * @param enabled Whether the item is enabled.
+ */
+@Composable
+fun RowScope.NavigationBarItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val platform = platform()
+    val itemHeight = if (platform != Platform.IOS) 64.dp else 48.dp
+    var isPressed by remember { mutableStateOf(false) }
+
+    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
+    val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
+
+    val tint = when {
+        isPressed -> if (selected) {
+            onSurfaceContainerColor.copy(alpha = 0.5f)
+        } else {
+            onSurfaceContainerVariantColor.copy(alpha = 0.5f)
+        }
+
+        selected -> onSurfaceContainerColor
+
+        else -> onSurfaceContainerVariantColor
+    }
+    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+    val mode = LocalNavigationDisplayMode.current
+
+    Column(
+        modifier = modifier
+            .height(itemHeight)
+            .weight(1f)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        if (enabled) {
+                            isPressed = true
+                            tryAwaitRelease()
+                            isPressed = false
+                        }
+                    },
+                    onTap = { if (enabled) onClick() },
+                )
+            },
+        horizontalAlignment = CenterHorizontally,
+        verticalArrangement = if (mode == NavigationDisplayMode.IconAndText || mode == NavigationDisplayMode.IconWithSelectedLabel) Arrangement.Top else Arrangement.Center,
+    ) {
+        when (mode) {
+            NavigationDisplayMode.IconAndText -> {
+                Image(
+                    modifier = Modifier.padding(top = 8.dp).size(26.dp),
+                    imageVector = icon,
+                    contentDescription = label,
+                    colorFilter = ColorFilter.tint(tint),
+                )
+                Text(
+                    modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp),
+                    text = label,
+                    color = tint,
+                    textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
+                    fontWeight = fontWeight,
+                )
+            }
+
+            NavigationDisplayMode.IconWithSelectedLabel -> {
+                val defaultPadding = (itemHeight - 26.dp) / 2
+                val iconTopPadding by animateDpAsState(
+                    targetValue = if (selected) 8.dp else defaultPadding,
+                    animationSpec = tween(durationMillis = 300),
+                    label = "iconTopPadding",
+                )
+                val textAlpha by animateFloatAsState(
+                    targetValue = if (selected) 1f else 0f,
+                    animationSpec = tween(durationMillis = 300),
+                    label = "textAlpha",
+                )
+
+                Image(
+                    modifier = Modifier.padding(top = iconTopPadding).size(26.dp),
+                    imageVector = icon,
+                    contentDescription = label,
+                    colorFilter = ColorFilter.tint(tint),
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp)
+                        .alpha(textAlpha),
+                    text = label,
+                    color = tint,
+                    textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
+                    fontWeight = fontWeight,
+                )
+            }
+
+            NavigationDisplayMode.TextOnly -> {
+                Text(
+                    modifier = Modifier.padding(vertical = if (platform != Platform.IOS) 8.dp else 0.dp),
+                    text = label,
+                    color = tint,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    fontWeight = fontWeight,
+                )
+            }
+
+            else -> {
+                Image(
+                    modifier = Modifier.size(26.dp),
+                    imageVector = icon,
+                    contentDescription = label,
+                    colorFilter = ColorFilter.tint(tint),
+                )
+            }
+        }
+    }
+}
+
+/**
  * A floating navigation bar that supports 2 to 5 items.
  *
- * @param items The list of items to display in the [FloatingNavigationBar].
- * @param selected The index of the currently selected item in the [FloatingNavigationBar].
- * @param onClick A callback function that is invoked when an item is clicked. It receives the selected item's index.
  * @param modifier A [Modifier] to be applied to the [FloatingNavigationBar] for additional customization.
  * @param color The background color of the [FloatingNavigationBar].
  * @param cornerRadius The corner radius of the [FloatingNavigationBar], used for rounded corners.
@@ -182,12 +254,10 @@ fun NavigationBar(
  * @param showDivider Whether to show the divider line around the [FloatingNavigationBar].
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [FloatingNavigationBar].
  * @param mode The mode for displaying items in the [FloatingNavigationBar]. It can show icons, text or both.
+ * @param content The content of the [FloatingNavigationBar], usually [FloatingNavigationBarItem]s.
  */
 @Composable
 fun FloatingNavigationBar(
-    items: List<NavigationItem>,
-    selected: Int,
-    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surfaceContainer,
     cornerRadius: Dp = FloatingToolbarDefaults.CornerRadius,
@@ -196,10 +266,9 @@ fun FloatingNavigationBar(
     shadowElevation: Dp = 1.dp,
     showDivider: Boolean = false,
     defaultWindowInsetsPadding: Boolean = true,
-    mode: FloatingNavigationBarMode = FloatingNavigationBarMode.IconOnly,
+    mode: NavigationDisplayMode = NavigationDisplayMode.IconOnly,
+    content: @Composable RowScope.() -> Unit,
 ) {
-    require(items.size in 2..5) { "FloatingNavigationBar must have between 2 and 5 items" }
-
     val density = LocalDensity.current
 
     val platform = platform()
@@ -215,7 +284,6 @@ fun FloatingNavigationBar(
         else -> 36.dp
     }
 
-    val currentOnClick by rememberUpdatedState(onClick)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,116 +340,179 @@ fun FloatingNavigationBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            items.forEachIndexed { index, item ->
-                val isSelected = selected == index
-                var isPressed by remember { mutableStateOf(false) }
-
-                val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-                val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
-
-                val tint = when {
-                    isPressed -> if (isSelected) {
-                        onSurfaceContainerColor.copy(alpha = 0.6f)
-                    } else {
-                        onSurfaceContainerVariantColor.copy(alpha = 0.6f)
-                    }
-
-                    isSelected -> onSurfaceContainerColor
-
-                    else -> onSurfaceContainerVariantColor
-                }
-                val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-
-                Column(
-                    modifier = Modifier
-                        .pointerInput(index) {
-                            detectTapGestures(
-                                onPress = {
-                                    isPressed = true
-                                    tryAwaitRelease()
-                                    isPressed = false
-                                },
-                                onTap = { currentOnClick(index) },
-                            )
-                        },
-                    horizontalAlignment = CenterHorizontally,
-                ) {
-                    when (mode) {
-                        FloatingNavigationBarMode.IconAndText -> {
-                            Image(
-                                modifier = Modifier.padding(top = 6.dp).size(24.dp),
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint),
-                            )
-                            Box(
-                                modifier = Modifier.padding(bottom = 6.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                // Invisible text for layout calculation (always bold)
-                                Text(
-                                    modifier = Modifier.alpha(0f),
-                                    text = item.label,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold, // Always bold for layout
-                                )
-                                // Visible text
-                                Text(
-                                    text = item.label,
-                                    color = tint,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    fontWeight = fontWeight,
-                                )
-                            }
-                        }
-
-                        FloatingNavigationBarMode.TextOnly -> {
-                            Box(
-                                modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                // Invisible text for layout calculation
-                                Text(
-                                    modifier = Modifier.alpha(0f),
-                                    text = item.label,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold, // Always bold for layout
-                                )
-                                // Visible text
-                                Text(
-                                    text = item.label,
-                                    color = tint,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 14.sp,
-                                    fontWeight = fontWeight,
-                                )
-                            }
-                        }
-
-                        else -> {
-                            Image(
-                                modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                colorFilter = ColorFilter.tint(tint),
-                            )
-                        }
-                    }
-                }
+            CompositionLocalProvider(LocalNavigationDisplayMode provides mode) {
+                content()
             }
         }
     }
 }
 
 /**
- * Defines the display mode for items in a FloatingNavigationBar.
+ * A [FloatingNavigationBarItem] that is suitable for [FloatingNavigationBar].
+ *
+ * @param selected Whether the item is selected.
+ * @param onClick The callback when the item is clicked.
+ * @param icon The icon of the item.
+ * @param label The label of the item.
+ * @param modifier The modifier to be applied to the [FloatingNavigationBarItem].
+ * @param enabled Whether the item is enabled.
+ */
+@Composable
+fun FloatingNavigationBarItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    var isPressed by remember { mutableStateOf(false) }
+
+    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
+    val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
+
+    val tint = when {
+        isPressed -> if (selected) {
+            onSurfaceContainerColor.copy(alpha = 0.6f)
+        } else {
+            onSurfaceContainerVariantColor.copy(alpha = 0.6f)
+        }
+
+        selected -> onSurfaceContainerColor
+
+        else -> onSurfaceContainerVariantColor
+    }
+    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+    val mode = LocalNavigationDisplayMode.current
+
+    Column(
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        if (enabled) {
+                            isPressed = true
+                            tryAwaitRelease()
+                            isPressed = false
+                        }
+                    },
+                    onTap = { if (enabled) onClick() },
+                )
+            },
+        horizontalAlignment = CenterHorizontally,
+    ) {
+        when (mode) {
+            NavigationDisplayMode.IconAndText -> {
+                Image(
+                    modifier = Modifier.padding(top = 6.dp).size(24.dp),
+                    imageVector = icon,
+                    contentDescription = label,
+                    colorFilter = ColorFilter.tint(tint),
+                )
+                Box(
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // Invisible text for layout calculation (always bold)
+                    Text(
+                        modifier = Modifier.alpha(0f),
+                        text = label,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold, // Always bold for layout
+                    )
+                    // Visible text
+                    Text(
+                        text = label,
+                        color = tint,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                        fontWeight = fontWeight,
+                    )
+                }
+            }
+
+            NavigationDisplayMode.IconWithSelectedLabel -> {
+                if (selected) {
+                    Image(
+                        modifier = Modifier.padding(top = 6.dp).size(24.dp),
+                        imageVector = icon,
+                        contentDescription = label,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                    Box(
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        // Invisible text for layout calculation (always bold)
+                        Text(
+                            modifier = Modifier.alpha(0f),
+                            text = label,
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold, // Always bold for layout
+                        )
+                        // Visible text
+                        Text(
+                            text = label,
+                            color = tint,
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            fontWeight = fontWeight,
+                        )
+                    }
+                } else {
+                    Image(
+                        modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
+                        imageVector = icon,
+                        contentDescription = label,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
+            }
+
+            NavigationDisplayMode.TextOnly -> {
+                Box(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // Invisible text for layout calculation
+                    Text(
+                        modifier = Modifier.alpha(0f),
+                        text = label,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold, // Always bold for layout
+                    )
+                    // Visible text
+                    Text(
+                        text = label,
+                        color = tint,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp,
+                        fontWeight = fontWeight,
+                    )
+                }
+            }
+
+            else -> {
+                Image(
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
+                    imageVector = icon,
+                    contentDescription = label,
+                    colorFilter = ColorFilter.tint(tint),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Defines the display mode for items in a NavigationBar.
  *
  * This controls whether to show both icon and text, icon only, or text only.
  */
-enum class FloatingNavigationBarMode {
+enum class NavigationDisplayMode {
     /** Show both icon and text. */
     IconAndText,
 
@@ -390,7 +521,15 @@ enum class FloatingNavigationBarMode {
 
     /** Show text only. */
     TextOnly,
+
+    /** Show icon always, show text only when selected. */
+    IconWithSelectedLabel,
 }
+
+/**
+ * A composition local to control the display mode for items in a NavigationBar.
+ */
+val LocalNavigationDisplayMode = compositionLocalOf { NavigationDisplayMode.IconAndText }
 
 /**
  * The data class for [NavigationBar].

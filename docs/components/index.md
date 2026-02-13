@@ -19,6 +19,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [Surface](../components/surface)                           | Basic container component                  | Content display, background container |
 | [TopAppBar](../components/topappbar)                       | Application top navigation bar             | Page title, primary actions           |
 | [NavigationBar](../components/navigationbar)               | Bottom navigation component                | Main page switching                   |
+| [NavigationRail](../components/navigationrail)             | Side navigation component                  | Main page switching (Large screen)    |
 | [TabRow](../components/tabrow)                             | Horizontal tab bar                         | Content category browsing             |
 | [Card](../components/card)                                 | Container with related information         | Information display, content grouping |
 | [BasicComponent](../components/basiccomponent)             | Universal base component                   | Custom component development          |
