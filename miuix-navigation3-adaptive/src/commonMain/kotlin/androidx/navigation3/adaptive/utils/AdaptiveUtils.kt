@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun shouldShowTwoPanes(): Boolean {
+fun shouldShowSplitPane(): Boolean {
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     return with(density) {

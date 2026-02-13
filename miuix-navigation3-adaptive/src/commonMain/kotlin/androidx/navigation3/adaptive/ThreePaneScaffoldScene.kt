@@ -18,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.adaptive.utils.shouldShowSplitPane
 import androidx.navigation3.adaptive.utils.shouldShowThreePanes
-import androidx.navigation3.adaptive.utils.shouldShowTwoPanes
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
 import top.yukonga.miuix.kmp.basic.VerticalDivider
@@ -104,8 +104,8 @@ private fun ListDetailContent(
     extraContent: (@Composable () -> Unit)?,
     detailPlaceholder: (@Composable () -> Unit)?,
 ) {
-    val showTwoPanes = shouldShowTwoPanes()
     val showThreePanes = shouldShowThreePanes()
+    val showTwoPanes = shouldShowSplitPane()
     val enableThreePanes = showThreePanes && extraContent != null
 
     Row(
@@ -140,8 +140,8 @@ private fun SupportingPaneContent(
     supportingContent: (@Composable () -> Unit)?,
     extraContent: (@Composable () -> Unit)?,
 ) {
-    val showTwoPanes = shouldShowTwoPanes()
     val showThreePanes = shouldShowThreePanes()
+    val showTwoPanes = shouldShowSplitPane()
     val enableThreePanes = showThreePanes && extraContent != null
 
     Row(

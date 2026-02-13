@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -17,7 +16,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
@@ -29,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import kotlin.random.Random
@@ -68,7 +67,6 @@ fun SettingsPage(
     seedIndex: MutableState<Int>,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
-    val layoutDirection = LocalLayoutDirection.current
 
     Scaffold(
         topBar = {
@@ -91,8 +89,6 @@ fun SettingsPage(
     ) { innerPadding ->
         SettingsContent(
             padding = PaddingValues(
-                start = innerPadding.calculateStartPadding(layoutDirection) + padding.calculateStartPadding(layoutDirection),
-                end = innerPadding.calculateEndPadding(layoutDirection) + padding.calculateEndPadding(layoutDirection),
                 top = innerPadding.calculateTopPadding(),
                 bottom = padding.calculateBottomPadding(),
             ),
@@ -167,7 +163,6 @@ fun SettingsContent(
     isWideScreen: Boolean,
 ) {
     val navigator = LocalNavigator.current
-    val layoutDirection = LocalLayoutDirection.current
     val floatingNavigationBarModeOptions = remember { listOf("IconOnly", "IconAndText", "TextOnly") }
     val floatingNavigationBarPositionOptions = remember { listOf("Center", "Start", "End") }
     val floatingToolbarPositionOptions =
@@ -185,8 +180,6 @@ fun SettingsContent(
             .fillMaxHeight(),
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
-            start = padding.calculateStartPadding(layoutDirection),
-            end = padding.calculateEndPadding(layoutDirection),
             bottom = if (isWideScreen) {
                 WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
             } else {
@@ -212,9 +205,10 @@ fun SettingsContent(
                 SuperSwitch(
                     title = "Show NavigationBar",
                     checked = showNavigationBar,
+                    enabled = !isWideScreen,
                     onCheckedChange = onShowNavigationBarChange,
                 )
-                AnimatedVisibility(visible = showNavigationBar) {
+                AnimatedVisibility(visible = showNavigationBar && !isWideScreen) {
                     Column {
                         SuperSwitch(
                             title = "Use FloatingNavigationBar",

@@ -160,9 +160,6 @@ private fun ScaffoldLayout(
     val floatingToolbarContent: @Composable () -> Unit = remember(floatingToolbar) { { Box { floatingToolbar() } } }
     val bodyContent: @Composable () -> Unit = remember(content, contentPadding) { { Box { content(contentPadding) } } }
     val bottomBarContent: @Composable () -> Unit = remember(bottomBar) { { Box { bottomBar() } } }
-
-    val isTwoPanes = shouldShowTwoPanes()
-
     SubcomposeLayout { constraints ->
         val layoutWidth = constraints.maxWidth
         val layoutHeight = constraints.maxHeight
@@ -237,7 +234,7 @@ private fun ScaffoldLayout(
                 .measure(looseConstraints)
         val isBottomBarEmpty = bottomBarPlaceable.width == 0 && bottomBarPlaceable.height == 0
         val fabOffsetFromBottom = fabPlacement?.let {
-            if (isBottomBarEmpty || floatingActionButtonPosition == FabPosition.EndOverlay || isTwoPanes) {
+            if (isBottomBarEmpty || floatingActionButtonPosition == FabPosition.EndOverlay) {
                 it.height + FabSpacing.roundToPx() + contentWindowInsets.getBottom(this@SubcomposeLayout)
             } else {
                 // Total height is the bottom bar height + the FAB height + the padding
@@ -278,12 +275,12 @@ private fun ScaffoldLayout(
                     topBarPlaceable.height.toDp()
                 },
                 bottom =
-                if (isBottomBarEmpty || isTwoPanes) {
+                if (isBottomBarEmpty) {
                     insets.calculateBottomPadding()
                 } else {
                     bottomBarPlaceable.height.toDp()
                 },
-                start = insets.calculateStartPadding(layoutDirection) + if (isTwoPanes) bottomBarPlaceable.width.toDp() else 0.dp,
+                start = insets.calculateStartPadding(layoutDirection),
                 end = insets.calculateEndPadding(layoutDirection),
             )
 
@@ -308,11 +305,7 @@ private fun ScaffoldLayout(
                 layoutHeight - snackbarOffsetFromBottom,
             )
             // Place BottomBar
-            if (isTwoPanes) {
-                bottomBarPlaceable.place(0, 0)
-            } else {
-                bottomBarPlaceable.place(0, layoutHeight - bottomBarPlaceable.height)
-            }
+            bottomBarPlaceable.place(0, layoutHeight - bottomBarPlaceable.height)
             // Place FloatingToolbar
             if (!isFloatingToolbarEmpty) {
                 val floatingToolbarWidth = floatingToolbarPlaceable.width

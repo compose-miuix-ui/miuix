@@ -4,8 +4,6 @@
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -21,7 +19,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
@@ -47,7 +44,6 @@ fun DropdownPage(
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
-    val layoutDirection = LocalLayoutDirection.current
 
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
     var dropdownSelectedOption by remember { mutableIntStateOf(0) }
@@ -86,8 +82,6 @@ fun DropdownPage(
             pullToRefreshState = pullToRefreshState,
             topAppBarScrollBehavior = if (showTopAppBar) topAppBarScrollBehavior else null,
             contentPadding = PaddingValues(
-                start = innerPadding.calculateStartPadding(layoutDirection) + padding.calculateStartPadding(layoutDirection),
-                end = innerPadding.calculateEndPadding(layoutDirection) + padding.calculateEndPadding(layoutDirection),
                 top = innerPadding.calculateTopPadding() + 12.dp,
                 bottom = if (isWideScreen) {
                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -103,8 +97,6 @@ fun DropdownPage(
                     .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(
-                    start = innerPadding.calculateStartPadding(layoutDirection) + padding.calculateStartPadding(layoutDirection),
-                    end = innerPadding.calculateEndPadding(layoutDirection) + padding.calculateEndPadding(layoutDirection),
                     top = innerPadding.calculateTopPadding() + 12.dp,
                     bottom = if (isWideScreen) {
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
