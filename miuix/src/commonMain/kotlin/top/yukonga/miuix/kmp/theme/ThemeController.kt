@@ -10,7 +10,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -101,7 +100,8 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  * @param darkColors The color scheme to use when the dark appearance is active. This is used when
  *   the [colorSchemeMode] is [ColorSchemeMode.Dark] or when it is [ColorSchemeMode.System] and a
  *   dark theme is selected.
- * @param keyColor The key color for generating dynamic color schemes. This is used when the [colorSchemeMode] is set to a Monet mode.
+ * @param keyColor The key color for generating dynamic color schemes. This is used when the
+ *   [colorSchemeMode] is set to a Monet mode.
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */
