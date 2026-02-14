@@ -26,7 +26,7 @@ fun MiuixTheme(
 ) {
     val rawColors = controller.currentColors()
     val miuixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
-    val miuixTextStyles = remember { textStyles.copy() }.apply { updateColorsFrom(miuixColors.onBackground) }
+    val miuixTextStyles = remember { textStyles.copy() }
     val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
     CompositionLocalProvider(
         LocalColors provides miuixColors,
@@ -53,7 +53,7 @@ fun MiuixTheme(
     content: @Composable () -> Unit,
 ) {
     val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
-    val miuixTextStyles = remember { textStyles.copy() }.apply { updateColorsFrom(miuixColors.onBackground) }
+    val miuixTextStyles = remember { textStyles.copy() }
     val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
     CompositionLocalProvider(
         LocalColors provides miuixColors,
