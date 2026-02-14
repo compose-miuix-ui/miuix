@@ -113,22 +113,22 @@ class ThemeController(
     keyColor: Color? = null,
     isDark: Boolean? = null,
 ) {
-    var colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
+    val colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
     val lightColors: Colors by mutableStateOf(lightColors)
     val darkColors: Colors by mutableStateOf(darkColors)
-    var keyColor: Color? by mutableStateOf(keyColor)
-    var isDark: Boolean? by mutableStateOf(isDark)
+    val keyColor: Color? by mutableStateOf(keyColor)
+    val isDark: Boolean? by mutableStateOf(isDark)
 
     @Composable
     fun currentColors(): Colors = when (colorSchemeMode) {
         ColorSchemeMode.System -> {
             val dark = isDark ?: isSystemInDarkTheme()
-            remember(dark) { if (dark) darkColors else lightColors }
+            if (dark) darkColors else lightColors
         }
 
-        ColorSchemeMode.Light -> remember { lightColors }
+        ColorSchemeMode.Light -> lightColors
 
-        ColorSchemeMode.Dark -> remember { darkColors }
+        ColorSchemeMode.Dark -> darkColors
 
         ColorSchemeMode.MonetSystem -> {
             val dark = isDark ?: isSystemInDarkTheme()
