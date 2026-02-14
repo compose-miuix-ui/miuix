@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -147,12 +149,14 @@ fun TextField(
 
     val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
+    val textColor = textStyle.color.takeOrElse { LocalContentColor.current }
+
     BasicTextField(
         state = state,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
-        textStyle = textStyle,
+        textStyle = textStyle.copy(textColor),
         cursorBrush = cursorBrush,
         keyboardOptions = keyboardOptions,
         onKeyboardAction = onKeyboardAction,
@@ -285,13 +289,15 @@ fun TextField(
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
+    val textColor = textStyle.color.takeOrElse { LocalContentColor.current }
+
     BasicTextField(
         value = value,
         onValueChange = currentOnValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
-        textStyle = textStyle,
+        textStyle = textStyle.copy(textColor),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = singleLine,
@@ -420,13 +426,15 @@ fun TextField(
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val currentOnTextLayout by rememberUpdatedState(onTextLayout)
 
+    val textColor = textStyle.color.takeOrElse { LocalContentColor.current }
+
     BasicTextField(
         value = value,
         onValueChange = currentOnValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
-        textStyle = textStyle,
+        textStyle = textStyle.copy(textColor),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = singleLine,
