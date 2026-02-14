@@ -20,30 +20,63 @@ fun App() {
 
 ### Specific Modes
 
-- Use `ThemeController` to control modes and enable Monet dynamic colors; Monet modes support a custom seed color via `keyColor`:
+- **Dynamic Colors (Monet)**
 
-```kotlin
-@Composable
-fun AppWithMonet() {
-    val controller = remember {
-        ThemeController(
-            ColorSchemeMode.MonetSystem, // or MonetLight, MonetDark
-            keyColor = Color(0xFF3482FF) // Custom seed color
-        )
-    }
-    MiuixTheme(controller = controller) { /* Content */ }
-}
-```
+  Use `ThemeController` with `Monet` modes to enable dynamic colors.
+  - If `keyColor` is provided, colors are generated from this seed color.
+  - If `keyColor` is `null` (default), it attempts to use the system's wallpaper colors (Android "Material You").
 
-- Provide a color scheme directly to `MiuixTheme(colors = ...)` for full customization or to use built-in light/dark schemes:
+  ```kotlin
+  @Composable
+  fun AppWithMonet() {
+      val controller = remember {
+          ThemeController(
+              ColorSchemeMode.MonetSystem, // or MonetLight, MonetDark
+              // keyColor = Color(0xFF3482FF) // Optional: Custom seed color
+          )
+      }
+      MiuixTheme(controller = controller) { /* Content */ }
+  }
+  ```
 
-```kotlin
-@Composable
-fun AppWithColors() {
-    val colors = lightColorScheme() // or darkColorScheme()
-    MiuixTheme(colors = colors) { /* Content */ }
-}
-```
+- **Manual Dark Mode Control**
+
+  Use the `isDark` parameter to explicitly control the dark state, overriding the system setting.
+
+  ```kotlin
+  val controller = remember {
+      ThemeController(
+          ColorSchemeMode.System,
+          isDark = true // Force dark mode
+      )
+  }
+  ```
+
+- **Custom Color Schemes**
+
+  You can provide custom `lightColors` and `darkColors` directly to the `ThemeController`.
+
+  ```kotlin
+  val controller = remember {
+      ThemeController(
+          ColorSchemeMode.System,
+          lightColors = myLightColors,
+          darkColors = myDarkColors
+      )
+  }
+  ```
+
+- **Direct Usage**
+
+  Provide a color scheme directly to `MiuixTheme(colors = ...)` for full customization without a controller:
+
+  ```kotlin
+  @Composable
+  fun AppWithColors() {
+      val colors = lightColorScheme() // or darkColorScheme()
+      MiuixTheme(colors = colors) { /* Content */ }
+  }
+  ```
 
 ## Customizing the Theme
 
