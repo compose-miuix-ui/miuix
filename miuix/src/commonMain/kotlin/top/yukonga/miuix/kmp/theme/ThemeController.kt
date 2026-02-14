@@ -89,13 +89,29 @@ internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
 @Stable
 internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), dark = dark)
 
+/**
+ * A controller for managing the current color scheme of the Miuix theme.
+ *
+ * @param colorSchemeMode The mode of the color scheme, which can be [ColorSchemeMode.System],
+ *   [ColorSchemeMode.Light], [ColorSchemeMode.Dark], [ColorSchemeMode.MonetSystem],
+ *   [ColorSchemeMode.MonetLight], or [ColorSchemeMode.MonetDark].
+ * @param lightColors The color scheme to use when the light mode is active. This is used when the [colorSchemeMode] is set to Light.
+ * @param darkColors The color scheme to use when the dark mode is active. This is used when the [colorSchemeMode] is set to Dark.
+ * @param keyColor The key color for generating dynamic color schemes. This is used when the [colorSchemeMode] is set to a Monet mode.
+ * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
+ *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
+ */
 @Stable
 class ThemeController(
     colorSchemeMode: ColorSchemeMode = ColorSchemeMode.System,
+    lightColors: Colors = lightColorScheme(),
+    darkColors: Colors = darkColorScheme(),
     keyColor: Color? = null,
     isDark: Boolean? = null,
 ) {
     var colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
+    val lightColors: Colors by mutableStateOf(lightColors)
+    val darkColors: Colors by mutableStateOf(darkColors)
     var keyColor: Color? by mutableStateOf(keyColor)
     var isDark: Boolean? by mutableStateOf(isDark)
 
@@ -103,12 +119,12 @@ class ThemeController(
     fun currentColors(): Colors = when (colorSchemeMode) {
         ColorSchemeMode.System -> {
             val dark = isDark ?: isSystemInDarkTheme()
-            remember(dark) { if (dark) darkColorScheme() else lightColorScheme() }
+            remember(dark) { if (dark) darkColors else lightColors }
         }
 
-        ColorSchemeMode.Light -> remember { lightColorScheme() }
+        ColorSchemeMode.Light -> remember { lightColors }
 
-        ColorSchemeMode.Dark -> remember { darkColorScheme() }
+        ColorSchemeMode.Dark -> remember { darkColors }
 
         ColorSchemeMode.MonetSystem -> {
             val dark = isDark ?: isSystemInDarkTheme()
