@@ -95,8 +95,12 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  * @param colorSchemeMode The mode of the color scheme, which can be [ColorSchemeMode.System],
  *   [ColorSchemeMode.Light], [ColorSchemeMode.Dark], [ColorSchemeMode.MonetSystem],
  *   [ColorSchemeMode.MonetLight], or [ColorSchemeMode.MonetDark].
- * @param lightColors The color scheme to use when the light mode is active. This is used when the [colorSchemeMode] is set to Light.
- * @param darkColors The color scheme to use when the dark mode is active. This is used when the [colorSchemeMode] is set to Dark.
+ * @param lightColors The color scheme to use when the light appearance is active. This is used when
+ *   the [colorSchemeMode] is [ColorSchemeMode.Light] or when it is [ColorSchemeMode.System] and a
+ *   light theme is selected.
+ * @param darkColors The color scheme to use when the dark appearance is active. This is used when
+ *   the [colorSchemeMode] is [ColorSchemeMode.Dark] or when it is [ColorSchemeMode.System] and a
+ *   dark theme is selected.
  * @param keyColor The key color for generating dynamic color schemes. This is used when the [colorSchemeMode] is set to a Monet mode.
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
