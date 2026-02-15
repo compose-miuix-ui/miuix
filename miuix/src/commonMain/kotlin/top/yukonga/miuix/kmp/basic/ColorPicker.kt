@@ -190,7 +190,7 @@ fun HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule)
+                    .clip(Capsule())
                     .background(selectedColor),
             )
         }
@@ -437,7 +437,7 @@ fun OkHsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule)
+                    .clip(Capsule())
                     .background(selectedColor),
             )
         }
@@ -688,7 +688,7 @@ fun OkLabColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule)
+                    .clip(Capsule())
                     .background(selectedColor),
             )
         }
@@ -817,7 +817,7 @@ fun OkLchColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule)
+                    .clip(Capsule())
                     .background(selectedColor),
             )
         }
@@ -1165,7 +1165,7 @@ private fun ColorSlider(
 
     BoxWithConstraints(
         modifier = Modifier
-            .clip(Capsule)
+            .clip(Capsule())
             .then(modifier)
             .height(sliderHeightDp)
             .drawWithCache {

@@ -184,7 +184,7 @@ fun InputField(
             ) {
                 Icon(
                     modifier = Modifier
-                        .clip(Capsule)
+                        .clip(Capsule())
                         .clickable { currentOnQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
@@ -228,7 +228,7 @@ fun InputField(
                 modifier = Modifier
                     .background(
                         color = MiuixTheme.colorScheme.surfaceContainerHigh,
-                        shape = Capsule,
+                        shape = Capsule(),
                     ),
                 contentAlignment = Alignment.CenterStart,
             ) {

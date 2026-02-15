@@ -88,7 +88,7 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.kyant.shapes.RoundedRectangle
+import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
@@ -714,7 +714,7 @@ fun <T : Any> NavDisplay(
             LocalEntriesToExcludeFromCurrentScene provides sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
-            val shape = remember(corner) { RoundedRectangle(topStart = corner, bottomStart = corner) }
+            val shape = remember(corner) { UnevenRoundedRectangle(topStart = corner, bottomStart = corner) }
 
             val myKey = sceneKeyOf(targetScene)
             val myIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == myKey }

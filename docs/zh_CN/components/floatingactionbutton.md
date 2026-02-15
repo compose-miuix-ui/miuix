@@ -37,11 +37,11 @@ FloatingActionButton(
 
 ### FloatingActionButton 属性
 
-| 属性名                     | 类型                   | 说明                     | 默认值                         | 是否必须 |
-| -------------------------- | ---------------------- | ------------------------ | ------------------------------ | -------- |
+| 属性名                     | 类型                   | 说明                     | 默认值                            | 是否必须 |
+| -------------------------- | ---------------------- | ------------------------ |--------------------------------| -------- |
 | onClick                    | () -> Unit             | 点击按钮时触发的回调     | -                              | 是       |
 | modifier                   | Modifier               | 应用于按钮的修饰符       | Modifier                       | 否       |
-| shape                      | Shape                  | 按钮的形状               | Capsule              | 否       |
+| shape                      | Shape                  | 按钮的形状               | Capsule()                      | 否       |
 | containerColor             | Color                  | 按钮的背景颜色           | MiuixTheme.colorScheme.primary | 否       |
 | shadowElevation            | Dp                     | 按钮的阴影高度           | 4.dp                           | 否       |
 | minWidth                   | Dp                     | 按钮的最小宽度           | 60.dp                          | 否       |

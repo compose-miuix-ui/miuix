@@ -153,7 +153,7 @@ fun Checkbox(
                 enabled = enabled,
                 delay = null,
             )
-            .clip(Capsule)
+            .clip(Capsule())
             .drawWithCache {
                 val viewportSize = 23f
                 val strokeWidth = size.width * 0.09f

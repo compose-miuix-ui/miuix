@@ -70,6 +70,7 @@ import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.RoundedRectangle
+import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -535,7 +536,7 @@ private fun SuperBottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .clip(RoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
+                .clip(UnevenRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),

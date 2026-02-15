@@ -142,7 +142,7 @@ fun Switch(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
             .size(49.dp, 28.dp)
-            .clip(Capsule)
+            .clip(Capsule())
             .drawBehind {
                 drawRect(backgroundColorState.value)
             }
