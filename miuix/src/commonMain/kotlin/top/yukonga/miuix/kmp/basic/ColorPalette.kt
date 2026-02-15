@@ -125,7 +125,7 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule)
+                    .clip(Capsule())
                     .background(lastEmittedColor ?: color),
             )
         }
