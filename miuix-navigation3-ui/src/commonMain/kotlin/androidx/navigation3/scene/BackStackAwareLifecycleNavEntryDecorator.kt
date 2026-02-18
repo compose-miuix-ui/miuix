@@ -22,6 +22,7 @@ package androidx.navigation3.scene
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -43,10 +44,12 @@ internal fun <T : Any> rememberBackStackAwareLifecycleNavEntryDecorator(
     entries: List<NavEntry<T>>,
 ): NavEntryDecorator<T> {
     val updatedEntries by rememberUpdatedState(entries)
-    return NavEntryDecorator { entry ->
-        val isInBackStack = updatedEntries.fastAnyOrAny { it.contentKey == entry.contentKey }
-        val maxLifecycle = if (isInBackStack) Lifecycle.State.RESUMED else Lifecycle.State.CREATED
-        val owner = rememberLifecycleOwner(maxLifecycle = maxLifecycle)
-        CompositionLocalProvider(LocalLifecycleOwner provides owner) { entry.Content() }
+    return remember {
+        NavEntryDecorator { entry ->
+            val isInBackStack = updatedEntries.fastAnyOrAny { it.contentKey == entry.contentKey }
+            val maxLifecycle = if (isInBackStack) Lifecycle.State.RESUMED else Lifecycle.State.CREATED
+            val owner = rememberLifecycleOwner(maxLifecycle = maxLifecycle)
+            CompositionLocalProvider(LocalLifecycleOwner provides owner) { entry.Content() }
+        }
     }
 }
