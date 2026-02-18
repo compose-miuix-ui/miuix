@@ -62,6 +62,9 @@ class SinglePaneSceneStrategy<T : Any> : SceneStrategy<T> {
         entry = entries.last(),
         previousEntries = entries.dropLast(1),
     )
+
+    override fun equals(other: Any?): Boolean = other is SinglePaneSceneStrategy<*>
+    override fun hashCode(): Int = this::class.hashCode()
 }
 
 internal fun <T : Any> SceneStrategy<T>.calculateSceneWithSinglePaneFallback(

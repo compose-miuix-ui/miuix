@@ -49,7 +49,6 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,7 +88,6 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.UnevenRoundedRectangle
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
@@ -332,8 +330,11 @@ fun <T : Any> NavDisplay(
     val scene = sceneState.currentScene
 
     // Predictive Back Handling
-    val currentInfo = SceneInfo(scene)
-    val previousSceneInfos = sceneState.previousScenes.map { SceneInfo(it) }
+    val previousScenes = sceneState.previousScenes
+    val currentSceneKey = remember(scene) { scene.createSceneKey() }
+    val previousSceneKeys = remember(previousScenes) { previousScenes.map { it.createSceneKey() } }
+    val currentInfo = remember(currentSceneKey) { SceneInfo(scene) }
+    val previousSceneInfos = remember(previousSceneKeys) { previousScenes.map { SceneInfo(it) } }
     val gestureState =
         rememberNavigationEventState(currentInfo = currentInfo, backInfo = previousSceneInfos)
 
@@ -471,11 +472,11 @@ fun <T : Any> NavDisplay(
         currentScenes.indexOf(targetScene).let { if (it != -1) it.toFloat() else 0f }
     }
 
-    if (sceneMap[targetKey] !== targetScene) {
+    if (!sceneMap.containsKey(targetKey)) {
         sceneMap[targetKey] = targetScene
         didMutateKeys = true
     }
-    if (sceneMap[initialKey] !== initialScene) {
+    if (!sceneMap.containsKey(initialKey)) {
         sceneMap[initialKey] = initialScene
         didMutateKeys = true
     }
@@ -571,7 +572,11 @@ fun <T : Any> NavDisplay(
             }
         }
     } else {
-        LaunchedEffect(scene, sceneState.entries) {
+        val launchSceneKey = sceneKeyOf(scene)
+        val launchEntriesKeys = remember(sceneState.entries) {
+            sceneState.entries.map { it.contentKey }
+        }
+        LaunchedEffect(launchSceneKey, launchEntriesKeys) {
             // Cleanup stale scenes from interrupted transitions
             val currentKey = sceneKeyOf(transitionState.currentState)
             val targetKey = sceneKeyOf(scene)
@@ -779,24 +784,6 @@ fun <T : Any> NavDisplay(
                 }
             }
         }
-    }
-
-    // Clean-up scene book-keeping once the transition is finished
-    LaunchedEffect(transition) {
-        snapshotFlow { transition.isRunning }
-            .filter { !it }
-            .collect {
-                val targetKey = transition.targetState::class to transition.targetState.key
-                // Creating a copy to avoid ConcurrentModificationException
-                @Suppress("ListIterator")
-                sceneMap.keys.toList().forEach { key ->
-                    if (key != targetKey) {
-                        sceneMap.remove(key)
-                    }
-                }
-                // Creating a copy to avoid ConcurrentModificationException
-                zIndices.removeIf { key, _ -> key != targetKey }
-            }
     }
 
     // Show all OverlayScene instances above the AnimatedContent

@@ -60,14 +60,19 @@ fun <T : Any> rememberSceneState(
     // - SceneSetupNavEntryDecorator to ensure all the ensures are inside of a moveable content
     // - BackStackAwareLifecycleNavEntryDecorator to ensure that the Lifecycle of entries that
     // are no longer on the back stack is capped at CREATED
+    val sceneSetupDecorator = rememberSceneSetupNavEntryDecorator<T>()
+    val lifecycleDecorator = rememberBackStackAwareLifecycleNavEntryDecorator(entries)
+    val entryDecorators = remember(sharedElementDecorator, sceneSetupDecorator, lifecycleDecorator) {
+        listOfNotNull(
+            sharedElementDecorator,
+            sceneSetupDecorator,
+            lifecycleDecorator,
+        )
+    }
     val decoratedEntries =
         rememberDecoratedNavEntries(
             entries,
-            listOfNotNull(
-                sharedElementDecorator,
-                rememberSceneSetupNavEntryDecorator(),
-                rememberBackStackAwareLifecycleNavEntryDecorator(entries),
-            ),
+            entryDecorators,
         )
 
     return remember(sceneStrategy, decoratedEntries) {
