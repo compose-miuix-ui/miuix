@@ -87,7 +87,7 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
@@ -719,7 +719,7 @@ fun <T : Any> NavDisplay(
             LocalEntriesToExcludeFromCurrentScene provides sceneToExcludedEntryMap.getOrElse(sceneKeyOf(targetScene)) { emptySet() },
         ) {
             val corner = if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner() else 0.dp
-            val shape = remember(corner) { ContinuousRoundedRectangle(topStart = corner, bottomStart = corner) }
+            val shape = remember(corner) { UnevenRoundedRectangle(topStart = corner, bottomStart = corner) }
 
             val myKey = sceneKeyOf(targetScene)
             val myIndex = currentScenes.indexOfFirst { sceneKeyOf(it) == myKey }
@@ -785,9 +785,6 @@ fun <T : Any> NavDisplay(
             }
         }
     }
-
-    // Note: Scene book-keeping cleanup is handled by
-    // LaunchedEffect(scene, sceneState.entries) above after animation settles.
 
     // Show all OverlayScene instances above the AnimatedContent
     overlayScenes.fastForEachReversed { overlayScene ->
