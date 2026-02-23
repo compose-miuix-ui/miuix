@@ -189,9 +189,17 @@ fun TextComponent(
                     )
                 },
                 endActions = {
-                    Text(text = "End1")
+                    Text(
+                        text = "End1",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                    )
                     Spacer(Modifier.width(8.dp))
-                    Text(text = "End2")
+                    Text(
+                        text = "End2",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                    )
                 },
                 enabled = true,
             )
@@ -207,11 +215,13 @@ fun TextComponent(
                 endActions = {
                     Text(
                         text = "End1",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "End2",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
@@ -260,6 +270,7 @@ fun TextComponent(
                 endActions = {
                     Text(
                         text = superEndCheckbox.value,
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
@@ -378,6 +389,7 @@ fun TextComponent(
                 endActions = {
                     Text(
                         text = "End",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
@@ -388,6 +400,7 @@ fun TextComponent(
                 endActions = {
                     Text(
                         text = "${(volume * 100).toInt()}%",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
@@ -405,6 +418,7 @@ fun TextComponent(
                 endActions = {
                     Text(
                         text = "End",
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },

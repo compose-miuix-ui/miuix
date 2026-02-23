@@ -3,7 +3,7 @@
 
 @file:Suppress("UnstableApiUsage")
 
-rootProject.name = "compose-ui-miuix"
+rootProject.name = "compose-miuix-ui"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 

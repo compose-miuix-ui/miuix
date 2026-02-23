@@ -168,8 +168,8 @@ fun AboutPage(
                     title = "View Source",
                     endActions = {
                         Text(
-                            modifier = Modifier.padding(end = 8.dp),
                             text = "GitHub",
+                            fontSize = MiuixTheme.textStyles.body2.fontSize,
                             color = colorScheme.onSurfaceVariantActions,
                         )
                     },
@@ -179,8 +179,8 @@ fun AboutPage(
                     title = "Join Group",
                     endActions = {
                         Text(
-                            modifier = Modifier.padding(end = 8.dp),
                             text = "Telegram",
+                            fontSize = MiuixTheme.textStyles.body2.fontSize,
                             color = colorScheme.onSurfaceVariantActions,
                         )
                     },
@@ -196,8 +196,8 @@ fun AboutPage(
                     title = "License",
                     endActions = {
                         Text(
-                            modifier = Modifier.padding(end = 8.dp),
                             text = "Apache-2.0",
+                            fontSize = MiuixTheme.textStyles.body2.fontSize,
                             color = colorScheme.onSurfaceVariantActions,
                         )
                     },

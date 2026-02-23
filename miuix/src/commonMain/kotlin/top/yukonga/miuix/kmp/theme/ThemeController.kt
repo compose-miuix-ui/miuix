@@ -30,13 +30,17 @@ enum class ColorSchemeMode {
 }
 
 @Stable
-internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
+internal fun colorsFromSeed(
+    seed: Color,
+    colorSpec: ColorSpec.SpecVersion,
+    dark: Boolean,
+): Colors {
     val hctColor = Hct.fromInt(seed.toArgb())
     val tonalSpot = SchemeTonalSpot(
         sourceColorHct = hctColor,
         isDark = dark,
         contrastLevel = 0.0,
-        specVersion = ColorSpec.SpecVersion.SPEC_2025,
+        specVersion = colorSpec,
         platform = DynamicScheme.Platform.PHONE,
     )
     val colors = DynamicScheme(
@@ -44,7 +48,7 @@ internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
         variant = Variant.TONAL_SPOT,
         isDark = dark,
         contrastLevel = 0.0,
-        specVersion = ColorSpec.SpecVersion.SPEC_2025,
+        specVersion = colorSpec,
         platform = DynamicScheme.Platform.PHONE,
         primaryPalette = tonalSpot.primaryPalette,
         secondaryPalette = tonalSpot.secondaryPalette,
@@ -86,7 +90,7 @@ internal fun colorsFromSeed(seed: Color, dark: Boolean): Colors {
 }
 
 @Stable
-internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), dark = dark)
+internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), colorSpec = ColorSpec.SpecVersion.SPEC_2021, dark = dark)
 
 /**
  * A controller for managing the current color scheme of the Miuix theme.
@@ -102,6 +106,8 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  *   dark theme is selected.
  * @param keyColor The key color for generating dynamic color schemes. This is used when the
  *   [colorSchemeMode] is set to a Monet mode.
+ * @param colorSpec The color specification version to use when generating dynamic color schemes. This
+ *  is used when the [colorSchemeMode] is set to a Monet mode.
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */
@@ -111,12 +117,14 @@ class ThemeController(
     lightColors: Colors = lightColorScheme(),
     darkColors: Colors = darkColorScheme(),
     keyColor: Color? = null,
+    colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
     isDark: Boolean? = null,
 ) {
     val colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
     val lightColors: Colors by mutableStateOf(lightColors)
     val darkColors: Colors by mutableStateOf(darkColors)
     val keyColor: Color? by mutableStateOf(keyColor)
+    val colorSpec: ColorSpec.SpecVersion by mutableStateOf(colorSpec)
     val isDark: Boolean? by mutableStateOf(isDark)
 
     @Composable
@@ -133,19 +141,19 @@ class ThemeController(
         ColorSchemeMode.MonetSystem -> {
             val dark = isDark ?: isSystemInDarkTheme()
             keyColor?.let {
-                remember(keyColor, dark) { colorsFromSeed(seed = it, dark = dark) }
+                remember(keyColor, dark) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = dark) }
             } ?: platformDynamicColors(dark = dark)
         }
 
         ColorSchemeMode.MonetLight -> {
             keyColor?.let {
-                remember(keyColor) { colorsFromSeed(seed = it, dark = false) }
+                remember(keyColor) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = false) }
             } ?: platformDynamicColors(dark = false)
         }
 
         ColorSchemeMode.MonetDark -> {
             keyColor?.let {
-                remember(keyColor) { colorsFromSeed(seed = it, dark = true) }
+                remember(keyColor) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = true) }
             } ?: platformDynamicColors(dark = true)
         }
     }
