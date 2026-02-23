@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -198,7 +199,9 @@ fun InputField(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    val inputTextStyle = MiuixTheme.textStyles.main.copy(fontWeight = FontWeight.Bold)
+    val textColor = LocalContentColor.current
+    val inputTextStyle = MiuixTheme.textStyles.main.copy(fontWeight = FontWeight.Bold, color = textColor)
+
     val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
     val labelText by remember(query, expanded, label) {
         derivedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
