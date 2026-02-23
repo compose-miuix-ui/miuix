@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -132,7 +133,11 @@ fun ListPopupColumn(
         content = content,
         modifier = Modifier
             .height(IntrinsicSize.Min)
-            .verticalScroll(scrollState),
+            .overScrollVertical()
+            .verticalScroll(
+                state = scrollState,
+                overscrollEffect = null,
+            ),
         measurePolicy = measurePolicy,
     )
 }
