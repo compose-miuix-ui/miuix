@@ -65,13 +65,13 @@ jobs:
           KEY_ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       - name: Upload Miuix ${{ matrix.platform }} artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
       - name: Upload Miuix ${{ matrix.platformEx }} artifact
         if: matrix.platformEx == 'android universal'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-nameEx }}
           path: ${{ matrix.artifact-pathEx }}
