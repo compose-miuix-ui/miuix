@@ -11,7 +11,7 @@ object BuildConfig {
     const val APPLICATION_SHARED_ID = "top.yukonga.miuix.shared"
     const val COMPILE_SDK = 36
     const val TARGET_SDK = 36
-    const val MIN_SDK = 24
+    const val MIN_SDK = 23
     const val BUILD_TOOLS_VERSION = "36.1.0"
     const val JDK_VERSION = 21
 }
