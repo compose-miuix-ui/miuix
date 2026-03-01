@@ -138,13 +138,13 @@ fun SearchBar(
  * @param enabled the enabled state of this input field. When `false`, this component will not
  *   respond to user input, and it will appear visually disabled and disabled to accessibility
  *   services.
+ * @param textStyle Style configuration that applies at character level such as color, font etc.
  * @param leadingIcon the leading icon to be displayed at the start of the input field.
  * @param trailingIcon the trailing icon to be displayed at the end of the input field.
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
  *   emitting [Interaction]s for this input field. You can use this to change the search bar's
  *   appearance or preview the search bar in different states. Note that if `null` is provided,
  *   interactions will still happen internally.
- * @param textStyle Style configuration that applies at character level such as color, font etc.
  */
 @Composable
 fun InputField(
