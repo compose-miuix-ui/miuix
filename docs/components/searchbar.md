@@ -1,6 +1,8 @@
 # SearchBar
 
-`SearchBar` is a component in Miuix used for user search input. It provides an intuitive and easy-to-use search interface with support for expanded/collapsed state switching and search suggestions display.
+`SearchBar` is a component in Miuix used for user search input. It provides an intuitive and
+easy-to-use search interface with support for expanded/collapsed state switching and search
+suggestions display.
 
 <div style="position: relative; max-width: 700px; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=searchBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -43,20 +45,20 @@ SearchBar(
 
 ### SearchBar Properties
 
-| Property Name      | Type                               | Description                                       | Default Value       | Required |
-| ------------------ | ---------------------------------- | ------------------------------------------------- | ------------------- | -------- |
-| inputField         | @Composable () -> Unit             | Search input field component                      | -                   | Yes      |
-| onExpandedChange   | (Boolean) -> Unit                  | Callback when expanded state changes              | -                   | Yes      |
-| modifier           | Modifier                           | Modifier applied to the search bar                | Modifier            | No       |
-| insideMargin       | DpSize                             | Internal padding                                  | DpSize(12.dp, 0.dp) | No       |
-| expanded           | Boolean                            | Whether to show search results                    | false               | No       |
-| outsideEndAction   | @Composable (() -> Unit)?          | Action component shown on the end when expanded   | null                | No       |
-| content            | @Composable ColumnScope.() -> Unit | Content shown when expanded                       | -                   | Yes      |
+| Property Name    | Type                               | Description                                     | Default Value       | Required |
+|------------------|------------------------------------|-------------------------------------------------|---------------------|----------|
+| inputField       | @Composable () -> Unit             | Search input field component                    | -                   | Yes      |
+| onExpandedChange | (Boolean) -> Unit                  | Callback when expanded state changes            | -                   | Yes      |
+| modifier         | Modifier                           | Modifier applied to the search bar              | Modifier            | No       |
+| insideMargin     | DpSize                             | Internal padding                                | DpSize(12.dp, 0.dp) | No       |
+| expanded         | Boolean                            | Whether to show search results                  | false               | No       |
+| outsideEndAction | @Composable (() -> Unit)?          | Action component shown on the end when expanded | null                | No       |
+| content          | @Composable ColumnScope.() -> Unit | Content shown when expanded                     | -                   | Yes      |
 
 ### InputField Properties
 
 | Property Name     | Type                      | Description                          | Default Value        | Required |
-| ----------------- | ------------------------- | ------------------------------------ | -------------------- | -------- |
+|-------------------|---------------------------|--------------------------------------|----------------------|----------|
 | query             | String                    | Text content in search field         | -                    | Yes      |
 | onQueryChange     | (String) -> Unit          | Callback when text content changes   | -                    | Yes      |
 | onSearch          | (String) -> Unit          | Callback when search is executed     | -                    | Yes      |
@@ -65,6 +67,7 @@ SearchBar(
 | modifier          | Modifier                  | Modifier applied to the input field  | Modifier             | No       |
 | label             | String                    | Placeholder text when empty          | ""                   | No       |
 | enabled           | Boolean                   | Whether search field is enabled      | true                 | No       |
+| textStyle         | TextStyle                 | Style of text in search box          | null                 | Yes      |
 | leadingIcon       | @Composable (() -> Unit)? | Leading icon                         | default search icon  | No       |
 | trailingIcon      | @Composable (() -> Unit)? | Trailing icon                        | default clear button | No       |
 | interactionSource | MutableInteractionSource? | Interaction source                   | null                 | No       |

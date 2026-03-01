@@ -138,6 +138,7 @@ fun SearchBar(
  * @param enabled the enabled state of this input field. When `false`, this component will not
  *   respond to user input, and it will appear visually disabled and disabled to accessibility
  *   services.
+ * @param textStyle Style configuration that applies at character level such as color, font etc.
  * @param leadingIcon the leading icon to be displayed at the start of the input field.
  * @param trailingIcon the trailing icon to be displayed at the end of the input field.
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
@@ -155,6 +156,7 @@ fun InputField(
     modifier: Modifier = Modifier,
     label: String = "",
     enabled: Boolean = true,
+    textStyle: TextStyle? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
@@ -200,7 +202,10 @@ fun InputField(
     val focusManager = LocalFocusManager.current
 
     val textColor = LocalContentColor.current
-    val inputTextStyle = MiuixTheme.textStyles.main.copy(fontWeight = FontWeight.Bold, color = textColor)
+    val inputTextStyle = MiuixTheme.textStyles.main
+        .copy(fontWeight = FontWeight.Bold)
+        .merge(textStyle)
+        .copy(color = textColor)
 
     val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
     val labelText by remember(query, expanded, label) {
@@ -248,7 +253,7 @@ fun InputField(
                     ) {
                         Text(
                             text = labelText,
-                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold).merge(textStyle),
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
                         innerTextField()
