@@ -144,6 +144,7 @@ fun SearchBar(
  *   emitting [Interaction]s for this input field. You can use this to change the search bar's
  *   appearance or preview the search bar in different states. Note that if `null` is provided,
  *   interactions will still happen internally.
+ * @param textStyle Style configuration that applies at character level such as color, font etc.
  */
 @Composable
 fun InputField(
@@ -155,6 +156,7 @@ fun InputField(
     modifier: Modifier = Modifier,
     label: String = "",
     enabled: Boolean = true,
+    textStyle: TextStyle? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
@@ -200,7 +202,10 @@ fun InputField(
     val focusManager = LocalFocusManager.current
 
     val textColor = LocalContentColor.current
-    val inputTextStyle = MiuixTheme.textStyles.main.copy(fontWeight = FontWeight.Bold, color = textColor)
+    val inputTextStyle = MiuixTheme.textStyles.main
+        .copy(fontWeight = FontWeight.Bold)
+        .merge(textStyle)
+        .copy(color = textColor)
 
     val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
     val labelText by remember(query, expanded, label) {
@@ -248,7 +253,7 @@ fun InputField(
                     ) {
                         Text(
                             text = labelText,
-                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold).merge(textStyle),
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
                         innerTextField()
