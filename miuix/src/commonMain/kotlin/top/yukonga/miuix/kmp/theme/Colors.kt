@@ -454,7 +454,7 @@ fun darkColorScheme(
     primaryVariant: Color = Color(0xFF0073DD),
     onPrimaryVariant: Color = Color(0xFF99C7F1),
     error: Color = Color(0xFFF12522),
-    onError: Color = Color(0xFF690005),
+    onError: Color = Color.White,
     errorContainer: Color = Color(0xFF2E0603),
     onErrorContainer: Color = Color(0xFFFFDAD6),
     disabledPrimary: Color = Color(0xFF253E64),
