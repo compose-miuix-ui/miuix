@@ -13,13 +13,42 @@ for artifact in artifacts/*; do
         dir_count=$(find "$artifact" -type d | wc -l | tr -d ' ')
         if [ "$file_count" -eq 1 ] && [ "$dir_count" -eq 1 ]; then
             file=$(find "$artifact" -type f | head -n 1)
-            cp "$file" "${packaged_dir}/$(basename "$file")"
+            filename=$(basename "$file")
+            if [ -n "$COMMIT_COUNT" ]; then
+                extension="${filename##*.}"
+                if [ "$filename" == "$extension" ]; then
+                    new_filename="${filename}-${COMMIT_COUNT}"
+                else
+                    filename_no_ext="${filename%.*}"
+                    new_filename="${filename_no_ext}-${COMMIT_COUNT}.${extension}"
+                fi
+                cp "$file" "${packaged_dir}/${new_filename}"
+            else
+                cp "$file" "${packaged_dir}/${filename}"
+            fi
         else
             name=$(basename "$artifact")
-            (cd "$artifact" && zip -qr "${packaged_dir}/${name}.zip" .)
+            if [ -n "$COMMIT_COUNT" ]; then
+                zip_name="${name}-${COMMIT_COUNT}.zip"
+            else
+                zip_name="${name}.zip"
+            fi
+            (cd "$artifact" && zip -qr "${packaged_dir}/${zip_name}" .)
         fi
     elif [ -f "$artifact" ]; then
-        cp "$artifact" "${packaged_dir}/$(basename "$artifact")"
+        filename=$(basename "$artifact")
+        if [ -n "$COMMIT_COUNT" ]; then
+            extension="${filename##*.}"
+            if [ "$filename" == "$extension" ]; then
+                new_filename="${filename}-${COMMIT_COUNT}"
+            else
+                filename_no_ext="${filename%.*}"
+                new_filename="${filename_no_ext}-${COMMIT_COUNT}.${extension}"
+            fi
+            cp "$artifact" "${packaged_dir}/${new_filename}"
+        else
+            cp "$artifact" "${packaged_dir}/${filename}"
+        fi
     fi
 done
 
@@ -66,7 +95,7 @@ with open("batches.list", "w", encoding="utf-8") as f:
         media = []
         for index, (name, _) in enumerate(batch):
             item = {"type": "document", "media": f"attach://file{index}"}
-            if i == 0 and index == 0 and text:
+            if i == 0 and index == len(batch) - 1 and text:
                 item["caption"] = text
                 item["parse_mode"] = "MarkdownV2"
             media.append(item)

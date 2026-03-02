@@ -19,7 +19,7 @@ jobs:
             platform: macos arm64
             build-command: ./gradlew packageDmgNativeReleaseMacosArm64
             artifact-path: example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg
-            artifact-name: Miuix-darwin-arm64-dmg
+            artifact-name: Miuix-darwin-arm64-dmg.dmg
             archive: false
           - os: ubuntu-latest
             platform: linux x64
@@ -29,7 +29,7 @@ jobs:
             artifact-path: example/desktop/build/compose/binaries/main-release/app/Miuix
             artifact-pathEx: example/android/build/outputs/apk/release/*.apk
             artifact-name: Miuix-linux-x64-bin
-            artifact-nameEx: Miuix-android-universal-apk
+            artifact-nameEx: Miuix-android-universal-apk.apk
             archive: true
           - os: ubuntu-24.04-arm
             platform: linux arm64
@@ -68,18 +68,25 @@ jobs:
           KEYSTORE_PASS: ${{ secrets.KEY_STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Rename ${{ matrix.platform }} artifact
+        run: mv ${{ matrix.artifact-path }} ${{ matrix.artifact-name }}
+        shell: bash
+      - name: Rename ${{ matrix.platformEx }} artifact
+        if: matrix.platformEx == 'android universal'
+        run: mv ${{ matrix.artifact-pathEx }} ${{ matrix.artifact-nameEx }}
+        shell: bash
       - name: Upload Miuix ${{ matrix.platform }} artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          path: ${{ matrix.artifact-name }}
           archive: ${{ matrix.archive }}
       - name: Upload Miuix ${{ matrix.platformEx }} artifact
         if: matrix.platformEx == 'android universal'
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-nameEx }}
-          path: ${{ matrix.artifact-pathEx }}
+          path: ${{ matrix.artifact-nameEx }}
           archive: false
 
   post_telegram:
@@ -90,7 +97,11 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - name: Get commit count
+        id: commit_count
+        run: echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -102,8 +113,9 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           BOT_API_LINK: ${{ secrets.BOT_API_LINK }}
+          COMMIT_COUNT: ${{ steps.commit_count.outputs.count }}
           COMMIT_MESSAGE: |+
-            New CI from compose-miuix-ui
+            New CI from compose-miuix-ui (${{ steps.commit_count.outputs.count }})
 
             ${{ github.event.head_commit.message }}
         run: bash .github/scripts/post_telegram.sh
