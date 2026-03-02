@@ -4,6 +4,17 @@ fi
 
 BOT_API_URL="${BOT_API_LINK:-https://api.telegram.org}"
 
+# Get Version Info
+VERSION_NAME=$(grep 'const val APPLICATION_VERSION_NAME' build-plugins/src/main/kotlin/BuildConfig.kt | cut -d '"' -f 2)
+SHORT_HASH=$(git rev-parse --short HEAD)
+COMMIT_MSG_BODY=$(git log -1 --pretty=%B)
+COMMIT_COUNT=$(git rev-list --count HEAD)
+
+export VERSION_NAME
+export SHORT_HASH
+export COMMIT_MSG_BODY
+export COMMIT_COUNT
+
 root_dir="$(pwd)"
 packaged_dir="${root_dir}/packaged"
 mkdir -p "$packaged_dir"
@@ -56,18 +67,34 @@ python3 - <<'PY'
 import json
 import os
 
-text = os.environ.get("COMMIT_MESSAGE", "")
-max_len = 1024
-if len(text) > max_len:
-    text = text[: max_len - 3] + "..."
-escape_chars = r"_*[]()~`>#+-=|{}.!\\"
-escaped = []
-for ch in text:
-    if ch in escape_chars:
-        escaped.append("\\" + ch)
-    else:
-        escaped.append(ch)
-text = "".join(escaped)
+def escape_md(text):
+    escape_chars = r"_*[]()~`>#+-=|{}.!\\"
+    escaped = []
+    for ch in text:
+        if ch in escape_chars:
+            escaped.append("\\" + ch)
+        else:
+            escaped.append(ch)
+    return "".join(escaped)
+
+def escape_code(text):
+    return text.replace("\\", "\\\\").replace("`", "\\`")
+
+repo_name = os.environ.get("GITHUB_REPOSITORY", "Unknown")
+version = os.environ.get("VERSION_NAME", "Unknown")
+short_hash = os.environ.get("SHORT_HASH", "Unknown")
+commit_count = os.environ.get("COMMIT_COUNT", "0")
+commit_msg = os.environ.get("COMMIT_MSG_BODY", "No commit message")
+
+max_len = 900
+if len(commit_msg) > max_len:
+    commit_msg = commit_msg[:max_len] + "..."
+
+header = f"New CI from {repo_name}"
+version_line = f"Version: v{version}-{short_hash} ({commit_count})"
+msg_label = "Commit message:"
+
+text = f"{escape_md(header)}\n\n{escape_md(version_line)}\n\n{escape_md(msg_label)}\n```\n{escape_code(commit_msg)}\n```"
 
 max_batch_files = int(os.environ.get("TELEGRAM_MAX_BATCH_FILES", "10"))
 

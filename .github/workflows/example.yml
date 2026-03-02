@@ -99,10 +99,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get commit count
-        id: commit_count
-        run: echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
-
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
@@ -113,9 +109,4 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           BOT_API_LINK: ${{ secrets.BOT_API_LINK }}
-          COMMIT_COUNT: ${{ steps.commit_count.outputs.count }}
-          COMMIT_MESSAGE: |+
-            New CI from compose-miuix-ui (${{ steps.commit_count.outputs.count }})
-
-            ${{ github.event.head_commit.message }}
         run: bash .github/scripts/post_telegram.sh
