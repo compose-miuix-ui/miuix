@@ -139,6 +139,8 @@ val LocalHandlePageChange = staticCompositionLocalOf<(Int) -> Unit> { error("No 
 fun UITest(
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     padding: PaddingValues,
     enableOverScroll: Boolean,
 ) {
@@ -196,6 +198,8 @@ fun UITest(
                         onUiStateChange = { uiState = it },
                         colorMode = colorMode,
                         seedIndex = seedIndex,
+                        paletteStyle = paletteStyle,
+                        colorSpec = colorSpec,
                         padding = padding,
                         navigationItems = navigationItems,
                     )
@@ -263,6 +267,8 @@ private fun Home(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
 ) {
@@ -282,6 +288,8 @@ private fun Home(
                 onUiStateChange = onUiStateChange,
                 colorMode = colorMode,
                 seedIndex = seedIndex,
+                paletteStyle = paletteStyle,
+                colorSpec = colorSpec,
                 snackbarHostState = snackbarHostState,
                 layoutDirection = layoutDirection,
             )
@@ -291,7 +299,9 @@ private fun Home(
                 uiState = uiState,
                 onUiStateChange = onUiStateChange,
                 colorMode = colorMode,
+                paletteStyle = paletteStyle,
                 seedIndex = seedIndex,
+                colorSpec = colorSpec,
                 snackbarHostState = snackbarHostState,
                 padding = padding,
             )
@@ -306,6 +316,8 @@ private fun WideScreenContent(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
 ) {
@@ -356,6 +368,8 @@ private fun WideScreenContent(
                 onUiStateChange = onUiStateChange,
                 colorMode = colorMode,
                 seedIndex = seedIndex,
+                paletteStyle = paletteStyle,
+                colorSpec = colorSpec,
                 modifier = Modifier
                     .imePadding()
                     .padding(end = padding.calculateEndPadding(layoutDirection)),
@@ -371,6 +385,8 @@ private fun CompactScreenLayout(
     onUiStateChange: (UIState) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
 ) {
@@ -408,6 +424,8 @@ private fun CompactScreenLayout(
             onUiStateChange = onUiStateChange,
             colorMode = colorMode,
             seedIndex = seedIndex,
+            paletteStyle = paletteStyle,
+            colorSpec = colorSpec,
             modifier = Modifier
                 .padding(
                     top = padding.calculateTopPadding(),
@@ -601,8 +619,10 @@ fun AppPager(
     padding: PaddingValues,
     uiState: UIState,
     onUiStateChange: (UIState) -> Unit,
+    paletteStyle: MutableState<Int>,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     modifier: Modifier = Modifier,
 ) {
     HorizontalPager(
@@ -683,6 +703,8 @@ fun AppPager(
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode,
                     seedIndex = seedIndex,
+                    paletteStyle = paletteStyle,
+                    colorSpec = colorSpec,
                 )
             }
         },

@@ -26,6 +26,8 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.theme.ThemeColorSpec
+import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import kotlin.random.Random
@@ -67,6 +69,8 @@ fun SettingsPage(
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
@@ -128,6 +132,8 @@ fun SettingsPage(
             enableOverScroll = enableOverScroll,
             colorMode = colorMode,
             seedIndex = seedIndex,
+            paletteStyle = paletteStyle,
+            colorSpec = colorSpec,
             isWideScreen = isWideScreen,
         )
     }
@@ -170,6 +176,8 @@ fun SettingsContent(
     enableOverScroll: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     isWideScreen: Boolean,
 ) {
     val navigator = LocalNavigator.current
@@ -180,6 +188,8 @@ fun SettingsContent(
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
     val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
+    val paletteStyleOptions = remember { ThemePaletteStyle.entries.map { it.name } }
+    val colorSpecOptions = remember { ThemeColorSpec.entries.map { it.name } }
     val keyColorOptions = remember { listOf("Default") + ui.KeyColors.map { it.first } }
 
     LazyColumn(
@@ -308,13 +318,29 @@ fun SettingsContent(
                     selectedIndex = colorMode.value,
                     onSelectedIndexChange = { colorMode.value = it },
                 )
-                AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5)) {
+                AnimatedVisibility(visible = colorMode.value in 3..5) {
                     SuperDropdown(
                         title = "Key Color",
                         items = keyColorOptions,
                         selectedIndex = seedIndex.value,
                         onSelectedIndexChange = { seedIndex.value = it },
                     )
+                }
+                AnimatedVisibility(visible = colorMode.value in 3..5 && seedIndex.value > 0) {
+                    Column {
+                        SuperDropdown(
+                            title = "Palette Style",
+                            items = paletteStyleOptions,
+                            selectedIndex = paletteStyle.value,
+                            onSelectedIndexChange = { paletteStyle.value = it },
+                        )
+                        SuperDropdown(
+                            title = "Color Spec",
+                            items = colorSpecOptions,
+                            selectedIndex = colorSpec.value,
+                            onSelectedIndexChange = { colorSpec.value = it },
+                        )
+                    }
                 }
             }
             Card(
