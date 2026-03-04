@@ -34,6 +34,7 @@ import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.Colors
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.theme.platformDynamicColors
@@ -85,6 +86,17 @@ fun ColorPage(
             ),
             overscrollEffect = null,
         ) {
+            item(key = "current") {
+                SmallTitle("Current Theme Colors")
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
+                    cornerRadius = 16.dp,
+                    insideMargin = PaddingValues(horizontal = 16.dp),
+                ) {
+                    ColorsPreview(MiuixTheme.colorScheme)
+                }
+            }
             item(key = "light") {
                 SmallTitle("Light Theme Colors")
                 Card(

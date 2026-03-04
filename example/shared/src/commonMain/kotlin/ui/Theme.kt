@@ -8,21 +8,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 
 @Composable
 fun AppTheme(
     colorMode: Int = 0,
     keyColor: Color? = null,
+    paletteStyle: Int = 0,
+    colorSpec: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    val controller = remember(colorMode, keyColor) {
+    val spec = when(colorSpec) {
+        1 -> ThemeColorSpec.Spec2025
+        else -> ThemeColorSpec.Spec2021
+    }
+    val style = when(paletteStyle) {
+        0 -> ThemePaletteStyle.TonalSpot
+        1 -> ThemePaletteStyle.Neutral
+        2 -> ThemePaletteStyle.Vibrant
+        3 -> ThemePaletteStyle.Expressive
+        4 -> ThemePaletteStyle.Rainbow
+        5 -> ThemePaletteStyle.FruitSalad
+        6 -> ThemePaletteStyle.Monochrome
+        7 -> ThemePaletteStyle.Fidelity
+        else -> ThemePaletteStyle.Content
+    }
+    val controller = remember(colorMode, keyColor, spec, style) {
         when (colorMode) {
             1 -> ThemeController(ColorSchemeMode.Light)
             2 -> ThemeController(ColorSchemeMode.Dark)
-            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor)
-            4 -> ThemeController(ColorSchemeMode.MonetLight, keyColor = keyColor)
-            5 -> ThemeController(ColorSchemeMode.MonetDark, keyColor = keyColor)
+            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor, colorSpec = spec, paletteStyle = style)
+            4 -> ThemeController(ColorSchemeMode.MonetLight, keyColor = keyColor, colorSpec = spec, paletteStyle = style)
+            5 -> ThemeController(ColorSchemeMode.MonetDark, keyColor = keyColor, colorSpec = spec, paletteStyle = style)
             else -> ThemeController(ColorSchemeMode.System)
         }
     }

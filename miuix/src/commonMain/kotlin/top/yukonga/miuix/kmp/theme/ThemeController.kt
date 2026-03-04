@@ -16,8 +16,34 @@ import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.hct.Hct
 import com.materialkolor.scheme.DynamicScheme
+import com.materialkolor.scheme.SchemeContent
+import com.materialkolor.scheme.SchemeExpressive
+import com.materialkolor.scheme.SchemeFidelity
+import com.materialkolor.scheme.SchemeFruitSalad
+import com.materialkolor.scheme.SchemeMonochrome
+import com.materialkolor.scheme.SchemeNeutral
+import com.materialkolor.scheme.SchemeRainbow
 import com.materialkolor.scheme.SchemeTonalSpot
-import com.materialkolor.scheme.Variant
+import com.materialkolor.scheme.SchemeVibrant
+
+@Stable
+enum class ThemeColorSpec {
+    Spec2021,
+    Spec2025
+}
+
+@Stable
+enum class ThemePaletteStyle {
+    TonalSpot,
+    Neutral,
+    Vibrant,
+    Expressive,
+    Rainbow,
+    FruitSalad,
+    Monochrome,
+    Fidelity,
+    Content
+}
 
 @Stable
 enum class ColorSchemeMode {
@@ -32,65 +58,119 @@ enum class ColorSchemeMode {
 @Stable
 internal fun colorsFromSeed(
     seed: Color,
-    colorSpec: ColorSpec.SpecVersion,
+    colorSpec: ThemeColorSpec,
+    paletteStyle: ThemePaletteStyle,
     dark: Boolean,
 ): Colors {
+    // Check if the selected style supports SPEC_2025
+    val isSpec2025Supported = paletteStyle in listOf(
+        ThemePaletteStyle.TonalSpot,
+        ThemePaletteStyle.Neutral,
+        ThemePaletteStyle.Vibrant,
+        ThemePaletteStyle.Expressive
+    )
+
+    // Gracefully downgrade to SPEC_2021 if the style doesn't support SPEC_2025
+    val internalSpec = if (colorSpec == ThemeColorSpec.Spec2025 && isSpec2025Supported) {
+        ColorSpec.SpecVersion.SPEC_2025
+    } else {
+        ColorSpec.SpecVersion.SPEC_2021
+    }
+
     val hctColor = Hct.fromInt(seed.toArgb())
-    val tonalSpot = SchemeTonalSpot(
-        sourceColorHct = hctColor,
-        isDark = dark,
-        contrastLevel = 0.0,
-        specVersion = colorSpec,
-        platform = DynamicScheme.Platform.PHONE,
-    )
-    val colors = DynamicScheme(
-        sourceColorHct = hctColor,
-        variant = Variant.TONAL_SPOT,
-        isDark = dark,
-        contrastLevel = 0.0,
-        specVersion = colorSpec,
-        platform = DynamicScheme.Platform.PHONE,
-        primaryPalette = tonalSpot.primaryPalette,
-        secondaryPalette = tonalSpot.secondaryPalette,
-        tertiaryPalette = tonalSpot.tertiaryPalette,
-        neutralPalette = tonalSpot.neutralPalette,
-        neutralVariantPalette = tonalSpot.neutralVariantPalette,
-        errorPalette = tonalSpot.errorPalette,
-    )
+    val scheme: DynamicScheme = when (paletteStyle) {
+        ThemePaletteStyle.TonalSpot -> SchemeTonalSpot(sourceColorHct = hctColor, isDark = dark, contrastLevel = 0.0, specVersion = internalSpec, platform = DynamicScheme.Platform.PHONE)
+        ThemePaletteStyle.Neutral -> SchemeNeutral(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Vibrant -> SchemeVibrant(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Expressive -> SchemeExpressive(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Rainbow -> SchemeRainbow(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.FruitSalad -> SchemeFruitSalad(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Monochrome -> SchemeMonochrome(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Fidelity -> SchemeFidelity(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+        ThemePaletteStyle.Content -> SchemeContent(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE
+        )
+    }
     val roles = MonetRoles(
-        primary = Color(colors.primary),
-        onPrimary = Color(colors.onPrimary),
-        primaryFixed = Color(colors.primaryFixed),
-        onPrimaryFixed = Color(colors.onPrimaryFixed),
-        error = Color(colors.error),
-        onError = Color(colors.onError),
-        errorContainer = Color(colors.errorContainer),
-        onErrorContainer = Color(colors.onErrorContainer),
-        primaryContainer = Color(colors.primaryContainer),
-        onPrimaryContainer = Color(colors.onPrimaryContainer),
-        secondary = Color(colors.secondary),
-        onSecondary = Color(colors.onSecondary),
-        secondaryContainer = Color(colors.secondaryContainer),
-        onSecondaryContainer = Color(colors.onSecondaryContainer),
-        tertiaryContainer = Color(colors.tertiaryContainer),
-        onTertiaryContainer = Color(colors.onTertiaryContainer),
-        background = Color(colors.background),
-        onBackground = Color(colors.onBackground),
-        surface = Color(colors.surface),
-        onSurface = Color(colors.onSurface),
-        surfaceVariant = Color(colors.surfaceVariant),
-        surfaceContainer = Color(colors.surfaceContainer),
-        surfaceContainerHigh = Color(colors.surfaceContainerHigh),
-        surfaceContainerHighest = Color(colors.surfaceContainerHighest),
-        outline = Color(colors.outline),
-        outlineVariant = Color(colors.outlineVariant),
-        onSurfaceVariant = Color(colors.onSurfaceVariant),
+        primary = Color(scheme.primary),
+        onPrimary = Color(scheme.onPrimary),
+        primaryFixed = Color(scheme.primaryFixed),
+        onPrimaryFixed = Color(scheme.onPrimaryFixed),
+        error = Color(scheme.error),
+        onError = Color(scheme.onError),
+        errorContainer = Color(scheme.errorContainer),
+        onErrorContainer = Color(scheme.onErrorContainer),
+        primaryContainer = Color(scheme.primaryContainer),
+        onPrimaryContainer = Color(scheme.onPrimaryContainer),
+        secondary = Color(scheme.secondary),
+        onSecondary = Color(scheme.onSecondary),
+        secondaryContainer = Color(scheme.secondaryContainer),
+        onSecondaryContainer = Color(scheme.onSecondaryContainer),
+        tertiaryContainer = Color(scheme.tertiaryContainer),
+        onTertiaryContainer = Color(scheme.onTertiaryContainer),
+        background = Color(scheme.background),
+        onBackground = Color(scheme.onBackground),
+        surface = Color(scheme.surface),
+        onSurface = Color(scheme.onSurface),
+        surfaceVariant = Color(scheme.surfaceVariant),
+        surfaceContainer = Color(scheme.surfaceContainer),
+        surfaceContainerHigh = Color(scheme.surfaceContainerHigh),
+        surfaceContainerHighest = Color(scheme.surfaceContainerHighest),
+        outline = Color(scheme.outline),
+        outlineVariant = Color(scheme.outlineVariant),
+        onSurfaceVariant = Color(scheme.onSurfaceVariant),
     )
     return mapMd3RolesToMiuixColorsCommon(roles, dark)
 }
 
 @Stable
-internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), colorSpec = ColorSpec.SpecVersion.SPEC_2021, dark = dark)
+internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Color(0xFF6750A4), colorSpec = ThemeColorSpec.Spec2021, paletteStyle = ThemePaletteStyle.TonalSpot, dark = dark)
 
 /**
  * A controller for managing the current color scheme of the Miuix theme.
@@ -108,6 +188,7 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  *   [colorSchemeMode] is set to a Monet mode.
  * @param colorSpec The color specification version to use when generating dynamic color schemes. This
  *  is used when the [colorSchemeMode] is set to a Monet mode.
+ * @param paletteStyle The palette style to use when generating dynamic color schemes.
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */
@@ -117,14 +198,16 @@ class ThemeController(
     lightColors: Colors = lightColorScheme(),
     darkColors: Colors = darkColorScheme(),
     keyColor: Color? = null,
-    colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+    colorSpec:ThemeColorSpec = ThemeColorSpec.Spec2021,
+    paletteStyle: ThemePaletteStyle = ThemePaletteStyle.TonalSpot,
     isDark: Boolean? = null,
 ) {
     val colorSchemeMode: ColorSchemeMode by mutableStateOf(colorSchemeMode)
     val lightColors: Colors by mutableStateOf(lightColors)
     val darkColors: Colors by mutableStateOf(darkColors)
     val keyColor: Color? by mutableStateOf(keyColor)
-    val colorSpec: ColorSpec.SpecVersion by mutableStateOf(colorSpec)
+    val colorSpec: ThemeColorSpec by mutableStateOf(colorSpec)
+    val paletteStyle: ThemePaletteStyle by mutableStateOf(paletteStyle)
     val isDark: Boolean? by mutableStateOf(isDark)
 
     @Composable
@@ -141,19 +224,19 @@ class ThemeController(
         ColorSchemeMode.MonetSystem -> {
             val dark = isDark ?: isSystemInDarkTheme()
             keyColor?.let {
-                remember(keyColor, dark) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = dark) }
+                remember(keyColor, dark, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = dark) }
             } ?: platformDynamicColors(dark = dark)
         }
 
         ColorSchemeMode.MonetLight -> {
             keyColor?.let {
-                remember(keyColor) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = false) }
+                remember(keyColor, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = false) }
             } ?: platformDynamicColors(dark = false)
         }
 
         ColorSchemeMode.MonetDark -> {
             keyColor?.let {
-                remember(keyColor) { colorsFromSeed(seed = it, colorSpec = colorSpec, dark = true) }
+                remember(keyColor, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = true) }
             } ?: platformDynamicColors(dark = true)
         }
     }

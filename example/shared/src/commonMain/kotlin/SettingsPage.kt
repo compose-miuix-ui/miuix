@@ -67,6 +67,8 @@ fun SettingsPage(
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
@@ -128,6 +130,8 @@ fun SettingsPage(
             enableOverScroll = enableOverScroll,
             colorMode = colorMode,
             seedIndex = seedIndex,
+            paletteStyle = paletteStyle,
+            colorSpec = colorSpec,
             isWideScreen = isWideScreen,
         )
     }
@@ -170,6 +174,8 @@ fun SettingsContent(
     enableOverScroll: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
+    paletteStyle: MutableState<Int>,
+    colorSpec: MutableState<Int>,
     isWideScreen: Boolean,
 ) {
     val navigator = LocalNavigator.current
@@ -180,6 +186,10 @@ fun SettingsContent(
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
     val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
+    val paletteStyleOptions = remember {
+        listOf("TonalSpot", "Neutral", "Vibrant", "Expressive", "Rainbow", "FruitSalad", "Monochrome", "Fidelity", "Content")
+    }
+    val colorSpecOptions = remember { listOf("SPEC_2021", "SPEC_2025") }
     val keyColorOptions = remember { listOf("Default") + ui.KeyColors.map { it.first } }
 
     LazyColumn(
@@ -315,6 +325,22 @@ fun SettingsContent(
                         selectedIndex = seedIndex.value,
                         onSelectedIndexChange = { seedIndex.value = it },
                     )
+                }
+                AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5) && seedIndex.value > 0) {
+                    Column {
+                        SuperDropdown(
+                            title = "Palette Style",
+                            items = paletteStyleOptions,
+                            selectedIndex = paletteStyle.value,
+                            onSelectedIndexChange = { paletteStyle.value = it },
+                        )
+                        SuperDropdown(
+                            title = "Color Spec",
+                            items = colorSpecOptions,
+                            selectedIndex = colorSpec.value,
+                            onSelectedIndexChange = { colorSpec.value = it },
+                        )
+                    }
                 }
             }
             Card(

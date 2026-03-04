@@ -16,15 +16,24 @@ import ui.keyColorFor
 fun App(
     colorMode: MutableState<Int> = remember { mutableIntStateOf(0) },
     seedIndex: MutableState<Int> = remember { mutableIntStateOf(0) },
+    paletteStyle: MutableState<Int> = remember { mutableIntStateOf(0) },
+    colorSpec: MutableState<Int> = remember { mutableIntStateOf(0) },
     padding: PaddingValues = PaddingValues(0.dp),
     enableOverScroll: Boolean = platform() == Platform.Android || platform() == Platform.IOS,
 ) {
     val keyColor = keyColorFor(seedIndex.value)
 
-    AppTheme(colorMode = colorMode.value, keyColor = keyColor) {
+    AppTheme(
+        colorMode = colorMode.value,
+        keyColor = keyColor,
+        paletteStyle = paletteStyle.value,
+        colorSpec = colorSpec.value,
+    ) {
         UITest(
             colorMode = colorMode,
             seedIndex = seedIndex,
+            paletteStyle = paletteStyle,
+            colorSpec = colorSpec,
             padding = padding,
             enableOverScroll = enableOverScroll,
         )
