@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
@@ -58,6 +59,7 @@ fun MainPage(
     val bottomSheetSuperSwitchState = remember { mutableStateOf(true) }
     val checkbox = remember { mutableStateOf(false) }
     val checkboxTrue = remember { mutableStateOf(true) }
+    val checkboxIndeterminate = remember { mutableStateOf(ToggleableState.Indeterminate) }
     val switch = remember { mutableStateOf(false) }
     val switchTrue = remember { mutableStateOf(true) }
     val superDropdownOptionSelected = remember { mutableIntStateOf(0) }
@@ -86,6 +88,7 @@ fun MainPage(
             bottomSheetSuperSwitchState,
             checkbox,
             checkboxTrue,
+            checkboxIndeterminate,
             switch,
             switchTrue,
             superDropdownOptionSelected,

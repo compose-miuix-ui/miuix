@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Checkbox
 
@@ -38,27 +39,43 @@ fun CheckboxDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var checkbox1 by remember { mutableStateOf(false) }
-            var checkbox2 by remember { mutableStateOf(true) }
+            var checkbox1 by remember { mutableStateOf(ToggleableState.Off) }
+            var checkbox2 by remember { mutableStateOf(ToggleableState.On) }
+            var checkbox3 by remember { mutableStateOf(ToggleableState.Indeterminate) }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
             ) {
                 Checkbox(
-                    checked = checkbox1,
-                    onCheckedChange = { checkbox1 = it },
+                    state = checkbox1,
+                    onClick = { checkbox1 = if (checkbox1 == ToggleableState.On) ToggleableState.Off else ToggleableState.On },
                 )
                 Checkbox(
-                    checked = checkbox2,
-                    onCheckedChange = { checkbox2 = it },
+                    state = checkbox2,
+                    onClick = { checkbox2 = if (checkbox2 == ToggleableState.On) ToggleableState.Off else ToggleableState.On },
                 )
                 Checkbox(
-                    checked = false,
-                    onCheckedChange = { },
+                    state = checkbox3,
+                    onClick = {
+                        checkbox3 = when (checkbox3) {
+                            ToggleableState.Off -> ToggleableState.Indeterminate
+                            ToggleableState.Indeterminate -> ToggleableState.On
+                            ToggleableState.On -> ToggleableState.Off
+                        }
+                    },
+                )
+                Checkbox(
+                    state = ToggleableState.Off,
+                    onClick = null,
                     enabled = false,
                 )
                 Checkbox(
-                    checked = true,
-                    onCheckedChange = { },
+                    state = ToggleableState.On,
+                    onClick = null,
+                    enabled = false,
+                )
+                Checkbox(
+                    state = ToggleableState.Indeterminate,
+                    onClick = null,
                     enabled = false,
                 )
             }

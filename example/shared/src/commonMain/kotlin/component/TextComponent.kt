@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -83,6 +84,7 @@ fun TextComponent(
     bottomSheetSuperSwitchState: MutableState<Boolean>,
     checkbox: MutableState<Boolean>,
     checkboxTrue: MutableState<Boolean>,
+    checkboxIndeterminate: MutableState<ToggleableState>,
     switch: MutableState<Boolean>,
     switchTrue: MutableState<Boolean>,
     superDropdownOptionSelected: MutableState<Int>,
@@ -242,23 +244,40 @@ fun TextComponent(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Checkbox(
-                    checked = checkbox.value,
-                    onCheckedChange = { checkbox.value = it },
+                    state = ToggleableState(checkbox.value),
+                    onClick = { checkbox.value = !checkbox.value },
                 )
                 Checkbox(
-                    checked = checkboxTrue.value,
-                    onCheckedChange = { checkboxTrue.value = it },
+                    state = ToggleableState(checkboxTrue.value),
+                    onClick = { checkboxTrue.value = !checkboxTrue.value },
                     modifier = Modifier.padding(start = 8.dp),
                 )
                 Checkbox(
-                    checked = false,
-                    onCheckedChange = { },
+                    state = checkboxIndeterminate.value,
+                    onClick = {
+                        checkboxIndeterminate.value = when (checkboxIndeterminate.value) {
+                            ToggleableState.Off -> ToggleableState.Indeterminate
+                            ToggleableState.Indeterminate -> ToggleableState.On
+                            ToggleableState.On -> ToggleableState.Off
+                        }
+                    },
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+                Checkbox(
+                    state = ToggleableState.Off,
+                    onClick = null,
                     modifier = Modifier.padding(start = 8.dp),
                     enabled = false,
                 )
                 Checkbox(
-                    checked = true,
-                    onCheckedChange = { },
+                    state = ToggleableState.On,
+                    onClick = null,
+                    modifier = Modifier.padding(start = 8.dp),
+                    enabled = false,
+                )
+                Checkbox(
+                    state = ToggleableState.Indeterminate,
+                    onClick = null,
                     modifier = Modifier.padding(start = 8.dp),
                     enabled = false,
                 )
