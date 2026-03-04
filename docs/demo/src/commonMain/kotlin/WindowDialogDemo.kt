@@ -53,7 +53,7 @@ fun WindowDialogDemo() {
                     val dismiss = LocalWindowDialogState.current
                     TextButton(
                         text = "Confirm",
-                        onClick = { dismiss?.invoke() },
+                        onClick = { dismiss.invoke() },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

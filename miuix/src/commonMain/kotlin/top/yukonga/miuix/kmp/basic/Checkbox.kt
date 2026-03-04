@@ -14,11 +14,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -35,62 +34,65 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.pressable
 
 /**
- * A [Checkbox] component with Miuix style.
+ * A [Checkbox] component with Miuix style, supporting three states: On, Off, and Indeterminate.
  *
- * @param checked The current state of the [Checkbox].
- * @param onCheckedChange The callback to be called when the state of the [Checkbox] changes.
+ * @param state The current [ToggleableState] of the [Checkbox].
+ * @param onClick The callback to be called when the [Checkbox] is clicked. The caller is
+ *   responsible for updating the state. If `null`, the [Checkbox] is not interactive.
  * @param modifier The modifier to be applied to the [Checkbox].
  * @param colors The [CheckboxColors] of the [Checkbox].
  * @param enabled Whether the [Checkbox] is enabled.
  */
 @Composable
 fun Checkbox(
-    checked: Boolean,
-    onCheckedChange: ((Boolean) -> Unit)?,
+    state: ToggleableState,
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     colors: CheckboxColors = CheckboxDefaults.checkboxColors(),
     enabled: Boolean = true,
 ) {
-    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentOnClickState = rememberUpdatedState(onClick)
     val hapticFeedback = LocalHapticFeedback.current
 
-    val transition = updateTransition(checked, label = "CheckboxTransition")
+    val transition = updateTransition(state, label = "CheckboxTransition")
 
-    val backgroundColor by transition.animateColor(
+    val backgroundColorState = transition.animateColor(
         transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
         label = "BackgroundColor",
     ) {
-        if (it) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled)
+        if (it != ToggleableState.Off) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled)
     }
 
-    val foregroundColor by transition.animateColor(
+    val foregroundColorState = transition.animateColor(
         transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
         label = "ForegroundColor",
     ) {
-        if (it) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled)
+        if (it != ToggleableState.Off) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled)
     }
 
-    val checkAlpha by transition.animateFloat(
+    val checkAlphaState = transition.animateFloat(
         transitionSpec = {
-            if (targetState) {
+            if (targetState != ToggleableState.Off) {
                 tween(durationMillis = 10, easing = FastOutSlowInEasing)
             } else {
                 tween(durationMillis = 150, easing = FastOutSlowInEasing)
             }
         },
         label = "CheckAlpha",
-    ) { if (it) 1f else 0f }
+    ) { if (it != ToggleableState.Off) 1f else 0f }
 
-    val checkStartTrim by transition.animateFloat(
+    val checkStartTrimState = transition.animateFloat(
         transitionSpec = {
-            if (targetState) {
+            if (targetState != ToggleableState.Off) {
                 tween(durationMillis = 200, easing = FastOutSlowInEasing)
             } else {
                 keyframes {
@@ -100,11 +102,11 @@ fun Checkbox(
             }
         },
         label = "CheckStartTrim",
-    ) { if (it) 0.186f else 0.1f }
+    ) { if (it != ToggleableState.Off) 0.186f else 0.1f }
 
-    val checkEndTrim by transition.animateFloat(
+    val checkEndTrimState = transition.animateFloat(
         transitionSpec = {
-            if (targetState) {
+            if (targetState != ToggleableState.Off) {
                 keyframes {
                     durationMillis = 300
                     0.85f at 200 using FastOutSlowInEasing
@@ -118,26 +120,44 @@ fun Checkbox(
             }
         },
         label = "CheckEndTrim",
-    ) { if (it) 0.803f else 0.1f }
+    ) { if (it != ToggleableState.Off) 0.803f else 0.1f }
+
+    val crossCenterGravitationState = transition.animateFloat(
+        transitionSpec = {
+            if (targetState == ToggleableState.Indeterminate) {
+                tween(durationMillis = 200, easing = FastOutSlowInEasing)
+            } else {
+                tween(durationMillis = 150, easing = FastOutSlowInEasing)
+            }
+        },
+        label = "CrossCenterGravitation",
+    ) { if (it == ToggleableState.Indeterminate) 1f else 0f }
 
     val checkPath = remember { Path() }
+    val sinkFeedback = remember { SinkFeedback(sinkAmount = 0.85f, animationSpec = spring(0.99f, 986.96f)) }
 
-    val finalModifier = if (currentOnCheckedChange != null) {
-        Modifier.toggleable(
-            value = checked,
-            onValueChange = {
-                currentOnCheckedChange!!(it)
-                hapticFeedback.performHapticFeedback(
-                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
-                )
-            },
-            enabled = enabled,
-            role = Role.Checkbox,
-            indication = null,
-            interactionSource = null,
-        )
-    } else {
-        modifier
+    val finalModifier = remember(state, enabled, onClick != null) {
+        if (onClick != null) {
+            Modifier.triStateToggleable(
+                state = state,
+                onClick = {
+                    currentOnClickState.value?.invoke()
+                    hapticFeedback.performHapticFeedback(
+                        when (state) {
+                            ToggleableState.Off -> HapticFeedbackType.ToggleOn
+                            ToggleableState.On -> HapticFeedbackType.ToggleOff
+                            ToggleableState.Indeterminate -> HapticFeedbackType.SegmentTick
+                        },
+                    )
+                },
+                enabled = enabled,
+                role = Role.Checkbox,
+                indication = null,
+                interactionSource = null,
+            )
+        } else {
+            Modifier
+        }
     }
 
     Box(
@@ -146,10 +166,7 @@ fun Checkbox(
             .requiredSize(26.dp)
             .pressable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = SinkFeedback(
-                    sinkAmount = 0.85f,
-                    animationSpec = spring(0.99f, 986.96f),
-                ),
+                indication = sinkFeedback,
                 enabled = enabled,
                 delay = null,
             )
@@ -175,27 +192,33 @@ fun Checkbox(
                     centerY + ((5.1f - viewportCenterY) / viewportSize * size.height),
                 )
 
-                val firstSegmentLength = (middlePoint - startPoint).getDistance()
-                val secondSegmentLength = (endPoint - middlePoint).getDistance()
-
                 val cache = CheckmarkCache(
                     startPoint,
                     middlePoint,
                     endPoint,
-                    firstSegmentLength,
-                    secondSegmentLength,
+                    centerX,
+                    centerY,
                     strokeWidth,
                 )
 
+                val stroke = Stroke(
+                    width = strokeWidth,
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round,
+                    miter = 10.0f,
+                )
+
                 onDrawBehind {
-                    drawCircle(backgroundColor)
+                    drawCircle(backgroundColorState.value)
                     drawTrimmedCheckmark(
-                        color = foregroundColor,
-                        alpha = checkAlpha,
-                        trimStart = checkStartTrim,
-                        trimEnd = checkEndTrim,
+                        color = foregroundColorState.value,
+                        alpha = checkAlphaState.value,
+                        trimStart = checkStartTrimState.value,
+                        trimEnd = checkEndTrimState.value,
+                        crossCenterGravitation = crossCenterGravitationState.value,
                         path = checkPath,
                         cache = cache,
+                        stroke = stroke,
                     )
                 }
             }
@@ -203,12 +226,49 @@ fun Checkbox(
     ) {}
 }
 
+/**
+ * A [Checkbox] component with Miuix style.
+ *
+ * @param checked The current state of the [Checkbox].
+ * @param onCheckedChange The callback to be called when the state of the [Checkbox] changes.
+ * @param modifier The modifier to be applied to the [Checkbox].
+ * @param colors The [CheckboxColors] of the [Checkbox].
+ * @param enabled Whether the [Checkbox] is enabled.
+ */
+@Deprecated(
+    message = "Use Checkbox with ToggleableState instead.",
+    replaceWith = ReplaceWith(
+        expression = "Checkbox(state = ToggleableState(checked), onClick = if (onCheckedChange != null) { { onCheckedChange(!checked) } } else null, modifier = modifier, colors = colors, enabled = enabled)",
+        imports = ["androidx.compose.ui.state.ToggleableState"],
+    ),
+)
+@Composable
+fun Checkbox(
+    checked: Boolean,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    modifier: Modifier = Modifier,
+    colors: CheckboxColors = CheckboxDefaults.checkboxColors(),
+    enabled: Boolean = true,
+) {
+    Checkbox(
+        state = ToggleableState(checked),
+        onClick = if (onCheckedChange != null) {
+            { onCheckedChange(!checked) }
+        } else {
+            null
+        },
+        modifier = modifier,
+        colors = colors,
+        enabled = enabled,
+    )
+}
+
 private data class CheckmarkCache(
     val startPoint: Offset,
     val middlePoint: Offset,
     val endPoint: Offset,
-    val firstSegmentLength: Float,
-    val secondSegmentLength: Float,
+    val centerX: Float,
+    val centerY: Float,
     val strokeWidth: Float,
 )
 
@@ -217,57 +277,68 @@ private fun DrawScope.drawTrimmedCheckmark(
     alpha: Float = 1f,
     trimStart: Float,
     trimEnd: Float,
+    crossCenterGravitation: Float,
     path: Path,
     cache: CheckmarkCache,
+    stroke: Stroke,
 ) {
     path.rewind()
 
-    val totalLength = cache.firstSegmentLength + cache.secondSegmentLength
+    val gravitatedStart = Offset(
+        cache.startPoint.x,
+        lerp(cache.startPoint.y, cache.centerY, crossCenterGravitation),
+    )
+    val gravitatedMiddle = Offset(
+        lerp(cache.middlePoint.x, cache.centerX, crossCenterGravitation),
+        lerp(cache.middlePoint.y, cache.centerY, crossCenterGravitation),
+    )
+    val gravitatedEnd = Offset(
+        cache.endPoint.x,
+        lerp(cache.endPoint.y, cache.centerY, crossCenterGravitation),
+    )
+
+    val firstSegmentLength = (gravitatedMiddle - gravitatedStart).getDistance()
+    val secondSegmentLength = (gravitatedEnd - gravitatedMiddle).getDistance()
+    val totalLength = firstSegmentLength + secondSegmentLength
 
     val startDistance = totalLength * trimStart
     val endDistance = totalLength * trimEnd
 
-    if (startDistance < cache.firstSegmentLength && endDistance > 0) {
-        val segStartRatio = (startDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
-        val segEndRatio = (endDistance / cache.firstSegmentLength).coerceIn(0f, 1f)
+    if (startDistance < firstSegmentLength && endDistance > 0) {
+        val segStartRatio = (startDistance / firstSegmentLength).coerceIn(0f, 1f)
+        val segEndRatio = (endDistance / firstSegmentLength).coerceIn(0f, 1f)
 
-        val startX = cache.startPoint.x + (cache.middlePoint.x - cache.startPoint.x) * segStartRatio
-        val startY = cache.startPoint.y + (cache.middlePoint.y - cache.startPoint.y) * segStartRatio
-        val endX = cache.startPoint.x + (cache.middlePoint.x - cache.startPoint.x) * segEndRatio
-        val endY = cache.startPoint.y + (cache.middlePoint.y - cache.startPoint.y) * segEndRatio
+        val startX = gravitatedStart.x + (gravitatedMiddle.x - gravitatedStart.x) * segStartRatio
+        val startY = gravitatedStart.y + (gravitatedMiddle.y - gravitatedStart.y) * segStartRatio
+        val endX = gravitatedStart.x + (gravitatedMiddle.x - gravitatedStart.x) * segEndRatio
+        val endY = gravitatedStart.y + (gravitatedMiddle.y - gravitatedStart.y) * segEndRatio
 
         path.moveTo(startX, startY)
         path.lineTo(endX, endY)
     }
 
-    if (endDistance > cache.firstSegmentLength) {
-        val segStartRatio = ((startDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
-        val segEndRatio = ((endDistance - cache.firstSegmentLength) / cache.secondSegmentLength).coerceIn(0f, 1f)
+    if (endDistance > firstSegmentLength) {
+        val segStartRatio = ((startDistance - firstSegmentLength) / secondSegmentLength).coerceIn(0f, 1f)
+        val segEndRatio = ((endDistance - firstSegmentLength) / secondSegmentLength).coerceIn(0f, 1f)
 
-        val startX = cache.middlePoint.x + (cache.endPoint.x - cache.middlePoint.x) * segStartRatio
-        val startY = cache.middlePoint.y + (cache.endPoint.y - cache.middlePoint.y) * segStartRatio
-        val endX = cache.middlePoint.x + (cache.endPoint.x - cache.middlePoint.x) * segEndRatio
-        val endY = cache.middlePoint.y + (cache.endPoint.y - cache.middlePoint.y) * segEndRatio
+        val startX = gravitatedMiddle.x + (gravitatedEnd.x - gravitatedMiddle.x) * segStartRatio
+        val startY = gravitatedMiddle.y + (gravitatedEnd.y - gravitatedMiddle.y) * segStartRatio
+        val endX = gravitatedMiddle.x + (gravitatedEnd.x - gravitatedMiddle.x) * segEndRatio
+        val endY = gravitatedMiddle.y + (gravitatedEnd.y - gravitatedMiddle.y) * segEndRatio
 
-        if (startDistance < cache.firstSegmentLength) {
+        if (startDistance < firstSegmentLength) {
             path.lineTo(endX, endY)
         } else {
             path.moveTo(startX, startY)
             path.lineTo(endX, endY)
         }
-        path.lineTo(endX, endY)
     }
 
     drawPath(
         path = path,
         color = color,
         alpha = alpha,
-        style = Stroke(
-            width = cache.strokeWidth,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-            miter = 10.0f,
-        ),
+        style = stroke,
     )
 }
 

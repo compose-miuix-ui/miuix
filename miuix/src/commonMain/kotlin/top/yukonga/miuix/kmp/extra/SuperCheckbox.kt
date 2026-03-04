@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
@@ -116,8 +117,12 @@ private fun SuperCheckboxStartAction(
     Checkbox(
         modifier = Modifier
             .padding(end = 8.dp),
-        checked = checked,
-        onCheckedChange = onCheckedChange,
+        state = ToggleableState(checked),
+        onClick = if (onCheckedChange != null) {
+            { onCheckedChange(!checked) }
+        } else {
+            null
+        },
         enabled = enabled,
         colors = checkboxColors,
     )
@@ -131,8 +136,12 @@ private fun SuperCheckboxEndAction(
     checkboxColors: CheckboxColors,
 ) {
     Checkbox(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
+        state = ToggleableState(checked),
+        onClick = if (onCheckedChange != null) {
+            { onCheckedChange(!checked) }
+        } else {
+            null
+        },
         enabled = enabled,
         colors = checkboxColors,
     )
