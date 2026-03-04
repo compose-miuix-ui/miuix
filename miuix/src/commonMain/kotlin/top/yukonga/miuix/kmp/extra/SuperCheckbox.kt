@@ -118,7 +118,11 @@ private fun SuperCheckboxStartAction(
         modifier = Modifier
             .padding(end = 8.dp),
         state = ToggleableState(checked),
-        onClick = if (onCheckedChange != null) { { onCheckedChange(!checked) } } else null,
+        onClick = if (onCheckedChange != null) {
+            { onCheckedChange(!checked) }
+        } else {
+            null
+        },
         enabled = enabled,
         colors = checkboxColors,
     )
@@ -133,7 +137,11 @@ private fun SuperCheckboxEndAction(
 ) {
     Checkbox(
         state = ToggleableState(checked),
-        onClick = if (onCheckedChange != null) { { onCheckedChange(!checked) } } else null,
+        onClick = if (onCheckedChange != null) {
+            { onCheckedChange(!checked) }
+        } else {
+            null
+        },
         enabled = enabled,
         colors = checkboxColors,
     )
