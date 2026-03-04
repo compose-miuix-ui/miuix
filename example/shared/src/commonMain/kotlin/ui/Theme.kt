@@ -20,11 +20,11 @@ fun AppTheme(
     colorSpec: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    val spec = when(colorSpec) {
+    val spec = when (colorSpec) {
         1 -> ThemeColorSpec.Spec2025
         else -> ThemeColorSpec.Spec2021
     }
-    val style = when(paletteStyle) {
+    val style = when (paletteStyle) {
         0 -> ThemePaletteStyle.TonalSpot
         1 -> ThemePaletteStyle.Neutral
         2 -> ThemePaletteStyle.Vibrant

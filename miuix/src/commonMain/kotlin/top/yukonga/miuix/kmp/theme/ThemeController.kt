@@ -29,7 +29,7 @@ import com.materialkolor.scheme.SchemeVibrant
 @Stable
 enum class ThemeColorSpec {
     Spec2021,
-    Spec2025
+    Spec2025,
 }
 
 @Stable
@@ -42,7 +42,7 @@ enum class ThemePaletteStyle {
     FruitSalad,
     Monochrome,
     Fidelity,
-    Content
+    Content,
 }
 
 @Stable
@@ -67,7 +67,7 @@ internal fun colorsFromSeed(
         ThemePaletteStyle.TonalSpot,
         ThemePaletteStyle.Neutral,
         ThemePaletteStyle.Vibrant,
-        ThemePaletteStyle.Expressive
+        ThemePaletteStyle.Expressive,
     )
 
     // Gracefully downgrade to SPEC_2021 if the style doesn't support SPEC_2025
@@ -80,61 +80,69 @@ internal fun colorsFromSeed(
     val hctColor = Hct.fromInt(seed.toArgb())
     val scheme: DynamicScheme = when (paletteStyle) {
         ThemePaletteStyle.TonalSpot -> SchemeTonalSpot(sourceColorHct = hctColor, isDark = dark, contrastLevel = 0.0, specVersion = internalSpec, platform = DynamicScheme.Platform.PHONE)
+
         ThemePaletteStyle.Neutral -> SchemeNeutral(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Vibrant -> SchemeVibrant(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Expressive -> SchemeExpressive(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Rainbow -> SchemeRainbow(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.FruitSalad -> SchemeFruitSalad(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Monochrome -> SchemeMonochrome(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Fidelity -> SchemeFidelity(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
+
         ThemePaletteStyle.Content -> SchemeContent(
             sourceColorHct = hctColor,
             isDark = dark,
             contrastLevel = 0.0,
             specVersion = internalSpec,
-            platform = DynamicScheme.Platform.PHONE
+            platform = DynamicScheme.Platform.PHONE,
         )
     }
     val roles = MonetRoles(
@@ -198,7 +206,7 @@ class ThemeController(
     lightColors: Colors = lightColorScheme(),
     darkColors: Colors = darkColorScheme(),
     keyColor: Color? = null,
-    colorSpec:ThemeColorSpec = ThemeColorSpec.Spec2021,
+    colorSpec: ThemeColorSpec = ThemeColorSpec.Spec2021,
     paletteStyle: ThemePaletteStyle = ThemePaletteStyle.TonalSpot,
     isDark: Boolean? = null,
 ) {

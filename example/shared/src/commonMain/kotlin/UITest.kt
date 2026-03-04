@@ -301,7 +301,7 @@ private fun Home(
                 colorMode = colorMode,
                 paletteStyle = paletteStyle,
                 seedIndex = seedIndex,
-                colorSpec=colorSpec,
+                colorSpec = colorSpec,
                 snackbarHostState = snackbarHostState,
                 padding = padding,
             )
