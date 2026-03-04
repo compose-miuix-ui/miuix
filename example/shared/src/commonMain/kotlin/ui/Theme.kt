@@ -20,21 +20,8 @@ fun AppTheme(
     colorSpec: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    val spec = when (colorSpec) {
-        1 -> ThemeColorSpec.Spec2025
-        else -> ThemeColorSpec.Spec2021
-    }
-    val style = when (paletteStyle) {
-        0 -> ThemePaletteStyle.TonalSpot
-        1 -> ThemePaletteStyle.Neutral
-        2 -> ThemePaletteStyle.Vibrant
-        3 -> ThemePaletteStyle.Expressive
-        4 -> ThemePaletteStyle.Rainbow
-        5 -> ThemePaletteStyle.FruitSalad
-        6 -> ThemePaletteStyle.Monochrome
-        7 -> ThemePaletteStyle.Fidelity
-        else -> ThemePaletteStyle.Content
-    }
+    val spec = ThemeColorSpec.entries.getOrNull(colorSpec) ?: ThemeColorSpec.Spec2021
+    val style = ThemePaletteStyle.entries.getOrNull(paletteStyle) ?: ThemePaletteStyle.Content
     val controller = remember(colorMode, keyColor, spec, style) {
         when (colorMode) {
             1 -> ThemeController(ColorSchemeMode.Light)

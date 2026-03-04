@@ -26,6 +26,8 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.theme.ThemeColorSpec
+import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import kotlin.random.Random
@@ -186,10 +188,8 @@ fun SettingsContent(
     val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
     val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
     val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
-    val paletteStyleOptions = remember {
-        listOf("TonalSpot", "Neutral", "Vibrant", "Expressive", "Rainbow", "FruitSalad", "Monochrome", "Fidelity", "Content")
-    }
-    val colorSpecOptions = remember { listOf("SPEC_2021", "SPEC_2025") }
+    val paletteStyleOptions = remember { ThemePaletteStyle.entries.map { it.name } }
+    val colorSpecOptions = remember { ThemeColorSpec.entries.map { it.name } }
     val keyColorOptions = remember { listOf("Default") + ui.KeyColors.map { it.first } }
 
     LazyColumn(
@@ -318,7 +318,7 @@ fun SettingsContent(
                     selectedIndex = colorMode.value,
                     onSelectedIndexChange = { colorMode.value = it },
                 )
-                AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5)) {
+                AnimatedVisibility(visible = colorMode.value in 3..5) {
                     SuperDropdown(
                         title = "Key Color",
                         items = keyColorOptions,
@@ -326,7 +326,7 @@ fun SettingsContent(
                         onSelectedIndexChange = { seedIndex.value = it },
                     )
                 }
-                AnimatedVisibility(visible = colorMode.value in listOf(3, 4, 5) && seedIndex.value > 0) {
+                AnimatedVisibility(visible = colorMode.value in 3..5 && seedIndex.value > 0) {
                     Column {
                         SuperDropdown(
                             title = "Palette Style",

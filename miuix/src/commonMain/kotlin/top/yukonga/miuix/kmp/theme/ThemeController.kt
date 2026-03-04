@@ -63,12 +63,15 @@ internal fun colorsFromSeed(
     dark: Boolean,
 ): Colors {
     // Check if the selected style supports SPEC_2025
-    val isSpec2025Supported = paletteStyle in listOf(
+    val isSpec2025Supported = when (paletteStyle) {
         ThemePaletteStyle.TonalSpot,
         ThemePaletteStyle.Neutral,
         ThemePaletteStyle.Vibrant,
         ThemePaletteStyle.Expressive,
-    )
+        -> true
+
+        else -> false
+    }
 
     // Gracefully downgrade to SPEC_2021 if the style doesn't support SPEC_2025
     val internalSpec = if (colorSpec == ThemeColorSpec.Spec2025 && isSpec2025Supported) {
@@ -79,7 +82,13 @@ internal fun colorsFromSeed(
 
     val hctColor = Hct.fromInt(seed.toArgb())
     val scheme: DynamicScheme = when (paletteStyle) {
-        ThemePaletteStyle.TonalSpot -> SchemeTonalSpot(sourceColorHct = hctColor, isDark = dark, contrastLevel = 0.0, specVersion = internalSpec, platform = DynamicScheme.Platform.PHONE)
+        ThemePaletteStyle.TonalSpot -> SchemeTonalSpot(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE,
+        )
 
         ThemePaletteStyle.Neutral -> SchemeNeutral(
             sourceColorHct = hctColor,
@@ -194,9 +203,13 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  *   dark theme is selected.
  * @param keyColor The key color for generating dynamic color schemes. This is used when the
  *   [colorSchemeMode] is set to a Monet mode.
- * @param colorSpec The color specification version to use when generating dynamic color schemes. This
- *  is used when the [colorSchemeMode] is set to a Monet mode.
- * @param paletteStyle The palette style to use when generating dynamic color schemes.
+ * @param colorSpec The requested Material color specification to use when generating dynamic color
+ *   schemes in Monet modes. When [ThemeColorSpec.Spec2025] is requested, it is only honored for
+ *   palette styles whose underlying implementation supports the 2025 spec; otherwise, the effective
+ *   spec is downgraded to [ThemeColorSpec.Spec2021] at runtime by [colorsFromSeed].
+ * @param paletteStyle The palette style to use when generating dynamic color schemes. The selected
+ *   style determines whether [ThemeColorSpec.Spec2025] can be applied; if it is not supported, the
+ *   effective [colorSpec] will fall back to [ThemeColorSpec.Spec2021].
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */
