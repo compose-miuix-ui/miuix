@@ -67,8 +67,7 @@ internal fun colorsFromSeed(
         ThemePaletteStyle.TonalSpot,
         ThemePaletteStyle.Neutral,
         ThemePaletteStyle.Vibrant,
-        ThemePaletteStyle.Expressive,
-        -> true
+        ThemePaletteStyle.Expressive -> true
 
         else -> false
     }
