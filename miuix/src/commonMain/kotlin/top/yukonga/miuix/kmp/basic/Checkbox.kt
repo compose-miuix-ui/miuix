@@ -65,8 +65,6 @@ fun Checkbox(
 
     val transition = updateTransition(state, label = "CheckboxTransition")
 
-    // Retain State<T> references instead of dereferencing with `by`, so that animated value
-    // changes are observed in the draw phase only — avoiding recomposition on every frame.
     val backgroundColorState = transition.animateColor(
         transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
         label = "BackgroundColor",
