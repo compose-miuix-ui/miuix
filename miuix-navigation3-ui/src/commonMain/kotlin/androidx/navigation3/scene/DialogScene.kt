@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -57,14 +54,17 @@ internal class DialogScene<T : Any>(
                 dialogProperties == other.dialogProperties
     }
 
-    override fun hashCode(): Int = key.hashCode() * 31 +
-            previousEntries.hashCode() * 31 +
-            overlaidEntries.hashCode() * 31 +
-            entry.hashCode() * 31 +
-            dialogProperties.hashCode() * 31
+    override fun hashCode(): Int {
+        return key.hashCode() * 31 +
+                previousEntries.hashCode() * 31 +
+                overlaidEntries.hashCode() * 31 +
+                entry.hashCode() * 31 +
+                dialogProperties.hashCode() * 31
+    }
 
-    override fun toString(): String =
-        "DialogScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries, dialogProperties=$dialogProperties)"
+    override fun toString(): String {
+        return "DialogScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries, dialogProperties=$dialogProperties)"
+    }
 }
 
 /**
@@ -76,7 +76,7 @@ internal class DialogScene<T : Any>(
 class DialogSceneStrategy<T : Any> : SceneStrategy<T> {
 
     override fun SceneStrategyScope<T>.calculateScene(
-        entries: List<NavEntry<T>>,
+        entries: List<NavEntry<T>>
     ): Scene<T>? {
         val lastEntry = entries.lastOrNull()
         val dialogProperties = lastEntry?.metadata?.get(DialogKey)
@@ -106,7 +106,7 @@ class DialogSceneStrategy<T : Any> : SceneStrategy<T> {
          * @param dialogProperties properties that should be passed to the containing [Dialog].
          */
         fun dialog(
-            dialogProperties: DialogProperties = DialogProperties(),
+            dialogProperties: DialogProperties = DialogProperties()
         ): Map<String, Any> = metadata { put(DialogKey, dialogProperties) }
     }
 }

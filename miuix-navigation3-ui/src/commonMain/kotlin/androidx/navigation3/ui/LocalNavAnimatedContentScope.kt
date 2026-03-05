@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -36,6 +33,6 @@ val LocalNavAnimatedContentScope: ProvidableCompositionLocal<AnimatedContentScop
         throw IllegalStateException(
             "Unexpected access to LocalNavAnimatedContentScope. You should only " +
                     "access LocalNavAnimatedContentScope inside a NavEntry passed " +
-                    "to NavDisplay that is not in a OverlayScene.",
+                    "to NavDisplay that is not in a OverlayScene."
         )
     }

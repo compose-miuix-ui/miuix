@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -39,7 +36,7 @@ internal constructor(
      * callback allows you to bubble up that event to the [SceneState] /
      * [androidx.navigation3.ui.NavDisplay] that interfaces with the developer owned back stack.
      */
-    val onBack: () -> Unit,
+    val onBack: () -> Unit
 ) {
     /**
      * Construct a [SceneStrategyScope] suitable for calling [SceneStrategy] functions in isolation.
@@ -73,6 +70,12 @@ fun interface SceneStrategy<T : Any> {
      * [SceneStrategy]. For the returned [SceneStrategy], [calculateScene] will use the first
      * non-null result from the calculation.
      */
+    @Deprecated(
+        message =
+            "Deprecated in favor of List<SceneStrategy> APIs that take the output of this operator" +
+                    " has been refactored to take a list of strategies instead.",
+        level = DeprecationLevel.WARNING,
+    )
     infix fun then(sceneStrategy: SceneStrategy<T>): SceneStrategy<T> {
         val firstStrategy = this
         return SceneStrategy { entries ->

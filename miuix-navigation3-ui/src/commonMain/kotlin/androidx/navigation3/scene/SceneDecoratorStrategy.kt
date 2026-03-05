@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2026 The Android Open Source Project
  *
@@ -39,7 +36,7 @@ internal constructor(
      * callback allows you to bubble up that event to the [SceneState] /
      * [androidx.navigation3.ui.NavDisplay] that interfaces with the developer owned back stack.
      */
-    onBack: () -> Unit,
+    onBack: () -> Unit
 ) : SceneStrategyScope<T>(onBack) {
     /**
      * Construct a [SceneDecoratorStrategyScope] suitable for calling [SceneDecoratorStrategy]

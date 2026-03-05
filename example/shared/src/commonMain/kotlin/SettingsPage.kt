@@ -66,6 +66,14 @@ fun SettingsPage(
     enableScrollEndHaptic: Boolean,
     onScrollEndHapticChange: (Boolean) -> Unit,
     enableOverScroll: Boolean,
+    enableCornerClip: Boolean,
+    onEnableCornerClipChange: (Boolean) -> Unit,
+    enableDim: Boolean,
+    onEnableDimChange: (Boolean) -> Unit,
+    blockInputDuringTransition: Boolean,
+    onBlockInputDuringTransitionChange: (Boolean) -> Unit,
+    popDirectionFollowsSwipeEdge: Boolean,
+    onPopDirectionFollowsSwipeEdgeChange: (Boolean) -> Unit,
     isWideScreen: Boolean,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
@@ -130,6 +138,14 @@ fun SettingsPage(
             enableScrollEndHaptic = enableScrollEndHaptic,
             onScrollEndHapticChange = onScrollEndHapticChange,
             enableOverScroll = enableOverScroll,
+            enableCornerClip = enableCornerClip,
+            onEnableCornerClipChange = onEnableCornerClipChange,
+            enableDim = enableDim,
+            onEnableDimChange = onEnableDimChange,
+            blockInputDuringTransition = blockInputDuringTransition,
+            onBlockInputDuringTransitionChange = onBlockInputDuringTransitionChange,
+            popDirectionFollowsSwipeEdge = popDirectionFollowsSwipeEdge,
+            onPopDirectionFollowsSwipeEdgeChange = onPopDirectionFollowsSwipeEdgeChange,
             colorMode = colorMode,
             seedIndex = seedIndex,
             paletteStyle = paletteStyle,
@@ -174,6 +190,14 @@ fun SettingsContent(
     enableScrollEndHaptic: Boolean,
     onScrollEndHapticChange: (Boolean) -> Unit,
     enableOverScroll: Boolean,
+    enableCornerClip: Boolean,
+    onEnableCornerClipChange: (Boolean) -> Unit,
+    enableDim: Boolean,
+    onEnableDimChange: (Boolean) -> Unit,
+    blockInputDuringTransition: Boolean,
+    onBlockInputDuringTransitionChange: (Boolean) -> Unit,
+    popDirectionFollowsSwipeEdge: Boolean,
+    onPopDirectionFollowsSwipeEdgeChange: (Boolean) -> Unit,
     colorMode: MutableState<Int>,
     seedIndex: MutableState<Int>,
     paletteStyle: MutableState<Int>,
@@ -342,6 +366,34 @@ fun SettingsContent(
                         )
                     }
                 }
+            }
+            Card(
+                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+            ) {
+                SuperSwitch(
+                    title = "Enable Corner Clip",
+                    summary = "Clip the top scene with rounded corners during transitions",
+                    checked = enableCornerClip,
+                    onCheckedChange = onEnableCornerClipChange,
+                )
+                SuperSwitch(
+                    title = "Enable Dim",
+                    summary = "Dim the scene behind during transitions",
+                    checked = enableDim,
+                    onCheckedChange = onEnableDimChange,
+                )
+                SuperSwitch(
+                    title = "Block Input During Transition",
+                    summary = "Block touch input on the non-target scene",
+                    checked = blockInputDuringTransition,
+                    onCheckedChange = onBlockInputDuringTransitionChange,
+                )
+                SuperSwitch(
+                    title = "Pop Follows Swipe Edge",
+                    summary = "Pop animation direction follows the finger swipe edge",
+                    checked = popDirectionFollowsSwipeEdge,
+                    onCheckedChange = onPopDirectionFollowsSwipeEdgeChange,
+                )
             }
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),

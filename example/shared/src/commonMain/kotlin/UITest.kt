@@ -56,6 +56,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.NavDisplayTransitionEffects
 import kotlinx.coroutines.launch
 import navigation3.Navigator
 import navigation3.Route
@@ -129,6 +130,10 @@ data class UIState(
     val enableScrollEndHaptic: Boolean = true,
     val enableOverScroll: Boolean = true,
     val isWideScreen: Boolean = false,
+    val enableCornerClip: Boolean = true,
+    val enableDim: Boolean = true,
+    val blockInputDuringTransition: Boolean = true,
+    val popDirectionFollowsSwipeEdge: Boolean = false,
 )
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator found!") }
@@ -244,6 +249,12 @@ fun UITest(
         NavDisplay(
             entries = entries,
             onBack = { navigator.pop() },
+            transitionEffects = NavDisplayTransitionEffects(
+                enableCornerClip = uiState.enableCornerClip,
+                dimAmount = if (uiState.enableDim) 0.5f else 0f,
+                blockInputDuringTransition = uiState.blockInputDuringTransition,
+                popDirectionFollowsSwipeEdge = uiState.popDirectionFollowsSwipeEdge,
+            ),
         )
     }
 
@@ -700,6 +711,14 @@ fun AppPager(
                     enableScrollEndHaptic = uiState.enableScrollEndHaptic,
                     onScrollEndHapticChange = { onUiStateChange(uiState.copy(enableScrollEndHaptic = it)) },
                     enableOverScroll = uiState.enableOverScroll,
+                    enableCornerClip = uiState.enableCornerClip,
+                    onEnableCornerClipChange = { onUiStateChange(uiState.copy(enableCornerClip = it)) },
+                    enableDim = uiState.enableDim,
+                    onEnableDimChange = { onUiStateChange(uiState.copy(enableDim = it)) },
+                    blockInputDuringTransition = uiState.blockInputDuringTransition,
+                    onBlockInputDuringTransitionChange = { onUiStateChange(uiState.copy(blockInputDuringTransition = it)) },
+                    popDirectionFollowsSwipeEdge = uiState.popDirectionFollowsSwipeEdge,
+                    onPopDirectionFollowsSwipeEdgeChange = { onUiStateChange(uiState.copy(popDirectionFollowsSwipeEdge = it)) },
                     isWideScreen = uiState.isWideScreen,
                     colorMode = colorMode,
                     seedIndex = seedIndex,

@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *

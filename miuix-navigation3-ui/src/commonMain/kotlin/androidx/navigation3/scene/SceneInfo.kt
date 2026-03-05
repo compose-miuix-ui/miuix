@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -43,7 +40,11 @@ class SceneInfo<T : Any>(val scene: Scene<T>) : NavigationEventInfo() {
         return scene == other.scene
     }
 
-    override fun hashCode(): Int = scene.hashCode()
+    override fun hashCode(): Int {
+        return scene.hashCode()
+    }
 
-    override fun toString(): String = "SceneInfo(scene=$scene)"
+    override fun toString(): String {
+        return "SceneInfo(scene=$scene)"
+    }
 }

@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -43,12 +40,16 @@ internal data class SinglePaneScene<T : Any>(
                 entries == other.entries
     }
 
-    override fun hashCode(): Int = key.hashCode() * 31 +
-            entry.hashCode() * 31 +
-            previousEntries.hashCode() * 31 +
-            entries.hashCode() * 31
+    override fun hashCode(): Int {
+        return key.hashCode() * 31 +
+                entry.hashCode() * 31 +
+                previousEntries.hashCode() * 31 +
+                entries.hashCode() * 31
+    }
 
-    override fun toString(): String = "SinglePaneScene(key=$key, entry=$entry, previousEntries=$previousEntries, entries=$entries)"
+    override fun toString(): String {
+        return "SinglePaneScene(key=$key, entry=$entry, previousEntries=$previousEntries, entries=$entries)"
+    }
 }
 
 /**
@@ -57,23 +58,31 @@ internal data class SinglePaneScene<T : Any>(
  */
 class SinglePaneSceneStrategy<T : Any> : SceneStrategy<T> {
 
-    override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T> = SinglePaneScene(
-        key = entries.last().contentKey,
-        entry = entries.last(),
-        previousEntries = entries.dropLast(1),
-    )
-
-    override fun equals(other: Any?): Boolean = other is SinglePaneSceneStrategy<*>
-    override fun hashCode(): Int = this::class.hashCode()
+    override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T> {
+        return SinglePaneScene(
+            key = entries.last().contentKey,
+            entry = entries.last(),
+            previousEntries = entries.dropLast(1),
+        )
+    }
 }
 
-internal fun <T : Any> SceneStrategy<T>.calculateSceneWithSinglePaneFallback(
+internal fun <T : Any> calculateSceneWithSinglePaneFallback(
+    sceneStrategies: List<SceneStrategy<T>>,
     scope: SceneStrategyScope<T>,
     entries: List<NavEntry<T>>,
-): Scene<T> = scope.calculateScene(entries)
-    ?: with(SinglePaneSceneStrategy<T>()) { scope.calculateScene(entries) }
+): Scene<T> {
+    var scene: Scene<T>? = null
+    for (index in sceneStrategies.indices) {
+        scene = with(sceneStrategies[index]) { scope.calculateScene(entries) }
+        if (scene != null) break
+    }
+    return scene ?: with(SinglePaneSceneStrategy<T>()) { scope.calculateScene(entries) }
+}
 
 internal fun <T : Any> SceneDecoratorStrategy<T>.decorateScene(
     scope: SceneDecoratorStrategyScope<T>,
     scene: Scene<T>,
-): Scene<T> = scope.decorateScene(scene)
+): Scene<T> {
+    return scope.decorateScene(scene)
+}
