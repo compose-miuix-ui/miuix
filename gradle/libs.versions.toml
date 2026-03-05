@@ -12,7 +12,7 @@ jetbrains-compose-multiplatform = "1.10.1"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.2.0-Beta"
 jetbrains-compose-hotReload = "1.0.0"
-jetbrains-lifecycle = "2.10.0-alpha08"
+jetbrains-lifecycle = "2.10.0-beta01"
 materialKolor-utilities = "4.1.1"
 spotless = "8.3.0"
 
