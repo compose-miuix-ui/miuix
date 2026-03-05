@@ -369,7 +369,6 @@ fun BasicComponent(
                 val endPlaceable = endMeasurable?.measure(
                     constraints.copy(minWidth = 0, maxWidth = targetEnd),
                 )
-                endPlaceable?.width ?: 0
                 val endHeight = endPlaceable?.height ?: 0
 
                 val rowHeight = maxOf(startHeight, centerPlaceable.height, endHeight)
