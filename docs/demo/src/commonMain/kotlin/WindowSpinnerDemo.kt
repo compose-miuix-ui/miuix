@@ -34,7 +34,7 @@ fun WindowSpinnerDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
+            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
         contentAlignment = Alignment.Center,
     ) {
         Column(
