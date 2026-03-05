@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -37,15 +34,48 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
  *
  * @param entries all of the entries that are associated with this state
  * @param sceneStrategy the [SceneStrategy] to determine which scene to render a list of entries.
- * @param sceneDecoratorStrategies list of [SceneDecoratorStrategy] to add content to the scene.
- * @param sharedTransitionScope the [SharedTransitionScope] needed to wrap the scene decorator. If
- *   this parameter is added, this function will require the [LocalNavAnimatedContentScope].
  * @param onBack a callback for handling system back press.
+ * @sample androidx.navigation3.scene.samples.SceneStateSample
  */
+@Deprecated(
+    message =
+        "Deprecated in favor of rememberSceneState that supports sharedTransitionScope, " +
+                "sceneDecoratorStrategies, and list of SceneStrategies",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 fun <T : Any> rememberSceneState(
     entries: List<NavEntry<T>>,
     sceneStrategy: SceneStrategy<T>,
+    onBack: () -> Unit,
+): SceneState<T> {
+    return rememberSceneState(
+        entries = entries,
+        sceneStrategies = listOf(sceneStrategy),
+        sharedTransitionScope = null,
+        onBack = onBack,
+    )
+}
+
+/**
+ * Returns a [SceneState] that is remembered across compositions based on the parameters.
+ *
+ * This calculates all of the scenes and provides them in a [SceneState].
+ *
+ * @param entries all of the entries that are associated with this state
+ * @param sceneStrategies the list of [SceneStrategy] to determine which scene to render a list of
+ *   entries.
+ * @param sceneDecoratorStrategies list of [SceneDecoratorStrategy] to add content to the scene.
+ * @param sharedTransitionScope the [SharedTransitionScope] needed to wrap the scene decorator. If
+ *   this parameter is added, this function will require the
+ *   [androidx.navigation3.ui.LocalNavAnimatedContentScope].
+ * @param onBack a callback for handling system back press.
+ * @sample androidx.navigation3.scene.samples.SceneStateSample
+ */
+@Composable
+fun <T : Any> rememberSceneState(
+    entries: List<NavEntry<T>>,
+    sceneStrategies: List<SceneStrategy<T>>,
     sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>> = emptyList(),
     sharedTransitionScope: SharedTransitionScope? = null,
     onBack: () -> Unit,
@@ -60,34 +90,30 @@ fun <T : Any> rememberSceneState(
     // - SceneSetupNavEntryDecorator to ensure all the ensures are inside of a moveable content
     // - BackStackAwareLifecycleNavEntryDecorator to ensure that the Lifecycle of entries that
     // are no longer on the back stack is capped at CREATED
-    val sceneSetupDecorator = rememberSceneSetupNavEntryDecorator<T>()
-    val lifecycleDecorator = rememberBackStackAwareLifecycleNavEntryDecorator(entries)
-    val entryDecorators = remember(sharedElementDecorator, sceneSetupDecorator, lifecycleDecorator) {
-        listOfNotNull(
-            sharedElementDecorator,
-            sceneSetupDecorator,
-            lifecycleDecorator,
-        )
-    }
     val decoratedEntries =
         rememberDecoratedNavEntries(
             entries,
-            entryDecorators,
+            listOfNotNull(
+                sharedElementDecorator,
+                rememberSceneSetupNavEntryDecorator(),
+                rememberBackStackAwareLifecycleNavEntryDecorator(entries),
+            ),
         )
 
-    return remember(sceneStrategy, decoratedEntries) {
+    @Suppress("ListIterator")
+    return remember(sceneStrategies.toList(), decoratedEntries) {
         val scope =
             SceneDecoratorStrategyScope<T>(
                 // `currentOnBack` invokes the *latest* `onBack` lambda. The outer
                 // `remember` block intentionally skips `onBack` as a key to avoid
                 // recalculating all scenes when just the `onBack` instance changes.
-                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() },
+                onBack = @Suppress("UnnecessaryLambdaCreation") { currentOnBack() }
             )
 
         // Calculate the single scene based on the sceneStrategy and start the list there.
         val allScenes =
             mutableListOf(
-                provideScene(scope, decoratedEntries, sceneStrategy, sceneDecoratorStrategies),
+                provideScene(scope, decoratedEntries, sceneStrategies, sceneDecoratorStrategies)
             )
 
         // find all of the OverlayScenes
@@ -102,7 +128,7 @@ fun <T : Any> rememberSceneState(
                 }
                 // Keep added scenes to the end of our list until we find a non-overlay scene
                 allScenes +=
-                    provideScene(scope, overlaidEntries, sceneStrategy, sceneDecoratorStrategies)
+                    provideScene(scope, overlaidEntries, sceneStrategies, sceneDecoratorStrategies)
             }
         } while (overlaidEntries != null)
 
@@ -122,7 +148,7 @@ fun <T : Any> rememberSceneState(
                 // the list
                 previousScenes.add(
                     index = 0,
-                    provideScene(scope, previousEntries, sceneStrategy, sceneDecoratorStrategies),
+                    provideScene(scope, previousEntries, sceneStrategies, sceneDecoratorStrategies),
                 )
             }
         } while (!previousEntries.isNullOrEmpty())
@@ -165,21 +191,26 @@ internal constructor(
                 previousScenes == other.previousScenes
     }
 
-    override fun hashCode(): Int = entries.hashCode() * 31 +
-            overlayScenes.hashCode() * 31 +
-            currentScene.hashCode() * 31 +
-            previousScenes.hashCode() * 31
+    override fun hashCode(): Int {
+        return entries.hashCode() * 31 +
+                overlayScenes.hashCode() * 31 +
+                currentScene.hashCode() * 31 +
+                previousScenes.hashCode() * 31
+    }
 
-    override fun toString(): String = "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
+    override fun toString(): String {
+        return "SceneState(entries=$entries, overlayScenes=$overlayScenes, currentScene=$currentScene, previousScenes=$previousScenes)"
+    }
 }
 
 private fun <T : Any> provideScene(
     scope: SceneDecoratorStrategyScope<T>,
     decoratedEntries: List<NavEntry<T>>,
-    sceneStrategy: SceneStrategy<T>,
+    sceneStrategies: List<SceneStrategy<T>>,
     sceneDecorators: List<SceneDecoratorStrategy<T>>,
-): Scene<T> = sceneDecorators.fastFold(
-    sceneStrategy.calculateSceneWithSinglePaneFallback(scope, decoratedEntries),
-) { scene, decoratorStrategy ->
-    scene as? OverlayScene ?: decoratorStrategy.decorateScene(scope, scene)
-}
+): Scene<T> =
+    sceneDecorators.fastFold(
+        calculateSceneWithSinglePaneFallback(sceneStrategies, scope, decoratedEntries)
+    ) { scene, decoratorStrategy ->
+        scene as? OverlayScene ?: decoratorStrategy.decorateScene(scope, scene)
+    }

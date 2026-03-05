@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -41,7 +38,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
  */
 @Composable
 internal fun <T : Any> rememberBackStackAwareLifecycleNavEntryDecorator(
-    entries: List<NavEntry<T>>,
+    entries: List<NavEntry<T>>
 ): NavEntryDecorator<T> {
     val updatedEntries by rememberUpdatedState(entries)
     return remember {

@@ -1,6 +1,3 @@
-// Copyright 2026, compose-miuix-ui contributors
-// SPDX-License-Identifier: Apache-2.0
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -32,35 +29,38 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 /** Returns a [SharedEntryInSceneNavEntryDecorator] that is remembered across recompositions. */
 @Composable
 internal fun <T : Any> rememberSharedEntryInSceneNavEntryDecorator(
-    sharedTransitionScope: SharedTransitionScope,
-): SharedEntryInSceneNavEntryDecorator<T> = remember(sharedTransitionScope) { SharedEntryInSceneNavEntryDecorator(sharedTransitionScope) }
+    sharedTransitionScope: SharedTransitionScope
+): SharedEntryInSceneNavEntryDecorator<T> =
+    remember(sharedTransitionScope) { SharedEntryInSceneNavEntryDecorator(sharedTransitionScope) }
 
 /**
- * A [NavEntryDecorator] that wraps each entry in a [Modifier.sharedElement] to allow nav displays
- * to animate arbitrarily place entries in different places in the composable call hierarchy.
+ * A [NavEntryDecorator] that wraps each entry in a
+ * [androidx.compose.animation.SharedTransitionScope.sharedElement] to allow nav displays to animate
+ * arbitrarily place entries in different places in the composable call hierarchy.
  *
  * This should be wrapped around the [SceneSetupNavEntryDecorator].
  */
 internal class SharedEntryInSceneNavEntryDecorator<T : Any>(
-    sharedTransitionScope: SharedTransitionScope,
-) : NavEntryDecorator<T>(
-    decorate = { entry ->
-        val currentScene = LocalCurrentScene.current
-        if (currentScene != null && currentScene !is OverlayScene<*>) {
-            with(sharedTransitionScope) {
-                Box(
-                    Modifier.sharedElement(
-                        rememberSharedContentState(entry.contentKey),
-                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                    ),
-                ) {
-                    entry.Content()
+    sharedTransitionScope: SharedTransitionScope
+) :
+    NavEntryDecorator<T>(
+        decorate = { entry ->
+            val currentScene = LocalCurrentScene.current
+            if (currentScene != null && currentScene !is OverlayScene<*>) {
+                with(sharedTransitionScope) {
+                    Box(
+                        Modifier.sharedElement(
+                            rememberSharedContentState(entry.contentKey),
+                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                        )
+                    ) {
+                        entry.Content()
+                    }
                 }
+            } else {
+                entry.Content()
             }
-        } else {
-            entry.Content()
         }
-    },
-)
+    )
 
 internal val LocalCurrentScene: ProvidableCompositionLocal<Scene<*>?> = compositionLocalOf { null }
