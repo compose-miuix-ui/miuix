@@ -353,16 +353,27 @@ object CheckboxDefaults {
         uncheckedBackgroundColor: Color = MiuixTheme.colorScheme.secondary,
         disabledCheckedBackgroundColor: Color = MiuixTheme.colorScheme.disabledPrimary,
         disabledUncheckedBackgroundColor: Color = MiuixTheme.colorScheme.disabledSecondary,
-    ): CheckboxColors = CheckboxColors(
-        checkedForegroundColor = checkedForegroundColor,
-        uncheckedForegroundColor = uncheckedForegroundColor,
-        disabledCheckedForegroundColor = disabledCheckedForegroundColor,
-        disabledUncheckedForegroundColor = disabledUncheckedForegroundColor,
-        checkedBackgroundColor = checkedBackgroundColor,
-        uncheckedBackgroundColor = uncheckedBackgroundColor,
-        disabledCheckedBackgroundColor = disabledCheckedBackgroundColor,
-        disabledUncheckedBackgroundColor = disabledUncheckedBackgroundColor,
-    )
+    ): CheckboxColors = remember(
+        checkedForegroundColor,
+        uncheckedForegroundColor,
+        disabledCheckedForegroundColor,
+        disabledUncheckedForegroundColor,
+        checkedBackgroundColor,
+        uncheckedBackgroundColor,
+        disabledCheckedBackgroundColor,
+        disabledUncheckedBackgroundColor,
+    ) {
+        CheckboxColors(
+            checkedForegroundColor = checkedForegroundColor,
+            uncheckedForegroundColor = uncheckedForegroundColor,
+            disabledCheckedForegroundColor = disabledCheckedForegroundColor,
+            disabledUncheckedForegroundColor = disabledUncheckedForegroundColor,
+            checkedBackgroundColor = checkedBackgroundColor,
+            uncheckedBackgroundColor = uncheckedBackgroundColor,
+            disabledCheckedBackgroundColor = disabledCheckedBackgroundColor,
+            disabledUncheckedBackgroundColor = disabledUncheckedBackgroundColor,
+        )
+    }
 }
 
 @Immutable

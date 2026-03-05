@@ -1387,16 +1387,27 @@ object SliderDefaults {
         disabledThumbColor: Color = MiuixTheme.colorScheme.disabledOnPrimary,
         keyPointColor: Color = MiuixTheme.colorScheme.sliderKeyPoint,
         keyPointForegroundColor: Color = MiuixTheme.colorScheme.sliderKeyPointForeground,
-    ): SliderColors = SliderColors(
-        foregroundColor = foregroundColor,
-        disabledForegroundColor = disabledForegroundColor,
-        backgroundColor = backgroundColor,
-        disabledBackgroundColor = disabledBackgroundColor,
-        thumbColor = thumbColor,
-        disabledThumbColor = disabledThumbColor,
-        keyPointColor = keyPointColor,
-        keyPointForegroundColor = keyPointForegroundColor,
-    )
+    ): SliderColors = remember(
+        foregroundColor,
+        disabledForegroundColor,
+        backgroundColor,
+        disabledBackgroundColor,
+        thumbColor,
+        disabledThumbColor,
+        keyPointColor,
+        keyPointForegroundColor,
+    ) {
+        SliderColors(
+            foregroundColor = foregroundColor,
+            disabledForegroundColor = disabledForegroundColor,
+            backgroundColor = backgroundColor,
+            disabledBackgroundColor = disabledBackgroundColor,
+            thumbColor = thumbColor,
+            disabledThumbColor = disabledThumbColor,
+            keyPointColor = keyPointColor,
+            keyPointForegroundColor = keyPointForegroundColor,
+        )
+    }
 }
 
 @Immutable

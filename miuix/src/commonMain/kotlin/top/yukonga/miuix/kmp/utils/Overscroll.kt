@@ -147,6 +147,8 @@ private class OverscrollNode(
 
     private var rawTouchAccumulation = 0f
     private var scrollRange: Float = 0f
+    private var cachedScrollRangeDensity: Density? = null
+    private var cachedScrollRangeWindowInfo: WindowInfo? = null
 
     override fun onAttach() {
         super.onAttach()
@@ -177,11 +179,16 @@ private class OverscrollNode(
     }
 
     private fun updateScrollRange() {
-        scrollRange = with(density) {
+        val currentDensity = density
+        val currentWindowInfo = windowInfo
+        if (currentDensity == cachedScrollRangeDensity && currentWindowInfo == cachedScrollRangeWindowInfo) return
+        cachedScrollRangeDensity = currentDensity
+        cachedScrollRangeWindowInfo = currentWindowInfo
+        scrollRange = with(currentDensity) {
             if (isVertical) {
-                windowInfo.containerDpSize.height.toPx()
+                currentWindowInfo.containerDpSize.height.toPx()
             } else {
-                windowInfo.containerDpSize.width.toPx()
+                currentWindowInfo.containerDpSize.width.toPx()
             }
         }
     }

@@ -191,10 +191,12 @@ object CardDefaults {
     fun defaultColors(
         color: Color = MiuixTheme.colorScheme.surfaceContainer,
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-    ): CardColors = CardColors(
-        color = color,
-        contentColor = contentColor,
-    )
+    ): CardColors = remember(color, contentColor) {
+        CardColors(
+            color = color,
+            contentColor = contentColor,
+        )
+    }
 }
 
 @Immutable

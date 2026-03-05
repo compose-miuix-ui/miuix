@@ -117,10 +117,16 @@ object SuperArrowDefaults {
      * The default color of the arrow.
      */
     @Composable
-    fun endActionColors() = EndActionColors(
-        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-        disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-    )
+    fun endActionColors(): EndActionColors {
+        val color = MiuixTheme.colorScheme.onSurfaceVariantActions
+        val disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        return remember(color, disabledColor) {
+            EndActionColors(
+                color = color,
+                disabledColor = disabledColor,
+            )
+        }
+    }
 }
 
 @Immutable

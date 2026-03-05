@@ -404,10 +404,12 @@ object SnackbarDefaults {
         contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
         actionContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainerHighest,
         dismissActionContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-    ): SnackbarColors = SnackbarColors(
-        containerColor = containerColor,
-        contentColor = contentColor,
-        actionContentColor = actionContentColor,
-        dismissActionContentColor = dismissActionContentColor,
-    )
+    ): SnackbarColors = remember(containerColor, contentColor, actionContentColor, dismissActionContentColor) {
+        SnackbarColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            actionContentColor = actionContentColor,
+            dismissActionContentColor = dismissActionContentColor,
+        )
+    }
 }
