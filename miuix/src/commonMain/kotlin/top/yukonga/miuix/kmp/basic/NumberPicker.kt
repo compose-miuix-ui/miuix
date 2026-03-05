@@ -33,6 +33,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,7 +55,7 @@ import kotlin.math.roundToInt
  * A vertical scroll picker that displays a range of numbers with the selected value centered.
  * Items fade out and scale down as they move away from the center.
  *
- * @param value The current selected value. Must be within [range].
+ * @param value The current selected value. If outside [range], it will be coerced into the range.
  * @param onValueChange The callback invoked when the selected value changes.
  * @param modifier The modifier to be applied to the [NumberPicker].
  * @param enabled Whether the [NumberPicker] is enabled for user interaction.
@@ -75,7 +79,7 @@ fun NumberPicker(
     wrapAround: Boolean = false,
     colors: NumberPickerColors = NumberPickerDefaults.colors(),
     textStyle: TextStyle = MiuixTheme.textStyles.title1,
-    itemHeight: Dp = NumberPickerDefaults.itemHeight,
+    itemHeight: Dp = NumberPickerDefaults.ItemHeight,
 ) {
     require(visibleItemCount % 2 == 1 && visibleItemCount >= 3) {
         "visibleItemCount must be odd and at least 3, but was $visibleItemCount"
@@ -96,6 +100,7 @@ fun NumberPicker(
     // Fling/snap animated offset
     val flingAnimatable = remember { Animatable(0f) }
     var isDragging by remember { mutableStateOf(false) }
+    var isUserScrolling by remember { mutableStateOf(false) }
     var itemHeightPx by remember { mutableIntStateOf(0) }
 
     // Total offset combines drag + fling
@@ -128,7 +133,9 @@ fun NumberPicker(
             .distinctUntilChanged()
             .collect { index ->
                 if (index != lastHapticIndex) {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    if (isUserScrolling) {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
                     lastHapticIndex = index
                 }
             }
@@ -150,11 +157,16 @@ fun NumberPicker(
         }
     }
 
+    val displayValue = label(coercedValue)
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(totalHeight)
             .clipToBounds()
+            .semantics {
+                role = Role.Image
+                contentDescription = "$displayValue, ${range.first} - ${range.last}"
+            }
             .onSizeChanged { size ->
                 itemHeightPx = size.height / visibleItemCount
             }
@@ -170,6 +182,7 @@ fun NumberPicker(
                             dragOffset += flingAnimatable.value
                             flingAnimatable.snapTo(0f)
                             isDragging = true
+                            isUserScrolling = true
                         },
                         onDragStopped = { velocity ->
                             isDragging = false
@@ -207,6 +220,7 @@ fun NumberPicker(
                                 if (newValue != coercedValue) {
                                     currentOnValueChange(newValue)
                                 }
+                                isUserScrolling = false
                                 flingAnimatable.snapTo(0f)
                             }
                         },
@@ -273,7 +287,7 @@ fun NumberPicker(
  */
 object NumberPickerDefaults {
 
-    val itemHeight = 45.dp
+    val ItemHeight = 45.dp
 
     /**
      * Creates the default [NumberPickerColors] for a [NumberPicker].

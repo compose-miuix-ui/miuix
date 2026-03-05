@@ -60,7 +60,7 @@ NumberPicker(
 
 | 属性名           | 类型               | 说明                                                 | 默认值                           | 是否必须 |
 | ---------------- | ------------------ | ---------------------------------------------------- | -------------------------------- | -------- |
-| value            | Int                | 当前选中的值，必须在 range 范围内                    | -                                | 是       |
+| value            | Int                | 当前选中的值，超出 range 时会自动修正                | -                                | 是       |
 | onValueChange    | (Int) -> Unit      | 选中值变化时的回调函数                               | -                                | 是       |
 | modifier         | Modifier           | 应用于选择器的修饰符                                 | Modifier                         | 否       |
 | enabled          | Boolean            | 是否启用用户交互                                     | true                             | 否       |
@@ -70,7 +70,7 @@ NumberPicker(
 | wrapAround       | Boolean            | 是否启用循环滚动（无限滚动）                         | false                            | 否       |
 | colors           | NumberPickerColors | 选择器的颜色配置                                     | NumberPickerDefaults.colors()    | 否       |
 | textStyle        | TextStyle          | 选择器项目的文本样式                                 | MiuixTheme.textStyles.title1     | 否       |
-| itemHeight       | Dp                 | 每个项目的高度                                       | NumberPickerDefaults.itemHeight   | 否       |
+| itemHeight       | Dp                 | 每个项目的高度                                       | NumberPickerDefaults.ItemHeight   | 否       |
 
 ### NumberPickerDefaults 对象
 
@@ -80,7 +80,7 @@ NumberPickerDefaults 对象提供了 NumberPicker 组件的默认配置。
 
 | 属性名     | 类型 | 说明                 | 默认值  |
 | ---------- | ---- | -------------------- | ------- |
-| itemHeight | Dp   | 每个项目的默认高度   | 45.dp   |
+| ItemHeight | Dp   | 每个项目的默认高度   | 45.dp   |
 
 #### 方法
 

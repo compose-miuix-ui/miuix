@@ -1,4 +1,4 @@
-// Copyright 2026, compose-miuix-ui contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package androidx.navigation3.ui

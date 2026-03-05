@@ -1,4 +1,4 @@
-// Copyright 2026, compose-miuix-ui contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.layout.PaddingValues

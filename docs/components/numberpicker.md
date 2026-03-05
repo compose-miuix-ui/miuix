@@ -60,7 +60,7 @@ NumberPicker(
 
 | Property Name    | Type               | Description                                                              | Default Value              | Required |
 | ---------------- | ------------------ | ------------------------------------------------------------------------ | -------------------------- | -------- |
-| value            | Int                | Current selected value. Must be within range                             | -                          | Yes      |
+| value            | Int                | Current selected value. If outside range, it will be coerced             | -                          | Yes      |
 | onValueChange    | (Int) -> Unit      | Callback invoked when the selected value changes                         | -                          | Yes      |
 | modifier         | Modifier           | Modifier applied to the picker                                           | Modifier                   | No       |
 | enabled          | Boolean            | Whether the picker is enabled for user interaction                       | true                       | No       |
@@ -70,7 +70,7 @@ NumberPicker(
 | wrapAround       | Boolean            | Whether the picker wraps around (infinite scrolling)                     | false                      | No       |
 | colors           | NumberPickerColors | Color configuration of the picker                                        | NumberPickerDefaults.colors() | No       |
 | textStyle        | TextStyle          | Text style for picker items                                              | MiuixTheme.textStyles.title1 | No       |
-| itemHeight       | Dp                 | The height of each item in the picker                                    | NumberPickerDefaults.itemHeight | No       |
+| itemHeight       | Dp                 | The height of each item in the picker                                    | NumberPickerDefaults.ItemHeight | No       |
 
 ### NumberPickerDefaults Object
 
@@ -80,7 +80,7 @@ The NumberPickerDefaults object provides default configurations for the NumberPi
 
 | Property Name | Type | Description                     | Default Value |
 | ------------- | ---- | ------------------------------- | ------------- |
-| itemHeight    | Dp   | Default height of each item     | 45.dp         |
+| ItemHeight    | Dp   | Default height of each item     | 45.dp         |
 
 #### Methods
 
