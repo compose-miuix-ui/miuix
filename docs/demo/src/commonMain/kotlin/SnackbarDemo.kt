@@ -1,4 +1,4 @@
-// Copyright 2026, compose-miuix-ui contributors
+// Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
@@ -39,7 +39,7 @@ fun SnackbarDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xfff77062), Color(0xfffe5196)))),
+            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
         contentAlignment = Alignment.Center,
     ) {
         Column(

@@ -30,6 +30,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [Switch](../components/switch)                             | Binary state toggle control                | Setting switches, feature enabling    |
 | [Checkbox](../components/checkbox)                         | Multiple selection control                 | Multiple choices, terms agreement     |
 | [Slider](../components/slider)                             | Sliding control for value adjustment       | Volume control, range selection       |
+| [NumberPicker](../components/numberpicker)                 | Vertical scroll picker for number selection | Time picker, quantity selection       |
 | [ProgressIndicator](../components/progressindicator)       | Displays operation progress status         | Loading, progress display             |
 | [Snackbar](../components/snackbar)                         | Temporary message bar for brief feedback   | Operation result, status notification |
 | [Icon](../components/icon)                                 | Icon display component                     | Icon buttons, status indicators       |

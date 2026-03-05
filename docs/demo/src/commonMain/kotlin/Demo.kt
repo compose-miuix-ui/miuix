@@ -58,6 +58,7 @@ private val availableComponents = listOf(
     AvailableComponent("Switch", "switch") { SwitchDemo() },
     AvailableComponent("Checkbox", "checkbox") { CheckboxDemo() },
     AvailableComponent("Slider", "slider") { SliderDemo() },
+    AvailableComponent("NumberPicker", "numberPicker") { NumberPickerDemo() },
     AvailableComponent("ProgressIndicator", "progressIndicator") { ProgressIndicatorDemo() },
     AvailableComponent("Snackbar", "snackbar") { SnackbarDemo() },
     AvailableComponent("Icon", "icon") { IconDemo() },

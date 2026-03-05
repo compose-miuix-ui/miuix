@@ -80,6 +80,7 @@ export default defineConfig({
                         { text: "Switch", link: "/zh_CN/components/switch" },
                         { text: "Checkbox", link: "/zh_CN/components/checkbox" },
                         { text: "Slider", link: "/zh_CN/components/slider" },
+                        { text: "NumberPicker", link: "/zh_CN/components/numberpicker" },
                         { text: "ProgressIndicator", link: "/zh_CN/components/progressindicator", },
                         { text: "Icon", link: "/zh_CN/components/icon" },
                         { text: "FloatingActionButton", link: "/zh_CN/components/floatingactionbutton", },

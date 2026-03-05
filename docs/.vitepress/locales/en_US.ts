@@ -71,6 +71,7 @@ export default defineConfig({
                         { text: "Switch", link: "/components/switch" },
                         { text: "Checkbox", link: "/components/checkbox" },
                         { text: "Slider", link: "/components/slider" },
+                        { text: "NumberPicker", link: "/components/numberpicker" },
                         { text: "ProgressIndicator", link: "/components/progressindicator", },
                         { text: "Icon", link: "/components/icon" },
                         { text: "FloatingActionButton", link: "/components/floatingactionbutton", },

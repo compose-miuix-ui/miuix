@@ -52,6 +52,7 @@ import top.yukonga.miuix.kmp.basic.ColorPicker
 import top.yukonga.miuix.kmp.basic.ColorSpace
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.NumberPicker
 import top.yukonga.miuix.kmp.basic.RangeSlider
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
@@ -697,6 +698,48 @@ fun LazyListScope.otherComponent(snackbarHostState: SnackbarHostState) {
                     )
                 },
             )
+        }
+    }
+
+    item(key = "numberPicker") {
+        SmallTitle(text = "NumberPicker")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            var hourValue by remember { mutableIntStateOf(16) }
+            var minuteValue by remember { mutableIntStateOf(30) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                NumberPicker(
+                    value = hourValue,
+                    onValueChange = { hourValue = it },
+                    range = 0..23,
+                    label = { it.toString().padStart(2, '0') },
+                    wrapAround = true,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = ":",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                NumberPicker(
+                    value = minuteValue,
+                    onValueChange = { minuteValue = it },
+                    range = 0..59,
+                    label = { it.toString().padStart(2, '0') },
+                    wrapAround = true,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 
