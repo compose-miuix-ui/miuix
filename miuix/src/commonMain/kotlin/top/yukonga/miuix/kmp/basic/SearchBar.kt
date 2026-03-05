@@ -203,7 +203,7 @@ fun InputField(
 
     val textColor = LocalContentColor.current
     val inputTextStyle = MiuixTheme.textStyles.main
-        .copy(fontWeight = FontWeight.Bold)
+        .copy(fontWeight = FontWeight.Medium)
         .merge(textStyle)
         .copy(color = textColor)
 
@@ -253,7 +253,7 @@ fun InputField(
                     ) {
                         Text(
                             text = labelText,
-                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold).merge(textStyle),
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium).merge(textStyle),
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
                         innerTextField()
