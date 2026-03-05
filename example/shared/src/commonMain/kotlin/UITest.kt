@@ -51,10 +51,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.adaptive.utils.shouldShowSplitPane
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.NavDisplayTransitionEffects
 import kotlinx.coroutines.launch
@@ -89,6 +89,7 @@ import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.FPSMonitor
+import utils.shouldShowSplitPane
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -243,6 +244,7 @@ fun UITest(
 
         val entries = rememberDecoratedNavEntries(
             backStack = backStack,
+            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
             entryProvider = entryProvider,
         )
 

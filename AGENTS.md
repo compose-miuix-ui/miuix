@@ -69,7 +69,6 @@ The project uses a custom theming system found in `miuix.kmp.theme`. Components 
 The project uses **AndroidX Navigation 3** (alpha) ported to KMP. Key modules:
 
 - `miuix-navigation3-ui`: UI hosting logic.
-- `miuix-navigation3-adaptive`: Adaptive layouts (list-detail, etc.).
 
 ---
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import java.io.FileInputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.file.Files
@@ -31,9 +32,8 @@ val localPackageUrl = layout.buildDirectory.dir("repository/local")
 val miuixDescription = "A UI library for Compose Multiplatform"
 val miuixIconsDescription = "An extended icon library for Miuix"
 val miuixNavigation3UiDescription = "A navigation3 UI library for Miuix"
-val miuixNavigation3AdaptiveDescription = "A navigation3 adaptive library for Miuix"
 
-val localPropertiesFile = project.rootProject.file("local.properties")
+val localPropertiesFile: File = project.rootProject.file("local.properties")
 val localProperties = Properties()
 if (localPropertiesFile.exists()) {
     FileInputStream(localPropertiesFile).use { localProperties.load(it) }
@@ -70,7 +70,6 @@ publishing {
                 when (project.name) {
                     "miuix-icons" -> miuixIconsDescription
                     "miuix-navigation3-ui" -> miuixNavigation3UiDescription
-                    "miuix-navigation3-adaptive" -> miuixNavigation3AdaptiveDescription
                     else -> miuixDescription
                 }
             )
@@ -150,7 +149,7 @@ tasks.register("publishToMavenCentralUsingCentralApi") {
                     output.flush()
                 }
             }
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             val responseCodeDuringError = runCatching { connection.responseCode }.getOrElse { -1 }
             val errorBody = runCatching {
                 (connection.errorStream ?: connection.inputStream)?.bufferedReader()?.use { it.readText() }

@@ -9,8 +9,6 @@
 ```kotlin
 implementation("androidx.navigation3:navigation3-runtime:<navigation3-version>")
 implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
-// 可选：添加 miuix-navigation3-adaptive 以支持自适应布局
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-adaptive:<version>")
 ```
 
 ::: warning
@@ -57,27 +55,4 @@ fun App() {
         onBack = { backStack.removeLast() }
     )
 }
-```
-
-## 自适应布局支持
-
-`miuix-navigation3-adaptive` 为 Navigation3 提供了自适应布局策略，例如 `ListDetailSceneStrategy`。
-
-### 列表详情布局
-
-使用 `ListDetailSceneStrategy` 创建列表详情布局。
-
-```kotlin
-import androidx.navigation3.adaptive.rememberListDetailSceneStrategy
-
-val strategy = rememberListDetailSceneStrategy<NavKey> {
-    // 可选：如果需要，显式配置面板
-    // listPane { ... }
-}
-
-NavDisplay(
-    entries = entries,
-    sceneStrategy = strategy,
-    onBack = { backStack.removeLast() }
-)
 ```

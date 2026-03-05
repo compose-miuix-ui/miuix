@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package androidx.navigation3.adaptive.utils
+package utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity

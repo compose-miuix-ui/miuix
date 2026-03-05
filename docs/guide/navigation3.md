@@ -9,8 +9,6 @@ Add the dependency to your `build.gradle.kts`:
 ```kotlin
 implementation("androidx.navigation3:navigation3-runtime:<navigation3-version>")
 implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
-// Optional: Add miuix-navigation3-adaptive for navigation3 adaptive support
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-adaptive:<version>")
 ```
 
 ::: warning
@@ -57,27 +55,4 @@ fun App() {
         onBack = { backStack.removeLast() }
     )
 }
-```
-
-## Adaptive Support
-
-`miuix-navigation3-adaptive` provides adaptive layout strategies for Navigation3, such as `ListDetailSceneStrategy`.
-
-### List Detail Layout
-
-Use `ListDetailSceneStrategy` to create a list-detail layout.
-
-```kotlin
-import androidx.navigation3.adaptive.rememberListDetailSceneStrategy
-
-val strategy = rememberListDetailSceneStrategy<NavKey> {
-    // Optional: Configure panes explicitly if needed
-    // listPane { ... }
-}
-
-NavDisplay(
-    entries = entries,
-    sceneStrategy = strategy,
-    onBack = { backStack.removeLast() }
-)
 ```
