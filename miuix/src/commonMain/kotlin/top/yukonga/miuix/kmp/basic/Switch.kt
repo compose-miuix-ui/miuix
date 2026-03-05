@@ -231,16 +231,27 @@ object SwitchDefaults {
         uncheckedTrackColor: Color = MiuixTheme.colorScheme.secondary,
         disabledCheckedTrackColor: Color = MiuixTheme.colorScheme.disabledPrimary,
         disabledUncheckedTrackColor: Color = MiuixTheme.colorScheme.disabledSecondary,
-    ): SwitchColors = SwitchColors(
-        checkedThumbColor = checkedThumbColor,
-        uncheckedThumbColor = uncheckedThumbColor,
-        disabledCheckedThumbColor = disabledCheckedThumbColor,
-        disabledUncheckedThumbColor = disabledUncheckedThumbColor,
-        checkedTrackColor = checkedTrackColor,
-        uncheckedTrackColor = uncheckedTrackColor,
-        disabledCheckedTrackColor = disabledCheckedTrackColor,
-        disabledUncheckedTrackColor = disabledUncheckedTrackColor,
-    )
+    ): SwitchColors = remember(
+        checkedThumbColor,
+        uncheckedThumbColor,
+        disabledCheckedThumbColor,
+        disabledUncheckedThumbColor,
+        checkedTrackColor,
+        uncheckedTrackColor,
+        disabledCheckedTrackColor,
+        disabledUncheckedTrackColor,
+    ) {
+        SwitchColors(
+            checkedThumbColor = checkedThumbColor,
+            uncheckedThumbColor = uncheckedThumbColor,
+            disabledCheckedThumbColor = disabledCheckedThumbColor,
+            disabledUncheckedThumbColor = disabledUncheckedThumbColor,
+            checkedTrackColor = checkedTrackColor,
+            uncheckedTrackColor = uncheckedTrackColor,
+            disabledCheckedTrackColor = disabledCheckedTrackColor,
+            disabledUncheckedTrackColor = disabledUncheckedTrackColor,
+        )
+    }
 }
 
 @Immutable

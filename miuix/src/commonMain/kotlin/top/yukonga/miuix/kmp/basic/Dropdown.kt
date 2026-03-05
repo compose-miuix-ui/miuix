@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -223,12 +224,14 @@ object DropdownDefaults {
         containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
         selectedContentColor: Color = MiuixTheme.colorScheme.primary,
         selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-    ): DropdownColors = DropdownColors(
-        contentColor = contentColor,
-        containerColor = containerColor,
-        selectedContentColor = selectedContentColor,
-        selectedContainerColor = selectedContainerColor,
-    )
+    ): DropdownColors = remember(contentColor, containerColor, selectedContentColor, selectedContainerColor) {
+        DropdownColors(
+            contentColor = contentColor,
+            containerColor = containerColor,
+            selectedContentColor = selectedContentColor,
+            selectedContainerColor = selectedContainerColor,
+        )
+    }
 }
 
 object SpinnerDefaults {
@@ -241,15 +244,25 @@ object SpinnerDefaults {
         selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
         selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
         selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary,
-    ): SpinnerColors = SpinnerColors(
-        contentColor = contentColor,
-        summaryColor = summaryColor,
-        containerColor = containerColor,
-        selectedContentColor = selectedContentColor,
-        selectedSummaryColor = selectedSummaryColor,
-        selectedContainerColor = selectedContainerColor,
-        selectedIndicatorColor = selectedIndicatorColor,
-    )
+    ): SpinnerColors = remember(
+        contentColor,
+        summaryColor,
+        containerColor,
+        selectedContentColor,
+        selectedSummaryColor,
+        selectedContainerColor,
+        selectedIndicatorColor,
+    ) {
+        SpinnerColors(
+            contentColor = contentColor,
+            summaryColor = summaryColor,
+            containerColor = containerColor,
+            selectedContentColor = selectedContentColor,
+            selectedSummaryColor = selectedSummaryColor,
+            selectedContainerColor = selectedContainerColor,
+            selectedIndicatorColor = selectedIndicatorColor,
+        )
+    }
 
     @Composable
     fun dialogSpinnerColors(
@@ -260,15 +273,25 @@ object SpinnerDefaults {
         selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
         selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
         selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-    ): SpinnerColors = SpinnerColors(
-        contentColor = contentColor,
-        summaryColor = summaryColor,
-        containerColor = containerColor,
-        selectedContentColor = selectedContentColor,
-        selectedSummaryColor = selectedSummaryColor,
-        selectedContainerColor = selectedContainerColor,
-        selectedIndicatorColor = selectedIndicatorColor,
-    )
+    ): SpinnerColors = remember(
+        contentColor,
+        summaryColor,
+        containerColor,
+        selectedContentColor,
+        selectedSummaryColor,
+        selectedContainerColor,
+        selectedIndicatorColor,
+    ) {
+        SpinnerColors(
+            contentColor = contentColor,
+            summaryColor = summaryColor,
+            containerColor = containerColor,
+            selectedContentColor = selectedContentColor,
+            selectedSummaryColor = selectedSummaryColor,
+            selectedContainerColor = selectedContainerColor,
+            selectedIndicatorColor = selectedIndicatorColor,
+        )
+    }
 }
 
 @Immutable

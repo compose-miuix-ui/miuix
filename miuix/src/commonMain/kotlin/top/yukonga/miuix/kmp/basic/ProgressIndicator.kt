@@ -19,6 +19,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -390,11 +391,13 @@ object ProgressIndicatorDefaults {
         foregroundColor: Color = MiuixTheme.colorScheme.primary,
         disabledForegroundColor: Color = MiuixTheme.colorScheme.disabledPrimarySlider,
         backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
-    ): ProgressIndicatorColors = ProgressIndicatorColors(
-        foregroundColor = foregroundColor,
-        disabledForegroundColor = disabledForegroundColor,
-        backgroundColor = backgroundColor,
-    )
+    ): ProgressIndicatorColors = remember(foregroundColor, disabledForegroundColor, backgroundColor) {
+        ProgressIndicatorColors(
+            foregroundColor = foregroundColor,
+            disabledForegroundColor = disabledForegroundColor,
+            backgroundColor = backgroundColor,
+        )
+    }
 }
 
 @Immutable

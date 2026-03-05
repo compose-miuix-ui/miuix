@@ -148,12 +148,13 @@ fun BasicComponent(
         }
     }
 
-    val clickableModifier = remember(enabled, interactionSource, indication, currentOnClick) {
-        if (enabled && currentOnClick != null) {
+    val hasOnClick = onClick != null
+    val clickableModifier = remember(enabled, interactionSource, indication, hasOnClick) {
+        if (enabled && hasOnClick) {
             Modifier.clickable(
                 interactionSource = interactionSource,
                 indication = indication,
-                onClick = currentOnClick!!,
+                onClick = { currentOnClick?.invoke() },
             )
         } else {
             Modifier
@@ -168,219 +169,227 @@ fun BasicComponent(
             .padding(insideMargin),
         verticalArrangement = Arrangement.Center,
     ) {
-        Layout(
-            content = {
-                startAction?.let {
+        if (startAction == null && endActions == null) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start,
+                content = content,
+            )
+        } else {
+            Layout(
+                content = {
+                    startAction?.let {
+                        Column(
+                            modifier = Modifier.layoutId("start"),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.Start,
+                        ) { it() }
+                    }
                     Column(
-                        modifier = Modifier.layoutId("start"),
+                        modifier = Modifier.layoutId("center"),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.Start,
-                    ) { it() }
-                }
-                Column(
-                    modifier = Modifier.layoutId("center"),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start,
-                    content = content,
-                )
-                endActions?.let {
-                    Column(
-                        modifier = Modifier.layoutId("end"),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.End,
-                    ) {
-                        Row { it() }
-                    }
-                }
-            },
-        ) { measurables, constraints ->
-            val spacerPx = 8.dp.roundToPx()
-
-            val startMeasurable = measurables.firstOrNull { it.layoutId == "start" }
-            val centerMeasurable = measurables.first { it.layoutId == "center" }
-            val endMeasurable = measurables.firstOrNull { it.layoutId == "end" }
-
-            val maxWidth = constraints.maxWidth
-            val maxHeight = constraints.maxHeight
-
-            val hasStart = startMeasurable != null
-            val hasEnd = endMeasurable != null
-            val startSpacerWidth = if (hasStart) spacerPx else 0
-            val endSpacerWidth = if (hasEnd) spacerPx else 0
-            val availableWidth = (maxWidth - startSpacerWidth - endSpacerWidth).coerceAtLeast(0)
-
-            val reqStart = startMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
-            val reqCenter = centerMeasurable.maxIntrinsicWidth(maxHeight)
-            val reqEnd = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
-
-            val minStart = startMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
-            val minCenter = centerMeasurable.minIntrinsicWidth(maxHeight)
-            val minEnd = endMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
-
-            val totalReq = reqStart + reqCenter + reqEnd
-
-            var targetStart = 0
-            var targetCenter = 0
-            var targetEnd = 0
-
-            if (totalReq <= availableWidth) {
-                targetStart = reqStart
-                targetEnd = reqEnd
-                targetCenter = (availableWidth - reqStart - reqEnd).coerceAtLeast(0)
-            } else {
-                val wStart = if (hasStart) 2 else 0
-                val wCenter = 5
-                val wEnd = if (hasEnd) 3 else 0
-                val totalWeight = wStart + wCenter + wEnd
-
-                if (totalWeight > 0) {
-                    val baseStart = (availableWidth.toLong() * wStart / totalWeight).toInt()
-                    val baseCenter = (availableWidth.toLong() * wCenter / totalWeight).toInt()
-                    val baseEnd = (availableWidth.toLong() * wEnd / totalWeight).toInt()
-
-                    val isStartHuge = hasStart && reqStart > baseStart
-                    val isCenterHuge = reqCenter > baseCenter
-                    val isEndHuge = hasEnd && reqEnd > baseEnd
-
-                    val hugeCount = (if (isStartHuge) 1 else 0) +
-                        (if (isCenterHuge) 1 else 0) +
-                        (if (isEndHuge) 1 else 0)
-
-                    when (hugeCount) {
-                        3 -> {
-                            targetStart = baseStart
-                            targetCenter = baseCenter
-                            targetEnd = baseEnd
-                            val used = targetStart + targetCenter + targetEnd
-                            if (used < availableWidth) {
-                                targetCenter += (availableWidth - used)
-                            }
-                        }
-
-                        2 -> {
-                            var remWidth = availableWidth
-                            if (!isStartHuge) {
-                                targetStart = reqStart
-                                remWidth -= targetStart
-                            }
-                            if (!isCenterHuge) {
-                                targetCenter = reqCenter
-                                remWidth -= targetCenter
-                            }
-                            if (!isEndHuge) {
-                                targetEnd = reqEnd
-                                remWidth -= targetEnd
-                            }
-
-                            val hugeSum = (if (isStartHuge) reqStart else 0) +
-                                (if (isCenterHuge) reqCenter else 0) +
-                                (if (isEndHuge) reqEnd else 0)
-
-                            if (hugeSum > 0) {
-                                if (isStartHuge) targetStart = (remWidth.toLong() * reqStart / hugeSum).toInt()
-                                if (isCenterHuge) targetCenter = (remWidth.toLong() * reqCenter / hugeSum).toInt()
-                                if (isEndHuge) targetEnd = (remWidth.toLong() * reqEnd / hugeSum).toInt()
-                            }
-                        }
-
-                        1 -> {
-                            var remWidth = availableWidth
-                            if (!isStartHuge) {
-                                targetStart = reqStart
-                                remWidth -= targetStart
-                            }
-                            if (!isCenterHuge) {
-                                targetCenter = reqCenter
-                                remWidth -= targetCenter
-                            }
-                            if (!isEndHuge) {
-                                targetEnd = reqEnd
-                                remWidth -= targetEnd
-                            }
-
-                            if (isStartHuge) targetStart = remWidth
-                            if (isCenterHuge) targetCenter = remWidth
-                            if (isEndHuge) targetEnd = remWidth
-                        }
-
-                        else -> {
-                            targetStart = reqStart
-                            targetCenter = reqCenter
-                            targetEnd = reqEnd
-                            val used = targetStart + targetCenter + targetEnd
-                            if (used < availableWidth) {
-                                targetCenter += (availableWidth - used)
-                            }
+                        content = content,
+                    )
+                    endActions?.let {
+                        Column(
+                            modifier = Modifier.layoutId("end"),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.End,
+                        ) {
+                            Row { it() }
                         }
                     }
+                },
+            ) { measurables, constraints ->
+                val spacerPx = 8.dp.roundToPx()
+
+                val startMeasurable = measurables.firstOrNull { it.layoutId == "start" }
+                val centerMeasurable = measurables.first { it.layoutId == "center" }
+                val endMeasurable = measurables.firstOrNull { it.layoutId == "end" }
+
+                val maxWidth = constraints.maxWidth
+                val maxHeight = constraints.maxHeight
+
+                val hasStart = startMeasurable != null
+                val hasEnd = endMeasurable != null
+                val startSpacerWidth = if (hasStart) spacerPx else 0
+                val endSpacerWidth = if (hasEnd) spacerPx else 0
+                val availableWidth = (maxWidth - startSpacerWidth - endSpacerWidth).coerceAtLeast(0)
+
+                val reqStart = startMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
+                val reqCenter = centerMeasurable.maxIntrinsicWidth(maxHeight)
+                val reqEnd = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
+
+                val minStart = startMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
+                val minCenter = centerMeasurable.minIntrinsicWidth(maxHeight)
+                val minEnd = endMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
+
+                val totalReq = reqStart + reqCenter + reqEnd
+
+                var targetStart = 0
+                var targetCenter = 0
+                var targetEnd = 0
+
+                if (totalReq <= availableWidth) {
+                    targetStart = reqStart
+                    targetEnd = reqEnd
+                    targetCenter = (availableWidth - reqStart - reqEnd).coerceAtLeast(0)
                 } else {
-                    targetCenter = availableWidth
+                    val wStart = if (hasStart) 2 else 0
+                    val wCenter = 5
+                    val wEnd = if (hasEnd) 3 else 0
+                    val totalWeight = wStart + wCenter + wEnd
+
+                    if (totalWeight > 0) {
+                        val baseStart = (availableWidth.toLong() * wStart / totalWeight).toInt()
+                        val baseCenter = (availableWidth.toLong() * wCenter / totalWeight).toInt()
+                        val baseEnd = (availableWidth.toLong() * wEnd / totalWeight).toInt()
+
+                        val isStartHuge = hasStart && reqStart > baseStart
+                        val isCenterHuge = reqCenter > baseCenter
+                        val isEndHuge = hasEnd && reqEnd > baseEnd
+
+                        val hugeCount = (if (isStartHuge) 1 else 0) +
+                            (if (isCenterHuge) 1 else 0) +
+                            (if (isEndHuge) 1 else 0)
+
+                        when (hugeCount) {
+                            3 -> {
+                                targetStart = baseStart
+                                targetCenter = baseCenter
+                                targetEnd = baseEnd
+                                val used = targetStart + targetCenter + targetEnd
+                                if (used < availableWidth) {
+                                    targetCenter += (availableWidth - used)
+                                }
+                            }
+
+                            2 -> {
+                                var remWidth = availableWidth
+                                if (!isStartHuge) {
+                                    targetStart = reqStart
+                                    remWidth -= targetStart
+                                }
+                                if (!isCenterHuge) {
+                                    targetCenter = reqCenter
+                                    remWidth -= targetCenter
+                                }
+                                if (!isEndHuge) {
+                                    targetEnd = reqEnd
+                                    remWidth -= targetEnd
+                                }
+
+                                val hugeSum = (if (isStartHuge) reqStart else 0) +
+                                    (if (isCenterHuge) reqCenter else 0) +
+                                    (if (isEndHuge) reqEnd else 0)
+
+                                if (hugeSum > 0) {
+                                    if (isStartHuge) targetStart = (remWidth.toLong() * reqStart / hugeSum).toInt()
+                                    if (isCenterHuge) targetCenter = (remWidth.toLong() * reqCenter / hugeSum).toInt()
+                                    if (isEndHuge) targetEnd = (remWidth.toLong() * reqEnd / hugeSum).toInt()
+                                }
+                            }
+
+                            1 -> {
+                                var remWidth = availableWidth
+                                if (!isStartHuge) {
+                                    targetStart = reqStart
+                                    remWidth -= targetStart
+                                }
+                                if (!isCenterHuge) {
+                                    targetCenter = reqCenter
+                                    remWidth -= targetCenter
+                                }
+                                if (!isEndHuge) {
+                                    targetEnd = reqEnd
+                                    remWidth -= targetEnd
+                                }
+
+                                if (isStartHuge) targetStart = remWidth
+                                if (isCenterHuge) targetCenter = remWidth
+                                if (isEndHuge) targetEnd = remWidth
+                            }
+
+                            else -> {
+                                targetStart = reqStart
+                                targetCenter = reqCenter
+                                targetEnd = reqEnd
+                                val used = targetStart + targetCenter + targetEnd
+                                if (used < availableWidth) {
+                                    targetCenter += (availableWidth - used)
+                                }
+                            }
+                        }
+                    } else {
+                        targetCenter = availableWidth
+                    }
                 }
-            }
 
-            if (targetCenter < minCenter && availableWidth >= minCenter) {
-                val need = minCenter - targetCenter
-                val startSlack = (targetStart - minStart).coerceAtLeast(0)
-                val endSlack = (targetEnd - minEnd).coerceAtLeast(0)
-                val totalSlack = startSlack + endSlack
+                if (targetCenter < minCenter && availableWidth >= minCenter) {
+                    val need = minCenter - targetCenter
+                    val startSlack = (targetStart - minStart).coerceAtLeast(0)
+                    val endSlack = (targetEnd - minEnd).coerceAtLeast(0)
+                    val totalSlack = startSlack + endSlack
 
-                if (totalSlack > 0) {
-                    val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
-                    val useEnd = (need - useStart).coerceAtLeast(0).coerceAtMost(endSlack)
-                    targetStart -= useStart
-                    targetEnd -= useEnd
-                    targetCenter += useStart + useEnd
+                    if (totalSlack > 0) {
+                        val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
+                        val useEnd = (need - useStart).coerceAtLeast(0).coerceAtMost(endSlack)
+                        targetStart -= useStart
+                        targetEnd -= useEnd
+                        targetCenter += useStart + useEnd
+                    }
                 }
-            }
 
-            if (targetEnd < minEnd && availableWidth >= minEnd) {
-                val need = minEnd - targetEnd
-                val startSlack = (targetStart - minStart).coerceAtLeast(0)
-                val centerSlack = (targetCenter - minCenter).coerceAtLeast(0)
-                val totalSlack = startSlack + centerSlack
+                if (targetEnd < minEnd && availableWidth >= minEnd) {
+                    val need = minEnd - targetEnd
+                    val startSlack = (targetStart - minStart).coerceAtLeast(0)
+                    val centerSlack = (targetCenter - minCenter).coerceAtLeast(0)
+                    val totalSlack = startSlack + centerSlack
 
-                if (totalSlack > 0) {
-                    val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
-                    val useCenter = (need - useStart).coerceAtLeast(0).coerceAtMost(centerSlack)
-                    targetStart -= useStart
-                    targetCenter -= useCenter
-                    targetEnd += useStart + useCenter
+                    if (totalSlack > 0) {
+                        val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
+                        val useCenter = (need - useStart).coerceAtLeast(0).coerceAtMost(centerSlack)
+                        targetStart -= useStart
+                        targetCenter -= useCenter
+                        targetEnd += useStart + useCenter
+                    }
                 }
-            }
 
-            val startPlaceable = startMeasurable?.measure(
-                constraints.copy(minWidth = 0, maxWidth = targetStart),
-            )
-            val startWidth = startPlaceable?.width ?: 0
-            val startHeight = startPlaceable?.height ?: 0
+                val startPlaceable = startMeasurable?.measure(
+                    constraints.copy(minWidth = 0, maxWidth = targetStart),
+                )
+                val startWidth = startPlaceable?.width ?: 0
+                val startHeight = startPlaceable?.height ?: 0
 
-            val centerPlaceable = centerMeasurable.measure(
-                constraints.copy(minWidth = 0, maxWidth = targetCenter),
-            )
+                val centerPlaceable = centerMeasurable.measure(
+                    constraints.copy(minWidth = 0, maxWidth = targetCenter),
+                )
 
-            val endPlaceable = endMeasurable?.measure(
-                constraints.copy(minWidth = 0, maxWidth = targetEnd),
-            )
-            endPlaceable?.width ?: 0
-            val endHeight = endPlaceable?.height ?: 0
+                val endPlaceable = endMeasurable?.measure(
+                    constraints.copy(minWidth = 0, maxWidth = targetEnd),
+                )
+                endPlaceable?.width ?: 0
+                val endHeight = endPlaceable?.height ?: 0
 
-            val rowHeight = maxOf(startHeight, centerPlaceable.height, endHeight)
-            val layoutHeight = rowHeight
-                .coerceIn(constraints.minHeight, maxHeight.takeIf { it != Constraints.Infinity } ?: rowHeight)
+                val rowHeight = maxOf(startHeight, centerPlaceable.height, endHeight)
+                val layoutHeight = rowHeight
+                    .coerceIn(constraints.minHeight, maxHeight.takeIf { it != Constraints.Infinity } ?: rowHeight)
 
-            layout(width = maxWidth, height = layoutHeight) {
-                val startTop = (rowHeight - startHeight).coerceAtLeast(0) / 2
-                val centerTop = (rowHeight - centerPlaceable.height) / 2
-                val endTop = (rowHeight - endHeight).coerceAtLeast(0) / 2
+                layout(width = maxWidth, height = layoutHeight) {
+                    val startTop = (rowHeight - startHeight).coerceAtLeast(0) / 2
+                    val centerTop = (rowHeight - centerPlaceable.height) / 2
+                    val endTop = (rowHeight - endHeight).coerceAtLeast(0) / 2
 
-                startPlaceable?.placeRelative(0, startTop)
+                    startPlaceable?.placeRelative(0, startTop)
 
-                val centerX = startWidth + startSpacerWidth
-                centerPlaceable.placeRelative(centerX, centerTop)
+                    val centerX = startWidth + startSpacerWidth
+                    centerPlaceable.placeRelative(centerX, centerTop)
 
-                endPlaceable?.let {
-                    val endX = maxWidth - it.width
-                    it.placeRelative(endX, endTop)
+                    endPlaceable?.let {
+                        val endX = maxWidth - it.width
+                        it.placeRelative(endX, endTop)
+                    }
                 }
             }
         }
@@ -406,10 +415,12 @@ object BasicComponentDefaults {
     fun titleColor(
         color: Color = MiuixTheme.colorScheme.onBackground,
         disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-    ): BasicComponentColors = BasicComponentColors(
-        color = color,
-        disabledColor = disabledColor,
-    )
+    ): BasicComponentColors = remember(color, disabledColor) {
+        BasicComponentColors(
+            color = color,
+            disabledColor = disabledColor,
+        )
+    }
 
     /**
      * The default color of the summary.
@@ -418,10 +429,12 @@ object BasicComponentDefaults {
     fun summaryColor(
         color: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         disabledColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-    ): BasicComponentColors = BasicComponentColors(
-        color = color,
-        disabledColor = disabledColor,
-    )
+    ): BasicComponentColors = remember(color, disabledColor) {
+        BasicComponentColors(
+            color = color,
+            disabledColor = disabledColor,
+        )
+    }
 }
 
 @Immutable

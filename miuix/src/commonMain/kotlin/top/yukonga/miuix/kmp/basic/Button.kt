@@ -158,19 +158,27 @@ object ButtonDefaults {
     fun buttonColors(
         color: Color = MiuixTheme.colorScheme.secondaryVariant,
         disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
-    ): ButtonColors = ButtonColors(
-        color = color,
-        disabledColor = disabledColor,
-    )
+    ): ButtonColors = remember(color, disabledColor) {
+        ButtonColors(
+            color = color,
+            disabledColor = disabledColor,
+        )
+    }
 
     /**
      * The [ButtonColors] for primary buttons.
      */
     @Composable
-    fun buttonColorsPrimary() = ButtonColors(
-        color = MiuixTheme.colorScheme.primary,
-        disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton,
-    )
+    fun buttonColorsPrimary(): ButtonColors {
+        val color = MiuixTheme.colorScheme.primary
+        val disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton
+        return remember(color, disabledColor) {
+            ButtonColors(
+                color = color,
+                disabledColor = disabledColor,
+            )
+        }
+    }
 
     /**
      * The default [TextButtonColors] for all text buttons.
@@ -181,23 +189,33 @@ object ButtonDefaults {
         disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
         textColor: Color = MiuixTheme.colorScheme.onSecondaryVariant,
         disabledTextColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-    ): TextButtonColors = TextButtonColors(
-        color = color,
-        disabledColor = disabledColor,
-        textColor = textColor,
-        disabledTextColor = disabledTextColor,
-    )
+    ): TextButtonColors = remember(color, disabledColor, textColor, disabledTextColor) {
+        TextButtonColors(
+            color = color,
+            disabledColor = disabledColor,
+            textColor = textColor,
+            disabledTextColor = disabledTextColor,
+        )
+    }
 
     /**
      * The [TextButtonColors] for primary text buttons.
      */
     @Composable
-    fun textButtonColorsPrimary() = TextButtonColors(
-        color = MiuixTheme.colorScheme.primary,
-        disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton,
-        textColor = MiuixTheme.colorScheme.onPrimary,
-        disabledTextColor = MiuixTheme.colorScheme.disabledOnPrimaryButton,
-    )
+    fun textButtonColorsPrimary(): TextButtonColors {
+        val color = MiuixTheme.colorScheme.primary
+        val disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton
+        val textColor = MiuixTheme.colorScheme.onPrimary
+        val disabledTextColor = MiuixTheme.colorScheme.disabledOnPrimaryButton
+        return remember(color, disabledColor, textColor, disabledTextColor) {
+            TextButtonColors(
+                color = color,
+                disabledColor = disabledColor,
+                textColor = textColor,
+                disabledTextColor = disabledTextColor,
+            )
+        }
+    }
 }
 
 @Immutable
