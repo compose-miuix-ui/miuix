@@ -41,13 +41,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -80,9 +81,6 @@ import androidx.navigation3.scene.SceneState
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.scene.rememberSceneState
-import androidx.navigation3.ui.NavDisplay.POP_TRANSITION_SPEC
-import androidx.navigation3.ui.NavDisplay.PREDICTIVE_POP_TRANSITION_SPEC
-import androidx.navigation3.ui.NavDisplay.TRANSITION_SPEC
 import androidx.navigation3.ui.NavDisplay.popTransitionSpec
 import androidx.navigation3.ui.NavDisplay.predictivePopTransitionSpec
 import androidx.navigation3.ui.NavDisplay.transitionSpec
@@ -93,15 +91,14 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.UnevenRoundedRectangle
-import kotlin.collections.emptySet
-import kotlin.jvm.JvmMultifileClass
-import kotlin.jvm.JvmName
-import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
 import top.yukonga.miuix.kmp.utils.platform
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.reflect.KClass
 
 /** Object that indicates the features that can be handled by the [NavDisplay] */
 object NavDisplay {
@@ -140,8 +137,8 @@ object NavDisplay {
      */
     object PredictivePopTransitionKey :
         NavMetadataKey<
-            AnimatedContentTransitionScope<Scene<*>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?
-        >
+                AnimatedContentTransitionScope<Scene<*>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?
+                >
 
     /**
      * Function to be called on the [NavEntry.metadata] or [Scene.metadata] to notify the
@@ -191,7 +188,7 @@ object NavDisplay {
      */
     fun predictivePopTransitionSpec(
         predictivePopTransitionSpec:
-            AnimatedContentTransitionScope<Scene<*>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?,
+        AnimatedContentTransitionScope<Scene<*>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?,
     ): Map<String, Any> =
         mapOf(PREDICTIVE_POP_TRANSITION_SPEC.toString() to predictivePopTransitionSpec)
 
@@ -295,7 +292,7 @@ fun <T : Any> NavDisplay(
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
     predictivePopTransitionSpec:
-        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
+    AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
     transitionEffects: NavDisplayTransitionEffects = NavDisplayTransitionEffects.Default,
     entryProvider: (key: T) -> NavEntry<T>,
@@ -387,7 +384,7 @@ fun <T : Any> NavDisplay(
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
     predictivePopTransitionSpec:
-        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
+    AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
     transitionEffects: NavDisplayTransitionEffects = NavDisplayTransitionEffects.Default,
     onBack: () -> Unit,
@@ -472,7 +469,7 @@ fun <T : Any> NavDisplay(
     popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
         defaultPopTransitionSpec(),
     predictivePopTransitionSpec:
-        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
+    AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
         defaultPredictivePopTransitionSpec(),
     transitionEffects: NavDisplayTransitionEffects = NavDisplayTransitionEffects.Default,
 ) {
@@ -701,7 +698,7 @@ fun <T : Any> NavDisplay(
     }
 
     val shouldFlipDirection = transitionEffects.popDirectionFollowsSwipeEdge &&
-        (if (inPredictiveBack) swipeEdge else lastSwipeEdge) == NavigationEvent.EDGE_RIGHT
+            (if (inPredictiveBack) swipeEdge else lastSwipeEdge) == NavigationEvent.EDGE_RIGHT
 
     val contentTransform: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
         when {
@@ -713,6 +710,7 @@ fun <T : Any> NavDisplay(
                         ?: predictivePopTransitionSpec(swipeEdge)
                 }
             }
+
             isPop -> {
                 if (shouldFlipDirection) {
                     flippedPopTransitionSpec()
@@ -721,6 +719,7 @@ fun <T : Any> NavDisplay(
                         ?: popTransitionSpec(this)
                 }
             }
+
             else -> {
                 transitionScene.contentTransform(NavDisplay.TransitionKey)?.invoke(this)
                     ?: transitionSpec(this)
@@ -755,7 +754,7 @@ fun <T : Any> NavDisplay(
             LocalNavAnimatedContentScope provides this,
             LocalCurrentScene provides targetScene,
             LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getValue(AnimatedSceneKey(targetScene)),
+                    sceneToExcludedEntryMap.getValue(AnimatedSceneKey(targetScene)),
         ) {
             val myZIndex =
                 zIndices.getOrElse(AnimatedSceneKey(targetScene)) { targetZIndex }
@@ -763,8 +762,8 @@ fun <T : Any> NavDisplay(
 
             val isTopScene =
                 !isSettled &&
-                    myZIndex > minOf(initialZIndex, targetZIndex) &&
-                    initialZIndex != targetZIndex
+                        myZIndex > minOf(initialZIndex, targetZIndex) &&
+                        initialZIndex != targetZIndex
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
                 val corner =
@@ -852,20 +851,22 @@ fun <T : Any> NavDisplay(
 
     // Show all OverlayScene instances above the AnimatedContent
     currentOverlayScenes.fastForEachReversed { overlayScene ->
-        val scope = rememberCoroutineScope()
-        CompositionLocalProvider(
-            LocalEntriesToExcludeFromCurrentScene provides
-                sceneToExcludedEntryMap.getValue(AnimatedSceneKey(overlayScene)),
-            LocalCurrentScene provides overlayScene,
-        ) {
-            overlayScene.content.invoke()
-        }
-        // if the overlay scene is popped, let onRemoved finish before
-        // removing from composition to ensure animations can complete
-        if (overlayScene !in overlayScenes) {
-            scope.launch {
-                overlayScene.onRemove()
-                currentOverlayScenes.remove(overlayScene)
+        key(AnimatedSceneKey(overlayScene)) {
+            val scope = rememberCoroutineScope()
+            CompositionLocalProvider(
+                LocalEntriesToExcludeFromCurrentScene provides
+                        sceneToExcludedEntryMap.getValue(AnimatedSceneKey(overlayScene)),
+                LocalCurrentScene provides overlayScene,
+            ) {
+                overlayScene.content.invoke()
+            }
+            // if the overlay scene is popped, let onRemoved finish before
+            // removing from composition to ensure animations can complete
+            if (overlayScene !in overlayScenes) {
+                scope.launch {
+                    overlayScene.onRemove()
+                    currentOverlayScenes.remove(overlayScene)
+                }
             }
         }
     }
@@ -893,15 +894,15 @@ private fun <T : Any> Scene<T>.contentTransform(
 
 @Suppress("UNCHECKED_CAST")
 private fun <T : Any> Scene<T>.predictivePopSpec():
-    (AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform)? {
+        (AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?)? {
     return metadata[NavDisplay.PredictivePopTransitionKey]
-        as?
-        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform
+            as?
+            AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform?
 }
 
 /** Default [transitionSpec] for forward navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultTransitionSpec():
-    AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
+        AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it },
@@ -916,7 +917,7 @@ fun <T : Any> defaultTransitionSpec():
 
 /** Default [transitionSpec] for pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPopTransitionSpec():
-    AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
+        AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { -it / 4 },
@@ -931,7 +932,7 @@ fun <T : Any> defaultPopTransitionSpec():
 
 /** Default [transitionSpec] for predictive pop navigation to be used by [NavDisplay]. */
 fun <T : Any> defaultPredictivePopTransitionSpec():
-    AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
+        AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = {
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { -it / 4 },
@@ -946,7 +947,7 @@ fun <T : Any> defaultPredictivePopTransitionSpec():
 
 /** Flipped [popTransitionSpec] for right-edge swipe (exit to left). */
 private fun flippedPopTransitionSpec():
-    ContentTransform =
+        ContentTransform =
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it / 4 },
@@ -960,7 +961,7 @@ private fun flippedPopTransitionSpec():
 
 /** Flipped [predictivePopTransitionSpec] for right-edge swipe (exit to left). */
 private fun flippedPredictivePopTransitionSpec():
-    ContentTransform =
+        ContentTransform =
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it / 4 },
