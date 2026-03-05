@@ -139,16 +139,18 @@ fun PullToRefresh(
         }
 
     // A modifier to detect when the user releases their finger and trigger the refresh logic.
-    val pointerModifier = Modifier.pointerInput(Unit) {
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent()
-                if (
-                    (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) &&
-                    event.changes.all { !it.pressed }
-                ) {
-                    coroutineScope.launch {
-                        pullToRefreshState.handlePointerRelease(currentOnRefresh)
+    val pointerModifier = remember(pullToRefreshState) {
+        Modifier.pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent()
+                    if (
+                        (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) &&
+                        event.changes.all { !it.pressed }
+                    ) {
+                        coroutineScope.launch {
+                            pullToRefreshState.handlePointerRelease(currentOnRefresh)
+                        }
                     }
                 }
             }
@@ -158,9 +160,11 @@ fun PullToRefresh(
     CompositionLocalProvider(
         LocalPullToRefreshState provides pullToRefreshState,
     ) {
-        val boxModifier = modifier
-            .nestedScroll(nestedScrollConnection)
-            .then(pointerModifier)
+        val boxModifier = remember(modifier, nestedScrollConnection, pointerModifier) {
+            modifier
+                .nestedScroll(nestedScrollConnection)
+                .then(pointerModifier)
+        }
 
         Box(modifier = boxModifier) {
             Column {
@@ -368,10 +372,7 @@ class PullToRefreshState(
         val animatedValue = Animatable(0f)
         animatedValue.animateTo(
             targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = 200,
-                easing = CubicBezierEasing(0f, 0f, 0f, 0.37f),
-            ),
+            animationSpec = tween<Float>(durationMillis = 200, easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)),
         ) {
             refreshCompleteAnimProgressState.floatValue = this.value
         }
@@ -548,7 +549,7 @@ private fun RefreshHeader(
         }
     }
 
-    val refreshDisplayInfo by remember(pullToRefreshState) {
+    val refreshDisplayInfo by remember(pullToRefreshState, refreshTexts) {
         derivedStateOf {
             when (pullToRefreshState.refreshState) {
                 RefreshState.Idle -> "" to 0f
@@ -573,7 +574,7 @@ private fun RefreshHeader(
         }
     }
 
-    val heightInfo by remember(pullToRefreshState) {
+    val heightInfo by remember(pullToRefreshState, circleSize, density) {
         derivedStateOf {
             val dragOffset = pullToRefreshState.dragOffset
             val threshold = pullToRefreshState.refreshThresholdOffset
@@ -644,12 +645,11 @@ private fun RefreshIndicator(
         contentAlignment = Alignment.TopCenter,
     ) {
         // Only create rotation animation when actually refreshing to save resources
-        val rotation = if (pullToRefreshState.refreshState == RefreshState.Refreshing) {
+        val rotationState = if (pullToRefreshState.refreshState == RefreshState.Refreshing) {
             animateRotation()
         } else {
-            remember { mutableFloatStateOf(0f) }
+            null
         }
-        val rotationValue by rotation
         Canvas(modifier = Modifier.size(circleSize)) {
             val ringStrokeWidthPx = circleSize.toPx() / 11
             val indicatorRadiusPx = max(size.minDimension / 2, circleSize.toPx() / 3.5f)
@@ -681,7 +681,7 @@ private fun RefreshIndicator(
                         indicatorRadiusPx,
                         ringStrokeWidthPx,
                         color,
-                        rotationValue,
+                        rotationState?.value ?: 0f,
                     )
                 }
 
@@ -706,7 +706,7 @@ private fun animateRotation(): State<Float> {
     return infiniteTransition.animateFloat(
         initialValue = initialRotation,
         targetValue = initialRotation + 360f,
-        animationSpec = infiniteRepeatable(
+        animationSpec = infiniteRepeatable<Float>(
             animation = tween(800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),

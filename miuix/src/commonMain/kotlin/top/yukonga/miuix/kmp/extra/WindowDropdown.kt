@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +52,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onSelectedIndexChange The callback when the selected index of the [WindowDropdown] is changed.
  */
 @Composable
-@NonRestartableComposable
 fun WindowDropdown(
     items: List<String>,
     selectedIndex: Int,

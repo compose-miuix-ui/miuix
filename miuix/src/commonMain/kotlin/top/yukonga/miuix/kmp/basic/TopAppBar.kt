@@ -89,7 +89,6 @@ import kotlin.math.roundToInt
  * @param horizontalPadding The horizontal padding of the [TopAppBar]'s title & large title.
  */
 @Composable
-@NonRestartableComposable
 fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
