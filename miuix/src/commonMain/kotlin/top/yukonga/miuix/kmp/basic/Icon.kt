@@ -6,11 +6,7 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.paint
@@ -46,7 +42,6 @@ import top.yukonga.miuix.kmp.theme.LocalContentColor
  *   is applied.
  */
 @Composable
-@NonRestartableComposable
 fun Icon(
     imageVector: ImageVector,
     contentDescription: String?,
@@ -74,7 +69,6 @@ fun Icon(
  *   applied.
  */
 @Composable
-@NonRestartableComposable
 fun Icon(
     bitmap: ImageBitmap,
     contentDescription: String?,
@@ -103,34 +97,29 @@ fun Icon(
  *   applied.
  */
 @Composable
-@NonRestartableComposable
 fun Icon(
     painter: Painter,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
 ) {
-    val colorFilter by remember(tint) {
-        derivedStateOf { if (tint == Color.Unspecified) null else ColorFilter.tint(tint) }
-    }
-    val semanticsModifier by remember(contentDescription) {
-        derivedStateOf {
-            if (contentDescription != null) {
-                Modifier.semantics {
-                    this.contentDescription = contentDescription
-                    this.role = Role.Image
-                }
-            } else {
-                Modifier
+    val colorFilter =
+        remember(tint) { if (tint == Color.Unspecified) null else ColorFilter.tint(tint) }
+    val semantics =
+        if (contentDescription != null) {
+            Modifier.semantics {
+                this.contentDescription = contentDescription
+                this.role = Role.Image
             }
+        } else {
+            Modifier
         }
-    }
     Box(
         modifier
             .toolingGraphicsLayer()
             .defaultSizeFor(painter)
             .paint(painter, colorFilter = colorFilter, contentScale = ContentScale.Fit)
-            .then(semanticsModifier),
+            .then(semantics),
     )
 }
 
@@ -146,14 +135,12 @@ fun Icon(
  * @param modifier the [Modifier] to be applied to this icon
  */
 @Composable
-@NonRestartableComposable
 fun Icon(
     painter: Painter,
     tint: ColorProducer?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
 ) {
-    val currentTint by rememberUpdatedState(tint)
     Icon(
         painter = painter,
         tint = Color.Unspecified,
@@ -163,7 +150,7 @@ fun Icon(
             val layer = obtainGraphicsLayer()
             layer.apply {
                 record { drawContent() }
-                currentTint?.let { this@apply.colorFilter = ColorFilter.tint(it()) }
+                tint?.let { this@apply.colorFilter = ColorFilter.tint(it()) }
             }
             onDrawWithContent { drawLayer(graphicsLayer = layer) }
         },

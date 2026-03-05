@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -86,7 +86,6 @@ import kotlin.math.abs
  *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
  */
 @Composable
-@NonRestartableComposable
 fun Slider(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -123,16 +122,17 @@ fun Slider(
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
-    val progressAnimationSpec = if (isDragging) {
-        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
-    } else {
-        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    val progressAnimationSpec = remember(isDragging) {
+        if (isDragging) {
+            spring(dampingRatio = 0.9f, stiffness = 1755f)
+        } else {
+            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+        }
     }
-    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
     val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
     val animatedValue by animatedValueState
-    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, thumbScaleAnimationSpec)
+    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -157,6 +157,9 @@ fun Slider(
         }
     }
 
+    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
+    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+
     Box(
         modifier = modifier
             .then(
@@ -166,12 +169,7 @@ fun Slider(
                             layoutWidth = it.width
                             layoutHeight = it.height
                         }
-                        .pointerInput(layoutWidth, layoutHeight, effectiveReverseDirection, valueRange) {
-                            val thumbRadius = layoutHeight / 2f
-                            val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                            val knobRadius = thumbRadius * 0.72f
-                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
-
+                        .pointerInput(effectiveReverseDirection, valueRange) {
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -184,6 +182,11 @@ fun Slider(
                                         isHoveringThumb = false
                                         continue
                                     }
+
+                                    val thumbRadius = currentLayoutHeight / 2f
+                                    val availableWidth = (currentLayoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
                                     val fraction = (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
@@ -292,7 +295,6 @@ fun Slider(
  *   Values should be within [valueRange].
  */
 @Composable
-@NonRestartableComposable
 fun VerticalSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -328,16 +330,17 @@ fun VerticalSlider(
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
-    val progressAnimationSpec = if (isDragging) {
-        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
-    } else {
-        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    val progressAnimationSpec = remember(isDragging) {
+        if (isDragging) {
+            spring(dampingRatio = 0.9f, stiffness = 1755f)
+        } else {
+            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+        }
     }
-    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
     val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
     val animatedValue by animatedValueState
-    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, thumbScaleAnimationSpec)
+    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -362,6 +365,9 @@ fun VerticalSlider(
         }
     }
 
+    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
+    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+
     Box(
         modifier = modifier
             .then(
@@ -371,12 +377,7 @@ fun VerticalSlider(
                             layoutWidth = it.width
                             layoutHeight = it.height
                         }
-                        .pointerInput(layoutWidth, layoutHeight, reverseDirection, valueRange) {
-                            val thumbRadius = layoutWidth / 2f
-                            val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
-                            val knobRadius = thumbRadius * 0.72f
-                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
-
+                        .pointerInput(reverseDirection, valueRange) {
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -389,6 +390,11 @@ fun VerticalSlider(
                                         isHoveringThumb = false
                                         continue
                                     }
+
+                                    val thumbRadius = currentLayoutWidth / 2f
+                                    val availableHeight = (currentLayoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
                                     val fraction =
@@ -496,7 +502,6 @@ fun VerticalSlider(
  *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
  */
 @Composable
-@NonRestartableComposable
 fun RangeSlider(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
@@ -526,7 +531,7 @@ fun RangeSlider(
     var isDraggingEnd by remember { mutableStateOf(false) }
     var isHoveringStartThumb by remember { mutableStateOf(false) }
     var isHoveringEndThumb by remember { mutableStateOf(false) }
-    val isDragging = isDraggingStart || isDraggingEnd
+    val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     val shape = remember(height) { RoundedRectangle(height) }
@@ -546,12 +551,13 @@ fun RangeSlider(
     val coercedStart = currentStartValue.coerceIn(valueRange.start, valueRange.endInclusive)
     val coercedEnd = currentEndValue.coerceIn(valueRange.start, valueRange.endInclusive)
 
-    val progressAnimationSpec = if (isDragging) {
-        spring<Float>(dampingRatio = 0.9f, stiffness = 1755f)
-    } else {
-        spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+    val progressAnimationSpec = remember(isDragging) {
+        if (isDragging) {
+            spring(dampingRatio = 0.9f, stiffness = 1755f)
+        } else {
+            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+        }
     }
-    val thumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
     val animatedStartValueState = animateFloatAsState(coercedStart, progressAnimationSpec)
     val animatedEndValueState = animateFloatAsState(coercedEnd, progressAnimationSpec)
@@ -559,9 +565,9 @@ fun RangeSlider(
     val animatedEndValue by animatedEndValueState
     val startThumbScale by animateFloatAsState(
         if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
-        thumbScaleAnimationSpec,
+        ThumbScaleAnimationSpec,
     )
-    val endThumbScale by animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, thumbScaleAnimationSpec)
+    val endThumbScale by animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -586,6 +592,9 @@ fun RangeSlider(
         }
     }
 
+    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
+    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+
     Box(
         modifier = modifier
             .then(
@@ -595,12 +604,7 @@ fun RangeSlider(
                             layoutWidth = it.width
                             layoutHeight = it.height
                         }
-                        .pointerInput(layoutWidth, layoutHeight, isRtl, valueRange) {
-                            val thumbRadius = layoutHeight / 2f
-                            val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                            val knobRadius = thumbRadius * 0.72f
-                            val hitRadius = knobRadius + (thumbRadius * 0.5f)
-
+                        .pointerInput(isRtl, valueRange) {
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -614,6 +618,11 @@ fun RangeSlider(
                                         isHoveringEndThumb = false
                                         continue
                                     }
+
+                                    val thumbRadius = currentLayoutHeight / 2f
+                                    val availableWidth = (currentLayoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val knobRadius = thumbRadius * 0.72f
+                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
                                     val startFraction = (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
@@ -1294,6 +1303,8 @@ private fun resolveValueFromFraction(
         else -> base
     }
 }
+
+private val ThumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
 
 private fun horizontalVisualFraction(offsetX: Float, sizeWidth: Int, sizeHeight: Int): Float {
     val thumbRadius = sizeHeight / 2f

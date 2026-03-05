@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,7 +63,6 @@ import kotlin.math.roundToInt
  * @param contentAlignment The content alignment of the tab in [TabRow].
  */
 @Composable
-@NonRestartableComposable
 fun TabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
@@ -163,7 +161,6 @@ fun TabRow(
  * @param contentAlignment The content alignment of the tab in [TabRow].
  */
 @Composable
-@NonRestartableComposable
 fun TabRowWithContour(
     tabs: List<String>,
     selectedTabIndex: Int,

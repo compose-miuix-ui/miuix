@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +61,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
-@NonRestartableComposable
 fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
@@ -207,7 +205,6 @@ private fun WindowSpinnerPopup(
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [WindowSpinner] is changed.
  */
 @Composable
-@NonRestartableComposable
 fun WindowSpinner(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
