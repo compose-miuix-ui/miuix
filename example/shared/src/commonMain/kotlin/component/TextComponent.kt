@@ -787,6 +787,13 @@ fun SuperBottomSheet(
                     onValueChange = { sliderValue = it },
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
+                var textFieldValue by remember { mutableStateOf("") }
+                TextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it },
+                    label = "TextField",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
@@ -809,8 +816,8 @@ fun SuperBottomSheet(
                 }
                 Spacer(
                     Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
                     ),
                 )
             }
@@ -896,6 +903,13 @@ fun WindowBottomSheet(
                     onValueChange = { sliderValue = it },
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
+                var textFieldValue by remember { mutableStateOf("") }
+                TextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it },
+                    label = "TextField",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
@@ -918,8 +932,8 @@ fun WindowBottomSheet(
                 }
                 Spacer(
                     Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
                     ),
                 )
             }
