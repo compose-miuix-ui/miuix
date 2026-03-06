@@ -95,7 +95,9 @@ fun WindowDialog(
         topInset = safeTopInset,
         content = {
             CompositionLocalProvider(
-                LocalWindowDialogState provides { currentOnDismissRequest.value?.invoke() },
+                LocalDismissState provides {
+                    currentOnDismissRequest.value?.invoke()
+                },
             ) {
                 content()
             }

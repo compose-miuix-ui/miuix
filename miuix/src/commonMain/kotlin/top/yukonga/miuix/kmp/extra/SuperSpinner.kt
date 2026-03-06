@@ -30,7 +30,6 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.SpinnerColors
 import top.yukonga.miuix.kmp.basic.SpinnerDefaults
@@ -315,12 +314,12 @@ private fun SuperSpinnerDialog(
     val showState = remember { mutableStateOf(false) }
     showState.value = isDropdownExpanded
     SuperDialog(
+        show = showState.value,
         modifier = popupModifier,
         title = title,
-        show = showState,
-        renderInRootScaffold = renderInRootScaffold,
         onDismissRequest = onDismiss,
         insideMargin = DpSize(0.dp, 24.dp),
+        renderInRootScaffold = renderInRootScaffold,
         content = {
             Layout(
                 content = {

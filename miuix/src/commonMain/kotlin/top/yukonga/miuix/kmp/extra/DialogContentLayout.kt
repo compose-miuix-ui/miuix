@@ -100,6 +100,7 @@ internal fun DialogContentLayout(
                 },
             )
         } else {
+            if (!internalVisible.value) return@LaunchedEffect
             if (imeInsets.getBottom(density) > 0) {
                 keyboardController?.hide()
             }

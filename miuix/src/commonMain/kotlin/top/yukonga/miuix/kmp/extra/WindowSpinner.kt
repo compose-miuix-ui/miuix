@@ -30,7 +30,6 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.SpinnerColors
 import top.yukonga.miuix.kmp.basic.SpinnerDefaults
@@ -303,9 +302,9 @@ private fun WindowSpinnerDialog(
     val showState = remember { mutableStateOf(false) }
     showState.value = isDropdownExpanded
     WindowDialog(
+        show = showState.value,
         modifier = popupModifier,
         title = title,
-        show = showState,
         onDismissRequest = onDismiss,
         insideMargin = DpSize(0.dp, 24.dp),
         content = {

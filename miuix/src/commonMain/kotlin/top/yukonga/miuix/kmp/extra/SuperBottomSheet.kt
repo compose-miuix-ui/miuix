@@ -241,8 +241,6 @@ internal fun SuperBottomSheetContent(
 
     val settlingJob = remember { mutableStateOf<Job?>(null) }
     val isSettling = remember { mutableStateOf(false) }
-    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-
     val calculatedTopInset = if (topInset != null) {
         topInset
     } else {

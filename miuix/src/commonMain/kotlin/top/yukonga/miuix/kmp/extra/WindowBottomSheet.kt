@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
@@ -113,7 +112,9 @@ fun WindowBottomSheet(
         topInset = safeTopInset,
         content = {
             CompositionLocalProvider(
-                LocalWindowBottomSheetState provides { currentOnDismissRequest.value?.invoke() },
+                LocalDismissState provides {
+                    currentOnDismissRequest.value?.invoke()
+                },
             ) {
                 content()
             }

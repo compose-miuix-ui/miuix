@@ -69,7 +69,9 @@ fun WindowListPopup(
         minWidth = minWidth,
         content = {
             CompositionLocalProvider(
-                LocalWindowListPopupState provides { currentOnDismissRequest.value?.invoke() },
+                LocalDismissState provides {
+                    currentOnDismissRequest.value?.invoke()
+                },
             ) {
                 content()
             }
