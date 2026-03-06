@@ -45,6 +45,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * Internal shared layout logic for [SuperListPopup] and [WindowListPopup].
  *
  * @param show Whether the popup is currently shown.
+ * @param popupHost A composable that provides the popup container (e.g., PopupLayout or Dialog).
+ *   It receives the visibility state and the inner content composable.
  * @param popupModifier The modifier to be applied to the popup content area.
  * @param popupPositionProvider The [PopupPositionProvider] for positioning.
  * @param alignment The alignment of the popup.
@@ -52,13 +54,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onDismissRequest The callback when the popup is dismissed.
  * @param maxHeight The maximum height of the popup.
  * @param minWidth The minimum width of the popup.
- * @param popupHost A composable that provides the popup container (e.g., PopupLayout or Dialog).
- *   It receives the visibility state and the inner content composable.
  * @param content The content of the popup.
  */
 @Composable
 internal fun ListPopupLayout(
     show: Boolean,
+    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
     popupModifier: Modifier = Modifier,
     popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
@@ -66,7 +67,6 @@ internal fun ListPopupLayout(
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
-    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f) }

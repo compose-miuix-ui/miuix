@@ -69,19 +69,11 @@ fun WindowDialog(
 
     DialogContentLayout(
         show = show,
-        modifier = modifier,
-        title = title,
         titleColor = titleColor,
-        summary = summary,
         summaryColor = summaryColor,
         backgroundColor = backgroundColor,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         outsideMargin = outsideMargin,
         insideMargin = insideMargin,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        topInset = safeTopInset,
         popupHost = { visible, hostContent ->
             if (visible) {
                 Dialog(
@@ -93,6 +85,14 @@ fun WindowDialog(
                 }
             }
         },
+        modifier = modifier,
+        title = title,
+        summary = summary,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        topInset = safeTopInset,
         content = {
             CompositionLocalProvider(
                 LocalWindowDialogState provides { currentOnDismissRequest.value?.invoke() },

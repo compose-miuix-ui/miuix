@@ -111,7 +111,7 @@ SuperListPopup(
 | show                  | Boolean                     | Whether to show the popup.                                        | -                                          |
 | popupModifier         | Modifier                    | Modifier applied to the popup container.                          | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | Provides position calculation logic for the popup.                | ListPopupDefaults.DropdownPositionProvider |
-| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.      | PopupPositionProvider.Align.End            |
+| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.      | PopupPositionProvider.Align.Start          |
 | enableWindowDim       | Boolean                     | Whether to dim the background when popup is shown.                | true                                       |
 | onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside). | null                                       |
 | maxHeight             | Dp?                         | Maximum height of the popup content.                              | null                                       |

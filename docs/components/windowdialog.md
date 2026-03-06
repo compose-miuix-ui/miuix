@@ -65,6 +65,7 @@ WindowDialog(
 | summary                    | String?                | Dialog summary                                                | null                                   | No       |
 | summaryColor               | Color                  | Summary color                                                 | DialogDefaults.summaryColor()    | No       |
 | backgroundColor            | Color                  | Dialog background color                                       | DialogDefaults.backgroundColor() | No       |
+| enableWindowDim            | Boolean                | Whether to enable dimming layer                               | true                                   | No       |
 | onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                   | No       |
 | onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses                         | null                                   | No       |
 | outsideMargin              | DpSize                 | Outer margin (window edges)                                   | DialogDefaults.outsideMargin     | No       |

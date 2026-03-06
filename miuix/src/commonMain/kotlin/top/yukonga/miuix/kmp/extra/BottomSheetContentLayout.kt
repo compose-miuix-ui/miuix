@@ -43,49 +43,49 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * Internal shared layout logic for [SuperBottomSheet] and [WindowBottomSheet].
  *
  * @param show Whether the bottom sheet is currently shown.
+ * @param backgroundColor The background color of the bottom sheet.
+ * @param cornerRadius The corner radius of the top corners of the bottom sheet.
+ * @param sheetMaxWidth The maximum width of the bottom sheet.
+ * @param outsideMargin The margin outside the bottom sheet.
+ * @param insideMargin The margin inside the bottom sheet.
+ * @param dragHandleColor The color of the drag handle.
+ * @param popupHost A composable that provides the container (e.g., DialogLayout or Dialog).
+ *   It receives the visibility state and the inner content composable.
  * @param modifier The modifier to be applied to the bottom sheet content.
  * @param title Optional title to display at the top of the bottom sheet.
  * @param startAction Optional [Composable] to display on the start side of the title.
  * @param endAction Optional [Composable] to display on the end side of the title.
- * @param backgroundColor The background color of the bottom sheet.
  * @param enableWindowDim Whether to dim the window behind the bottom sheet.
- * @param cornerRadius The corner radius of the top corners of the bottom sheet.
- * @param sheetMaxWidth The maximum width of the bottom sheet.
  * @param onDismissRequest The callback when the user tries to dismiss the bottom sheet.
  * @param onDismissFinished The callback when the bottom sheet is completely dismissed.
- * @param outsideMargin The margin outside the bottom sheet.
- * @param insideMargin The margin inside the bottom sheet.
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
- * @param dragHandleColor The color of the drag handle.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param topInset Optional top inset override. If null, calculated from window insets.
- * @param popupHost A composable that provides the container (e.g., DialogLayout or Dialog).
- *   It receives the visibility state and the inner content composable.
  * @param content The content of the bottom sheet.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun BottomSheetContentLayout(
     show: Boolean,
+    backgroundColor: Color,
+    cornerRadius: Dp,
+    sheetMaxWidth: Dp,
+    outsideMargin: DpSize,
+    insideMargin: DpSize,
+    dragHandleColor: Color,
+    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
-    backgroundColor: Color,
     enableWindowDim: Boolean = true,
-    cornerRadius: Dp,
-    sheetMaxWidth: Dp,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize,
-    insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean = true,
-    dragHandleColor: Color,
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     topInset: Dp? = null,
-    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }

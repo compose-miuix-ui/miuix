@@ -42,41 +42,41 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * Internal shared layout logic for [SuperDialog] and [WindowDialog].
  *
  * @param show Whether the dialog is currently shown.
- * @param modifier The modifier to be applied to the dialog content.
- * @param title The title of the dialog.
  * @param titleColor The color of the title.
- * @param summary The summary of the dialog.
  * @param summaryColor The color of the summary.
  * @param backgroundColor The background color of the dialog.
+ * @param outsideMargin The margin outside the dialog.
+ * @param insideMargin The margin inside the dialog.
+ * @param popupHost A composable that provides the dialog container (e.g., DialogLayout or Dialog).
+ *   It receives the visibility state and the inner content composable.
+ * @param modifier The modifier to be applied to the dialog content.
+ * @param title The title of the dialog.
+ * @param summary The summary of the dialog.
  * @param enableWindowDim Whether to enable window dimming.
  * @param onDismissRequest The callback when the dialog is dismissed.
  * @param onDismissFinished The callback when the dialog is completely dismissed.
- * @param outsideMargin The margin outside the dialog.
- * @param insideMargin The margin inside the dialog.
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param topInset Optional top inset override. If null, calculated from window insets.
- * @param popupHost A composable that provides the dialog container (e.g., DialogLayout or Dialog).
- *   It receives the visibility state and the inner content composable.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun DialogContentLayout(
     show: Boolean,
-    modifier: Modifier = Modifier,
-    title: String? = null,
     titleColor: Color,
-    summary: String? = null,
     summaryColor: Color,
     backgroundColor: Color,
+    outsideMargin: DpSize,
+    insideMargin: DpSize,
+    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    summary: String? = null,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize,
-    insideMargin: DpSize,
     defaultWindowInsetsPadding: Boolean = true,
     topInset: Dp? = null,
-    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }

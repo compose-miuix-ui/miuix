@@ -65,6 +65,7 @@ WindowDialog(
 | summary                    | String?                | 对话框摘要                                     | null                                   | 否       |
 | summaryColor               | Color                  | 摘要颜色                                       | DialogDefaults.summaryColor()    | 否       |
 | backgroundColor            | Color                  | 对话框背景色                                   | DialogDefaults.backgroundColor() | 否       |
+| enableWindowDim            | Boolean                | 是否启用遮罩层                                 | true                                   | 否       |
 | onDismissRequest           | (() -> Unit)?          | 当用户请求关闭（点击遮罩层或返回手势）时触发   | null                                   | 否       |
 | onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调             | null                                   | 否       |
 | outsideMargin              | DpSize                 | 相对窗口边缘的外部边距                         | DialogDefaults.outsideMargin     | 否       |

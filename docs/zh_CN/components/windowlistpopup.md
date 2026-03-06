@@ -76,7 +76,6 @@ Box {
 | popupPositionProvider | PopupPositionProvider       | 提供弹窗的位置计算逻辑               | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.Start          |
 | enableWindowDim       | Boolean                     | 是否在弹窗显示时使背景变暗           | true                                       |
-| shadowElevation       | Dp                          | 弹窗阴影的高度                       | 11.dp                                      |
 | onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
 | maxHeight             | Dp?                         | 弹窗内容的最大高度                   | null                                       |
 | minWidth              | Dp                          | 弹窗内容的最小宽度                   | 200.dp                                     |

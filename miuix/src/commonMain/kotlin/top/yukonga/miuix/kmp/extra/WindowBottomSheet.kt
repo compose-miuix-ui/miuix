@@ -79,23 +79,12 @@ fun WindowBottomSheet(
 
     BottomSheetContentLayout(
         show = show,
-        modifier = modifier,
-        title = title,
-        startAction = startAction,
-        endAction = endAction,
         backgroundColor = backgroundColor,
-        enableWindowDim = enableWindowDim,
         cornerRadius = cornerRadius,
         sheetMaxWidth = sheetMaxWidth,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         outsideMargin = outsideMargin,
         insideMargin = insideMargin,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         dragHandleColor = dragHandleColor,
-        allowDismiss = allowDismiss,
-        enableNestedScroll = enableNestedScroll,
-        topInset = safeTopInset,
         popupHost = { visible, hostContent ->
             if (visible) {
                 Dialog(
@@ -111,6 +100,17 @@ fun WindowBottomSheet(
                 }
             }
         },
+        modifier = modifier,
+        title = title,
+        startAction = startAction,
+        endAction = endAction,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        topInset = safeTopInset,
         content = {
             CompositionLocalProvider(
                 LocalWindowBottomSheetState provides { currentOnDismissRequest.value?.invoke() },

@@ -49,13 +49,6 @@ fun WindowListPopup(
 
     ListPopupLayout(
         show = show,
-        popupModifier = popupModifier,
-        popupPositionProvider = popupPositionProvider,
-        alignment = alignment,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        maxHeight = maxHeight,
-        minWidth = minWidth,
         popupHost = { visible, hostContent ->
             if (visible) {
                 Dialog(
@@ -67,6 +60,13 @@ fun WindowListPopup(
                 }
             }
         },
+        popupModifier = popupModifier,
+        popupPositionProvider = popupPositionProvider,
+        alignment = alignment,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        maxHeight = maxHeight,
+        minWidth = minWidth,
         content = {
             CompositionLocalProvider(
                 LocalWindowListPopupState provides { currentOnDismissRequest.value?.invoke() },

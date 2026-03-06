@@ -48,13 +48,6 @@ fun SuperListPopup(
 ) {
     ListPopupLayout(
         show = show,
-        popupModifier = popupModifier,
-        popupPositionProvider = popupPositionProvider,
-        alignment = alignment,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        maxHeight = maxHeight,
-        minWidth = minWidth,
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
             visibleState.value = visible
@@ -69,6 +62,13 @@ fun SuperListPopup(
                 hostContent()
             }
         },
+        popupModifier = popupModifier,
+        popupPositionProvider = popupPositionProvider,
+        alignment = alignment,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        maxHeight = maxHeight,
+        minWidth = minWidth,
         content = content,
     )
 }
