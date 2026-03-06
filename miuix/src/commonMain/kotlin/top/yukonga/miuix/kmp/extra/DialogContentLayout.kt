@@ -127,8 +127,8 @@ internal fun DialogContentLayout(
     val windowInfo = LocalWindowInfo.current
     val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
 
-    val requestDismiss: () -> Unit = remember {
-        { currentOnDismissRequest?.invoke() }
+    val requestDismiss: () -> Unit = {
+        currentOnDismissRequest?.invoke()
     }
 
     val resetGesture: suspend () -> Unit = {

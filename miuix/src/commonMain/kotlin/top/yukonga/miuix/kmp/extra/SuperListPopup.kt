@@ -79,7 +79,7 @@ fun SuperListPopup(
 @Deprecated(
     message = "Use SuperListPopup with show: Boolean parameter instead for unidirectional data flow.",
     replaceWith = ReplaceWith(
-        "SuperListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, renderInRootScaffold = renderInRootScaffold, content = content)"
+        "SuperListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, renderInRootScaffold = renderInRootScaffold, content = content)",
     ),
 )
 @Composable

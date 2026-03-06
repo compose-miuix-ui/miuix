@@ -308,6 +308,6 @@ fun TopBarActions() {
                     }
                 }
             }
-        }
+        },
     )
 }

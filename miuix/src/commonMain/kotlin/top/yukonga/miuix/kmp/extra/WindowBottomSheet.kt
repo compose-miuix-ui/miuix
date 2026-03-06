@@ -127,7 +127,7 @@ fun WindowBottomSheet(
 @Deprecated(
     message = "Use WindowBottomSheet with show: Boolean parameter instead for unidirectional data flow.",
     replaceWith = ReplaceWith(
-        "WindowBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, content = content)"
+        "WindowBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, content = content)",
     ),
 )
 @Composable

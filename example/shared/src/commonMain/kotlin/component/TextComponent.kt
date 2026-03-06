@@ -616,7 +616,8 @@ fun SuperDialog(
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
-        })
+        },
+    )
 }
 
 @Composable
@@ -652,7 +653,8 @@ fun WindowDialog(
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
-        })
+        },
+    )
 }
 
 @Composable
@@ -705,7 +707,7 @@ fun SliderDialog(
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
-        }
+        },
     )
 }
 

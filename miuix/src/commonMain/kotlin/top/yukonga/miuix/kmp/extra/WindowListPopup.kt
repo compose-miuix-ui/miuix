@@ -83,7 +83,7 @@ fun WindowListPopup(
 @Deprecated(
     message = "Use WindowListPopup with show: Boolean parameter instead for unidirectional data flow.",
     replaceWith = ReplaceWith(
-        "WindowListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, content = content)"
+        "WindowListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, content = content)",
     ),
 )
 @Composable

@@ -162,7 +162,7 @@ fun SuperBottomSheet(
 @Deprecated(
     message = "Use SuperBottomSheet with show: Boolean parameter instead for unidirectional data flow.",
     replaceWith = ReplaceWith(
-        "SuperBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, renderInRootScaffold = renderInRootScaffold, content = content)"
+        "SuperBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, renderInRootScaffold = renderInRootScaffold, content = content)",
     ),
 )
 @Composable
