@@ -48,12 +48,12 @@ IconButton(
 IconButton 支持通过 `holdDownState` 参数控制按下状态，通常用于显示弹出对话框时的视觉反馈：
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     IconButton(
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     ) {
         Icon(
             imageVector = MiuixIcons.Favorites,
@@ -64,7 +64,7 @@ Scaffold {
     SuperDialog(
         title = "对话框",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         // 对话框内容
     }

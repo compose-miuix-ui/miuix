@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - Must be used within `Scaffold` to provide `MiuixPopupHost`
   - Using outside `Scaffold` will cause popup content not to render
-  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -97,6 +97,7 @@ SuperDropdown(
 | maxHeight             | Dp?                       | Maximum height of dropdown menu   | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive  | true                                  | No       |
 | showValue             | Boolean                   | Whether to show selected value    | true                                  | No       |
+| renderInRootScaffold  | Boolean                   | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation | true | No |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Callback when selection changes   | -                                     | No       |
 
 ### DropdownColors Properties

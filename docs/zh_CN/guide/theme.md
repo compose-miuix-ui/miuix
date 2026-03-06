@@ -38,6 +38,26 @@ fun App() {
   }
   ```
 
+- **调色板风格与颜色规范**
+
+  通过 `paletteStyle` 和 `colorSpec` 自定义 Monet 动态取色使用的调色板风格和颜色规范：
+
+  ```kotlin
+  val controller = remember {
+      ThemeController(
+          ColorSchemeMode.MonetSystem,
+          keyColor = Color(0xFF3482FF),
+          paletteStyle = ThemePaletteStyle.Vibrant,
+          colorSpec = ThemeColorSpec.Spec2025
+      )
+  }
+  MiuixTheme(controller = controller) { /* 内容 */ }
+  ```
+
+  ::: tip 提示
+  `ThemeColorSpec.Spec2025` 仅由 `TonalSpot`、`Neutral`、`Vibrant` 和 `Expressive` 调色板风格支持。其他风格会自动降级为 `Spec2021`。
+  :::
+
 - **手动控制深色模式**
 
   使用 `isDark` 参数显式控制深色状态，覆盖系统设置。
@@ -77,12 +97,79 @@ fun App() {
   }
   ```
 
+## ThemeController
+
+`ThemeController` 管理当前 Miuix 主题的配色方案。
+
+### ThemeController 属性
+
+| 属性名 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| colorSchemeMode | ColorSchemeMode | 配色模式 | ColorSchemeMode.System |
+| lightColors | Colors | 浅色配色方案 | lightColorScheme() |
+| darkColors | Colors | 深色配色方案 | darkColorScheme() |
+| keyColor | Color? | 动态取色的种子颜色。`null` 时使用系统壁纸颜色 | null |
+| colorSpec | ThemeColorSpec | Material 颜色规范版本 | ThemeColorSpec.Spec2021 |
+| paletteStyle | ThemePaletteStyle | 动态取色的调色板风格 | ThemePaletteStyle.TonalSpot |
+| isDark | Boolean? | 覆盖系统深色模式。`null` 时跟随系统 | null |
+
+### ColorSchemeMode
+
+| 值 | 说明 |
+| --- | --- |
+| System | 跟随系统浅色/深色设置 |
+| Light | 强制浅色模式 |
+| Dark | 强制深色模式 |
+| MonetSystem | 动态取色，跟随系统浅色/深色 |
+| MonetLight | 动态取色，强制浅色模式 |
+| MonetDark | 动态取色，强制深色模式 |
+
+### ThemePaletteStyle
+
+| 值 | 支持 Spec2025 | 说明 |
+| --- | --- | --- |
+| TonalSpot | 是 | 默认 Material You 风格，平衡的色调变化 |
+| Neutral | 是 | 柔和、低彩度调色板 |
+| Vibrant | 是 | 高彩度、鲜艳调色板 |
+| Expressive | 是 | 大胆且富有艺术感的创意配色 |
+| Rainbow | 否 | 广谱多色相调色板 |
+| FruitSalad | 否 | 活泼的多色相调色板 |
+| Monochrome | 否 | 单色灰度调色板 |
+| Fidelity | 否 | 紧密匹配种子颜色 |
+| Content | 否 | 从内容颜色派生，最大程度保持准确性 |
+
+### ThemeColorSpec
+
+| 值 | 说明 |
+| --- | --- |
+| Spec2021 | 原始 Material Design 3 颜色规范 |
+| Spec2025 | 2025 更新版颜色规范（仅 TonalSpot、Neutral、Vibrant、Expressive 支持） |
+
+## MiuixTheme 对象
+
+通过 `MiuixTheme` 对象访问当前主题值：
+
+```kotlin
+val colors = MiuixTheme.colorScheme
+val textStyles = MiuixTheme.textStyles
+val mode = MiuixTheme.colorSchemeMode
+val isDynamic = MiuixTheme.isDynamicColor
+```
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| colorScheme | Colors | 当前颜色方案 |
+| textStyles | TextStyles | 当前文本样式 |
+| colorSchemeMode | ColorSchemeMode? | 当前配色模式（使用直接 `colors` 重载时为 null） |
+| isDynamicColor | Boolean | 当前模式是否为 Monet 动态取色模式 |
+
 ## 自定义主题
 
 可以通过以下方式进行主题自定义：
 
 - 通过 `ThemeController(ColorSchemeMode.*)` 选择配色模式。
 - 选择动态配色：`MonetSystem` / `MonetLight` / `MonetDark`。
+- 通过 `paletteStyle` 选择调色板风格，通过 `colorSpec` 选择颜色规范。
 - 传入 `textStyles` 覆盖文本样式：
 
 ```kotlin

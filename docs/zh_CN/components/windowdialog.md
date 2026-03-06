@@ -24,26 +24,26 @@ popupHost: None
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
+import top.yukonga.miuix.kmp.extra.LocalDismissState
 ```
 
 ## 基本用法
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 TextButton(
     text = "打开",
-    onClick = { showDialog.value = true }
+    onClick = { showDialog = true }
 )
 
 WindowDialog(
     title = "WindowDialog",
     summary = "一个基础的窗口级对话框示例",
     show = showDialog,
-    onDismissRequest = { showDialog.value = false }
+    onDismissRequest = { showDialog = false }
 ) {
-    val dismiss = LocalWindowDialogState.current
+    val dismiss = LocalDismissState.current
     TextButton(
         text = "确认",
         onClick = { dismiss?.invoke() },
@@ -58,21 +58,21 @@ WindowDialog(
 
 | 属性名                     | 类型                   | 说明                                           | 默认值                                 | 是否必须 |
 | -------------------------- | ---------------------- | ---------------------------------------------- | -------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | 控制显示状态                                   | -                                      | 是       |
+| show                       | Boolean                | 是否显示对话框                                 | -                                      | 是       |
 | modifier                   | Modifier               | 根内容修饰符                                   | Modifier                               | 否       |
 | title                      | String?                | 对话框标题                                     | null                                   | 否       |
-| titleColor                 | Color                  | 标题颜色                                       | WindowDialogDefaults.titleColor()      | 否       |
+| titleColor                 | Color                  | 标题颜色                                       | DialogDefaults.titleColor()      | 否       |
 | summary                    | String?                | 对话框摘要                                     | null                                   | 否       |
-| summaryColor               | Color                  | 摘要颜色                                       | WindowDialogDefaults.summaryColor()    | 否       |
-| backgroundColor            | Color                  | 对话框背景色                                   | WindowDialogDefaults.backgroundColor() | 否       |
+| summaryColor               | Color                  | 摘要颜色                                       | DialogDefaults.summaryColor()    | 否       |
+| backgroundColor            | Color                  | 对话框背景色                                   | DialogDefaults.backgroundColor() | 否       |
 | onDismissRequest           | (() -> Unit)?          | 当用户请求关闭（点击遮罩层或返回手势）时触发   | null                                   | 否       |
 | onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调             | null                                   | 否       |
-| outsideMargin              | DpSize                 | 相对窗口边缘的外部边距                         | WindowDialogDefaults.outsideMargin     | 否       |
-| insideMargin               | DpSize                 | 对话框内容内部边距                             | WindowDialogDefaults.insideMargin      | 否       |
+| outsideMargin              | DpSize                 | 相对窗口边缘的外部边距                         | DialogDefaults.outsideMargin     | 否       |
+| insideMargin               | DpSize                 | 对话框内容内部边距                             | DialogDefaults.insideMargin      | 否       |
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距（输入法/导航/标题） | true                                   | 否       |
 | content                    | @Composable () -> Unit | 对话框内容                                     | -                                      | 是       |
 
-### WindowDialogDefaults
+### DialogDefaults
 
 #### 属性
 
@@ -89,14 +89,14 @@ WindowDialog(
 | summaryColor()    | Color    | 获取默认摘要颜色       |
 | backgroundColor() | Color    | 获取默认对话框背景颜色 |
 
-### LocalWindowDialogState
+### LocalDismissState
 
-提供一个 `() -> Unit` 函数，用于从内容内部关闭当前弹窗。
+提供一个 `(() -> Unit)?` 函数，用于从内容内部关闭当前弹窗。这是所有弹出组件提供的统一关闭状态。
 
 ```kotlin
-val state = LocalWindowDialogState.current
+val dismiss = LocalDismissState.current
 TextButton(
     text = "关闭",
-    onClick = { state.invoke() }
+    onClick = { dismiss?.invoke() }
 )
 ```

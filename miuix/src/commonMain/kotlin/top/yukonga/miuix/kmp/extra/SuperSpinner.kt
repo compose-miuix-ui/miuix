@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +30,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.SpinnerColors
 import top.yukonga.miuix.kmp.basic.SpinnerDefaults
@@ -58,6 +57,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperSpinner] is enabled.
  * @param showValue Whether to show the value of the [SuperSpinner].
+ * @param renderInRootScaffold Whether to render the popup in the root (outermost) Scaffold.
+ *   When true (default), the popup covers the full screen. When false, it renders within the
+ *   current Scaffold's bounds with position compensation.
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [SuperSpinner] is changed.
  */
 @Composable
@@ -76,6 +78,7 @@ fun SuperSpinner(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -129,10 +132,12 @@ fun SuperSpinner(
                 SuperSpinnerPopup(
                     items = items,
                     selectedIndex = selectedIndex,
-                    isDropdownExpanded = isDropdownExpanded,
+                    isDropdownExpanded = isDropdownExpanded.value,
+                    onDismiss = { isDropdownExpanded.value = false },
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
+                    renderInRootScaffold = renderInRootScaffold,
                     onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
@@ -148,20 +153,21 @@ fun SuperSpinner(
 private fun SuperSpinnerPopup(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
+    renderInRootScaffold: Boolean,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     SuperListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        onDismissRequest = onDismiss,
         maxHeight = maxHeight,
+        renderInRootScaffold = renderInRootScaffold,
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
@@ -176,7 +182,7 @@ private fun SuperSpinnerPopup(
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
-                        isDropdownExpanded.value = false
+                        onDismiss()
                     }
                 }
             }
@@ -201,6 +207,9 @@ private fun SuperSpinnerPopup(
  * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner].
  * @param enabled whether the [SuperSpinner] is enabled.
  * @param showValue whether to show the value of the [SuperSpinner].
+ * @param renderInRootScaffold Whether to render the dialog in the root (outermost) Scaffold.
+ *   When true (default), the dialog covers the full screen. When false, it renders within the
+ *   current Scaffold's bounds.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [SuperSpinner] is changed.
  */
 @Composable
@@ -220,6 +229,7 @@ fun SuperSpinner(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -235,10 +245,6 @@ fun SuperSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val componentModifier = modifier.pointerInput(actualEnabled) {
-        if (!actualEnabled) return@pointerInput
-    }
-
     val handleClick: () -> Unit = {
         if (actualEnabled) {
             isDropdownExpanded.value = !isDropdownExpanded.value
@@ -246,7 +252,7 @@ fun SuperSpinner(
     }
 
     BasicComponent(
-        modifier = componentModifier,
+        modifier = modifier,
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -275,10 +281,12 @@ fun SuperSpinner(
                 selectedIndex = selectedIndex,
                 title = title,
                 dialogButtonString = dialogButtonString,
-                isDropdownExpanded = isDropdownExpanded,
+                isDropdownExpanded = isDropdownExpanded.value,
+                onDismiss = { isDropdownExpanded.value = false },
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
                 popupModifier = popupModifier,
+                renderInRootScaffold = renderInRootScaffold,
                 onSelectedIndexChange = onSelectedIndexChange,
             )
         },
@@ -295,20 +303,23 @@ private fun SuperSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
     popupModifier: Modifier = Modifier,
+    renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val showState = remember { mutableStateOf(false) }
+    showState.value = isDropdownExpanded
     SuperDialog(
         modifier = popupModifier,
         title = title,
-        show = isDropdownExpanded,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        show = showState,
+        renderInRootScaffold = renderInRootScaffold,
+        onDismissRequest = onDismiss,
         insideMargin = DpSize(0.dp, 24.dp),
         content = {
             Layout(
@@ -325,7 +336,7 @@ private fun SuperSpinnerDialog(
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                isDropdownExpanded.value = false
+                                onDismiss()
                             }
                         }
                     }
@@ -335,7 +346,7 @@ private fun SuperSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { isDropdownExpanded.value = false },
+                        onClick = onDismiss,
                     )
                 },
             ) { measurables, constraints ->

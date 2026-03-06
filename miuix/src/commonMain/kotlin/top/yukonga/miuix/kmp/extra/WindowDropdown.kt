@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -120,7 +120,8 @@ fun WindowDropdown(
                 WindowDropdownPopup(
                     items = items,
                     selectedIndex = selectedIndex,
-                    isDropdownExpanded = isDropdownExpanded,
+                    isDropdownExpanded = isDropdownExpanded.value,
+                    onDismiss = { isDropdownExpanded.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
@@ -139,7 +140,8 @@ fun WindowDropdown(
 private fun WindowDropdownPopup(
     items: List<String>,
     selectedIndex: Int,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
@@ -149,12 +151,10 @@ private fun WindowDropdownPopup(
     WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        onDismissRequest = onDismiss,
         maxHeight = maxHeight,
     ) {
-        val dismiss = LocalWindowListPopupState.current
+        val dismiss = LocalDismissState.current
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 key(index) {
@@ -166,7 +166,7 @@ private fun WindowDropdownPopup(
                         onSelectedIndexChange = { selectedIdx ->
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                             onSelectState.value?.invoke(selectedIdx)
-                            dismiss()
+                            dismiss?.invoke()
                         },
                         index = index,
                     )

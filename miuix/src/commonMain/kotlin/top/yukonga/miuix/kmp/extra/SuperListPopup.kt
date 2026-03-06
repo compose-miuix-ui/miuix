@@ -5,52 +5,22 @@ package top.yukonga.miuix.kmp.extra
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.NavigationEventTransitionState
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupContent
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
 
 /**
  * A popup with a list of items.
  *
- * @param show The show state of the [SuperListPopup].
+ * @param show Whether the [SuperListPopup] is shown.
  * @param popupModifier The modifier to be applied to the [SuperListPopup].
  * @param popupPositionProvider The [PopupPositionProvider] of the [SuperListPopup].
  * @param alignment The alignment of the [SuperListPopup].
@@ -58,9 +28,60 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
  * @param onDismissRequest The callback when the [SuperListPopup] is dismissed.
  * @param maxHeight The maximum height of the [SuperListPopup]. If null, the height will be calculated automatically.
  * @param minWidth The minimum width of the [SuperListPopup].
+ * @param renderInRootScaffold Whether to render the popup in the root (outermost) Scaffold.
+ *   When true (default), the popup covers the full screen. When false, it renders within the
+ *   current Scaffold's bounds with position compensation.
  * @param content The [Composable] content of the [SuperListPopup]. You should use the [ListPopupColumn] in general.
  */
-@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun SuperListPopup(
+    show: Boolean,
+    popupModifier: Modifier = Modifier,
+    popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
+    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
+    enableWindowDim: Boolean = true,
+    onDismissRequest: (() -> Unit)? = null,
+    maxHeight: Dp? = null,
+    minWidth: Dp = 200.dp,
+    renderInRootScaffold: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    ListPopupLayout(
+        show = show,
+        popupModifier = popupModifier,
+        popupPositionProvider = popupPositionProvider,
+        alignment = alignment,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        maxHeight = maxHeight,
+        minWidth = minWidth,
+        popupHost = { visible, hostContent ->
+            val visibleState = remember { mutableStateOf(false) }
+            visibleState.value = visible
+            PopupLayout(
+                visible = visibleState,
+                enableWindowDim = false,
+                enableBackHandler = false,
+                enterTransition = EnterTransition.None,
+                exitTransition = ExitTransition.None,
+                renderInRootScaffold = renderInRootScaffold,
+            ) {
+                hostContent()
+            }
+        },
+        content = content,
+    )
+}
+
+/**
+ * A popup with a list of items.
+ */
+@Deprecated(
+    message = "Use SuperListPopup with show: Boolean parameter instead for unidirectional data flow.",
+    replaceWith = ReplaceWith(
+        "SuperListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, renderInRootScaffold = renderInRootScaffold, content = content)"
+    ),
+)
 @Composable
 fun SuperListPopup(
     show: MutableState<Boolean>,
@@ -71,151 +92,19 @@ fun SuperListPopup(
     onDismissRequest: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
+    renderInRootScaffold: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val animationProgress = remember { Animatable(0f) }
-    val currentOnDismiss by rememberUpdatedState(onDismissRequest)
-    val coroutineScope = rememberCoroutineScope()
-    val internalPopupState = remember { mutableStateOf(show.value) }
-
-    LaunchedEffect(show.value) {
-        if (show.value) {
-            internalPopupState.value = true
-            animationProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f),
-            )
-        } else {
-            animationProgress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(300, easing = DecelerateEasing(1.5f)),
-            )
-            internalPopupState.value = false
-        }
-    }
-
-    val resetGesture: suspend () -> Unit = {
-        animationProgress.animateTo(1f, animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
-    }
-
-    val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
-    NavigationBackHandler(
-        state = navigationEventState,
-        isBackEnabled = show.value,
-        onBackCancelled = {
-            coroutineScope.launch {
-                resetGesture()
-            }
-        },
-        onBackCompleted = {
-            currentOnDismiss?.invoke()
-        },
-    )
-
-    LaunchedEffect(navigationEventState.transitionState) {
-        val transitionState = navigationEventState.transitionState
-        if (
-            transitionState is NavigationEventTransitionState.InProgress &&
-            transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
-        ) {
-            val progress = transitionState.latestEvent.progress
-            animationProgress.snapTo(1f - progress)
-        }
-    }
-
-    if (!show.value && !internalPopupState.value) return
-
-    var parentBounds by remember { mutableStateOf(IntRect.Zero) }
-
-    Spacer(
-        modifier = Modifier
-            .onGloballyPositioned { childCoordinates ->
-                childCoordinates.parentLayoutCoordinates?.let { parentLayoutCoordinates ->
-                    val positionInWindow = parentLayoutCoordinates.positionInWindow()
-                    parentBounds = IntRect(
-                        left = positionInWindow.x.toInt(),
-                        top = positionInWindow.y.toInt(),
-                        right = positionInWindow.x.toInt() + parentLayoutCoordinates.size.width,
-                        bottom = positionInWindow.y.toInt() + parentLayoutCoordinates.size.height,
-                    )
-                }
-            },
-    )
-
-    if (parentBounds == IntRect.Zero) return
-
-    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
-    val layoutInfo = rememberListPopupLayoutInfo(
-        alignment = alignment,
+    SuperListPopup(
+        show = show.value,
+        popupModifier = popupModifier,
         popupPositionProvider = popupPositionProvider,
-        parentBounds = parentBounds,
-        popupContentSize = popupContentSize,
+        alignment = alignment,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        maxHeight = maxHeight,
+        minWidth = minWidth,
+        renderInRootScaffold = renderInRootScaffold,
+        content = content,
     )
-
-    PopupLayout(
-        visible = internalPopupState,
-        enableWindowDim = false,
-        enableBackHandler = false,
-        enterTransition = EnterTransition.None,
-        exitTransition = ExitTransition.None,
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            if (enableWindowDim) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = animationProgress.value
-                        }
-                        .background(MiuixTheme.colorScheme.windowDimming),
-                )
-            }
-            Box(
-                modifier = popupModifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { currentOnDismiss?.invoke() },
-                        )
-                    }
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            constraints.copy(
-                                maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
-                                    ?: (layoutInfo.windowBounds.height - layoutInfo.popupMargin.top - layoutInfo.popupMargin.bottom)
-                                        .coerceAtLeast(50.dp.roundToPx()),
-                                minHeight = if (50.dp.roundToPx() <= constraints.maxHeight) 50.dp.roundToPx() else constraints.maxHeight,
-                                maxWidth = constraints.maxWidth,
-                                minWidth = minWidth.roundToPx().coerceAtMost(constraints.maxWidth),
-                            ),
-                        )
-                        val measuredSize = IntSize(placeable.width, placeable.height)
-
-                        val calculatedOffset = popupPositionProvider.calculatePosition(
-                            parentBounds,
-                            layoutInfo.windowBounds,
-                            layoutDirection,
-                            measuredSize,
-                            layoutInfo.popupMargin,
-                            alignment,
-                        )
-
-                        layout(constraints.maxWidth, constraints.maxHeight) {
-                            placeable.place(calculatedOffset)
-                        }
-                    },
-            ) {
-                ListPopupContent(
-                    popupContentSize = popupContentSize,
-                    onPopupContentSizeChange = { popupContentSize = it },
-                    animationProgress = { animationProgress.value },
-                    popupLayoutInfo = layoutInfo.popupLayoutInfo,
-                    localTransformOrigin = layoutInfo.localTransformOrigin,
-                    content = content,
-                )
-            }
-        }
-    }
 }

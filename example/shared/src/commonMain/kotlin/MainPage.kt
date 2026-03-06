@@ -126,7 +126,6 @@ fun MainPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

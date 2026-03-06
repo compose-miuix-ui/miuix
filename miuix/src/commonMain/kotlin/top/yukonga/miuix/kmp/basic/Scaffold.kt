@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +38,11 @@ import androidx.compose.ui.unit.offset
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.LocalDialogStates
+import top.yukonga.miuix.kmp.utils.LocalPopupStates
+import top.yukonga.miuix.kmp.utils.LocalRootDialogStates
+import top.yukonga.miuix.kmp.utils.LocalRootPopupStates
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.MiuixPopupHost
 
 /**
@@ -84,6 +91,12 @@ fun Scaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val safeInsets = remember(contentWindowInsets) { MutableWindowInsets(contentWindowInsets) }
+    val popupStates = remember { mutableStateListOf<MiuixPopupUtils.PopupState>() }
+    val dialogStates = remember { mutableStateListOf<MiuixPopupUtils.DialogState>() }
+    val parentRootDialogStates = LocalRootDialogStates.current
+    val rootDialogStates = parentRootDialogStates ?: dialogStates
+    val parentRootPopupStates = LocalRootPopupStates.current
+    val rootPopupStates = parentRootPopupStates ?: popupStates
     Surface(
         modifier = modifier.onConsumedWindowInsetsChanged { consumedWindowInsets ->
             // Exclude currently consumed window insets from user provided contentWindowInsets
@@ -91,18 +104,25 @@ fun Scaffold(
         },
         color = containerColor,
     ) {
-        ScaffoldLayout(
-            topBar = topBar,
-            bottomBar = bottomBar,
-            content = content,
-            snackbar = snackbarHost,
-            floatingActionButton = floatingActionButton,
-            floatingActionButtonPosition = floatingActionButtonPosition,
-            floatingToolbar = floatingToolbar,
-            floatingToolbarPosition = floatingToolbarPosition,
-            popup = popupHost,
-            contentWindowInsets = safeInsets,
-        )
+        CompositionLocalProvider(
+            LocalPopupStates provides popupStates,
+            LocalDialogStates provides dialogStates,
+            LocalRootDialogStates provides rootDialogStates,
+            LocalRootPopupStates provides rootPopupStates,
+        ) {
+            ScaffoldLayout(
+                topBar = topBar,
+                bottomBar = bottomBar,
+                content = content,
+                snackbar = snackbarHost,
+                floatingActionButton = floatingActionButton,
+                floatingActionButtonPosition = floatingActionButtonPosition,
+                floatingToolbar = floatingToolbar,
+                floatingToolbarPosition = floatingToolbarPosition,
+                popup = popupHost,
+                contentWindowInsets = safeInsets,
+            )
+        }
     }
 }
 

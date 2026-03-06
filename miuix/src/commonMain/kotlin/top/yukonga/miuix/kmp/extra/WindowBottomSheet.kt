@@ -3,49 +3,23 @@
 
 package top.yukonga.miuix.kmp.extra
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.NavigationEventTransitionState
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.DecelerateEasing
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
@@ -54,7 +28,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  *
  * Use [LocalWindowBottomSheetState] inside `content` to request dismissal from inner composables.
  *
- * @param show The show state of the [WindowBottomSheet].
+ * @param show Whether the [WindowBottomSheet] is shown.
  * @param modifier The modifier to be applied to the [WindowBottomSheet].
  * @param title Optional title to display at the top of the [WindowBottomSheet].
  * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
@@ -64,7 +38,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param cornerRadius The corner radius of the top corners of the [WindowBottomSheet].
  * @param sheetMaxWidth The maximum width of the [WindowBottomSheet].
  * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
- * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
+ * @param onDismissFinished The callback when the [WindowBottomSheet] is completely dismissed.
  * @param outsideMargin The margin outside the [WindowBottomSheet].
  * @param insideMargin The margin inside the [WindowBottomSheet].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
@@ -73,24 +47,23 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
-@Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 fun WindowBottomSheet(
-    show: MutableState<Boolean>,
+    show: Boolean,
     modifier: Modifier = Modifier,
     title: String? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
-    backgroundColor: Color = WindowBottomSheetDefaults.backgroundColor(),
+    backgroundColor: Color = BottomSheetDefaults.backgroundColor(),
     enableWindowDim: Boolean = true,
-    cornerRadius: Dp = WindowBottomSheetDefaults.cornerRadius,
-    sheetMaxWidth: Dp = WindowBottomSheetDefaults.maxWidth,
+    cornerRadius: Dp = BottomSheetDefaults.cornerRadius,
+    sheetMaxWidth: Dp = BottomSheetDefaults.maxWidth,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize = WindowBottomSheetDefaults.outsideMargin,
-    insideMargin: DpSize = WindowBottomSheetDefaults.insideMargin,
+    outsideMargin: DpSize = BottomSheetDefaults.outsideMargin,
+    insideMargin: DpSize = BottomSheetDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
-    dragHandleColor: Color = WindowBottomSheetDefaults.dragHandleColor(),
+    dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     content: @Composable () -> Unit,
@@ -98,217 +71,124 @@ fun WindowBottomSheet(
     val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
     val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-
     val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
         maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
     }
 
-    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
-    var isAnimating by remember { mutableStateOf(false) }
+    val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
 
-    if (!show.value && !isAnimating && animationProgress.value == 0f) return
-
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-    val coroutineScope = rememberCoroutineScope()
-    val sheetHeightPx = remember { mutableIntStateOf(0) }
-    val dragOffsetY = remember { Animatable(0f) }
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
-    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
-
-    LaunchedEffect(show.value) {
-        isAnimating = true
-        val target = if (show.value) 1f else 0f
-        animationProgress.animateTo(
-            targetValue = target,
-            animationSpec = if (show.value) {
-                tween(durationMillis = 450, easing = DecelerateEasing(1.5f))
-            } else {
-                tween(durationMillis = 450, easing = DecelerateEasing(0.8f))
-            },
-        )
-        isAnimating = false
-        if (!show.value && animationProgress.value == 0f) {
-            currentOnDismissFinished?.invoke()
-        }
-    }
-
-    val requestDismiss: () -> Unit = remember {
-        {
-            currentOnDismissRequest?.invoke()
-        }
-    }
-
-    val resetGesture: suspend () -> Unit = {
-        dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-            dimAlpha.floatValue = value
-        }
-    }
-
-    LaunchedEffect(dragOffsetY) {
-        for (target in dragSnapChannel) {
-            dragOffsetY.snapTo(target)
-        }
-    }
-
-    Dialog(
-        onDismissRequest = {
-            if (allowDismiss) {
-                requestDismiss()
+    BottomSheetContentLayout(
+        show = show,
+        modifier = modifier,
+        title = title,
+        startAction = startAction,
+        endAction = endAction,
+        backgroundColor = backgroundColor,
+        enableWindowDim = enableWindowDim,
+        cornerRadius = cornerRadius,
+        sheetMaxWidth = sheetMaxWidth,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        outsideMargin = outsideMargin,
+        insideMargin = insideMargin,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        dragHandleColor = dragHandleColor,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        topInset = safeTopInset,
+        popupHost = { visible, hostContent ->
+            if (visible) {
+                Dialog(
+                    onDismissRequest = {
+                        if (allowDismiss) {
+                            currentOnDismissRequest.value?.invoke()
+                        }
+                    },
+                    properties = platformDialogProperties(),
+                ) {
+                    RemovePlatformDialogDefaultEffects()
+                    hostContent()
+                }
             }
         },
-        properties = platformDialogProperties(),
-    ) {
-        RemovePlatformDialogDefaultEffects()
-
-        val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
-        NavigationBackHandler(
-            state = navigationEventState,
-            isBackEnabled = show.value,
-            onBackCancelled = {
-                coroutineScope.launch {
-                    resetGesture()
-                }
-            },
-            onBackCompleted = {
-                if (allowDismiss) {
-                    requestDismiss()
-                } else {
-                    coroutineScope.launch {
-                        resetGesture()
-                    }
-                }
-            },
-        )
-
-        LaunchedEffect(navigationEventState.transitionState, allowDismiss) {
-            val transitionState = navigationEventState.transitionState
-            if (
-                transitionState is NavigationEventTransitionState.InProgress &&
-                transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
+        content = {
+            CompositionLocalProvider(
+                LocalWindowBottomSheetState provides { currentOnDismissRequest.value?.invoke() },
             ) {
-                val maxOffset = if (sheetHeightPx.intValue > 0) {
-                    sheetHeightPx.intValue.toFloat()
-                } else {
-                    500f
-                }
-                val offset = transitionState.latestEvent.progress * maxOffset
-                val finalOffset = if (!allowDismiss) {
-                    offset * 0.1f
-                } else {
-                    offset
-                }
-                dragSnapChannel.trySend(finalOffset)
-                dimAlpha.floatValue = 1f - transitionState.latestEvent.progress
+                content()
             }
-        }
-
-        val progress = animationProgress.value
-        val baseColor = MiuixTheme.colorScheme.windowDimming
-        val dimColor = if (enableWindowDim) {
-            baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * progress)
-        } else {
-            Color.Transparent
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(dimColor),
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(show.value) {
-                    detectTapGestures(
-                        onTap = {
-                            if (allowDismiss) {
-                                requestDismiss()
-                            }
-                        },
-                    )
-                },
-        ) {
-            val sheetModifier = modifier.graphicsLayer {
-                val currentHeight = sheetHeightPx.intValue.toFloat()
-                val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
-
-                // If height is 0 (not measured yet), use windowHeight to keep it off-screen
-                val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
-
-                translationY = baseOffset * (1f - progress) + dragOffsetY.value
-                alpha = 1f
-            }
-            SuperBottomSheetContent(
-                title = title,
-                backgroundColor = backgroundColor,
-                cornerRadius = cornerRadius,
-                sheetMaxWidth = sheetMaxWidth,
-                outsideMargin = outsideMargin,
-                insideMargin = insideMargin,
-                defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-                dragHandleColor = dragHandleColor,
-                allowDismiss = allowDismiss,
-                sheetHeightPx = sheetHeightPx,
-                dragOffsetY = dragOffsetY,
-                dimAlpha = dimAlpha,
-                dragSnapChannel = dragSnapChannel,
-                onDismissRequest = {
-                    if (allowDismiss) {
-                        requestDismiss()
-                    }
-                },
-                modifier = sheetModifier,
-                topInset = safeTopInset,
-                enableNestedScroll = enableNestedScroll,
-                startAction = startAction,
-                endAction = endAction,
-                content = {
-                    CompositionLocalProvider(LocalWindowBottomSheetState provides { requestDismiss() }) {
-                        content()
-                    }
-                },
-            )
-        }
-    }
+        },
+    )
 }
 
+/**
+ * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
+ */
+@Deprecated(
+    message = "Use WindowBottomSheet with show: Boolean parameter instead for unidirectional data flow.",
+    replaceWith = ReplaceWith(
+        "WindowBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, content = content)"
+    ),
+)
+@Composable
+fun WindowBottomSheet(
+    show: MutableState<Boolean>,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endAction: @Composable (() -> Unit)? = null,
+    backgroundColor: Color = BottomSheetDefaults.backgroundColor(),
+    enableWindowDim: Boolean = true,
+    cornerRadius: Dp = BottomSheetDefaults.cornerRadius,
+    sheetMaxWidth: Dp = BottomSheetDefaults.maxWidth,
+    onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
+    outsideMargin: DpSize = BottomSheetDefaults.outsideMargin,
+    insideMargin: DpSize = BottomSheetDefaults.insideMargin,
+    defaultWindowInsetsPadding: Boolean = true,
+    dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
+    allowDismiss: Boolean = true,
+    enableNestedScroll: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    WindowBottomSheet(
+        show = show.value,
+        modifier = modifier,
+        title = title,
+        startAction = startAction,
+        endAction = endAction,
+        backgroundColor = backgroundColor,
+        enableWindowDim = enableWindowDim,
+        cornerRadius = cornerRadius,
+        sheetMaxWidth = sheetMaxWidth,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        outsideMargin = outsideMargin,
+        insideMargin = insideMargin,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        dragHandleColor = dragHandleColor,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        content = content,
+    )
+}
+
+@Deprecated("Use BottomSheetDefaults instead", ReplaceWith("BottomSheetDefaults"))
 object WindowBottomSheetDefaults {
 
-    /**
-     * The default background color of the [WindowBottomSheet].
-     */
     @Composable
-    fun backgroundColor() = MiuixTheme.colorScheme.background
+    fun backgroundColor() = BottomSheetDefaults.backgroundColor()
 
-    /**
-     * The default color of the drag handle.
-     */
     @Composable
-    fun dragHandleColor() = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f)
+    fun dragHandleColor() = BottomSheetDefaults.dragHandleColor()
 
-    /**
-     * The default corner radius of the [WindowBottomSheet].
-     */
-    val cornerRadius = 28.dp
+    val cornerRadius get() = BottomSheetDefaults.cornerRadius
 
-    /**
-     * The default maximum width of the [WindowBottomSheet].
-     */
-    val maxWidth = 640.dp
+    val maxWidth get() = BottomSheetDefaults.maxWidth
 
-    /**
-     * The default margin outside the [WindowBottomSheet].
-     */
-    val outsideMargin = DpSize(0.dp, 0.dp)
+    val outsideMargin get() = BottomSheetDefaults.outsideMargin
 
-    /**
-     * The default margin inside the [WindowBottomSheet].
-     */
-    val insideMargin = DpSize(24.dp, 0.dp)
+    val insideMargin get() = BottomSheetDefaults.insideMargin
 }
 
 /**
@@ -316,4 +196,8 @@ object WindowBottomSheetDefaults {
  *
  * Call the provided function to request dismissal from inside bottom sheet content.
  */
+@Deprecated(
+    "Use LocalDismissState instead, which is provided by all overlay components.",
+    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.extra.LocalDismissState"),
+)
 val LocalWindowBottomSheetState = staticCompositionLocalOf<(() -> Unit)?> { null }

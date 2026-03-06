@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - Must be used within `Scaffold` to provide `MiuixPopupHost`
   - Using outside `Scaffold` will cause popup content not to render
-  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -161,6 +161,7 @@ Scaffold {
 | maxHeight             | Dp?                       | Maximum dropdown height         | null                                  | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
+| renderInRootScaffold  | Boolean                   | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation | true | No |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### SuperSpinner Properties (Dialog Mode)
@@ -182,6 +183,7 @@ Scaffold {
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
+| renderInRootScaffold  | Boolean                   | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### SpinnerEntry Properties

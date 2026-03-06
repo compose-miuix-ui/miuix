@@ -51,20 +51,20 @@ SuperArrow(
 SuperArrow 支持通过 `holdDownState` 参数控制按下状态，通常用于显示弹出对话框时的视觉反馈：
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     SuperArrow(
         title = "打开对话框",
         summary = "点击显示对话框",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     )
     // 在其他地方定义对话框
     SuperDialog(
         title = "对话框",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         // 对话框内容
     }
@@ -142,7 +142,7 @@ SuperArrow(
 ### 结合对话框使用
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var language by remember { mutableStateOf("简体中文") }
 
 Scaffold {
@@ -152,13 +152,13 @@ SuperArrow(
     endActions = {
         Text(language)
     },
-    onClick = { showDialog.value = true },
-    holdDownState = showDialog.value
+    onClick = { showDialog = true },
+    holdDownState = showDialog
 )
     SuperDialog(
         title = "选择语言",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         // 对话框内容
         Card {
@@ -166,14 +166,14 @@ SuperArrow(
                 title = "简体中文",
                 onClick = {
                     language = "简体中文"
-                    showDialog.value = false // 关闭对话框
+                    showDialog = false // 关闭对话框
                 }
             )
             SuperArrow(
                 title = "English",
                 onClick = {
                     language = "English"
-                    showDialog.value = false // 关闭对话框
+                    showDialog = false // 关闭对话框
                 }
             )
         }
@@ -182,7 +182,7 @@ SuperArrow(
         ) {
             TextButton(
                 text = "取消",
-                onClick = { showDialog.value = false },  // 关闭对话框
+                onClick = { showDialog = false },  // 关闭对话框
                 modifier = Modifier.weight(1f).padding(top = 8.dp)
             )
         }

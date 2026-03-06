@@ -28,21 +28,21 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 The WindowListPopup component can be used to create dropdown menus without `Scaffold`:
 
 ```kotlin
-val showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 var selectedIndex by remember { mutableStateOf(0) }
 val items = listOf("Option 1", "Option 2", "Option 3")
 
 Box {
     TextButton(
         text = "Click to show menu",
-        onClick = { showPopup.value = true }
+        onClick = { showPopup = true }
     )
     WindowListPopup(
         show = showPopup,
         alignment = PopupPositionProvider.Align.Start,
-        onDismissRequest = { showPopup.value = false }
+        onDismissRequest = { showPopup = false }
     ) {
-        val dismiss = LocalWindowListPopupState.current
+        val dismiss = LocalDismissState.current
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 DropdownImpl(
@@ -51,7 +51,7 @@ Box {
                     isSelected = selectedIndex == index,
                     onSelectedIndexChange = {
                         selectedIndex = index
-                        dismiss()
+                        dismiss?.invoke()
                     },
                     index = index
                 )
@@ -67,10 +67,10 @@ Box {
 
 | Property Name         | Type                        | Description                                                      | Default Value                              |
 | --------------------- | --------------------------- | ---------------------------------------------------------------- | ------------------------------------------ |
-| show                  | MutableState\<Boolean>      | Controls the visibility state of the popup.                      | -                                          |
+| show                  | Boolean                     | Whether to show the popup.                                       | -                                          |
 | popupModifier         | Modifier                    | Modifier applied to the popup container.                         | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | Provides position calculation logic for the popup.               | ListPopupDefaults.DropdownPositionProvider |
-| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.     | PopupPositionProvider.Align.End            |
+| alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.     | PopupPositionProvider.Align.Start          |
 | enableWindowDim       | Boolean                     | Whether to dim the background when popup is shown.               | true                                       |
 | onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside) | null                                       |
 | maxHeight             | Dp?                         | Maximum height of the popup content.                             | null                                       |
@@ -94,14 +94,14 @@ Box {
 | BottomStart | Aligns the popup to the bottom-start of the anchor. |
 | BottomEnd   | Aligns the popup to the bottom-end of the anchor.   |
 
-### LocalWindowListPopupState
+### LocalDismissState
 
-Provides a function `() -> Unit` to dismiss the current popup from within its content.
+Provides a `(() -> Unit)?` function to dismiss the current popup from within its content. This is a unified dismiss state provided by all overlay components.
 
 ```kotlin
-val state = LocalWindowListPopupState.current
+val dismiss = LocalDismissState.current
 TextButton(
     text = "Close",
-    onClick = { state.invoke() }
+    onClick = { dismiss?.invoke() }
 )
 ```

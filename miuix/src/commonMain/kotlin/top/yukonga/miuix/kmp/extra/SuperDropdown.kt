@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -49,6 +49,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperDropdown] is enabled.
  * @param showValue Whether to show the selected value of the [SuperDropdown].
+ * @param renderInRootScaffold Whether to render the popup in the root (outermost) Scaffold.
+ *   When true (default), the popup covers the full screen. When false, it renders within the
+ *   current Scaffold's bounds with position compensation.
  * @param onSelectedIndexChange The callback when the selected index of the [SuperDropdown] is changed.
  */
 @Composable
@@ -67,6 +70,7 @@ fun SuperDropdown(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -120,10 +124,12 @@ fun SuperDropdown(
                 SuperDropdownPopup(
                     items = items,
                     selectedIndex = selectedIndex,
-                    isDropdownExpanded = isDropdownExpanded,
+                    isDropdownExpanded = isDropdownExpanded.value,
+                    onDismiss = { isDropdownExpanded.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
+                    renderInRootScaffold = renderInRootScaffold,
                     onSelectedIndexChange = onSelectedIndexChange,
                 )
             }
@@ -139,20 +145,21 @@ fun SuperDropdown(
 private fun SuperDropdownPopup(
     items: List<String>,
     selectedIndex: Int,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
+    renderInRootScaffold: Boolean,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
     SuperListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        onDismissRequest = onDismiss,
         maxHeight = maxHeight,
+        renderInRootScaffold = renderInRootScaffold,
     ) {
         ListPopupColumn {
             items.forEachIndexed { index, string ->
@@ -165,7 +172,7 @@ private fun SuperDropdownPopup(
                         onSelectedIndexChange = { selectedIdx ->
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                             onSelectState.value?.invoke(selectedIdx)
-                            isDropdownExpanded.value = false
+                            onDismiss()
                         },
                         index = index,
                     )

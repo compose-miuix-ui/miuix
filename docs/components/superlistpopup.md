@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - Must be used within `Scaffold` to provide `MiuixPopupHost`
   - Using outside `Scaffold` will cause popup content not to render
-  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -33,7 +33,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 The SuperListPopup component can be used to create simple dropdown menus:
 
 ```kotlin
-val showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 var selectedIndex by remember { mutableStateOf(0) }
 val items = listOf("Option 1", "Option 2", "Option 3")
 
@@ -41,12 +41,12 @@ Scaffold {
     Box {
         TextButton(
             text = "Click to show menu",
-            onClick = { showPopup.value = true }
+            onClick = { showPopup = true }
         )
         SuperListPopup(
             show = showPopup,
             alignment = PopupPositionProvider.Align.Start,
-            onDismissRequest = { showPopup.value = false } // Close the popup menu
+            onDismissRequest = { showPopup = false } // Close the popup menu
         ) {
             ListPopupColumn {
                 items.forEachIndexed { index, string ->
@@ -56,7 +56,7 @@ Scaffold {
                         isSelected = selectedIndex == index,
                         onSelectedIndexChange = {
                             selectedIndex = index
-                            showPopup.value = false // Close the popup menu
+                            showPopup = false // Close the popup menu
                         },
                         index = index
                     )
@@ -73,11 +73,11 @@ Scaffold {
 SuperListPopup can be set with different alignment options:
 
 ```kotlin
-var showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 
 SuperListPopup(
     show = showPopup,
-    onDismissRequest = { showPopup.value = false }, // Close the popup menu
+    onDismissRequest = { showPopup = false }, // Close the popup menu
     alignment = PopupPositionProvider.Align.Start
 ) {
     ListPopupColumn {
@@ -89,11 +89,11 @@ SuperListPopup(
 ### Disable Window Dimming
 
 ```kotlin
-var showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 
 SuperListPopup(
     show = showPopup,
-    onDismissRequest = { showPopup.value = false } // Close the popup menu
+    onDismissRequest = { showPopup = false } // Close the popup menu
     enableWindowDim = false // Disable dimming layer
 ) {
     ListPopupColumn {
@@ -108,7 +108,7 @@ SuperListPopup(
 
 | Property Name         | Type                        | Description                                                       | Default Value                              |
 | --------------------- | --------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
-| show                  | MutableState\<Boolean>      | Controls the visibility state of the popup.                       | -                                          |
+| show                  | Boolean                     | Whether to show the popup.                                        | -                                          |
 | popupModifier         | Modifier                    | Modifier applied to the popup container.                          | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | Provides position calculation logic for the popup.                | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | Specifies the alignment of the popup relative to the anchor.      | PopupPositionProvider.Align.End            |
@@ -116,6 +116,7 @@ SuperListPopup(
 | onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside). | null                                       |
 | maxHeight             | Dp?                         | Maximum height of the popup content.                              | null                                       |
 | minWidth              | Dp                          | Minimum width of the popup content.                               | 200.dp                                     |
+| renderInRootScaffold  | Boolean                     | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation. | true |
 | content               | @Composable () -> Unit      | The content to display inside the popup.                          | -                                          |
 
 ### ListPopupColumn

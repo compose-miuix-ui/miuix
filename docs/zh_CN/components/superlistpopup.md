@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - 必须在 `Scaffold` 内使用以提供 `MiuixPopupHost`
   - 在 `Scaffold` 外使用会导致弹窗内容不渲染
-  - 在嵌套的 `Scaffold` 中，仅在顶层保留 `MiuixPopupHost`；将其他的设为空
+  - 支持多个嵌套或并列的 `Scaffold`，无需额外配置
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -33,7 +33,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 SuperListPopup 组件可用于创建简单的下拉菜单：
 
 ```kotlin
-val showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 var selectedIndex by remember { mutableStateOf(0) }
 val items = listOf("选项 1", "选项 2", "选项 3")
 
@@ -41,12 +41,12 @@ Scaffold {
     Box {
         TextButton(
             text = "点击显示菜单",
-            onClick = { showPopup.value = true }
+            onClick = { showPopup = true }
         )
         SuperListPopup(
             show = showPopup,
             alignment = PopupPositionProvider.Align.Start,
-            onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
+            onDismissRequest = { showPopup = false } // 关闭弹窗菜单
         ) {
             ListPopupColumn {
                 items.forEachIndexed { index, string ->
@@ -56,7 +56,7 @@ Scaffold {
                         isSelected = selectedIndex == index,
                         onSelectedIndexChange = {
                             selectedIndex = index
-                            showPopup.value = false // 关闭弹窗菜单
+                            showPopup = false // 关闭弹窗菜单
                         },
                         index = index
                     )
@@ -74,11 +74,11 @@ Scaffold {
 SuperListPopup 可以设置不同的对齐选项：
 
 ```kotlin
-var showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 
 SuperListPopup(
     show = showPopup,
-    onDismissRequest = { showPopup.value = false }, // 关闭弹窗菜单
+    onDismissRequest = { showPopup = false }, // 关闭弹窗菜单
     alignment = PopupPositionProvider.Align.Start
 ) {
     ListPopupColumn {
@@ -90,11 +90,11 @@ SuperListPopup(
 ### 禁用窗口变暗
 
 ```kotlin
-var showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 
 SuperListPopup(
     show = showPopup,
-    onDismissRequest = { showPopup.value = false } // 关闭弹窗菜单
+    onDismissRequest = { showPopup = false } // 关闭弹窗菜单
     enableWindowDim = false // 禁用变暗层
 ) {
     ListPopupColumn {
@@ -109,7 +109,7 @@ SuperListPopup(
 
 | 属性名                | 类型                        | 说明                                 | 默认值                                     |
 | --------------------- | --------------------------- | ------------------------------------ | ------------------------------------------ |
-| show                  | MutableState\<Boolean>      | 控制弹窗的显示状态                   | -                                          |
+| show                  | Boolean                     | 是否显示弹窗                         | -                                          |
 | popupModifier         | Modifier                    | 应用于弹窗容器的修饰符               | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | 提供弹窗的位置计算逻辑               | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.End            |
@@ -118,6 +118,7 @@ SuperListPopup(
 | onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
 | maxHeight             | Dp?                         | 弹窗内容的最大高度                   | null                                       |
 | minWidth              | Dp                          | 弹窗内容的最小宽度                   | 200.dp                                     |
+| renderInRootScaffold  | Boolean                     | 是否在根（最外层）Scaffold 中渲染弹窗。为 true 时，弹窗覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染并进行位置补偿 | true |
 | content               | @Composable () -> Unit      | 要在弹窗内显示的内容                 | -                                          |
 
 ### ListPopupColumn

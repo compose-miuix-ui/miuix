@@ -53,8 +53,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.CheckboxLocation
-import top.yukonga.miuix.kmp.extra.LocalWindowBottomSheetState
-import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
+import top.yukonga.miuix.kmp.extra.LocalDismissState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperCheckbox
@@ -590,34 +589,34 @@ fun SuperDialog(
     showDialog: MutableState<Boolean>,
 ) {
     SuperDialog(
+        show = showDialog.value,
         title = "SuperDialog",
         summary = "A dialog component inside MiuixPopupHost.",
-        show = showDialog,
         onDismissRequest = {
             showDialog.value = false
         },
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            TextButton(
-                text = "Cancel",
-                onClick = {
-                    showDialog.value = false
-                },
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(20.dp))
-            TextButton(
-                text = "Confirm",
-                onClick = {
-                    showDialog.value = false
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary(),
-            )
-        }
-    }
+        content = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                TextButton(
+                    text = "Cancel",
+                    onClick = {
+                        showDialog.value = false
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(20.dp))
+                TextButton(
+                    text = "Confirm",
+                    onClick = {
+                        showDialog.value = false
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        })
 }
 
 @Composable
@@ -625,35 +624,35 @@ fun WindowDialog(
     showDialog: MutableState<Boolean>,
 ) {
     WindowDialog(
+        show = showDialog.value,
         title = "WindowDialog",
         summary = "A window-level dialog, no MiuixPopupHost required.",
-        show = showDialog,
         onDismissRequest = {
             showDialog.value = false
         },
-    ) {
-        val state = LocalWindowDialogState.current
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            TextButton(
-                text = "Cancel",
-                onClick = {
-                    state.invoke()
-                },
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(20.dp))
-            TextButton(
-                text = "Confirm",
-                onClick = {
-                    state.invoke()
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary(),
-            )
-        }
-    }
+        content = {
+            val state = LocalDismissState.current
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                TextButton(
+                    text = "Cancel",
+                    onClick = {
+                        state?.invoke()
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(20.dp))
+                TextButton(
+                    text = "Confirm",
+                    onClick = {
+                        state?.invoke()
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        })
 }
 
 @Composable
@@ -663,48 +662,51 @@ fun SliderDialog(
     onVolumeChange: (Float) -> Unit,
 ) {
     SuperDialog(
+        show = showDialog.value,
         title = "Adjust Volume",
         summary = "Enter 0-100",
-        show = showDialog,
-        onDismissRequest = { showDialog.value = false },
-    ) {
-        var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
-        TextField(
-            modifier = Modifier.padding(bottom = 16.dp),
-            value = text,
-            maxLines = 1,
-            onValueChange = { newValue ->
-                val digits = newValue.filter { it.isDigit() }
-                if (digits.isEmpty()) {
-                    text = ""
-                } else {
-                    val limited = digits.take(3)
-                    val num = limited.toIntOrNull() ?: 0
-                    val clamped = num.coerceIn(0, 100)
-                    text = clamped.toString()
-                }
-            },
-        )
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(
-                text = "Cancel",
-                onClick = { showDialog.value = false },
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(20.dp))
-            TextButton(
-                text = "Confirm",
-                onClick = {
-                    val parsed = text.toIntOrNull()
-                    val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
-                    onVolumeChange(clamped / 100f)
-                    showDialog.value = false
+        onDismissRequest = {
+            showDialog.value = false
+        },
+        content = {
+            var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
+            TextField(
+                modifier = Modifier.padding(bottom = 16.dp),
+                value = text,
+                maxLines = 1,
+                onValueChange = { newValue ->
+                    val digits = newValue.filter { it.isDigit() }
+                    if (digits.isEmpty()) {
+                        text = ""
+                    } else {
+                        val limited = digits.take(3)
+                        val num = limited.toIntOrNull() ?: 0
+                        val clamped = num.coerceIn(0, 100)
+                        text = clamped.toString()
+                    }
                 },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(
+                    text = "Cancel",
+                    onClick = { showDialog.value = false },
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(20.dp))
+                TextButton(
+                    text = "Confirm",
+                    onClick = {
+                        val parsed = text.toIntOrNull()
+                        val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
+                        onVolumeChange(clamped / 100f)
+                        showDialog.value = false
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
         }
-    }
+    )
 }
 
 @Composable
@@ -719,7 +721,7 @@ fun SuperBottomSheet(
     val dropdownOptions = listOf("Option 1", "Option 2")
     SuperBottomSheet(
         title = "BottomSheet",
-        show = showBottomSheet,
+        show = showBottomSheet.value,
         allowDismiss = allowDismiss.value,
         enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
@@ -829,7 +831,7 @@ fun WindowBottomSheet(
     var state: (() -> Unit)? = null
     WindowBottomSheet(
         title = "WindowBottomSheet",
-        show = showBottomSheet,
+        show = showBottomSheet.value,
         allowDismiss = allowDismiss.value,
         enableNestedScroll = enableNestedScroll.value,
         onDismissRequest = {
@@ -860,7 +862,7 @@ fun WindowBottomSheet(
             }
         },
     ) {
-        state = LocalWindowBottomSheetState.current
+        state = LocalDismissState.current
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()

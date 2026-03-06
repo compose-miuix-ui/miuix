@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - 必须在 `Scaffold` 中使用以提供 `MiuixPopupHost`
   - 未在 `Scaffold` 中使用将导致弹出内容无法渲染
-  - 多层 `Scaffold` 时仅在顶层保留 `MiuixPopupHost`，其余置空
+  - 支持多个嵌套或并列的 `Scaffold`，无需额外配置
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -32,23 +32,23 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
 SuperDialog 组件提供了基础的对话框功能：
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "显示对话框",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "对话框标题",
         summary = "这是一个基本的对话框示例，可以包含各种内容。",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         TextButton(
             text = "确定",
-            onClick = { showDialog.value = false }, // 关闭对话框
+            onClick = { showDialog = false }, // 关闭对话框
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -61,22 +61,23 @@ Scaffold {
 
 | 属性名                     | 类型                   | 说明                                         | 默认值                                | 是否必须 |
 | -------------------------- | ---------------------- | -------------------------------------------- | ------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | 控制对话框显示状态的状态对象                 | -                                     | 是       |
+| show                       | Boolean                | 是否显示对话框                               | -                                     | 是       |
 | modifier                   | Modifier               | 应用于对话框的修饰符                         | Modifier                              | 否       |
 | title                      | String?                | 对话框的标题                                 | null                                  | 否       |
-| titleColor                 | Color                  | 标题文本的颜色                               | SuperDialogDefaults.titleColor()      | 否       |
+| titleColor                 | Color                  | 标题文本的颜色                               | DialogDefaults.titleColor()      | 否       |
 | summary                    | String?                | 对话框的摘要说明                             | null                                  | 否       |
-| summaryColor               | Color                  | 摘要文本的颜色                               | SuperDialogDefaults.summaryColor()    | 否       |
-| backgroundColor            | Color                  | 对话框背景色                                 | SuperDialogDefaults.backgroundColor() | 否       |
+| summaryColor               | Color                  | 摘要文本的颜色                               | DialogDefaults.summaryColor()    | 否       |
+| backgroundColor            | Color                  | 对话框背景色                                 | DialogDefaults.backgroundColor() | 否       |
 | enableWindowDim            | Boolean                | 是否启用遮罩层                               | true                                  | 否       |
 | onDismissRequest           | (() -> Unit)?          | 当用户请求关闭（点击遮罩层或返回手势）时触发 | null                                  | 否       |
 | onDismissFinished          | (() -> Unit)?          | 对话框完全关闭（动画结束）时的回调           | null                                  | 否       |
-| outsideMargin              | DpSize                 | 对话框外部边距                               | SuperDialogDefaults.outsideMargin     | 否       |
-| insideMargin               | DpSize                 | 对话框内部内容的边距                         | SuperDialogDefaults.insideMargin      | 否       |
+| outsideMargin              | DpSize                 | 对话框外部边距                               | DialogDefaults.outsideMargin     | 否       |
+| insideMargin               | DpSize                 | 对话框内部内容的边距                         | DialogDefaults.insideMargin      | 否       |
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距                   | true                                  | 否       |
+| renderInRootScaffold       | Boolean                | 是否在根（最外层）Scaffold 中渲染对话框。为 true 时，对话框覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染 | true | 否 |
 | content                    | @Composable () -> Unit | 对话框的内容                                 | -                                     | 是       |
 
-### SuperDialogDefaults
+### DialogDefaults
 
 #### 属性
 
@@ -98,19 +99,19 @@ Scaffold {
 ### 自定义样式对话框
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "显示自定义样式对话框",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "自定义样式",
         summary = "这个对话框使用了自定义颜色和边距",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }, // 关闭对话框
+        onDismissRequest = { showDialog = false }, // 关闭对话框
         titleColor = Color.Blue,
         summaryColor = Color.Gray,
         backgroundColor = Color(0xFFF5F5F5),
@@ -124,7 +125,7 @@ Scaffold {
         
         TextButton(
             text = "关闭",
-            onClick = { showDialog.value = false }, // 关闭对话框
+            onClick = { showDialog = false }, // 关闭对话框
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -134,14 +135,14 @@ Scaffold {
 ### 创建确认对话框
 
 ```kotlin
-var showConfirmDialog = remember { mutableStateOf(false) }
+var showConfirmDialog by remember { mutableStateOf(false) }
 var result by remember { mutableStateOf("") }
 
 Scaffold {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TextButton(
             text = "显示确认对话框",
-            onClick = { showConfirmDialog.value = true }
+            onClick = { showConfirmDialog = true }
         )
         
         Text("结果: $result")
@@ -151,7 +152,7 @@ Scaffold {
         title = "确认操作",
         summary = "此操作不可撤销，是否继续？",
         show = showConfirmDialog,
-        onDismissRequest = { showConfirmDialog.value = false } // 关闭对话框
+        onDismissRequest = { showConfirmDialog = false } // 关闭对话框
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
@@ -160,7 +161,7 @@ Scaffold {
                 text = "取消",
                 onClick = { 
                     result = "用户取消了操作"
-                    showConfirmDialog.value = false // 关闭对话框
+                    showConfirmDialog = false // 关闭对话框
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -169,7 +170,7 @@ Scaffold {
                 text = "确认",
                 onClick = { 
                     result = "用户确认了操作"
-                    showConfirmDialog.value = false // 关闭对话框
+                    showConfirmDialog = false // 关闭对话框
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // 使用主题颜色
@@ -182,19 +183,19 @@ Scaffold {
 ### 带有输入框的对话框
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var textFieldValue by remember { mutableStateOf("") }
 
 Scaffold {
     TextButton(
         text = "显示输入对话框",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "请输入内容",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         TextField(
             modifier = Modifier.padding(bottom = 16.dp),
@@ -208,13 +209,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "取消",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
                 text = "确认",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // 使用主题颜色
             )
@@ -226,7 +227,7 @@ Scaffold {
 ### 带有表单的对话框
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var dropdownSelectedOption by remember { mutableStateOf(0) }
 var switchState by remember { mutableStateOf(false) }
 val dropdownOptions = listOf("选项 1", "选项 2")
@@ -234,13 +235,13 @@ val dropdownOptions = listOf("选项 1", "选项 2")
 Scaffold {
     TextButton(
         text = "显示表单对话框",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "表单对话框",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         Card(
             color = MiuixTheme.colorScheme.secondaryContainer,
@@ -266,13 +267,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "取消",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
                 text = "确认",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // 使用主题颜色
             )
@@ -284,19 +285,19 @@ Scaffold {
 ### 带有颜色选择器的对话框
 
 ```kotlin
-var showColorDialog = remember { mutableStateOf(false) }
+var showColorDialog by remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 Scaffold {
     TextButton(
         text = "选择颜色",
-        onClick = { showColorDialog.value = true }
+        onClick = { showColorDialog = true }
     )
     
     SuperDialog(
         title = "选择颜色",
         show = showColorDialog,
-        onDismissRequest = { showColorDialog.value = false } // 关闭对话框
+        onDismissRequest = { showColorDialog = false } // 关闭对话框
     ) {
         Column {
             ColorPicker(
@@ -311,14 +312,14 @@ Scaffold {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "取消",
-                    onClick = { showColorDialog.value = false } // 关闭对话框
+                    onClick = { showColorDialog = false } // 关闭对话框
                 )
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "确认",
                     colors = ButtonDefaults.textButtonColorsPrimary(), // 使用主题颜色
                     onClick = {
-                        showColorDialog.value = false // 关闭对话框
+                        showColorDialog = false // 关闭对话框
                         // 处理确认逻辑
                     }
                 )

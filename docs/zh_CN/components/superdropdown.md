@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - 必须在 `Scaffold` 中使用以提供 `MiuixPopupHost`
   - 未在 `Scaffold` 中使用将导致弹出内容无法渲染
-  - 多层 `Scaffold` 时仅在顶层保留 `MiuixPopupHost`，其余置空
+  - 支持多个嵌套或并列的 `Scaffold`，无需额外配置
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -97,6 +97,7 @@ SuperDropdown(
 | maxHeight             | Dp?                       | 下拉菜单的最大高度   | null                                  | 否       |
 | enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中的值 | true                                  | 否       |
+| renderInRootScaffold  | Boolean                   | 是否在根（最外层）Scaffold 中渲染弹窗。为 true 时，弹窗覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染并进行位置补偿 | true | 否 |
 | onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调   | -                                     | 否       |
 
 ### DropdownColors 属性

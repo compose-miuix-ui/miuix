@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - Must be used within `Scaffold` to provide `MiuixPopupHost`
   - Using outside `Scaffold` will cause popup content not to render
-  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -32,18 +32,18 @@ import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 SuperBottomSheet component provides basic bottom sheet functionality:
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Bottom Sheet",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Bottom Sheet Title",
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Text(text = "This is the content of the bottom sheet")
     }
@@ -56,30 +56,31 @@ Scaffold {
 
 | Property Name              | Type                      | Description                                                    | Default Value                              | Required |
 | -------------------------- | ------------------------- |----------------------------------------------------------------| ------------------------------------------ |----------|
-| show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                          | Yes      |
+| show                       | Boolean                   | Whether to show the bottom sheet                               | -                                          | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                   | No       |
 | title                      | String?                   | Bottom sheet title                                             | null                                       | No       |
 | startAction                | @Composable (() -> Unit)? | Optional composable for start action (e.g., close button)      | null                                       | No       |
 | endAction                  | @Composable (() -> Unit)? | Optional composable for end action (e.g., submit button)       | null                                       | No       |
-| backgroundColor            | Color                     | Bottom sheet background color                                  | SuperBottomSheetDefaults.backgroundColor() | No       |
+| backgroundColor            | Color                     | Bottom sheet background color                                  | BottomSheetDefaults.backgroundColor() | No       |
 | enableWindowDim            | Boolean                   | Whether to enable dimming layer                                | true                                       | No       |
-| cornerRadius               | Dp                        | Corner radius of the top corners                               | SuperBottomSheetDefaults.cornerRadius      | No       |
-| sheetMaxWidth              | Dp                        | Maximum width of the bottom sheet                              | SuperBottomSheetDefaults.maxWidth          | No       |
+| cornerRadius               | Dp                        | Corner radius of the top corners                               | BottomSheetDefaults.cornerRadius      | No       |
+| sheetMaxWidth              | Dp                        | Maximum width of the bottom sheet                              | BottomSheetDefaults.maxWidth          | No       |
 | onDismissRequest           | (() -> Unit)?             | Called when the user requests dismissal (outside tap or back)  | null                                       | No       |
 | onDismissFinished          | (() -> Unit)?             | Callback after bottom sheet fully dismisses                    | null                                       | No       |
-| outsideMargin              | DpSize                    | Bottom sheet external margin                                   | SuperBottomSheetDefaults.outsideMargin     | No       |
-| insideMargin               | DpSize                    | Bottom sheet internal content margin                           | SuperBottomSheetDefaults.insideMargin      | No       |
+| outsideMargin              | DpSize                    | Bottom sheet external margin                                   | BottomSheetDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                    | Bottom sheet internal content margin                           | BottomSheetDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                   | Whether to apply default window insets padding                 | true                                       | No       |
-| dragHandleColor            | Color                     | Drag indicator color                                           | SuperBottomSheetDefaults.dragHandleColor() | No       |
+| dragHandleColor            | Color                     | Drag indicator color                                           | BottomSheetDefaults.dragHandleColor() | No       |
 | allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                       | No       |
 | enableNestedScroll         | Boolean                   | Whether to enable nested scrolling for the content             | true                                       | No       |
+| renderInRootScaffold       | Boolean                   | Whether to render the bottom sheet in the root (outermost) Scaffold. When true, it covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                          | Yes      |
 
-### SuperBottomSheetDefaults Object
+### BottomSheetDefaults Object
 
-The SuperBottomSheetDefaults object provides default settings for the SuperBottomSheet component.
+The BottomSheetDefaults object provides default settings for the SuperBottomSheet component.
 
-#### SuperBottomSheetDefaults Properties
+#### BottomSheetDefaults Properties
 
 | Property Name | Type   | Description                          |
 | ------------- | ------ | ------------------------------------ |
@@ -88,7 +89,7 @@ The SuperBottomSheetDefaults object provides default settings for the SuperBotto
 | outsideMargin | DpSize | Default bottom sheet external margin |
 | insideMargin  | DpSize | Default bottom sheet internal margin |
 
-#### SuperBottomSheetDefaults Functions
+#### BottomSheetDefaults Functions
 
 | Function Name     | Return Type | Description                      |
 | ----------------- | ----------- | -------------------------------- |
@@ -100,12 +101,12 @@ The SuperBottomSheetDefaults object provides default settings for the SuperBotto
 ### Custom Styled Bottom Sheet
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Custom Styled Bottom Sheet",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
@@ -115,14 +116,14 @@ Scaffold {
         dragHandleColor = MiuixTheme.colorScheme.primary,
         outsideMargin = DpSize(16.dp, 0.dp),
         insideMargin = DpSize(32.dp, 16.dp),
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Column {
             Text("Custom styled bottom sheet")
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(
                 text = "Close",
-                onClick = { showBottomSheet.value = false },
+                onClick = { showBottomSheet = false },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -133,14 +134,14 @@ Scaffold {
 ### Bottom Sheet with List Content
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 var selectedItem by remember { mutableStateOf("") }
 
 Scaffold {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TextButton(
             text = "Show Selection List",
-            onClick = { showBottomSheet.value = true }
+            onClick = { showBottomSheet = true }
         )
         
         Text("Selected: $selectedItem")
@@ -149,7 +150,7 @@ Scaffold {
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Select Item",
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         LazyColumn {
             items(20) { index ->
@@ -159,7 +160,7 @@ Scaffold {
                         .fillMaxWidth()
                         .clickable {
                             selectedItem = "Item ${index + 1}"
-                            showBottomSheet.value = false
+                            showBottomSheet = false
                         }
                         .padding(vertical = 12.dp)
                 )
@@ -172,25 +173,25 @@ Scaffold {
 ### Without Dimming Layer
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Bottom Sheet Without Dim",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
         show = showBottomSheet,
         title = "No Dimming",
         enableWindowDim = false,
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Text("This bottom sheet has no background dimming layer")
         Spacer(modifier = Modifier.height(16.dp))
         TextButton(
             text = "Close",
-            onClick = { showBottomSheet.value = false },
+            onClick = { showBottomSheet = false },
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -200,12 +201,12 @@ Scaffold {
 ### Bottom Sheet with Action Buttons
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Bottom Sheet with Actions",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
@@ -214,7 +215,7 @@ Scaffold {
         startAction = {
             TextButton(
                 text = "Cancel",
-                onClick = { showBottomSheet.value = false }
+                onClick = { showBottomSheet = false }
             )
         },
         endAction = {
@@ -222,12 +223,12 @@ Scaffold {
                 text = "Confirm",
                 onClick = { 
                     // Handle confirm action
-                    showBottomSheet.value = false 
+                    showBottomSheet = false 
                 },
                 colors = ButtonDefaults.textButtonColorsPrimary()
             )
         },
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Text("Content with custom header actions")
         Spacer(modifier = Modifier.height(16.dp))
@@ -239,20 +240,20 @@ Scaffold {
 ### Bottom Sheet with Form
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 var textFieldValue by remember { mutableStateOf("") }
 var switchState by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Form Bottom Sheet",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Settings Form",
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Card(
             color = MiuixTheme.colorScheme.secondaryContainer,
@@ -279,13 +280,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showBottomSheet.value = false },
+                onClick = { showBottomSheet = false },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
                 text = "Confirm",
-                onClick = { showBottomSheet.value = false },
+                onClick = { showBottomSheet = false },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
             )
@@ -297,18 +298,18 @@ Scaffold {
 ### Adaptive Content Height
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Adaptive Height Bottom Sheet",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Adaptive Height",
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
             Text("The height adapts to content")
@@ -319,7 +320,7 @@ Scaffold {
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(
                 text = "Close",
-                onClick = { showBottomSheet.value = false },
+                onClick = { showBottomSheet = false },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -330,19 +331,19 @@ Scaffold {
 ### Non-Dismissible Bottom Sheet
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Non-Dismissible Bottom Sheet",
-        onClick = { showBottomSheet.value = true }
+        onClick = { showBottomSheet = true }
     )
 
     SuperBottomSheet(
         show = showBottomSheet,
         title = "Non-Dismissible",
         allowDismiss = false,
-        onDismissRequest = { showBottomSheet.value = false }
+        onDismissRequest = { showBottomSheet = false }
     ) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
             Text("This bottom sheet cannot be dismissed by dragging or back gesture")
@@ -351,7 +352,7 @@ Scaffold {
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(
                 text = "Close",
-                onClick = { showBottomSheet.value = false },
+                onClick = { showBottomSheet = false },
                 modifier = Modifier.fillMaxWidth()
             )
         }

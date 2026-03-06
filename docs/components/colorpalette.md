@@ -143,18 +143,18 @@ Surface {
 Use `ColorPalette` in a dialog to select a color:
 
 ```kotlin
-var showColorDialog = remember { mutableStateOf(false) }
+var showColorDialog by remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color(0xFF2196F3)) }
 
 Scaffold {
     TextButton(
         text = "Select Color",
-        onClick = { showColorDialog.value = true }
+        onClick = { showColorDialog = true }
     )
     SuperDialog(
         title = "Select Color",
         show = showColorDialog,
-        onDismissRequest = { showColorDialog.value = false } // Close dialog
+        onDismissRequest = { showColorDialog = false } // Close dialog
     ) {
         Column {
             ColorPalette(
@@ -169,14 +169,14 @@ Scaffold {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "Cancel",
-                    onClick = { showColorDialog.value = false } // Close dialog
+                    onClick = { showColorDialog = false } // Close dialog
                 )
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "Confirm",
                     colors = ButtonDefaults.textButtonColorsPrimary(), // Use theme color
                     onClick = {
-                        showColorDialog.value = false
+                        showColorDialog = false
                         // Handle confirmation logic
                         // For example: save the selected color
                     })

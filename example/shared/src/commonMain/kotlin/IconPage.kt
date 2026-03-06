@@ -59,7 +59,6 @@ fun IconsPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         val allIcons = remember { MiuixIcons.All }
         LazyColumn(

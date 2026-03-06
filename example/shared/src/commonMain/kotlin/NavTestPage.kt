@@ -1,14 +1,12 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -41,7 +39,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
+import top.yukonga.miuix.kmp.extra.LocalDismissState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -284,31 +282,32 @@ fun TopBarActions() {
         )
     }
     WindowListPopup(
-        show = showTopPopup,
+        show = showTopPopup.value,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = PopupPositionProvider.Align.TopEnd,
         onDismissRequest = {
             showTopPopup.value = false
         },
-    ) {
-        val state = LocalWindowListPopupState.current
-        val items = listOf("Window 1", "Window 2", "Window 3")
-        ListPopupColumn {
-            items.forEachIndexed { index, string ->
-                key(index) {
-                    DropdownImpl(
-                        text = string,
-                        optionSize = items.size,
-                        isSelected = selectedIndex == index,
-                        onSelectedIndexChange = { selectedIdx ->
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                            selectedIndex = selectedIdx
-                            state.invoke()
-                        },
-                        index = index,
-                    )
+        content = {
+            val state = LocalDismissState.current
+            val items = listOf("Window 1", "Window 2", "Window 3")
+            ListPopupColumn {
+                items.forEachIndexed { index, string ->
+                    key(index) {
+                        DropdownImpl(
+                            text = string,
+                            optionSize = items.size,
+                            isSelected = selectedIndex == index,
+                            onSelectedIndexChange = { selectedIdx ->
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                                selectedIndex = selectedIdx
+                                state?.invoke()
+                            },
+                            index = index,
+                        )
+                    }
                 }
             }
         }
-    }
+    )
 }

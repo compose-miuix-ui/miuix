@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +30,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.SpinnerColors
 import top.yukonga.miuix.kmp.basic.SpinnerDefaults
@@ -129,7 +128,8 @@ fun WindowSpinner(
                 WindowSpinnerPopup(
                     items = items,
                     selectedIndex = selectedIndex,
-                    isDropdownExpanded = isDropdownExpanded,
+                    isDropdownExpanded = isDropdownExpanded.value,
+                    onDismiss = { isDropdownExpanded.value = false },
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
@@ -148,7 +148,8 @@ fun WindowSpinner(
 private fun WindowSpinnerPopup(
     items: List<SpinnerEntry>,
     selectedIndex: Int,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
@@ -158,12 +159,10 @@ private fun WindowSpinnerPopup(
     WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        onDismissRequest = onDismiss,
         maxHeight = maxHeight,
     ) {
-        val dismiss = LocalWindowListPopupState.current
+        val dismiss = LocalDismissState.current
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
                 key(index) {
@@ -177,7 +176,7 @@ private fun WindowSpinnerPopup(
                     ) { selectedIdx ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSelectState.value?.invoke(selectedIdx)
-                        dismiss()
+                        dismiss?.invoke()
                     }
                 }
             }
@@ -236,10 +235,6 @@ fun WindowSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val componentModifier = modifier.pointerInput(actualEnabled) {
-        if (!actualEnabled) return@pointerInput
-    }
-
     val handleClick: () -> Unit = {
         if (actualEnabled) {
             isDropdownExpanded.value = !isDropdownExpanded.value
@@ -247,7 +242,7 @@ fun WindowSpinner(
     }
 
     BasicComponent(
-        modifier = componentModifier,
+        modifier = modifier,
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -276,7 +271,8 @@ fun WindowSpinner(
                 selectedIndex = selectedIndex,
                 title = title,
                 dialogButtonString = dialogButtonString,
-                isDropdownExpanded = isDropdownExpanded,
+                isDropdownExpanded = isDropdownExpanded.value,
+                onDismiss = { isDropdownExpanded.value = false },
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
                 popupModifier = popupModifier,
@@ -296,23 +292,24 @@ private fun WindowSpinnerDialog(
     selectedIndex: Int,
     title: String,
     dialogButtonString: String,
-    isDropdownExpanded: MutableState<Boolean>,
+    isDropdownExpanded: Boolean,
+    onDismiss: () -> Unit,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
     popupModifier: Modifier = Modifier,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val showState = remember { mutableStateOf(false) }
+    showState.value = isDropdownExpanded
     WindowDialog(
         modifier = popupModifier,
         title = title,
-        show = isDropdownExpanded,
-        onDismissRequest = {
-            isDropdownExpanded.value = false
-        },
+        show = showState,
+        onDismissRequest = onDismiss,
         insideMargin = DpSize(0.dp, 24.dp),
         content = {
-            val dismiss = LocalWindowDialogState.current
+            val dismiss = LocalDismissState.current
             Layout(
                 content = {
                     LazyColumn {
@@ -327,7 +324,7 @@ private fun WindowSpinnerDialog(
                             ) { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                dismiss.invoke()
+                                dismiss?.invoke()
                             }
                         }
                     }
@@ -337,7 +334,7 @@ private fun WindowSpinnerDialog(
                             .fillMaxWidth(),
                         text = dialogButtonString,
                         minHeight = 50.dp,
-                        onClick = { dismiss.invoke() },
+                        onClick = { dismiss?.invoke() },
                     )
                 },
             ) { measurables, constraints ->

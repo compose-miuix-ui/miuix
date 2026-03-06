@@ -24,26 +24,26 @@ This component is independent of `Scaffold` and can be used in any composable sc
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
+import top.yukonga.miuix.kmp.extra.LocalDismissState
 ```
 
 ## Basic Usage
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 TextButton(
     text = "Open",
-    onClick = { showDialog.value = true }
+    onClick = { showDialog = true }
 )
 
 WindowDialog(
     title = "WindowDialog",
     summary = "A basic window-level dialog",
     show = showDialog,
-    onDismissRequest = { showDialog.value = false }
+    onDismissRequest = { showDialog = false }
 ) {
-    val dismiss = LocalWindowDialogState.current
+    val dismiss = LocalDismissState.current
     TextButton(
         text = "Confirm",
         onClick = { dismiss?.invoke() },
@@ -58,21 +58,21 @@ WindowDialog(
 
 | Property Name              | Type                   | Description                                                   | Default Value                          | Required |
 | -------------------------- | ---------------------- | ------------------------------------------------------------- | -------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | Controls visibility of the dialog                             | -                                      | Yes      |
+| show                       | Boolean                | Whether to show the dialog                                    | -                                      | Yes      |
 | modifier                   | Modifier               | Root content modifier                                         | Modifier                               | No       |
 | title                      | String?                | Dialog title                                                  | null                                   | No       |
-| titleColor                 | Color                  | Title color                                                   | WindowDialogDefaults.titleColor()      | No       |
+| titleColor                 | Color                  | Title color                                                   | DialogDefaults.titleColor()      | No       |
 | summary                    | String?                | Dialog summary                                                | null                                   | No       |
-| summaryColor               | Color                  | Summary color                                                 | WindowDialogDefaults.summaryColor()    | No       |
-| backgroundColor            | Color                  | Dialog background color                                       | WindowDialogDefaults.backgroundColor() | No       |
+| summaryColor               | Color                  | Summary color                                                 | DialogDefaults.summaryColor()    | No       |
+| backgroundColor            | Color                  | Dialog background color                                       | DialogDefaults.backgroundColor() | No       |
 | onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                   | No       |
 | onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses                         | null                                   | No       |
-| outsideMargin              | DpSize                 | Outer margin (window edges)                                   | WindowDialogDefaults.outsideMargin     | No       |
-| insideMargin               | DpSize                 | Inner padding for dialog content                              | WindowDialogDefaults.insideMargin      | No       |
+| outsideMargin              | DpSize                 | Outer margin (window edges)                                   | DialogDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                 | Inner padding for dialog content                              | DialogDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                | Apply default insets padding (IME, nav, caption)              | true                                   | No       |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                      | Yes      |
 
-### WindowDialogDefaults
+### DialogDefaults
 
 #### Properties
 
@@ -89,14 +89,14 @@ WindowDialog(
 | summaryColor()    | Color       | Get default summary color           |
 | backgroundColor() | Color       | Get default dialog background color |
 
-### LocalWindowDialogState
+### LocalDismissState
 
-Provides a `() -> Unit` function to close the current popup from within the content.
+Provides a `(() -> Unit)?` function to close the current popup from within the content. This is a unified dismiss state provided by all overlay components.
 
 ```kotlin
-val state = LocalWindowDialogState.current
+val dismiss = LocalDismissState.current
 TextButton(
     text = "Close",
-    onClick = { state.invoke() }
+    onClick = { dismiss?.invoke() }
 )
 ```

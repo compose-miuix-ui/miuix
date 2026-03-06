@@ -22,4 +22,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class NavTest(val id: String) : Route
+
+    @Serializable
+    data object MultiScaffoldTest : Route
 }

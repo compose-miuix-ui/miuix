@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.RoundedRectangle
+import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.math.abs
@@ -182,6 +185,10 @@ interface PopupPositionProvider {
 }
 
 object ListPopupDefaults {
+    val EnterAnimationSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val ExitAnimationSpec = tween<Float>(300, easing = DecelerateEasing(1.5f))
+    val ResetAnimationSpec = tween<Float>(300, easing = DecelerateEasing(1.5f))
+
     val DropdownPositionProvider = object : PopupPositionProvider {
         override fun calculatePosition(
             anchorBounds: IntRect,
@@ -296,12 +303,18 @@ fun safeTransformOrigin(x: Float, y: Float): TransformOrigin {
     return TransformOrigin(safeX, safeY)
 }
 
+data class PopupLayoutPosition(
+    val showBelow: Boolean,
+    val showAbove: Boolean,
+    val isRightAligned: Boolean,
+)
+
 data class ListPopupLayoutInfo(
     val windowBounds: IntRect,
     val popupMargin: IntRect,
     val effectiveTransformOrigin: TransformOrigin,
     val localTransformOrigin: TransformOrigin,
-    val popupLayoutInfo: Triple<Boolean, Boolean, Boolean>,
+    val popupLayoutPosition: PopupLayoutPosition,
 )
 
 @Composable
@@ -330,6 +343,8 @@ fun rememberListPopupLayoutInfo(
         }
     }
 
+    val containerSize = windowInfo.containerSize
+
     val windowBounds = remember(
         layoutDirection,
         density,
@@ -337,18 +352,19 @@ fun rememberListPopupLayoutInfo(
         statusBars,
         navigationBars,
         captionBar,
+        containerSize,
     ) {
         with(density) {
             IntRect(
                 left = displayCutout.getLeft(this, layoutDirection),
                 top = statusBars.getTop(this),
-                right = windowInfo.containerSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = windowInfo.containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
+                right = containerSize.width - displayCutout.getRight(this, layoutDirection),
+                bottom = containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
             )
         }
     }
 
-    val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds, layoutDirection) {
+    val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds, layoutDirection, containerSize) {
         val xInWindow = when (alignment.resolve(layoutDirection)) {
             PopupPositionProvider.Align.End,
             PopupPositionProvider.Align.TopEnd,
@@ -365,8 +381,8 @@ fun rememberListPopupLayoutInfo(
                 parentBounds.bottom + popupMargin.bottom
         }
         safeTransformOrigin(
-            xInWindow / windowInfo.containerSize.width.toFloat(),
-            yInWindow / windowInfo.containerSize.height.toFloat(),
+            xInWindow / containerSize.width.toFloat(),
+            yInWindow / containerSize.height.toFloat(),
         )
     }
 
@@ -393,7 +409,7 @@ fun rememberListPopupLayoutInfo(
         }
     }
 
-    val popupLayoutInfo = remember(
+    val popupLayoutPosition = remember(
         popupContentSize,
         windowBounds,
         parentBounds,
@@ -410,7 +426,7 @@ fun rememberListPopupLayoutInfo(
 
                 else -> false
             }
-            Triple(false, false, isRightAligned)
+            PopupLayoutPosition(showBelow = false, showAbove = false, isRightAligned = isRightAligned)
         } else {
             val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
             val anchorCenterY = parentBounds.top + parentBounds.height / 2
@@ -421,7 +437,7 @@ fun rememberListPopupLayoutInfo(
             val distRight = abs((calculatedOffset.x + popupContentSize.width) - parentBounds.right)
             val isRightAligned = distRight < distLeft
 
-            Triple(showBelow, showAbove, isRightAligned)
+            PopupLayoutPosition(showBelow = showBelow, showAbove = showAbove, isRightAligned = isRightAligned)
         }
     }
 
@@ -434,12 +450,13 @@ fun rememberListPopupLayoutInfo(
         windowBounds,
         popupPositionProvider,
         calculatedOffset,
-        popupLayoutInfo,
+        popupLayoutPosition,
+        containerSize,
     ) {
         if (popupContentSize == IntSize.Zero) {
             predictedTransformOrigin
         } else {
-            val (showBelow, showAbove, isRightAligned) = popupLayoutInfo
+            val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
             val cornerX = if (isRightAligned) {
                 (calculatedOffset.x + popupContentSize.width).toFloat()
             } else {
@@ -456,14 +473,14 @@ fun rememberListPopupLayoutInfo(
             }
 
             safeTransformOrigin(
-                cornerX / windowInfo.containerSize.width.toFloat(),
-                cornerY / windowInfo.containerSize.height.toFloat(),
+                cornerX / containerSize.width.toFloat(),
+                cornerY / containerSize.height.toFloat(),
             )
         }
     }
 
-    val localTransformOrigin = remember(popupLayoutInfo) {
-        val (showBelow, showAbove, isRightAligned) = popupLayoutInfo
+    val localTransformOrigin = remember(popupLayoutPosition) {
+        val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
         val showMiddle = !showBelow && !showAbove
 
         TransformOrigin(
@@ -482,7 +499,7 @@ fun rememberListPopupLayoutInfo(
         popupMargin = popupMargin,
         effectiveTransformOrigin = effectiveTransformOrigin,
         localTransformOrigin = localTransformOrigin,
-        popupLayoutInfo = popupLayoutInfo,
+        popupLayoutPosition = popupLayoutPosition,
     )
 }
 
@@ -491,7 +508,7 @@ fun ListPopupContent(
     popupContentSize: IntSize,
     onPopupContentSizeChange: (IntSize) -> Unit,
     animationProgress: () -> Float,
-    popupLayoutInfo: Triple<Boolean, Boolean, Boolean>,
+    popupLayoutPosition: PopupLayoutPosition,
     localTransformOrigin: TransformOrigin,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -523,7 +540,7 @@ fun ListPopupContent(
                 }
                 .drawWithContent {
                     val progress = animationProgress()
-                    val (showBelow, showAbove, _) = popupLayoutInfo
+                    val (showBelow, showAbove, _) = popupLayoutPosition
                     val size = this.size
 
                     val clipTop = when {

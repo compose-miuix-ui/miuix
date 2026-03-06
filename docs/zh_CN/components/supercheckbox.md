@@ -204,21 +204,21 @@ SuperCheckbox(
 ### 结合对话框使用
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var privacyOption by remember { mutableStateOf(false) }
 var analyticsOption by remember { mutableStateOf(false) }
 
 Scaffold {
     SuperArrow(
         title = "隐私设置",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     )
     
     SuperDialog(
         title = "隐私设置",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // 关闭对话框
+        onDismissRequest = { showDialog = false } // 关闭对话框
     ) {
         Card {
             SuperCheckbox(
@@ -242,13 +242,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "取消",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(16.dp))
             TextButton(
                 text = "确认",
-                onClick = { showDialog.value = false }, // 关闭对话框
+                onClick = { showDialog = false }, // 关闭对话框
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // 使用主题颜色
             )
