@@ -32,7 +32,7 @@ import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * A arrow with a title and a summary.
+ * An arrow with a title and a summary.
  *
  * @param title The title of the [SuperArrow].
  * @param titleColor The color of the title.

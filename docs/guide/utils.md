@@ -6,7 +6,7 @@ Miuix provides a series of utility functions to help you develop applications mo
 
 `MiuixPopupUtils` is a utility class for displaying dialog layout and popup layout. This class is already integrated into the `Scaffold` component and can be used directly.
 
-If you use multiple Scaffolds, you need to set the `popupHost` parameter in the subordinate `Scaffold` to `null`.
+Each `Scaffold` automatically manages its own isolated popup state, so multiple nested or side-by-side `Scaffold`s work correctly without any extra configuration.
 
 ### DialogLayout
 
@@ -23,7 +23,8 @@ DialogLayout(
     dimEnterTransition = fadeIn(),      // Optional, custom enter animation for dim layer
     dimExitTransition = fadeOut(),      // Optional, custom exit animation for dim layer
     dimAlpha = null,                    // Optional, MutableState<Float> to dynamically control dim layer alph (0f-1f)
-    onDismissFinished = { /* callback after dialog fully dismisses */ } // Optional, callback when the dialog is completely dismissed (after animations)
+    onDismissFinished = { /* callback after dialog fully dismisses */ }, // Optional, callback when the dialog is completely dismissed (after animations)
+    renderInRootScaffold = true,       // Optional, whether to render in the root (outermost) Scaffold, defaults to true
 ) {
     // Dialog content
 }
@@ -43,7 +44,8 @@ PopupLayout(
     exitTransition = fadeOut(),                       // Optional, custom exit animation for popup content
     enableWindowDim = true,                           // Optional, whether to enable dimming layer, defaults to true
     dimEnterTransition = fadeIn(),                    // Optional, custom enter animation for dim layer
-    dimExitTransition = fadeOut()                     // Optional, custom exit animation for dim layer
+    dimExitTransition = fadeOut(),                    // Optional, custom exit animation for dim layer
+    renderInRootScaffold = true,                      // Optional, whether to render in the root (outermost) Scaffold, defaults to true
 ) {
     // Popup content
 }

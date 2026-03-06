@@ -4,7 +4,7 @@ requiresScaffoldHost: true
 prerequisites:
   - Must be used within `Scaffold` to provide `MiuixPopupHost`
   - Using outside `Scaffold` will cause popup content not to render
-  - In nested `Scaffold`s, keep `MiuixPopupHost` only at top-level; set others empty
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
 hostComponent: Scaffold
 popupHost: MiuixPopupHost
 ---
@@ -32,23 +32,23 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
 SuperDialog component provides basic dialog functionality:
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Dialog",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "Dialog Title",
         summary = "This is a basic dialog example that can contain various content.",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // Close dialog
+        onDismissRequest = { showDialog = false } // Close dialog
     ) {
         TextButton(
             text = "Confirm",
-            onClick = { showDialog.value = false }, // Close dialog
+            onClick = { showDialog = false }, // Close dialog
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -61,24 +61,25 @@ Scaffold {
 
 | Property Name              | Type                   | Description                                                   | Default Value                         | Required |
 | -------------------------- | ---------------------- | ------------------------------------------------------------- | ------------------------------------- | -------- |
-| show                       | MutableState\<Boolean> | State object to control dialog visibility                     | -                                     | Yes      |
+| show                       | Boolean                | Whether to show the dialog                                    | -                                     | Yes      |
 | modifier                   | Modifier               | Modifier applied to the dialog                                | Modifier                              | No       |
 | title                      | String?                | Dialog title                                                  | null                                  | No       |
-| titleColor                 | Color                  | Title text color                                              | SuperDialogDefaults.titleColor()      | No       |
+| titleColor                 | Color                  | Title text color                                              | DialogDefaults.titleColor()      | No       |
 | summary                    | String?                | Dialog summary text                                           | null                                  | No       |
-| summaryColor               | Color                  | Summary text color                                            | SuperDialogDefaults.summaryColor()    | No       |
-| backgroundColor            | Color                  | Dialog background color                                       | SuperDialogDefaults.backgroundColor() | No       |
+| summaryColor               | Color                  | Summary text color                                            | DialogDefaults.summaryColor()    | No       |
+| backgroundColor            | Color                  | Dialog background color                                       | DialogDefaults.backgroundColor() | No       |
 | enableWindowDim            | Boolean                | Whether to enable dimming layer                               | true                                  | No       |
 | onDismissRequest           | (() -> Unit)?          | Called when the user requests dismissal (outside tap or back) | null                                  | No       |
 | onDismissFinished          | (() -> Unit)?          | Callback after dialog fully dismisses                         | null                                  | No       |
-| outsideMargin              | DpSize                 | Dialog external margin                                        | SuperDialogDefaults.outsideMargin     | No       |
-| insideMargin               | DpSize                 | Dialog internal content margin                                | SuperDialogDefaults.insideMargin      | No       |
+| outsideMargin              | DpSize                 | Dialog external margin                                        | DialogDefaults.outsideMargin     | No       |
+| insideMargin               | DpSize                 | Dialog internal content margin                                | DialogDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                | Whether to apply default window insets padding                | true                                  | No       |
+| renderInRootScaffold       | Boolean                | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                     | Yes      |
 
-### SuperDialogDefaults Object
+### DialogDefaults Object
 
-The SuperDialogDefaults object provides default settings for the SuperDialog component.
+The DialogDefaults object provides default settings for the SuperDialog component.
 
 #### Properties
 
@@ -100,19 +101,19 @@ The SuperDialogDefaults object provides default settings for the SuperDialog com
 ### Custom Styled Dialog
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     TextButton(
         text = "Show Custom Styled Dialog",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "Custom Style",
         summary = "This dialog uses custom colors and margins",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }, // Close dialog
+        onDismissRequest = { showDialog = false }, // Close dialog
         titleColor = Color.Blue,
         summaryColor = Color.Gray,
         backgroundColor = Color(0xFFF5F5F5),
@@ -126,7 +127,7 @@ Scaffold {
         
         TextButton(
             text = "Close",
-            onClick = { showDialog.value = false }, // Close dialog
+            onClick = { showDialog = false }, // Close dialog
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -136,14 +137,14 @@ Scaffold {
 ### Creating a Confirmation Dialog
 
 ```kotlin
-var showConfirmDialog = remember { mutableStateOf(false) }
+var showConfirmDialog by remember { mutableStateOf(false) }
 var result by remember { mutableStateOf("") }
 
 Scaffold {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TextButton(
             text = "Show Confirmation Dialog",
-            onClick = { showConfirmDialog.value = true }
+            onClick = { showConfirmDialog = true }
         )
         
         Text("Result: $result")
@@ -153,7 +154,7 @@ Scaffold {
         title = "Confirm Action",
         summary = "This action is irreversible, do you want to proceed?",
         show = showConfirmDialog,
-        onDismissRequest = { showConfirmDialog.value = false } // Close dialog
+        onDismissRequest = { showConfirmDialog = false } // Close dialog
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
@@ -162,7 +163,7 @@ Scaffold {
                 text = "Cancel",
                 onClick = { 
                     result = "User cancelled the action"
-                    showConfirmDialog.value = false // Close dialog
+                    showConfirmDialog = false // Close dialog
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -171,7 +172,7 @@ Scaffold {
                 text = "Confirm",
                 onClick = { 
                     result = "User confirmed the action"
-                    showConfirmDialog.value = false // Close dialog 
+                    showConfirmDialog = false // Close dialog 
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
@@ -184,19 +185,19 @@ Scaffold {
 ### Dialog with Input Field
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var textFieldValue by remember { mutableStateOf("") }
 
 Scaffold {
     TextButton(
         text = "Show Input Dialog",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "Please Enter Content",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // Close dialog
+        onDismissRequest = { showDialog = false } // Close dialog
     ) {
         TextField(
             modifier = Modifier.padding(bottom = 16.dp),
@@ -210,13 +211,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
                 text = "Confirm",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // Use theme color
             )
@@ -228,7 +229,7 @@ Scaffold {
 ### Dialog with Form
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var dropdownSelectedOption by remember { mutableStateOf(0) }
 var switchState by remember { mutableStateOf(false) }
 val dropdownOptions = listOf("Option 1", "Option 2")
@@ -236,13 +237,13 @@ val dropdownOptions = listOf("Option 1", "Option 2")
 Scaffold {
     TextButton(
         text = "Show Form Dialog",
-        onClick = { showDialog.value = true }
+        onClick = { showDialog = true }
     )
 
     SuperDialog(
         title = "Form Dialog",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // Close dialog
+        onDismissRequest = { showDialog = false } // Close dialog
     ) {
         Card(
             color = MiuixTheme.colorScheme.secondaryContainer,
@@ -268,13 +269,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(20.dp))
             TextButton(
                 text = "Confirm",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // Use theme color
             )
@@ -286,19 +287,19 @@ Scaffold {
 ### Dialog with Color Picker
 
 ```kotlin
-var showColorDialog = remember { mutableStateOf(false) }
+var showColorDialog by remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 Scaffold {
     TextButton(
         text = "Select Color",
-        onClick = { showColorDialog.value = true }
+        onClick = { showColorDialog = true }
     )
     
     SuperDialog(
         title = "Select Color",
         show = showColorDialog,
-        onDismissRequest = { showColorDialog.value = false } // Close dialog
+        onDismissRequest = { showColorDialog = false } // Close dialog
     ) {
         Column {
             ColorPicker(
@@ -313,14 +314,14 @@ Scaffold {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "Cancel",
-                    onClick = { showColorDialog.value = false } // Close dialog
+                    onClick = { showColorDialog = false } // Close dialog
                 )
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "Confirm",
                     colors = ButtonDefaults.textButtonColorsPrimary(), // Use theme color
                     onClick = {
-                        showColorDialog.value = false // Close dialog
+                        showColorDialog = false // Close dialog
                         // Handle confirm logic
                     }
                 )

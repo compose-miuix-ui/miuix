@@ -169,19 +169,19 @@ SuperSwitch(
 ### Use with Dialog
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var option by remember { mutableStateOf(false) }
 
 Scaffold {
     SuperArrow(
         title = "Advanced Settings",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     )
     SuperDialog(
         title = "Advanced Settings",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showDialog = false }
     ) {
         Card {
             SuperSwitch(
@@ -197,13 +197,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showDialog.value = false },
+                onClick = { showDialog = false },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(16.dp))
             TextButton(
                 text = "Confirm",
-                onClick = { showDialog.value = false },
+                onClick = { showDialog = false },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
             )

@@ -74,7 +74,6 @@ fun DropdownPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         PullToRefresh(
             isRefreshing = isRefreshing,

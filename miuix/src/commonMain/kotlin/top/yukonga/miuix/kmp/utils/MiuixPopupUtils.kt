@@ -155,6 +155,9 @@ class MiuixPopupUtils {
          * @param dimAlpha Optional, a mutable state to dynamically control the dim layer alpha (0f-1f).
          *   When provided, the dim layer will use this alpha value instead of default animations.
          * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
+         * @param renderInRootScaffold Whether to render the dialog in the root (outermost) [Scaffold].
+         *   When true (default), the dialog covers the full screen. When false, it renders within the
+         *   current [Scaffold]'s bounds.
          * @param content The [Composable] content of the dialog.
          */
         @Composable
@@ -168,6 +171,7 @@ class MiuixPopupUtils {
             dimExitTransition: ExitTransition? = null,
             dimAlpha: MutableState<Float>? = null,
             onDismissFinished: (() -> Unit)? = null,
+            renderInRootScaffold: Boolean = true,
             content: (@Composable () -> Unit)? = null,
         ) {
             if (content == null) {
@@ -175,7 +179,11 @@ class MiuixPopupUtils {
                 return
             }
 
-            val dialogStates = LocalDialogStates.current
+            val dialogStates = if (renderInRootScaffold) {
+                LocalRootDialogStates.current ?: LocalDialogStates.current
+            } else {
+                LocalDialogStates.current
+            }
 
             val state = remember(visible) {
                 DialogState(showState = visible, zIndex = nextZIndex++)
@@ -230,6 +238,9 @@ class MiuixPopupUtils {
          * @param enableWindowDim Whether to dim the window behind the popup.
          * @param dimEnterTransition Optional, custom enter animation for dim layer.
          * @param dimExitTransition Optional, custom exit animation for dim layer.
+         * @param renderInRootScaffold Whether to render the popup in the root (outermost) [Scaffold].
+         *   When true (default), the popup covers the full screen. When false, it renders within the
+         *   current [Scaffold]'s bounds.
          * @param content The [Composable] content of the popup.
          */
         @Composable
@@ -241,6 +252,7 @@ class MiuixPopupUtils {
             enableBackHandler: Boolean = true,
             dimEnterTransition: EnterTransition? = null,
             dimExitTransition: ExitTransition? = null,
+            renderInRootScaffold: Boolean = true,
             content: (@Composable () -> Unit)? = null,
         ) {
             if (content == null) {
@@ -248,7 +260,11 @@ class MiuixPopupUtils {
                 return
             }
 
-            val popupStates = LocalPopupStates.current
+            val popupStates = if (renderInRootScaffold) {
+                LocalRootPopupStates.current ?: LocalPopupStates.current
+            } else {
+                LocalPopupStates.current
+            }
 
             val state = remember(visible) {
                 PopupState(showState = visible, zIndex = nextZIndex++)
@@ -574,3 +590,5 @@ internal fun isLargeScreen(): Boolean {
 
 internal val LocalPopupStates = staticCompositionLocalOf { mutableStateListOf<MiuixPopupUtils.PopupState>() }
 internal val LocalDialogStates = staticCompositionLocalOf { mutableStateListOf<MiuixPopupUtils.DialogState>() }
+internal val LocalRootDialogStates = staticCompositionLocalOf<MutableList<MiuixPopupUtils.DialogState>?> { null }
+internal val LocalRootPopupStates = staticCompositionLocalOf<MutableList<MiuixPopupUtils.PopupState>?> { null }

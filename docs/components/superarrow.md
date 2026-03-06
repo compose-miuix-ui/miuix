@@ -51,20 +51,20 @@ SuperArrow(
 SuperArrow supports controlling the hold-down state through the `holdDownState` parameter, typically used for visual feedback when displaying popup dialogs:
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     SuperArrow(
         title = "Open Dialog",
         summary = "Click to show dialog",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     )
     // Define dialog elsewhere
     SuperDialog(
         title = "Dialog",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showDialog = false }
     ) {
         // Dialog content
     }
@@ -142,7 +142,7 @@ SuperArrow(
 ### Using with Dialog
 
 ```kotlin
-val showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var language by remember { mutableStateOf("Simplified Chinese") }
 
 Scaffold {
@@ -152,13 +152,13 @@ SuperArrow(
     endActions = {
         Text(language)
     },
-    onClick = { showDialog.value = true },
-    holdDownState = showDialog.value
+    onClick = { showDialog = true },
+    holdDownState = showDialog
 )
     SuperDialog(
         title = "Select Language",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showDialog = false }
     ) {
         // Dialog content
         Card {
@@ -166,14 +166,14 @@ SuperArrow(
                 title = "Simplified Chinese",
                 onClick = {
                     language = "Simplified Chinese"
-                    showDialog.value = false
+                    showDialog = false
                 }
             )
             SuperArrow(
                 title = "English",
                 onClick = {
                     language = "English"
-                    showDialog.value = false
+                    showDialog = false
                 }
             )
         }
@@ -182,7 +182,7 @@ SuperArrow(
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showDialog.value = false },
+                onClick = { showDialog = false },
                 modifier = Modifier.weight(1f).padding(top = 8.dp)
             )
         }

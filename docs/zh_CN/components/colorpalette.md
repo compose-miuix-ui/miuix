@@ -141,18 +141,18 @@ Surface {
 在对话框中使用 `ColorPalette`：
 
 ```kotlin
-var showColorDialog = remember { mutableStateOf(false) }
+var showColorDialog by remember { mutableStateOf(false) }
 var selectedColor by remember { mutableStateOf(Color.Red) }
 
 Scaffold {
     TextButton(
         text = "选择颜色",
-        onClick = { showColorDialog.value = true }
+        onClick = { showColorDialog = true }
     )
     SuperDialog(
         title = "选择颜色",
         show = showColorDialog,
-        onDismissRequest = { showColorDialog.value = false } // 关闭对话框
+        onDismissRequest = { showColorDialog = false } // 关闭对话框
     ) {
         Column {
             ColorPalette(
@@ -167,14 +167,14 @@ Scaffold {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "取消",
-                    onClick = { showColorDialog.value = false } // 关闭对话框
+                    onClick = { showColorDialog = false } // 关闭对话框
                 )
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = "确定",
                     colors = ButtonDefaults.textButtonColorsPrimary(), // 使用主题颜色
                     onClick = {
-                        showColorDialog.value = false // 关闭对话框
+                        showColorDialog = false // 关闭对话框
                         // 处理确认逻辑
                         // 例如：保存选中的颜色
                     })

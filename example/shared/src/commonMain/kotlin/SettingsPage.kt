@@ -99,7 +99,6 @@ fun SettingsPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         SettingsContent(
             padding = PaddingValues(
@@ -402,6 +401,11 @@ fun SettingsContent(
                     title = "NavTest",
                     summary = "Navigate to a NavTest Page",
                     onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
+                )
+                SuperArrow(
+                    title = "Multi-Scaffold Test",
+                    summary = "Test popup positioning with side-by-side Scaffolds",
+                    onClick = { navigator.push(Route.MultiScaffoldTest) },
                 )
             }
             Card(

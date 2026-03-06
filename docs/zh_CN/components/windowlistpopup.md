@@ -32,21 +32,21 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 WindowListPopup 组件可用于在没有 `Scaffold` 的情况下创建下拉菜单：
 
 ```kotlin
-val showPopup = remember { mutableStateOf(false) }
+var showPopup by remember { mutableStateOf(false) }
 var selectedIndex by remember { mutableStateOf(0) }
 val items = listOf("选项 1", "选项 2", "选项 3")
 
 Box {
     TextButton(
         text = "点击显示菜单",
-        onClick = { showPopup.value = true }
+        onClick = { showPopup = true }
     )
     WindowListPopup(
         show = showPopup,
         alignment = PopupPositionProvider.Align.Start,
-        onDismissRequest = { showPopup.value = false }
+        onDismissRequest = { showPopup = false }
     ) {
-        val dismiss = LocalWindowListPopupState.current
+        val dismiss = LocalDismissState.current
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 DropdownImpl(
@@ -55,7 +55,7 @@ Box {
                     isSelected = selectedIndex == index,
                     onSelectedIndexChange = {
                         selectedIndex = index
-                        dismiss()
+                        dismiss?.invoke()
                     },
                     index = index
                 )
@@ -71,12 +71,11 @@ Box {
 
 | 属性名                | 类型                        | 说明                                 | 默认值                                     |
 | --------------------- | --------------------------- | ------------------------------------ | ------------------------------------------ |
-| show                  | MutableState\<Boolean>      | 控制弹窗的显示状态                   | -                                          |
+| show                  | Boolean                     | 是否显示弹窗                         | -                                          |
 | popupModifier         | Modifier                    | 应用于弹窗容器的修饰符               | Modifier                                   |
 | popupPositionProvider | PopupPositionProvider       | 提供弹窗的位置计算逻辑               | ListPopupDefaults.DropdownPositionProvider |
-| alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.Right          |
+| alignment             | PopupPositionProvider.Align | 指定弹窗相对于锚点的对齐方式         | PopupPositionProvider.Align.Start          |
 | enableWindowDim       | Boolean                     | 是否在弹窗显示时使背景变暗           | true                                       |
-| shadowElevation       | Dp                          | 弹窗阴影的高度                       | 11.dp                                      |
 | onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
 | maxHeight             | Dp?                         | 弹窗内容的最大高度                   | null                                       |
 | minWidth              | Dp                          | 弹窗内容的最小宽度                   | 200.dp                                     |
@@ -99,14 +98,14 @@ Box {
 | BottomStart | 将弹窗对齐到锚点的底部起始端 |
 | BottomEnd   | 将弹窗对齐到锚点的底部结束端 |
 
-### LocalWindowListPopupState
+### LocalDismissState
 
-提供一个 `() -> Unit` 函数，用于从内容内部关闭当前弹窗。
+提供一个 `(() -> Unit)?` 函数，用于从内容内部关闭当前弹窗。这是所有弹出组件提供的统一关闭状态。
 
 ```kotlin
-val state = LocalWindowListPopupState.current
+val dismiss = LocalDismissState.current
 TextButton(
     text = "关闭",
-    onClick = { state.invoke() }
+    onClick = { dismiss?.invoke() }
 )
 ```

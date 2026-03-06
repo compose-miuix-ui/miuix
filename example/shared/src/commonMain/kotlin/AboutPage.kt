@@ -83,7 +83,6 @@ fun AboutPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         AboutPage(
             padding = PaddingValues(

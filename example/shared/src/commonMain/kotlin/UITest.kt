@@ -239,6 +239,15 @@ fun UITest(
                         enableOverScroll = uiState.enableOverScroll,
                     )
                 }
+                entry<Route.MultiScaffoldTest> {
+                    MultiScaffoldTestPage(
+                        padding = padding,
+                        showTopAppBar = uiState.showTopAppBar,
+                        isWideScreen = uiState.isWideScreen,
+                        enableScrollEndHaptic = uiState.enableScrollEndHaptic,
+                        enableOverScroll = uiState.enableOverScroll,
+                    )
+                }
             }
         }
 
@@ -372,7 +381,6 @@ private fun WideScreenContent(
                 )
             },
             floatingToolbarPosition = uiState.floatingToolbarPosition.toToolbarPosition(),
-            popupHost = { },
         ) { padding ->
             AppPager(
                 snackbarHostState = snackbarHostState,
@@ -428,7 +436,6 @@ private fun CompactScreenLayout(
                 SnackbarHost(state = snackbarHostState)
             }
         },
-        popupHost = { },
     ) { innerPadding ->
         AppPager(
             snackbarHostState = snackbarHostState,

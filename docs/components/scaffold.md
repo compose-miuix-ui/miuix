@@ -15,20 +15,7 @@ Why not use the official `Popup` and `Dialog` instead of creating our own popup 
 :::
 
 ::: tip
-When your project contains multiple nested `Scaffold`s, you should only keep `MiuixPopupHost` in the top-level `Scaffold`, and set others to empty to avoid duplicated hosts and popup conflicts:
-
-```kotlin
-Scaffold(
-    popupHost = { MiuixPopupHost() },
-) {
-    // Child pages or local layouts
-    Scaffold(
-        popupHost = { }, // empty to avoid duplicated host
-    ) {
-        // ...
-    }
-}
-```
+Each `Scaffold` automatically manages its own isolated popup state. Multiple nested or side-by-side `Scaffold`s work correctly without any extra configuration — no need to manually set `popupHost`.
 :::
 
 ## Import

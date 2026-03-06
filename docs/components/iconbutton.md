@@ -48,12 +48,12 @@ IconButton(
 IconButton supports controlling the hold down state through the `holdDownState` parameter, typically used for visual feedback when displaying pop-up dialogs:
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 
 Scaffold {
     IconButton(
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     ) {
         Icon(
             imageVector = MiuixIcons.Favorites,
@@ -64,7 +64,7 @@ Scaffold {
     SuperDialog(
         title = "Dialog",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showDialog = false }
     ) {
         // Dialog content
     }

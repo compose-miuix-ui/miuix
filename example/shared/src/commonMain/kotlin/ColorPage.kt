@@ -68,7 +68,6 @@ fun ColorPage(
                 }
             }
         },
-        popupHost = {},
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

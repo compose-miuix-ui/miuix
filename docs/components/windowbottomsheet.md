@@ -24,7 +24,7 @@ This component is independent of `Scaffold` and can be used in any composable sc
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.WindowBottomSheet
-import top.yukonga.miuix.kmp.extra.LocalWindowBottomSheetState
+import top.yukonga.miuix.kmp.extra.LocalDismissState
 ```
 
 ## Basic Usage
@@ -32,20 +32,20 @@ import top.yukonga.miuix.kmp.extra.LocalWindowBottomSheetState
 `WindowBottomSheet` component provides basic bottom sheet functionality:
 
 ```kotlin
-var showBottomSheet = remember { mutableStateOf(false) }
+var showBottomSheet by remember { mutableStateOf(false) }
 
 // Can be used anywhere
 TextButton(
     text = "Show Window Bottom Sheet",
-    onClick = { showBottomSheet.value = true }
+    onClick = { showBottomSheet = true }
 )
 
 WindowBottomSheet(
     show = showBottomSheet,
     title = "Window Bottom Sheet Title",
-    onDismissRequest = { showBottomSheet.value = false }
+    onDismissRequest = { showBottomSheet = false }
 ) {
-    val dismiss = LocalWindowBottomSheetState.current
+    val dismiss = LocalDismissState.current
     Text(text = "This is the content of the window bottom sheet")
     TextButton(
         text = "Close",
@@ -60,30 +60,30 @@ WindowBottomSheet(
 
 | Property Name              | Type                      | Description                                                    | Default Value                                | Required |
 | -------------------------- | ------------------------- |----------------------------------------------------------------|----------------------------------------------| -------- |
-| show                       | MutableState\<Boolean>    | State object to control bottom sheet visibility                | -                                            | Yes      |
+| show                       | Boolean                   | Whether to show the bottom sheet                               | -                                            | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                     | No       |
 | title                      | String?                   | Bottom sheet title                                             | null                                         | No       |
 | startAction                | @Composable (() -> Unit)? | Optional composable for start action (e.g., close button)      | null                                         | No       |
 | endAction                  | @Composable (() -> Unit)? | Optional composable for end action (e.g., submit button)       | null                                         | No       |
-| backgroundColor            | Color                     | Bottom sheet background color                                  | WindowBottomSheetDefaults.backgroundColor()  | No       |
+| backgroundColor            | Color                     | Bottom sheet background color                                  | BottomSheetDefaults.backgroundColor()  | No       |
 | enableWindowDim            | Boolean                   | Whether to enable dimming layer                                | true                                         | No       |
-| cornerRadius               | Dp                        | Corner radius of the top corners                               | WindowBottomSheetDefaults.cornerRadius       | No       |
-| sheetMaxWidth              | Dp                        | Maximum width of the bottom sheet                              | WindowBottomSheetDefaults.maxWidth           | No       |
+| cornerRadius               | Dp                        | Corner radius of the top corners                               | BottomSheetDefaults.cornerRadius       | No       |
+| sheetMaxWidth              | Dp                        | Maximum width of the bottom sheet                              | BottomSheetDefaults.maxWidth           | No       |
 | onDismissRequest           | (() -> Unit)?             | Called when the user requests dismissal (outside tap or back)  | null                                         | No       |
 | onDismissFinished          | (() -> Unit)?             | Callback after bottom sheet fully dismisses                    | null                                         | No       |
-| outsideMargin              | DpSize                    | Bottom sheet external margin                                   | WindowBottomSheetDefaults.outsideMargin      | No       |
-| insideMargin               | DpSize                    | Bottom sheet internal content margin                           | WindowBottomSheetDefaults.insideMargin       | No       |
+| outsideMargin              | DpSize                    | Bottom sheet external margin                                   | BottomSheetDefaults.outsideMargin      | No       |
+| insideMargin               | DpSize                    | Bottom sheet internal content margin                           | BottomSheetDefaults.insideMargin       | No       |
 | defaultWindowInsetsPadding | Boolean                   | Whether to apply default window insets padding                 | true                                         | No       |
-| dragHandleColor            | Color                     | Drag indicator color                                           | WindowBottomSheetDefaults.dragHandleColor()  | No       |
+| dragHandleColor            | Color                     | Drag indicator color                                           | BottomSheetDefaults.dragHandleColor()  | No       |
 | allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                         | No       |
 | enableNestedScroll         | Boolean                   | Whether to enable nested scrolling for the content             | true                                         | No       |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                            | Yes      |
 
-### WindowBottomSheetDefaults Object
+### BottomSheetDefaults Object
 
-The WindowBottomSheetDefaults object provides default settings for the SuperBottomSheet component.
+The BottomSheetDefaults object provides default settings for the bottom sheet component.
 
-#### WindowBottomSheetDefaults Properties
+#### BottomSheetDefaults Properties
 
 | Property Name | Type   | Description                          |
 | ------------- | ------ | ------------------------------------ |
@@ -92,7 +92,7 @@ The WindowBottomSheetDefaults object provides default settings for the SuperBott
 | outsideMargin | DpSize | Default bottom sheet external margin |
 | insideMargin  | DpSize | Default bottom sheet internal margin |
 
-#### WindowBottomSheetDefaults Functions
+#### BottomSheetDefaults Functions
 
 | Function Name     | Return Type | Description                      |
 | ----------------- | ----------- | -------------------------------- |
@@ -103,15 +103,15 @@ The WindowBottomSheetDefaults object provides default settings for the SuperBott
 
 ### Dismissing from Content
 
-You can use `LocalWindowBottomSheetState` to dismiss the bottom sheet from within its content:
+You can use `LocalDismissState` to dismiss the bottom sheet from within its content:
 
 ```kotlin
 WindowBottomSheet(
     show = showBottomSheet,
     title = "Dismiss Example",
-    onDismissRequest = { showBottomSheet.value = false }
+    onDismissRequest = { showBottomSheet = false }
 ) {
-    val dismiss = LocalWindowBottomSheetState.current
+    val dismiss = LocalDismissState.current
     
     Button(
         onClick = { dismiss?.invoke() }

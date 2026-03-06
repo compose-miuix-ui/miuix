@@ -204,21 +204,21 @@ SuperCheckbox(
 ### Using with Dialog
 
 ```kotlin
-var showDialog = remember { mutableStateOf(false) }
+var showDialog by remember { mutableStateOf(false) }
 var privacyOption by remember { mutableStateOf(false) }
 var analyticsOption by remember { mutableStateOf(false) }
 
 Scaffold {
     SuperArrow(
         title = "Privacy Settings",
-        onClick = { showDialog.value = true },
-        holdDownState = showDialog.value
+        onClick = { showDialog = true },
+        holdDownState = showDialog
     )
     
     SuperDialog(
         title = "Privacy Settings",
         show = showDialog,
-        onDismissRequest = { showDialog.value = false } // Close dialog
+        onDismissRequest = { showDialog = false } // Close dialog
     ) {
         Card {
             SuperCheckbox(
@@ -242,13 +242,13 @@ Scaffold {
         ) {
             TextButton(
                 text = "Cancel",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(16.dp))
             TextButton(
                 text = "Confirm",
-                onClick = { showDialog.value = false }, // Close dialog
+                onClick = { showDialog = false }, // Close dialog
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary() // Use theme colors
             )
