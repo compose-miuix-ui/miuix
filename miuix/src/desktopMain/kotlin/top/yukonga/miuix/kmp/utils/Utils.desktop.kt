@@ -11,6 +11,8 @@ import androidx.compose.ui.window.DialogProperties
 
 actual fun platform(): Platform = Platform.Desktop
 
+actual val hasFocusReassignBug: Boolean = false
+
 @Composable
 actual fun getRoundedCorner(): Dp = 0.dp
 

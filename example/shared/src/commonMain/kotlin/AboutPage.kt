@@ -23,9 +23,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import misc.VersionInfo
 import navigation3.Route
@@ -149,15 +151,18 @@ fun AboutPage(
                     )
                 }
                 Text(
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = 12.dp),
                     text = "Miuix",
-                    style = MiuixTheme.textStyles.title3,
-                    color = colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 26.sp,
                 )
             }
             Text(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 48.dp),
-                text = "App Ver. " + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")" + "\nJDK Ver. " + VersionInfo.JDK_VERSION,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 48.dp),
+                text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                fontSize = 14.sp,
                 textAlign = TextAlign.Center,
             )
             Card(

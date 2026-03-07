@@ -129,7 +129,6 @@ val generateVersionInfo by tasks.registering {
             object VersionInfo {
                 const val VERSION_NAME = "${BuildConfig.APPLICATION_VERSION_NAME}"
                 const val VERSION_CODE = ${BuildConfig.APPLICATION_VERSION_CODE}
-                const val JDK_VERSION = "${System.getProperty("java.version")}"
             }
             """.trimIndent(),
         )

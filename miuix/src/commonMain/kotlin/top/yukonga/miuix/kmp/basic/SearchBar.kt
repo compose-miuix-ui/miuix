@@ -12,6 +12,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -38,6 +39,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
@@ -57,6 +59,7 @@ import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.hasFocusReassignBug
 
 /**
  * A [SearchBar] component with Miuix style.
@@ -212,10 +215,21 @@ fun InputField(
         derivedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
     }
 
+    // On API 26-27, focus is incorrectly reassigned after clearFocus(), preventing the
+    // SearchBar from closing. Workaround: disable the TextField when collapsed and use
+    // pointerInput to handle tap-to-expand. https://issuetracker.google.com/issues/433382598
+    val workaroundEnabled = !hasFocusReassignBug || expanded
+    val expandOnTapModifier = if (workaroundEnabled) {
+        Modifier
+    } else {
+        Modifier.pointerInput(Unit) { detectTapGestures { currentOnExpandedChange(true) } }
+    }
+
     BasicTextField(
         value = query,
         onValueChange = currentOnQueryChange,
         modifier = modifier
+            .then(expandOnTapModifier)
             .focusRequester(focusRequester)
             .onFocusChanged { if (it.isFocused) currentOnExpandedChange(true) }
             .semantics {
@@ -224,7 +238,7 @@ fun InputField(
                     true
                 }
             },
-        enabled = enabled,
+        enabled = enabled && workaroundEnabled,
         singleLine = true,
         textStyle = inputTextStyle,
         cursorBrush = cursorBrush,
@@ -265,7 +279,12 @@ fun InputField(
     )
 
     LaunchedEffect(expanded) {
-        if (!expanded && focused) {
+        if (expanded) {
+            // Explicitly request focus when expanded. On API 26-27, the workaround disables
+            // the TextField when collapsed, so the initial tap doesn't grant focus — this
+            // ensures the keyboard appears after the TextField becomes enabled again.
+            focusRequester.requestFocus()
+        } else if (focused) {
             delay(100)
             focusManager.clearFocus()
         }

@@ -45,3 +45,11 @@ expect fun platformDialogProperties(): DialogProperties
  */
 @Composable
 expect fun RemovePlatformDialogDefaultEffects()
+
+/**
+ * Whether the platform has a bug where clearing focus causes automatic re-assignment
+ * to the first focusable view. This occurs on Android API levels 26-27.
+ *
+ * See: https://issuetracker.google.com/issues/433382598
+ */
+expect val hasFocusReassignBug: Boolean
