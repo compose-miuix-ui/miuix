@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,6 +40,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.onClick
@@ -203,6 +205,7 @@ fun InputField(
     val focused = internalInteractionSource.collectIsFocusedAsState().value
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val textAlpha = remember { Animatable(1f) }
 
     val textColor = LocalContentColor.current
     val inputTextStyle = MiuixTheme.textStyles.main
@@ -270,7 +273,9 @@ fun InputField(
                             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium).merge(textStyle),
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
-                        innerTextField()
+                        Box(modifier = Modifier.graphicsLayer { alpha = textAlpha.value }) {
+                            innerTextField()
+                        }
                     }
                     actualTrailingIcon()
                 }
@@ -286,6 +291,11 @@ fun InputField(
             focusRequester.requestFocus()
         } else if (focused) {
             delay(100)
+            if (query.isNotEmpty()) {
+                textAlpha.animateTo(0f)
+                currentOnQueryChange("")
+                textAlpha.snapTo(1f)
+            }
             focusManager.clearFocus()
         }
     }
