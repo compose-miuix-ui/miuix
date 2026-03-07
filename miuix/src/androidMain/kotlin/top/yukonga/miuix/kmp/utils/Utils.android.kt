@@ -21,6 +21,8 @@ import androidx.compose.ui.window.DialogWindowProvider
 
 actual fun platform(): Platform = Platform.Android
 
+actual val hasFocusReassignBug: Boolean = Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1
+
 @Composable
 actual fun getRoundedCorner(): Dp = getSystemCornerRadius()
 
@@ -64,12 +66,8 @@ actual fun RemovePlatformDialogDefaultEffects() {
     DisposableEffect(parent) {
         val provider = parent as? DialogWindowProvider
         val window = provider?.window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CUPCAKE) {
-            window?.setWindowAnimations(0)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            window?.setDimAmount(0f)
-        }
+        window?.setWindowAnimations(0)
+        window?.setDimAmount(0f)
         window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         onDispose {
             // No-op

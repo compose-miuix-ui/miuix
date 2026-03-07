@@ -113,6 +113,7 @@ fun NavTestPage(
                     padding.calculateBottomPadding() + 12.dp
                 },
             ),
+            overscrollEffect = null,
         ) {
             item {
                 Card(
