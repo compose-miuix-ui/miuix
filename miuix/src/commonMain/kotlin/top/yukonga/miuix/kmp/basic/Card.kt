@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -109,11 +108,6 @@ fun Card(
     val usedInteractionSource = remember(pressFeedback) {
         if (pressFeedback != null) interactionSource else null
     }
-    val indicationLocal = LocalIndication.current
-    val indicationToUse = remember(showIndication, indicationLocal) {
-        if (showIndication == true) indicationLocal else null
-    }
-
     BasicCard(
         modifier = modifier.pressable(
             interactionSource = usedInteractionSource,
@@ -127,7 +121,6 @@ fun Card(
             modifier = Modifier
                 .combinedClickable(
                     interactionSource = interactionSource,
-                    indication = indicationToUse,
                     onClick = { currentOnClick?.invoke() },
                     onLongClick = currentOnLongPress,
                 )

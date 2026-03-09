@@ -29,6 +29,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +66,7 @@ fun NavigationRail(
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
     minWidth: Dp = 80.dp,
-    mode: NavigationDisplayMode = NavigationDisplayMode.IconAndText,
+    mode: NavigationRailDisplayMode = NavigationRailDisplayMode.IconAndText,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
@@ -96,7 +97,7 @@ fun NavigationRail(
                 header()
                 Spacer(modifier = Modifier.height(24.dp))
             }
-            CompositionLocalProvider(LocalNavigationDisplayMode provides mode) {
+            CompositionLocalProvider(LocalNavigationRailDisplayMode provides mode) {
                 content()
             }
         }
@@ -142,7 +143,7 @@ fun NavigationRailItem(
         else -> onSurfaceContainerVariantColor
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-    val mode = LocalNavigationDisplayMode.current
+    val mode = LocalNavigationRailDisplayMode.current
 
     Column(
         modifier = modifier
@@ -165,7 +166,7 @@ fun NavigationRailItem(
         verticalArrangement = Arrangement.Center,
     ) {
         when (mode) {
-            NavigationDisplayMode.IconAndText -> {
+            NavigationRailDisplayMode.IconAndText -> {
                 Image(
                     modifier = Modifier.size(28.dp),
                     imageVector = icon,
@@ -182,7 +183,7 @@ fun NavigationRailItem(
                 )
             }
 
-            NavigationDisplayMode.IconWithSelectedLabel -> {
+            NavigationRailDisplayMode.IconWithSelectedLabel -> {
                 Image(
                     modifier = Modifier.size(28.dp),
                     imageVector = icon,
@@ -201,7 +202,7 @@ fun NavigationRailItem(
                 }
             }
 
-            NavigationDisplayMode.TextOnly -> {
+            NavigationRailDisplayMode.TextOnly -> {
                 Text(
                     modifier = Modifier.padding(vertical = 4.dp),
                     text = label,
@@ -223,3 +224,28 @@ fun NavigationRailItem(
         }
     }
 }
+
+/**
+ * Defines the display mode for items in a [NavigationRail].
+ *
+ * This controls whether to show both icon and text, icon only, text only,
+ * or icon with text only when selected.
+ */
+enum class NavigationRailDisplayMode {
+    /** Show both icon and text. */
+    IconAndText,
+
+    /** Show icon only. */
+    IconOnly,
+
+    /** Show text only. */
+    TextOnly,
+
+    /** Show icon always, show text only when selected. */
+    IconWithSelectedLabel,
+}
+
+/**
+ * A composition local to control the display mode for items in a [NavigationRail].
+ */
+val LocalNavigationRailDisplayMode = compositionLocalOf { NavigationRailDisplayMode.IconAndText }

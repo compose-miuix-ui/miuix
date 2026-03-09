@@ -25,7 +25,7 @@ import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
@@ -98,7 +98,7 @@ fun NavigationBarDemo() {
                     Scaffold(
                         bottomBar = {
                             FloatingNavigationBar(
-                                mode = NavigationDisplayMode.IconOnly, // Show icons only
+                                mode = FloatingNavigationBarDisplayMode.IconOnly, // Show icons only
                             ) {
                                 items.forEachIndexed { index, item ->
                                     FloatingNavigationBarItem(

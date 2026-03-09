@@ -15,6 +15,7 @@ import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
@@ -29,6 +30,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param alignment The alignment of the [WindowListPopup].
  * @param enableWindowDim Whether to enable window dimming when the [WindowListPopup] is shown.
  * @param onDismissRequest The callback when the [WindowListPopup] is dismissed.
+ * @param onDismissFinished The callback when the [WindowListPopup] is completely dismissed (after exit animation).
  * @param maxHeight The maximum height of the [WindowListPopup]. If null, the height will be calculated automatically.
  * @param minWidth The minimum width of the [WindowListPopup].
  * @param content The [Composable] content of the [WindowListPopup]. You should use the [ListPopupColumn] in general.
@@ -41,6 +43,7 @@ fun WindowListPopup(
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
     content: @Composable () -> Unit,
@@ -65,6 +68,7 @@ fun WindowListPopup(
         alignment = alignment,
         enableWindowDim = enableWindowDim,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
         content = {
@@ -96,6 +100,7 @@ fun WindowListPopup(
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
     content: @Composable () -> Unit,
@@ -107,6 +112,7 @@ fun WindowListPopup(
         alignment = alignment,
         enableWindowDim = enableWindowDim,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
         content = content,
@@ -115,7 +121,7 @@ fun WindowListPopup(
 
 @Deprecated(
     "Use LocalDismissState instead, which is provided by all overlay components.",
-    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.extra.LocalDismissState"),
+    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.theme.LocalDismissState"),
 )
 val LocalWindowListPopupState = staticCompositionLocalOf<() -> Unit> {
     error("LocalWindowListPopupState not provided")

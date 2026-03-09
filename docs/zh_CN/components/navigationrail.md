@@ -11,7 +11,7 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 ```
 
 ## 基本用法
@@ -56,7 +56,7 @@ Row {
 | showDivider                | Boolean                                | 是否在 NavigationRail 和内容之间显示分割线    | true                              | 否       |
 | defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
 | minWidth                   | Dp                                     | NavigationRail 的最小宽度                     | 80.dp                             | 否       |
-| mode                       | NavigationDisplayMode                  | 项目的显示模式                                | NavigationDisplayMode.IconAndText | 否       |
+| mode                       | NavigationRailDisplayMode                  | 项目的显示模式                                | NavigationRailDisplayMode.IconAndText | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |
 
 ### NavigationRailItem 属性
@@ -70,7 +70,7 @@ Row {
 | modifier | Modifier    | 应用于 NavigationRailItem 的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用该项     | true     | 否       |
 
-### NavigationDisplayMode
+### NavigationRailDisplayMode
 
 | 值                    | 描述                                    |
 | --------------------- | --------------------------------------- |

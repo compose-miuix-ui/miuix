@@ -26,6 +26,7 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
  * @param alignment The alignment of the [SuperListPopup].
  * @param enableWindowDim Whether to enable window dimming when the [SuperListPopup] is shown.
  * @param onDismissRequest The callback when the [SuperListPopup] is dismissed.
+ * @param onDismissFinished The callback when the [SuperListPopup] is completely dismissed (after exit animation).
  * @param maxHeight The maximum height of the [SuperListPopup]. If null, the height will be calculated automatically.
  * @param minWidth The minimum width of the [SuperListPopup].
  * @param renderInRootScaffold Whether to render the popup in the root (outermost) Scaffold.
@@ -41,6 +42,7 @@ fun SuperListPopup(
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
     renderInRootScaffold: Boolean = true,
@@ -67,6 +69,7 @@ fun SuperListPopup(
         alignment = alignment,
         enableWindowDim = enableWindowDim,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
         content = content,
@@ -90,6 +93,7 @@ fun SuperListPopup(
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
     renderInRootScaffold: Boolean = true,
@@ -102,6 +106,7 @@ fun SuperListPopup(
         alignment = alignment,
         enableWindowDim = enableWindowDim,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
         renderInRootScaffold = renderInRootScaffold,

@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
@@ -67,7 +67,7 @@ fun NavigationRailDemo() {
                 ) {
                     Row(modifier = Modifier.fillMaxSize()) {
                         NavigationRail(
-                            mode = NavigationDisplayMode.IconAndText,
+                            mode = NavigationRailDisplayMode.IconAndText,
                         ) {
                             items.forEachIndexed { index, item ->
                                 NavigationRailItem(

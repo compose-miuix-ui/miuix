@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -127,38 +126,34 @@ fun BasicComponent(
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val indication = LocalIndication.current
     val currentOnClick by rememberUpdatedState(onClick)
 
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
-    LaunchedEffect(holdDownState, interactionSource, indication) {
-        if (holdDownState) {
+    LaunchedEffect(holdDownState, interactionSource) {
+        suspend fun releaseHoldDown() {
             holdDown.value?.let { oldValue ->
                 interactionSource.emit(HoldDownInteraction.Release(oldValue))
                 holdDown.value = null
             }
+        }
+        if (holdDownState) {
+            releaseHoldDown()
             val interaction = HoldDownInteraction.HoldDown()
             holdDown.value = interaction
             interactionSource.emit(interaction)
         } else {
-            holdDown.value?.let { oldValue ->
-                interactionSource.emit(HoldDownInteraction.Release(oldValue))
-                holdDown.value = null
-            }
+            releaseHoldDown()
         }
     }
 
     val hasOnClick = onClick != null
-    val clickableModifier = remember(enabled, interactionSource, indication, hasOnClick) {
-        if (enabled && hasOnClick) {
-            Modifier.clickable(
-                interactionSource = interactionSource,
-                indication = indication,
-                onClick = { currentOnClick?.invoke() },
-            )
-        } else {
-            Modifier
-        }
+    val clickableModifier = if (enabled && hasOnClick) {
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            onClick = { currentOnClick?.invoke() },
+        )
+    } else {
+        Modifier
     }
 
     Column(
@@ -221,10 +216,6 @@ fun BasicComponent(
                 val reqCenter = centerMeasurable.maxIntrinsicWidth(maxHeight)
                 val reqEnd = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
 
-                val minStart = startMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
-                val minCenter = centerMeasurable.minIntrinsicWidth(maxHeight)
-                val minEnd = endMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
-
                 val totalReq = reqStart + reqCenter + reqEnd
 
                 var targetStart = 0
@@ -236,6 +227,10 @@ fun BasicComponent(
                     targetEnd = reqEnd
                     targetCenter = (availableWidth - reqStart - reqEnd).coerceAtLeast(0)
                 } else {
+                    val minStart = startMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
+                    val minCenter = centerMeasurable.minIntrinsicWidth(maxHeight)
+                    val minEnd = endMeasurable?.minIntrinsicWidth(maxHeight) ?: 0
+
                     val wStart = if (hasStart) 2 else 0
                     val wCenter = 5
                     val wEnd = if (hasEnd) 3 else 0
@@ -324,35 +319,35 @@ fun BasicComponent(
                     } else {
                         targetCenter = availableWidth
                     }
-                }
 
-                if (targetCenter < minCenter && availableWidth >= minCenter) {
-                    val need = minCenter - targetCenter
-                    val startSlack = (targetStart - minStart).coerceAtLeast(0)
-                    val endSlack = (targetEnd - minEnd).coerceAtLeast(0)
-                    val totalSlack = startSlack + endSlack
+                    if (minCenter in (targetCenter + 1)..availableWidth) {
+                        val need = minCenter - targetCenter
+                        val startSlack = (targetStart - minStart).coerceAtLeast(0)
+                        val endSlack = (targetEnd - minEnd).coerceAtLeast(0)
+                        val totalSlack = startSlack + endSlack
 
-                    if (totalSlack > 0) {
-                        val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
-                        val useEnd = (need - useStart).coerceAtLeast(0).coerceAtMost(endSlack)
-                        targetStart -= useStart
-                        targetEnd -= useEnd
-                        targetCenter += useStart + useEnd
+                        if (totalSlack > 0) {
+                            val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
+                            val useEnd = (need - useStart).coerceAtLeast(0).coerceAtMost(endSlack)
+                            targetStart -= useStart
+                            targetEnd -= useEnd
+                            targetCenter += useStart + useEnd
+                        }
                     }
-                }
 
-                if (targetEnd < minEnd && availableWidth >= minEnd) {
-                    val need = minEnd - targetEnd
-                    val startSlack = (targetStart - minStart).coerceAtLeast(0)
-                    val centerSlack = (targetCenter - minCenter).coerceAtLeast(0)
-                    val totalSlack = startSlack + centerSlack
+                    if (minEnd in (targetEnd + 1)..availableWidth) {
+                        val need = minEnd - targetEnd
+                        val startSlack = (targetStart - minStart).coerceAtLeast(0)
+                        val centerSlack = (targetCenter - minCenter).coerceAtLeast(0)
+                        val totalSlack = startSlack + centerSlack
 
-                    if (totalSlack > 0) {
-                        val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
-                        val useCenter = (need - useStart).coerceAtLeast(0).coerceAtMost(centerSlack)
-                        targetStart -= useStart
-                        targetCenter -= useCenter
-                        targetEnd += useStart + useCenter
+                        if (totalSlack > 0) {
+                            val useStart = (need.toLong() * startSlack / totalSlack).toInt().coerceAtMost(startSlack)
+                            val useCenter = (need - useStart).coerceAtLeast(0).coerceAtMost(centerSlack)
+                            targetStart -= useStart
+                            targetCenter -= useCenter
+                            targetEnd += useStart + useCenter
+                        }
                     }
                 }
 

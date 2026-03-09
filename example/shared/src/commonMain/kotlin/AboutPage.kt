@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,105 +33,81 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import utils.AdaptiveTopAppBar
+import utils.pageContentPadding
+import utils.pageScrollModifiers
 
 @Composable
 fun AboutPage(
     padding: PaddingValues,
-    showTopAppBar: Boolean,
-    isWideScreen: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
 ) {
+    val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
     Scaffold(
         topBar = {
-            if (showTopAppBar) {
-                if (isWideScreen) {
-                    SmallTopAppBar(
-                        title = "About",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
+            AdaptiveTopAppBar(
+                title = "About",
+                showTopAppBar = appState.showTopAppBar,
+                isWideScreen = isWideScreen,
+                scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    BackNavigationIcon(
+                        modifier = Modifier.padding(start = 16.dp),
+                        onClick = { navigator.pop() },
                     )
-                } else {
-                    TopAppBar(
-                        title = "About",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
-                    )
-                }
-            }
+                },
+            )
         },
     ) { innerPadding ->
-        AboutPage(
+        AboutContent(
             padding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
                 bottom = padding.calculateBottomPadding(),
             ),
             topAppBarScrollBehavior = topAppBarScrollBehavior,
-            showTopAppBar = showTopAppBar,
-            enableScrollEndHaptic = enableScrollEndHaptic,
-            enableOverScroll = enableOverScroll,
-            isWideScreen = isWideScreen,
         )
     }
 }
 
 @Composable
-fun AboutPage(
+private fun AboutContent(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
-    showTopAppBar: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
-    isWideScreen: Boolean,
 ) {
+    val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
 
     LazyColumn(
-        modifier = Modifier
-            .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-            .overScrollVertical(isEnabled = { enableOverScroll })
-            .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
-            .fillMaxHeight(),
-        contentPadding = PaddingValues(
-            top = padding.calculateTopPadding(),
-            start = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-            end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-            bottom = if (isWideScreen) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
-            } else {
-                padding.calculateBottomPadding() + 12.dp
-            },
+        modifier = Modifier.pageScrollModifiers(
+            appState.enableScrollEndHaptic,
+            appState.enableOverScroll,
+            appState.showTopAppBar,
+            topAppBarScrollBehavior,
+        ),
+        contentPadding = pageContentPadding(
+            padding,
+            padding,
+            isWideScreen,
+            extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         ),
         overscrollEffect = null,
     ) {
-        item {
+        item(key = "about") {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 72.dp, bottom = 12.dp),
+                    .padding(top = 72.dp, bottom = 48.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
@@ -156,15 +129,14 @@ fun AboutPage(
                     fontWeight = FontWeight.Medium,
                     fontSize = 26.sp,
                 )
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                )
             }
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 48.dp),
-                text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-            )
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {

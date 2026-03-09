@@ -71,6 +71,7 @@ fun Switch(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     var hasVibrated by remember { mutableStateOf(false) }
     var hasVibratedOnce by remember { mutableStateOf(false) }
     var rawDragOffset by remember { mutableFloatStateOf(0f) }
@@ -120,19 +121,19 @@ fun Switch(
         animationSpec = tween(durationMillis = 200),
     )
 
-    val toggleableModifier = if (currentOnCheckedChange != null) {
+    val hasCallback = onCheckedChange != null
+    val toggleableModifier = if (hasCallback) {
         Modifier.toggleable(
             value = checked,
-            onValueChange = {
-                currentOnCheckedChange!!(it)
-                hapticFeedback.performHapticFeedback(
-                    if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
+            onValueChange = { v ->
+                currentOnCheckedChange?.invoke(v)
+                currentHapticFeedback.performHapticFeedback(
+                    if (v) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
                 )
             },
             enabled = enabled,
             role = Role.Switch,
             interactionSource = interactionSource,
-            indication = null,
         )
     } else {
         Modifier

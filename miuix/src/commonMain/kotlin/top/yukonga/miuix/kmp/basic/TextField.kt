@@ -7,7 +7,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -33,9 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -107,12 +110,9 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidth by animateDpAsState(if (isFocused) 2.dp else 0.dp)
-    val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
+    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
-    val finalModifier = remember(backgroundColor, borderWidth, animatedBorderColor, borderShape) {
-        Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-    }
     val labelState by remember(label, useLabelAsPlaceholder) {
         derivedStateOf {
             when {
@@ -176,7 +176,11 @@ fun TextField(
                     labelFontSize = labelFontSize,
                     labelColor = labelColor,
                     labelState = labelState,
-                    finalModifier = finalModifier,
+                    backgroundColor = backgroundColor,
+                    borderWidth = borderWidthState.value,
+                    borderColor = borderColorState.value,
+                    borderShape = borderShape,
+                    cornerRadius = cornerRadius,
                     paddingModifier = paddingModifier,
                     leadingIcon = leadingIcon,
                     trailingIcon = trailingIcon,
@@ -249,12 +253,9 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidth by animateDpAsState(if (isFocused) 2.dp else 0.dp)
-    val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
+    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
-    val finalModifier = remember(backgroundColor, borderWidth, animatedBorderColor, borderShape) {
-        Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-    }
     val labelState = remember(value.text, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
@@ -316,7 +317,11 @@ fun TextField(
                 labelFontSize = labelFontSize,
                 labelColor = labelColor,
                 labelState = labelState,
-                finalModifier = finalModifier,
+                backgroundColor = backgroundColor,
+                borderWidth = borderWidthState.value,
+                borderColor = borderColorState.value,
+                borderShape = borderShape,
+                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -387,12 +392,9 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidth by animateDpAsState(if (isFocused) 2.dp else 0.dp)
-    val animatedBorderColor by animateColorAsState(if (isFocused) borderColor else backgroundColor)
+    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
-    val finalModifier = remember(backgroundColor, borderWidth, animatedBorderColor, borderShape) {
-        Modifier.background(backgroundColor, borderShape).border(borderWidth, animatedBorderColor, borderShape)
-    }
     val labelState = remember(value, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
@@ -454,7 +456,11 @@ fun TextField(
                 labelFontSize = labelFontSize,
                 labelColor = labelColor,
                 labelState = labelState,
-                finalModifier = finalModifier,
+                backgroundColor = backgroundColor,
+                borderWidth = borderWidthState.value,
+                borderColor = borderColorState.value,
+                borderShape = borderShape,
+                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -477,7 +483,11 @@ private fun TextFieldDecorationBox(
     labelFontSize: Dp,
     labelColor: Color,
     labelState: LabelAnimState,
-    finalModifier: Modifier = Modifier,
+    backgroundColor: Color,
+    borderWidth: Dp,
+    borderColor: Color,
+    borderShape: RoundedCornerShape,
+    cornerRadius: Dp,
     paddingModifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -486,7 +496,24 @@ private fun TextFieldDecorationBox(
     innerTextField: @Composable () -> Unit,
 ) {
     Box(
-        modifier = finalModifier,
+        modifier = Modifier
+            .background(backgroundColor, borderShape)
+            .drawWithContent {
+                drawContent()
+                val bw = borderWidth
+                if (bw > 0.dp) {
+                    val strokePx = bw.toPx()
+                    val halfStroke = strokePx / 2f
+                    val cr = cornerRadius.toPx()
+                    inset(halfStroke) {
+                        drawRoundRect(
+                            color = borderColor,
+                            cornerRadius = CornerRadius(cr - halfStroke, cr - halfStroke),
+                            style = Stroke(width = strokePx),
+                        )
+                    }
+                }
+            },
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(

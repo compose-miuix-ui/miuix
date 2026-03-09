@@ -37,6 +37,7 @@ import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.SpinnerItemImpl
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -78,7 +79,9 @@ fun WindowSpinner(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -89,11 +92,14 @@ fun WindowSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
-            if (isDropdownExpanded.value) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                }
             }
         }
     }
@@ -129,6 +135,7 @@ fun WindowSpinner(
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
                     onDismiss = { isDropdownExpanded.value = false },
+                    onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
@@ -138,7 +145,7 @@ fun WindowSpinner(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -149,19 +156,30 @@ private fun WindowSpinnerPopup(
     selectedIndex: Int,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
     ) {
         val dismiss = LocalDismissState.current
+        val currentDismiss by rememberUpdatedState(dismiss)
+        val onItemSelected: (Int) -> Unit = remember {
+            { selectedIdx ->
+                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                onSelectState.value?.invoke(selectedIdx)
+                currentDismiss?.invoke()
+            }
+        }
         ListPopupColumn {
             items.forEachIndexed { index, spinnerEntry ->
                 key(index) {
@@ -172,11 +190,8 @@ private fun WindowSpinnerPopup(
                         index = index,
                         spinnerColors = spinnerColors,
                         dialogMode = false,
-                    ) { selectedIdx ->
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onSelectState.value?.invoke(selectedIdx)
-                        dismiss?.invoke()
-                    }
+                        onSelectedIndexChange = onItemSelected,
+                    )
                 }
             }
         }
@@ -223,6 +238,7 @@ fun WindowSpinner(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
     val itemsNotEmpty = items.isNotEmpty()
@@ -234,9 +250,14 @@ fun WindowSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                }
+            }
         }
     }
 
@@ -272,6 +293,7 @@ fun WindowSpinner(
                 dialogButtonString = dialogButtonString,
                 isDropdownExpanded = isDropdownExpanded.value,
                 onDismiss = { isDropdownExpanded.value = false },
+                onDismissFinished = { isHoldDown.value = false },
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
                 popupModifier = popupModifier,
@@ -280,7 +302,7 @@ fun WindowSpinner(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -293,12 +315,22 @@ private fun WindowSpinnerDialog(
     dialogButtonString: String,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
     popupModifier: Modifier = Modifier,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val onItemSelected: (Int) -> Unit = remember {
+        { selectedIdx ->
+            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            currentOnSelectedIndexChange?.invoke(selectedIdx)
+            currentOnDismiss()
+        }
+    }
     val showState = remember { mutableStateOf(false) }
     showState.value = isDropdownExpanded
     WindowDialog(
@@ -306,6 +338,7 @@ private fun WindowSpinnerDialog(
         modifier = popupModifier,
         title = title,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         insideMargin = DpSize(0.dp, 24.dp),
         content = {
             val dismiss = LocalDismissState.current
@@ -320,11 +353,8 @@ private fun WindowSpinnerDialog(
                                 index = index,
                                 spinnerColors = spinnerColors,
                                 dialogMode = true,
-                            ) { selectedIdx ->
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                                currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                dismiss?.invoke()
-                            }
+                                onSelectedIndexChange = onItemSelected,
+                            )
                         }
                     }
                     TextButton(

@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
@@ -199,6 +200,6 @@ object WindowBottomSheetDefaults {
  */
 @Deprecated(
     "Use LocalDismissState instead, which is provided by all overlay components.",
-    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.extra.LocalDismissState"),
+    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.theme.LocalDismissState"),
 )
 val LocalWindowBottomSheetState = staticCompositionLocalOf<(() -> Unit)?> { null }

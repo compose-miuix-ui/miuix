@@ -39,6 +39,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupContent
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -65,12 +66,14 @@ internal fun ListPopupLayout(
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = 200.dp,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f) }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
+    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
     val internalVisible = remember { mutableStateOf(false) }
 
@@ -82,11 +85,13 @@ internal fun ListPopupLayout(
                 animationSpec = ListPopupDefaults.EnterAnimationSpec,
             )
         } else {
+            if (!internalVisible.value) return@LaunchedEffect
             animationProgress.animateTo(
                 targetValue = 0f,
                 animationSpec = ListPopupDefaults.ExitAnimationSpec,
             )
             internalVisible.value = false
+            currentOnDismissFinished?.invoke()
         }
     }
 
