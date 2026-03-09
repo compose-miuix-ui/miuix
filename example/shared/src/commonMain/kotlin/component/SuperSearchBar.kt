@@ -113,9 +113,15 @@ fun SearchStatus.SearchBox(
                     boxHeight.value = newBoxHeight
                 }
             }
-            .pointerInput(Unit) {
-                detectTapGestures { onSearchStatusChange(searchStatus.copy(current = SearchStatus.Status.EXPANDING)) }
-            }
+            .then(
+                if (searchStatus.isCollapsed()) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { onSearchStatusChange(searchStatus.copy(current = SearchStatus.Status.EXPANDING)) }
+                    }
+                } else {
+                    Modifier
+                },
+            )
             .background(colorScheme.surface),
     ) {
         collapseBar(searchStatus, searchBarTopPadding, contentPadding)
@@ -284,7 +290,7 @@ fun SearchBar(
     InputField(
         query = searchStatus.searchText,
         onQueryChange = { onSearchStatusChange(searchStatus.copy(searchText = it)) },
-        label = "",
+        label = searchStatus.label,
         leadingIcon = {
             Icon(
                 imageVector = MiuixIcons.Basic.Search,
