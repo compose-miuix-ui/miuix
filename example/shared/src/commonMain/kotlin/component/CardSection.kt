@@ -58,7 +58,6 @@ fun LazyListScope.cardSection() {
                 modifier = Modifier.weight(1f),
                 insideMargin = PaddingValues(16.dp),
                 pressFeedbackType = PressFeedbackType.Sink,
-                showIndication = true,
                 onClick = { println("Card click") },
                 content = {
                     Text(
