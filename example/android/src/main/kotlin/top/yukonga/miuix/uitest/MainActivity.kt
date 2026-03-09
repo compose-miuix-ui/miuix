@@ -13,16 +13,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val colorMode = remember { mutableIntStateOf(0) }
-            val darkMode = when (colorMode.intValue) {
+            var colorMode by remember { mutableIntStateOf(0) }
+            val darkMode = when (colorMode) {
                 2, 5 -> true
                 0, 3 -> isSystemInDarkTheme()
                 else -> false
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            App(colorMode)
+            App(onColorModeChange = { colorMode = it })
         }
     }
 }

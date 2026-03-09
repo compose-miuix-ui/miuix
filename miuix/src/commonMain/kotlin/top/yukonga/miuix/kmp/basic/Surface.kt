@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -53,8 +51,8 @@ fun Surface(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val shadowElevationPx by remember(density, shadowElevation) {
-        derivedStateOf { with(density) { shadowElevation.toPx() } }
+    val shadowElevationPx = remember(density, shadowElevation) {
+        with(density) { shadowElevation.toPx() }
     }
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
@@ -107,10 +105,9 @@ fun Surface(
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val currentOnClick by rememberUpdatedState(onClick)
     val density = LocalDensity.current
-    val shadowElevationPx by remember(density, shadowElevation) {
-        derivedStateOf { with(density) { shadowElevation.toPx() } }
+    val shadowElevationPx = remember(density, shadowElevation) {
+        with(density) { shadowElevation.toPx() }
     }
-    val indication = LocalIndication.current
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
     ) {
@@ -122,15 +119,10 @@ fun Surface(
                     border = border,
                     shadowElevation = shadowElevationPx,
                 )
-                .then(
-                    remember(enabled, interactionSource, indication, currentOnClick) {
-                        Modifier.clickable(
-                            interactionSource = interactionSource,
-                            indication = indication,
-                            enabled = enabled,
-                            onClick = currentOnClick,
-                        )
-                    },
+                .clickable(
+                    interactionSource = interactionSource,
+                    enabled = enabled,
+                    onClick = currentOnClick,
                 ),
             propagateMinConstraints = true,
         ) {

@@ -17,7 +17,8 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
 ```
 
 ## 基本用法
@@ -59,7 +60,7 @@ val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Contacts, MiuixIcons.Set
 Scaffold(
     bottomBar = {
         FloatingNavigationBar(
-            mode = NavigationDisplayMode.IconOnly // 仅显示图标
+            mode = FloatingNavigationBarDisplayMode.IconOnly // 仅显示图标
         ) {
             items.forEachIndexed { index, label ->
                 FloatingNavigationBarItem(
@@ -90,7 +91,7 @@ Scaffold(
 | color                      | Color                   | 导航栏背景颜色             | MiuixTheme.colorScheme.surface        | 否       |
 | showDivider                | Boolean                 | 是否显示顶部分割线         | true                                  | 否       |
 | defaultWindowInsetsPadding | Boolean                 | 是否应用默认窗口嵌入边距   | true                                  | 否       |
-| mode                       | NavigationDisplayMode   | 导航项的显示模式           | NavigationDisplayMode.IconAndText     | 否       |
+| mode                       | NavigationBarDisplayMode   | 导航项的显示模式           | NavigationBarDisplayMode.IconAndText     | 否       |
 | content                    | @Composable RowScope.() | 导航栏的内容               | -                                     | 是       |
 
 ### NavigationBarItem 属性
@@ -116,7 +117,7 @@ Scaffold(
 | shadowElevation            | Dp                        | 导航栏的阴影高度                   | 1.dp                                    | 否       |
 | showDivider                | Boolean                   | 是否显示导航栏周围的分割线         | false                                   | 否       |
 | defaultWindowInsetsPadding | Boolean                   | 是否应用默认窗口嵌入边距           | true                                    | 否       |
-| mode                       | NavigationDisplayMode     | 导航项的显示模式（图标/文本/两者） | NavigationDisplayMode.IconOnly          | 否       |
+| mode                       | FloatingNavigationBarDisplayMode | 导航项的显示模式（图标/文本/两者） | FloatingNavigationBarDisplayMode.IconOnly  | 否       |
 | content                    | @Composable RowScope.()   | 导航栏的内容                       | -                                       | 是       |
 
 ### FloatingNavigationBarItem 属性
@@ -130,7 +131,7 @@ Scaffold(
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
 
-### NavigationDisplayMode 枚举
+### NavigationBarDisplayMode 枚举
 
 | 值                    | 说明                   |
 | --------------------- | ---------------------- |
@@ -138,6 +139,14 @@ Scaffold(
 | IconOnly              | 仅显示图标             |
 | TextOnly              | 仅显示文本             |
 | IconWithSelectedLabel | 始终显示图标，仅选中时显示文本 |
+
+### FloatingNavigationBarDisplayMode 枚举
+
+| 值          | 说明           |
+| ----------- | -------------- |
+| IconAndText | 显示图标和文本 |
+| IconOnly    | 仅显示图标     |
+| TextOnly    | 仅显示文本     |
 
 ## 进阶用法
 
@@ -179,7 +188,7 @@ NavigationBar(
 
 ```kotlin
 FloatingNavigationBar(
-    mode = NavigationDisplayMode.IconAndText
+    mode = FloatingNavigationBarDisplayMode.IconAndText
 ) {
     // ... items ...
 }
@@ -189,7 +198,7 @@ FloatingNavigationBar(
 
 ```kotlin
 FloatingNavigationBar(
-    mode = NavigationDisplayMode.TextOnly
+    mode = FloatingNavigationBarDisplayMode.TextOnly
 ) {
     // ... items ...
 }
@@ -201,7 +210,7 @@ FloatingNavigationBar(
 FloatingNavigationBar(
     color = MiuixTheme.colorScheme.primaryContainer,
     cornerRadius = 28.dp,
-    mode = NavigationDisplayMode.IconAndText
+    mode = FloatingNavigationBarDisplayMode.IconAndText
 ) {
     // ... items ...
 }
@@ -213,7 +222,7 @@ FloatingNavigationBar(
 FloatingNavigationBar(
     horizontalAlignment = Alignment.Start, // 左对齐
     horizontalOutSidePadding = 16.dp, // 设置外部边距
-    mode = NavigationDisplayMode.IconOnly
+    mode = FloatingNavigationBarDisplayMode.IconOnly
 ) {
     // ... items ...
 }
@@ -267,7 +276,7 @@ var selectedIndex by remember { mutableStateOf(0) }
 Scaffold(
     bottomBar = {
         FloatingNavigationBar(
-            mode = NavigationDisplayMode.IconOnly // 仅显示图标
+            mode = FloatingNavigationBarDisplayMode.IconOnly // 仅显示图标
         ) {
             pages.forEachIndexed { index, label ->
                 FloatingNavigationBarItem(

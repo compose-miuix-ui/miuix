@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -36,86 +33,61 @@ import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.LocalDismissState
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import utils.AdaptiveTopAppBar
+import utils.pageContentPadding
+import utils.pageScrollModifiers
 import kotlin.random.Random
+
+private val TopBarPopupItems = listOf("Window 1", "Window 2", "Window 3")
 
 @Composable
 fun NavTestPage(
     index: Int,
     padding: PaddingValues,
-    showTopAppBar: Boolean,
-    isWideScreen: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
 ) {
+    val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
-    val rememberIndex by remember { mutableIntStateOf(index) }
 
     Scaffold(
         topBar = {
-            if (showTopAppBar) {
-                if (isWideScreen) {
-                    SmallTopAppBar(
-                        title = "NavTest $rememberIndex",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
-                        actions = {
-                            TopBarActions()
-                        },
+            AdaptiveTopAppBar(
+                title = "NavTest $index",
+                showTopAppBar = appState.showTopAppBar,
+                isWideScreen = isWideScreen,
+                scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    BackNavigationIcon(
+                        modifier = Modifier.padding(start = 16.dp),
+                        onClick = { navigator.pop() },
                     )
-                } else {
-                    TopAppBar(
-                        title = "NavTest $rememberIndex",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
-                        actions = {
-                            TopBarActions()
-                        },
-                    )
-                }
-            }
+                },
+                actions = {
+                    TopBarActions()
+                },
+            )
         },
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier
-                .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-                .overScrollVertical(isEnabled = { enableOverScroll })
-                .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                start = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-                end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-                bottom = if (isWideScreen) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
-                } else {
-                    padding.calculateBottomPadding() + 12.dp
-                },
+            modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+            contentPadding = pageContentPadding(
+                innerPadding,
+                padding,
+                isWideScreen,
+                extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+                extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             ),
             overscrollEffect = null,
         ) {
-            item {
+            item(key = "nav_push") {
                 Card(
                     modifier = Modifier
                         .padding(all = 12.dp),
@@ -127,7 +99,7 @@ fun NavTestPage(
                     )
                 }
             }
-            item {
+            item(key = "nav_layout") {
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
@@ -269,12 +241,16 @@ fun NavTestPage(
 @Composable
 fun TopBarActions() {
     val showTopPopup = remember { mutableStateOf(false) }
+    val topPopupHoldDown = remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
     IconButton(
         modifier = Modifier.padding(end = 16.dp),
-        onClick = { showTopPopup.value = true },
-        holdDownState = showTopPopup.value,
+        onClick = {
+            showTopPopup.value = true
+            topPopupHoldDown.value = true
+        },
+        holdDownState = topPopupHoldDown.value,
     ) {
         Icon(
             imageVector = MiuixIcons.Edit,
@@ -289,15 +265,17 @@ fun TopBarActions() {
         onDismissRequest = {
             showTopPopup.value = false
         },
+        onDismissFinished = {
+            topPopupHoldDown.value = false
+        },
         content = {
             val state = LocalDismissState.current
-            val items = listOf("Window 1", "Window 2", "Window 3")
             ListPopupColumn {
-                items.forEachIndexed { index, string ->
+                TopBarPopupItems.forEachIndexed { index, string ->
                     key(index) {
                         DropdownImpl(
                             text = string,
-                            optionSize = items.size,
+                            optionSize = TopBarPopupItems.size,
                             isSelected = selectedIndex == index,
                             onSelectedIndexChange = { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)

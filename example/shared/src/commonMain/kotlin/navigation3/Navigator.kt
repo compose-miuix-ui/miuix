@@ -48,7 +48,7 @@ class Navigator(
      * Pop until predicate matches the top key.
      */
     fun popUntil(predicate: (NavKey) -> Boolean) {
-        while (backStack.isNotEmpty() && !predicate(backStack.last())) {
+        while (backStack.size > 1 && !predicate(backStack.last())) {
             backStack.removeAt(backStack.lastIndex)
         }
     }
@@ -82,6 +82,10 @@ class Navigator(
     fun clearResult(requestKey: String) {
         ensureChannel(requestKey).resetReplayCache()
     }
+
+    fun current() = backStack.lastOrNull()
+
+    fun backStackSize() = backStack.size
 
     private fun ensureChannel(key: String): MutableSharedFlow<Any> = resultBus.getOrPut(key) { MutableSharedFlow(replay = 1, extraBufferCapacity = 0) }
 }

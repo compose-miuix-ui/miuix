@@ -17,7 +17,8 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
 ```
 
 ## Basic Usage
@@ -59,7 +60,7 @@ val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Contacts, MiuixIcons.Set
 Scaffold(
     bottomBar = {
         FloatingNavigationBar(
-            mode = NavigationDisplayMode.IconOnly // Show icons only
+            mode = FloatingNavigationBarDisplayMode.IconOnly // Show icons only
         ) {
             items.forEachIndexed { index, label ->
                 FloatingNavigationBarItem(
@@ -90,7 +91,7 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | color                      | Color                    | Background color of the nav bar     | MiuixTheme.colorScheme.surface        | No       |
 | showDivider                | Boolean                  | Show top divider line or not        | true                                  | No       |
 | defaultWindowInsetsPadding | Boolean                  | Apply default window insets padding | true                                  | No       |
-| mode                       | NavigationDisplayMode    | Display mode for items              | NavigationDisplayMode.IconAndText     | No       |
+| mode                       | NavigationBarDisplayMode    | Display mode for items              | NavigationBarDisplayMode.IconAndText     | No       |
 | content                    | @Composable RowScope.()  | The content of the nav bar          | -                                     | Yes      |
 
 ### NavigationBarItem Properties
@@ -116,7 +117,7 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | shadowElevation            | Dp                       | The shadow elevation of the nav bar     | 1.dp                                    | No       |
 | showDivider                | Boolean                  | Show divider line around the nav bar    | false                                   | No       |
 | defaultWindowInsetsPadding | Boolean                  | Apply default window insets padding     | true                                    | No       |
-| mode                       | NavigationDisplayMode    | Display mode for items (icon/text/both) | NavigationDisplayMode.IconOnly          | No       |
+| mode                       | FloatingNavigationBarDisplayMode | Display mode for items (icon/text/both) | FloatingNavigationBarDisplayMode.IconOnly  | No       |
 | content                    | @Composable RowScope.()  | The content of the nav bar              | -                                       | Yes      |
 
 ### FloatingNavigationBarItem Properties
@@ -130,7 +131,7 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
 
-### NavigationDisplayMode Enum
+### NavigationBarDisplayMode Enum
 
 | Value                 | Description                                  |
 | --------------------- | -------------------------------------------- |
@@ -138,6 +139,14 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | IconOnly              | Show icon only                               |
 | TextOnly              | Show text only                               |
 | IconWithSelectedLabel | Show icon always, show text only when selected|
+
+### FloatingNavigationBarDisplayMode Enum
+
+| Value       | Description             |
+| ----------- | ----------------------- |
+| IconAndText | Show both icon and text |
+| IconOnly    | Show icon only          |
+| TextOnly    | Show text only          |
 
 ## Advanced Usage
 
@@ -179,7 +188,7 @@ NavigationBar(
 
 ```kotlin
 FloatingNavigationBar(
-    mode = NavigationDisplayMode.IconAndText
+    mode = FloatingNavigationBarDisplayMode.IconAndText
 ) {
     // ... items ...
 }
@@ -189,7 +198,7 @@ FloatingNavigationBar(
 
 ```kotlin
 FloatingNavigationBar(
-    mode = NavigationDisplayMode.TextOnly
+    mode = FloatingNavigationBarDisplayMode.TextOnly
 ) {
     // ... items ...
 }
@@ -201,7 +210,7 @@ FloatingNavigationBar(
 FloatingNavigationBar(
     color = MiuixTheme.colorScheme.primaryContainer,
     cornerRadius = 28.dp,
-    mode = NavigationDisplayMode.IconAndText
+    mode = FloatingNavigationBarDisplayMode.IconAndText
 ) {
     // ... items ...
 }
@@ -213,7 +222,7 @@ FloatingNavigationBar(
 FloatingNavigationBar(
     horizontalAlignment = Alignment.Start, // Align to start
     horizontalOutSidePadding = 16.dp, // Set outside padding
-    mode = NavigationDisplayMode.IconOnly
+    mode = FloatingNavigationBarDisplayMode.IconOnly
 ) {
     // ... items ...
 }
@@ -267,7 +276,7 @@ var selectedIndex by remember { mutableStateOf(0) }
 Scaffold(
     bottomBar = {
         FloatingNavigationBar(
-            mode = NavigationDisplayMode.IconOnly // Show icons only
+            mode = FloatingNavigationBarDisplayMode.IconOnly // Show icons only
         ) {
             pages.forEachIndexed { index, label ->
                 FloatingNavigationBarItem(

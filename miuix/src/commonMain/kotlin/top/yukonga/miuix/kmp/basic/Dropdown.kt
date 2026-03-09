@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +17,12 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlendModeColorFilter
 import androidx.compose.ui.graphics.Color
@@ -36,12 +38,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun RowScope.DropdownArrowEndAction(
     actionColor: Color,
 ) {
+    val colorFilter = remember(actionColor) { ColorFilter.tint(actionColor) }
     Image(
         modifier = Modifier
             .size(10.dp, 16.dp)
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowUpDown,
-        colorFilter = ColorFilter.tint(actionColor),
+        colorFilter = colorFilter,
         contentDescription = null,
     )
 }
@@ -79,12 +82,13 @@ fun DropdownImpl(
         Color.Transparent
     }
 
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .clickable { onSelectedIndexChange(index) }
-            .background(backgroundColor)
+            .drawBehind { drawRect(backgroundColor) }
+            .clickable { currentOnSelectedIndexChange(index) }
             .padding(horizontal = 20.dp)
             .padding(
                 top = additionalTopPadding,
@@ -99,12 +103,13 @@ fun DropdownImpl(
             color = textColor,
         )
 
+        val checkColorFilter = remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
                 .size(20.dp),
             imageVector = MiuixIcons.Basic.Check,
-            colorFilter = BlendModeColorFilter(checkColor, BlendMode.SrcIn),
+            colorFilter = checkColorFilter,
             contentDescription = null,
         )
     }
@@ -149,30 +154,28 @@ fun SpinnerItemImpl(
 
     val selectColor = if (isSelected) spinnerColors.selectedIndicatorColor else Color.Transparent
 
-    val itemModifier = Modifier
-        .clickable { onSelectedIndexChange(index) }
-        .background(backgroundColor)
-        .then(
-            if (dialogMode) {
-                Modifier
-                    .heightIn(min = 56.dp)
-                    .widthIn(min = 200.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 28.dp)
-            } else {
-                Modifier.padding(horizontal = 20.dp)
-            },
-        )
-        .padding(top = additionalTopPadding, bottom = additionalBottomPadding)
-
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = itemModifier,
+        modifier = Modifier
+            .drawBehind { drawRect(backgroundColor) }
+            .clickable { currentOnSelectedIndexChange(index) }
+            .then(
+                if (dialogMode) {
+                    Modifier
+                        .heightIn(min = 56.dp)
+                        .widthIn(min = 200.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 28.dp)
+                } else {
+                    Modifier.padding(horizontal = 20.dp)
+                },
+            )
+            .padding(top = additionalTopPadding, bottom = additionalBottomPadding),
     ) {
-        val contentRowModifier = if (dialogMode) Modifier else Modifier.widthIn(max = 216.dp)
         Row(
-            modifier = contentRowModifier,
+            modifier = if (dialogMode) Modifier else Modifier.widthIn(max = 216.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
@@ -197,12 +200,13 @@ fun SpinnerItemImpl(
                 }
             }
         }
+        val selectColorFilter = remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
                 .size(20.dp),
             imageVector = MiuixIcons.Basic.Check,
-            colorFilter = BlendModeColorFilter(selectColor, BlendMode.SrcIn),
+            colorFilter = selectColorFilter,
             contentDescription = null,
         )
     }

@@ -82,7 +82,9 @@ fun SuperSpinner(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -93,11 +95,14 @@ fun SuperSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
-            if (isDropdownExpanded.value) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                }
             }
         }
     }
@@ -133,6 +138,7 @@ fun SuperSpinner(
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
                     onDismiss = { isDropdownExpanded.value = false },
+                    onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
                     spinnerColors = spinnerColors,
@@ -143,7 +149,7 @@ fun SuperSpinner(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -154,6 +160,7 @@ private fun SuperSpinnerPopup(
     selectedIndex: Int,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
@@ -161,10 +168,20 @@ private fun SuperSpinnerPopup(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val onItemSelected: (Int) -> Unit = remember {
+        { selectedIdx ->
+            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            onSelectState.value?.invoke(selectedIdx)
+            currentOnDismiss()
+        }
+    }
     SuperListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         renderInRootScaffold = renderInRootScaffold,
     ) {
@@ -178,11 +195,8 @@ private fun SuperSpinnerPopup(
                         index = index,
                         spinnerColors = spinnerColors,
                         dialogMode = false,
-                    ) { selectedIdx ->
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onSelectState.value?.invoke(selectedIdx)
-                        onDismiss()
-                    }
+                        onSelectedIndexChange = onItemSelected,
+                    )
                 }
             }
         }
@@ -233,6 +247,7 @@ fun SuperSpinner(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
     val itemsNotEmpty = items.isNotEmpty()
@@ -244,9 +259,14 @@ fun SuperSpinner(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                }
+            }
         }
     }
 
@@ -282,6 +302,7 @@ fun SuperSpinner(
                 dialogButtonString = dialogButtonString,
                 isDropdownExpanded = isDropdownExpanded.value,
                 onDismiss = { isDropdownExpanded.value = false },
+                onDismissFinished = { isHoldDown.value = false },
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
                 popupModifier = popupModifier,
@@ -291,7 +312,7 @@ fun SuperSpinner(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -304,6 +325,7 @@ private fun SuperSpinnerDialog(
     dialogButtonString: String,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     hapticFeedback: HapticFeedback,
     spinnerColors: SpinnerColors,
     popupModifier: Modifier = Modifier,
@@ -311,6 +333,15 @@ private fun SuperSpinnerDialog(
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val onItemSelected: (Int) -> Unit = remember {
+        { selectedIdx ->
+            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            currentOnSelectedIndexChange?.invoke(selectedIdx)
+            currentOnDismiss()
+        }
+    }
     val showState = remember { mutableStateOf(false) }
     showState.value = isDropdownExpanded
     SuperDialog(
@@ -318,6 +349,7 @@ private fun SuperSpinnerDialog(
         modifier = popupModifier,
         title = title,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         insideMargin = DpSize(0.dp, 24.dp),
         renderInRootScaffold = renderInRootScaffold,
         content = {
@@ -332,11 +364,8 @@ private fun SuperSpinnerDialog(
                                 index = index,
                                 spinnerColors = spinnerColors,
                                 dialogMode = true,
-                            ) { selectedIdx ->
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                                currentOnSelectedIndexChange?.invoke(selectedIdx)
-                                onDismiss()
-                            }
+                                onSelectedIndexChange = onItemSelected,
+                            )
                         }
                     }
                     TextButton(

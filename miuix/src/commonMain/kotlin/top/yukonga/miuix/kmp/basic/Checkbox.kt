@@ -18,6 +18,7 @@ import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ fun Checkbox(
 ) {
     val currentOnClickState = rememberUpdatedState(onClick)
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     val transition = updateTransition(state, label = "CheckboxTransition")
 
@@ -136,28 +138,25 @@ fun Checkbox(
     val checkPath = remember { Path() }
     val sinkFeedback = remember { SinkFeedback(sinkAmount = 0.85f, animationSpec = spring(0.99f, 986.96f)) }
 
-    val finalModifier = remember(state, enabled, onClick != null) {
-        if (onClick != null) {
-            Modifier.triStateToggleable(
-                state = state,
-                onClick = {
-                    currentOnClickState.value?.invoke()
-                    hapticFeedback.performHapticFeedback(
-                        when (state) {
-                            ToggleableState.Off -> HapticFeedbackType.ToggleOn
-                            ToggleableState.On -> HapticFeedbackType.ToggleOff
-                            ToggleableState.Indeterminate -> HapticFeedbackType.SegmentTick
-                        },
-                    )
-                },
-                enabled = enabled,
-                role = Role.Checkbox,
-                indication = null,
-                interactionSource = null,
-            )
-        } else {
-            Modifier
-        }
+    val finalModifier = if (onClick != null) {
+        Modifier.triStateToggleable(
+            state = state,
+            onClick = {
+                currentOnClickState.value?.invoke()
+                currentHapticFeedback.performHapticFeedback(
+                    when (state) {
+                        ToggleableState.Off -> HapticFeedbackType.ToggleOn
+                        ToggleableState.On -> HapticFeedbackType.ToggleOff
+                        ToggleableState.Indeterminate -> HapticFeedbackType.SegmentTick
+                    },
+                )
+            },
+            enabled = enabled,
+            role = Role.Checkbox,
+            interactionSource = null,
+        )
+    } else {
+        Modifier
     }
 
     Box(

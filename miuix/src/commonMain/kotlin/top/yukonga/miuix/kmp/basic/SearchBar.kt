@@ -268,9 +268,12 @@ fun InputField(
                             .heightIn(min = 45.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
+                        val mergedLabelStyle = remember(textStyle) {
+                            TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium).merge(textStyle)
+                        }
                         Text(
                             text = labelText,
-                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium).merge(textStyle),
+                            style = mergedLabelStyle,
                             color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                         )
                         Box(modifier = Modifier.graphicsLayer { alpha = textAlpha.value }) {

@@ -11,7 +11,7 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationDisplayMode
+import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 ```
 
 ## Basic Usage
@@ -56,7 +56,7 @@ Row {
 | showDivider                | Boolean                                | Show divider line between rail and content    | true                              | No       |
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
 | minWidth                   | Dp                                     | Minimum width of the rail                     | 80.dp                             | No       |
-| mode                       | NavigationDisplayMode                  | Display mode for items                        | NavigationDisplayMode.IconAndText | No       |
+| mode                       | NavigationRailDisplayMode                  | Display mode for items                        | NavigationRailDisplayMode.IconAndText | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
 ### NavigationRailItem Properties
@@ -70,7 +70,7 @@ Row {
 | modifier      | Modifier    | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean     | Whether the item is enabled      | true          | No       |
 
-### NavigationDisplayMode
+### NavigationRailDisplayMode
 
 | Value                 | Description                                       |
 | --------------------- | ------------------------------------------------- |

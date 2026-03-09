@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -68,12 +67,10 @@ fun IconButton(
         }
     }
 
-    val indication = LocalIndication.current
-    val clickableModifier = remember(enabled, interactionSource, indication, onClick) {
+    val clickableModifier = remember(enabled, interactionSource, onClick) {
         if (enabled) {
             Modifier.clickable(
                 role = Role.Button,
-                indication = indication,
                 interactionSource = interactionSource,
                 onClick = onClick,
             )

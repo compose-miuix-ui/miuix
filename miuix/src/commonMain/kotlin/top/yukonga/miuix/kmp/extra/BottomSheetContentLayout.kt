@@ -72,6 +72,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -136,6 +137,7 @@ internal fun BottomSheetContentLayout(
                 animationSpec = tween(durationMillis = 450, easing = DecelerateEasing(1.5f)),
             )
         } else {
+            if (!internalVisible.value) return@LaunchedEffect
             animationProgress.animateTo(
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = 450, easing = DecelerateEasing(0.8f)),
@@ -294,6 +296,8 @@ internal fun BottomSheetContent(
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
+    // Do NOT use windowHeight as a remember key — IME resize would recreate handlers and trigger dismiss.
+    val currentWindowHeight by rememberUpdatedState(windowHeight)
     val coroutineScope = rememberCoroutineScope()
 
     val settlingJob = remember { mutableStateOf<Job?>(null) }
@@ -336,7 +340,7 @@ internal fun BottomSheetContent(
     }
 
     // Settlement logic
-    val performSettle: (Float) -> Unit = remember(allowDismiss, density, windowHeight) {
+    val performSettle: (Float) -> Unit = remember(allowDismiss, density) {
         { velocity ->
             settlingJob.value?.cancel()
             isSettling.value = true
@@ -344,7 +348,7 @@ internal fun BottomSheetContent(
                 val currentOffset = dragOffsetY.value
                 val dismissThresholdPx = with(density) { 150.dp.toPx() }
                 val velocityThresholdPx = with(density) { 800.dp.toPx() }
-                val windowHeightPx = with(density) { windowHeight.toPx() }
+                val windowHeightPx = with(density) { currentWindowHeight.toPx() }
 
                 val shouldDismiss = allowDismiss && (
                     (velocity > velocityThresholdPx) ||
@@ -399,7 +403,7 @@ internal fun BottomSheetContent(
     }
 
     // Nested scroll logic
-    val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, windowHeight) {
+    val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (!enableNestedScroll) return Offset.Zero
@@ -441,7 +445,7 @@ internal fun BottomSheetContent(
                     updateDimAlpha(newOffset)
 
                     // Dismiss immediately if dragged beyond window height
-                    val windowHeightPx = with(density) { windowHeight.toPx() }
+                    val windowHeightPx = with(density) { currentWindowHeight.toPx() }
                     if (newOffset > windowHeightPx) {
                         performSettle(0f)
                         return available

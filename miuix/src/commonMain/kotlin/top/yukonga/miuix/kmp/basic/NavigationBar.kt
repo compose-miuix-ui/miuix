@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,7 +72,7 @@ fun NavigationBar(
     color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
-    mode: NavigationDisplayMode = NavigationDisplayMode.IconAndText,
+    mode: NavigationBarDisplayMode = NavigationBarDisplayMode.IconAndText,
     content: @Composable RowScope.() -> Unit,
 ) {
     val captionBarPaddings = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues()
@@ -95,7 +96,7 @@ fun NavigationBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CompositionLocalProvider(LocalNavigationDisplayMode provides mode) {
+            CompositionLocalProvider(LocalNavigationBarDisplayMode provides mode) {
                 content()
             }
         }
@@ -149,7 +150,7 @@ fun RowScope.NavigationBarItem(
         else -> onSurfaceContainerVariantColor
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-    val mode = LocalNavigationDisplayMode.current
+    val mode = LocalNavigationBarDisplayMode.current
 
     Column(
         modifier = modifier
@@ -168,10 +169,10 @@ fun RowScope.NavigationBarItem(
                 )
             },
         horizontalAlignment = CenterHorizontally,
-        verticalArrangement = if (mode == NavigationDisplayMode.IconAndText || mode == NavigationDisplayMode.IconWithSelectedLabel) Arrangement.Top else Arrangement.Center,
+        verticalArrangement = if (mode == NavigationBarDisplayMode.IconAndText || mode == NavigationBarDisplayMode.IconWithSelectedLabel) Arrangement.Top else Arrangement.Center,
     ) {
         when (mode) {
-            NavigationDisplayMode.IconAndText -> {
+            NavigationBarDisplayMode.IconAndText -> {
                 Image(
                     modifier = Modifier.padding(top = 8.dp).size(26.dp),
                     imageVector = icon,
@@ -188,7 +189,7 @@ fun RowScope.NavigationBarItem(
                 )
             }
 
-            NavigationDisplayMode.IconWithSelectedLabel -> {
+            NavigationBarDisplayMode.IconWithSelectedLabel -> {
                 val defaultPadding = (itemHeight - 26.dp) / 2
                 val iconTopPadding by animateDpAsState(
                     targetValue = if (selected) 8.dp else defaultPadding,
@@ -219,7 +220,7 @@ fun RowScope.NavigationBarItem(
                 )
             }
 
-            NavigationDisplayMode.TextOnly -> {
+            NavigationBarDisplayMode.TextOnly -> {
                 Text(
                     modifier = Modifier.padding(vertical = if (platform != Platform.IOS) 8.dp else 0.dp),
                     text = label,
@@ -266,8 +267,8 @@ fun FloatingNavigationBar(
     shadowElevation: Dp = 1.dp,
     showDivider: Boolean = false,
     defaultWindowInsetsPadding: Boolean = true,
-    mode: NavigationDisplayMode = NavigationDisplayMode.IconOnly,
-    content: @Composable RowScope.() -> Unit,
+    mode: FloatingNavigationBarDisplayMode = FloatingNavigationBarDisplayMode.IconOnly,
+    content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -340,7 +341,7 @@ fun FloatingNavigationBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CompositionLocalProvider(LocalNavigationDisplayMode provides mode) {
+            CompositionLocalProvider(LocalFloatingNavigationBarDisplayMode provides mode) {
                 content()
             }
         }
@@ -383,7 +384,7 @@ fun FloatingNavigationBarItem(
         else -> onSurfaceContainerVariantColor
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-    val mode = LocalNavigationDisplayMode.current
+    val mode = LocalFloatingNavigationBarDisplayMode.current
 
     Column(
         modifier = modifier
@@ -402,7 +403,7 @@ fun FloatingNavigationBarItem(
         horizontalAlignment = CenterHorizontally,
     ) {
         when (mode) {
-            NavigationDisplayMode.IconAndText -> {
+            FloatingNavigationBarDisplayMode.IconAndText -> {
                 Image(
                     modifier = Modifier.padding(top = 6.dp).size(24.dp),
                     imageVector = icon,
@@ -432,46 +433,7 @@ fun FloatingNavigationBarItem(
                 }
             }
 
-            NavigationDisplayMode.IconWithSelectedLabel -> {
-                if (selected) {
-                    Image(
-                        modifier = Modifier.padding(top = 6.dp).size(24.dp),
-                        imageVector = icon,
-                        contentDescription = label,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                    Box(
-                        modifier = Modifier.padding(bottom = 6.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        // Invisible text for layout calculation (always bold)
-                        Text(
-                            modifier = Modifier.alpha(0f),
-                            text = label,
-                            textAlign = TextAlign.Center,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold, // Always bold for layout
-                        )
-                        // Visible text
-                        Text(
-                            text = label,
-                            color = tint,
-                            textAlign = TextAlign.Center,
-                            fontSize = 12.sp,
-                            fontWeight = fontWeight,
-                        )
-                    }
-                } else {
-                    Image(
-                        modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
-                        imageVector = icon,
-                        contentDescription = label,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                }
-            }
-
-            NavigationDisplayMode.TextOnly -> {
+            FloatingNavigationBarDisplayMode.TextOnly -> {
                 Box(
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
                     contentAlignment = Alignment.Center,
@@ -495,7 +457,7 @@ fun FloatingNavigationBarItem(
                 }
             }
 
-            else -> {
+            FloatingNavigationBarDisplayMode.IconOnly -> {
                 Image(
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
                     imageVector = icon,
@@ -512,7 +474,7 @@ fun FloatingNavigationBarItem(
  *
  * This controls whether to show both icon and text, icon only, or text only.
  */
-enum class NavigationDisplayMode {
+enum class NavigationBarDisplayMode {
     /** Show both icon and text. */
     IconAndText,
 
@@ -529,7 +491,28 @@ enum class NavigationDisplayMode {
 /**
  * A composition local to control the display mode for items in a NavigationBar.
  */
-val LocalNavigationDisplayMode = compositionLocalOf { NavigationDisplayMode.IconAndText }
+val LocalNavigationBarDisplayMode = compositionLocalOf { NavigationBarDisplayMode.IconAndText }
+
+/**
+ * Defines the display mode for items in a [FloatingNavigationBar].
+ *
+ * This controls whether to show both icon and text, icon only, or text only.
+ */
+enum class FloatingNavigationBarDisplayMode {
+    /** Show both icon and text. */
+    IconAndText,
+
+    /** Show icon only. */
+    IconOnly,
+
+    /** Show text only. */
+    TextOnly,
+}
+
+/**
+ * A composition local to control the display mode for items in a [FloatingNavigationBar].
+ */
+val LocalFloatingNavigationBarDisplayMode = compositionLocalOf { FloatingNavigationBarDisplayMode.IconOnly }
 
 /**
  * The data class for [NavigationBar].

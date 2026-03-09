@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -114,15 +115,20 @@ private fun SuperCheckboxStartAction(
     enabled: Boolean,
     checkboxColors: CheckboxColors,
 ) {
+    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentChecked by rememberUpdatedState(checked)
+    val onClick = remember(onCheckedChange != null) {
+        if (onCheckedChange != null) {
+            { currentOnCheckedChange?.invoke(!currentChecked) ?: Unit }
+        } else {
+            null
+        }
+    }
     Checkbox(
         modifier = Modifier
             .padding(end = 8.dp),
         state = ToggleableState(checked),
-        onClick = if (onCheckedChange != null) {
-            { onCheckedChange(!checked) }
-        } else {
-            null
-        },
+        onClick = onClick,
         enabled = enabled,
         colors = checkboxColors,
     )
@@ -135,13 +141,18 @@ private fun SuperCheckboxEndAction(
     enabled: Boolean,
     checkboxColors: CheckboxColors,
 ) {
-    Checkbox(
-        state = ToggleableState(checked),
-        onClick = if (onCheckedChange != null) {
-            { onCheckedChange(!checked) }
+    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentChecked by rememberUpdatedState(checked)
+    val onClick = remember(onCheckedChange != null) {
+        if (onCheckedChange != null) {
+            { currentOnCheckedChange?.invoke(!currentChecked) ?: Unit }
         } else {
             null
-        },
+        }
+    }
+    Checkbox(
+        state = ToggleableState(checked),
+        onClick = onClick,
         enabled = enabled,
         colors = checkboxColors,
     )

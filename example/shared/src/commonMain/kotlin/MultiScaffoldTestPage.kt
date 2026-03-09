@@ -25,54 +25,38 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import utils.AdaptiveTopAppBar
 
 @Composable
 fun MultiScaffoldTestPage(
     padding: PaddingValues,
-    showTopAppBar: Boolean,
-    isWideScreen: Boolean,
-    enableScrollEndHaptic: Boolean,
-    enableOverScroll: Boolean,
 ) {
+    val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
 
     Scaffold(
         topBar = {
-            if (showTopAppBar) {
-                if (isWideScreen) {
-                    SmallTopAppBar(
-                        title = "Multi-Scaffold Test",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
+            AdaptiveTopAppBar(
+                title = "Multi-Scaffold Test",
+                showTopAppBar = appState.showTopAppBar,
+                isWideScreen = isWideScreen,
+                scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    BackNavigationIcon(
+                        modifier = Modifier.padding(start = 16.dp),
+                        onClick = { navigator.pop() },
                     )
-                } else {
-                    TopAppBar(
-                        title = "Multi-Scaffold Test",
-                        scrollBehavior = topAppBarScrollBehavior,
-                        navigationIcon = {
-                            BackNavigationIcon(
-                                modifier = Modifier.padding(start = 16.dp),
-                                onClick = { navigator.pop() },
-                            )
-                        },
-                    )
-                }
-            }
+                },
+            )
         },
     ) { innerPadding ->
-        val dropdownOptions = remember { listOf("Option A", "Option B", "Option C") }
+        val dropdownOptions = remember { listOf("A", "B", "C") }
         val topLeftSelected = remember { mutableIntStateOf(0) }
         val topRightSelected = remember { mutableIntStateOf(0) }
         val bottomLeftSelected = remember { mutableIntStateOf(0) }
@@ -82,9 +66,9 @@ fun MultiScaffoldTestPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-                .overScrollVertical(isEnabled = { enableOverScroll })
-                .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
+                .then(if (appState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+                .overScrollVertical(isEnabled = { appState.enableOverScroll })
+                .then(if (appState.showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .verticalScroll(scrollState)
                 .padding(
                     top = innerPadding.calculateTopPadding(),

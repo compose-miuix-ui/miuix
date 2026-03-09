@@ -946,8 +946,7 @@ fun <T : Any> defaultPredictivePopTransitionSpec():
 }
 
 /** Flipped [popTransitionSpec] for right-edge swipe (exit to left). */
-private fun flippedPopTransitionSpec():
-        ContentTransform =
+private fun flippedPopTransitionSpec(): ContentTransform =
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it / 4 },
@@ -960,8 +959,7 @@ private fun flippedPopTransitionSpec():
     )
 
 /** Flipped [predictivePopTransitionSpec] for right-edge swipe (exit to left). */
-private fun flippedPredictivePopTransitionSpec():
-        ContentTransform =
+private fun flippedPredictivePopTransitionSpec(): ContentTransform =
     ContentTransform(
         slideInHorizontally(
             initialOffsetX = { it / 4 },

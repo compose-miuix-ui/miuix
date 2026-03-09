@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +28,6 @@ import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -75,7 +75,9 @@ fun SuperDropdown(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -86,11 +88,14 @@ fun SuperDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
-            if (isDropdownExpanded.value) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                }
             }
         }
     }
@@ -126,6 +131,7 @@ fun SuperDropdown(
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
                     onDismiss = { isDropdownExpanded.value = false },
+                    onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
@@ -136,7 +142,7 @@ fun SuperDropdown(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -147,6 +153,7 @@ private fun SuperDropdownPopup(
     selectedIndex: Int,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
@@ -154,10 +161,20 @@ private fun SuperDropdownPopup(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val onItemSelected: (Int) -> Unit = remember {
+        { selectedIdx ->
+            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            onSelectState.value?.invoke(selectedIdx)
+            currentOnDismiss()
+        }
+    }
     SuperListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         renderInRootScaffold = renderInRootScaffold,
     ) {
@@ -169,11 +186,7 @@ private fun SuperDropdownPopup(
                         optionSize = items.size,
                         isSelected = selectedIndex == index,
                         dropdownColors = dropdownColors,
-                        onSelectedIndexChange = { selectedIdx ->
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onSelectState.value?.invoke(selectedIdx)
-                            onDismiss()
-                        },
+                        onSelectedIndexChange = onItemSelected,
                         index = index,
                     )
                 }

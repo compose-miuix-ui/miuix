@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,9 +28,9 @@ import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -71,7 +72,9 @@ fun WindowDropdown(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
+    val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -82,11 +85,14 @@ fun WindowDropdown(
         MiuixTheme.colorScheme.disabledOnSecondaryVariant
     }
 
-    val handleClick: () -> Unit = {
-        if (actualEnabled) {
-            isDropdownExpanded.value = !isDropdownExpanded.value
-            if (isDropdownExpanded.value) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+    val handleClick = remember(actualEnabled) {
+        {
+            if (actualEnabled) {
+                isDropdownExpanded.value = !isDropdownExpanded.value
+                if (isDropdownExpanded.value) {
+                    isHoldDown.value = true
+                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                }
             }
         }
     }
@@ -122,6 +128,7 @@ fun WindowDropdown(
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
                     onDismiss = { isDropdownExpanded.value = false },
+                    onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     hapticFeedback = hapticFeedback,
@@ -131,7 +138,7 @@ fun WindowDropdown(
         },
         bottomAction = bottomAction,
         onClick = handleClick,
-        holdDownState = isDropdownExpanded.value,
+        holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
 }
@@ -142,19 +149,30 @@ private fun WindowDropdownPopup(
     selectedIndex: Int,
     isDropdownExpanded: Boolean,
     onDismiss: () -> Unit,
+    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val onSelectState = rememberUpdatedState(onSelectedIndexChange)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     WindowListPopup(
         show = isDropdownExpanded,
         alignment = PopupPositionProvider.Align.End,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
     ) {
         val dismiss = LocalDismissState.current
+        val currentDismiss by rememberUpdatedState(dismiss)
+        val onItemSelected: (Int) -> Unit = remember {
+            { selectedIdx ->
+                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                onSelectState.value?.invoke(selectedIdx)
+                currentDismiss?.invoke()
+            }
+        }
         ListPopupColumn {
             items.forEachIndexed { index, string ->
                 key(index) {
@@ -163,11 +181,7 @@ private fun WindowDropdownPopup(
                         optionSize = items.size,
                         isSelected = selectedIndex == index,
                         dropdownColors = dropdownColors,
-                        onSelectedIndexChange = { selectedIdx ->
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onSelectState.value?.invoke(selectedIdx)
-                            dismiss?.invoke()
-                        },
+                        onSelectedIndexChange = onItemSelected,
                         index = index,
                     )
                 }
