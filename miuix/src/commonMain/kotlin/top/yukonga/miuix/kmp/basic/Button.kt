@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -37,6 +40,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param minHeight The minimum height of the [Button].
  * @param colors The [ButtonColors] of the [Button].
  * @param insideMargin The margin inside the [Button].
+ * @param interactionSource The [MutableInteractionSource] to be used for the [Button].
+ * @param indication The [Indication] to be used for the [Button].
  * @param content The [Composable] content of the [Button].
  */
 @Composable
@@ -50,6 +55,8 @@ fun Button(
     minHeight: Dp = ButtonDefaults.MinHeight,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
@@ -61,6 +68,8 @@ fun Button(
         modifier = modifier.semantics { role = Role.Button },
         shape = shape,
         color = color,
+        interactionSource = interactionSource,
+        indication = indication,
     ) {
         Row(
             modifier = Modifier
@@ -85,6 +94,8 @@ fun Button(
  * @param minWidth The minimum width of the [TextButton].
  * @param minHeight The minimum height of the [TextButton].
  * @param insideMargin The margin inside the [TextButton].
+ * @param interactionSource The [MutableInteractionSource] to be used for the [TextButton].
+ * @param indication The [Indication] to be used for the [TextButton].
  */
 @Composable
 @NonRestartableComposable
@@ -98,6 +109,8 @@ fun TextButton(
     minWidth: Dp = ButtonDefaults.MinWidth,
     minHeight: Dp = ButtonDefaults.MinHeight,
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = LocalIndication.current,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
@@ -109,6 +122,8 @@ fun TextButton(
         modifier = modifier.semantics { role = Role.Button },
         shape = shape,
         color = color,
+        interactionSource = interactionSource,
+        indication = indication,
     ) {
         Row(
             modifier = Modifier

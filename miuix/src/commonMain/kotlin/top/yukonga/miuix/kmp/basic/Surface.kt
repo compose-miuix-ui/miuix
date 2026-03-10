@@ -4,6 +4,8 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -86,6 +88,8 @@ fun Surface(
  * @param contentColor The content color of the [Surface].
  * @param border The border of the [Surface].
  * @param shadowElevation The shadow elevation of the [Surface].
+ * @param interactionSource The [MutableInteractionSource] to be used for the [Surface].
+ * @param indication The [Indication] to be used for the [Surface].
  * @param content The [Composable] content of the [Surface].
  */
 @Composable
@@ -99,6 +103,7 @@ fun Surface(
     border: BorderStroke? = null,
     shadowElevation: Dp = 0.dp,
     interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = LocalIndication.current,
     content: @Composable () -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
@@ -121,6 +126,7 @@ fun Surface(
                 )
                 .clickable(
                     interactionSource = interactionSource,
+                    indication = indication,
                     enabled = enabled,
                     onClick = currentOnClick,
                 ),
