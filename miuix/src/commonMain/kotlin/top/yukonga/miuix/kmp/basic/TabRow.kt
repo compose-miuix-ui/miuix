@@ -6,8 +6,10 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -61,6 +63,8 @@ import kotlin.math.roundToInt
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
+ * @param interactionSource The [MutableInteractionSource] to be used for the [TabRow].
+ * @param indication The [Indication] to be used for the [TabRow].
  */
 @Composable
 fun TabRow(
@@ -75,6 +79,8 @@ fun TabRow(
     cornerRadius: Dp = TabRowDefaults.TabRowCornerRadius,
     itemSpacing: Dp = 9.dp,
     contentAlignment: Alignment = Alignment.Center,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
 
@@ -138,6 +144,8 @@ fun TabRow(
                         width = config.tabWidth,
                         color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
+                        interactionSource = interactionSource,
+                        indication = indication,
                     )
                 }
             }
@@ -159,6 +167,8 @@ fun TabRow(
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
+ * @param interactionSource The [MutableInteractionSource] to be used for the [TabRow].
+ * @param indication The [Indication] to be used for the [TabRow].
  */
 @Composable
 fun TabRowWithContour(
@@ -173,6 +183,8 @@ fun TabRowWithContour(
     cornerRadius: Dp = TabRowDefaults.TabRowWithContourCornerRadius,
     itemSpacing: Dp = 5.dp,
     contentAlignment: Alignment = Alignment.Center,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
@@ -243,6 +255,8 @@ fun TabRowWithContour(
                         width = config.tabWidth,
                         color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
+                        interactionSource = interactionSource,
+                        indication = indication,
                     )
                 }
             }
@@ -259,6 +273,8 @@ private fun TabItem(
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = null,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     Surface(
@@ -271,6 +287,8 @@ private fun TabItem(
             .fillMaxHeight()
             .width(width)
             .semantics { role = Role.Tab },
+        interactionSource = interactionSource,
+        indication = indication,
     ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
@@ -297,6 +315,8 @@ private fun TabItemWithContour(
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = null,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     Box(
@@ -304,7 +324,10 @@ private fun TabItemWithContour(
             .fillMaxHeight()
             .width(width)
             .clip(shape)
-            .clickable {
+            .clickable(
+                interactionSource = interactionSource,
+                indication = indication,
+            ) {
                 currentOnClick()
             }
             .semantics { role = Role.Tab },

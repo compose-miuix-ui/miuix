@@ -76,31 +76,35 @@ Button(
 
 ### Button Properties
 
-| Property Name | Type                            | Description                            | Default Value                 | Required |
-| ------------- | ------------------------------- | -------------------------------------- | ----------------------------- | -------- |
-| onClick       | () -> Unit                      | Callback triggered on click            | -                             | Yes      |
-| modifier      | Modifier                        | Modifier applied to the button         | Modifier                      | No       |
-| enabled       | Boolean                         | Whether the button is clickable        | true                          | No       |
-| cornerRadius  | Dp                              | Corner radius of the button            | ButtonDefaults.CornerRadius   | No       |
-| minWidth      | Dp                              | Minimum width of the button            | ButtonDefaults.MinWidth       | No       |
-| minHeight     | Dp                              | Minimum height of the button           | ButtonDefaults.MinHeight      | No       |
-| colors        | ButtonColors                    | Button color configuration             | ButtonDefaults.buttonColors() | No       |
-| insideMargin  | PaddingValues                   | Internal padding of the button         | ButtonDefaults.InsideMargin   | No       |
-| content       | @Composable RowScope.() -> Unit | Composable function for button content | -                             | Yes      |
+| Property Name     | Type                            | Description                            | Default Value                 | Required |
+| ----------------- | ------------------------------- | -------------------------------------- | ----------------------------- | -------- |
+| onClick           | () -> Unit                      | Callback triggered on click            | -                             | Yes      |
+| modifier          | Modifier                        | Modifier applied to the button         | Modifier                      | No       |
+| enabled           | Boolean                         | Whether the button is clickable        | true                          | No       |
+| cornerRadius      | Dp                              | Corner radius of the button            | ButtonDefaults.CornerRadius   | No       |
+| minWidth          | Dp                              | Minimum width of the button            | ButtonDefaults.MinWidth       | No       |
+| minHeight         | Dp                              | Minimum height of the button           | ButtonDefaults.MinHeight      | No       |
+| colors            | ButtonColors                    | Button color configuration             | ButtonDefaults.buttonColors() | No       |
+| insideMargin      | PaddingValues                   | Internal padding of the button         | ButtonDefaults.InsideMargin   | No       |
+| interactionSource | MutableInteractionSource?       | Interaction source for the button      | null                          | No       |
+| indication        | Indication?                     | Indication for click interactions      | LocalIndication.current       | No       |
+| content           | @Composable RowScope.() -> Unit | Composable function for button content | -                             | Yes      |
 
 ### TextButton Properties
 
-| Property Name | Type             | Description                     | Default Value                     | Required |
-| ------------- | ---------------- | ------------------------------- | --------------------------------- | -------- |
-| text          | String           | Text displayed on the button    | -                                 | Yes      |
-| onClick       | () -> Unit       | Callback triggered on click     | -                                 | Yes      |
-| modifier      | Modifier         | Modifier applied to the button  | Modifier                          | No       |
-| enabled       | Boolean          | Whether the button is clickable | true                              | No       |
-| colors        | TextButtonColors | Text button color configuration | ButtonDefaults.textButtonColors() | No       |
-| cornerRadius  | Dp               | Corner radius of the button     | ButtonDefaults.CornerRadius       | No       |
-| minWidth      | Dp               | Minimum width of the button     | ButtonDefaults.MinWidth           | No       |
-| minHeight     | Dp               | Minimum height of the button    | ButtonDefaults.MinHeight          | No       |
-| insideMargin  | PaddingValues    | Internal padding of the button  | ButtonDefaults.InsideMargin       | No       |
+| Property Name     | Type                      | Description                       | Default Value                     | Required |
+| ----------------- | ------------------------- | --------------------------------- | --------------------------------- | -------- |
+| text              | String                    | Text displayed on the button      | -                                 | Yes      |
+| onClick           | () -> Unit                | Callback triggered on click       | -                                 | Yes      |
+| modifier          | Modifier                  | Modifier applied to the button    | Modifier                          | No       |
+| enabled           | Boolean                   | Whether the button is clickable   | true                              | No       |
+| colors            | TextButtonColors          | Text button color configuration   | ButtonDefaults.textButtonColors() | No       |
+| cornerRadius      | Dp                        | Corner radius of the button       | ButtonDefaults.CornerRadius       | No       |
+| minWidth          | Dp                        | Minimum width of the button       | ButtonDefaults.MinWidth           | No       |
+| minHeight         | Dp                        | Minimum height of the button      | ButtonDefaults.MinHeight          | No       |
+| insideMargin      | PaddingValues             | Internal padding of the button    | ButtonDefaults.InsideMargin       | No       |
+| interactionSource | MutableInteractionSource? | Interaction source for the button | null                              | No       |
+| indication        | Indication?               | Indication for click interactions | LocalIndication.current           | No       |
 
 ### ButtonDefaults Object
 

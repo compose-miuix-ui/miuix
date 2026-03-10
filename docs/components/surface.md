@@ -40,19 +40,20 @@ Surface(
 | --------------- | ---------------------- | ------------------------------------------------ | --------------------------------- | -------- |
 | modifier        | Modifier               | Modifiers applied to Surface                     | Modifier                          | No       |
 | shape           | Shape                  | Shape of the Surface                             | RectangleShape                    | No       |
-| color           | Color                  | Background color of Surface                      | MiuixTheme.colorScheme.surface | No       |
-| contentColor    | Color                  | Content color of Surface                         | MiuixTheme.colorScheme.onSurface | No       |
+| color           | Color                  | Background color of Surface                      | MiuixTheme.colorScheme.surface    | No       |
+| contentColor    | Color                  | Content color of Surface                         | MiuixTheme.colorScheme.onSurface  | No       |
 | border          | BorderStroke?          | Border style of Surface                          | null                              | No       |
 | shadowElevation | Dp                     | Shadow elevation of Surface                      | 0.dp                              | No       |
 | content         | @Composable () -> Unit | Composable function for the Surface content area | -                                 | Yes      |
 
 ### Additional Properties for Clickable Surface
 
-| Property Name     | Type                      | Description                          | Default Value | Required |
-| ----------------- | ------------------------- | ------------------------------------ | ------------- | -------- |
-| onClick           | () -> Unit                | Callback triggered on click          | -             | Yes      |
-| enabled           | Boolean                   | Whether the component is clickable   | true          | No       |
-| interactionSource | MutableInteractionSource? | Interaction source for the component | null          | No       |
+| Property Name     | Type                      | Description                          | Default Value           | Required |
+| ----------------- | ------------------------- | ------------------------------------ | ----------------------- | -------- |
+| onClick           | () -> Unit                | Callback triggered on click          | -                       | Yes      |
+| enabled           | Boolean                   | Whether the component is clickable   | true                    | No       |
+| interactionSource | MutableInteractionSource? | Interaction source for the component | null                    | No       |
+| indication        | Indication?               | Indication for click interactions    | LocalIndication.current | No       |
 
 ## Advanced Usage
 

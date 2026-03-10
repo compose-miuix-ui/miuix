@@ -76,31 +76,35 @@ Button(
 
 ### Button 属性
 
-| 属性名       | 类型                            | 说明                     | 默认值                        | 是否必须 |
-| ------------ | ------------------------------- | ------------------------ | ----------------------------- | -------- |
-| onClick      | () -> Unit                      | 点击按钮时触发的回调     | -                             | 是       |
-| modifier     | Modifier                        | 应用于按钮的修饰符       | Modifier                      | 否       |
-| enabled      | Boolean                         | 按钮是否可点击           | true                          | 否       |
-| cornerRadius | Dp                              | 按钮圆角半径             | ButtonDefaults.CornerRadius   | 否       |
-| minWidth     | Dp                              | 按钮最小宽度             | ButtonDefaults.MinWidth       | 否       |
-| minHeight    | Dp                              | 按钮最小高度             | ButtonDefaults.MinHeight      | 否       |
-| colors       | ButtonColors                    | 按钮颜色配置             | ButtonDefaults.buttonColors() | 否       |
-| insideMargin | PaddingValues                   | 按钮内部边距             | ButtonDefaults.InsideMargin   | 否       |
-| content      | @Composable RowScope.() -> Unit | 按钮内容区域的可组合函数 | -                             | 是       |
+| 属性名            | 类型                            | 说明                     | 默认值                        | 是否必须 |
+| ----------------- | ------------------------------- | ------------------------ | ----------------------------- | -------- |
+| onClick           | () -> Unit                      | 点击按钮时触发的回调     | -                             | 是       |
+| modifier          | Modifier                        | 应用于按钮的修饰符       | Modifier                      | 否       |
+| enabled           | Boolean                         | 按钮是否可点击           | true                          | 否       |
+| cornerRadius      | Dp                              | 按钮圆角半径             | ButtonDefaults.CornerRadius   | 否       |
+| minWidth          | Dp                              | 按钮最小宽度             | ButtonDefaults.MinWidth       | 否       |
+| minHeight         | Dp                              | 按钮最小高度             | ButtonDefaults.MinHeight      | 否       |
+| colors            | ButtonColors                    | 按钮颜色配置             | ButtonDefaults.buttonColors() | 否       |
+| insideMargin      | PaddingValues                   | 按钮内部边距             | ButtonDefaults.InsideMargin   | 否       |
+| interactionSource | MutableInteractionSource?       | 按钮的交互源             | null                          | 否       |
+| indication        | Indication?                     | 点击交互的反馈效果       | LocalIndication.current       | 否       |
+| content           | @Composable RowScope.() -> Unit | 按钮内容区域的可组合函数 | -                             | 是       |
 
 ### TextButton 属性
 
-| 属性名       | 类型             | 说明                 | 默认值                            | 是否必须 |
-| ------------ | ---------------- | -------------------- | --------------------------------- | -------- |
-| text         | String           | 按钮显示的文本       | -                                 | 是       |
-| onClick      | () -> Unit       | 点击按钮时触发的回调 | -                                 | 是       |
-| modifier     | Modifier         | 应用于按钮的修饰符   | Modifier                          | 否       |
-| enabled      | Boolean          | 按钮是否可点击       | true                              | 否       |
-| colors       | TextButtonColors | 文本按钮颜色配置     | ButtonDefaults.textButtonColors() | 否       |
-| cornerRadius | Dp               | 按钮圆角半径         | ButtonDefaults.CornerRadius       | 否       |
-| minWidth     | Dp               | 按钮最小宽度         | ButtonDefaults.MinWidth           | 否       |
-| minHeight    | Dp               | 按钮最小高度         | ButtonDefaults.MinHeight          | 否       |
-| insideMargin | PaddingValues    | 按钮内部边距         | ButtonDefaults.InsideMargin       | 否       |
+| 属性名            | 类型                      | 说明                 | 默认值                            | 是否必须 |
+| ----------------- | ------------------------- | -------------------- | --------------------------------- | -------- |
+| text              | String                    | 按钮显示的文本       | -                                 | 是       |
+| onClick           | () -> Unit                | 点击按钮时触发的回调 | -                                 | 是       |
+| modifier          | Modifier                  | 应用于按钮的修饰符   | Modifier                          | 否       |
+| enabled           | Boolean                   | 按钮是否可点击       | true                              | 否       |
+| colors            | TextButtonColors          | 文本按钮颜色配置     | ButtonDefaults.textButtonColors() | 否       |
+| cornerRadius      | Dp                        | 按钮圆角半径         | ButtonDefaults.CornerRadius       | 否       |
+| minWidth          | Dp                        | 按钮最小宽度         | ButtonDefaults.MinWidth           | 否       |
+| minHeight         | Dp                        | 按钮最小高度         | ButtonDefaults.MinHeight          | 否       |
+| insideMargin      | PaddingValues             | 按钮内部边距         | ButtonDefaults.InsideMargin       | 否       |
+| interactionSource | MutableInteractionSource? | 按钮的交互源         | null                              | 否       |
+| indication        | Indication?               | 点击交互的反馈效果   | LocalIndication.current           | 否       |
 
 ### ButtonDefaults 对象
 

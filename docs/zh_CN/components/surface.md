@@ -40,19 +40,20 @@ Surface(
 | --------------- | ---------------------- | ---------------------------- | --------------------------------- | -------- |
 | modifier        | Modifier               | 应用于 Surface 的修饰符      | Modifier                          | 否       |
 | shape           | Shape                  | Surface 的形状               | RectangleShape                    | 否       |
-| color           | Color                  | Surface 的背景颜色           | MiuixTheme.colorScheme.surface | 否       |
-| contentColor    | Color                  | Surface 的内容颜色           | MiuixTheme.colorScheme.onSurface | 否       |
+| color           | Color                  | Surface 的背景颜色           | MiuixTheme.colorScheme.surface    | 否       |
+| contentColor    | Color                  | Surface 的内容颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
 | border          | BorderStroke?          | Surface 的边框样式           | null                              | 否       |
 | shadowElevation | Dp                     | Surface 的阴影高度           | 0.dp                              | 否       |
 | content         | @Composable () -> Unit | Surface 内容区域的可组合函数 | -                                 | 是       |
 
 ### 可点击 Surface 额外属性
 
-| 属性名            | 类型                      | 说明                 | 默认值 | 是否必须 |
-| ----------------- | ------------------------- | -------------------- | ------ | -------- |
-| onClick           | () -> Unit                | 点击组件时触发的回调 | -      | 是       |
-| enabled           | Boolean                   | 组件是否可点击       | true   | 否       |
-| interactionSource | MutableInteractionSource? | 组件的交互源         | null   | 否       |
+| 属性名            | 类型                      | 说明                 | 默认值                  | 是否必须 |
+| ----------------- | ------------------------- | -------------------- | ----------------------- | -------- |
+| onClick           | () -> Unit                | 点击组件时触发的回调 | -                       | 是       |
+| enabled           | Boolean                   | 组件是否可点击       | true                    | 否       |
+| interactionSource | MutableInteractionSource? | 组件的交互源         | null                    | 否       |
+| indication        | Indication?               | 点击交互的反馈效果   | LocalIndication.current | 否       |
 
 ## 进阶用法
 
