@@ -238,21 +238,19 @@ fun SearchStatus.SearchPager(
                             )
                         },
                 )
-                run {
-                    val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
-                    NavigationBackHandler(
-                        state = navEventState,
-                        isBackEnabled = true,
-                        onBackCompleted = {
-                            onSearchStatusChange(
-                                searchStatus.copy(
-                                    searchText = "",
-                                    current = SearchStatus.Status.COLLAPSING,
-                                ),
-                            )
-                        },
-                    )
-                }
+                val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
+                NavigationBackHandler(
+                    state = navEventState,
+                    isBackEnabled = true,
+                    onBackCompleted = {
+                        onSearchStatusChange(
+                            searchStatus.copy(
+                                searchText = "",
+                                current = SearchStatus.Status.COLLAPSING,
+                            ),
+                        )
+                    },
+                )
             }
         }
         AnimatedVisibility(

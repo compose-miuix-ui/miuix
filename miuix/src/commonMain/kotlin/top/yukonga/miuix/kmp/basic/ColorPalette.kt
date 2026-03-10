@@ -114,6 +114,7 @@ fun ColorPalette(
     }
 
     val onColorChangedState = rememberUpdatedState(onColorChanged)
+    val capsuleShape = remember { Capsule() }
 
     Column(
         modifier = modifier,
@@ -125,7 +126,7 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule())
+                    .clip(capsuleShape)
                     .background(lastEmittedColor ?: color),
             )
         }

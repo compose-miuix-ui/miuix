@@ -34,7 +34,7 @@ Card {
 | cornerRadius      | Dp                                 | Card corner radius                        | CardDefaults.CornerRadius    | No       | All         |
 | insideMargin      | PaddingValues                      | Card inner padding                        | CardDefaults.InsideMargin    | No       | All         |
 | pressFeedbackType | PressFeedbackType                  | Feedback type when pressed                | PressFeedbackType.None       | No       | Interactive |
-| showIndication    | Boolean?                           | Show indication on interaction            | false                        | No       | Interactive |
+| showIndication    | Boolean                            | Show indication on interaction            | false                        | No       | Interactive |
 | onClick           | (() -> Unit)?                      | Callback when clicked                     | null                         | No       | Interactive |
 | onLongPress       | (() -> Unit)?                      | Callback when long pressed                | null                         | No       | Interactive |
 | content           | @Composable ColumnScope.() -> Unit | Composable function for card content area | -                            | Yes      | All         |

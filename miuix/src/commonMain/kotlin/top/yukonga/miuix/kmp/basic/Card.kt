@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -36,7 +37,7 @@ import top.yukonga.miuix.kmp.utils.pressable
 
 /**
  * A [Card] component with Miuix style.
- * Card contain contain content and actions that relate information about a subject.
+ * Card contain content and actions that relate information about a subject.
  *
  * This [Card] does not handle input events
  *
@@ -47,6 +48,7 @@ import top.yukonga.miuix.kmp.utils.pressable
  * @param content The [Composable] content of the [Card].
  */
 @Composable
+@NonRestartableComposable
 fun Card(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = CardDefaults.CornerRadius,
@@ -89,7 +91,7 @@ fun Card(
     insideMargin: PaddingValues = CardDefaults.InsideMargin,
     colors: CardColors = CardDefaults.defaultColors(),
     pressFeedbackType: PressFeedbackType = PressFeedbackType.None,
-    showIndication: Boolean? = false,
+    showIndication: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -106,13 +108,8 @@ fun Card(
         }
     }
 
-    val usedInteractionSource = remember(pressFeedback) {
-        if (pressFeedback != null) interactionSource else null
-    }
-    val indicationLocal = LocalIndication.current
-    val indicationToUse = remember(showIndication, indicationLocal) {
-        if (showIndication == true) indicationLocal else null
-    }
+    val usedInteractionSource = if (pressFeedback != null) interactionSource else null
+    val indicationToUse = if (showIndication) LocalIndication.current else null
 
     BasicCard(
         modifier = modifier.pressable(
@@ -128,7 +125,7 @@ fun Card(
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = indicationToUse,
-                    onClick = { currentOnClick?.invoke() },
+                    onClick = currentOnClick ?: {},
                     onLongClick = currentOnLongPress,
                 )
                 .padding(insideMargin),

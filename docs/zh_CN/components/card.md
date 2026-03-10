@@ -35,7 +35,7 @@ Card {
 | cornerRadius      | Dp                                 | 卡片圆角半径             | CardDefaults.CornerRadius    | 否       | 所有     |
 | insideMargin      | PaddingValues                      | 卡片内部边距             | CardDefaults.InsideMargin    | 否       | 所有     |
 | pressFeedbackType | PressFeedbackType                  | 按压反馈类型             | PressFeedbackType.None       | 否       | 交互式   |
-| showIndication    | Boolean?                           | 显示点击指示效果         | false                        | 否       | 交互式   |
+| showIndication    | Boolean                            | 显示点击指示效果         | false                        | 否       | 交互式   |
 | onClick           | (() -> Unit)?                      | 点击事件回调             | null                         | 否       | 交互式   |
 | onLongPress       | (() -> Unit)?                      | 长按事件回调             | null                         | 否       | 交互式   |
 | content           | @Composable ColumnScope.() -> Unit | 卡片内容区域的可组合函数 | -                            | 是       | 所有     |

@@ -63,6 +63,7 @@ kotlin {
                 implementation(libs.androidx.navigation3.runtime)
                 implementation(libs.aboutlibraries.core)
                 implementation(libs.jetbrains.androidx.navigationevent)
+                implementation(libs.kyant.shapes)
             }
         }
 

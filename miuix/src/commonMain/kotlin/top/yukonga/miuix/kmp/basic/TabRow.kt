@@ -188,6 +188,7 @@ fun TabRowWithContour(
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
+    val outerShape = remember(cornerRadius) { RoundedRectangle(cornerRadius + contourPadding) }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -226,7 +227,7 @@ fun TabRowWithContour(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedRectangle(cornerRadius + contourPadding))
+                .clip(outerShape)
                 .background(color = colors.backgroundColor(false))
                 .padding(contourPadding),
         ) {

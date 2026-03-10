@@ -83,7 +83,7 @@ private fun SettingsContent(
         ),
         contentPadding = pageContentPadding(padding, padding, isWideScreen),
     ) {
-        item(key = "settings") {
+        item(key = "settingsUi") {
             Card(
                 modifier = Modifier.padding(12.dp),
             ) {
@@ -218,6 +218,8 @@ private fun SettingsContent(
                     }
                 }
             }
+        }
+        item(key = "settingsTransition") {
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             ) {
@@ -246,6 +248,8 @@ private fun SettingsContent(
                     onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
                 )
             }
+        }
+        item(key = "settingsNavigation") {
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             ) {
@@ -260,6 +264,8 @@ private fun SettingsContent(
                     onClick = { navigator.push(Route.MultiScaffoldTest) },
                 )
             }
+        }
+        item(key = "settingsAbout") {
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {

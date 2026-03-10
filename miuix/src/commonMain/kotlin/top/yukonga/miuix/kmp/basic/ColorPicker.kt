@@ -135,6 +135,7 @@ fun HsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
+    val capsuleShape = remember { Capsule() }
 
     // Initialize basic values, execute only once.
     val hsv = remember { color.toHsv() }
@@ -190,7 +191,7 @@ fun HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule())
+                    .clip(capsuleShape)
                     .background(selectedColor),
             )
         }
@@ -382,6 +383,7 @@ fun OkHsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
+    val capsuleShape = remember { Capsule() }
 
     // Initialize basic values, execute only once.
     val okhsv = remember { Transforms.colorToOkhsv(color) }
@@ -437,7 +439,7 @@ fun OkHsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule())
+                    .clip(capsuleShape)
                     .background(selectedColor),
             )
         }
@@ -633,6 +635,7 @@ fun OkLabColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
+    val capsuleShape = remember { Capsule() }
 
     // Initialize basic values, execute only once.
     val ok = remember { color.toOkLab() }
@@ -688,7 +691,7 @@ fun OkLabColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule())
+                    .clip(capsuleShape)
                     .background(selectedColor),
             )
         }
@@ -762,6 +765,7 @@ fun OkLchColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
+    val capsuleShape = remember { Capsule() }
 
     // Initialize basic values, execute only once.
     val oklch = remember { color.toOkLch() }
@@ -817,7 +821,7 @@ fun OkLchColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(Capsule())
+                    .clip(capsuleShape)
                     .background(selectedColor),
             )
         }
@@ -1152,6 +1156,7 @@ private fun ColorSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val onValueChangedState = rememberUpdatedState(onValueChanged)
+    val capsuleShape = remember { Capsule() }
     val density = LocalDensity.current
     val indicatorSizeDp = 20.dp
     val sliderHeightDp = 26.dp
@@ -1165,7 +1170,7 @@ private fun ColorSlider(
 
     BoxWithConstraints(
         modifier = Modifier
-            .clip(Capsule())
+            .clip(capsuleShape)
             .then(modifier)
             .height(sliderHeightDp)
             .drawWithCache {

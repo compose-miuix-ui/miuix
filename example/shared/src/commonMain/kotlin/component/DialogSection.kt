@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -26,10 +27,10 @@ import top.yukonga.miuix.kmp.theme.LocalDismissState
 
 fun LazyListScope.dialogSection() {
     item(key = "dialog") {
-        val showSuperDialog = remember { mutableStateOf(false) }
-        val showWindowDialog = remember { mutableStateOf(false) }
-        val superDialogHoldDown = remember { mutableStateOf(false) }
-        val windowDialogHoldDown = remember { mutableStateOf(false) }
+        var showSuperDialog by remember { mutableStateOf(false) }
+        var showWindowDialog by remember { mutableStateOf(false) }
+        var superDialogHoldDown by remember { mutableStateOf(false) }
+        var windowDialogHoldDown by remember { mutableStateOf(false) }
 
         SmallTitle(text = "Dialog")
         Card(
@@ -41,39 +42,46 @@ fun LazyListScope.dialogSection() {
                 title = "SuperDialog",
                 summary = "Click to show a SuperDialog",
                 onClick = {
-                    showSuperDialog.value = true
-                    superDialogHoldDown.value = true
+                    showSuperDialog = true
+                    superDialogHoldDown = true
                 },
-                holdDownState = superDialogHoldDown.value,
+                holdDownState = superDialogHoldDown,
             )
             SuperArrow(
                 title = "WindowDialog",
                 summary = "Click to show a WindowDialog",
                 onClick = {
-                    showWindowDialog.value = true
-                    windowDialogHoldDown.value = true
+                    showWindowDialog = true
+                    windowDialogHoldDown = true
                 },
-                holdDownState = windowDialogHoldDown.value,
+                holdDownState = windowDialogHoldDown,
             )
         }
 
-        SuperDialogDemo(showSuperDialog, onDismissFinished = { superDialogHoldDown.value = false })
-        WindowDialogDemo(showWindowDialog, onDismissFinished = { windowDialogHoldDown.value = false })
+        SuperDialogDemo(
+            show = showSuperDialog,
+            onDismissRequest = { showSuperDialog = false },
+            onDismissFinished = { superDialogHoldDown = false },
+        )
+        WindowDialogDemo(
+            show = showWindowDialog,
+            onDismissRequest = { showWindowDialog = false },
+            onDismissFinished = { windowDialogHoldDown = false },
+        )
     }
 }
 
 @Composable
 private fun SuperDialogDemo(
-    showDialog: MutableState<Boolean>,
+    show: Boolean,
+    onDismissRequest: () -> Unit,
     onDismissFinished: () -> Unit,
 ) {
     SuperDialog(
-        show = showDialog.value,
+        show = show,
         title = "SuperDialog",
         summary = "A dialog component inside MiuixPopupHost.",
-        onDismissRequest = {
-            showDialog.value = false
-        },
+        onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         content = {
             Row(
@@ -81,17 +89,13 @@ private fun SuperDialogDemo(
             ) {
                 TextButton(
                     text = "Cancel",
-                    onClick = {
-                        showDialog.value = false
-                    },
+                    onClick = onDismissRequest,
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(20.dp))
                 TextButton(
                     text = "Confirm",
-                    onClick = {
-                        showDialog.value = false
-                    },
+                    onClick = onDismissRequest,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
@@ -102,35 +106,30 @@ private fun SuperDialogDemo(
 
 @Composable
 private fun WindowDialogDemo(
-    showDialog: MutableState<Boolean>,
+    show: Boolean,
+    onDismissRequest: () -> Unit,
     onDismissFinished: () -> Unit,
 ) {
     WindowDialog(
-        show = showDialog.value,
+        show = show,
         title = "WindowDialog",
         summary = "A window-level dialog, no MiuixPopupHost required.",
-        onDismissRequest = {
-            showDialog.value = false
-        },
+        onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         content = {
-            val state = LocalDismissState.current
+            val dismissState = LocalDismissState.current
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
                     text = "Cancel",
-                    onClick = {
-                        state?.invoke()
-                    },
+                    onClick = { dismissState?.invoke() },
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(20.dp))
                 TextButton(
                     text = "Confirm",
-                    onClick = {
-                        state?.invoke()
-                    },
+                    onClick = { dismissState?.invoke() },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )

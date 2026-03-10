@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -135,6 +134,7 @@ fun Checkbox(
         label = "CrossCenterGravitation",
     ) { if (it == ToggleableState.Indeterminate) 1f else 0f }
 
+    val capsuleShape = remember { Capsule() }
     val checkPath = remember { Path() }
     val sinkFeedback = remember { SinkFeedback(sinkAmount = 0.85f, animationSpec = spring(0.99f, 986.96f)) }
 
@@ -169,7 +169,7 @@ fun Checkbox(
                 enabled = enabled,
                 delay = null,
             )
-            .clip(Capsule())
+            .clip(capsuleShape)
             .drawWithCache {
                 val viewportSize = 23f
                 val strokeWidth = size.width * 0.09f
@@ -386,15 +386,11 @@ data class CheckboxColors(
     private val disabledCheckedBackgroundColor: Color,
     private val disabledUncheckedBackgroundColor: Color,
 ) {
-    @Stable
     internal fun checkedForegroundColor(enabled: Boolean): Color = if (enabled) checkedForegroundColor else disabledCheckedForegroundColor
 
-    @Stable
     internal fun uncheckedForegroundColor(enabled: Boolean): Color = if (enabled) uncheckedForegroundColor else disabledUncheckedForegroundColor
 
-    @Stable
     internal fun checkedBackgroundColor(enabled: Boolean): Color = if (enabled) checkedBackgroundColor else disabledCheckedBackgroundColor
 
-    @Stable
     internal fun uncheckedBackgroundColor(enabled: Boolean): Color = if (enabled) uncheckedBackgroundColor else disabledUncheckedBackgroundColor
 }

@@ -46,6 +46,8 @@ import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 
+private val IconListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+
 @Composable
 fun IconsPage(
     padding: PaddingValues,
@@ -218,11 +220,7 @@ fun IconsPage(
                     key = { "icon_$it" },
                 ) { index ->
                     val isLast = index == lightIcons.lastIndex
-                    val shape = if (isLast) {
-                        RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
-                    } else {
-                        RectangleShape
-                    }
+                    val shape = if (isLast) IconListBottomShape else RectangleShape
                     val bottomPadding = if (isLast) 6.dp else 0.dp
                     Row(
                         modifier = Modifier

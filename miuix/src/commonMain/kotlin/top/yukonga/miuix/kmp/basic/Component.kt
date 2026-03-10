@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
  */
 @Composable
+@NonRestartableComposable
 fun BasicComponent(
     modifier: Modifier = Modifier,
     title: String? = null,
@@ -147,13 +149,15 @@ fun BasicComponent(
     }
 
     val hasOnClick = onClick != null
-    val clickableModifier = if (enabled && hasOnClick) {
-        Modifier.clickable(
-            interactionSource = interactionSource,
-            onClick = { currentOnClick?.invoke() },
-        )
-    } else {
-        Modifier
+    val clickableModifier = remember(enabled, hasOnClick, interactionSource) {
+        if (enabled && hasOnClick) {
+            Modifier.clickable(
+                interactionSource = interactionSource,
+                onClick = { currentOnClick?.invoke() },
+            )
+        } else {
+            Modifier
+        }
     }
 
     Column(

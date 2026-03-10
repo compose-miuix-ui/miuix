@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,12 +47,12 @@ private val BottomSheetDropdownOptions = listOf("Option 1", "Option 2")
 
 fun LazyListScope.bottomSheetSection() {
     item(key = "bottomSheet") {
-        val showSuperBottomSheet = remember { mutableStateOf(false) }
-        val showWindowBottomSheet = remember { mutableStateOf(false) }
-        val superBottomSheetHoldDown = remember { mutableStateOf(false) }
-        val windowBottomSheetHoldDown = remember { mutableStateOf(false) }
-        val bottomSheetDropdownSelectedOption = remember { mutableIntStateOf(0) }
-        val bottomSheetSuperSwitchState = remember { mutableStateOf(true) }
+        var showSuperBottomSheet by remember { mutableStateOf(false) }
+        var showWindowBottomSheet by remember { mutableStateOf(false) }
+        var superBottomSheetHoldDown by remember { mutableStateOf(false) }
+        var windowBottomSheetHoldDown by remember { mutableStateOf(false) }
+        var bottomSheetDropdownSelectedOption by remember { mutableIntStateOf(0) }
+        var bottomSheetSuperSwitchState by remember { mutableStateOf(true) }
 
         SmallTitle(text = "BottomSheet")
         Card(
@@ -65,59 +64,66 @@ fun LazyListScope.bottomSheetSection() {
                 title = "SuperBottomSheet",
                 summary = "Click to show a SuperBottomSheet",
                 onClick = {
-                    showSuperBottomSheet.value = true
-                    superBottomSheetHoldDown.value = true
+                    showSuperBottomSheet = true
+                    superBottomSheetHoldDown = true
                 },
-                holdDownState = superBottomSheetHoldDown.value,
+                holdDownState = superBottomSheetHoldDown,
             )
             SuperArrow(
                 title = "WindowBottomSheet",
                 summary = "Click to show a WindowBottomSheet",
                 onClick = {
-                    showWindowBottomSheet.value = true
-                    windowBottomSheetHoldDown.value = true
+                    showWindowBottomSheet = true
+                    windowBottomSheetHoldDown = true
                 },
-                holdDownState = windowBottomSheetHoldDown.value,
+                holdDownState = windowBottomSheetHoldDown,
             )
         }
 
         SuperBottomSheetDemo(
-            showSuperBottomSheet,
-            bottomSheetDropdownSelectedOption,
-            bottomSheetSuperSwitchState,
-            onDismissFinished = { superBottomSheetHoldDown.value = false },
+            show = showSuperBottomSheet,
+            onDismissRequest = { showSuperBottomSheet = false },
+            dropdownSelectedIndex = bottomSheetDropdownSelectedOption,
+            onDropdownSelectedIndexChange = { bottomSheetDropdownSelectedOption = it },
+            switchChecked = bottomSheetSuperSwitchState,
+            onSwitchCheckedChange = { bottomSheetSuperSwitchState = it },
+            onDismissFinished = { superBottomSheetHoldDown = false },
         )
         WindowBottomSheetDemo(
-            showWindowBottomSheet,
-            bottomSheetDropdownSelectedOption,
-            bottomSheetSuperSwitchState,
-            onDismissFinished = { windowBottomSheetHoldDown.value = false },
+            show = showWindowBottomSheet,
+            onDismissRequest = { showWindowBottomSheet = false },
+            dropdownSelectedIndex = bottomSheetDropdownSelectedOption,
+            onDropdownSelectedIndexChange = { bottomSheetDropdownSelectedOption = it },
+            switchChecked = bottomSheetSuperSwitchState,
+            onSwitchCheckedChange = { bottomSheetSuperSwitchState = it },
+            onDismissFinished = { windowBottomSheetHoldDown = false },
         )
     }
 }
 
 @Composable
 private fun SuperBottomSheetDemo(
-    showBottomSheet: MutableState<Boolean>,
-    bottomSheetDropdownSelectedOption: MutableState<Int>,
-    bottomSheetSuperSwitchState: MutableState<Boolean>,
+    show: Boolean,
+    onDismissRequest: () -> Unit,
+    dropdownSelectedIndex: Int,
+    onDropdownSelectedIndexChange: (Int) -> Unit,
+    switchChecked: Boolean,
+    onSwitchCheckedChange: (Boolean) -> Unit,
     onDismissFinished: () -> Unit,
 ) {
-    val allowDismiss = remember { mutableStateOf(true) }
-    val enableNestedScroll = remember { mutableStateOf(true) }
+    var allowDismiss by remember { mutableStateOf(true) }
+    var enableNestedScroll by remember { mutableStateOf(true) }
 
     SuperBottomSheet(
         title = "SuperBottomSheet",
-        show = showBottomSheet.value,
-        allowDismiss = allowDismiss.value,
-        enableNestedScroll = enableNestedScroll.value,
-        onDismissRequest = {
-            showBottomSheet.value = false
-        },
+        show = show,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         startAction = {
             IconButton(
-                onClick = { showBottomSheet.value = false },
+                onClick = onDismissRequest,
             ) {
                 Icon(
                     imageVector = MiuixIcons.Close,
@@ -128,7 +134,7 @@ private fun SuperBottomSheetDemo(
         },
         endAction = {
             IconButton(
-                onClick = { showBottomSheet.value = false },
+                onClick = onDismissRequest,
             ) {
                 Icon(
                     imageVector = MiuixIcons.Ok,
@@ -154,14 +160,14 @@ private fun SuperBottomSheetDemo(
                     SuperSwitch(
                         title = "Allow Dismiss",
                         summary = "Drag or Back to dismiss",
-                        checked = allowDismiss.value,
-                        onCheckedChange = { allowDismiss.value = it },
+                        checked = allowDismiss,
+                        onCheckedChange = { allowDismiss = it },
                     )
                     SuperSwitch(
                         title = "Enable NestedScroll",
                         summary = "Scroll content vs Drag sheet",
-                        checked = enableNestedScroll.value,
-                        onCheckedChange = { enableNestedScroll.value = it },
+                        checked = enableNestedScroll,
+                        onCheckedChange = { enableNestedScroll = it },
                     )
                 }
             }
@@ -188,15 +194,13 @@ private fun SuperBottomSheetDemo(
                     SuperDropdown(
                         title = "SuperDropdown",
                         items = BottomSheetDropdownOptions,
-                        selectedIndex = bottomSheetDropdownSelectedOption.value,
-                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption },
+                        selectedIndex = dropdownSelectedIndex,
+                        onSelectedIndexChange = onDropdownSelectedIndexChange,
                     )
                     SuperSwitch(
                         title = "SuperSwitch",
-                        checked = bottomSheetSuperSwitchState.value,
-                        onCheckedChange = {
-                            bottomSheetSuperSwitchState.value = it
-                        },
+                        checked = switchChecked,
+                        onCheckedChange = onSwitchCheckedChange,
                     )
                 }
                 Spacer(
@@ -212,27 +216,28 @@ private fun SuperBottomSheetDemo(
 
 @Composable
 private fun WindowBottomSheetDemo(
-    showBottomSheet: MutableState<Boolean>,
-    bottomSheetDropdownSelectedOption: MutableState<Int>,
-    bottomSheetSuperSwitchState: MutableState<Boolean>,
+    show: Boolean,
+    onDismissRequest: () -> Unit,
+    dropdownSelectedIndex: Int,
+    onDropdownSelectedIndexChange: (Int) -> Unit,
+    switchChecked: Boolean,
+    onSwitchCheckedChange: (Boolean) -> Unit,
     onDismissFinished: () -> Unit,
 ) {
-    val allowDismiss = remember { mutableStateOf(true) }
-    val enableNestedScroll = remember { mutableStateOf(true) }
+    var allowDismiss by remember { mutableStateOf(true) }
+    var enableNestedScroll by remember { mutableStateOf(true) }
 
-    var state: (() -> Unit)? = null
     WindowBottomSheet(
         title = "WindowBottomSheet",
-        show = showBottomSheet.value,
-        allowDismiss = allowDismiss.value,
-        enableNestedScroll = enableNestedScroll.value,
-        onDismissRequest = {
-            showBottomSheet.value = false
-        },
+        show = show,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         startAction = {
+            val dismissState = LocalDismissState.current
             IconButton(
-                onClick = { state?.invoke() },
+                onClick = { dismissState?.invoke() },
             ) {
                 Icon(
                     imageVector = MiuixIcons.Close,
@@ -242,8 +247,9 @@ private fun WindowBottomSheetDemo(
             }
         },
         endAction = {
+            val dismissState = LocalDismissState.current
             IconButton(
-                onClick = { state?.invoke() },
+                onClick = { dismissState?.invoke() },
             ) {
                 Icon(
                     imageVector = MiuixIcons.Ok,
@@ -253,7 +259,6 @@ private fun WindowBottomSheetDemo(
             }
         },
     ) {
-        state = LocalDismissState.current
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()
@@ -270,14 +275,14 @@ private fun WindowBottomSheetDemo(
                     SuperSwitch(
                         title = "Allow Dismiss",
                         summary = "Drag or Back to dismiss",
-                        checked = allowDismiss.value,
-                        onCheckedChange = { allowDismiss.value = it },
+                        checked = allowDismiss,
+                        onCheckedChange = { allowDismiss = it },
                     )
                     SuperSwitch(
                         title = "Enable NestedScroll",
                         summary = "Scroll content vs Drag sheet",
-                        checked = enableNestedScroll.value,
-                        onCheckedChange = { enableNestedScroll.value = it },
+                        checked = enableNestedScroll,
+                        onCheckedChange = { enableNestedScroll = it },
                     )
                 }
             }
@@ -304,15 +309,13 @@ private fun WindowBottomSheetDemo(
                     WindowDropdown(
                         title = "WindowDropdown",
                         items = BottomSheetDropdownOptions,
-                        selectedIndex = bottomSheetDropdownSelectedOption.value,
-                        onSelectedIndexChange = { newOption -> bottomSheetDropdownSelectedOption.value = newOption },
+                        selectedIndex = dropdownSelectedIndex,
+                        onSelectedIndexChange = onDropdownSelectedIndexChange,
                     )
                     SuperSwitch(
                         title = "SuperSwitch",
-                        checked = bottomSheetSuperSwitchState.value,
-                        onCheckedChange = {
-                            bottomSheetSuperSwitchState.value = it
-                        },
+                        checked = switchChecked,
+                        onCheckedChange = onSwitchCheckedChange,
                     )
                 }
                 Spacer(
