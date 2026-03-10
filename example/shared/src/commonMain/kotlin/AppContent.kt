@@ -5,11 +5,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -26,6 +24,7 @@ import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -198,28 +197,37 @@ fun AppContent(
             entryProvider = entryProvider,
         )
 
-        NavDisplay(
-            entries = entries,
-            onBack = { navigator.pop() },
-            transitionEffects = NavDisplayTransitionEffects(
+        val transitionEffects = remember(
+            appState.enableCornerClip,
+            appState.enableDim,
+            appState.blockInputDuringTransition,
+            appState.popDirectionFollowsSwipeEdge,
+        ) {
+            NavDisplayTransitionEffects(
                 enableCornerClip = appState.enableCornerClip,
                 dimAmount = if (appState.enableDim) 0.5f else 0f,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
                 popDirectionFollowsSwipeEdge = appState.popDirectionFollowsSwipeEdge,
-            ),
+            )
+        }
+
+        NavDisplay(
+            entries = entries,
+            onBack = { navigator.pop() },
+            transitionEffects = transitionEffects,
         )
     }
 
     AnimatedVisibility(
         visible = appState.showFPSMonitor,
-        enter = fadeIn() + expandHorizontally(),
-        exit = fadeOut() + shrinkHorizontally(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
     ) {
         FPSMonitor(
             modifier = Modifier
                 .statusBarsPadding()
                 .captionBarPadding()
-                .padding(all = 12.dp),
+                .fillMaxWidth(),
         )
     }
 }
@@ -552,8 +560,6 @@ fun AppPager(
         modifier = modifier,
         userScrollEnabled = appState.enablePageUserScroll,
         verticalAlignment = Alignment.Top,
-        beyondViewportPageCount = 4,
-        overscrollEffect = null,
         pageContent = { page ->
             when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(

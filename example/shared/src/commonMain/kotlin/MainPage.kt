@@ -72,9 +72,12 @@ fun MainPage(
         },
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+            modifier = Modifier.pageScrollModifiers(
+                appState.enableScrollEndHaptic,
+                appState.showTopAppBar,
+                topAppBarScrollBehavior,
+            ),
             contentPadding = pageContentPadding(innerPadding, padding, isWideScreen),
-            overscrollEffect = null,
         ) {
             item(key = "searchbar") {
                 SmallTitle(text = "SearchBar")

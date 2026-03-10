@@ -77,7 +77,11 @@ fun NavTestPage(
         },
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+            modifier = Modifier.pageScrollModifiers(
+                appState.enableScrollEndHaptic,
+                appState.showTopAppBar,
+                topAppBarScrollBehavior,
+            ),
             contentPadding = pageContentPadding(
                 innerPadding,
                 padding,
@@ -85,7 +89,6 @@ fun NavTestPage(
                 extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
                 extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             ),
-            overscrollEffect = null,
         ) {
             item(key = "nav_push") {
                 Card(

@@ -60,6 +60,7 @@ fun IconsPage(
     // Search state
     var searchStatus by remember { mutableStateOf(SearchStatus(label = "Search icons")) }
     val updateSearchStatus: (SearchStatus) -> Unit = { searchStatus = it }
+    var searchOffsetY by remember { mutableStateOf(0.dp) }
 
     // Icon data
     val allIcons = remember { MiuixIcons.All }
@@ -78,14 +79,16 @@ fun IconsPage(
             }
         }
     }
-    LaunchedEffect(filteredIndices) {
-        val newStatus = when {
+    val searchResultStatus = remember(searchStatus.searchText, filteredIndices) {
+        when {
             searchStatus.searchText.isBlank() -> SearchStatus.ResultStatus.DEFAULT
             filteredIndices.isEmpty() -> SearchStatus.ResultStatus.EMPTY
             else -> SearchStatus.ResultStatus.SHOW
         }
-        if (searchStatus.resultStatus != newStatus) {
-            searchStatus = searchStatus.copy(resultStatus = newStatus)
+    }
+    LaunchedEffect(searchResultStatus) {
+        if (searchStatus.resultStatus != searchResultStatus) {
+            searchStatus = searchStatus.copy(resultStatus = searchResultStatus)
         }
     }
 
@@ -107,6 +110,7 @@ fun IconsPage(
         popupHost = {
             searchStatus.SearchPager(
                 onSearchStatusChange = updateSearchStatus,
+                offsetY = searchOffsetY,
                 defaultResult = {},
                 searchBarTopPadding = dynamicTopPadding,
             ) {
@@ -150,6 +154,7 @@ fun IconsPage(
     ) { innerPadding ->
         searchStatus.SearchBox(
             onSearchStatusChange = updateSearchStatus,
+            onOffsetYChange = { searchOffsetY = it },
             searchBarTopPadding = dynamicTopPadding,
             contentPadding = PaddingValues(top = innerPadding.calculateTopPadding()),
         ) { boxHeight ->
@@ -157,7 +162,6 @@ fun IconsPage(
                 state = lazyListState,
                 modifier = Modifier.pageScrollModifiers(
                     appState.enableScrollEndHaptic,
-                    appState.enableOverScroll,
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
@@ -167,7 +171,6 @@ fun IconsPage(
                     isWideScreen,
                     extraTop = boxHeight.value,
                 ),
-                overscrollEffect = null,
             ) {
                 item(key = "iconsHeader") {
                     Spacer(modifier = Modifier.height(6.dp))
@@ -220,7 +223,7 @@ fun IconsPage(
                     } else {
                         RectangleShape
                     }
-                    val bottomPadding = if (isLast) 12.dp else 0.dp
+                    val bottomPadding = if (isLast) 6.dp else 0.dp
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -233,7 +236,7 @@ fun IconsPage(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = lightIcons[index].name.substringBefore("."),
+                            text = iconNames[index],
                             modifier = Modifier.weight(2f),
                             style = MiuixTheme.textStyles.body2,
                             color = colorScheme.onSurface,

@@ -142,7 +142,6 @@ private fun SuperBottomSheetDemo(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()
                 .overScrollVertical(),
-            overscrollEffect = null,
         ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
@@ -259,7 +258,6 @@ private fun WindowBottomSheetDemo(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()
                 .overScrollVertical(),
-            overscrollEffect = null,
         ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))

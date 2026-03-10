@@ -2,9 +2,12 @@
 
 Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM), macOS, Web (Wasm/JS).
 
-## Prerequisites
+## Quick Start
 
-Always use Chinese to communicate with users and output Plan content, but the generated code (including comments and KDoc) must remain in English.
+- For significant features or refactors, sketch an Plan first; keep it updated as you work.
+- Run the component-specific checks below before handing work off; do not skip failing steps.
+- Use Context7 to pull library/API docs when you touch unfamiliar Compose/Android/JVM/Js/WasmJs/Swift APIs or deps.
+- Always use Chinese to communicate with users and output Plan content, but the generated code (including comments and KDoc) must remain in English.
 
 ## Key Commands
 

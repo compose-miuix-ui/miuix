@@ -110,6 +110,58 @@ LazyColumn(
 * `springDamp`：浮点数，回弹阻尼系数。默认：`1f`。
 * `isEnabled`：Lambda，是否启用越界回弹。默认仅 Android/iOS。
 
+### 通过 OverscrollFactory（主题级集成）
+
+`MiuixOverscrollFactory` 实现了 Compose 的 `OverscrollFactory` 接口，与 `overScrollVertical()` 提供完全相同的弹簧物理效果，但以主题级别集成。两个 `MiuixTheme` 重载均已将其设置为默认工厂，因此所有标准 Compose 可滚动组件（`LazyColumn`、`LazyRow`、`verticalScroll`、`horizontalScroll` 等）无需任何额外修饰符即可自动使用 Miuix 越界回弹效果。
+
+```kotlin
+// 无需额外修饰符 —— MiuixTheme 已自动提供越界回弹效果
+LazyColumn {
+    items(list) { item -> ItemRow(item) }
+}
+```
+
+禁用特定组件的越界效果：
+
+```kotlin
+LazyColumn(overscrollEffect = null) {
+    items(list) { item -> ItemRow(item) }
+}
+```
+
+禁用整个子树的越界效果：
+
+```kotlin
+CompositionLocalProvider(LocalOverscrollFactory provides null) {
+    // 此处的组件不会有 Miuix 越界回弹效果
+}
+```
+
+显式使用 `MiuixOverscrollEffect`（例如与自定义 `Modifier.overscroll()` 配合）：
+
+```kotlin
+val overscrollEffect = rememberOverscrollEffect()
+
+LazyColumn(
+    modifier = Modifier.overscroll(overscrollEffect),
+    overscrollEffect = overscrollEffect,
+) {
+    items(list) { item -> ItemRow(item) }
+}
+```
+
+**与 `overScrollVertical()` 的对比：**
+
+| 特性 | `overScrollVertical()` | `MiuixOverscrollFactory` |
+| :--- | :---: | :---: |
+| 使用方式 | 每个组件手动添加 `Modifier` | 主题级别，自动生效 |
+| 物理效果 | 相同弹簧物理 | 相同弹簧物理 |
+| 默认启用平台 | Android、iOS | 全平台（通过主题） |
+| 内容未超出容器时仍可触发 | ✅ | ❌ |
+| 需要逐个组件手动添加修饰符 | ✅ | ❌ |
+
+> **限制说明：** `MiuixOverscrollFactory` 通过接收可滚动组件到达滚动边界后无法消耗的剩余 delta 来工作。如果内容未超出容器高度（例如 `LazyColumn` 的所有条目均能在屏幕内完整显示），可滚动组件不会到达真正的边界，`applyToScroll` 不会收到非零剩余量，越界回弹效果将**无法触发**。此类场景请改用 `overScrollVertical()`。
+
 ## 滚动到边界触觉反馈 (Modifier.scrollEndHaptic())
 
 Miuix 提供了用于在可滚动容器快速滑动到其开始或结束边界时触发触觉反馈的修饰符，通过触觉反馈确认已到达边界增强用户的交互体验。

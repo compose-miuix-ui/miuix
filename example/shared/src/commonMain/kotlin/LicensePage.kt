@@ -66,7 +66,11 @@ fun LicensePage(
     ) { innerPadding ->
         val uriHandler = LocalUriHandler.current
         LazyColumn(
-            modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+            modifier = Modifier.pageScrollModifiers(
+                appState.enableScrollEndHaptic,
+                appState.showTopAppBar,
+                topAppBarScrollBehavior,
+            ),
             contentPadding = pageContentPadding(
                 innerPadding,
                 padding,

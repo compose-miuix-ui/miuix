@@ -31,26 +31,6 @@ private external fun hideLoading()
 )
 private external fun getCssVar(name: String): Double
 
-@OptIn(ExperimentalWasmJsInterop::class)
-@JsFun(
-    """
-        function isTouchEnabled() {
-            if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
-                return true;
-            }
-            if ('ontouchstart' in window) {
-                return true;
-            }
-            const nav = navigator || {};
-            const points = (nav.maxTouchPoints || 0) + (nav.msMaxTouchPoints || 0);
-            return points > 0;
-        }
-    """,
-)
-private external fun isTouchEnabled(): Boolean
-
 actual fun platformHideLoading() = hideLoading()
 
 actual fun platformGetCssVar(name: String): Double = getCssVar(name)
-
-actual fun platformIsTouchEnabled(): Boolean = isTouchEnabled()
