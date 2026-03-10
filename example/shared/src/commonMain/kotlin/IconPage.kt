@@ -53,8 +53,8 @@ fun IconsPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
-    val dynamicTopPadding by remember {
-        derivedStateOf { 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction) }
+    val dynamicTopPadding by remember(isWideScreen) {
+        derivedStateOf { if (isWideScreen) 0.dp else 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction) }
     }
 
     // Search state
