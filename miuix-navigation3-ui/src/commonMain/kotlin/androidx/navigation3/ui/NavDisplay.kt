@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
@@ -699,6 +701,7 @@ fun <T : Any> NavDisplay(
 
     val shouldFlipDirection = transitionEffects.popDirectionFollowsSwipeEdge &&
             (if (inPredictiveBack) swipeEdge else lastSwipeEdge) == NavigationEvent.EDGE_RIGHT
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val contentTransform: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
         when {
@@ -769,8 +772,8 @@ fun <T : Any> NavDisplay(
                 val corner =
                     if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner()
                     else 0.dp
-                val shape = remember(corner, shouldFlipDirection) {
-                    if (shouldFlipDirection) {
+                val shape = remember(corner, shouldFlipDirection, isRtl) {
+                    if (shouldFlipDirection xor isRtl) {
                         UnevenRoundedRectangle(topEnd = corner, bottomEnd = corner)
                     } else {
                         UnevenRoundedRectangle(topStart = corner, bottomStart = corner)
