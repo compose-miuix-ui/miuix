@@ -34,7 +34,6 @@ fun main() {
                 start = Dp(insetStartPx.toFloat()),
                 end = Dp(insetEndPx.toFloat()),
             ),
-            enableOverScroll = isTouchEnabled(),
         )
     }
 }
@@ -42,5 +41,3 @@ fun main() {
 private fun hideLoading() = platformHideLoading()
 
 private fun getCssVar(name: String): Double = platformGetCssVar(name)
-
-private fun isTouchEnabled(): Boolean = platformIsTouchEnabled()

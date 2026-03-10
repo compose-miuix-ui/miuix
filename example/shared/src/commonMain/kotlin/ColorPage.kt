@@ -54,6 +54,11 @@ fun ColorPage(
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
+    val lightColors = remember { lightColorScheme() }
+    val darkColors = remember { darkColorScheme() }
+    val dynLight = platformDynamicColors(dark = false)
+    val dynDark = platformDynamicColors(dark = true)
+
     Scaffold(
         topBar = {
             AdaptiveTopAppBar(
@@ -65,9 +70,12 @@ fun ColorPage(
         },
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+            modifier = Modifier.pageScrollModifiers(
+                appState.enableScrollEndHaptic,
+                appState.showTopAppBar,
+                topAppBarScrollBehavior,
+            ),
             contentPadding = pageContentPadding(innerPadding, padding, isWideScreen),
-            overscrollEffect = null,
         ) {
             item(key = "current") {
                 SmallTitle("Current Theme Colors")
@@ -84,16 +92,15 @@ fun ColorPage(
                 SmallTitle("Light Theme Colors")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = lightColorScheme().surfaceContainer),
+                    colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
                     cornerRadius = 16.dp,
                     insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
-                    ColorsPreview(lightColorScheme())
+                    ColorsPreview(lightColors)
                 }
             }
             item(key = "dynamic_light") {
                 SmallTitle("Dynamic Light Colors")
-                val dynLight = platformDynamicColors(dark = false)
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
@@ -107,16 +114,15 @@ fun ColorPage(
                 SmallTitle("Dark Theme Colors")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = darkColorScheme().surfaceContainer),
+                    colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
                     cornerRadius = 16.dp,
                     insideMargin = PaddingValues(horizontal = 16.dp),
                 ) {
-                    ColorsPreview(darkColorScheme())
+                    ColorsPreview(darkColors)
                 }
             }
             item(key = "dynamic_dark") {
                 SmallTitle("Dynamic Dark Colors")
-                val dynDark = platformDynamicColors(dark = true)
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),

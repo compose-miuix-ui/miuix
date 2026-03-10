@@ -541,12 +541,13 @@ class MiuixPopupUtils {
         fun MiuixPopupHost() {
             val dialogStates = LocalDialogStates.current
             val popupStates = LocalPopupStates.current
+            val largeScreen = isLargeScreen()
 
             for (state in dialogStates) {
                 key(state.showState) {
                     DialogEntry(
                         dialogState = state,
-                        largeScreen = isLargeScreen(),
+                        largeScreen = largeScreen,
                     )
                 }
             }

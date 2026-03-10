@@ -27,7 +27,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.AdaptiveTopAppBar
 
@@ -67,7 +66,6 @@ fun MultiScaffoldTestPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(if (appState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-                .overScrollVertical(isEnabled = { appState.enableOverScroll })
                 .then(if (appState.showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .verticalScroll(scrollState)
                 .padding(

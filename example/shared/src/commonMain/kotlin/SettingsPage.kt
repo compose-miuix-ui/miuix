@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import navigation3.Route
@@ -24,6 +23,19 @@ import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.random.Random
+
+private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
+private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
+private val FloatingNavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly")
+private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
+private val FloatingToolbarPositionOptions =
+    listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter")
+private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
+private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
+private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
+private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
+private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
+private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
 
 @Composable
 fun SettingsPage(
@@ -62,23 +74,14 @@ private fun SettingsContent(
     val isWideScreen = LocalIsWideScreen.current
     val updateAppState = LocalUpdateAppState.current
     val navigator = LocalNavigator.current
-    val navigationBarDisplayModeOptions = remember { listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel") }
-    val navigationRailDisplayModeOptions = remember { listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel") }
-    val floatingNavigationBarDisplayModeOptions = remember { listOf("IconAndText", "IconOnly", "TextOnly") }
-    val floatingNavigationBarPositionOptions = remember { listOf("Center", "Start", "End") }
-    val floatingToolbarPositionOptions =
-        remember { listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter") }
-    val floatingToolbarOrientationOptions = remember { listOf("Horizontal", "Vertical") }
-    val fabPositionOptions = remember { listOf("Start", "Center", "End", "EndOverlay") }
-    val colorModeOptions = remember { listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark") }
-    val paletteStyleOptions = remember { ThemePaletteStyle.entries.map { it.name } }
-    val colorSpecOptions = remember { ThemeColorSpec.entries.map { it.name } }
-    val keyColorOptions = remember { listOf("Default") + ui.KeyColors.map { it.first } }
 
     LazyColumn(
-        modifier = Modifier.pageScrollModifiers(appState.enableScrollEndHaptic, appState.enableOverScroll, appState.showTopAppBar, topAppBarScrollBehavior),
+        modifier = Modifier.pageScrollModifiers(
+            appState.enableScrollEndHaptic,
+            appState.showTopAppBar,
+            topAppBarScrollBehavior,
+        ),
         contentPadding = pageContentPadding(padding, padding, isWideScreen),
-        overscrollEffect = null,
     ) {
         item(key = "settings") {
             Card(
@@ -102,7 +105,7 @@ private fun SettingsContent(
                 AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
                     SuperDropdown(
                         title = "NavigationBar Mode",
-                        items = navigationBarDisplayModeOptions,
+                        items = NavigationBarDisplayModeOptions,
                         selectedIndex = appState.navigationBarMode,
                         onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
                     )
@@ -110,7 +113,7 @@ private fun SettingsContent(
                 AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
                     SuperDropdown(
                         title = "NavigationRail Mode",
-                        items = navigationRailDisplayModeOptions,
+                        items = NavigationRailDisplayModeOptions,
                         selectedIndex = appState.navigationRailMode,
                         onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailMode = it) } },
                     )
@@ -126,13 +129,13 @@ private fun SettingsContent(
                             Column {
                                 SuperDropdown(
                                     title = "FloatingNavigationBar Mode",
-                                    items = floatingNavigationBarDisplayModeOptions,
+                                    items = FloatingNavigationBarDisplayModeOptions,
                                     selectedIndex = appState.floatingNavigationBarMode,
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarMode = it) } },
                                 )
                                 SuperDropdown(
                                     title = "FloatingNavigationBar Position",
-                                    items = floatingNavigationBarPositionOptions,
+                                    items = FloatingNavigationBarPositionOptions,
                                     selectedIndex = appState.floatingNavigationBarPosition,
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarPosition = it) } },
                                 )
@@ -149,13 +152,13 @@ private fun SettingsContent(
                     Column {
                         SuperDropdown(
                             title = "FloatingToolbar Position",
-                            items = floatingToolbarPositionOptions,
+                            items = FloatingToolbarPositionOptions,
                             selectedIndex = appState.floatingToolbarPosition,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarPosition = it) } },
                         )
                         SuperDropdown(
                             title = "FloatingToolbar Orientation",
-                            items = floatingToolbarOrientationOptions,
+                            items = FloatingToolbarOrientationOptions,
                             selectedIndex = appState.floatingToolbarOrientation,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
                         )
@@ -169,7 +172,7 @@ private fun SettingsContent(
                 AnimatedVisibility(visible = appState.showFloatingActionButton) {
                     SuperDropdown(
                         title = "FloatingActionButton Position",
-                        items = fabPositionOptions,
+                        items = FabPositionOptions,
                         selectedIndex = appState.floatingActionButtonPosition,
                         onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
                     )
@@ -186,14 +189,14 @@ private fun SettingsContent(
                 )
                 SuperDropdown(
                     title = "Color Mode",
-                    items = colorModeOptions,
+                    items = ColorModeOptions,
                     selectedIndex = appState.colorMode,
                     onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
                 )
                 AnimatedVisibility(visible = appState.colorMode in 3..5) {
                     SuperDropdown(
                         title = "Key Color",
-                        items = keyColorOptions,
+                        items = KeyColorOptions,
                         selectedIndex = appState.seedIndex,
                         onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
                     )
@@ -202,13 +205,13 @@ private fun SettingsContent(
                     Column {
                         SuperDropdown(
                             title = "Palette Style",
-                            items = paletteStyleOptions,
+                            items = PaletteStyleOptions,
                             selectedIndex = appState.paletteStyle,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
                         )
                         SuperDropdown(
                             title = "Color Spec",
-                            items = colorSpecOptions,
+                            items = ColorSpecOptions,
                             selectedIndex = appState.colorSpec,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                         )

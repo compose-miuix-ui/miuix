@@ -4,11 +4,13 @@
 package top.yukonga.miuix.kmp.theme
 
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import top.yukonga.miuix.kmp.utils.MiuixIndication
+import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
 /**
  * The Miuix theme that provides color and text styles for the Miuix components.
@@ -33,6 +35,7 @@ fun MiuixTheme(
         LocalTextStyles provides miuixTextStyles,
         LocalIndication provides miuixIndication,
         LocalColorSchemeMode provides controller.colorSchemeMode,
+        LocalOverscrollFactory provides MiuixOverscrollFactory,
     ) {
         content()
     }
@@ -59,6 +62,7 @@ fun MiuixTheme(
         LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,
         LocalIndication provides miuixIndication,
+        LocalOverscrollFactory provides MiuixOverscrollFactory,
     ) {
         content()
     }

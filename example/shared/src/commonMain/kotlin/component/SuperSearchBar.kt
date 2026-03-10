@@ -82,6 +82,7 @@ import utils.SearchStatus
 @Composable
 fun SearchStatus.SearchBox(
     onSearchStatusChange: (SearchStatus) -> Unit,
+    onOffsetYChange: (Dp) -> Unit,
     collapseBar: @Composable (SearchStatus, Dp, PaddingValues) -> Unit = { searchStatus, topPadding, innerPadding ->
         SearchBarFake(searchStatus.label, topPadding, innerPadding)
     },
@@ -94,6 +95,7 @@ fun SearchStatus.SearchBox(
 
     val offsetY = remember { mutableIntStateOf(0) }
     val boxHeight = remember { mutableStateOf(0.dp) }
+    var lastOffsetY by remember { mutableStateOf(0.dp) }
 
     Box(
         modifier = Modifier
@@ -107,8 +109,9 @@ fun SearchStatus.SearchBox(
                 with(density) {
                     val newOffsetY = windowY.toDp()
                     val newBoxHeight = coordinates.size.height.toDp()
-                    if (searchStatus.offsetY != newOffsetY) {
-                        onSearchStatusChange(searchStatus.copy(offsetY = newOffsetY))
+                    if (lastOffsetY != newOffsetY) {
+                        lastOffsetY = newOffsetY
+                        onOffsetYChange(newOffsetY)
                     }
                     boxHeight.value = newBoxHeight
                 }
@@ -151,6 +154,7 @@ fun SearchStatus.SearchBox(
 @Composable
 fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
+    offsetY: Dp,
     defaultResult: @Composable () -> Unit,
     expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp) -> Unit = { searchStatus, onStatusChange, padding ->
         SearchBar(searchStatus, onStatusChange, padding)
@@ -164,7 +168,7 @@ fun SearchStatus.SearchPager(
         targetValue = if (searchStatus.shouldExpand()) {
             systemBarsPadding + 5.dp
         } else {
-            max(searchStatus.offsetY, 0.dp)
+            max(offsetY, 0.dp)
         },
         animationSpec = tween(300, easing = LinearOutSlowInEasing),
         label = "SearchPagerTopPadding",
@@ -220,7 +224,7 @@ fun SearchStatus.SearchPager(
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
                     modifier = Modifier
-                        .padding(start = 4.dp, end = 16.dp, top = searchBarTopPadding)
+                        .padding(end = 16.dp, top = searchBarTopPadding)
                         .clickable(
                             interactionSource = null,
                             enabled = searchStatus.isExpand(),

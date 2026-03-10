@@ -90,7 +90,6 @@ private fun AboutContent(
     LazyColumn(
         modifier = Modifier.pageScrollModifiers(
             appState.enableScrollEndHaptic,
-            appState.enableOverScroll,
             appState.showTopAppBar,
             topAppBarScrollBehavior,
         ),
@@ -101,7 +100,6 @@ private fun AboutContent(
             extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         ),
-        overscrollEffect = null,
     ) {
         item(key = "about") {
             Column(
