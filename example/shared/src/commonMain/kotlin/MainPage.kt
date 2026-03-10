@@ -75,7 +75,7 @@ fun MainPage(
             modifier = Modifier.pageScrollModifiers(
                 appState.enableScrollEndHaptic,
                 appState.showTopAppBar,
-                topAppBarScrollBehavior
+                topAppBarScrollBehavior,
             ),
             contentPadding = pageContentPadding(innerPadding, padding, isWideScreen),
         ) {
