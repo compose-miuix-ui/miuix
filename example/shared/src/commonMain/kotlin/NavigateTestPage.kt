@@ -60,7 +60,7 @@ fun NavTestPage(
     Scaffold(
         topBar = {
             AdaptiveTopAppBar(
-                title = "NavTest $index",
+                title = "Navigate Test $index",
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
@@ -97,7 +97,7 @@ fun NavTestPage(
                 ) {
                     val navigator = LocalNavigator.current
                     SuperArrow(
-                        title = "Push another NavTest Page",
+                        title = "Push another Navigate Test Page",
                         onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                     )
                 }

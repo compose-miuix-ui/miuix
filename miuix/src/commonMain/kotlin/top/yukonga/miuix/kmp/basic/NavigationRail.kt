@@ -129,18 +129,16 @@ fun NavigationRailItem(
     var isPressed by remember { mutableStateOf(false) }
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
-
     val tint = when {
         isPressed -> if (selected) {
             onSurfaceContainerColor.copy(alpha = 0.5f)
         } else {
-            onSurfaceContainerVariantColor.copy(alpha = 0.5f)
+            onSurfaceContainerColor.copy(alpha = 0.6f)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerVariantColor
+        else -> onSurfaceContainerColor.copy(0.4f)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationRailDisplayMode.current

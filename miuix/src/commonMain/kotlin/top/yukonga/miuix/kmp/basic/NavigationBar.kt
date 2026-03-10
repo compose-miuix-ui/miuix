@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -136,18 +135,16 @@ fun RowScope.NavigationBarItem(
     var isPressed by remember { mutableStateOf(false) }
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
-
     val tint = when {
         isPressed -> if (selected) {
             onSurfaceContainerColor.copy(alpha = 0.5f)
         } else {
-            onSurfaceContainerVariantColor.copy(alpha = 0.5f)
+            onSurfaceContainerColor.copy(alpha = 0.6f)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerVariantColor
+        else -> onSurfaceContainerColor.copy(0.4f)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationBarDisplayMode.current
@@ -222,7 +219,8 @@ fun RowScope.NavigationBarItem(
 
             NavigationBarDisplayMode.TextOnly -> {
                 Text(
-                    modifier = Modifier.padding(vertical = if (platform != Platform.IOS) 8.dp else 0.dp),
+                    modifier = Modifier
+                        .padding(vertical = if (platform != Platform.IOS) 8.dp else 0.dp),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
@@ -370,18 +368,16 @@ fun FloatingNavigationBarItem(
     var isPressed by remember { mutableStateOf(false) }
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val onSurfaceContainerVariantColor = MiuixTheme.colorScheme.onSurfaceContainerVariant
-
     val tint = when {
         isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = 0.6f)
+            onSurfaceContainerColor.copy(alpha = 0.5f)
         } else {
-            onSurfaceContainerVariantColor.copy(alpha = 0.6f)
+            onSurfaceContainerColor.copy(alpha = 0.6f)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerVariantColor
+        else -> onSurfaceContainerColor.copy(0.4f)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalFloatingNavigationBarDisplayMode.current

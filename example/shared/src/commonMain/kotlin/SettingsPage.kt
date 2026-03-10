@@ -250,8 +250,8 @@ private fun SettingsContent(
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             ) {
                 SuperArrow(
-                    title = "NavTest",
-                    summary = "Navigate to a NavTest Page",
+                    title = "Navigate Test",
+                    summary = "Navigate to a Navigate Test Page",
                     onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                 )
                 SuperArrow(

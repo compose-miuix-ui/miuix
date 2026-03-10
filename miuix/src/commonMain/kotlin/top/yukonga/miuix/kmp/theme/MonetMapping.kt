@@ -85,41 +85,19 @@ private fun ensureOpaqueOver(fg: Color, bg: Color): Color = if (fg.alpha >= 1f) 
  */
 internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): Colors {
     val baseSurface = roles.surface
-    val baseSurfaceContainer = roles.surfaceContainer
     val baseSurfaceContainerHigh = roles.surfaceContainerHigh
-
-    // Flatten secondaryContainer/onSecondaryContainer on surface
-    val secondaryContainerOpaque = ensureOpaqueOver(roles.secondaryContainer, baseSurface)
-    val onSecondaryContainerOpaque = ensureOpaqueOver(roles.onSecondaryContainer, secondaryContainerOpaque)
-
-    // Flatten secondaryVariant/onSecondaryVariant on surface
-    val secondaryVariantSource = roles.primary.copy(alpha = 0.24f)
-    val secondaryVariantOpaque = ensureOpaqueOver(secondaryVariantSource, baseSurface)
-    val onSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary, secondaryVariantOpaque)
-
-    // Flatten all other alpha usages to opaque
+    val onSurfaceSecondaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurface)
+    val onSurfaceContainerHighOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurfaceContainerHigh)
+    val sliderBackground = ensureOpaqueOver(roles.primary.copy(alpha = 0.2f), baseSurface)
     val disabledPrimaryOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
     val disabledOnPrimaryOpaque = ensureOpaqueOver(roles.onPrimary.copy(alpha = 0.38f), disabledPrimaryOpaque)
-
     val disabledPrimaryButtonOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
     val disabledOnPrimaryButtonOpaque = ensureOpaqueOver(roles.onPrimary.copy(alpha = 0.6f), disabledPrimaryButtonOpaque)
-
     val disabledPrimarySliderOpaque = ensureOpaqueOver(roles.primary.copy(alpha = 0.38f), baseSurface)
-
-    val secondaryOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.38f), baseSurface)
-
-    val disabledSecondaryOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.24f), baseSurface)
-    val disabledOnSecondaryOpaque = ensureOpaqueOver(roles.onSecondary.copy(alpha = 0.42f), disabledSecondaryOpaque)
-
-    val disabledSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.12f), baseSurface)
-    val disabledOnSecondaryVariantOpaque = ensureOpaqueOver(roles.secondary.copy(alpha = 0.24f), disabledSecondaryVariantOpaque)
-
-    val onSurfaceSecondaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurface)
-    val onSurfaceVariantSummaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.6f), baseSurfaceContainer)
-    val onSurfaceVariantActionsOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.6f), baseSurfaceContainer)
-
-    val onSurfaceContainerVariantOpaque = ensureOpaqueOver(roles.onSurfaceVariant.copy(alpha = 0.6f), baseSurfaceContainer)
-    val onSurfaceContainerHighOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.8f), baseSurfaceContainerHigh)
+    val disabledSecondaryOpaque = ensureOpaqueOver(roles.outlineVariant.copy(alpha = 0.5f), baseSurface)
+    val disabledOnSecondaryOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.38f), disabledSecondaryOpaque)
+    val disabledSecondaryVariantOpaque = ensureOpaqueOver(roles.surfaceContainerHigh.copy(alpha = 0.6f), baseSurface)
+    val disabledOnSecondaryVariantOpaque = ensureOpaqueOver(roles.onSurface.copy(alpha = 0.38f), disabledSecondaryVariantOpaque)
 
     return Colors(
         primary = roles.primary,
@@ -137,18 +115,18 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         disabledPrimarySlider = disabledPrimarySliderOpaque,
         primaryContainer = roles.primaryContainer,
         onPrimaryContainer = roles.onPrimaryContainer,
-        secondary = secondaryOpaque,
-        onSecondary = roles.onSecondary,
-        secondaryVariant = secondaryVariantOpaque,
-        onSecondaryVariant = onSecondaryVariantOpaque,
+        secondary = roles.outlineVariant,
+        onSecondary = roles.outline,
+        secondaryVariant = roles.surfaceContainerHigh,
+        onSecondaryVariant = roles.onSurface,
         disabledSecondary = disabledSecondaryOpaque,
         disabledOnSecondary = disabledOnSecondaryOpaque,
         disabledSecondaryVariant = disabledSecondaryVariantOpaque,
         disabledOnSecondaryVariant = disabledOnSecondaryVariantOpaque,
-        secondaryContainer = secondaryContainerOpaque,
-        onSecondaryContainer = onSecondaryContainerOpaque,
-        secondaryContainerVariant = secondaryContainerOpaque,
-        onSecondaryContainerVariant = onSecondaryContainerOpaque,
+        secondaryContainer = roles.secondaryContainer,
+        onSecondaryContainer = roles.onSecondaryContainer,
+        secondaryContainerVariant = roles.surfaceContainerHighest,
+        onSecondaryContainerVariant = roles.onSurfaceVariant,
         tertiaryContainer = roles.tertiaryContainer,
         onTertiaryContainer = roles.onTertiaryContainer,
         tertiaryContainerVariant = roles.onTertiaryContainer,
@@ -159,12 +137,12 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         onSurface = roles.onSurface,
         surfaceVariant = roles.surfaceVariant,
         onSurfaceSecondary = onSurfaceSecondaryOpaque,
-        onSurfaceVariantSummary = onSurfaceVariantSummaryOpaque,
-        onSurfaceVariantActions = onSurfaceVariantActionsOpaque,
+        onSurfaceVariantSummary = roles.onSurfaceVariant,
+        onSurfaceVariantActions = roles.onSurfaceVariant,
         disabledOnSurface = roles.onSurface,
         surfaceContainer = roles.surfaceContainer,
         onSurfaceContainer = roles.onSurface,
-        onSurfaceContainerVariant = onSurfaceContainerVariantOpaque,
+        onSurfaceContainerVariant = roles.onSurfaceVariant,
         surfaceContainerHigh = roles.surfaceContainerHigh,
         onSurfaceContainerHigh = onSurfaceContainerHighOpaque,
         surfaceContainerHighest = roles.surfaceContainerHighest,
@@ -172,8 +150,8 @@ internal fun mapMd3RolesToMiuixColorsCommon(roles: MonetRoles, dark: Boolean): C
         outline = roles.outline,
         dividerLine = roles.outlineVariant,
         windowDimming = if (dark) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.3f),
-        sliderKeyPoint = onSecondaryContainerOpaque,
-        sliderKeyPointForeground = roles.onPrimary,
-        sliderBackground = secondaryVariantOpaque,
+        sliderKeyPoint = roles.primary,
+        sliderKeyPointForeground = roles.surfaceContainerHigh,
+        sliderBackground = sliderBackground,
     )
 }
