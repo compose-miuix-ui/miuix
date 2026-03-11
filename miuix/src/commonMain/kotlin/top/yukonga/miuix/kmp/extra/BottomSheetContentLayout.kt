@@ -257,8 +257,12 @@ internal fun BottomSheetContentLayout(
                 modifier = sheetModifier,
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
-                startAction = startAction,
-                endAction = endAction,
+                startAction = startAction?.let { action ->
+                    { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
+                },
+                endAction = endAction?.let { action ->
+                    { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
+                },
                 content = {
                     CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                         content()

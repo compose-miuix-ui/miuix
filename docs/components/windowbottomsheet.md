@@ -24,7 +24,7 @@ This component is independent of `Scaffold` and can be used in any composable sc
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.WindowBottomSheet
-import top.yukonga.miuix.kmp.extra.LocalDismissState
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 ```
 
 ## Basic Usage
@@ -101,6 +101,36 @@ The BottomSheetDefaults object provides default settings for the bottom sheet co
 
 ## Advanced Usage
 
+### Action Buttons in Header
+
+Use `startAction` and `endAction` to place buttons in the header area. `LocalDismissState` is provided in both action slots and the content slot:
+
+```kotlin
+var showBottomSheet by remember { mutableStateOf(false) }
+
+WindowBottomSheet(
+    show = showBottomSheet,
+    title = "Action Sheet",
+    startAction = {
+        val dismiss = LocalDismissState.current
+        TextButton(
+            text = "Cancel",
+            onClick = { dismiss?.invoke() }
+        )
+    },
+    endAction = {
+        val dismiss = LocalDismissState.current
+        TextButton(
+            text = "Confirm",
+            onClick = { dismiss?.invoke() }
+        )
+    },
+    onDismissRequest = { showBottomSheet = false }
+) {
+    Text("Content with header action buttons")
+}
+```
+
 ### Dismissing from Content
 
 You can use `LocalDismissState` to dismiss the bottom sheet from within its content:
@@ -112,11 +142,10 @@ WindowBottomSheet(
     onDismissRequest = { showBottomSheet = false }
 ) {
     val dismiss = LocalDismissState.current
-    
-    Button(
+
+    TextButton(
+        text = "Close Bottom Sheet",
         onClick = { dismiss?.invoke() }
-    ) {
-        Text("Close Bottom Sheet")
-    }
+    )
 }
 ```
