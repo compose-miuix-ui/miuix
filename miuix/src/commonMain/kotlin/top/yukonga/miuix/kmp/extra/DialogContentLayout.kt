@@ -266,6 +266,7 @@ internal fun DialogContent(
         (roundedCorner - offset).coerceAtLeast(32.dp)
     }
 
+    val bottomCornerShape = remember(bottomCornerRadius) { RoundedRectangle(bottomCornerRadius) }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
     val calculatedTopInset = if (topInset != null) {
@@ -314,7 +315,7 @@ internal fun DialogContent(
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
         }
-        .clip(RoundedRectangle(bottomCornerRadius))
+        .clip(bottomCornerShape)
         .background(backgroundColor)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 

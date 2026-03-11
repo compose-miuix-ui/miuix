@@ -515,7 +515,7 @@ fun ListPopupContent(
 ) {
     val density = LocalDensity.current
 
-    val shape = RoundedRectangle(16.dp)
+    val shape = remember { RoundedRectangle(16.dp) }
 
     Box(
         modifier = modifier

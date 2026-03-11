@@ -257,8 +257,12 @@ internal fun BottomSheetContentLayout(
                 modifier = sheetModifier,
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
-                startAction = startAction,
-                endAction = endAction,
+                startAction = startAction?.let { action ->
+                    { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
+                },
+                endAction = endAction?.let { action ->
+                    { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
+                },
                 content = {
                     CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                         content()
@@ -534,6 +538,7 @@ private fun BottomSheetColumn(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
+    val topCornerShape = remember(cornerRadius) { UnevenRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius) }
     val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
     val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetYValue).coerceAtLeast(0f) } }
 
@@ -567,7 +572,7 @@ private fun BottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .clip(UnevenRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius))
+                .clip(topCornerShape)
                 .background(backgroundColor)
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
@@ -606,6 +611,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
+    val handleShape = remember { RoundedRectangle(2.dp) }
 
     Box(
         modifier = Modifier
@@ -698,7 +704,7 @@ private fun DragHandleArea(
                 .graphicsLayer {
                     scaleY = pressScale.value
                 }
-                .clip(RoundedRectangle(2.dp))
+                .clip(handleShape)
                 .background(dragHandleColor.copy(alpha = handleAlpha)),
         )
     }

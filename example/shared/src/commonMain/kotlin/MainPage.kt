@@ -58,6 +58,12 @@ fun MainPage(
     var expanded by remember { mutableStateOf(false) }
 
     val notExpanded by remember { derivedStateOf { !expanded } }
+    val onCancelSearch = remember {
+        {
+            expanded = false
+            searchValue = ""
+        }
+    }
 
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
@@ -100,10 +106,8 @@ fun MainPage(
                                 .clickable(
                                     interactionSource = null,
                                     indication = null,
-                                ) {
-                                    expanded = false
-                                    searchValue = ""
-                                },
+                                    onClick = onCancelSearch,
+                                ),
                             text = "Cancel",
                             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
                             color = MiuixTheme.colorScheme.primary,

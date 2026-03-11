@@ -246,7 +246,9 @@ Scaffold {
         onDismissRequest = { showDialog = false } // Close dialog
     ) {
         Card(
-            color = MiuixTheme.colorScheme.secondaryContainer,
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryContainer,
+            ),
         ) {
             SuperDropdown(
                 title = "Dropdown Selection",

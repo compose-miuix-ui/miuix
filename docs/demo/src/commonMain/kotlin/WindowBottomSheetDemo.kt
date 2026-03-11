@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -21,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.LocalWindowBottomSheetState
 import top.yukonga.miuix.kmp.extra.WindowBottomSheet
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 
 @Composable
 fun WindowBottomSheetDemo() {
@@ -40,16 +42,30 @@ fun WindowBottomSheetDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val showBottomSheet = remember { mutableStateOf(false) }
+            var showBottomSheet by remember { mutableStateOf(false) }
             Card {
                 TextButton(
                     text = "Show a WindowBottomSheet",
-                    onClick = { showBottomSheet.value = true },
+                    onClick = { showBottomSheet = true },
                 )
                 WindowBottomSheet(
                     show = showBottomSheet,
                     title = "WindowBottomSheet Title",
-                    onDismissRequest = { showBottomSheet.value = false },
+                    startAction = {
+                        val dismiss = LocalDismissState.current
+                        TextButton(
+                            text = "Cancel",
+                            onClick = { dismiss?.invoke() },
+                        )
+                    },
+                    endAction = {
+                        val dismiss = LocalDismissState.current
+                        TextButton(
+                            text = "Confirm",
+                            onClick = { dismiss?.invoke() },
+                        )
+                    },
+                    onDismissRequest = { showBottomSheet = false },
                 ) {
                     Column(
                         modifier = Modifier
@@ -59,7 +75,7 @@ fun WindowBottomSheetDemo() {
                     ) {
                         Text("This is a window-level bottom sheet that does not require MiuixPopupHost.")
                         Box(modifier = Modifier.height(16.dp))
-                        val dismiss = LocalWindowBottomSheetState.current
+                        val dismiss = LocalDismissState.current
                         TextButton(
                             text = "Close",
                             onClick = { dismiss?.invoke() },

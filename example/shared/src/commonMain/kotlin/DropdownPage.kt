@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
@@ -36,6 +36,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+
+private val DropdownListTopShape = UnevenRoundedRectangle(topStart = 16.dp, topEnd = 16.dp)
+private val DropdownListBottomShape = UnevenRoundedRectangle(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun DropdownPage(
@@ -53,7 +56,7 @@ fun DropdownPage(
 
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            delay(100)
+            delay(200)
             dropdownCount += 6
             isRefreshing = false
         }
@@ -101,8 +104,8 @@ fun DropdownPage(
                     val isFirst = i == 0
                     val isLast = i == dropdownCount - 1
                     val shape = when {
-                        isFirst -> RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                        isLast -> RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                        isFirst -> DropdownListTopShape
+                        isLast -> DropdownListBottomShape
                         else -> RectangleShape
                     }
                     Box(

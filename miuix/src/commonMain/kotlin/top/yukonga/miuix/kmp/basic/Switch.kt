@@ -77,6 +77,7 @@ fun Switch(
     var rawDragOffset by remember { mutableFloatStateOf(0f) }
     var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
 
+    val capsuleShape = remember { Capsule() }
     val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -143,7 +144,7 @@ fun Switch(
         modifier = modifier
             .wrapContentSize(Alignment.Center)
             .size(49.dp, 28.dp)
-            .clip(Capsule())
+            .clip(capsuleShape)
             .drawBehind {
                 drawRect(backgroundColorState.value)
             }

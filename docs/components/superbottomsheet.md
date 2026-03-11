@@ -25,6 +25,7 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 
 ```kotlin
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 ```
 
 ## Basic Usage
@@ -213,18 +214,17 @@ Scaffold {
         show = showBottomSheet,
         title = "Action Sheet",
         startAction = {
+            val dismiss = LocalDismissState.current
             TextButton(
                 text = "Cancel",
-                onClick = { showBottomSheet = false }
+                onClick = { dismiss?.invoke() }
             )
         },
         endAction = {
+            val dismiss = LocalDismissState.current
             TextButton(
                 text = "Confirm",
-                onClick = { 
-                    // Handle confirm action
-                    showBottomSheet = false 
-                },
+                onClick = { dismiss?.invoke() },
                 colors = ButtonDefaults.textButtonColorsPrimary()
             )
         },
@@ -256,7 +256,9 @@ Scaffold {
         onDismissRequest = { showBottomSheet = false }
     ) {
         Card(
-            color = MiuixTheme.colorScheme.secondaryContainer,
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryContainer,
+            ),
         ) {
             TextField(
                 modifier = Modifier.padding(vertical = 12.dp),

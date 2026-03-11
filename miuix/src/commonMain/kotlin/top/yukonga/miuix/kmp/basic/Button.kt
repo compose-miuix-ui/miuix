@@ -15,9 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,15 +57,14 @@ fun Button(
     indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
     val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
-    val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
     Surface(
-        onClick = currentOnClick,
+        onClick = onClick,
         enabled = enabled,
         modifier = modifier.semantics { role = Role.Button },
         shape = shape,
-        color = color,
+        color = if (enabled) colors.color else colors.disabledColor,
+        contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
         interactionSource = interactionSource,
         indication = indication,
     ) {
@@ -89,10 +86,10 @@ fun Button(
  * @param onClick The callback when the [TextButton] is clicked.
  * @param modifier The modifier to be applied to the [TextButton].
  * @param enabled Whether the [TextButton] is enabled.
- * @param colors The [TextButtonColors] of the [TextButton].
  * @param cornerRadius The corner radius of the [TextButton].
  * @param minWidth The minimum width of the [TextButton].
  * @param minHeight The minimum height of the [TextButton].
+ * @param colors The [TextButtonColors] of the [TextButton].
  * @param insideMargin The margin inside the [TextButton].
  * @param interactionSource The [MutableInteractionSource] to be used for the [TextButton].
  * @param indication The [Indication] to be used for the [TextButton].
@@ -104,40 +101,34 @@ fun TextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: TextButtonColors = ButtonDefaults.textButtonColors(),
     cornerRadius: Dp = ButtonDefaults.CornerRadius,
     minWidth: Dp = ButtonDefaults.MinWidth,
     minHeight: Dp = ButtonDefaults.MinHeight,
+    colors: TextButtonColors = ButtonDefaults.textButtonColors(),
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = LocalIndication.current,
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
-    val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
-    val textColor = remember(enabled, colors) { if (enabled) colors.textColor else colors.disabledTextColor }
-    Surface(
-        onClick = currentOnClick,
+    Button(
+        onClick = onClick,
+        modifier = modifier,
         enabled = enabled,
-        modifier = modifier.semantics { role = Role.Button },
-        shape = shape,
-        color = color,
+        cornerRadius = cornerRadius,
+        minWidth = minWidth,
+        minHeight = minHeight,
+        colors = ButtonColors(
+            color = colors.color,
+            disabledColor = colors.disabledColor,
+            contentColor = colors.textColor,
+            disabledContentColor = colors.disabledTextColor,
+        ),
+        insideMargin = insideMargin,
         interactionSource = interactionSource,
         indication = indication,
     ) {
-        Row(
-            modifier = Modifier
-                .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
-                .padding(insideMargin),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            content = {
-                Text(
-                    text = text,
-                    color = textColor,
-                    style = MiuixTheme.textStyles.button,
-                )
-            },
+        Text(
+            text = text,
+            style = MiuixTheme.textStyles.button,
         )
     }
 }
@@ -173,10 +164,14 @@ object ButtonDefaults {
     fun buttonColors(
         color: Color = MiuixTheme.colorScheme.secondaryVariant,
         disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
-    ): ButtonColors = remember(color, disabledColor) {
+        contentColor: Color = MiuixTheme.colorScheme.onSecondaryVariant,
+        disabledContentColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+    ): ButtonColors = remember(color, disabledColor, contentColor, disabledContentColor) {
         ButtonColors(
             color = color,
             disabledColor = disabledColor,
+            contentColor = contentColor,
+            disabledContentColor = disabledContentColor,
         )
     }
 
@@ -187,10 +182,14 @@ object ButtonDefaults {
     fun buttonColorsPrimary(): ButtonColors {
         val color = MiuixTheme.colorScheme.primary
         val disabledColor = MiuixTheme.colorScheme.disabledPrimaryButton
-        return remember(color, disabledColor) {
+        val contentColor = MiuixTheme.colorScheme.onPrimary
+        val disabledContentColor = MiuixTheme.colorScheme.disabledOnPrimaryButton
+        return remember(color, disabledColor, contentColor, disabledContentColor) {
             ButtonColors(
                 color = color,
                 disabledColor = disabledColor,
+                contentColor = contentColor,
+                disabledContentColor = disabledContentColor,
             )
         }
     }
@@ -237,6 +236,8 @@ object ButtonDefaults {
 data class ButtonColors(
     val color: Color,
     val disabledColor: Color,
+    val contentColor: Color,
+    val disabledContentColor: Color,
 )
 
 @Immutable

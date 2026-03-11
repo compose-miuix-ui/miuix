@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
@@ -25,9 +24,6 @@ import top.yukonga.miuix.kmp.basic.Text
 fun FPSMonitor(modifier: Modifier = Modifier) {
     var fps by remember { mutableIntStateOf(0) }
     var maxFps by remember { mutableIntStateOf(0) }
-    var lastFrameTime by remember { mutableLongStateOf(0L) }
-    var frameCount by remember { mutableIntStateOf(0) }
-    var totalFrameTime by remember { mutableLongStateOf(0L) }
 
     val color by remember {
         derivedStateOf {
@@ -49,6 +45,9 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
     )
 
     LaunchedEffect(Unit) {
+        var lastFrameTime = 0L
+        var frameCount = 0
+        var totalFrameTime = 0L
         while (true) {
             withFrameMillis { frameTimeMillis ->
                 if (lastFrameTime != 0L) {

@@ -170,6 +170,7 @@ fun InputField(
     val currentOnSearch by rememberUpdatedState(onSearch)
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
+    val capsuleShape = remember { Capsule() }
 
     val actualLeadingIcon = leadingIcon ?: {
         Icon(
@@ -192,7 +193,7 @@ fun InputField(
             ) {
                 Icon(
                     modifier = Modifier
-                        .clip(Capsule())
+                        .clip(capsuleShape)
                         .clickable { currentOnQueryChange("") },
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
@@ -253,7 +254,7 @@ fun InputField(
                 modifier = Modifier
                     .background(
                         color = MiuixTheme.colorScheme.surfaceContainerHigh,
-                        shape = Capsule(),
+                        shape = capsuleShape,
                     ),
                 contentAlignment = Alignment.CenterStart,
             ) {

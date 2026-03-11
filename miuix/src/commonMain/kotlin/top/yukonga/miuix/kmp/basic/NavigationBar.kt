@@ -269,6 +269,7 @@ fun FloatingNavigationBar(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
+    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
 
     val platform = platform()
     val bottomPaddingValue = when (platform) {
@@ -309,7 +310,7 @@ fun FloatingNavigationBar(
                         Modifier
                             .background(
                                 color = MiuixTheme.colorScheme.dividerLine,
-                                shape = RoundedRectangle(cornerRadius),
+                                shape = shape,
                             )
                             .padding(0.75.dp)
                     } else {
@@ -320,11 +321,11 @@ fun FloatingNavigationBar(
                     if (shadowElevation > 0.dp) {
                         Modifier.graphicsLayer(
                             shadowElevation = with(density) { shadowElevation.toPx() },
-                            shape = RoundedRectangle(cornerRadius),
+                            shape = shape,
                             clip = cornerRadius > 0.dp,
                         )
                     } else if (cornerRadius > 0.dp) {
-                        Modifier.clip(RoundedRectangle(cornerRadius))
+                        Modifier.clip(shape)
                     } else {
                         Modifier
                     },

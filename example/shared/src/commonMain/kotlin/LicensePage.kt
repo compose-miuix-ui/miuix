@@ -80,7 +80,7 @@ fun LicensePage(
             ),
         ) {
             libraries?.let { libs ->
-                items(libs) { library ->
+                items(libs, key = { it.uniqueId }) { library ->
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
