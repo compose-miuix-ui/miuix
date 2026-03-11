@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -27,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kyant.shapes.UnevenRoundedRectangle
 import component.SearchBox
 import component.SearchPager
 import kotlinx.coroutines.delay
@@ -46,7 +46,8 @@ import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 
-private val IconListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+private val IconListTopShape = UnevenRoundedRectangle(topStart = 16.dp, topEnd = 16.dp)
+private val IconListBottomShape = UnevenRoundedRectangle(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun IconsPage(
@@ -180,7 +181,7 @@ fun IconsPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp)
-                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                            .clip(IconListTopShape)
                             .background(colorScheme.surfaceContainer)
                             .padding(horizontal = 16.dp)
                             .padding(top = 12.dp, bottom = 8.dp),
