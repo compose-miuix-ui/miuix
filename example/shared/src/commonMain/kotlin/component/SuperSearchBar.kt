@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -163,6 +164,18 @@ fun SearchStatus.SearchPager(
     result: LazyListScope.() -> Unit,
 ) {
     val searchStatus = this
+    val onSearchStatusChangeUpdated = rememberUpdatedState(onSearchStatusChange)
+    val searchStatusUpdated = rememberUpdatedState(searchStatus)
+    val onCancelSearch = remember {
+        {
+            onSearchStatusChangeUpdated.value(
+                searchStatusUpdated.value.copy(
+                    searchText = "",
+                    current = SearchStatus.Status.COLLAPSING,
+                ),
+            )
+        }
+    }
     val systemBarsPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
     val topPadding by animateDpAsState(
         targetValue = if (searchStatus.shouldExpand()) {
@@ -229,14 +242,8 @@ fun SearchStatus.SearchPager(
                             interactionSource = null,
                             enabled = searchStatus.isExpand(),
                             indication = null,
-                        ) {
-                            onSearchStatusChange(
-                                searchStatus.copy(
-                                    searchText = "",
-                                    current = SearchStatus.Status.COLLAPSING,
-                                ),
-                            )
-                        },
+                            onClick = onCancelSearch,
+                        ),
                 )
                 val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
                 NavigationBackHandler(
@@ -288,6 +295,11 @@ fun SearchBar(
 ) {
     val focusRequester = remember { FocusRequester() }
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val onSearchStatusChangeUpdated = rememberUpdatedState(onSearchStatusChange)
+    val searchStatusUpdated = rememberUpdatedState(searchStatus)
+    val onClearSearch = remember {
+        { onSearchStatusChangeUpdated.value(searchStatusUpdated.value.copy(searchText = "")) }
+    }
 
     InputField(
         query = searchStatus.searchText,
@@ -319,9 +331,8 @@ fun SearchBar(
                         .clickable(
                             interactionSource = null,
                             indication = null,
-                        ) {
-                            onSearchStatusChange(searchStatus.copy(searchText = ""))
-                        },
+                            onClick = onClearSearch,
+                        ),
                 )
             }
         },

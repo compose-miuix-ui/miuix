@@ -37,6 +37,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -601,6 +602,7 @@ private fun MainScreenBackHandler(
     )
 }
 
+@Stable
 class MainPagerState(
     val pagerState: PagerState,
     private val coroutineScope: CoroutineScope,

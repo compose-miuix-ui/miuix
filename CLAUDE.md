@@ -138,9 +138,9 @@ data class ComponentColors(
 
 ### Key Patterns
 
-- **`rememberUpdatedState`** for callback lambdas: `val currentOnClick by rememberUpdatedState(onClick)`
+- **`rememberUpdatedState`** for callbacks that must always reflect the latest value without restarting an effect or invalidating a Modifier: use inside `LaunchedEffect`/`DisposableEffect` to avoid stale closures, and inside lambdas captured by Modifier factories (`clickable`, `toggleable`, etc.) to stabilize the lambda identity; do NOT use when passing a callback directly as a composable parameter (e.g., `Button(onClick = onClick)`) — Compose's skip mechanism handles that
 - **`remember` with keys** for derived values: `val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }`
-- **`@NonRestartableComposable`** on component functions that delegate entirely to other composables
+- **`@NonRestartableComposable`** on thin wrapper composables that fully delegate to other composables and read no state themselves; avoid on composables with multiple internal state reads (they benefit from smart recomposition)
 - **`@Immutable`** on color/style data classes
 - **Shapes**: Use `com.kyant.shapes.RoundedRectangle` / `Capsule`, not Compose's built-in shapes
 - **Theme colors**: Always use `MiuixTheme.colorScheme.*`, never hardcode colors
@@ -156,7 +156,8 @@ data class ComponentColors(
 
 - `LaunchedEffect` keys: only include values actually read in the effect body
 - `minIntrinsicWidth`/`maxIntrinsicWidth` triggers full subtree traversal — defer to overflow branch when possible
-- Use `@Stable` on frequently-accessed properties in data classes
+- Use `@Immutable` on truly immutable data classes (all `val`, never mutated); use `@Stable` on classes whose mutable properties notify Compose via `MutableState`; `@Stable` may also be applied to pure/deterministic functions and extension functions to declare referential transparency (e.g., `@Stable internal fun color(enabled: Boolean): Color`)
+- Standard collections (`List`, `Set`, `Map`) are unstable to Compose; prefer `kotlinx.collections.immutable` (`ImmutableList` etc.) or `@Immutable` wrapper classes as composable parameters
 
 ## Workflows
 

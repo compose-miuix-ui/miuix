@@ -345,7 +345,7 @@ private fun WindowSpinnerDialog(
             Layout(
                 content = {
                     LazyColumn {
-                        items(items.size) { index ->
+                        items(items.size, key = { it }) { index ->
                             SpinnerItemImpl(
                                 entry = items[index],
                                 entryCount = items.size,

@@ -229,4 +229,22 @@ private val Title4: TextStyle
             fontSize = 18.sp,
         )
 
+@Stable
+internal fun TextStyles.updateTextStylesFrom(other: TextStyles) {
+    main = other.main
+    paragraph = other.paragraph
+    body1 = other.body1
+    body2 = other.body2
+    button = other.button
+    footnote1 = other.footnote1
+    footnote2 = other.footnote2
+    headline1 = other.headline1
+    headline2 = other.headline2
+    subtitle = other.subtitle
+    title1 = other.title1
+    title2 = other.title2
+    title3 = other.title3
+    title4 = other.title4
+}
+
 internal val LocalTextStyles = staticCompositionLocalOf { defaultTextStyles() }
