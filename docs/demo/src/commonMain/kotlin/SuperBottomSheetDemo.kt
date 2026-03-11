@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -39,20 +41,20 @@ fun SuperBottomSheetDemo() {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val showBottomSheet = remember { mutableStateOf(false) }
+                var showBottomSheet by remember { mutableStateOf(false) }
                 Card {
                     TextButton(
                         text = "Show a BottomSheet",
-                        onClick = { showBottomSheet.value = true },
+                        onClick = { showBottomSheet = true },
                     )
                     SuperBottomSheet(
                         title = "BottomSheet Title",
                         show = showBottomSheet,
-                        onDismissRequest = { showBottomSheet.value = false }, // Close bottom sheet
+                        onDismissRequest = { showBottomSheet = false },
                     ) {
                         TextButton(
                             text = "Confirm",
-                            onClick = { showBottomSheet.value = false }, // Close bottom sheet
+                            onClick = { showBottomSheet = false },
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                         )
                     }

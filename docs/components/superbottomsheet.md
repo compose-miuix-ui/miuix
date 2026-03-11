@@ -256,7 +256,9 @@ Scaffold {
         onDismissRequest = { showBottomSheet = false }
     ) {
         Card(
-            color = MiuixTheme.colorScheme.secondaryContainer,
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryContainer,
+            ),
         ) {
             TextField(
                 modifier = Modifier.padding(vertical = 12.dp),

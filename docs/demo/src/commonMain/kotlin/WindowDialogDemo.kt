@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -19,8 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.LocalWindowDialogState
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 
 @Composable
 fun WindowDialogDemo() {
@@ -38,22 +40,22 @@ fun WindowDialogDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val showDialog = remember { mutableStateOf(false) }
+            var showDialog by remember { mutableStateOf(false) }
             Card {
                 TextButton(
                     text = "Show a WindowDialog",
-                    onClick = { showDialog.value = true },
+                    onClick = { showDialog = true },
                 )
                 WindowDialog(
                     title = "WindowDialog Title",
                     summary = "This is a window-level dialog that does not require MiuixPopupHost.",
                     show = showDialog,
-                    onDismissRequest = { showDialog.value = false },
+                    onDismissRequest = { showDialog = false },
                 ) {
-                    val dismiss = LocalWindowDialogState.current
+                    val dismiss = LocalDismissState.current
                     TextButton(
                         text = "Confirm",
-                        onClick = { dismiss.invoke() },
+                        onClick = { dismiss?.invoke() },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

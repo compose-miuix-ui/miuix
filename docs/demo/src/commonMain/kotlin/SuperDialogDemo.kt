@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -39,21 +41,21 @@ fun SuperDialogDemo() {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val showDialog = remember { mutableStateOf(false) }
+                var showDialog by remember { mutableStateOf(false) }
                 Card {
                     TextButton(
                         text = "Show a SuperDialog",
-                        onClick = { showDialog.value = true },
+                        onClick = { showDialog = true },
                     )
                     SuperDialog(
                         title = "SuperDialog Title",
                         summary = "This is a basic dialog example that can contain various content.",
                         show = showDialog,
-                        onDismissRequest = { showDialog.value = false }, // Close dialog
+                        onDismissRequest = { showDialog = false },
                     ) {
                         TextButton(
                             text = "Confirm",
-                            onClick = { showDialog.value = false }, // Close dialog
+                            onClick = { showDialog = false },
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
