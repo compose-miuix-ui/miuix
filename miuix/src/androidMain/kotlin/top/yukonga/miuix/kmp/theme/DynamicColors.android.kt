@@ -5,22 +5,92 @@ package top.yukonga.miuix.kmp.theme
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color.parseColor
 import android.os.Build
+import android.provider.Settings
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.materialkolor.hct.Hct
+import org.json.JSONObject
+
+private data class SystemPaletteInfo(
+    val seedColor: Color,
+    val paletteStyle: ThemePaletteStyle,
+    val colorSpec: ThemeColorSpec,
+)
 
 @Composable
 actual fun platformDynamicColors(dark: Boolean): Colors {
     val context = LocalContext.current
-    val roles = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        systemMd3Roles(context, dark) // Use Android 12+ system dynamic colors
-    } else {
-        return monetSystemColors(dark) // Fallback to Monet implementation for older Android versions
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val paletteInfo = readSystemPaletteInfo(context)
+        Log.d("DynamicColors", "System palette info: $paletteInfo")
+        if (paletteInfo != null) {
+            return colorsFromSeed(
+                seed = paletteInfo.seedColor,
+                colorSpec = paletteInfo.colorSpec,
+                paletteStyle = paletteInfo.paletteStyle,
+                dark = dark,
+            )
+        }
     }
-    return mapMd3RolesToMiuixColorsCommon(roles, dark)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val roles = systemMd3Roles(context, dark)
+        return mapMd3RolesToMiuixColorsCommon(roles, dark)
+    }
+    return monetSystemColors(dark)
+}
+
+@SuppressLint("InlinedApi", "UseKtx")
+private fun readSystemPaletteInfo(context: Context): SystemPaletteInfo? {
+    return try {
+        val json = Settings.Secure.getString(
+            context.contentResolver,
+            "theme_customization_overlay_packages",
+        ) ?: return null
+
+        val jsonObject = JSONObject(json)
+
+        val seedColor: Color
+        val seedHex = jsonObject.optString("android.theme.customization.system_palette", "")
+        if (seedHex.isNotBlank()) {
+            val seedArgb = parseColor(if (seedHex.startsWith("#")) seedHex else "#$seedHex")
+            seedColor = Color(seedArgb)
+        } else {
+            seedColor = systemColor(context, android.R.color.system_accent1_500)
+        }
+
+        val styleName = jsonObject.optString("android.theme.customization.theme_style", "TONAL_SPOT")
+        val paletteStyle = mapAndroidStyleToThemePaletteStyle(styleName)
+
+        val colorSpec = if (Build.VERSION.SDK_INT >= 36) {
+            ThemeColorSpec.Spec2025
+        } else {
+            ThemeColorSpec.Spec2021
+        }
+
+        SystemPaletteInfo(seedColor, paletteStyle, colorSpec)
+    } catch (_: Exception) {
+        null
+    }
+}
+
+private fun mapAndroidStyleToThemePaletteStyle(styleName: String): ThemePaletteStyle = when (styleName.uppercase()) {
+    "TONAL_SPOT" -> ThemePaletteStyle.TonalSpot
+    "VIBRANT" -> ThemePaletteStyle.Vibrant
+    "EXPRESSIVE" -> ThemePaletteStyle.Expressive
+    "SPRITZ" -> ThemePaletteStyle.Neutral
+    "RAINBOW" -> ThemePaletteStyle.Rainbow
+    "FRUIT_SALAD" -> ThemePaletteStyle.FruitSalad
+    "MONOCHROMATIC" -> ThemePaletteStyle.Monochrome
+    "MONOCHROME" -> ThemePaletteStyle.Monochrome
+    "FIDELITY" -> ThemePaletteStyle.Fidelity
+    "CONTENT" -> ThemePaletteStyle.Content
+    "NEUTRAL" -> ThemePaletteStyle.Neutral
+    else -> ThemePaletteStyle.TonalSpot
 }
 
 @SuppressLint("NewApi")
