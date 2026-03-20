@@ -277,23 +277,45 @@ class MiuixOverscrollEffect : OverscrollEffect {
         performFling: suspend (Velocity) -> Velocity,
     ) {
         val isActiveY = abs(offsetY) > offsetThreshold
+        val isActiveX = abs(offsetX) > offsetThreshold
         val bypassY = shouldBypassForPullToRefreshY() && !isActiveY
 
         animationJobY?.cancel()
         animationJobX?.cancel()
 
-        // If Y overscroll active and fling is opposite direction, attenuate to prevent violent throw
-        val performVelocity = if (!bypassY && isActiveY && velocity.y != 0f && sign(velocity.y) != sign(offsetY)) {
-            Velocity(velocity.x, velocity.y / 2.13333f)
-        } else {
-            velocity
+        var performVelocity = velocity
+
+        // Y-axis: when overscrolled, spring absorbs velocity before scroll
+        if (!bypassY && isActiveY && velocity.y != 0f) {
+            if (sign(velocity.y) == sign(offsetY)) {
+                // Same direction fling: spring absorbs all velocity, scroll gets nothing
+                startSpringAnimationY(velocity.y)
+                performVelocity = Velocity(performVelocity.x, 0f)
+            } else {
+                // Opposite direction fling: spring starts with full velocity, scroll gets attenuated
+                startSpringAnimationY(velocity.y)
+                performVelocity = Velocity(performVelocity.x, velocity.y / 2.13333f)
+            }
+        }
+
+        // X-axis: same logic
+        if (isActiveX && velocity.x != 0f) {
+            if (sign(velocity.x) == sign(offsetX)) {
+                startSpringAnimationX(velocity.x)
+                performVelocity = Velocity(0f, performVelocity.y)
+            } else {
+                startSpringAnimationX(velocity.x)
+                performVelocity = Velocity(velocity.x / 2.13333f, performVelocity.y)
+            }
         }
 
         val consumed = performFling(performVelocity)
         val remaining = performVelocity - consumed
 
-        // Start spring animations with attenuated remaining velocity (same as onPostFling)
-        if (!bypassY) startSpringAnimationY(remaining.y / 1.53333f)
+        // Post-fling: always restart spring with attenuated remaining velocity (mirrors onPostFling)
+        if (!bypassY) {
+            startSpringAnimationY(remaining.y / 1.53333f)
+        }
         startSpringAnimationX(remaining.x / 1.53333f)
 
         updateOverScrollState()
