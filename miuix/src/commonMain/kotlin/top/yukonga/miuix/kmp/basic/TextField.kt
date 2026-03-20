@@ -169,27 +169,24 @@ fun TextField(
         inputTransformation = inputTransformation,
         outputTransformation = outputTransformation,
         scrollState = scrollState,
-        decorator = object : TextFieldDecorator {
-            @Composable
-            override fun Decoration(innerTextField: @Composable () -> Unit) {
-                TextFieldDecorationBox(
-                    label = label,
-                    labelFontSize = labelFontSize,
-                    labelColor = labelColor,
-                    labelState = labelState,
-                    backgroundColor = backgroundColor,
-                    borderWidth = borderWidthState.value,
-                    borderColor = borderColorState.value,
-                    borderShape = borderShape,
-                    cornerRadius = cornerRadius,
-                    paddingModifier = paddingModifier,
-                    leadingIcon = leadingIcon,
-                    trailingIcon = trailingIcon,
-                    labelAnim = labelAnim,
-                    insideMargin = insideMargin,
-                    innerTextField = innerTextField,
-                )
-            }
+        decorator = TextFieldDecorator { innerTextField ->
+            TextFieldDecorationBox(
+                label = label,
+                labelFontSize = labelFontSize,
+                labelColor = labelColor,
+                labelState = labelState,
+                backgroundColor = backgroundColor,
+                borderWidth = { borderWidthState.value },
+                borderColor = { borderColorState.value },
+                borderShape = borderShape,
+                cornerRadius = cornerRadius,
+                paddingModifier = paddingModifier,
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                labelAnim = labelAnim,
+                insideMargin = insideMargin,
+                innerTextField = innerTextField,
+            )
         },
     )
 }
@@ -319,8 +316,8 @@ fun TextField(
                 labelColor = labelColor,
                 labelState = labelState,
                 backgroundColor = backgroundColor,
-                borderWidth = borderWidthState.value,
-                borderColor = borderColorState.value,
+                borderWidth = { borderWidthState.value },
+                borderColor = { borderColorState.value },
                 borderShape = borderShape,
                 cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
@@ -458,8 +455,8 @@ fun TextField(
                 labelColor = labelColor,
                 labelState = labelState,
                 backgroundColor = backgroundColor,
-                borderWidth = borderWidthState.value,
-                borderColor = borderColorState.value,
+                borderWidth = { borderWidthState.value },
+                borderColor = { borderColorState.value },
                 borderShape = borderShape,
                 cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
@@ -485,8 +482,8 @@ private fun TextFieldDecorationBox(
     labelColor: Color,
     labelState: LabelAnimState,
     backgroundColor: Color,
-    borderWidth: Dp,
-    borderColor: Color,
+    borderWidth: () -> Dp,
+    borderColor: () -> Color,
     borderShape: RoundedCornerShape,
     cornerRadius: Dp,
     paddingModifier: Modifier = Modifier,
@@ -501,14 +498,14 @@ private fun TextFieldDecorationBox(
             .background(backgroundColor, borderShape)
             .drawWithContent {
                 drawContent()
-                val bw = borderWidth
+                val bw = borderWidth()
                 if (bw > 0.dp) {
                     val strokePx = bw.toPx()
                     val halfStroke = strokePx / 2f
                     val cr = cornerRadius.toPx()
                     inset(halfStroke) {
                         drawRoundRect(
-                            color = borderColor,
+                            color = borderColor(),
                             cornerRadius = CornerRadius(cr - halfStroke, cr - halfStroke),
                             style = Stroke(width = strokePx),
                         )

@@ -696,8 +696,6 @@ private fun DragHandleArea(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val handleAlpha = lerp(0.2f, 0.35f, isPressing.floatValue)
-
         Box(
             modifier = Modifier
                 .width(pressWidth.value.dp)
@@ -706,7 +704,10 @@ private fun DragHandleArea(
                     scaleY = pressScale.value
                 }
                 .clip(handleShape)
-                .background(dragHandleColor.copy(alpha = handleAlpha)),
+                .drawBehind {
+                    val handleAlpha = lerp(0.2f, 0.35f, isPressing.floatValue)
+                    drawRect(dragHandleColor.copy(alpha = handleAlpha))
+                },
         )
     }
 }

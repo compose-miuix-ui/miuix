@@ -131,8 +131,7 @@ fun Slider(
     }
 
     val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
-    val animatedValue by animatedValueState
-    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val thumbScaleState = animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -261,13 +260,13 @@ fun Slider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            value = animatedValue,
+            valueProvider = { animatedValueState.value },
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = false,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            thumbScale = thumbScale,
+            thumbScaleProvider = { thumbScaleState.value },
             reverseDirection = effectiveReverseDirection,
             modifier = Modifier.fillMaxWidth().height(height),
         )
@@ -339,8 +338,7 @@ fun VerticalSlider(
     }
 
     val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
-    val animatedValue by animatedValueState
-    val thumbScale by animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val thumbScaleState = animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -466,13 +464,13 @@ fun VerticalSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            value = animatedValue,
+            valueProvider = { animatedValueState.value },
             valueRange = valueRange,
             isDragging = isDragging,
             isVertical = true,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            thumbScale = thumbScale,
+            thumbScaleProvider = { thumbScaleState.value },
             reverseDirection = reverseDirection,
             modifier = Modifier.width(width).fillMaxHeight(),
         )
@@ -561,13 +559,11 @@ fun RangeSlider(
 
     val animatedStartValueState = animateFloatAsState(coercedStart, progressAnimationSpec)
     val animatedEndValueState = animateFloatAsState(coercedEnd, progressAnimationSpec)
-    val animatedStartValue by animatedStartValueState
-    val animatedEndValue by animatedEndValueState
-    val startThumbScale by animateFloatAsState(
+    val startThumbScaleState = animateFloatAsState(
         if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
         ThumbScaleAnimationSpec,
     )
-    val endThumbScale by animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val endThumbScaleState = animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -813,10 +809,10 @@ fun RangeSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueStart = animatedStartValue,
-            valueEnd = animatedEndValue,
-            startThumbScale = startThumbScale,
-            endThumbScale = endThumbScale,
+            valueStartProvider = { animatedStartValueState.value },
+            valueEndProvider = { animatedEndValueState.value },
+            startThumbScaleProvider = { startThumbScaleState.value },
+            endThumbScaleProvider = { endThumbScaleState.value },
             valueRange = valueRange,
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
@@ -838,13 +834,13 @@ private fun SliderTrack(
     thumbColor: Color,
     keyPointColor: Color,
     keyPointForegroundColor: Color,
-    value: Float,
+    valueProvider: () -> Float,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     isVertical: Boolean,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
-    thumbScale: Float,
+    thumbScaleProvider: () -> Float,
     reverseDirection: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -864,6 +860,8 @@ private fun SliderTrack(
     ) {
         val barHeight = size.height
         val barWidth = size.width
+        val value = valueProvider()
+        val thumbScale = thumbScaleProvider()
         val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
 
         if (isVertical) {
@@ -949,10 +947,10 @@ private fun RangeSliderTrack(
     thumbColor: Color,
     keyPointColor: Color,
     keyPointForegroundColor: Color,
-    valueStart: Float,
-    valueEnd: Float,
-    startThumbScale: Float,
-    endThumbScale: Float,
+    valueStartProvider: () -> Float,
+    valueEndProvider: () -> Float,
+    startThumbScaleProvider: () -> Float,
+    endThumbScaleProvider: () -> Float,
     valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     showKeyPoints: Boolean,
@@ -976,6 +974,10 @@ private fun RangeSliderTrack(
     ) {
         val barHeight = size.height
         val barWidth = size.width
+        val valueStart = valueStartProvider()
+        val valueEnd = valueEndProvider()
+        val startThumbScale = startThumbScaleProvider()
+        val endThumbScale = endThumbScaleProvider()
         val startFraction = (valueStart - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val endFraction = (valueEnd - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val thumbRadius = barHeight / 2f

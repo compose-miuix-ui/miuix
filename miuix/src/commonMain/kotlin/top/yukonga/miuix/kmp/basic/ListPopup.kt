@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -303,12 +304,14 @@ fun safeTransformOrigin(x: Float, y: Float): TransformOrigin {
     return TransformOrigin(safeX, safeY)
 }
 
+@Immutable
 data class PopupLayoutPosition(
     val showBelow: Boolean,
     val showAbove: Boolean,
     val isRightAligned: Boolean,
 )
 
+@Immutable
 data class ListPopupLayoutInfo(
     val windowBounds: IntRect,
     val popupMargin: IntRect,

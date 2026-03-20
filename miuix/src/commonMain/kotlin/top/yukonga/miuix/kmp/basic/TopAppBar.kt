@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -100,11 +99,11 @@ fun TopAppBar(
     horizontalPadding: Dp = 26.dp,
 ) {
     val largeTitleHeight = remember { mutableIntStateOf(0) }
-    val expandedHeightPx by rememberUpdatedState(
-        remember(largeTitleHeight.value) {
-            largeTitleHeight.value.toFloat().coerceAtLeast(0f)
-        },
-    )
+    val expandedHeightPx by remember {
+        derivedStateOf {
+            largeTitleHeight.intValue.toFloat().coerceAtLeast(0f)
+        }
+    }
 
     SideEffect {
         // Sets the app bar's height offset to collapse the entire bar's height when content is scrolled.

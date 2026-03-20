@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -354,9 +355,7 @@ class MiuixPopupUtils {
                         exit = dialogState.dimExitTransition ?: DialogDimExit,
                     ) {
                         val baseColor = MiuixTheme.colorScheme.windowDimming
-                        val dimColor = dialogState.dimAlpha?.value?.let { alphaMultiplier ->
-                            baseColor.copy(alpha = (baseColor.alpha * alphaMultiplier.coerceIn(0f, 1f)))
-                        } ?: baseColor
+                        val dimAlphaState = dialogState.dimAlpha
 
                         Box(
                             modifier = Modifier
@@ -374,7 +373,10 @@ class MiuixPopupUtils {
                                         }
                                     }
                                 }
-                                .background(dimColor),
+                                .drawBehind {
+                                    val alpha = dimAlphaState?.value?.coerceIn(0f, 1f) ?: 1f
+                                    drawRect(baseColor.copy(alpha = baseColor.alpha * alpha))
+                                },
                         )
                     }
                 } else {

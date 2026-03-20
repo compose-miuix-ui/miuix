@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -517,6 +518,7 @@ val LocalFloatingNavigationBarDisplayMode = compositionLocalOf { FloatingNavigat
  * @param label The label of the item.
  * @param icon The icon of the item.
  */
+@Immutable
 data class NavigationItem(
     val label: String,
     val icon: ImageVector,
