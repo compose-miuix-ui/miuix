@@ -125,7 +125,7 @@ fun Card(
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = indicationToUse,
-                    onClick = currentOnClick ?: {},
+                    onClick = currentOnClick ?: EmptyClickAction,
                     onLongClick = currentOnLongPress,
                 )
                 .padding(insideMargin),
@@ -168,6 +168,8 @@ private fun BasicCard(
         }
     }
 }
+
+private val EmptyClickAction: () -> Unit = {}
 
 object CardDefaults {
 

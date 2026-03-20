@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -297,10 +296,8 @@ internal fun DialogContent(
             } else {
                 val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
                     WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-                val extraBottomPadding by remember(bottomPadding, outsideMargin.height) {
-                    derivedStateOf {
-                        bottomPadding + outsideMargin.height
-                    }
+                val extraBottomPadding = remember(bottomPadding, outsideMargin.height) {
+                    bottomPadding + outsideMargin.height
                 }
                 // Small screen
                 Modifier.graphicsLayer {

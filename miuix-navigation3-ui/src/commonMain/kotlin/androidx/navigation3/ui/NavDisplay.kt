@@ -40,7 +40,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -93,6 +95,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.UnevenRoundedRectangle
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.Platform
@@ -212,6 +215,7 @@ object NavDisplay {
  *   direction (entered from right, exits to right). When true, the pop animation direction matches
  *   the swipe edge (swipe from right edge, exits to left).
  */
+@Immutable
 data class NavDisplayTransitionEffects(
     val enableCornerClip: Boolean = true,
     val dimAmount: Float = 0.5f,
@@ -498,19 +502,21 @@ fun <T : Any> NavDisplay(
 
     // Set up Gesture Back tracking
     val previousScene = sceneState.previousScenes.lastOrNull()
-    val gestureTransition = navigationEventState.transitionState
 
-    val inPredictiveBack = gestureTransition is InProgress && previousScene != null
-    val progress =
-        when (gestureTransition) {
-            is Idle -> 0f
-            is InProgress -> gestureTransition.latestEvent.progress
+    val hasPreviousScene = previousScene != null
+    val inPredictiveBack by remember(hasPreviousScene) {
+        derivedStateOf {
+            navigationEventState.transitionState is InProgress && hasPreviousScene
         }
-    val swipeEdge =
-        when (gestureTransition) {
-            is Idle -> NavigationEvent.EDGE_NONE
-            is InProgress -> gestureTransition.latestEvent.swipeEdge
+    }
+    val swipeEdge by remember {
+        derivedStateOf {
+            when (val gesture = navigationEventState.transitionState) {
+                is Idle -> NavigationEvent.EDGE_NONE
+                is InProgress -> gesture.latestEvent.swipeEdge
+            }
         }
+    }
 
     // Remember the swipe edge for use after finger lift (when isPop but not inPredictiveBack)
     var lastSwipeEdge by remember { mutableStateOf(NavigationEvent.EDGE_NONE) }
@@ -552,8 +558,8 @@ fun <T : Any> NavDisplay(
     // Determine which entries should be rendered within each currently rendered scene,
     // using the z-index of each screen to always show the entry on the topmost screen
     // The map is AnimatedSceneKey to a Set of NavEntry.key values
-    val sceneToExcludedEntryMap =
-        remember(sceneMap.entries.toList(), currentOverlayScenes.toList(), zIndices.toString()) {
+    val sceneToExcludedEntryMap by remember {
+        derivedStateOf {
             buildMap {
                 val scenes = mutableListOf<Scene<T>>()
                 // First sort the non-overlay scenes by z-order in descending order.
@@ -612,6 +618,7 @@ fun <T : Any> NavDisplay(
                 }
             }
         }
+    }
 
     // Determine which NavEntry's transition to use(if any), prioritizing the one with highest
     // zIndex
@@ -631,19 +638,27 @@ fun <T : Any> NavDisplay(
         }
     }
 
-    if (inPredictiveBack) {
-        LaunchedEffect(previousScene, progress) {
-            if (transition.currentState == previousScene) {
-                // Interrupting entry: A -> B
-                // Scale progress to match the partial entry state
-                val startPhysical = NavAnimationEasing.transform(entryInterruptionFraction)
-                val targetPhysical = startPhysical * (1f - progress)
-                val targetFraction = NavAnimationEasing.inverseTransform(targetPhysical)
-                transitionState.seekTo(targetFraction, scene)
-            } else {
-                // Standard back: B -> A
-                transitionState.seekTo(progress, previousScene)
-            }
+    if (inPredictiveBack && previousScene != null) {
+        LaunchedEffect(previousScene) {
+            snapshotFlow { navigationEventState.transitionState }
+                .collectLatest { gestureState ->
+                    if (gestureState is InProgress) {
+                        val progress = gestureState.latestEvent.progress
+                        if (transition.currentState == previousScene) {
+                            // Interrupting entry: A -> B
+                            // Scale progress to match the partial entry state
+                            val startPhysical =
+                                NavAnimationEasing.transform(entryInterruptionFraction)
+                            val targetPhysical = startPhysical * (1f - progress)
+                            val targetFraction =
+                                NavAnimationEasing.inverseTransform(targetPhysical)
+                            transitionState.seekTo(targetFraction, scene)
+                        } else {
+                            // Standard back: B -> A
+                            transitionState.seekTo(progress, previousScene)
+                        }
+                    }
+                }
         }
     } else {
         LaunchedEffect(scene) {
@@ -801,17 +816,6 @@ fun <T : Any> NavDisplay(
                     Modifier
                 }
 
-            val dimAlpha =
-                if (transitionEffects.dimAmount > 0f && !isSettled && myZIndex < topZIndex) {
-                    if (targetScene == transition.currentState) {
-                        transitionState.fraction * transitionEffects.dimAmount
-                    } else {
-                        (1f - transitionState.fraction) * transitionEffects.dimAmount
-                    }
-                } else {
-                    0f
-                }
-
             Box(
                 modifier =
                     Modifier
@@ -820,12 +824,27 @@ fun <T : Any> NavDisplay(
             ) {
                 targetScene.content()
 
-                if (dimAlpha > 0.001f) {
+                if (transitionEffects.dimAmount > 0f && myZIndex < topZIndex) {
+                    val isCurrentScene = targetScene == transition.currentState
                     Box(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .graphicsLayer { alpha = dimAlpha }
+                                .graphicsLayer {
+                                    val settled =
+                                        transition.currentState == transition.targetState
+                                    alpha = if (!settled) {
+                                        if (isCurrentScene) {
+                                            transitionState.fraction *
+                                                transitionEffects.dimAmount
+                                        } else {
+                                            (1f - transitionState.fraction) *
+                                                transitionEffects.dimAmount
+                                        }
+                                    } else {
+                                        0f
+                                    }
+                                }
                                 .background(Color.Black),
                     )
                 }

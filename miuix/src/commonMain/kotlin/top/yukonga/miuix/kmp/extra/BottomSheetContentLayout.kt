@@ -540,8 +540,7 @@ private fun BottomSheetColumn(
 ) {
     val density = LocalDensity.current
     val topCornerShape = remember(cornerRadius) { UnevenRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius) }
-    val dragOffsetYValue by remember { derivedStateOf { dragOffsetY.value } }
-    val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetYValue).coerceAtLeast(0f) } }
+    val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
 
     Box(
         modifier = Modifier.fillMaxWidth(),
