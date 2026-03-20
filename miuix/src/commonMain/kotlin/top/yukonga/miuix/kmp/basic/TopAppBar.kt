@@ -45,7 +45,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -594,11 +593,11 @@ private fun TopAppBarLayout(
         }
     }
 
-    val alpha by animateFloatAsState(
+    val smallTitleAlpha by animateFloatAsState(
         targetValue = if (1 - extOffset.coerceIn(0f, 1f) == 0f) 1f else 0f,
         animationSpec = tween(durationMillis = 250),
     )
-    val translationY by animateFloatAsState(
+    val smallTitleTranslationY by animateFloatAsState(
         targetValue = if (extOffset > 1f) 0f else 12f,
         animationSpec = tween(durationMillis = 250),
     )
@@ -615,10 +614,10 @@ private fun TopAppBarLayout(
                 Modifier
                     .layoutId("title")
                     .padding(horizontal = horizontalPadding)
-                    .graphicsLayer(
-                        alpha = alpha,
-                        translationY = translationY,
-                    ),
+                    .graphicsLayer {
+                        alpha = smallTitleAlpha
+                        translationY = smallTitleTranslationY
+                    },
             ) {
                 Text(
                     text = title,
@@ -639,7 +638,7 @@ private fun TopAppBarLayout(
                     .layoutId("largeTitle")
                     .padding(top = 56.dp)
                     .padding(horizontal = horizontalPadding)
-                    .alpha(largeTitleAlpha),
+                    .graphicsLayer { alpha = largeTitleAlpha },
             ) {
                 Text(
                     modifier = Modifier.offset { IntOffset(0, heightOffset) },

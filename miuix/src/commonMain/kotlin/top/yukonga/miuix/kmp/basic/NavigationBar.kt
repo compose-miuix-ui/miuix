@@ -208,7 +208,7 @@ fun RowScope.NavigationBarItem(
                 Text(
                     modifier = Modifier
                         .padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp)
-                        .alpha(textAlpha),
+                        .graphicsLayer { alpha = textAlpha },
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,

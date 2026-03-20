@@ -41,6 +41,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -190,18 +191,18 @@ internal fun DialogContentLayout(
         }
 
         if (enableWindowDim) {
-            val progress = animationProgress.value
             val baseColor = MiuixTheme.colorScheme.windowDimming
-            val dimColor = baseColor.copy(alpha = (baseColor.alpha * dimAlpha.floatValue * progress))
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(dimColor),
+                    .drawBehind {
+                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * animationProgress.value))
+                    },
             )
         }
 
-        val progress = animationProgress.value
         val contentModifier = modifier.graphicsLayer {
+            val progress = animationProgress.value
             if (isLargeScreen) {
                 val scale = 0.8f + 0.2f * progress
                 scaleX = scale

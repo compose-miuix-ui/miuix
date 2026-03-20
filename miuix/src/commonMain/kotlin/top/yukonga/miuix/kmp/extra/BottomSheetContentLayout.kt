@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -203,13 +204,13 @@ internal fun BottomSheetContentLayout(
         }
 
         if (enableWindowDim) {
-            val progress = animationProgress.value
             val baseColor = MiuixTheme.colorScheme.windowDimming
-            val dimColor = baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * progress)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(dimColor),
+                    .drawBehind {
+                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * animationProgress.value))
+                    },
             )
         }
 
@@ -227,8 +228,8 @@ internal fun BottomSheetContentLayout(
                 },
             contentAlignment = Alignment.BottomCenter,
         ) {
-            val progress = animationProgress.value
             val sheetModifier = modifier.graphicsLayer {
+                val progress = animationProgress.value
                 val currentHeight = sheetHeightPx.intValue.toFloat()
                 val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
                 val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx

@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.theme.LocalContentColor
@@ -531,7 +532,7 @@ private fun TextFieldDecorationBox(
                         fontSize = labelFontSize.value.sp,
                         color = labelColor,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.offset(y = labelAnim),
+                        modifier = Modifier.offset { IntOffset(0, labelAnim.roundToPx()) },
                         textAlign = TextAlign.Start,
                     )
                 }
