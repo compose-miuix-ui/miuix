@@ -312,6 +312,7 @@ data class SpinnerColors(
 /**
  * The spinner entry.
  */
+@Immutable
 data class SpinnerEntry(
     val icon: @Composable ((Modifier) -> Unit)? = null,
     val title: String? = null,

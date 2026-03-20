@@ -1029,6 +1029,7 @@ private fun RangeSliderTrack(
 /**
  * Manages haptic feedback state for the slider.
  */
+@Stable
 internal class SliderHapticState {
     private var edgeFeedbackTriggered: Boolean = false
     private var lastStep: Float = 0f
@@ -1116,6 +1117,7 @@ internal class SliderHapticState {
 /**
  * Manages haptic feedback state for the range slider.
  */
+@Stable
 internal class RangeSliderHapticState {
     private var startEdgeFeedbackTriggered: Boolean = false
     private var endEdgeFeedbackTriggered: Boolean = false

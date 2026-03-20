@@ -45,11 +45,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.sp
 import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -105,7 +108,14 @@ fun NavigationBar(
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(navigationBarsPadding.calculateBottomPadding() + animatedCaptionBarHeight)
+                    .layout { measurable, constraints ->
+                        val totalHeight = (navigationBarsPadding.calculateBottomPadding() + animatedCaptionBarHeight).roundToPx()
+                        val fixedConstraints = constraints.copy(minHeight = totalHeight, maxHeight = totalHeight)
+                        val placeable = measurable.measure(fixedConstraints)
+                        layout(placeable.width, totalHeight) {
+                            placeable.placeRelative(0, 0)
+                        }
+                    }
                     .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } },
             )
         }
@@ -201,7 +211,15 @@ fun RowScope.NavigationBarItem(
                 )
 
                 Image(
-                    modifier = Modifier.padding(top = iconTopPadding).size(26.dp),
+                    modifier = Modifier
+                        .layout { measurable, constraints ->
+                            val topPaddingPx = iconTopPadding.roundToPx()
+                            val placeable = measurable.measure(constraints.offset(vertical = -topPaddingPx))
+                            layout(placeable.width, placeable.height + topPaddingPx) {
+                                placeable.placeRelative(0, topPaddingPx)
+                            }
+                        }
+                        .size(26.dp),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),

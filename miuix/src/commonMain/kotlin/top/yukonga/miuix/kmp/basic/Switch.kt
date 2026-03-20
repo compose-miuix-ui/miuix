@@ -36,8 +36,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -158,7 +160,14 @@ fun Switch(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .offset { IntOffset(thumbOffsetState.value.roundToPx(), 0) }
-                .size(thumbSizeState.value)
+                .layout { measurable, _ ->
+                    val sizePx = thumbSizeState.value.roundToPx()
+                    val constraints = Constraints.fixed(sizePx, sizePx)
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .drawBehind {
                     drawCircle(color = thumbColorState.value)
                 }

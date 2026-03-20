@@ -4,11 +4,9 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -94,9 +92,6 @@ fun DropdownPage(
                 ),
                 contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp),
             ) {
-                item(key = "dropdownSpacer") {
-                    Spacer(modifier = Modifier.height(6.dp))
-                }
                 items(
                     count = dropdownCount,
                     key = { "dropdown_$it" },
