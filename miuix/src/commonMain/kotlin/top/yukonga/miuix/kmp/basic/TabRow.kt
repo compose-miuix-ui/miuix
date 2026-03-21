@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -45,8 +46,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 import kotlin.math.roundToInt
 
 /**
@@ -188,7 +189,7 @@ fun TabRowWithContour(
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
-    val outerShape = remember(cornerRadius) { RoundedRectangle(cornerRadius + contourPadding) }
+    val outerShape = miuixShape(cornerRadius + contourPadding)
 
     BoxWithConstraints(
         modifier = Modifier
@@ -270,7 +271,7 @@ private fun TabItem(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    shape: RoundedRectangle,
+    shape: Shape,
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
@@ -312,7 +313,7 @@ private fun TabItemWithContour(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    shape: RoundedRectangle,
+    shape: Shape,
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
@@ -350,7 +351,7 @@ private fun TabItemWithContour(
  */
 private data class TabRowConfig(
     val tabWidth: Dp,
-    val shape: RoundedRectangle,
+    val shape: Shape,
     val listState: androidx.compose.foundation.lazy.LazyListState,
 )
 
@@ -371,7 +372,7 @@ private fun rememberTabRowConfig(
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val shape = miuixShape(cornerRadius)
 
     return TabRowConfig(tabWidth, shape, listState)
 }

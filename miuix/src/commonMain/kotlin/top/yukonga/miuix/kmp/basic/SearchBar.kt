@@ -54,13 +54,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.kyant.shapes.Capsule
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.utils.hasFocusReassignBug
 
 /**
@@ -170,7 +170,7 @@ fun InputField(
     val currentOnSearch by rememberUpdatedState(onSearch)
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val capsuleShape = remember { Capsule() }
+    val capsuleShape = miuixCapsuleShape()
 
     val actualLeadingIcon = leadingIcon ?: {
         Icon(

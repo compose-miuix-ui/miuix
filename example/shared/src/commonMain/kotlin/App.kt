@@ -40,6 +40,7 @@ fun App(
         keyColor = keyColor,
         paletteStyle = appState.paletteStyle,
         colorSpec = appState.colorSpec,
+        smoothRounding = appState.smoothRounding,
     ) {
         CompositionLocalProvider(
             LocalAppState provides appState,

@@ -37,8 +37,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.utils.SinkFeedback
 import top.yukonga.miuix.kmp.utils.pressable
 
@@ -134,7 +134,7 @@ fun Checkbox(
         label = "CrossCenterGravitation",
     ) { if (it == ToggleableState.Indeterminate) 1f else 0f }
 
-    val capsuleShape = remember { Capsule() }
+    val capsuleShape = miuixCapsuleShape()
     val checkPath = remember { Path() }
     val sinkFeedback = remember { SinkFeedback(sinkAmount = 0.85f, animationSpec = spring(0.99f, 986.96f)) }
 

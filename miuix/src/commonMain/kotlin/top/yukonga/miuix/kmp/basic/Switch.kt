@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.LocalColors
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import kotlin.math.absoluteValue
@@ -79,7 +79,7 @@ fun Switch(
     var rawDragOffset by remember { mutableFloatStateOf(0f) }
     var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
 
-    val capsuleShape = remember { Capsule() }
+    val capsuleShape = miuixCapsuleShape()
     val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }

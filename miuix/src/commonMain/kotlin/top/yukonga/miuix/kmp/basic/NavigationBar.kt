@@ -53,8 +53,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.sp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.platform
 
@@ -287,7 +287,7 @@ fun FloatingNavigationBar(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val shape = miuixShape(cornerRadius)
 
     val platform = platform()
     val bottomPaddingValue = when (platform) {

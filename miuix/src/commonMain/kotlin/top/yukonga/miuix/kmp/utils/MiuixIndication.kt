@@ -125,10 +125,11 @@ class MiuixIndication(
         }
 
         override fun ContentDrawScope.draw() {
-            // Draw content
             drawContent()
-            // Draw foreground
-            drawRect(color = color, alpha = animatedAlpha.value, size = size)
+            val alpha = animatedAlpha.value
+            if (alpha > 0f) {
+                drawRect(color = color, alpha = alpha, size = size)
+            }
         }
     }
 }

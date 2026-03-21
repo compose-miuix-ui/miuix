@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.kyant.shapes.Capsule
-import com.kyant.shapes.RoundedRectangle
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
+import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
 import kotlin.math.abs
@@ -114,7 +114,7 @@ fun ColorPalette(
     }
 
     val onColorChangedState = rememberUpdatedState(onColorChanged)
-    val capsuleShape = remember { Capsule() }
+    val capsuleShape = miuixCapsuleShape()
 
     Column(
         modifier = modifier,
@@ -192,7 +192,7 @@ private fun PaletteCanvas(
 ) {
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val shape = miuixShape(cornerRadius)
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 

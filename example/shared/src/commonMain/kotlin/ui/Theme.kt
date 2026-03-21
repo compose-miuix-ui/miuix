@@ -18,6 +18,7 @@ fun AppTheme(
     keyColor: Color? = null,
     paletteStyle: Int = 0,
     colorSpec: Int = 0,
+    smoothRounding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val spec = ThemeColorSpec.entries.getOrNull(colorSpec) ?: ThemeColorSpec.Spec2021
@@ -34,6 +35,7 @@ fun AppTheme(
     }
     return MiuixTheme(
         controller = controller,
+        smoothRounding = smoothRounding,
         content = content,
     )
 }

@@ -24,8 +24,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [Button] component with Miuix style.
@@ -57,7 +57,7 @@ fun Button(
     indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val shape = miuixShape(cornerRadius)
     Surface(
         onClick = onClick,
         enabled = enabled,

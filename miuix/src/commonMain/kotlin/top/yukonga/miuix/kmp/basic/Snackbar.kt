@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -56,6 +55,7 @@ import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * Possible durations of the [Snackbar].
@@ -308,7 +308,7 @@ fun Snackbar(
     colors: SnackbarColors = SnackbarDefaults.snackbarColors(),
     insideMargin: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
 ) {
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val shape = miuixShape(cornerRadius)
     val visuals = data.visuals
     val scope = rememberCoroutineScope()
 
