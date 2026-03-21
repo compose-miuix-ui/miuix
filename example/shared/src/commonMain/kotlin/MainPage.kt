@@ -28,6 +28,7 @@ import component.dialogSection
 import component.dropdownSection
 import component.numberPickerSection
 import component.progressIndicatorSection
+import component.radioButtonSection
 import component.sliderSection
 import component.snackbarSection
 import component.spinnerSection
@@ -133,6 +134,7 @@ fun MainPage(
             if (notExpanded) {
                 basicComponentSection()
                 checkboxSection()
+                radioButtonSection()
                 switchSection()
                 arrowSection()
                 dialogSection()
