@@ -6,7 +6,6 @@ object BuildConfig {
     const val LIBRARY_ID = "top.yukonga.miuix.kmp"
     const val APPLICATION_NAME = "Miuix"
     const val APPLICATION_VERSION_NAME = "1.0.8"
-    val APPLICATION_VERSION_CODE = getGitVersionCode()
     const val APPLICATION_ID = "top.yukonga.miuix.uitest"
     const val APPLICATION_SHARED_ID = "top.yukonga.miuix.shared"
     const val COMPILE_SDK = 36
@@ -16,12 +15,14 @@ object BuildConfig {
     const val JDK_VERSION = 21
 }
 
-fun getGitVersionCode(): Int {
-    val process = ProcessBuilder("git", "rev-list", "--count", "HEAD").start()
-    return process.inputStream.bufferedReader().use { it.readText().trim().toInt() }
+fun org.gradle.api.Project.getGitVersionCode(): Int {
+    return providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.get().trim().toInt()
 }
 
-fun getGitHashShort(): String {
-    val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
-    return process.inputStream.bufferedReader().use { it.readText().trim() }
+fun org.gradle.api.Project.getGitHashShort(): String {
+    return providers.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+    }.standardOutput.asText.get().trim()
 }

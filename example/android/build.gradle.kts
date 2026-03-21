@@ -5,12 +5,15 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
+    alias(libs.plugins.baselineprofile)
     alias(libs.plugins.composeCompiler)
 }
 
 dependencies {
     implementation(projects.example.shared)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
 }
 
 @Suppress("UnstableApiUsage")
@@ -22,8 +25,9 @@ android {
         minSdk = BuildConfig.MIN_SDK
         targetSdk = BuildConfig.TARGET_SDK
         versionName = BuildConfig.APPLICATION_VERSION_NAME
-        versionCode = BuildConfig.APPLICATION_VERSION_CODE
+        versionCode = getGitVersionCode()
     }
+    experimentalProperties["android.experimental.r8.dex-startup-optimization"] = true
     namespace = BuildConfig.APPLICATION_ID
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
@@ -61,6 +65,14 @@ android {
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
         }
+        create("nonMinifiedRelease") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        create("benchmarkRelease") {
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
     }
     dependenciesInfo {
         includeInApk = false
@@ -70,13 +82,12 @@ android {
 
 androidComponents {
     onVariants(selector().withBuildType("release")) {
-        it.packaging.resources.excludes
-            .add("**")
+        it.packaging.resources.excludes.add("**")
     }
 }
 
 base {
     archivesName.set(
-        "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${BuildConfig.APPLICATION_VERSION_CODE})",
+        "${BuildConfig.APPLICATION_NAME}-v${BuildConfig.APPLICATION_VERSION_NAME}(${getGitVersionCode()})",
     )
 }
