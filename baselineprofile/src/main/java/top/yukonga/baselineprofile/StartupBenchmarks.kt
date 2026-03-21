@@ -1,3 +1,6 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package top.yukonga.baselineprofile
 
 import androidx.benchmark.macro.BaselineProfileMode
@@ -38,12 +41,10 @@ class StartupBenchmarks {
     val rule = MacrobenchmarkRule()
 
     @Test
-    fun startupCompilationNone() =
-        benchmark(CompilationMode.None())
+    fun startupCompilationNone() = benchmark(CompilationMode.None())
 
     @Test
-    fun startupCompilationBaselineProfiles() =
-        benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
+    fun startupCompilationBaselineProfiles() = benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
     private fun benchmark(compilationMode: CompilationMode) {
         rule.measureRepeated(

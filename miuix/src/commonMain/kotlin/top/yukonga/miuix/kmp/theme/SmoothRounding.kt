@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.kyant.shapes.Capsule
 import com.kyant.shapes.RoundedRectangle
 import com.kyant.shapes.UnevenRoundedRectangle
@@ -53,10 +54,10 @@ fun miuixCapsuleShape(): Shape {
  */
 @Composable
 fun miuixUnevenShape(
-    topStart: Dp = Dp.Unspecified,
-    topEnd: Dp = Dp.Unspecified,
-    bottomEnd: Dp = Dp.Unspecified,
-    bottomStart: Dp = Dp.Unspecified,
+    topStart: Dp = 0.dp,
+    topEnd: Dp = 0.dp,
+    bottomEnd: Dp = 0.dp,
+    bottomStart: Dp = 0.dp,
 ): Shape {
     val smooth = MiuixTheme.smoothRounding
     return remember(topStart, topEnd, bottomEnd, bottomStart, smooth) {
@@ -68,12 +69,11 @@ fun miuixUnevenShape(
                 bottomStart = bottomStart,
             )
         } else {
-            val zero = Dp.Hairline
             RoundedCornerShape(
-                topStart = if (topStart == Dp.Unspecified) zero else topStart,
-                topEnd = if (topEnd == Dp.Unspecified) zero else topEnd,
-                bottomEnd = if (bottomEnd == Dp.Unspecified) zero else bottomEnd,
-                bottomStart = if (bottomStart == Dp.Unspecified) zero else bottomStart,
+                topStart = topStart,
+                topEnd = topEnd,
+                bottomEnd = bottomEnd,
+                bottomStart = bottomStart,
             )
         }
     }

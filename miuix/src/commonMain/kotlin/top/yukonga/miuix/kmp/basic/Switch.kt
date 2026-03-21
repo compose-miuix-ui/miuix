@@ -44,9 +44,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.LocalColors
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import kotlin.math.absoluteValue
 
 /**
