@@ -95,9 +95,9 @@ TextField(
 | value                 | String or TextFieldValue                     | Text value of the input field       | -                                                | Yes      |
 | onValueChange         | (String) -> Unit or (TextFieldValue) -> Unit | Callback when text changes          | -                                                | Yes      |
 | modifier              | Modifier                                     | Modifier applied to the input field | Modifier                                         | No       |
-| insideMargin          | DpSize                                       | Internal padding of input field     | DpSize(16.dp, 16.dp)                             | No       |
+| insideMargin          | DpSize                                       | Internal padding of input field     | TextFieldDefaults.InsideMargin                    | No       |
 | backgroundColor       | Color                                        | Background color                    | MiuixTheme.colorScheme.secondaryContainer        | No       |
-| cornerRadius          | Dp                                           | Corner radius                       | 16.dp                                            | No       |
+| cornerRadius          | Dp                                           | Corner radius                       | TextFieldDefaults.CornerRadius                    | No       |
 | label                 | String                                       | Label text                          | ""                                               | No       |
 | labelColor            | Color                                        | Label text color                    | MiuixTheme.colorScheme.onSecondaryContainer      | No       |
 | borderColor           | Color                                        | Border color when focused           | MiuixTheme.colorScheme.primary                   | No       |
@@ -123,9 +123,9 @@ TextField(
 | --------------------- | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------ | -------- |
 | state                 | TextFieldState                                 | State object holding text and selection            | -                                          | Yes      |
 | modifier              | Modifier                                       | Modifier applied to the input field                | Modifier                                   | No       |
-| insideMargin          | DpSize                                         | Internal padding of input field                    | DpSize(16.dp, 16.dp)                       | No       |
+| insideMargin          | DpSize                                         | Internal padding of input field                    | TextFieldDefaults.InsideMargin              | No       |
 | backgroundColor       | Color                                          | Background color                                   | MiuixTheme.colorScheme.secondaryContainer  | No       |
-| cornerRadius          | Dp                                             | Corner radius                                      | 16.dp                                      | No       |
+| cornerRadius          | Dp                                             | Corner radius                                      | TextFieldDefaults.CornerRadius              | No       |
 | label                 | String                                         | Label text                                         | ""                                         | No       |
 | labelColor            | Color                                          | Label text color                                   | MiuixTheme.colorScheme.onSecondaryContainer | No       |
 | borderColor           | Color                                          | Border color when focused                          | MiuixTheme.colorScheme.primary             | No       |
@@ -144,6 +144,17 @@ TextField(
 | cursorBrush           | Brush                                          | Cursor brush                                       | SolidColor(borderColor)                    | No       |
 | outputTransformation  | OutputTransformation?                          | Output transformation                              | null                                       | No       |
 | scrollState           | ScrollState                                    | Scroll state                                       | rememberScrollState()                       | No       |
+
+### TextFieldDefaults Object
+
+The TextFieldDefaults object provides default values for TextField components.
+
+#### Constants
+
+| Constant Name | Type   | Description                  | Default Value          |
+| ------------- | ------ | ---------------------------- | ---------------------- |
+| CornerRadius  | Dp     | Corner radius of the field   | 16.dp                  |
+| InsideMargin  | DpSize | Internal padding of the field| DpSize(16.dp, 16.dp)  |
 
 ## Advanced Usage
 

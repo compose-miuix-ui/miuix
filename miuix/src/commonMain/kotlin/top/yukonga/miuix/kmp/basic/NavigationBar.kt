@@ -141,20 +141,20 @@ fun RowScope.NavigationBarItem(
     enabled: Boolean = true,
 ) {
     val platform = platform()
-    val itemHeight = if (platform != Platform.IOS) 64.dp else 48.dp
+    val itemHeight = if (platform != Platform.IOS) NavigationBarDefaults.ItemHeight else NavigationBarDefaults.ItemHeightIOS
     var isPressed by remember { mutableStateOf(false) }
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
     val tint = when {
         isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = 0.5f)
+            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
         } else {
-            onSurfaceContainerColor.copy(alpha = 0.6f)
+            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerColor.copy(0.4f)
+        else -> onSurfaceContainerColor.copy(NavigationBarDefaults.UnselectedAlpha)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationBarDisplayMode.current
@@ -181,25 +181,25 @@ fun RowScope.NavigationBarItem(
         when (mode) {
             NavigationBarDisplayMode.IconAndText -> {
                 Image(
-                    modifier = Modifier.padding(top = 8.dp).size(26.dp),
+                    modifier = Modifier.padding(top = NavigationBarDefaults.IconTopPadding).size(NavigationBarDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Text(
-                    modifier = Modifier.padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp),
+                    modifier = Modifier.padding(bottom = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
+                    fontSize = NavigationBarDefaults.LabelFontSize,
                     fontWeight = fontWeight,
                 )
             }
 
             NavigationBarDisplayMode.IconWithSelectedLabel -> {
-                val defaultPadding = (itemHeight - 26.dp) / 2
+                val defaultPadding = (itemHeight - NavigationBarDefaults.IconSize) / 2
                 val iconTopPadding by animateDpAsState(
-                    targetValue = if (selected) 8.dp else defaultPadding,
+                    targetValue = if (selected) NavigationBarDefaults.IconTopPadding else defaultPadding,
                     animationSpec = tween(durationMillis = 300),
                     label = "iconTopPadding",
                 )
@@ -218,19 +218,19 @@ fun RowScope.NavigationBarItem(
                                 placeable.placeRelative(0, topPaddingPx)
                             }
                         }
-                        .size(26.dp),
+                        .size(NavigationBarDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Text(
                     modifier = Modifier
-                        .padding(bottom = if (platform != Platform.IOS) 8.dp else 0.dp)
+                        .padding(bottom = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp)
                         .graphicsLayer { alpha = textAlpha },
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
+                    fontSize = NavigationBarDefaults.LabelFontSize,
                     fontWeight = fontWeight,
                 )
             }
@@ -238,18 +238,18 @@ fun RowScope.NavigationBarItem(
             NavigationBarDisplayMode.TextOnly -> {
                 Text(
                     modifier = Modifier
-                        .padding(vertical = if (platform != Platform.IOS) 8.dp else 0.dp),
+                        .padding(vertical = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
+                    fontSize = FloatingNavigationBarDefaults.TextFontSize,
                     fontWeight = fontWeight,
                 )
             }
 
             else -> {
                 Image(
-                    modifier = Modifier.size(26.dp),
+                    modifier = Modifier.size(NavigationBarDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
@@ -279,8 +279,8 @@ fun FloatingNavigationBar(
     color: Color = MiuixTheme.colorScheme.surfaceContainer,
     cornerRadius: Dp = FloatingToolbarDefaults.CornerRadius,
     horizontalAlignment: Alignment.Horizontal = CenterHorizontally,
-    horizontalOutSidePadding: Dp = 36.dp,
-    shadowElevation: Dp = 1.dp,
+    horizontalOutSidePadding: Dp = FloatingNavigationBarDefaults.HorizontalOutSidePadding,
+    shadowElevation: Dp = FloatingNavigationBarDefaults.ShadowElevation,
     showDivider: Boolean = false,
     defaultWindowInsetsPadding: Boolean = true,
     mode: FloatingNavigationBarDisplayMode = FloatingNavigationBarDisplayMode.IconOnly,
@@ -350,12 +350,12 @@ fun FloatingNavigationBar(
                 )
                 .background(color)
                 .then(modifier)
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = FloatingNavigationBarDefaults.HorizontalPadding)
                 .align(horizontalAlignment)
                 .pointerInput(Unit) {
                     detectTapGestures { /* Consume click */ }
                 },
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(FloatingNavigationBarDefaults.ItemSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             CompositionLocalProvider(LocalFloatingNavigationBarDisplayMode provides mode) {
@@ -389,14 +389,14 @@ fun FloatingNavigationBarItem(
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
     val tint = when {
         isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = 0.5f)
+            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.SelectedPressedAlpha)
         } else {
-            onSurfaceContainerColor.copy(alpha = 0.6f)
+            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.UnselectedPressedAlpha)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerColor.copy(0.4f)
+        else -> onSurfaceContainerColor.copy(FloatingNavigationBarDefaults.UnselectedAlpha)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalFloatingNavigationBarDisplayMode.current
@@ -420,13 +420,13 @@ fun FloatingNavigationBarItem(
         when (mode) {
             FloatingNavigationBarDisplayMode.IconAndText -> {
                 Image(
-                    modifier = Modifier.padding(top = 6.dp).size(24.dp),
+                    modifier = Modifier.padding(top = FloatingNavigationBarDefaults.VerticalPadding).size(FloatingNavigationBarDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Box(
-                    modifier = Modifier.padding(bottom = 6.dp),
+                    modifier = Modifier.padding(bottom = FloatingNavigationBarDefaults.VerticalPadding),
                     contentAlignment = Alignment.Center,
                 ) {
                     // Invisible text for layout calculation (always bold)
@@ -434,7 +434,7 @@ fun FloatingNavigationBarItem(
                         modifier = Modifier.alpha(0f),
                         text = label,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
+                        fontSize = FloatingNavigationBarDefaults.LabelFontSize,
                         fontWeight = FontWeight.Bold, // Always bold for layout
                     )
                     // Visible text
@@ -442,7 +442,7 @@ fun FloatingNavigationBarItem(
                         text = label,
                         color = tint,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
+                        fontSize = FloatingNavigationBarDefaults.LabelFontSize,
                         fontWeight = fontWeight,
                     )
                 }
@@ -450,7 +450,7 @@ fun FloatingNavigationBarItem(
 
             FloatingNavigationBarDisplayMode.TextOnly -> {
                 Box(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
+                    modifier = Modifier.padding(vertical = FloatingNavigationBarDefaults.TextVerticalPadding, horizontal = FloatingNavigationBarDefaults.TextHorizontalPadding),
                     contentAlignment = Alignment.Center,
                 ) {
                     // Invisible text for layout calculation
@@ -458,7 +458,7 @@ fun FloatingNavigationBarItem(
                         modifier = Modifier.alpha(0f),
                         text = label,
                         textAlign = TextAlign.Center,
-                        fontSize = 14.sp,
+                        fontSize = FloatingNavigationBarDefaults.TextFontSize,
                         fontWeight = FontWeight.Bold, // Always bold for layout
                     )
                     // Visible text
@@ -466,7 +466,7 @@ fun FloatingNavigationBarItem(
                         text = label,
                         color = tint,
                         textAlign = TextAlign.Center,
-                        fontSize = 14.sp,
+                        fontSize = FloatingNavigationBarDefaults.TextFontSize,
                         fontWeight = fontWeight,
                     )
                 }
@@ -474,7 +474,7 @@ fun FloatingNavigationBarItem(
 
             FloatingNavigationBarDisplayMode.IconOnly -> {
                 Image(
-                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp).size(28.dp),
+                    modifier = Modifier.padding(vertical = FloatingNavigationBarDefaults.IconOnlyPadding, horizontal = FloatingNavigationBarDefaults.IconOnlyPadding).size(FloatingNavigationBarDefaults.IconOnlySize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
@@ -482,6 +482,84 @@ fun FloatingNavigationBarItem(
             }
         }
     }
+}
+
+/** Contains default values used by [NavigationBar] and [NavigationBarItem]. */
+object NavigationBarDefaults {
+    /** The default item height on non-iOS platforms. */
+    val ItemHeight = 64.dp
+
+    /** The default item height on iOS. */
+    val ItemHeightIOS = 48.dp
+
+    /** The default icon size. */
+    val IconSize = 26.dp
+
+    /** The default label font size. */
+    val LabelFontSize = 12.sp
+
+    /** The default top padding for the icon. */
+    val IconTopPadding = 8.dp
+
+    /** The default bottom padding for the label. */
+    val BottomPadding = 8.dp
+
+    /** The alpha value for the selected item when pressed. */
+    val SelectedPressedAlpha = 0.5f
+
+    /** The alpha value for an unselected item when pressed. */
+    val UnselectedPressedAlpha = 0.6f
+
+    /** The alpha value for an unselected item. */
+    val UnselectedAlpha = 0.4f
+}
+
+/** Contains default values used by [FloatingNavigationBar] and [FloatingNavigationBarItem]. */
+object FloatingNavigationBarDefaults {
+    /** The default horizontal outside padding. */
+    val HorizontalOutSidePadding = 36.dp
+
+    /** The default shadow elevation. */
+    val ShadowElevation = 1.dp
+
+    /** The default horizontal padding inside the bar. */
+    val HorizontalPadding = 12.dp
+
+    /** The default spacing between items. */
+    val ItemSpacing = 12.dp
+
+    /** The icon size in [FloatingNavigationBarDisplayMode.IconAndText] mode. */
+    val IconSize = 24.dp
+
+    /** The label font size in [FloatingNavigationBarDisplayMode.IconAndText] mode. */
+    val LabelFontSize = 12.sp
+
+    /** The vertical padding in [FloatingNavigationBarDisplayMode.IconAndText] mode. */
+    val VerticalPadding = 6.dp
+
+    /** The vertical padding in [FloatingNavigationBarDisplayMode.TextOnly] mode. */
+    val TextVerticalPadding = 16.dp
+
+    /** The horizontal padding in [FloatingNavigationBarDisplayMode.TextOnly] mode. */
+    val TextHorizontalPadding = 2.dp
+
+    /** The font size in [FloatingNavigationBarDisplayMode.TextOnly] mode. */
+    val TextFontSize = 14.sp
+
+    /** The icon size in [FloatingNavigationBarDisplayMode.IconOnly] mode. */
+    val IconOnlySize = 28.dp
+
+    /** The padding in [FloatingNavigationBarDisplayMode.IconOnly] mode. */
+    val IconOnlyPadding = 10.dp
+
+    /** The alpha value for the selected item when pressed. */
+    val SelectedPressedAlpha = 0.5f
+
+    /** The alpha value for an unselected item when pressed. */
+    val UnselectedPressedAlpha = 0.6f
+
+    /** The alpha value for an unselected item. */
+    val UnselectedAlpha = 0.4f
 }
 
 /**

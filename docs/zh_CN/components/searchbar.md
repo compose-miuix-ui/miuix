@@ -48,7 +48,7 @@ SearchBar(
 | inputField        | @Composable () -> Unit             | 搜索输入框组件       | -                   | 是    |
 | onExpandedChange  | (Boolean) -> Unit                  | 展开状态变化的回调     | -                   | 是    |
 | modifier          | Modifier                           | 应用于搜索栏的修饰符    | Modifier            | 否    |
-| insideMargin      | DpSize                             | 内部边距          | DpSize(12.dp, 0.dp) | 否    |
+| insideMargin      | DpSize                             | 内部边距          | SearchBarDefaults.InsideMargin | 否    |
 | expanded          | Boolean                            | 是否展开显示搜索结果    | false               | 否    |
 | outsideEndAction. | @Composable (() -> Unit)?          | 展开时显示在右侧的操作组件 | null                | 否    |
 | content           | @Composable ColumnScope.() -> Unit | 展开时显示的内容      | -                   | 是    |
@@ -69,6 +69,22 @@ SearchBar(
 | leadingIcon       | @Composable (() -> Unit)? | 前置图标          | 默认放大镜    | 否    |
 | trailingIcon      | @Composable (() -> Unit)? | 后置图标          | 默认清除按钮   | 否    |
 | interactionSource | MutableInteractionSource? | 交互源           | null     | 否    |
+
+### SearchBarDefaults 对象
+
+SearchBarDefaults 对象提供了 SearchBar 和 InputField 组件的默认值。
+
+#### 常量
+
+| 常量名                   | 类型     | 说明                        | 默认值              |
+| ------------------------ | -------- | --------------------------- | ------------------- |
+| InsideMargin             | DpSize   | SearchBar 的内部边距        | DpSize(12.dp, 0.dp) |
+| InputFieldMinHeight      | Dp       | InputField 的最小高度       | 45.dp               |
+| InputFieldFontSize       | TextUnit | InputField 标签字号         | 17.sp               |
+| LeadingIconStartPadding  | Dp       | 默认前置图标的起始内边距    | 16.dp               |
+| LeadingIconEndPadding    | Dp       | 默认前置图标的结束内边距    | 8.dp                |
+| TrailingIconStartPadding | Dp       | 默认后置图标的起始内边距    | 8.dp                |
+| TrailingIconEndPadding   | Dp       | 默认后置图标的结束内边距    | 16.dp               |
 
 ## 进阶用法
 

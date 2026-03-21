@@ -13,7 +13,8 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 
 | Action              | Command                                                 |
 | :------------------ | :------------------------------------------------------ |
-| Build               | `./gradlew assemble`                                    |
+| Build (full)        | `./gradlew assemble`                                    |
+| Build (quick check) | `./gradlew :miuix:compileKotlinDesktop`                 |
 | Test                | `./gradlew check`                                       |
 | Check formatting    | `./gradlew spotlessCheck`                               |
 | **Fix formatting**  | `./gradlew spotlessApply`                               |
@@ -170,6 +171,14 @@ data class ComponentColors(
 5. Verify on at least Android and Desktop
 
 Use `/create-component` to scaffold a new component.
+
+### Modifying a Component
+
+When changing a component's API, defaults, or behavior, check and update all related artifacts:
+
+1. **Documentation** (`docs/components/` and `docs/zh_CN/components/`): update properties tables, Defaults object sections, and code examples in both English and Chinese docs
+2. **Docs demo code** (`docs/demo/`): update the interactive demo if it uses changed APIs
+3. **Example app** (`example/shared/src/commonMain/kotlin/component/`): update demo code to reflect the changes
 
 ### Fixing Bugs
 

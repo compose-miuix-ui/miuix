@@ -55,7 +55,7 @@ Row {
 | color                      | Color                                  | NavigationRail 的背景颜色                     | MiuixTheme.colorScheme.surface    | 否       |
 | showDivider                | Boolean                                | 是否在 NavigationRail 和内容之间显示分割线    | true                              | 否       |
 | defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
-| minWidth                   | Dp                                     | NavigationRail 的最小宽度                     | 80.dp                             | 否       |
+| minWidth                   | Dp                                     | NavigationRail 的最小宽度                     | NavigationRailDefaults.MinWidth   | 否       |
 | mode                       | NavigationRailDisplayMode                  | 项目的显示模式                                | NavigationRailDisplayMode.IconAndText | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |
 
@@ -69,6 +69,27 @@ Row {
 | label    | String      | 该项的标签文本   | -      | 是       |
 | modifier | Modifier    | 应用于 NavigationRailItem 的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用该项     | true     | 否       |
+
+### NavigationRailDefaults 对象
+
+NavigationRailDefaults 对象提供了 NavigationRail 和 NavigationRailItem 组件的默认值。
+
+#### 常量
+
+| 常量名                 | 类型     | 说明                         | 默认值 |
+| ---------------------- | -------- | ---------------------------- | ------ |
+| MinWidth               | Dp       | 导航栏最小宽度               | 80.dp  |
+| VerticalPadding        | Dp       | 内容垂直内边距               | 24.dp  |
+| HeaderSpacing          | Dp       | 头部后的间距                 | 24.dp  |
+| IconSize               | Dp       | 图标尺寸                     | 28.dp  |
+| IconTextSpacing        | Dp       | 图标与文字间距               | 4.dp   |
+| ItemVerticalPadding    | Dp       | 每个项目的垂直内边距         | 12.dp  |
+| LabelFontSize          | TextUnit | 标签字号                     | 12.sp  |
+| TextOnlyFontSize       | TextUnit | TextOnly 模式字号            | 14.sp  |
+| TextOnlyVerticalPadding| Dp       | TextOnly 模式垂直内边距      | 4.dp   |
+| SelectedPressedAlpha   | Float    | 选中项按压时的透明度         | 0.5f   |
+| UnselectedPressedAlpha | Float    | 未选中项按压时的透明度       | 0.6f   |
+| UnselectedAlpha        | Float    | 未选中项的透明度             | 0.4f   |
 
 ### NavigationRailDisplayMode
 

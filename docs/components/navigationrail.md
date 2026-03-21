@@ -55,7 +55,7 @@ Row {
 | color                      | Color                                  | Background color of the rail                  | MiuixTheme.colorScheme.surface    | No       |
 | showDivider                | Boolean                                | Show divider line between rail and content    | true                              | No       |
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
-| minWidth                   | Dp                                     | Minimum width of the rail                     | 80.dp                             | No       |
+| minWidth                   | Dp                                     | Minimum width of the rail                     | NavigationRailDefaults.MinWidth   | No       |
 | mode                       | NavigationRailDisplayMode                  | Display mode for items                        | NavigationRailDisplayMode.IconAndText | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
@@ -69,6 +69,27 @@ Row {
 | label         | String      | Label of the item                | -             | Yes      |
 | modifier      | Modifier    | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean     | Whether the item is enabled      | true          | No       |
+
+### NavigationRailDefaults Object
+
+The NavigationRailDefaults object provides default values for NavigationRail and NavigationRailItem components.
+
+#### Constants
+
+| Constant Name          | Type     | Description                                | Default Value |
+| ---------------------- | -------- | ------------------------------------------ | ------------- |
+| MinWidth               | Dp       | Minimum width of the rail                  | 80.dp         |
+| VerticalPadding        | Dp       | Vertical padding of the content            | 24.dp         |
+| HeaderSpacing          | Dp       | Spacing after the header                   | 24.dp         |
+| IconSize               | Dp       | Icon size                                  | 28.dp         |
+| IconTextSpacing        | Dp       | Spacing between icon and text              | 4.dp          |
+| ItemVerticalPadding    | Dp       | Vertical padding for each item             | 12.dp         |
+| LabelFontSize          | TextUnit | Label font size                            | 12.sp         |
+| TextOnlyFontSize       | TextUnit | Font size in TextOnly mode                 | 14.sp         |
+| TextOnlyVerticalPadding| Dp       | Vertical padding in TextOnly mode          | 4.dp          |
+| SelectedPressedAlpha   | Float    | Alpha for selected pressed item            | 0.5f          |
+| UnselectedPressedAlpha | Float    | Alpha for unselected pressed item          | 0.6f          |
+| UnselectedAlpha        | Float    | Alpha for unselected item                  | 0.4f          |
 
 ### NavigationRailDisplayMode
 

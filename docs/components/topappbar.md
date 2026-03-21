@@ -129,7 +129,7 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
 | defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                           | No       |
+| horizontalPadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.HorizontalPadding | No       |
 
 ### SmallTopAppBar Properties
 
@@ -142,7 +142,19 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
 | defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | 26.dp                           | No       |
+| horizontalPadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.HorizontalPadding | No       |
+
+### TopAppBarDefaults Object
+
+The TopAppBarDefaults object provides default values for TopAppBar and SmallTopAppBar components.
+
+#### Constants
+
+| Constant Name             | Type | Description                                        | Default Value |
+| ------------------------- | ---- | -------------------------------------------------- | ------------- |
+| HorizontalPadding         | Dp   | Horizontal padding of the title and large title    | 26.dp         |
+| CollapsedHeight            | Dp   | Collapsed height of the TopAppBar                 | 56.dp         |
+| SmallTopAppBarCenterHeight | Dp   | Vertical center height for SmallTopAppBar layout  | 60.dp         |
 
 ### ScrollBehavior
 

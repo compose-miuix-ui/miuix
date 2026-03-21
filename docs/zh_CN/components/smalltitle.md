@@ -51,7 +51,17 @@ SmallTitle(
 | text         | String        | 要显示的文本内容   | -                                          | 是       |
 | modifier     | Modifier      | 应用于组件的修饰符 | Modifier                                   | 否       |
 | textColor    | Color         | 标题文本颜色       | MiuixTheme.colorScheme.onBackgroundVariant | 否       |
-| insideMargin | PaddingValues | 组件内部边距       | PaddingValues(28.dp, 8.dp)                 | 否       |
+| insideMargin | PaddingValues | 组件内部边距       | SmallTitleDefaults.InsideMargin             | 否       |
+
+### SmallTitleDefaults 对象
+
+SmallTitleDefaults 对象提供了 SmallTitle 组件的默认值。
+
+#### 常量
+
+| 常量名       | 类型          | 说明           | 默认值                   |
+| ------------ | ------------- | -------------- | ------------------------ |
+| InsideMargin | PaddingValues | 组件内部边距   | PaddingValues(28.dp, 8.dp)|
 
 ## 进阶用法
 

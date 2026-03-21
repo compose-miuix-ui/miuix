@@ -129,7 +129,7 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数       | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为             | null                              | 否       |
 | defaultWindowInsetsPadding | Boolean                         | 是否应用默认窗口边距           | true                              | 否       |
-| horizontalPadding          | Dp                              | 水平内容边距                   | 26.dp                             | 否       |
+| horizontalPadding          | Dp                              | 水平内容边距                   | TopAppBarDefaults.HorizontalPadding | 否       |
 
 ### SmallTopAppBar 属性
 
@@ -142,7 +142,19 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数 | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为       | null                              | 否       |
 | defaultWindowInsetsPadding | Boolean                         | 是否应用默认窗口边距     | true                              | 否       |
-| horizontalPadding          | Dp                              | 水平内容边距             | 26.dp                             | 否       |
+| horizontalPadding          | Dp                              | 水平内容边距             | TopAppBarDefaults.HorizontalPadding | 否       |
+
+### TopAppBarDefaults 对象
+
+TopAppBarDefaults 对象提供了 TopAppBar 和 SmallTopAppBar 组件的默认值。
+
+#### 常量
+
+| 常量名                    | 类型 | 说明                              | 默认值 |
+| ------------------------- | ---- | --------------------------------- | ------ |
+| HorizontalPadding         | Dp   | 标题和大标题的水平内边距          | 26.dp  |
+| CollapsedHeight            | Dp   | TopAppBar 折叠时的高度           | 56.dp  |
+| SmallTopAppBarCenterHeight | Dp   | SmallTopAppBar 布局的垂直中心高度 | 60.dp  |
 
 ### ScrollBehavior
 

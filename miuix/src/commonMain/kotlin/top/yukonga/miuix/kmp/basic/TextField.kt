@@ -86,9 +86,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun TextField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
-    insideMargin: DpSize = DpSize(16.dp, 16.dp),
+    insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
-    cornerRadius: Dp = 16.dp,
+    cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
     labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
     borderColor: Color = MiuixTheme.colorScheme.primary,
@@ -111,7 +111,7 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val labelState by remember(label, useLabelAsPlaceholder) {
@@ -133,8 +133,8 @@ fun TextField(
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
-            LabelAnimState.Floating -> 10.dp
-            else -> 17.dp
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
+            else -> TextFieldDefaults.LabelFontSizeNormal
         },
     )
     val paddingModifier = remember(leadingIcon, trailingIcon, insideMargin) {
@@ -226,9 +226,9 @@ fun TextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
-    insideMargin: DpSize = DpSize(16.dp, 16.dp),
+    insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
-    cornerRadius: Dp = 16.dp,
+    cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
     labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
     borderColor: Color = MiuixTheme.colorScheme.primary,
@@ -251,7 +251,7 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val labelState = remember(value.text, label, useLabelAsPlaceholder) {
@@ -271,8 +271,8 @@ fun TextField(
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
-            LabelAnimState.Floating -> 10.dp
-            else -> 17.dp
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
+            else -> TextFieldDefaults.LabelFontSizeNormal
         },
     )
     val paddingModifier = remember(leadingIcon, trailingIcon, insideMargin) {
@@ -365,9 +365,9 @@ fun TextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    insideMargin: DpSize = DpSize(16.dp, 16.dp),
+    insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
-    cornerRadius: Dp = 16.dp,
+    cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
     labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
     borderColor: Color = MiuixTheme.colorScheme.primary,
@@ -390,7 +390,7 @@ fun TextField(
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) 2.dp else 0.dp)
+    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
     val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val labelState = remember(value, label, useLabelAsPlaceholder) {
@@ -410,8 +410,8 @@ fun TextField(
     )
     val labelFontSize by animateDpAsState(
         when (labelState) {
-            LabelAnimState.Floating -> 10.dp
-            else -> 17.dp
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
+            else -> TextFieldDefaults.LabelFontSizeNormal
         },
     )
     val paddingModifier = remember(leadingIcon, trailingIcon, insideMargin) {
@@ -472,6 +472,24 @@ fun TextField(
 
 private enum class LabelAnimState { Hidden, Placeholder, Normal, Floating }
 
+/** Contains default values used by [TextField]. */
+object TextFieldDefaults {
+    /** The default corner radius of the [TextField]. */
+    val CornerRadius = 16.dp
+
+    /** The default inside margin of the [TextField]. */
+    val InsideMargin = DpSize(16.dp, 16.dp)
+
+    /** The default border width when the [TextField] is focused. */
+    internal val BorderWidth = 2.dp
+
+    /** The label font size when the label is floating above the text. */
+    internal val LabelFontSizeFloating = 10.dp
+
+    /** The label font size when the label is in its normal position. */
+    internal val LabelFontSizeNormal = 17.dp
+}
+
 /**
  * A Miuix style decoration box for the [TextField] component.
  */
@@ -490,7 +508,7 @@ private fun TextFieldDecorationBox(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     labelAnim: Dp = 0.dp,
-    insideMargin: DpSize = DpSize(16.dp, 16.dp),
+    insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     innerTextField: @Composable () -> Unit,
 ) {
     Box(

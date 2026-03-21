@@ -65,7 +65,7 @@ fun NavigationRail(
     color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
-    minWidth: Dp = 80.dp,
+    minWidth: Dp = NavigationRailDefaults.MinWidth,
     mode: NavigationRailDisplayMode = NavigationRailDisplayMode.IconAndText,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -89,13 +89,13 @@ fun NavigationRail(
                 .width(minWidth)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp),
+                .padding(vertical = NavigationRailDefaults.VerticalPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
         ) {
             if (header != null) {
                 header()
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
             CompositionLocalProvider(LocalNavigationRailDisplayMode provides mode) {
                 content()
@@ -131,14 +131,14 @@ fun NavigationRailItem(
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
     val tint = when {
         isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = 0.5f)
+            onSurfaceContainerColor.copy(alpha = NavigationRailDefaults.SelectedPressedAlpha)
         } else {
-            onSurfaceContainerColor.copy(alpha = 0.6f)
+            onSurfaceContainerColor.copy(alpha = NavigationRailDefaults.UnselectedPressedAlpha)
         }
 
         selected -> onSurfaceContainerColor
 
-        else -> onSurfaceContainerColor.copy(0.4f)
+        else -> onSurfaceContainerColor.copy(NavigationRailDefaults.UnselectedAlpha)
     }
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationRailDisplayMode.current
@@ -158,7 +158,7 @@ fun NavigationRailItem(
                     onTap = { if (enabled) onClick() },
                 )
             }
-            .padding(vertical = 12.dp)
+            .padding(vertical = NavigationRailDefaults.ItemVerticalPadding)
             .animateContentSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -166,35 +166,35 @@ fun NavigationRailItem(
         when (mode) {
             NavigationRailDisplayMode.IconAndText -> {
                 Image(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
                 Text(
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
+                    fontSize = NavigationRailDefaults.LabelFontSize,
                     fontWeight = fontWeight,
                 )
             }
 
             NavigationRailDisplayMode.IconWithSelectedLabel -> {
                 Image(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 if (selected) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
                     Text(
                         text = label,
                         color = tint,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
+                        fontSize = NavigationRailDefaults.LabelFontSize,
                         fontWeight = fontWeight,
                     )
                 }
@@ -202,18 +202,18 @@ fun NavigationRailItem(
 
             NavigationRailDisplayMode.TextOnly -> {
                 Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
+                    modifier = Modifier.padding(vertical = NavigationRailDefaults.TextOnlyVerticalPadding),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
+                    fontSize = NavigationRailDefaults.TextOnlyFontSize,
                     fontWeight = fontWeight,
                 )
             }
 
             else -> {
                 Image(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                     imageVector = icon,
                     contentDescription = label,
                     colorFilter = ColorFilter.tint(tint),
@@ -221,6 +221,45 @@ fun NavigationRailItem(
             }
         }
     }
+}
+
+/** Contains default values used by [NavigationRail] and [NavigationRailItem]. */
+object NavigationRailDefaults {
+    /** The default minimum width of the [NavigationRail]. */
+    val MinWidth = 80.dp
+
+    /** The default vertical padding of the [NavigationRail] content. */
+    val VerticalPadding = 24.dp
+
+    /** The default spacing after the header. */
+    val HeaderSpacing = 24.dp
+
+    /** The default icon size. */
+    val IconSize = 28.dp
+
+    /** The default spacing between icon and text. */
+    val IconTextSpacing = 4.dp
+
+    /** The default vertical padding for each item. */
+    val ItemVerticalPadding = 12.dp
+
+    /** The default label font size. */
+    val LabelFontSize = 12.sp
+
+    /** The font size in [NavigationRailDisplayMode.TextOnly] mode. */
+    val TextOnlyFontSize = 14.sp
+
+    /** The vertical padding in [NavigationRailDisplayMode.TextOnly] mode. */
+    val TextOnlyVerticalPadding = 4.dp
+
+    /** The alpha value for the selected item when pressed. */
+    val SelectedPressedAlpha = 0.5f
+
+    /** The alpha value for an unselected item when pressed. */
+    val UnselectedPressedAlpha = 0.6f
+
+    /** The alpha value for an unselected item. */
+    val UnselectedAlpha = 0.4f
 }
 
 /**

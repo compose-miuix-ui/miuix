@@ -38,9 +38,9 @@ fun FloatingActionButton(
     modifier: Modifier = Modifier,
     shape: Shape = Capsule(),
     containerColor: Color = MiuixTheme.colorScheme.primary,
-    shadowElevation: Dp = 4.dp,
-    minWidth: Dp = 60.dp,
-    minHeight: Dp = 60.dp,
+    shadowElevation: Dp = FloatingActionButtonDefaults.ShadowElevation,
+    minWidth: Dp = FloatingActionButtonDefaults.MinWidth,
+    minHeight: Dp = FloatingActionButtonDefaults.MinHeight,
     content: @Composable () -> Unit,
 ) {
     Surface(
@@ -61,4 +61,16 @@ fun FloatingActionButton(
             content()
         }
     }
+}
+
+/** Contains default values used by [FloatingActionButton]. */
+object FloatingActionButtonDefaults {
+    /** The default minimum width of the [FloatingActionButton]. */
+    val MinWidth = 60.dp
+
+    /** The default minimum height of the [FloatingActionButton]. */
+    val MinHeight = 60.dp
+
+    /** The default shadow elevation of the [FloatingActionButton]. */
+    val ShadowElevation = 4.dp
 }

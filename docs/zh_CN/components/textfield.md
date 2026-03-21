@@ -95,9 +95,9 @@ TextField(
 | value                 | String 或 TextFieldValue                     | 输入框的文本值         | -                                                    | 是       |
 | onValueChange         | (String) -> Unit 或 (TextFieldValue) -> Unit | 文本变化时的回调函数   | -                                                    | 是       |
 | modifier              | Modifier                                     | 应用于输入框的修饰符   | Modifier                                             | 否       |
-| insideMargin          | DpSize                                       | 输入框内部边距         | DpSize(16.dp, 16.dp)                                 | 否       |
+| insideMargin          | DpSize                                       | 输入框内部边距         | TextFieldDefaults.InsideMargin                        | 否       |
 | backgroundColor       | Color                                        | 输入框背景颜色         | MiuixTheme.colorScheme.secondaryContainer            | 否       |
-| cornerRadius          | Dp                                           | 输入框圆角半径         | 16.dp                                                | 否       |
+| cornerRadius          | Dp                                           | 输入框圆角半径         | TextFieldDefaults.CornerRadius                        | 否       |
 | label                 | String                                       | 输入框标签文本         | ""                                                   | 否       |
 | labelColor            | Color                                        | 标签文本颜色           | MiuixTheme.colorScheme.onSecondaryContainer          | 否       |
 | borderColor           | Color                                        | 输入框聚焦时的边框颜色 | MiuixTheme.colorScheme.primary                       | 否       |
@@ -123,9 +123,9 @@ TextField(
 | --------------------- | --------------------------------------------------- | ------------------------------ | --------------------------------------------- | -------- |
 | state                 | TextFieldState                                      | 保存文本与选择的状态对象       | -                                             | 是       |
 | modifier              | Modifier                                            | 应用于输入框的修饰符           | Modifier                                      | 否       |
-| insideMargin          | DpSize                                              | 输入框内部边距                 | DpSize(16.dp, 16.dp)                          | 否       |
+| insideMargin          | DpSize                                              | 输入框内部边距                 | TextFieldDefaults.InsideMargin                | 否       |
 | backgroundColor       | Color                                               | 输入框背景颜色                 | MiuixTheme.colorScheme.secondaryContainer     | 否       |
-| cornerRadius          | Dp                                                  | 输入框圆角半径                 | 16.dp                                         | 否       |
+| cornerRadius          | Dp                                                  | 输入框圆角半径                 | TextFieldDefaults.CornerRadius                | 否       |
 | label                 | String                                              | 输入框标签文本                 | ""                                            | 否       |
 | labelColor            | Color                                               | 标签文本颜色                   | MiuixTheme.colorScheme.onSecondaryContainer   | 否       |
 | borderColor           | Color                                               | 聚焦时的边框颜色               | MiuixTheme.colorScheme.primary                | 否       |
@@ -144,6 +144,17 @@ TextField(
 | cursorBrush           | Brush                                               | 光标画刷                       | SolidColor(borderColor)                       | 否       |
 | outputTransformation  | OutputTransformation?                               | 输出变换器                     | null                                          | 否       |
 | scrollState           | ScrollState                                         | 滚动状态                       | rememberScrollState()                         | 否       |
+
+### TextFieldDefaults 对象
+
+TextFieldDefaults 对象提供了 TextField 组件的默认值。
+
+#### 常量
+
+| 常量名       | 类型   | 说明           | 默认值                |
+| ------------ | ------ | -------------- | --------------------- |
+| CornerRadius | Dp     | 输入框圆角半径 | 16.dp                 |
+| InsideMargin | DpSize | 输入框内部边距 | DpSize(16.dp, 16.dp) |
 
 ## 进阶用法
 

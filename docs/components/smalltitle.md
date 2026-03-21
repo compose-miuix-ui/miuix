@@ -51,7 +51,17 @@ SmallTitle(
 | text          | String        | Text content to display       | -                                          | Yes      |
 | modifier      | Modifier      | Modifier applied to component | Modifier                                   | No       |
 | textColor     | Color         | Title text color              | MiuixTheme.colorScheme.onBackgroundVariant | No       |
-| insideMargin  | PaddingValues | Component internal padding    | PaddingValues(28.dp, 8.dp)                 | No       |
+| insideMargin  | PaddingValues | Component internal padding    | SmallTitleDefaults.InsideMargin             | No       |
+
+### SmallTitleDefaults Object
+
+The SmallTitleDefaults object provides default values for SmallTitle components.
+
+#### Constants
+
+| Constant Name | Type          | Description                | Default Value            |
+| ------------- | ------------- | -------------------------- | ------------------------ |
+| InsideMargin  | PaddingValues | Component internal padding | PaddingValues(28.dp, 8.dp)|
 
 ## Advanced Usage
 

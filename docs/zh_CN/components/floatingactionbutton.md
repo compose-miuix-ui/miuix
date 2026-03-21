@@ -43,10 +43,22 @@ FloatingActionButton(
 | modifier                   | Modifier               | 应用于按钮的修饰符       | Modifier                       | 否       |
 | shape                      | Shape                  | 按钮的形状               | Capsule()                      | 否       |
 | containerColor             | Color                  | 按钮的背景颜色           | MiuixTheme.colorScheme.primary | 否       |
-| shadowElevation            | Dp                     | 按钮的阴影高度           | 4.dp                           | 否       |
-| minWidth                   | Dp                     | 按钮的最小宽度           | 60.dp                          | 否       |
-| minHeight                  | Dp                     | 按钮的最小高度           | 60.dp                          | 否       |
+| shadowElevation            | Dp                     | 按钮的阴影高度           | FloatingActionButtonDefaults.ShadowElevation | 否       |
+| minWidth                   | Dp                     | 按钮的最小宽度           | FloatingActionButtonDefaults.MinWidth        | 否       |
+| minHeight                  | Dp                     | 按钮的最小高度           | FloatingActionButtonDefaults.MinHeight       | 否       |
 | content                    | @Composable () -> Unit | 按钮内容区域的可组合函数 | -                              | 是       |
+
+### FloatingActionButtonDefaults 对象
+
+FloatingActionButtonDefaults 对象提供了 FloatingActionButton 组件的默认值。
+
+#### 常量
+
+| 常量名          | 类型 | 说明         | 默认值 |
+| --------------- | ---- | ------------ | ------ |
+| MinWidth        | Dp   | 按钮最小宽度 | 60.dp  |
+| MinHeight       | Dp   | 按钮最小高度 | 60.dp  |
+| ShadowElevation | Dp   | 按钮阴影高度 | 4.dp   |
 
 ## 进阶用法
 

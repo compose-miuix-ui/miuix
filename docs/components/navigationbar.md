@@ -113,8 +113,8 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | color                      | Color                    | Background color of the nav bar         | MiuixTheme.colorScheme.surfaceContainer | No       |
 | cornerRadius               | Dp                       | Corner radius of the nav bar            | FloatingToolbarDefaults.CornerRadius    | No       |
 | horizontalAlignment        | Alignment.Horizontal     | Horizontal alignment within its parent  | CenterHorizontally                      | No       |
-| horizontalOutSidePadding   | Dp                       | Horizontal padding outside the nav bar  | 36.dp                                   | No       |
-| shadowElevation            | Dp                       | The shadow elevation of the nav bar     | 1.dp                                    | No       |
+| horizontalOutSidePadding   | Dp                       | Horizontal padding outside the nav bar  | FloatingNavigationBarDefaults.HorizontalOutSidePadding | No       |
+| shadowElevation            | Dp                       | The shadow elevation of the nav bar     | FloatingNavigationBarDefaults.ShadowElevation          | No       |
 | showDivider                | Boolean                  | Show divider line around the nav bar    | false                                   | No       |
 | defaultWindowInsetsPadding | Boolean                  | Apply default window insets padding     | true                                    | No       |
 | mode                       | FloatingNavigationBarDisplayMode | Display mode for items (icon/text/both) | FloatingNavigationBarDisplayMode.IconOnly  | No       |
@@ -130,6 +130,48 @@ Both `NavigationBarItem` and `FloatingNavigationBarItem` automatically handle th
 | label         | String        | Label of the item                | -             | Yes      |
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
+
+### NavigationBarDefaults Object
+
+The NavigationBarDefaults object provides default values for NavigationBar and NavigationBarItem components.
+
+#### Constants
+
+| Constant Name        | Type  | Description                                 | Default Value |
+| -------------------- | ----- | ------------------------------------------- | ------------- |
+| ItemHeight           | Dp    | Item height on non-iOS platforms             | 64.dp         |
+| ItemHeightIOS        | Dp    | Item height on iOS                           | 48.dp         |
+| IconSize             | Dp    | Icon size                                    | 26.dp         |
+| LabelFontSize        | TextUnit | Label font size                           | 12.sp         |
+| IconTopPadding       | Dp    | Top padding for the icon                     | 8.dp          |
+| BottomPadding        | Dp    | Bottom padding for the label                 | 8.dp          |
+| SelectedPressedAlpha | Float | Alpha value for selected item when pressed   | 0.5f          |
+| UnselectedPressedAlpha | Float | Alpha value for unselected item when pressed | 0.6f        |
+| UnselectedAlpha      | Float | Alpha value for unselected item              | 0.4f          |
+
+### FloatingNavigationBarDefaults Object
+
+The FloatingNavigationBarDefaults object provides default values for FloatingNavigationBar and FloatingNavigationBarItem components.
+
+#### Constants
+
+| Constant Name          | Type     | Description                         | Default Value |
+| ---------------------- | -------- | ----------------------------------- | ------------- |
+| HorizontalOutSidePadding | Dp    | Horizontal outside padding          | 36.dp         |
+| ShadowElevation        | Dp       | Shadow elevation                    | 1.dp          |
+| HorizontalPadding      | Dp       | Horizontal padding inside the bar   | 12.dp         |
+| ItemSpacing            | Dp       | Spacing between items               | 12.dp         |
+| IconSize               | Dp       | Icon size (IconAndText mode)        | 24.dp         |
+| LabelFontSize          | TextUnit | Label font size (IconAndText mode)  | 12.sp         |
+| VerticalPadding        | Dp       | Vertical padding (IconAndText mode) | 6.dp          |
+| TextVerticalPadding    | Dp       | Vertical padding (TextOnly mode)    | 16.dp         |
+| TextHorizontalPadding  | Dp       | Horizontal padding (TextOnly mode)  | 2.dp          |
+| TextFontSize           | TextUnit | Font size (TextOnly mode)           | 14.sp         |
+| IconOnlySize           | Dp       | Icon size (IconOnly mode)           | 28.dp         |
+| IconOnlyPadding        | Dp       | Padding (IconOnly mode)             | 10.dp         |
+| SelectedPressedAlpha   | Float    | Alpha for selected pressed item     | 0.5f          |
+| UnselectedPressedAlpha | Float    | Alpha for unselected pressed item   | 0.6f          |
+| UnselectedAlpha        | Float    | Alpha for unselected item           | 0.4f          |
 
 ### NavigationBarDisplayMode Enum
 

@@ -96,7 +96,7 @@ fun TopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = 26.dp,
+    horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
 ) {
     val largeTitleHeight = remember { mutableIntStateOf(0) }
     val expandedHeightPx by remember {
@@ -165,7 +165,7 @@ fun SmallTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = 26.dp,
+    horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
 ) {
     SideEffect {
         // Sets the height offset limit of the SmallTopAppBar to 0f
@@ -352,6 +352,18 @@ class TopAppBarState(
     }
 
     private var _heightOffset = mutableFloatStateOf(initialHeightOffset)
+}
+
+/** Contains default values used by [TopAppBar] and [SmallTopAppBar]. */
+object TopAppBarDefaults {
+    /** The default horizontal padding of the title and large title. */
+    val HorizontalPadding = 26.dp
+
+    /** The default collapsed height of the [TopAppBar]. */
+    val CollapsedHeight = 56.dp
+
+    /** The vertical center height used for [SmallTopAppBar] layout. */
+    val SmallTopAppBarCenterHeight = 60.dp
 }
 
 @Stable
@@ -635,7 +647,7 @@ private fun TopAppBarLayout(
             Box(
                 Modifier
                     .layoutId("largeTitle")
-                    .padding(top = 56.dp)
+                    .padding(top = TopAppBarDefaults.CollapsedHeight)
                     .padding(horizontal = horizontalPadding)
                     .graphicsLayer { alpha = largeTitleAlpha },
             ) {
@@ -695,7 +707,7 @@ private fun TopAppBarLayout(
                     ),
                 )
 
-        val collapsedHeight = 56.dp.roundToPx()
+        val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
         val expandedHeight = maxOf(
             collapsedHeight,
             largeTitlePlaceable.height,
@@ -814,7 +826,7 @@ private fun SmallTopAppBarLayout(
                 },
             )
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-            .heightIn(max = 56.dp)
+            .heightIn(max = TopAppBarDefaults.CollapsedHeight)
             .clipToBounds()
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
@@ -845,7 +857,7 @@ private fun SmallTopAppBarLayout(
             }
 
         layout(constraints.maxWidth, layoutHeight) {
-            val verticalCenter = 60.dp.roundToPx() / 2
+            val verticalCenter = TopAppBarDefaults.SmallTopAppBarCenterHeight.roundToPx() / 2
 
             // Navigation icon
             navigationIconPlaceable.placeRelative(

@@ -113,8 +113,8 @@ Scaffold(
 | color                      | Color                     | 导航栏背景颜色                     | MiuixTheme.colorScheme.surfaceContainer | 否       |
 | cornerRadius               | Dp                        | 导航栏的圆角半径                   | FloatingToolbarDefaults.CornerRadius    | 否       |
 | horizontalAlignment        | Alignment.Horizontal      | 导航栏在其父容器中的水平对齐方式   | CenterHorizontally                      | 否       |
-| horizontalOutSidePadding   | Dp                        | 导航栏外部的水平内边距             | 36.dp                                   | 否       |
-| shadowElevation            | Dp                        | 导航栏的阴影高度                   | 1.dp                                    | 否       |
+| horizontalOutSidePadding   | Dp                        | 导航栏外部的水平内边距             | FloatingNavigationBarDefaults.HorizontalOutSidePadding | 否       |
+| shadowElevation            | Dp                        | 导航栏的阴影高度                   | FloatingNavigationBarDefaults.ShadowElevation          | 否       |
 | showDivider                | Boolean                   | 是否显示导航栏周围的分割线         | false                                   | 否       |
 | defaultWindowInsetsPadding | Boolean                   | 是否应用默认窗口嵌入边距           | true                                    | 否       |
 | mode                       | FloatingNavigationBarDisplayMode | 导航项的显示模式（图标/文本/两者） | FloatingNavigationBarDisplayMode.IconOnly  | 否       |
@@ -130,6 +130,48 @@ Scaffold(
 | label    | String      | 文本标签         | -      | 是       |
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
+
+### NavigationBarDefaults 对象
+
+NavigationBarDefaults 对象提供了 NavigationBar 和 NavigationBarItem 组件的默认值。
+
+#### 常量
+
+| 常量名               | 类型     | 说明                       | 默认值 |
+| -------------------- | -------- | -------------------------- | ------ |
+| ItemHeight           | Dp       | 非 iOS 平台的项目高度      | 64.dp  |
+| ItemHeightIOS        | Dp       | iOS 平台的项目高度         | 48.dp  |
+| IconSize             | Dp       | 图标尺寸                   | 26.dp  |
+| LabelFontSize        | TextUnit | 标签字号                   | 12.sp  |
+| IconTopPadding       | Dp       | 图标顶部内边距             | 8.dp   |
+| BottomPadding        | Dp       | 标签底部内边距             | 8.dp   |
+| SelectedPressedAlpha | Float    | 选中项按压时的透明度       | 0.5f   |
+| UnselectedPressedAlpha | Float  | 未选中项按压时的透明度     | 0.6f   |
+| UnselectedAlpha      | Float    | 未选中项的透明度           | 0.4f   |
+
+### FloatingNavigationBarDefaults 对象
+
+FloatingNavigationBarDefaults 对象提供了 FloatingNavigationBar 和 FloatingNavigationBarItem 组件的默认值。
+
+#### 常量
+
+| 常量名                   | 类型     | 说明                               | 默认值 |
+| ------------------------ | -------- | ---------------------------------- | ------ |
+| HorizontalOutSidePadding | Dp      | 外部水平内边距                     | 36.dp  |
+| ShadowElevation          | Dp      | 阴影高度                           | 1.dp   |
+| HorizontalPadding        | Dp      | 内部水平内边距                     | 12.dp  |
+| ItemSpacing              | Dp      | 项目间距                           | 12.dp  |
+| IconSize                 | Dp      | 图标尺寸（IconAndText 模式）       | 24.dp  |
+| LabelFontSize            | TextUnit| 标签字号（IconAndText 模式）       | 12.sp  |
+| VerticalPadding          | Dp      | 垂直内边距（IconAndText 模式）     | 6.dp   |
+| TextVerticalPadding      | Dp      | 垂直内边距（TextOnly 模式）        | 16.dp  |
+| TextHorizontalPadding    | Dp      | 水平内边距（TextOnly 模式）        | 2.dp   |
+| TextFontSize             | TextUnit| 字号（TextOnly 模式）              | 14.sp  |
+| IconOnlySize             | Dp      | 图标尺寸（IconOnly 模式）          | 28.dp  |
+| IconOnlyPadding          | Dp      | 内边距（IconOnly 模式）            | 10.dp  |
+| SelectedPressedAlpha     | Float   | 选中项按压时的透明度               | 0.5f   |
+| UnselectedPressedAlpha   | Float   | 未选中项按压时的透明度             | 0.6f   |
+| UnselectedAlpha          | Float   | 未选中项的透明度                   | 0.4f   |
 
 ### NavigationBarDisplayMode 枚举
 

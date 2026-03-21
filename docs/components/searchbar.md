@@ -50,7 +50,7 @@ SearchBar(
 | inputField       | @Composable () -> Unit             | Search input field component                    | -                   | Yes      |
 | onExpandedChange | (Boolean) -> Unit                  | Callback when expanded state changes            | -                   | Yes      |
 | modifier         | Modifier                           | Modifier applied to the search bar              | Modifier            | No       |
-| insideMargin     | DpSize                             | Internal padding                                | DpSize(12.dp, 0.dp) | No       |
+| insideMargin     | DpSize                             | Internal padding                                | SearchBarDefaults.InsideMargin | No       |
 | expanded         | Boolean                            | Whether to show search results                  | false               | No       |
 | outsideEndAction | @Composable (() -> Unit)?          | Action component shown on the end when expanded | null                | No       |
 | content          | @Composable ColumnScope.() -> Unit | Content shown when expanded                     | -                   | Yes      |
@@ -71,6 +71,22 @@ SearchBar(
 | leadingIcon       | @Composable (() -> Unit)? | Leading icon                         | default search icon  | No       |
 | trailingIcon      | @Composable (() -> Unit)? | Trailing icon                        | default clear button | No       |
 | interactionSource | MutableInteractionSource? | Interaction source                   | null                 | No       |
+
+### SearchBarDefaults Object
+
+The SearchBarDefaults object provides default values for SearchBar and InputField components.
+
+#### Constants
+
+| Constant Name         | Type     | Description                              | Default Value      |
+| --------------------- | -------- | ---------------------------------------- | ------------------ |
+| InsideMargin          | DpSize   | Internal padding of the SearchBar        | DpSize(12.dp, 0.dp)|
+| InputFieldMinHeight   | Dp       | Minimum height of the InputField         | 45.dp              |
+| InputFieldFontSize    | TextUnit | Font size for the InputField label       | 17.sp              |
+| LeadingIconStartPadding | Dp     | Start padding for default leading icon   | 16.dp              |
+| LeadingIconEndPadding | Dp       | End padding for default leading icon     | 8.dp               |
+| TrailingIconStartPadding | Dp    | Start padding for default trailing icon  | 8.dp               |
+| TrailingIconEndPadding | Dp      | End padding for default trailing icon    | 16.dp              |
 
 ## Advanced Usage
 

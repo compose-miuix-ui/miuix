@@ -26,7 +26,7 @@ fun SmallTitle(
     text: String,
     modifier: Modifier = Modifier,
     textColor: Color = MiuixTheme.colorScheme.onBackgroundVariant,
-    insideMargin: PaddingValues = PaddingValues(28.dp, 8.dp),
+    insideMargin: PaddingValues = SmallTitleDefaults.InsideMargin,
 ) {
     Text(
         modifier = modifier.padding(insideMargin),
@@ -34,4 +34,10 @@ fun SmallTitle(
         style = MiuixTheme.textStyles.subtitle,
         color = textColor,
     )
+}
+
+/** Contains default values used by [SmallTitle]. */
+object SmallTitleDefaults {
+    /** The default inside margin of the [SmallTitle]. */
+    val InsideMargin = PaddingValues(28.dp, 8.dp)
 }

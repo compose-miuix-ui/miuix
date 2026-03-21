@@ -81,7 +81,7 @@ fun SearchBar(
     inputField: @Composable () -> Unit,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    insideMargin: DpSize = DpSize(12.dp, 0.dp),
+    insideMargin: DpSize = SearchBarDefaults.InsideMargin,
     expanded: Boolean = false,
     outsideEndAction: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -174,7 +174,7 @@ fun InputField(
 
     val actualLeadingIcon = leadingIcon ?: {
         Icon(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+            modifier = Modifier.padding(start = SearchBarDefaults.LeadingIconStartPadding, end = SearchBarDefaults.LeadingIconEndPadding),
             imageVector = MiuixIcons.Basic.Search,
             tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
             contentDescription = "Search",
@@ -188,7 +188,7 @@ fun InputField(
             exit = fadeOut(),
         ) {
             Box(
-                modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                modifier = Modifier.padding(start = SearchBarDefaults.TrailingIconStartPadding, end = SearchBarDefaults.TrailingIconEndPadding),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Icon(
@@ -266,11 +266,11 @@ fun InputField(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .heightIn(min = 45.dp),
+                            .heightIn(min = SearchBarDefaults.InputFieldMinHeight),
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         val mergedLabelStyle = remember(textStyle) {
-                            TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium).merge(textStyle)
+                            TextStyle(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
                         }
                         Text(
                             text = labelText,
@@ -303,4 +303,28 @@ fun InputField(
             focusManager.clearFocus()
         }
     }
+}
+
+/** Contains default values used by [SearchBar] and [InputField]. */
+object SearchBarDefaults {
+    /** The default inside margin of the [SearchBar]. */
+    val InsideMargin = DpSize(12.dp, 0.dp)
+
+    /** The default minimum height of the [InputField]. */
+    val InputFieldMinHeight = 45.dp
+
+    /** The default font size for the [InputField] label. */
+    val InputFieldFontSize = 17.sp
+
+    /** The start padding for the default leading icon. */
+    val LeadingIconStartPadding = 16.dp
+
+    /** The end padding for the default leading icon. */
+    val LeadingIconEndPadding = 8.dp
+
+    /** The start padding for the default trailing icon. */
+    val TrailingIconStartPadding = 8.dp
+
+    /** The end padding for the default trailing icon. */
+    val TrailingIconEndPadding = 16.dp
 }
