@@ -42,7 +42,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.api.toOkLab
 import top.yukonga.miuix.kmp.color.api.toOkLch
@@ -51,6 +50,7 @@ import top.yukonga.miuix.kmp.color.space.Hsv
 import top.yukonga.miuix.kmp.color.space.OkHsv
 import top.yukonga.miuix.kmp.color.space.OkLab
 import top.yukonga.miuix.kmp.color.space.OkLch
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import kotlin.math.ceil
 import kotlin.math.min
 
