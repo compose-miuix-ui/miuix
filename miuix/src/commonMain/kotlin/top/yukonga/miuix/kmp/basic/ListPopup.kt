@@ -50,9 +50,9 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.math.abs
 import kotlin.math.min
@@ -518,7 +518,7 @@ fun ListPopupContent(
 ) {
     val density = LocalDensity.current
 
-    val shape = remember { RoundedRectangle(16.dp) }
+    val shape = miuixShape(16.dp)
 
     Box(
         modifier = modifier

@@ -19,8 +19,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [FloatingToolbar] that renders its content in a Card, arranged either horizontally or vertically.
@@ -46,7 +46,7 @@ fun FloatingToolbar(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val roundedCornerShape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+    val roundedCornerShape = miuixShape(cornerRadius)
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
     val clipRequired = cornerRadius > 0.dp

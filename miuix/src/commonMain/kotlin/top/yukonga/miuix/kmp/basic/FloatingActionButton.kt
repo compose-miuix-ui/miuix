@@ -16,8 +16,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.Capsule
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 
 /**
  * A [FloatingActionButton] component with Miuix style.
@@ -36,7 +36,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun FloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = Capsule(),
+    shape: Shape = miuixCapsuleShape(),
     containerColor: Color = MiuixTheme.colorScheme.primary,
     shadowElevation: Dp = FloatingActionButtonDefaults.ShadowElevation,
     minWidth: Dp = FloatingActionButtonDefaults.MinWidth,

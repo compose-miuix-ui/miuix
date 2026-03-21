@@ -27,7 +27,6 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -149,7 +148,6 @@ private fun BasicCard(
     cornerRadius: Dp = CardDefaults.CornerRadius,
     content: @Composable () -> Unit,
 ) {
-    val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
     val clipShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
 
     CompositionLocalProvider(
@@ -161,7 +159,7 @@ private fun BasicCard(
                     isTraversalGroup = true
                 }
                 .clip(clipShape) // For touch feedback, there is a problem when using G2Continuity.
-                .background(color = colors.color, shape = shape),
+                .background(color = colors.color),
             propagateMinConstraints = true,
         ) {
             content()

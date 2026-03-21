@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.utils
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -142,8 +141,13 @@ private class OverscrollNode(
     private var animationJob: Job? = null
     private val offsetThreshold = 1f
 
-    var offset by mutableFloatStateOf(0f)
-        private set
+    var offset = 0f
+        private set(value) {
+            if (field != value) {
+                field = value
+                if (isAttached) invalidatePlacement()
+            }
+        }
 
     private var rawTouchAccumulation = 0f
     private var scrollRange: Float = 0f

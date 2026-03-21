@@ -155,5 +155,5 @@ private fun Modifier.surface(
     },
 )
     .then(if (border != null) Modifier.border(border, shape) else Modifier)
-    .background(color = backgroundColor, shape = shape)
     .clip(shape)
+    .background(color = backgroundColor)

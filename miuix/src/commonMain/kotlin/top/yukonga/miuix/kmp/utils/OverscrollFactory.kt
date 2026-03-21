@@ -5,9 +5,6 @@ package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.OverscrollFactory
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,6 +16,7 @@ import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidatePlacement
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Constraints
@@ -60,11 +58,24 @@ object MiuixOverscrollFactory : OverscrollFactory {
 class MiuixOverscrollEffect : OverscrollEffect {
     private val offsetThreshold = 1f
 
-    internal var offsetX by mutableFloatStateOf(0f)
-        private set
+    internal var offsetX = 0f
+        private set(value) {
+            if (field != value) {
+                field = value
+                invalidateNodePlacement?.invoke()
+            }
+        }
 
-    internal var offsetY by mutableFloatStateOf(0f)
-        private set
+    internal var offsetY = 0f
+        private set(value) {
+            if (field != value) {
+                field = value
+                invalidateNodePlacement?.invoke()
+            }
+        }
+
+    // Injected by MiuixOverscrollEffectNode when attached
+    internal var invalidateNodePlacement: (() -> Unit)? = null
 
     private var rawTouchAccumulationX = 0f
     private var rawTouchAccumulationY = 0f
@@ -334,6 +345,7 @@ private class MiuixOverscrollEffectNode(
         effect.launchAnimation = { block -> coroutineScope.launch(block = block) }
         effect.getPullToRefreshState = { currentValueOf(LocalPullToRefreshState) }
         effect.getOverScrollState = { currentValueOf(LocalOverScrollState) }
+        effect.invalidateNodePlacement = { invalidatePlacement() }
     }
 
     override fun onDetach() {
@@ -341,6 +353,7 @@ private class MiuixOverscrollEffectNode(
         effect.launchAnimation = null
         effect.getPullToRefreshState = null
         effect.getOverScrollState = null
+        effect.invalidateNodePlacement = null
         effect.resetAll()
     }
 

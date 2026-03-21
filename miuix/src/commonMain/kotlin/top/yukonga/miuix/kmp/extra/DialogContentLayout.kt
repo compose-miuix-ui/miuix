@@ -57,12 +57,12 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
 
 /**
@@ -266,7 +266,7 @@ internal fun DialogContent(
         (roundedCorner - offset).coerceAtLeast(32.dp)
     }
 
-    val bottomCornerShape = remember(bottomCornerRadius) { RoundedRectangle(bottomCornerRadius) }
+    val bottomCornerShape = miuixShape(bottomCornerRadius)
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
     val calculatedTopInset = if (topInset != null) {

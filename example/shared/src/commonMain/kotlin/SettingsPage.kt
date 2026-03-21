@@ -187,6 +187,11 @@ private fun SettingsContent(
                     checked = appState.enablePageUserScroll,
                     onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                 )
+                SuperSwitch(
+                    title = "G2 Smooth Rounded",
+                    checked = appState.smoothRounding,
+                    onCheckedChange = { updateAppState { state -> state.copy(smoothRounding = it) } },
+                )
                 SuperDropdown(
                     title = "Color Mode",
                     items = ColorModeOptions,

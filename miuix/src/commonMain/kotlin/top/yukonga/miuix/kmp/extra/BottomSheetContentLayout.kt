@@ -65,8 +65,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.kyant.shapes.RoundedRectangle
-import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -75,6 +73,8 @@ import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
+import top.yukonga.miuix.kmp.theme.miuixUnevenShape
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -539,7 +539,7 @@ private fun BottomSheetColumn(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val topCornerShape = remember(cornerRadius) { UnevenRoundedRectangle(topStart = cornerRadius, topEnd = cornerRadius) }
+    val topCornerShape = miuixUnevenShape(topStart = cornerRadius, topEnd = cornerRadius)
     val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
 
     Box(
@@ -611,7 +611,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
-    val handleShape = remember { RoundedRectangle(2.dp) }
+    val handleShape = miuixShape(2.dp)
 
     Box(
         modifier = Modifier
