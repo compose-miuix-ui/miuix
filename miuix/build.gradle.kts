@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.baselineprofile)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.dokka)
@@ -92,4 +93,14 @@ kotlin {
             dependsOn(webMain)
         }
     }
+}
+
+baselineProfile {
+    filter {
+        include("top.yukonga.miuix.kmp.**")
+    }
+}
+
+dependencies {
+    baselineProfile(project(":baselineprofile"))
 }

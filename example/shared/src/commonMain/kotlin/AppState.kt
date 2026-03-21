@@ -26,7 +26,7 @@ data class AppState(
     val floatingToolbarOrientation: Int = 1,
     val showFloatingActionButton: Boolean = false,
     val floatingActionButtonPosition: Int = 2,
-    val enablePageUserScroll: Boolean = false,
+    val enablePageUserScroll: Boolean = true,
     val enableScrollEndHaptic: Boolean = true,
     val enableCornerClip: Boolean = true,
     val enableDim: Boolean = true,

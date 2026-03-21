@@ -43,6 +43,8 @@ include(":miuix")
 include(":miuix-icons")
 include(":miuix-navigation3-ui")
 
+include(":baselineprofile")
+
 include(":example:shared")
 include(":example:android")
 include(":example:desktop")
