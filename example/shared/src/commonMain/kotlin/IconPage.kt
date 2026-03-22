@@ -1,11 +1,14 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(ExperimentalScrollBarApi::class)
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,7 +40,10 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
@@ -161,111 +167,120 @@ fun IconsPage(
             searchBarTopPadding = dynamicTopPadding,
             contentPadding = PaddingValues(top = innerPadding.calculateTopPadding()),
         ) { boxHeight ->
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.pageScrollModifiers(
-                    appState.enableScrollEndHaptic,
-                    appState.showTopAppBar,
-                    topAppBarScrollBehavior,
-                ),
-                contentPadding = pageContentPadding(
-                    innerPadding,
-                    padding,
-                    isWideScreen,
-                    extraTop = boxHeight.value,
-                ),
-            ) {
-                item(key = "iconsHeader") {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .clip(IconListTopShape)
-                            .background(colorScheme.surfaceContainer)
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 12.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "Name",
-                            modifier = Modifier.weight(2f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                        )
-                        Text(
-                            text = "Light",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "Regular",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "Heavy",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                items(
-                    count = lightIcons.size,
-                    key = { "icon_$it" },
-                ) { index ->
-                    val isLast = index == lightIcons.lastIndex
-                    val shape = if (isLast) IconListBottomShape else RectangleShape
-                    val bottomPadding = if (isLast) 6.dp else 0.dp
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .clip(shape)
-                            .background(colorScheme.surfaceContainer)
-                            .padding(horizontal = 16.dp)
-                            .padding(vertical = 6.dp)
-                            .padding(bottom = bottomPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = iconNames[index],
-                            modifier = Modifier.weight(2f),
-                            style = MiuixTheme.textStyles.body2,
-                            color = colorScheme.onSurface,
-                        )
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = lightIcons[index],
-                                contentDescription = lightIcons[index].name,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
+            val contentPadding = pageContentPadding(
+                innerPadding,
+                padding,
+                isWideScreen,
+                extraTop = boxHeight.value,
+            )
+            Box {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.pageScrollModifiers(
+                        appState.enableScrollEndHaptic,
+                        appState.showTopAppBar,
+                        topAppBarScrollBehavior,
+                    ),
+                    contentPadding = contentPadding,
+                ) {
+                    item(key = "iconsHeader") {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .clip(IconListTopShape)
+                                .background(colorScheme.surfaceContainer)
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 12.dp, bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Name",
+                                modifier = Modifier.weight(2f),
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = colorScheme.onSurfaceVariantActions,
                             )
-                        }
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = regularIcons[index],
-                                contentDescription = regularIcons[index].name,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
+                            Text(
+                                text = "Light",
+                                modifier = Modifier.weight(1f),
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = colorScheme.onSurfaceVariantActions,
+                                textAlign = TextAlign.Center,
                             )
-                        }
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = heavyIcons[index],
-                                contentDescription = heavyIcons[index].name,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
+                            Text(
+                                text = "Regular",
+                                modifier = Modifier.weight(1f),
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = colorScheme.onSurfaceVariantActions,
+                                textAlign = TextAlign.Center,
+                            )
+                            Text(
+                                text = "Heavy",
+                                modifier = Modifier.weight(1f),
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = colorScheme.onSurfaceVariantActions,
+                                textAlign = TextAlign.Center,
                             )
                         }
                     }
+                    items(
+                        count = lightIcons.size,
+                        key = { "icon_$it" },
+                    ) { index ->
+                        val isLast = index == lightIcons.lastIndex
+                        val shape = if (isLast) IconListBottomShape else RectangleShape
+                        val bottomPadding = if (isLast) 6.dp else 0.dp
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .clip(shape)
+                                .background(colorScheme.surfaceContainer)
+                                .padding(horizontal = 16.dp)
+                                .padding(vertical = 6.dp)
+                                .padding(bottom = bottomPadding),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = iconNames[index],
+                                modifier = Modifier.weight(2f),
+                                style = MiuixTheme.textStyles.body2,
+                                color = colorScheme.onSurface,
+                            )
+                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = lightIcons[index],
+                                    contentDescription = lightIcons[index].name,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = regularIcons[index],
+                                    contentDescription = regularIcons[index].name,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = heavyIcons[index],
+                                    contentDescription = heavyIcons[index].name,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(12.dp)) }
                 }
+                VerticalScrollBar(
+                    adapter = rememberScrollBarAdapter(lazyListState),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    trackPadding = contentPadding,
+                )
             }
         }
     }

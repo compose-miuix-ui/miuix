@@ -1,15 +1,21 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(ExperimentalScrollBarApi::class)
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
@@ -27,9 +34,12 @@ import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.WindowDropdown
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
@@ -84,53 +94,64 @@ fun DropdownPage(
                 },
             ),
         ) {
-            LazyColumn(
-                modifier = Modifier.pageScrollModifiers(
-                    appState.enableScrollEndHaptic,
-                    appState.showTopAppBar,
-                    topAppBarScrollBehavior,
-                ),
-                contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp),
-            ) {
-                items(
-                    count = dropdownCount,
-                    key = { "dropdown_$it" },
-                ) { i ->
-                    val isFirst = i == 0
-                    val isLast = i == dropdownCount - 1
-                    val shape = when {
-                        isFirst -> DropdownListTopShape
-                        isLast -> DropdownListBottomShape
-                        else -> RectangleShape
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .clip(shape)
-                            .background(colorScheme.surfaceContainer),
-                    ) {
-                        if (i % 2 == 0) {
-                            SuperDropdown(
-                                title = "SuperDropdown ${i + 1}",
-                                items = dropdownOptions,
-                                selectedIndex = dropdownSelectedOption,
-                                onSelectedIndexChange = { newOption ->
-                                    dropdownSelectedOption = newOption
-                                },
-                            )
-                        } else {
-                            WindowDropdown(
-                                title = "WindowDropdown ${i + 1}",
-                                items = dropdownOptions,
-                                selectedIndex = dropdownSelectedOption,
-                                onSelectedIndexChange = { newOption ->
-                                    dropdownSelectedOption = newOption
-                                },
-                            )
+            val lazyListState = rememberLazyListState()
+            val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp)
+            Box {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.pageScrollModifiers(
+                        appState.enableScrollEndHaptic,
+                        appState.showTopAppBar,
+                        topAppBarScrollBehavior,
+                    ),
+                    contentPadding = contentPadding,
+                ) {
+                    items(
+                        count = dropdownCount,
+                        key = { "dropdown_$it" },
+                    ) { i ->
+                        val isFirst = i == 0
+                        val isLast = i == dropdownCount - 1
+                        val shape = when {
+                            isFirst -> DropdownListTopShape
+                            isLast -> DropdownListBottomShape
+                            else -> RectangleShape
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .clip(shape)
+                                .background(colorScheme.surfaceContainer),
+                        ) {
+                            if (i % 2 == 0) {
+                                SuperDropdown(
+                                    title = "SuperDropdown ${i + 1}",
+                                    items = dropdownOptions,
+                                    selectedIndex = dropdownSelectedOption,
+                                    onSelectedIndexChange = { newOption ->
+                                        dropdownSelectedOption = newOption
+                                    },
+                                )
+                            } else {
+                                WindowDropdown(
+                                    title = "WindowDropdown ${i + 1}",
+                                    items = dropdownOptions,
+                                    selectedIndex = dropdownSelectedOption,
+                                    onSelectedIndexChange = { newOption ->
+                                        dropdownSelectedOption = newOption
+                                    },
+                                )
+                            }
                         }
                     }
+                    item { Spacer(modifier = Modifier.height(12.dp)) }
                 }
+                VerticalScrollBar(
+                    adapter = rememberScrollBarAdapter(lazyListState),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    trackPadding = contentPadding,
+                )
             }
         }
     }

@@ -40,9 +40,9 @@ fun pageContentPadding(
 ): PaddingValues {
     val topPadding = innerPadding.calculateTopPadding() + extraTop
     val bottomPadding = if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + outerPadding.calculateBottomPadding() + 12.dp
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + outerPadding.calculateBottomPadding()
     } else {
-        outerPadding.calculateBottomPadding() + 12.dp
+        outerPadding.calculateBottomPadding()
     }
     return remember(topPadding, bottomPadding, extraStart, extraEnd) {
         PaddingValues(

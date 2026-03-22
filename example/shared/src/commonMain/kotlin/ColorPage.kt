@@ -1,16 +1,21 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(ExperimentalScrollBarApi::class)
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -28,6 +33,9 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
@@ -71,69 +79,80 @@ fun ColorPage(
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.pageScrollModifiers(
-                appState.enableScrollEndHaptic,
-                appState.showTopAppBar,
-                topAppBarScrollBehavior,
-            ),
-            contentPadding = pageContentPadding(innerPadding, padding, isWideScreen),
-        ) {
-            item(key = "current") {
-                SmallTitle("Current Theme Colors")
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
-                    cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp),
-                ) {
-                    ColorsPreview(MiuixTheme.colorScheme)
+        val lazyListState = rememberLazyListState()
+        val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen)
+        Box {
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.pageScrollModifiers(
+                    appState.enableScrollEndHaptic,
+                    appState.showTopAppBar,
+                    topAppBarScrollBehavior,
+                ),
+                contentPadding = contentPadding,
+            ) {
+                item(key = "current") {
+                    SmallTitle("Current Theme Colors")
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
+                        cornerRadius = 16.dp,
+                        insideMargin = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        ColorsPreview(MiuixTheme.colorScheme)
+                    }
                 }
-            }
-            item(key = "light") {
-                SmallTitle("Light Theme Colors")
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
-                    cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp),
-                ) {
-                    ColorsPreview(lightColors)
+                item(key = "light") {
+                    SmallTitle("Light Theme Colors")
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
+                        cornerRadius = 16.dp,
+                        insideMargin = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        ColorsPreview(lightColors)
+                    }
                 }
-            }
-            item(key = "dynamic_light") {
-                SmallTitle("Dynamic Light Colors")
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
-                    cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp),
-                ) {
-                    ColorsPreview(dynLight)
+                item(key = "dynamic_light") {
+                    SmallTitle("Dynamic Light Colors")
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
+                        cornerRadius = 16.dp,
+                        insideMargin = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        ColorsPreview(dynLight)
+                    }
                 }
-            }
-            item(key = "dark") {
-                SmallTitle("Dark Theme Colors")
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
-                    cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp),
-                ) {
-                    ColorsPreview(darkColors)
+                item(key = "dark") {
+                    SmallTitle("Dark Theme Colors")
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
+                        cornerRadius = 16.dp,
+                        insideMargin = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        ColorsPreview(darkColors)
+                    }
                 }
-            }
-            item(key = "dynamic_dark") {
-                SmallTitle("Dynamic Dark Colors")
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
-                    cornerRadius = 16.dp,
-                    insideMargin = PaddingValues(horizontal = 16.dp),
-                ) {
-                    ColorsPreview(dynDark)
+                item(key = "dynamic_dark") {
+                    SmallTitle("Dynamic Dark Colors")
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
+                        cornerRadius = 16.dp,
+                        insideMargin = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        ColorsPreview(dynDark)
+                    }
                 }
+                item { Spacer(modifier = Modifier.height(12.dp)) }
             }
+            VerticalScrollBar(
+                adapter = rememberScrollBarAdapter(lazyListState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                trackPadding = contentPadding,
+            )
         }
     }
 }

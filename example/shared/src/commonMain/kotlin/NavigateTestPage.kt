@@ -1,14 +1,19 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(ExperimentalScrollBarApi::class)
+
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -16,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -34,10 +40,13 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
@@ -76,167 +85,177 @@ fun NavTestPage(
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.pageScrollModifiers(
-                appState.enableScrollEndHaptic,
-                appState.showTopAppBar,
-                topAppBarScrollBehavior,
-            ),
-            contentPadding = pageContentPadding(
-                innerPadding,
-                padding,
-                isWideScreen,
-                extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-                extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-            ),
-        ) {
-            item(key = "nav_push") {
-                Card(
-                    modifier = Modifier
-                        .padding(all = 12.dp),
-                ) {
-                    val navigator = LocalNavigator.current
-                    SuperArrow(
-                        title = "Push another Navigate Test Page",
-                        onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
-                    )
+        val lazyListState = rememberLazyListState()
+        val contentPadding = pageContentPadding(
+            innerPadding,
+            padding,
+            isWideScreen,
+            extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+        )
+        Box {
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.pageScrollModifiers(
+                    appState.enableScrollEndHaptic,
+                    appState.showTopAppBar,
+                    topAppBarScrollBehavior,
+                ),
+                contentPadding = contentPadding,
+            ) {
+                item(key = "nav_push") {
+                    Card(
+                        modifier = Modifier
+                            .padding(all = 12.dp),
+                    ) {
+                        val navigator = LocalNavigator.current
+                        SuperArrow(
+                            title = "Push another Navigate Test Page",
+                            onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
+                        )
+                    }
+                }
+                item(key = "nav_layout") {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        SuperArrow(
+                            title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Start")
+                            },
+                            endActions = {
+                                Text(text = "End1", textAlign = TextAlign.End)
+                                Spacer(Modifier.width(8.dp))
+                                Text(text = "End2", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                            startAction = {
+                                Text(text = "Start")
+                            },
+                            endActions = {
+                                Text(text = "End1", textAlign = TextAlign.End)
+                                Spacer(Modifier.width(8.dp))
+                                Text(text = "End2", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
+                            },
+                            endActions = {
+                                Text(text = "End1", textAlign = TextAlign.End)
+                                Spacer(Modifier.width(8.dp))
+                                Text(text = "End2", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Start")
+                            },
+                            endActions = {
+                                Text(
+                                    text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
+                            },
+                            endActions = {
+                                Text(text = "End", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Start")
+                            },
+                            endActions = {
+                                Text(
+                                    text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Summary",
+                            startAction = {
+                                Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
+                            },
+                            endActions = {
+                                Text(
+                                    text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                            endActions = {
+                                Text(
+                                    text = "Long End Long End Long End Long End Long End Long End Long End Long End",
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
+                            summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
+                            endActions = {
+                                Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Long Title Long Title Long Title Long Title",
+                            summary = "Summary",
+                            endActions = {
+                                Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                        SuperArrow(
+                            title = "Title",
+                            summary = "Long Summary Long Summary Long Summary Long Summary",
+                            endActions = {
+                                Text(text = "Long End Long End", textAlign = TextAlign.End)
+                            },
+                            enabled = true,
+                        )
+                    }
                 }
             }
-            item(key = "nav_layout") {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    SuperArrow(
-                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Start")
-                        },
-                        endActions = {
-                            Text(text = "End1", textAlign = TextAlign.End)
-                            Spacer(Modifier.width(8.dp))
-                            Text(text = "End2", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
-                        startAction = {
-                            Text(text = "Start")
-                        },
-                        endActions = {
-                            Text(text = "End1", textAlign = TextAlign.End)
-                            Spacer(Modifier.width(8.dp))
-                            Text(text = "End2", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
-                        },
-                        endActions = {
-                            Text(text = "End1", textAlign = TextAlign.End)
-                            Spacer(Modifier.width(8.dp))
-                            Text(text = "End2", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Start")
-                        },
-                        endActions = {
-                            Text(
-                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
-                                textAlign = TextAlign.End,
-                            )
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
-                        },
-                        endActions = {
-                            Text(text = "End", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Start")
-                        },
-                        endActions = {
-                            Text(
-                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
-                                textAlign = TextAlign.End,
-                            )
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Summary",
-                        startAction = {
-                            Text(text = "Long Start Long Start Long Start Long Start Long Start Long Start Long Start Long Start")
-                        },
-                        endActions = {
-                            Text(
-                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
-                                textAlign = TextAlign.End,
-                            )
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
-                        endActions = {
-                            Text(
-                                text = "Long End Long End Long End Long End Long End Long End Long End Long End",
-                                textAlign = TextAlign.End,
-                            )
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
-                        summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
-                        endActions = {
-                            Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Long Title Long Title Long Title Long Title",
-                        summary = "Summary",
-                        endActions = {
-                            Text(text = "Long End Long End Long End Long End", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                    SuperArrow(
-                        title = "Title",
-                        summary = "Long Summary Long Summary Long Summary Long Summary",
-                        endActions = {
-                            Text(text = "Long End Long End", textAlign = TextAlign.End)
-                        },
-                        enabled = true,
-                    )
-                }
-            }
+            VerticalScrollBar(
+                adapter = rememberScrollBarAdapter(lazyListState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                trackPadding = contentPadding,
+            )
         }
     }
 }
