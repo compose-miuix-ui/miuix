@@ -1,3 +1,4 @@
+Ltop/yukonga/miuix/kmp/basic/ScrollBarAdapter;
 Ltop/yukonga/miuix/kmp/basic/ScrollBehavior;
 Ltop/yukonga/miuix/kmp/basic/ScrolledOffset;
 Ltop/yukonga/miuix/kmp/interfaces/HoldDownInteraction;
@@ -22,6 +23,8 @@ SPLtop/yukonga/miuix/kmp/basic/ExitUntilCollapsedScrollBehavior;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/FabPosition;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/FloatingNavigationBarDisplayMode;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/IconKt**->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/LazyLineContentAdapter;->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/LazyListAdapter;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/MutableWindowInsets;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/NavigationBarDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/NavigationBarDisplayMode;->**(**)**
@@ -32,8 +35,12 @@ SPLtop/yukonga/miuix/kmp/basic/RadioButtonDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/RadioButtonKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/ScaffoldKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/ScaffoldLayoutContent;->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/ScrollBarColors;->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/ScrollBarDefaults;->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/ScrollBarKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/SearchBarDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/SearchBarKt**->**(**)**
+SPLtop/yukonga/miuix/kmp/basic/SliderAdapter;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/SmallTitleDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/SmallTitleKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/basic/SnackbarHostState;->**(**)**

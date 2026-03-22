@@ -29,6 +29,8 @@ HSPLtop/yukonga/miuix/kmp/basic/FabPosition;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/FloatingNavigationBarDisplayMode;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/IconKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/LabelAnimState;->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/LazyLineContentAdapter;->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/LazyListAdapter;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/ListPopupDefaults;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/MutableWindowInsets;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/NavigationBarDefaults;->**(**)**
@@ -49,8 +51,12 @@ HSPLtop/yukonga/miuix/kmp/basic/RadioButtonKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/RangeSliderHapticState;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/ScaffoldKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/ScaffoldLayoutContent;->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/ScrollBarColors;->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/ScrollBarDefaults;->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/ScrollBarKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/SearchBarDefaults;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/SearchBarKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/basic/SliderAdapter;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/SliderColors;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/SliderDefaults;->**(**)**
 HSPLtop/yukonga/miuix/kmp/basic/SliderHapticState;->**(**)**
@@ -148,6 +154,7 @@ HSPLtop/yukonga/miuix/kmp/utils/SpringEngine;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/TiltFeedback;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/Utils_androidKt**->**(**)**
 Ltop/yukonga/miuix/kmp/basic/FabPlacement;
+Ltop/yukonga/miuix/kmp/basic/ScrollBarAdapter;
 Ltop/yukonga/miuix/kmp/basic/ScrollBehavior;
 Ltop/yukonga/miuix/kmp/basic/ScrolledOffset;
 Ltop/yukonga/miuix/kmp/interfaces/HoldDownInteraction;
@@ -157,6 +164,5 @@ PLtop/yukonga/miuix/kmp/basic/RefreshState;->**(**)**
 PLtop/yukonga/miuix/kmp/theme/DynamicColors_androidKt**->**(**)**
 PLtop/yukonga/miuix/kmp/theme/MonetMappingKt**->**(**)**
 PLtop/yukonga/miuix/kmp/theme/MonetRoles;->**(**)**
-PLtop/yukonga/miuix/kmp/utils/PressGestureScopeImpl;->**(**)**
 PLtop/yukonga/miuix/kmp/utils/SpringMath;->**(**)**
 PLtop/yukonga/miuix/kmp/utils/SpringOperator;->**(**)**
