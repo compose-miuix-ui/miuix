@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -817,7 +817,7 @@ private fun DrawScope.drawRefreshCompleteIndicator(
 private const val MAX_DRAWRATIO = 1 / 6f
 private const val THRESHOLD_RADIO = 1 / 4f
 
-internal val LocalPullToRefreshState = compositionLocalOf<PullToRefreshState?> { null }
+internal val LocalPullToRefreshState = staticCompositionLocalOf<PullToRefreshState?> { null }
 
 /** Default values for the [PullToRefresh] component. */
 object PullToRefreshDefaults {

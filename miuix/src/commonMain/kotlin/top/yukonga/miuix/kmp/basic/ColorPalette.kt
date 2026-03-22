@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -155,7 +156,7 @@ fun ColorPalette(
             },
         )
 
-        val hsvBase = baseColor.toHsv()
+        val hsvBase = remember(baseColor) { baseColor.toHsv() }
         val h = hsvBase.h
         val s = hsvBase.s / 100f
         val v = hsvBase.v / 100f
@@ -168,8 +169,7 @@ fun ColorPalette(
             onAlphaChanged = {
                 alpha = it
                 val newColor = baseColor.copy(alpha = it)
-                lastAcceptedHSV =
-                    baseColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
+                lastAcceptedHSV = baseColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
                 lastEmittedColor = newColor
                 onColorChangedState.value(newColor)
             },
@@ -246,12 +246,15 @@ private fun PaletteCanvas(
 
             val indicatorSize = indicatorRadius * 2
             val density = LocalDensity.current
+            val halfIndicatorPx = with(density) { (indicatorSize / 2).roundToPx() }
             Box(
                 modifier = Modifier
-                    .offset(
-                        x = with(density) { cxPx.toDp() - indicatorSize / 2 },
-                        y = with(density) { cyPx.toDp() - indicatorSize / 2 },
-                    )
+                    .offset {
+                        IntOffset(
+                            x = (cxPx - halfIndicatorPx).toInt(),
+                            y = (cyPx - halfIndicatorPx).toInt(),
+                        )
+                    }
                     .size(indicatorSize)
                     .drawWithCache {
                         val strokeWidth = 6.dp.toPx()
@@ -300,6 +303,13 @@ private fun PaletteGrid(
     isRtl: Boolean,
 ) {
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
+    val precomputedColors = remember(rows, hueColumns, includeGrayColumn) {
+        Array(rows) { r ->
+            Array(totalColumns) { c ->
+                cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
+            }
+        }
+    }
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width.toInt()
         val h = size.height.toInt()
@@ -315,7 +325,7 @@ private fun PaletteGrid(
                 val start = colEdges[c].toFloat()
                 val end = colEdges[c + 1].toFloat()
                 val cellW = end - start
-                val color = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn)
+                val color = precomputedColors[r][c]
                 val left = if (isRtl) size.width - end else start
                 drawRect(
                     color = color,

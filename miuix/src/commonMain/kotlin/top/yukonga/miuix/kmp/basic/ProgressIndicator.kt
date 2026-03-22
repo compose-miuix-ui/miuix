@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -65,6 +68,7 @@ fun LinearProgressIndicator(
 
         Canvas(
             modifier = modifier
+                .semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }
                 .fillMaxWidth()
                 .height(height),
         ) {
@@ -83,6 +87,7 @@ fun LinearProgressIndicator(
 
         Canvas(
             modifier = modifier
+                .semantics { progressBarRangeInfo = ProgressBarRangeInfo(progressValue, 0f..1f) }
                 .fillMaxWidth()
                 .height(height),
         ) {
@@ -151,7 +156,9 @@ fun CircularProgressIndicator(
         )
 
         Canvas(
-            modifier = modifier.size(size),
+            modifier = modifier
+                .semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }
+                .size(size),
         ) {
             val strokeWidthPx = strokeWidth.toPx()
             val radius = (size.toPx() - strokeWidthPx) / 2
@@ -173,7 +180,9 @@ fun CircularProgressIndicator(
         val progressValue = progress.coerceIn(0f, 1f)
 
         Canvas(
-            modifier = modifier.size(size),
+            modifier = modifier
+                .semantics { progressBarRangeInfo = ProgressBarRangeInfo(progressValue, 0f..1f) }
+                .size(size),
         ) {
             val strokeWidthPx = strokeWidth.toPx()
             val radius = (size.toPx() - strokeWidthPx) / 2

@@ -240,10 +240,20 @@ private fun ScrollBar(
     val coroutineScope = rememberCoroutineScope()
 
     val beforeTrackPaddingPx = with(density) {
-        if (isVertical) trackPadding.calculateTopPadding().toPx() else trackPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr).toPx()
+        if (isVertical) {
+            trackPadding.calculateTopPadding()
+                .toPx()
+        } else {
+            trackPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr).toPx()
+        }
     }
     val afterTrackPaddingPx = with(density) {
-        if (isVertical) trackPadding.calculateBottomPadding().toPx() else trackPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr).toPx()
+        if (isVertical) {
+            trackPadding.calculateBottomPadding()
+                .toPx()
+        } else {
+            trackPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr).toPx()
+        }
     }
     val totalTrackPaddingPx = beforeTrackPaddingPx + afterTrackPaddingPx
 
@@ -404,7 +414,7 @@ private fun ScrollBar(
                 val targetThumbLength = sliderAdapter.thumbSize.toFloat()
                 if (displayedThumbLength == 0f) {
                     displayedThumbLength = targetThumbLength
-                } else if (kotlin.math.abs(targetThumbLength - displayedThumbLength) >= 1f) {
+                } else if (abs(targetThumbLength - displayedThumbLength) >= 1f) {
                     if (thumbLengthAnimJob?.isActive != true) {
                         val startValue = displayedThumbLength
                         thumbLengthAnimJob = coroutineScope.launch {

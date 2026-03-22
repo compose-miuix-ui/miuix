@@ -156,8 +156,8 @@ fun Slider(
         }
     }
 
-    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
-    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+    val currentLayoutWidth = layoutWidth
+    val currentLayoutHeight = layoutHeight
 
     Box(
         modifier = modifier
@@ -362,8 +362,8 @@ fun VerticalSlider(
         }
     }
 
-    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
-    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+    val currentLayoutWidth = layoutWidth
+    val currentLayoutHeight = layoutHeight
 
     Box(
         modifier = modifier
@@ -586,8 +586,8 @@ fun RangeSlider(
         }
     }
 
-    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
-    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
+    val currentLayoutWidth = layoutWidth
+    val currentLayoutHeight = layoutHeight
 
     Box(
         modifier = modifier

@@ -34,6 +34,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -143,6 +144,8 @@ fun RowScope.NavigationBarItem(
     val platform = platform()
     val itemHeight = if (platform != Platform.IOS) NavigationBarDefaults.ItemHeight else NavigationBarDefaults.ItemHeightIOS
     var isPressed by remember { mutableStateOf(false) }
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentEnabled by rememberUpdatedState(enabled)
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
     val tint = when {
@@ -166,13 +169,13 @@ fun RowScope.NavigationBarItem(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
-                        if (enabled) {
+                        if (currentEnabled) {
                             isPressed = true
                             tryAwaitRelease()
                             isPressed = false
                         }
                     },
-                    onTap = { if (enabled) onClick() },
+                    onTap = { if (currentEnabled) currentOnClick() },
                 )
             },
         horizontalAlignment = CenterHorizontally,
@@ -385,6 +388,8 @@ fun FloatingNavigationBarItem(
     enabled: Boolean = true,
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentEnabled by rememberUpdatedState(enabled)
 
     val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
     val tint = when {
@@ -406,13 +411,13 @@ fun FloatingNavigationBarItem(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
-                        if (enabled) {
+                        if (currentEnabled) {
                             isPressed = true
                             tryAwaitRelease()
                             isPressed = false
                         }
                     },
-                    onTap = { if (enabled) onClick() },
+                    onTap = { if (currentEnabled) currentOnClick() },
                 )
             },
         horizontalAlignment = CenterHorizontally,

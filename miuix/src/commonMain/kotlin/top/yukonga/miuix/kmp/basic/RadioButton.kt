@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
@@ -66,10 +65,7 @@ fun RadioButton(
 
     val transition = updateTransition(selected, label = "RadioButtonTransition")
 
-    val colorState = transition.animateColor(
-        transitionSpec = { tween(durationMillis = 300, easing = FastOutSlowInEasing) },
-        label = "Color",
-    ) { if (it) colors.color(enabled) else colors.color(enabled) }
+    val color = colors.color(enabled)
 
     val checkAlphaState = transition.animateFloat(
         transitionSpec = {
@@ -155,7 +151,7 @@ fun RadioButton(
 
                 onDrawBehind {
                     drawTrimmedCheck(
-                        color = colorState.value,
+                        color = color,
                         alpha = checkAlphaState.value,
                         trimEnd = trimEndState.value,
                         path = checkPath,

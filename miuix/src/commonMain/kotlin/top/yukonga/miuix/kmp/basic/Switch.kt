@@ -109,21 +109,23 @@ fun Switch(
     )
 
     val hasCallback = onCheckedChange != null
-    val toggleableModifier = if (hasCallback) {
-        Modifier.toggleable(
-            value = checked,
-            onValueChange = { v ->
-                currentOnCheckedChange?.invoke(v)
-                currentHapticFeedback.performHapticFeedback(
-                    if (v) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
-                )
-            },
-            enabled = enabled,
-            role = Role.Switch,
-            interactionSource = interactionSource,
-        )
-    } else {
-        Modifier
+    val toggleableModifier = remember(checked, enabled, hasCallback, interactionSource) {
+        if (hasCallback) {
+            Modifier.toggleable(
+                value = checked,
+                onValueChange = { v ->
+                    currentOnCheckedChange?.invoke(v)
+                    currentHapticFeedback.performHapticFeedback(
+                        if (v) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
+                    )
+                },
+                enabled = enabled,
+                role = Role.Switch,
+                interactionSource = interactionSource,
+            )
+        } else {
+            Modifier
+        }
     }
 
     Box(

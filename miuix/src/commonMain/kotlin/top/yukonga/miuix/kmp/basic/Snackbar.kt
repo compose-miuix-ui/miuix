@@ -42,6 +42,9 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -314,6 +317,7 @@ fun Snackbar(
 
     Surface(
         modifier = modifier
+            .semantics { liveRegion = LiveRegionMode.Polite }
             .padding(horizontal = 12.dp, vertical = 4.dp)
             .dropShadow(
                 shape = shape,
