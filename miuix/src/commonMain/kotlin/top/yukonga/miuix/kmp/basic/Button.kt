@@ -155,7 +155,7 @@ object ButtonDefaults {
     /**
      * The default inside margin applied for all buttons.
      */
-    val InsideMargin = PaddingValues(16.dp)
+    val InsideMargin = PaddingValues(horizontal = 16.dp, vertical = 13.dp)
 
     /**
      * The default [ButtonColors] for all buttons.

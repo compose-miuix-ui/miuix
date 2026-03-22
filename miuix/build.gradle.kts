@@ -101,6 +101,34 @@ baselineProfile {
     }
 }
 
+val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::class) {
+    inputFile.set(
+        layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt"),
+    )
+    outputFile.set(
+        layout.projectDirectory.file("src/androidMain/baselineProfiles/baseline-prof.txt"),
+    )
+    targetPackage.set("top/yukonga/miuix/kmp/")
+    excludePackages.set(listOf("top/yukonga/miuix/kmp/icon/extended/"))
+}
+
+val convertStartupProfile by tasks.registering(ConvertBaselineProfileTask::class) {
+    inputFile.set(
+        rootProject.layout.projectDirectory.file(
+            "example/android/src/release/generated/baselineProfiles/startup-prof.txt",
+        ),
+    )
+    outputFile.set(
+        layout.projectDirectory.file("src/androidMain/baselineProfiles/startup-prof.txt"),
+    )
+    targetPackage.set("top/yukonga/miuix/kmp/")
+    excludePackages.set(listOf("top/yukonga/miuix/kmp/icon/extended/"))
+}
+
+tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
+    finalizedBy(convertBaselineProfile, convertStartupProfile)
+}
+
 dependencies {
     baselineProfile(project(":baselineprofile"))
 }

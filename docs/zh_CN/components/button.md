@@ -117,7 +117,7 @@ ButtonDefaults 对象提供了按钮组件的默认值和颜色配置。
 | MinWidth     | Dp            | 按钮的最小宽度 | 58.dp                |
 | MinHeight    | Dp            | 按钮的最小高度 | 40.dp                |
 | CornerRadius | Dp            | 按钮的圆角半径 | 16.dp                |
-| InsideMargin | PaddingValues | 按钮的内部边距 | PaddingValues(16.dp) |
+| InsideMargin | PaddingValues | 按钮的内部边距 | PaddingValues(horizontal = 16.dp, vertical = 13.dp) |
 
 #### 方法
 
