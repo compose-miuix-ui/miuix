@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,8 +69,9 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.DecelerateEasing
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -127,22 +129,30 @@ internal fun BottomSheetContentLayout(
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
+    val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val internalVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            dragOffsetY.snapTo(0f)
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 450, easing = DecelerateEasing(1.5f)),
+                animationSpec = folmeSpring(damping = 0.9f, response = 0.38f),
             )
         } else {
             if (!internalVisible.value) return@LaunchedEffect
-            animationProgress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = 450, easing = DecelerateEasing(0.8f)),
-            )
+            if (dragOffsetY.value > 0f) {
+                // Sheet already dragged off-screen — snap immediately
+                animationProgress.snapTo(0f)
+            } else {
+                // Button/back dismiss — animate normally
+                animationProgress.animateTo(
+                    targetValue = 0f,
+                    animationSpec = folmeSpring(damping = 0.9f, response = 0.38f),
+                )
+            }
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -154,7 +164,6 @@ internal fun BottomSheetContentLayout(
     val windowInfo = LocalWindowInfo.current
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
-    val dragOffsetY = remember { Animatable(0f) }
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
@@ -365,32 +374,27 @@ internal fun BottomSheetContent(
                         if (currentOffset >= windowHeightPx) {
                             onDismissRequest?.invoke()
                         } else {
-                            val remainingDistance = windowHeightPx - currentOffset
-                            val calculatedDuration = if (velocity > 100f) {
-                                // Calculate duration assuming constant deceleration: time = 2 * distance / velocity.
-                                ((remainingDistance * 2) / velocity * 1000).toInt()
-                            } else {
-                                300
+                            val sheetHeight = sheetHeightPx.intValue.toFloat()
+                            val settleJob = launch {
+                                dragOffsetY.animateTo(
+                                    targetValue = windowHeightPx,
+                                    animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
+                                    initialVelocity = velocity,
+                                ) {
+                                    updateDimAlpha(value)
+                                }
                             }
-                            val targetDuration = calculatedDuration.coerceIn(150, 450)
-
-                            dragOffsetY.animateTo(
-                                targetValue = windowHeightPx,
-                                animationSpec = tween(
-                                    durationMillis = targetDuration,
-                                    easing = DecelerateEasing(1f),
-                                ),
-                                initialVelocity = velocity,
-                            ) {
-                                updateDimAlpha(value)
-                            }
+                            // Wait until sheet leaves viewport, then dismiss immediately
+                            snapshotFlow { dragOffsetY.value }
+                                .first { sheetHeight > 0 && it >= sheetHeight }
+                            settleJob.cancel()
                             onDismissRequest?.invoke()
                         }
                     } else {
                         val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
                         dragOffsetY.animateTo(
                             targetValue = 0f,
-                            animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1f)),
+                            animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
                             initialVelocity = effectiveVelocity,
                         ) {
                             updateDimAlpha(value)

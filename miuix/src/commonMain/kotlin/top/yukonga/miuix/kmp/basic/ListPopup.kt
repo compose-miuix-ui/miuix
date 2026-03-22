@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.anim.DecelerateEasing
+import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -186,9 +186,12 @@ interface PopupPositionProvider {
 }
 
 object ListPopupDefaults {
-    val EnterAnimationSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
-    val ExitAnimationSpec = tween<Float>(300, easing = DecelerateEasing(1.5f))
-    val ResetAnimationSpec = tween<Float>(300, easing = DecelerateEasing(1.5f))
+    val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val AlphaEnterAnimationSpec = tween<Float>(durationMillis = 200)
+    val AlphaExitAnimationSpec = tween<Float>(durationMillis = 150)
+    val DimEnterAnimationSpec = tween<Float>(durationMillis = 300, easing = SinOutEasing)
+    val DimExitAnimationSpec = tween<Float>(durationMillis = 150, easing = SinOutEasing)
+    val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
 
     val DropdownPositionProvider = object : PopupPositionProvider {
         override fun calculatePosition(
@@ -510,7 +513,8 @@ fun rememberListPopupLayoutInfo(
 fun ListPopupContent(
     popupContentSize: IntSize,
     onPopupContentSizeChange: (IntSize) -> Unit,
-    animationProgress: () -> Float,
+    fractionProgress: () -> Float,
+    alphaProgress: () -> Float,
     popupLayoutPosition: PopupLayoutPosition,
     localTransformOrigin: TransformOrigin,
     modifier: Modifier = Modifier,
@@ -527,11 +531,11 @@ fun ListPopupContent(
                 if (popupContentSize != size) onPopupContentSizeChange(size)
             }
             .graphicsLayer {
-                val progress = animationProgress()
-                val scale = 0.15f + 0.85f * progress
+                val fraction = fractionProgress()
+                val scale = 0.15f + 0.85f * fraction
                 scaleX = scale
                 scaleY = scale
-                alpha = progress
+                alpha = alphaProgress()
                 transformOrigin = localTransformOrigin
             },
     ) {
@@ -542,7 +546,7 @@ fun ListPopupContent(
                     clip = true
                 }
                 .drawWithContent {
-                    val progress = animationProgress()
+                    val progress = fractionProgress()
                     val (showBelow, showAbove, _) = popupLayoutPosition
                     val size = this.size
 

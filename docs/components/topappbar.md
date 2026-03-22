@@ -102,7 +102,9 @@ Scaffold(
 ```kotlin
 TopAppBar(
     title = "Title",
-    color = MiuixTheme.colorScheme.primary
+    color = MiuixTheme.colorScheme.primary,
+    titleColor = MiuixTheme.colorScheme.onPrimary,
+    largeTitleColor = MiuixTheme.colorScheme.onPrimary
 )
 ```
 
@@ -124,7 +126,9 @@ TopAppBar(
 | title                      | String                          | Top bar title                                  | -                               | Yes      |
 | modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
 | color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
-| largeTitle                 | String?                         | Large title text, uses title if not specified  | null                            | No       |
+| titleColor                 | Color                           | Color of the collapsed small title text        | MiuixTheme.colorScheme.onSurface | No       |
+| largeTitle                 | String                          | Large title text                               | title                           | No       |
+| largeTitleColor            | Color                           | Color of the expanded large title text         | MiuixTheme.colorScheme.onSurface | No       |
 | navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
@@ -138,6 +142,7 @@ TopAppBar(
 | title                      | String                          | Top bar title                                  | -                               | Yes      |
 | modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
 | color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
+| titleColor                 | Color                           | Color of the title text                        | MiuixTheme.colorScheme.onSurface | No       |
 | navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |

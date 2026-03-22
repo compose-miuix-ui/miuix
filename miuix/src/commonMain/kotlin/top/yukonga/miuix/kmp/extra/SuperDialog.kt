@@ -130,22 +130,3 @@ fun SuperDialog(
         content = content,
     )
 }
-
-@Deprecated("Use DialogDefaults instead", ReplaceWith("DialogDefaults"))
-object SuperDialogDefaults {
-    @Composable
-    internal fun isLargeScreen() = DialogDefaults.isLargeScreen()
-
-    @Composable
-    fun titleColor() = DialogDefaults.titleColor()
-
-    @Composable
-    fun summaryColor() = DialogDefaults.summaryColor()
-
-    @Composable
-    fun backgroundColor() = DialogDefaults.backgroundColor()
-
-    val outsideMargin get() = DialogDefaults.outsideMargin
-
-    val insideMargin get() = DialogDefaults.insideMargin
-}

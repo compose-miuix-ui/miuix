@@ -59,6 +59,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -107,6 +108,7 @@ internal fun DialogContentLayout(
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
+    val dimProgress = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val internalVisible = remember { mutableStateOf(false) }
 
@@ -118,12 +120,13 @@ internal fun DialogContentLayout(
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            launch { dimProgress.animateTo(1f, tween(300, easing = DecelerateEasing(1.5f))) }
             animationProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = if (isLargeScreen) {
-                    tween(durationMillis = 300, easing = DecelerateEasing(1.5f))
+                    folmeSpring(damping = 0.9f, response = 0.3f)
                 } else {
-                    spring(dampingRatio = 0.86f, stiffness = 450f, visibilityThreshold = 0.0001f)
+                    spring(dampingRatio = 0.88f, stiffness = 450f, visibilityThreshold = 0.0001f)
                 },
             )
         } else {
@@ -131,14 +134,12 @@ internal fun DialogContentLayout(
             if (imeInsets.getBottom(density) > 0) {
                 keyboardController?.hide()
             }
+            launch { dimProgress.animateTo(0f, tween(250, easing = DecelerateEasing(1.5f))) }
             animationProgress.animateTo(
                 targetValue = 0f,
-                animationSpec = if (isLargeScreen) {
-                    tween(durationMillis = 280, easing = DecelerateEasing(1.5f))
-                } else {
-                    tween(durationMillis = 220, easing = DecelerateEasing(0.8f))
-                },
+                animationSpec = tween(durationMillis = 260, easing = DecelerateEasing(1.5f)),
             )
+            dimProgress.stop()
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -195,7 +196,7 @@ internal fun DialogContentLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .drawBehind {
-                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * animationProgress.value))
+                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * dimProgress.value))
                     },
             )
         }

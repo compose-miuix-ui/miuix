@@ -149,30 +149,3 @@ fun WindowDialog(
         content = content,
     )
 }
-
-@Deprecated("Use DialogDefaults instead", ReplaceWith("DialogDefaults"))
-object WindowDialogDefaults {
-    @Composable
-    internal fun isLargeScreen() = DialogDefaults.isLargeScreen()
-
-    @Composable
-    fun titleColor() = DialogDefaults.titleColor()
-
-    @Composable
-    fun summaryColor() = DialogDefaults.summaryColor()
-
-    @Composable
-    fun backgroundColor() = DialogDefaults.backgroundColor()
-
-    val outsideMargin get() = DialogDefaults.outsideMargin
-
-    val insideMargin get() = DialogDefaults.insideMargin
-}
-
-@Deprecated(
-    "Use LocalDismissState instead, which is provided by all overlay components.",
-    ReplaceWith("LocalDismissState", "top.yukonga.miuix.kmp.theme.LocalDismissState"),
-)
-val LocalWindowDialogState = staticCompositionLocalOf<() -> Unit> {
-    error("LocalWindowDialogState not provided")
-}

@@ -47,6 +47,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
+import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -92,26 +93,26 @@ class MiuixPopupUtils {
         private val DialogDimEnter: EnterTransition =
             fadeIn(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
         private val DialogDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(260, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(250, easing = DecelerateEasing(1.5f)))
 
         private val PopupDimEnter: EnterTransition =
-            fadeIn(animationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f))
+            fadeIn(animationSpec = tween(300, easing = SinOutEasing))
         private val PopupDimExit: ExitTransition =
-            fadeOut(animationSpec = tween(300, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(150, easing = SinOutEasing))
 
         @Composable
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
             if (largeScreen) {
                 fadeIn(
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 800f, visibilityThreshold = 0.0001f),
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.0001f),
                 ) + scaleIn(
                     initialScale = 0.8f,
-                    animationSpec = spring(dampingRatio = 0.73f, stiffness = 800f, visibilityThreshold = 0.0001f),
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.0001f),
                 )
             } else {
                 slideInVertically(
                     initialOffsetY = { it },
-                    animationSpec = spring(dampingRatio = 0.86f, stiffness = 450f),
+                    animationSpec = spring(dampingRatio = 0.88f, stiffness = 450f),
                 )
             }
         }
@@ -128,19 +129,19 @@ class MiuixPopupUtils {
             } else {
                 slideOutVertically(
                     targetOffsetY = { it },
-                    animationSpec = tween(300, easing = DecelerateEasing(0.8f)),
+                    animationSpec = tween(200, easing = DecelerateEasing(1.5f)),
                 )
             }
         }
 
         @Composable
         private fun rememberDefaultPopupEnterTransition(): EnterTransition = remember {
-            fadeIn(animationSpec = tween(durationMillis = 150, easing = DecelerateEasing(1.5f)))
+            fadeIn(animationSpec = tween(durationMillis = 200))
         }
 
         @Composable
         private fun rememberDefaultPopupExitTransition(): ExitTransition = remember {
-            fadeOut(animationSpec = tween(durationMillis = 300, easing = DecelerateEasing(1.5f)))
+            fadeOut(animationSpec = tween(durationMillis = 150))
         }
 
         /**

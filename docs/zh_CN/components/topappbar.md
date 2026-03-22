@@ -102,7 +102,9 @@ Scaffold(
 ```kotlin
 TopAppBar(
     title = "标题",
-    color = MiuixTheme.colorScheme.primary
+    color = MiuixTheme.colorScheme.primary,
+    titleColor = MiuixTheme.colorScheme.onPrimary,
+    largeTitleColor = MiuixTheme.colorScheme.onPrimary
 )
 ```
 
@@ -123,8 +125,10 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ------------------------------ | --------------------------------- | -------- |
 | title                      | String                          | 顶部栏标题                     | -                                 | 是       |
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符           | Modifier                          | 否       |
-| color                      | Color                           | 顶部栏背景颜色                 | MiuixTheme.colorScheme.surface | 否       |
-| largeTitle                 | String?                         | 大标题文本，不指定时使用 title | null                              | 否       |
+| color                      | Color                           | 顶部栏背景颜色                 | MiuixTheme.colorScheme.surface    | 否       |
+| titleColor                 | Color                           | 折叠时小标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
+| largeTitle                 | String                          | 大标题文本                     | title                             | 否       |
+| largeTitleColor            | Color                           | 展开时大标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数       | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数       | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为             | null                              | 否       |
@@ -137,7 +141,8 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ------------------------ | --------------------------------- | -------- |
 | title                      | String                          | 顶部栏标题               | -                                 | 是       |
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符     | Modifier                          | 否       |
-| color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.surface | 否       |
+| color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.surface    | 否       |
+| titleColor                 | Color                           | 标题文字颜色             | MiuixTheme.colorScheme.onSurface  | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数 | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数 | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为       | null                              | 否       |

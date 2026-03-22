@@ -3,11 +3,12 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.animateDecay
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
@@ -63,6 +65,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.lerp
+import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.TopAppBarState.Companion.Saver
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
@@ -79,7 +83,9 @@ import kotlin.math.roundToInt
  * @param title The title of the [TopAppBar].
  * @param modifier The modifier to be applied to the  [TopAppBar].
  * @param color The background color of the [TopAppBar].
- * @param largeTitle The large title of the [TopAppBar], If not specified, it will be the same as title.
+ * @param titleColor The color of the collapsed small title text.
+ * @param largeTitle The large title of the [TopAppBar].
+ * @param largeTitleColor The color of the expanded large title text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
@@ -91,7 +97,9 @@ fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surface,
-    largeTitle: String? = null,
+    titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    largeTitle: String = title,
+    largeTitleColor: Color = MiuixTheme.colorScheme.onSurface,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
@@ -129,6 +137,8 @@ fun TopAppBar(
     TopAppBarLayout(
         title = title,
         color = color,
+        titleColor = titleColor,
+        largeTitleColor = largeTitleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
         horizontalPadding = horizontalPadding,
@@ -136,7 +146,7 @@ fun TopAppBar(
         expandedHeightPx = expandedHeightPx,
         largeTitleHeight = largeTitleHeight,
         modifier = modifier,
-        largeTitle = largeTitle ?: title,
+        largeTitle = largeTitle,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
     )
 }
@@ -149,6 +159,7 @@ fun TopAppBar(
  * @param title The title of the [SmallTopAppBar].
  * @param modifier The modifier to be applied to the  [SmallTopAppBar].
  * @param color The background color of the [SmallTopAppBar].
+ * @param titleColor The color of the title text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [SmallTopAppBar].
@@ -161,6 +172,7 @@ fun SmallTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surface,
+    titleColor: Color = MiuixTheme.colorScheme.onSurface,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
@@ -190,6 +202,7 @@ fun SmallTopAppBar(
     SmallTopAppBarLayout(
         title = title,
         color = color,
+        titleColor = titleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
         horizontalPadding = horizontalPadding,
@@ -432,7 +445,7 @@ private class ExitUntilCollapsedScrollBehavior(
                 // Don't intercept if scrolling down.
                 if (!canScroll() || available.y > 0) return Offset.Zero
                 val prevHeightOffset = state.heightOffset
-                state.heightOffset = state.heightOffset + available.y
+                state.heightOffset += available.y
                 return if (prevHeightOffset != state.heightOffset) {
                     // We're in the middle of top app bar collapse or expand.
                     // Consume only the scroll on the Y axis.
@@ -453,7 +466,7 @@ private class ExitUntilCollapsedScrollBehavior(
                 if (available.y < 0f || consumed.y < 0f) {
                     // When scrolling up, just update the state's height offset.
                     val oldHeightOffset = state.heightOffset
-                    state.heightOffset = state.heightOffset + consumed.y
+                    state.heightOffset += consumed.y
                     return Offset(0f, state.heightOffset - oldHeightOffset)
                 }
 
@@ -461,7 +474,7 @@ private class ExitUntilCollapsedScrollBehavior(
                     // Adjust the height offset in case the consumed delta Y is less than what was
                     // recorded as available delta Y in the pre-scroll.
                     val oldHeightOffset = state.heightOffset
-                    state.heightOffset = state.heightOffset + available.y
+                    state.heightOffset += available.y
                     return Offset(0f, state.heightOffset - oldHeightOffset)
                 }
                 return Offset.Zero
@@ -557,6 +570,8 @@ private fun interface ScrolledOffset {
  *
  * @param title the [TopAppBar] title (header).
  * @param color the background color of the [TopAppBar].
+ * @param titleColor the color of the collapsed small title text.
+ * @param largeTitleColor the color of the expanded large title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param horizontalPadding the horizontal padding of the [TopAppBar]'s title & large title.
@@ -571,6 +586,8 @@ private fun interface ScrolledOffset {
 private fun TopAppBarLayout(
     title: String,
     color: Color,
+    titleColor: Color,
+    largeTitleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     horizontalPadding: Dp,
@@ -581,8 +598,7 @@ private fun TopAppBarLayout(
     largeTitle: String = title,
     defaultWindowInsetsPadding: Boolean = true,
 ) {
-    // Subtract the scrolledOffset from the maxHeight. The scrolledOffset is expected to be
-    // equal or smaller than zero.
+    // Subtract the scrolledOffset from the maxHeight
     val heightOffset by remember(scrolledOffset) {
         derivedStateOf {
             val offset = scrolledOffset.offset()
@@ -593,24 +609,43 @@ private fun TopAppBarLayout(
     // Small Title Animation
     val extOffset by remember(heightOffset) {
         derivedStateOf {
-            abs(heightOffset) / expandedHeightPx * 2
+            abs(heightOffset) / expandedHeightPx * 3
         }
     }
 
     // Large Title Alpha Animation
     val largeTitleAlpha by remember(heightOffset, expandedHeightPx) {
         derivedStateOf {
-            1f - (abs(heightOffset) / expandedHeightPx * 2).coerceIn(0f, 1f)
+            1f - (abs(heightOffset) / expandedHeightPx * 3).coerceIn(0f, 1f)
         }
     }
 
-    val smallTitleAlpha by animateFloatAsState(
-        targetValue = if (1 - extOffset.coerceIn(0f, 1f) == 0f) 1f else 0f,
-        animationSpec = tween(durationMillis = 250),
+    // Small title animation is triggered once when the threshold is crossed
+    // then runs independently to completion
+    val smallTitleVisible = extOffset >= 1f
+    val smallTitleAlpha = remember { Animatable(0f) }
+    val smallTitleTranslationY = remember { Animatable(20f) }
+
+    LaunchedEffect(smallTitleVisible) {
+        if (smallTitleVisible) {
+            val showSpec = folmeSpring<Float>(damping = 1.0f, response = 0.3f)
+            launch { smallTitleAlpha.animateTo(1f, showSpec) }
+            launch { smallTitleTranslationY.animateTo(0f, showSpec) }
+        } else {
+            val hideSpec = folmeSpring<Float>(damping = 1.0f, response = 0.15f)
+            launch { smallTitleAlpha.animateTo(0f, hideSpec) }
+            launch { smallTitleTranslationY.animateTo(20f, hideSpec) }
+        }
+    }
+
+    // Title color transition animation
+    val animatedTitleColor by animateColorAsState(
+        targetValue = titleColor,
+        animationSpec = tween(durationMillis = 50),
     )
-    val smallTitleTranslationY by animateFloatAsState(
-        targetValue = if (extOffset > 1f) 0f else 12f,
-        animationSpec = tween(durationMillis = 250),
+    val animatedLargeTitleColor by animateColorAsState(
+        targetValue = largeTitleColor,
+        animationSpec = tween(durationMillis = 50),
     )
 
     Layout(
@@ -626,12 +661,13 @@ private fun TopAppBarLayout(
                     .layoutId("title")
                     .padding(horizontal = horizontalPadding)
                     .graphicsLayer {
-                        alpha = smallTitleAlpha
-                        translationY = smallTitleTranslationY
+                        alpha = smallTitleAlpha.value
+                        translationY = smallTitleTranslationY.value
                     },
             ) {
                 Text(
                     text = title,
+                    color = animatedTitleColor,
                     fontSize = MiuixTheme.textStyles.title3.fontSize,
                     fontWeight = FontWeight.Medium,
                     overflow = TextOverflow.Ellipsis,
@@ -654,6 +690,7 @@ private fun TopAppBarLayout(
                 Text(
                     modifier = Modifier.offset { IntOffset(0, heightOffset) },
                     text = largeTitle,
+                    color = animatedLargeTitleColor,
                     fontSize = MiuixTheme.textStyles.title1.fontSize,
                     fontWeight = FontWeight.Normal,
                     onTextLayout = {
@@ -767,6 +804,7 @@ private fun TopAppBarLayout(
  *
  * @param title the [SmallTopAppBar] title (header).
  * @param color the background color of the [SmallTopAppBar].
+ * @param titleColor the color of the title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param horizontalPadding the horizontal padding of the [SmallTopAppBar]'s title.
@@ -777,6 +815,7 @@ private fun TopAppBarLayout(
 private fun SmallTopAppBarLayout(
     title: String,
     color: Color,
+    titleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     horizontalPadding: Dp,
@@ -789,6 +828,12 @@ private fun SmallTopAppBarLayout(
             .padding(horizontal = horizontalPadding)
     }
 
+    // Title color transition animation
+    val animatedTitleColor by animateColorAsState(
+        targetValue = titleColor,
+        animationSpec = tween(durationMillis = 50),
+    )
+
     Layout(
         {
             Box(
@@ -800,6 +845,7 @@ private fun SmallTopAppBarLayout(
             Box(titleModifier) {
                 Text(
                     text = title,
+                    color = animatedTitleColor,
                     maxLines = 1,
                     fontSize = MiuixTheme.textStyles.title3.fontSize,
                     fontWeight = FontWeight.Medium,

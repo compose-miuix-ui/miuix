@@ -71,7 +71,9 @@ internal fun ListPopupLayout(
     minWidth: Dp = 200.dp,
     content: @Composable () -> Unit,
 ) {
-    val animationProgress = remember { Animatable(0f) }
+    val fractionProgress = remember { Animatable(0f) }
+    val alphaProgress = remember { Animatable(0f) }
+    val dimProgress = remember { Animatable(0f) }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
@@ -80,16 +82,16 @@ internal fun ListPopupLayout(
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
-            animationProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = ListPopupDefaults.EnterAnimationSpec,
-            )
+            launch { fractionProgress.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
+            launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
+            launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
         } else {
             if (!internalVisible.value) return@LaunchedEffect
-            animationProgress.animateTo(
-                targetValue = 0f,
-                animationSpec = ListPopupDefaults.ExitAnimationSpec,
-            )
+            launch { fractionProgress.animateTo(0f, ListPopupDefaults.FractionAnimationSpec) }
+            launch { dimProgress.animateTo(0f, ListPopupDefaults.DimExitAnimationSpec) }
+            alphaProgress.animateTo(0f, ListPopupDefaults.AlphaExitAnimationSpec)
+            fractionProgress.stop()
+            dimProgress.stop()
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -133,7 +135,9 @@ internal fun ListPopupLayout(
             isBackEnabled = show,
             onBackCancelled = {
                 coroutineScope.launch {
-                    animationProgress.animateTo(1f, animationSpec = ListPopupDefaults.ResetAnimationSpec)
+                    launch { fractionProgress.animateTo(1f, ListPopupDefaults.ResetAnimationSpec) }
+                    launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
+                    launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
                 }
             },
             onBackCompleted = {
@@ -148,7 +152,8 @@ internal fun ListPopupLayout(
                 transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
             ) {
                 val progress = transitionState.latestEvent.progress
-                animationProgress.snapTo(1f - progress)
+                fractionProgress.snapTo(1f - progress)
+                alphaProgress.snapTo(1f - progress)
             }
         }
 
@@ -160,7 +165,7 @@ internal fun ListPopupLayout(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            alpha = animationProgress.value
+                            alpha = dimProgress.value
                         }
                         .background(MiuixTheme.colorScheme.windowDimming),
                 )
@@ -213,7 +218,8 @@ internal fun ListPopupLayout(
                 ListPopupContent(
                     popupContentSize = popupContentSize,
                     onPopupContentSizeChange = { popupContentSize = it },
-                    animationProgress = { animationProgress.value },
+                    fractionProgress = { fractionProgress.value },
+                    alphaProgress = { alphaProgress.value },
                     popupLayoutPosition = layoutInfo.popupLayoutPosition,
                     localTransformOrigin = layoutInfo.localTransformOrigin,
                     content = {
