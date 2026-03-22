@@ -5,8 +5,8 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -35,11 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -80,39 +79,24 @@ fun Switch(
     var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
 
     val capsuleShape = miuixCapsuleShape()
-    val springSpec = remember { spring<Dp>(dampingRatio = 0.6f, stiffness = 987f) }
+    val thumbOffsetSpringSpec = remember { spring<Dp>(dampingRatio = 0.7f, stiffness = 987f) }
+    val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val thumbOffsetState = animateDpAsState(
-        targetValue = if (checked) {
-            if (!enabled) {
-                25.dp
-            } else if (isPressed || isDragged || isHovered) {
-                23.75.dp
-            } else {
-                25.dp
-            }
-        } else {
-            if (!enabled) {
-                4.dp
-            } else if (isPressed || isDragged || isHovered) {
-                2.75.dp
-            } else {
-                4.dp
-            }
-        } + dragOffset.dp,
-        animationSpec = springSpec,
+        targetValue = (if (checked) 25.dp else 4.dp) + dragOffset.dp,
+        animationSpec = thumbOffsetSpringSpec,
     )
 
-    val thumbSizeState = animateDpAsState(
+    val thumbScaleState = animateFloatAsState(
         targetValue = if (!enabled) {
-            20.dp
+            1f
         } else if (isPressed || isDragged || isHovered) {
-            22.5.dp
+            1.127f
         } else {
-            20.dp
+            1f
         },
-        animationSpec = springSpec,
+        animationSpec = thumbScaleSpringSpec,
     )
 
     val thumbColorState = animateColorAsState(
@@ -121,7 +105,7 @@ fun Switch(
 
     val backgroundColorState = animateColorAsState(
         if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = spring(dampingRatio = 0.99f, stiffness = 438.6f),
     )
 
     val hasCallback = onCheckedChange != null
@@ -158,15 +142,14 @@ fun Switch(
     ) {
         Box(
             modifier = Modifier
+                .size(20.dp)
                 .align(Alignment.CenterStart)
-                .offset { IntOffset(thumbOffsetState.value.roundToPx(), 0) }
-                .layout { measurable, _ ->
-                    val sizePx = thumbSizeState.value.roundToPx()
-                    val constraints = Constraints.fixed(sizePx, sizePx)
-                    val placeable = measurable.measure(constraints)
-                    layout(placeable.width, placeable.height) {
-                        placeable.placeRelative(0, 0)
-                    }
+                .offset {
+                    IntOffset(thumbOffsetState.value.roundToPx(), 0)
+                }
+                .graphicsLayer {
+                    scaleX = thumbScaleState.value
+                    scaleY = thumbScaleState.value
                 }
                 .drawBehind {
                     drawCircle(color = thumbColorState.value)
