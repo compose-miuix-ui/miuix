@@ -60,6 +60,7 @@ import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * A [Slider] component with Miuix style.
@@ -149,7 +150,6 @@ fun Slider(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
-                stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
@@ -356,7 +356,6 @@ fun VerticalSlider(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
-                stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
@@ -581,7 +580,6 @@ fun RangeSlider(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
-                stepFractions = stepFractions,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
@@ -1277,14 +1275,19 @@ private fun resolveValueFromFraction(
     fraction: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int,
-    stepFractions: FloatArray,
     allKeyPointFractions: FloatArray,
     magnetThreshold: Float,
 ): Float {
     val f = fraction.coerceIn(0f, 1f)
     val base = lerp(valueRange.start, valueRange.endInclusive, f)
     return when {
-        steps > 0 -> snapValueToTick(base, stepFractions, valueRange.start, valueRange.endInclusive)
+        steps > 0 -> {
+            val stepCount = steps + 1
+            val start = valueRange.start.toDouble()
+            val end = valueRange.endInclusive.toDouble()
+            val stepIndex = (f * stepCount).roundToInt().coerceIn(0, stepCount)
+            (start + (end - start) * stepIndex / stepCount).toFloat()
+        }
 
         allKeyPointFractions.isNotEmpty() -> {
             var closest = allKeyPointFractions[0]

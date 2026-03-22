@@ -51,9 +51,9 @@ fun LazyListScope.sliderSection() {
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
-            var stepsValue by remember { mutableFloatStateOf(5f) }
+            var stepsValue by remember { mutableFloatStateOf(100f) }
             Text(
-                text = "Steps: ${stepsValue.toInt()}/8",
+                text = "Steps: ${stepsValue.toInt()}/200",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
@@ -62,8 +62,8 @@ fun LazyListScope.sliderSection() {
             Slider(
                 value = stepsValue,
                 onValueChange = { stepsValue = it },
-                valueRange = 0f..8f,
-                steps = 7,
+                valueRange = 0f..200f,
+                steps = 199,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
