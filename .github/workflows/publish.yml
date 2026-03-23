@@ -36,7 +36,7 @@ jobs:
           distribution: "zulu"
           java-version: "21"
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Publish SNAPSHOT to GitHub Packages
         run: ./gradlew --no-daemon --stacktrace publishAllPublicationsToGithubRepository --no-configuration-cache
         env:

@@ -54,7 +54,7 @@ jobs:
           distribution: "zulu"
           java-version: "21"
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Decode android signing key
         if: matrix.platformEx == 'android universal'
         run: echo ${{ secrets.SIGNING_KEY }} | base64 -d > keystore.jks
