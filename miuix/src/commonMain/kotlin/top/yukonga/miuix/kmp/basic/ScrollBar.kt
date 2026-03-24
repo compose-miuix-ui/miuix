@@ -67,6 +67,7 @@ interface ScrollBarAdapter {
     suspend fun scrollTo(scrollOffset: Double)
 }
 
+@OptIn(ExperimentalScrollBarApi::class)
 internal val ScrollBarAdapter.maxScrollOffset: Double
     get() = (contentSize - viewportSize).coerceAtLeast(0.0)
 

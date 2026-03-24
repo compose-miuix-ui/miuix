@@ -191,7 +191,17 @@ internal fun BottomSheetContentLayout(
             onBackCancelled = { coroutineScope.launch { resetGesture() } },
             onBackCompleted = {
                 if (allowDismiss) {
-                    requestDismiss()
+                    coroutineScope.launch {
+                        val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
+                        animateDismissOffScreen(
+                            dragOffsetY = dragOffsetY,
+                            sheetHeightPx = sheetHeightPx.intValue,
+                            windowHeightPx = windowHeightPx,
+                            dimAlpha = dimAlpha,
+                        ) {
+                            requestDismiss()
+                        }
+                    }
                 } else {
                     coroutineScope.launch { resetGesture() }
                 }
@@ -374,21 +384,15 @@ internal fun BottomSheetContent(
                         if (currentOffset >= windowHeightPx) {
                             onDismissRequest?.invoke()
                         } else {
-                            val sheetHeight = sheetHeightPx.intValue.toFloat()
-                            val settleJob = launch {
-                                dragOffsetY.animateTo(
-                                    targetValue = windowHeightPx,
-                                    animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
-                                    initialVelocity = velocity,
-                                ) {
-                                    updateDimAlpha(value)
-                                }
+                            animateDismissOffScreen(
+                                dragOffsetY = dragOffsetY,
+                                sheetHeightPx = sheetHeightPx.intValue,
+                                windowHeightPx = windowHeightPx,
+                                dimAlpha = dimAlpha,
+                                velocity = velocity,
+                            ) {
+                                onDismissRequest?.invoke()
                             }
-                            // Wait until sheet leaves viewport, then dismiss immediately
-                            snapshotFlow { dragOffsetY.value }
-                                .first { sheetHeight > 0 && it >= sheetHeight }
-                            settleJob.cancel()
-                            onDismissRequest?.invoke()
                         }
                     } else {
                         val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
@@ -748,6 +752,35 @@ private fun TitleAndActionsRow(
             endAction?.invoke()
         }
     }
+}
+
+/**
+ * Animate the sheet off-screen, updating dim alpha along the way.
+ * Dismisses as soon as the sheet leaves the viewport (offset >= sheetHeight).
+ */
+private suspend fun CoroutineScope.animateDismissOffScreen(
+    dragOffsetY: Animatable<Float, *>,
+    sheetHeightPx: Int,
+    windowHeightPx: Float,
+    dimAlpha: MutableFloatState,
+    velocity: Float = 0f,
+    onDismiss: () -> Unit,
+) {
+    val sheetHeight = sheetHeightPx.toFloat()
+    val thresholdPx = if (sheetHeight > 0) sheetHeight else 500f
+    val settleJob = launch {
+        dragOffsetY.animateTo(
+            targetValue = windowHeightPx,
+            animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
+            initialVelocity = velocity,
+        ) {
+            dimAlpha.floatValue = (1f - (value / thresholdPx).coerceIn(0f, 1f))
+        }
+    }
+    snapshotFlow { dragOffsetY.value }
+        .first { sheetHeight > 0 && it >= sheetHeight }
+    settleJob.cancel()
+    onDismiss()
 }
 
 object BottomSheetDefaults {
