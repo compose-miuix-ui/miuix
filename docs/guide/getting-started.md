@@ -78,7 +78,7 @@ fun AppTheme(
 ) {
     // Available modes: System, Light, Dark, MonetSystem, MonetLight, MonetDark
     val controller = remember { ThemeController(ColorSchemeMode.System) }
-    return MiuixTheme(
+    MiuixTheme(
         controller = controller,
         content = content
     )
