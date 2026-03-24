@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.utils.LocalOverScrollState
@@ -120,7 +121,7 @@ fun PullToRefresh(
     val currentOnRefresh by rememberUpdatedState(onRefresh)
 
     LaunchedEffect(isRefreshing) {
-        if (!isRefreshing) {
+        if (!isRefreshing && pullToRefreshState.refreshState == RefreshState.Refreshing) {
             // Data loading completed, end refresh
             pullToRefreshState.finishRefreshing()
         }
@@ -257,8 +258,9 @@ class PullToRefreshState(
     internal var isRefreshing by mutableStateOf(false)
     internal var isTouching by mutableStateOf(false)
     internal var isRebounding by mutableStateOf(false)
+    private var isProcessingRelease = false
     private val refreshCompleteAnimProgressState = mutableFloatStateOf(1f)
-    internal val refreshCompleteAnimProgress: Float by derivedStateOf { refreshCompleteAnimProgressState.floatValue }
+    internal val refreshCompleteAnimProgress: Float get() = refreshCompleteAnimProgressState.floatValue
 
     // Physics Engine for rebound
     private val springEngine = SpringEngine()
@@ -266,52 +268,56 @@ class PullToRefreshState(
 
     /**
      * Drives the dragOffset using SpringEngine physics.
+     * Runs the animation loop directly in the caller's coroutine context,
+     * so cancellation of the caller naturally stops the animation.
      */
     internal suspend fun animateToSpring(targetValue: Float) {
         animationJob?.cancel()
-        animationJob = coroutineScope.launch {
-            springEngine.start(
-                startValue = dragOffset,
-                targetValue = targetValue,
-                initialVel = 0f, // Assume zero velocity on release for simplicity
-            )
 
-            var lastFrameTimeNanos = -1L
-            var isFinished = false
+        springEngine.start(
+            startValue = dragOffset,
+            targetValue = targetValue,
+            initialVel = 0f,
+        )
 
-            try {
-                while (isActive) {
-                    isFinished = withFrameNanos { frameTimeNanos ->
-                        if (lastFrameTimeNanos == -1L) {
-                            lastFrameTimeNanos = frameTimeNanos
-                            return@withFrameNanos false
-                        }
-                        val dt = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
+        val currentJob = currentCoroutineContext()[Job]
+        animationJob = currentJob
+
+        var lastFrameTimeNanos = -1L
+        var isFinished = false
+
+        try {
+            while (currentCoroutineContext().isActive) {
+                isFinished = withFrameNanos { frameTimeNanos ->
+                    if (lastFrameTimeNanos == -1L) {
                         lastFrameTimeNanos = frameTimeNanos
-
-                        val finished = springEngine.step(dt)
-                        val newOffset = springEngine.currentPos.toFloat()
-
-                        // Directly update the state
-                        dragOffset = newOffset
-
-                        // Crucial: Update currentTouch using inverse damping so that if user catches
-                        // the list mid-animation, the touch tracking is consistent with visual position.
-                        currentTouch = SpringMath.obtainTouchDistance(newOffset, maxDragDistancePx)
-
-                        finished
+                        return@withFrameNanos false
                     }
-                    if (isFinished) break
+                    val dt = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
+                    lastFrameTimeNanos = frameTimeNanos
+
+                    val finished = springEngine.step(dt)
+                    val newOffset = springEngine.currentPos.toFloat()
+
+                    // Directly update the state
+                    dragOffset = newOffset
+
+                    // Crucial: Update currentTouch using inverse damping so that if user catches
+                    // the list mid-animation, the touch tracking is consistent with visual position.
+                    currentTouch = SpringMath.obtainTouchDistance(newOffset, maxDragDistancePx)
+
+                    finished
                 }
-            } finally {
-                if (isFinished) { // Ensure position only after normal completion
-                    // Ensure we land exactly on target
-                    dragOffset = targetValue
-                    currentTouch = SpringMath.obtainTouchDistance(targetValue, maxDragDistancePx)
-                }
+                if (isFinished) break
+            }
+        } finally {
+            if (animationJob == currentJob) animationJob = null
+            if (isFinished) {
+                // Ensure we land exactly on target after normal completion
+                dragOffset = targetValue
+                currentTouch = SpringMath.obtainTouchDistance(targetValue, maxDragDistancePx)
             }
         }
-        animationJob?.join()
     }
 
     /**
@@ -350,7 +356,9 @@ class PullToRefreshState(
     internal suspend fun handlePointerRelease(onRefresh: () -> Unit) {
         isTouching = false
 
-        if (!isRefreshing) {
+        if (isProcessingRelease || isRefreshing || isRebounding) return
+        isProcessingRelease = true
+        try {
             if (dragOffset >= refreshThresholdOffset) {
                 // If pulled past threshold, will then call startRefreshing().
                 startRefreshing(onRefresh)
@@ -361,9 +369,11 @@ class PullToRefreshState(
                     animateToSpring(0f)
                 } finally {
                     isRebounding = false
-                    internalRefreshState = RefreshState.Idle
+                    resetToIdle()
                 }
             }
+        } finally {
+            isProcessingRelease = false
         }
     }
 
@@ -383,6 +393,13 @@ class PullToRefreshState(
         internalRefreshState = RefreshState.Idle
         // Animate back to 0 using Spring
         animateToSpring(0f)
+    }
+
+    /** Resets the refresh state to [RefreshState.Idle]. */
+    internal fun resetToIdle() {
+        if (internalRefreshState != RefreshState.Refreshing && internalRefreshState != RefreshState.RefreshComplete) {
+            internalRefreshState = RefreshState.Idle
+        }
     }
 
     /** Creates a [NestedScrollConnection] for the pull-to-refresh logic itself. */
@@ -521,8 +538,11 @@ private fun createPullToRefreshConnection(
                 pullToRefreshState.dragOffset < pullToRefreshState.refreshThresholdOffset
             ) {
                 try {
+                    pullToRefreshState.isRebounding = true
                     pullToRefreshState.animateToSpring(0f)
                 } finally {
+                    pullToRefreshState.isRebounding = false
+                    pullToRefreshState.resetToIdle()
                 }
             }
             return available
@@ -549,64 +569,77 @@ private fun RefreshHeader(
         }
     }
 
-    val refreshDisplayInfo by remember(pullToRefreshState, refreshTexts) {
+    val refreshText by remember(pullToRefreshState, refreshTexts) {
         derivedStateOf {
             when (pullToRefreshState.refreshState) {
-                RefreshState.Idle -> "" to 0f
+                RefreshState.Idle -> ""
+
+                RefreshState.Pulling -> {
+                    if (pullToRefreshState.pullProgress > 0.5) refreshTexts.getOrElse(0) { "" } else ""
+                }
+
+                RefreshState.ThresholdReached -> refreshTexts.getOrElse(1) { "" }
+
+                RefreshState.Refreshing -> refreshTexts.getOrElse(2) { "" }
+
+                RefreshState.RefreshComplete -> refreshTexts.getOrElse(3) { "" }
+            }
+        }
+    }
+
+    val refreshTextAlpha by remember(pullToRefreshState) {
+        derivedStateOf {
+            when (pullToRefreshState.refreshState) {
+                RefreshState.Idle -> 0f
 
                 RefreshState.Pulling -> {
                     val progress = pullToRefreshState.pullProgress
-                    val text = refreshTexts.getOrElse(0) { "" }
-                    val alpha = if (progress > 0.6f) (progress - 0.5f) * 2f else 0f
-                    if (progress > 0.5) text to alpha else "" to 0f
+                    if (progress > 0.6f) (progress - 0.5f) * 2f else 0f
                 }
 
-                RefreshState.ThresholdReached -> refreshTexts.getOrElse(1) { "" } to 1f
-
-                RefreshState.Refreshing -> refreshTexts.getOrElse(2) { "" } to 1f
+                RefreshState.ThresholdReached, RefreshState.Refreshing -> 1f
 
                 RefreshState.RefreshComplete -> {
-                    val text = refreshTexts.getOrElse(3) { "" }
-                    val alpha = (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f).coerceAtLeast(0f)
-                    text to alpha
+                    (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f).coerceAtLeast(0f)
                 }
             }
         }
     }
 
-    val heightInfo by remember(pullToRefreshState, circleSize, density) {
+    val indicatorHeight by remember(pullToRefreshState, circleSize, density) {
         derivedStateOf {
-            val dragOffset = pullToRefreshState.dragOffset
-            val threshold = pullToRefreshState.refreshThresholdOffset
-            val progress = pullToRefreshState.pullProgress
-            val completeProgress = pullToRefreshState.refreshCompleteAnimProgress
-
-            val indicatorHeight: Dp
-            val headerHeight: Dp
-
             when (pullToRefreshState.refreshState) {
-                RefreshState.Idle -> 0.dp to 0.dp
+                RefreshState.Idle -> 0.dp
 
-                RefreshState.Pulling -> {
-                    indicatorHeight = circleSize * progress
-                    headerHeight = (circleSize + 36.dp) * progress
-                    indicatorHeight to headerHeight
-                }
+                RefreshState.Pulling -> circleSize * pullToRefreshState.pullProgress
 
                 RefreshState.ThresholdReached -> {
-                    val offsetDp = with(density) { (dragOffset - threshold).toDp() }
-                    indicatorHeight = circleSize + offsetDp
-                    headerHeight = (circleSize + 36.dp) + offsetDp
-                    indicatorHeight to headerHeight
+                    val offsetDp = with(density) { (pullToRefreshState.dragOffset - pullToRefreshState.refreshThresholdOffset).toDp() }
+                    circleSize + offsetDp
                 }
 
-                RefreshState.Refreshing -> circleSize to (circleSize + 36.dp)
+                RefreshState.Refreshing -> circleSize
 
-                RefreshState.RefreshComplete -> {
-                    indicatorHeight = circleSize * (1 - completeProgress)
-                    headerHeight = (circleSize + 36.dp) * (1 - completeProgress)
-                    indicatorHeight to headerHeight
+                RefreshState.RefreshComplete -> circleSize * (1 - pullToRefreshState.refreshCompleteAnimProgress)
+            }
+        }
+    }
+
+    val headerHeight by remember(pullToRefreshState, circleSize, density) {
+        derivedStateOf {
+            when (pullToRefreshState.refreshState) {
+                RefreshState.Idle -> 0.dp
+
+                RefreshState.Pulling -> (circleSize + 36.dp) * pullToRefreshState.pullProgress
+
+                RefreshState.ThresholdReached -> {
+                    val offsetDp = with(density) { (pullToRefreshState.dragOffset - pullToRefreshState.refreshThresholdOffset).toDp() }
+                    (circleSize + 36.dp) + offsetDp
                 }
+
+                RefreshState.Refreshing -> circleSize + 36.dp
+
+                RefreshState.RefreshComplete -> (circleSize + 36.dp) * (1 - pullToRefreshState.refreshCompleteAnimProgress)
             }
         }
     }
@@ -614,7 +647,7 @@ private fun RefreshHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(heightInfo.second),
+            .height(headerHeight),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
@@ -622,13 +655,13 @@ private fun RefreshHeader(
             pullToRefreshState = pullToRefreshState,
             circleSize = circleSize,
             color = color,
-            modifier = Modifier.height(heightInfo.first),
+            modifier = Modifier.height(indicatorHeight),
         )
         Text(
-            text = refreshDisplayInfo.first,
+            text = refreshText,
             style = refreshTextStyle,
             color = color,
-            modifier = Modifier.padding(top = 6.dp).graphicsLayer { alpha = refreshDisplayInfo.second },
+            modifier = Modifier.padding(top = 6.dp).graphicsLayer { alpha = refreshTextAlpha },
         )
     }
 }

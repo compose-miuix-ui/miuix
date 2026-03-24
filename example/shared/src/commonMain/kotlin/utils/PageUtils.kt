@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 fun Modifier.pageScrollModifiers(
@@ -26,6 +27,7 @@ fun Modifier.pageScrollModifiers(
     topAppBarScrollBehavior: ScrollBehavior,
 ): Modifier = this
     .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+    .overScrollVertical()
     .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
     .fillMaxHeight()
 
