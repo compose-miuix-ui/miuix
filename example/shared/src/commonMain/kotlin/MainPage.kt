@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.arrowSection
 import component.basicComponentSection
+import component.blurSection
 import component.bottomSheetSection
 import component.buttonSection
 import component.cardSection
@@ -165,6 +166,7 @@ fun MainPage(
                     numberPickerSection()
                     colorPickerSection()
                     cardSection()
+                    blurSection()
                     item { Spacer(modifier = Modifier.height(12.dp)) }
                 }
             }

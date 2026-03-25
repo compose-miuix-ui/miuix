@@ -41,6 +41,7 @@ plugins {
 
 include(":miuix")
 include(":miuix-icons")
+include(":miuix-blur")
 include(":miuix-navigation3-ui")
 
 include(":baselineprofile")
