@@ -19,6 +19,10 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 
 ## 基本用法
 
+::: tip 提示
+`navigationIcon` 和 `actions` 插槽不包含内置的水平边距。你需要手动为图标添加边距（例如，导航图标使用 `Modifier.padding(start = 16.dp)`，操作图标使用 `Modifier.padding(end = 16.dp)`），以保持与边缘的适当间距。
+:::
+
 ### 小标题顶部栏
 
 ```kotlin
@@ -27,12 +31,18 @@ Scaffold(
         SmallTopAppBar(
             title = "标题",
             navigationIcon = {
-                IconButton(onClick = { /* 处理点击事件 */ }) {
+                IconButton(
+                    onClick = { /* 处理点击事件 */ },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(MiuixIcons.Back, contentDescription = "返回")
                 }
             },
             actions = {
-                IconButton(onClick = { /* 处理点击事件 */ }) {
+                IconButton(
+                    onClick = { /* 处理点击事件 */ },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
                     Icon(MiuixIcons.More, contentDescription = "更多")
                 }
             }
@@ -50,15 +60,21 @@ Scaffold(
             title = "标题",
             largeTitle = "大标题", // 如果不指定，将使用 title 的值
             navigationIcon = {
-                IconButton(onClick = { /* 处理点击事件 */ }) {
+                IconButton(
+                    onClick = { /* 处理点击事件 */ },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(MiuixIcons.Back, contentDescription = "返回")
                 }
             },
             actions = {
-                IconButton(onClick = { /* 处理点击事件 */ }) {
+                IconButton(
+                    onClick = { /* 处理点击事件 */ },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
                     Icon(MiuixIcons.More, contentDescription = "更多")
                 }
-           }
+            }
         )
     }
 )
@@ -223,7 +239,10 @@ Box(modifier = Modifier.fillMaxSize()) {
         SmallTopAppBar(
             title = "精简模式",
             navigationIcon = {
-                IconButton(onClick = { useSmallTopBar = false }) {
+                IconButton(
+                    onClick = { useSmallTopBar = false },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(
                         imageVector = MiuixIcons.Back,
                         contentDescription = "切换到大标题",
@@ -237,9 +256,12 @@ Box(modifier = Modifier.fillMaxSize()) {
             title = "标题",
             largeTitle = "展开模式",
             navigationIcon = {
-                IconButton(onClick = { useSmallTopBar = true }) {
+                IconButton(
+                    onClick = { useSmallTopBar = true },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(
-                            imageVector = MiuixIcons.Back,
+                        imageVector = MiuixIcons.Back,
                         contentDescription = "切换到小标题",
                         tint = MiuixTheme.colorScheme.onBackground
                     )

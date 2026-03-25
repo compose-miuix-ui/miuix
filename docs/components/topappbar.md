@@ -19,6 +19,10 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 
 ## Basic Usage
 
+::: tip
+The `navigationIcon` and `actions` slots do not include built-in horizontal padding. You need to manually add padding to the icons (e.g., `Modifier.padding(start = 16.dp)` for navigation icons and `Modifier.padding(end = 16.dp)` for action icons) to maintain proper spacing from the edges.
+:::
+
 ### Small TopAppBar
 
 ```kotlin
@@ -27,12 +31,18 @@ Scaffold(
         SmallTopAppBar(
             title = "Title",
             navigationIcon = {
-                IconButton(onClick = { /* Handle click event */ }) {
+                IconButton(
+                    onClick = { /* Handle click event */ },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
-                IconButton(onClick = { /* Handle click event */ }) {
+                IconButton(
+                    onClick = { /* Handle click event */ },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
                     Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
@@ -50,12 +60,18 @@ Scaffold(
             title = "Title",
             largeTitle = "Large Title", // If not specified, title value will be used
             navigationIcon = {
-                IconButton(onClick = { /* Handle click event */ }) {
+                IconButton(
+                    onClick = { /* Handle click event */ },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
-                IconButton(onClick = { /* Handle click event */ }) {
+                IconButton(
+                    onClick = { /* Handle click event */ },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
                     Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
@@ -223,7 +239,10 @@ Box(modifier = Modifier.fillMaxSize()) {
         SmallTopAppBar(
             title = "Compact Mode",
             navigationIcon = {
-                IconButton(onClick = { useSmallTopBar = false }) {
+                IconButton(
+                    onClick = { useSmallTopBar = false },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(
                         imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Large Title",
@@ -237,7 +256,10 @@ Box(modifier = Modifier.fillMaxSize()) {
             title = "Title",
             largeTitle = "Expanded Mode",
             navigationIcon = {
-                IconButton(onClick = { useSmallTopBar = true }) {
+                IconButton(
+                    onClick = { useSmallTopBar = true },
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Icon(
                         imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Small Title",
