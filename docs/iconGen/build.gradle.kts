@@ -20,12 +20,13 @@ val extendedIconsSourceDir =
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
 val docFileZh = project.file("../zh_CN/guide/icons.md")
+val mainClasspath = sourceSets.main.get().runtimeClasspath
 
 tasks.register<JavaExec>("generateIcons") {
     group = "iconGen"
     description = "Generate SVGs from Compose ImageVector definitions"
     dependsOn(tasks.named("classes"))
-    classpath = sourceSets.main.get().runtimeClasspath
+    classpath = mainClasspath
     mainClass.set("top.yukonga.miuix.docs.icongen.MainKt")
     val lightColor = project.findProperty("iconLightColor")?.toString() ?: "#000000"
     val darkColor = project.findProperty("iconDarkColor")?.toString() ?: "#FFFFFF"
