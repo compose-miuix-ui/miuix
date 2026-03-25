@@ -65,7 +65,6 @@ fun TopAppBarDemo() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.Back,
@@ -76,7 +75,6 @@ fun TopAppBarDemo() {
                                 actions = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.More,
@@ -118,7 +116,6 @@ fun TopAppBarDemo() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.Back,
@@ -129,7 +126,6 @@ fun TopAppBarDemo() {
                                 actions = {
                                     IconButton(
                                         onClick = { /* Handle click event */ },
-                                        modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
                                             MiuixIcons.More,

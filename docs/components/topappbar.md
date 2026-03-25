@@ -19,10 +19,6 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 
 ## Basic Usage
 
-::: tip
-The `navigationIcon` and `actions` slots do not include built-in horizontal padding. You need to manually add padding to the icons (e.g., `Modifier.padding(start = 16.dp)` for navigation icons and `Modifier.padding(end = 16.dp)` for action icons) to maintain proper spacing from the edges.
-:::
-
 ### Small TopAppBar
 
 ```kotlin
@@ -31,18 +27,12 @@ Scaffold(
         SmallTopAppBar(
             title = "Title",
             navigationIcon = {
-                IconButton(
-                    onClick = { /* Handle click event */ },
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
+                IconButton(onClick = { /* Handle click event */ }) {
                     Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
-                IconButton(
-                    onClick = { /* Handle click event */ },
-                    modifier = Modifier.padding(end = 16.dp)
-                ) {
+                IconButton(onClick = { /* Handle click event */ }) {
                     Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
@@ -60,18 +50,12 @@ Scaffold(
             title = "Title",
             largeTitle = "Large Title", // If not specified, title value will be used
             navigationIcon = {
-                IconButton(
-                    onClick = { /* Handle click event */ },
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
+                IconButton(onClick = { /* Handle click event */ }) {
                     Icon(MiuixIcons.Back, contentDescription = "Back")
                 }
             },
             actions = {
-                IconButton(
-                    onClick = { /* Handle click event */ },
-                    modifier = Modifier.padding(end = 16.dp)
-                ) {
+                IconButton(onClick = { /* Handle click event */ }) {
                     Icon(MiuixIcons.More, contentDescription = "More")
                 }
             }
@@ -129,7 +113,17 @@ TopAppBar(
 ```kotlin
 TopAppBar(
     title = "Title",
-    horizontalPadding = 32.dp
+    titlePadding = 32.dp
+)
+```
+
+### Custom Icon Padding
+
+```kotlin
+TopAppBar(
+    title = "Title",
+    navigationIconPadding = 12.dp,
+    actionIconPadding = 12.dp
 )
 ```
 
@@ -149,7 +143,9 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
 | defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.HorizontalPadding | No       |
+| titlePadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.TitlePadding | No       |
+| navigationIconPadding      | Dp                              | Start padding of the navigation icon           | TopAppBarDefaults.NavigationIconPadding | No       |
+| actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
 
 ### SmallTopAppBar Properties
 
@@ -163,7 +159,9 @@ TopAppBar(
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
 | defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding | true                            | No       |
-| horizontalPadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.HorizontalPadding | No       |
+| titlePadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.TitlePadding | No       |
+| navigationIconPadding      | Dp                              | Start padding of the navigation icon           | TopAppBarDefaults.NavigationIconPadding | No       |
+| actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
 
 ### TopAppBarDefaults Object
 
@@ -173,7 +171,9 @@ The TopAppBarDefaults object provides default values for TopAppBar and SmallTopA
 
 | Constant Name             | Type | Description                                        | Default Value |
 | ------------------------- | ---- | -------------------------------------------------- | ------------- |
-| HorizontalPadding         | Dp   | Horizontal padding of the title and large title    | 26.dp         |
+| TitlePadding    | Dp   | Horizontal padding of the title and large title    | 26.dp         |
+| NavigationIconPadding      | Dp   | Start padding of the navigation icon              | 16.dp         |
+| ActionIconPadding          | Dp   | End padding of the action icons                   | 16.dp         |
 | CollapsedHeight            | Dp   | Collapsed height of the TopAppBar                 | 56.dp         |
 | SmallTopAppBarCenterHeight | Dp   | Vertical center height for SmallTopAppBar layout  | 60.dp         |
 
@@ -239,10 +239,7 @@ Box(modifier = Modifier.fillMaxSize()) {
         SmallTopAppBar(
             title = "Compact Mode",
             navigationIcon = {
-                IconButton(
-                    onClick = { useSmallTopBar = false },
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
+                IconButton(onClick = { useSmallTopBar = false }) {
                     Icon(
                         imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Large Title",
@@ -256,10 +253,7 @@ Box(modifier = Modifier.fillMaxSize()) {
             title = "Title",
             largeTitle = "Expanded Mode",
             navigationIcon = {
-                IconButton(
-                    onClick = { useSmallTopBar = true },
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
+                IconButton(onClick = { useSmallTopBar = true }) {
                     Icon(
                         imageVector = MiuixIcons.Back,
                         contentDescription = "Switch to Small Title",

@@ -90,7 +90,9 @@ import kotlin.math.roundToInt
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [TopAppBar].
- * @param horizontalPadding The horizontal padding of the [TopAppBar]'s title & large title.
+ * @param titlePadding The horizontal padding of the [TopAppBar]'s title & large title.
+ * @param navigationIconPadding The start padding of the navigation icon.
+ * @param actionIconPadding The end padding of the action icons.
  */
 @Composable
 fun TopAppBar(
@@ -104,7 +106,9 @@ fun TopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
+    titlePadding: Dp = TopAppBarDefaults.TitlePadding,
+    navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
+    actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
 ) {
     val largeTitleHeight = remember { mutableIntStateOf(0) }
     val expandedHeightPx by remember {
@@ -141,7 +145,9 @@ fun TopAppBar(
         largeTitleColor = largeTitleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
-        horizontalPadding = horizontalPadding,
+        titlePadding = titlePadding,
+        navigationIconPadding = navigationIconPadding,
+        actionIconPadding = actionIconPadding,
         scrolledOffset = { scrollBehavior?.state?.heightOffset ?: 0f },
         expandedHeightPx = expandedHeightPx,
         largeTitleHeight = largeTitleHeight,
@@ -164,7 +170,9 @@ fun TopAppBar(
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [SmallTopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SmallTopAppBar].
- * @param horizontalPadding The horizontal padding of the [SmallTopAppBar]'s title.
+ * @param titlePadding The horizontal padding of the [SmallTopAppBar]'s title.
+ * @param navigationIconPadding The start padding of the navigation icon.
+ * @param actionIconPadding The end padding of the action icons.
  */
 @Composable
 @NonRestartableComposable
@@ -177,7 +185,9 @@ fun SmallTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
+    titlePadding: Dp = TopAppBarDefaults.TitlePadding,
+    navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
+    actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
 ) {
     SideEffect {
         // Sets the height offset limit of the SmallTopAppBar to 0f
@@ -205,7 +215,9 @@ fun SmallTopAppBar(
         titleColor = titleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
-        horizontalPadding = horizontalPadding,
+        titlePadding = titlePadding,
+        navigationIconPadding = navigationIconPadding,
+        actionIconPadding = actionIconPadding,
         modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
     )
@@ -370,7 +382,13 @@ class TopAppBarState(
 /** Contains default values used by [TopAppBar] and [SmallTopAppBar]. */
 object TopAppBarDefaults {
     /** The default horizontal padding of the title and large title. */
-    val HorizontalPadding = 26.dp
+    val TitlePadding = 26.dp
+
+    /** The default start padding of the navigation icon. */
+    val NavigationIconPadding = 16.dp
+
+    /** The default end padding of the action icons. */
+    val ActionIconPadding = 16.dp
 
     /** The default collapsed height of the [TopAppBar]. */
     val CollapsedHeight = 56.dp
@@ -574,7 +592,9 @@ private fun interface ScrolledOffset {
  * @param largeTitleColor the color of the expanded large title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param horizontalPadding the horizontal padding of the [TopAppBar]'s title & large title.
+ * @param titlePadding the horizontal padding of the [TopAppBar]'s title & large title.
+ * @param navigationIconPadding the start padding of the navigation icon.
+ * @param actionIconPadding the end padding of the action icons.
  * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
  * @param largeTitleHeight a mutable state that holds the height of the large title.
  * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
@@ -590,7 +610,9 @@ private fun TopAppBarLayout(
     largeTitleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
-    horizontalPadding: Dp,
+    titlePadding: Dp,
+    navigationIconPadding: Dp,
+    actionIconPadding: Dp,
     scrolledOffset: ScrolledOffset,
     expandedHeightPx: Float,
     largeTitleHeight: MutableState<Int>,
@@ -652,14 +674,15 @@ private fun TopAppBarLayout(
         {
             Box(
                 Modifier
-                    .layoutId("navigationIcon"),
+                    .layoutId("navigationIcon")
+                    .padding(start = navigationIconPadding),
             ) {
                 navigationIcon()
             }
             Box(
                 Modifier
                     .layoutId("title")
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontal = titlePadding)
                     .graphicsLayer {
                         alpha = smallTitleAlpha.value
                         translationY = smallTitleTranslationY.value
@@ -676,7 +699,8 @@ private fun TopAppBarLayout(
             }
             Box(
                 Modifier
-                    .layoutId("actionIcons"),
+                    .layoutId("actionIcons")
+                    .padding(end = actionIconPadding),
             ) {
                 actions()
             }
@@ -684,7 +708,7 @@ private fun TopAppBarLayout(
                 Modifier
                     .layoutId("largeTitle")
                     .padding(top = TopAppBarDefaults.CollapsedHeight)
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontal = titlePadding)
                     .graphicsLayer { alpha = largeTitleAlpha },
             ) {
                 Text(
@@ -807,7 +831,9 @@ private fun TopAppBarLayout(
  * @param titleColor the color of the title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param horizontalPadding the horizontal padding of the [SmallTopAppBar]'s title.
+ * @param titlePadding the horizontal padding of the [SmallTopAppBar]'s title.
+ * @param navigationIconPadding the start padding of the navigation icon.
+ * @param actionIconPadding the end padding of the action icons.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [SmallTopAppBar].
  */
@@ -818,14 +844,16 @@ private fun SmallTopAppBarLayout(
     titleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
-    horizontalPadding: Dp,
+    titlePadding: Dp,
+    navigationIconPadding: Dp,
+    actionIconPadding: Dp,
     modifier: Modifier = Modifier,
     defaultWindowInsetsPadding: Boolean = true,
 ) {
-    val titleModifier = remember(horizontalPadding) {
+    val titleModifier = remember(titlePadding) {
         Modifier
             .layoutId("title")
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontal = titlePadding)
     }
 
     // Title color transition animation
@@ -838,7 +866,8 @@ private fun SmallTopAppBarLayout(
         {
             Box(
                 Modifier
-                    .layoutId("navigationIcon"),
+                    .layoutId("navigationIcon")
+                    .padding(start = navigationIconPadding),
             ) {
                 navigationIcon()
             }
@@ -855,7 +884,8 @@ private fun SmallTopAppBarLayout(
             }
             Box(
                 Modifier
-                    .layoutId("actionIcons"),
+                    .layoutId("actionIcons")
+                    .padding(end = actionIconPadding),
             ) {
                 actions()
             }

@@ -69,7 +69,6 @@ fun AboutPage(
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
                     BackNavigationIcon(
-                        modifier = Modifier.padding(start = 16.dp),
                         onClick = { navigator.pop() },
                     )
                 },

@@ -75,7 +75,6 @@ fun NavTestPage(
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
                     BackNavigationIcon(
-                        modifier = Modifier.padding(start = 16.dp),
                         onClick = { navigator.pop() },
                     )
                 },
@@ -267,7 +266,6 @@ fun TopBarActions() {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val hapticFeedback = LocalHapticFeedback.current
     IconButton(
-        modifier = Modifier.padding(end = 16.dp),
         onClick = {
             showTopPopup.value = true
             topPopupHoldDown.value = true
