@@ -20,7 +20,10 @@ val extendedIconsSourceDir =
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
 val docFileZh = project.file("../zh_CN/guide/icons.md")
-val mainClasspath = sourceSets.main.get().runtimeClasspath
+val mainClasspath = objects.fileCollection().from(sourceSets.main.map { it.runtimeClasspath })
+val lightColor = providers.gradleProperty("iconLightColor").getOrElse("#000000")
+val darkColor = providers.gradleProperty("iconDarkColor").getOrElse("#FFFFFF")
+val preserve = providers.gradleProperty("iconPreserveColors").map { it.equals("true", true) }.getOrElse(false)
 
 tasks.register<JavaExec>("generateIcons") {
     group = "iconGen"
@@ -28,15 +31,7 @@ tasks.register<JavaExec>("generateIcons") {
     dependsOn(tasks.named("classes"))
     classpath = mainClasspath
     mainClass.set("top.yukonga.miuix.docs.icongen.MainKt")
-    val lightColor = project.findProperty("iconLightColor")?.toString() ?: "#000000"
-    val darkColor = project.findProperty("iconDarkColor")?.toString() ?: "#FFFFFF"
-    val preserve = project.findProperty("iconPreserveColors")?.toString()?.equals("true", true) == true
     outputs.dir(outputDir)
-    doFirst {
-        if (!outputDir.exists()) {
-            outputDir.mkdirs()
-        }
-    }
     args =
         listOf(
             "--src",
