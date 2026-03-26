@@ -45,12 +45,28 @@ internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
     val params = computeGaussianParams(adjustedVariance)
     if (params.tapCount == 0) return
 
+    // Extend capture area so the blur has real background content at edges.
+    // Align padding to the downscale factor to avoid fractional offset when
+    // converting between original and downsampled pixel space.
+    val rawPadding = radius.toInt()
+    val alignedPadding = if (downScale > 1) {
+        ((rawPadding + downScale - 1) / downScale) * downScale
+    } else {
+        rawPadding
+    }
+    if (alignedPadding > padding) {
+        padding = alignedPadding.toFloat()
+    }
+
     // Set adaptive downsampling — effects execute on reduced-area texture
     downscaleFactor = downScale
 
-    // Texture content size in downsampled space (for mirror edge reflection)
-    val texW = size.width / downScale.toFloat()
-    val texH = size.height / downScale.toFloat()
+    // Texture size must use the same integer arithmetic as drawBackdropLayer
+    // to avoid precision mismatch where the shader samples beyond the texture bounds.
+    val fullWidth = size.width.toInt() + alignedPadding * 2
+    val fullHeight = size.height.toInt() + alignedPadding * 2
+    val texW = (if (downScale > 1) (fullWidth / downScale).coerceAtLeast(1) else fullWidth).toFloat()
+    val texH = (if (downScale > 1) (fullHeight / downScale).coerceAtLeast(1) else fullHeight).toFloat()
 
     // Horizontal pass
     runtimeShaderEffect(
