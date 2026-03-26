@@ -3,7 +3,11 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.snapping.SnapPosition.Center.position
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -32,13 +37,19 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
@@ -46,12 +57,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import com.kyant.shapes.RoundedRectangle
 import component.BackNavigationIcon
+import component.blend.BlendTokenConfig
+import component.blend.BlurToken
+import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
+import kotlinx.coroutines.flow.onEach
 import misc.VersionInfo
 import navigation3.Route
+import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -75,7 +92,10 @@ import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.shared.generated.resources.Res
+import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import ui.isInDarkTheme
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -106,8 +126,8 @@ fun AboutPage(
             SmallTopAppBar(
                 title = "About",
                 scrollBehavior = topAppBarScrollBehavior,
-                color = MiuixTheme.colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f),
-                titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
+                color = colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f),
+                titleColor = colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
                 navigationIcon = {
                     BackNavigationIcon(
@@ -159,14 +179,16 @@ private fun AboutContent(
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
 
-    var blurEnable by remember { mutableStateOf(true) }
-    val dynamicBackground = remember { mutableStateOf(true) }
-    val effectBackground = remember { mutableStateOf(true) }
+    val isInDark = isInDarkTheme()
+    var blurEnable by remember { mutableStateOf(true)}
+    val dynamicBackground = remember { mutableStateOf(true)}
+    val effectBackground = remember { mutableStateOf(true)}
 
-    val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
-    val blendConfigs = remember {
-        listOf(
+    val surface = colorScheme.surface.copy(alpha = 0.6f)
+    val blendConfigs = remember(isInDark) {
+        mapOf(
             // No blend
+            "Default" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light,
             "None" to emptyList(),
             // Standard SkBlendMode (GPU hardware)
             "SrcOver" to listOf(BlendColorEntry(surface, BlendMode.SRC_OVER)),
@@ -187,16 +209,15 @@ private fun AboutContent(
             "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
-    val isInDark = isInDarkTheme()
-    val defaultBlendIndex = if (isInDarkTheme()) 15 else 14
-    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
-    val currentBlend = blendConfigs[blendModeIndex]
+    val configEntries = blendConfigs.entries.toList()
+    var blendModeIndex by remember { mutableIntStateOf(0) }
+    val currentConfigValue = configEntries.getOrNull(blendModeIndex)?.value ?: emptyList()
     val logoBlend = remember(isInDark) {
         if (isInDark) {
             listOf(
                 BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
                 BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
+                BlendColorEntry(Color(0xff1af500), BlendMode.LAB)
             )
         } else {
             listOf(
@@ -207,27 +228,47 @@ private fun AboutContent(
         }
     }
 
-    val cardColor = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = scrollProgress)
-
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(300.dp) }
+    var logoAreaY by remember { mutableFloatStateOf(0f) }
+    var iconY by remember { mutableFloatStateOf(0f) }
+    var projectNameY by remember { mutableFloatStateOf(0f) }
+    var versionCodeY by remember { mutableFloatStateOf(0f) }
+
+    var iconProgress by remember { mutableFloatStateOf(0f) }
+    var projectNameProgress by remember { mutableFloatStateOf(0f) }
+    var versionCodeProgress by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
+            .onEach { offset ->
+                if (lazyListState.firstVisibleItemIndex > 0) {
+                    if (iconProgress != 1f) iconProgress = 1f
+                    if (projectNameProgress != 1f) projectNameProgress = 1f
+                    if (iconProgress != 1f) iconProgress = 1f
+                    return@onEach
+                }
+                val stage1TotalLength = logoAreaY - versionCodeY
+                val stage2TotalLength = versionCodeY - projectNameY
+                val stage3TotalLength = projectNameY - iconY
+
+                versionCodeProgress = (offset.toFloat().coerceAtMost(stage1TotalLength) / stage1TotalLength).coerceIn(0f, 1f)
+                projectNameProgress = ((offset.toFloat().coerceAtMost(stage1TotalLength + stage2TotalLength) - stage1TotalLength) / stage2TotalLength).coerceIn(0f, 1f)
+                iconProgress = ((offset.toFloat().coerceAtMost(iconY) - stage1TotalLength - stage3TotalLength) / stage3TotalLength).coerceIn(0f, 1f)
+            }
+            .collect {  }
+    }
 
     BgEffectBackground(
         effectBackground = effectBackground,
         dynamicBackground = dynamicBackground,
+        alpha = 1f - scrollProgress,
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier.then(
-            if (blurEnable) {
-                Modifier.layerBackdrop(backdrop)
-            } else {
-                Modifier
-            }.alpha(1f - scrollProgress),
-        ),
+        bgModifier = Modifier.layerBackdrop(backdrop),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer { alpha = 1f - scrollProgress }
                 .padding(
                     top = contentPadding.calculateTopPadding() + 52.dp,
                     start = contentPadding.calculateLeftPadding(LayoutDirection.Ltr),
@@ -239,45 +280,74 @@ private fun AboutContent(
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//            Box(
-//                contentAlignment = Alignment.Center,
-//                modifier = Modifier
-//                    .size(88.dp)
-//                    .clip(RoundedCornerShape(24.dp))
-//                    .background(Color.White),
-//            ) {
-//                Image(
-//                    modifier = Modifier
-//                        .size(74.dp),
-//                    painter = painterResource(Res.drawable.ic_launcher),
-//                    contentDescription = null,
-//                )
-//            }
-            Text(
-                modifier = Modifier.padding(top = 12.dp).then(
-                    if (blurEnable) {
-                        Modifier.foregroundBlur(
-                            backdrop = backdrop,
-                            shape = RoundedRectangle(16.dp),
-                            blurRadius = 200f,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
-                                blendColors = logoBlend,
-                            ),
-                        )
-                    } else {
-                        Modifier
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(88.dp)
+                    .graphicsLayer {
+                        clip = true
+                        shape = RoundedCornerShape(24.dp)
+                        alpha = 1 - iconProgress
+                        scaleX = 1 - (iconProgress * 0.05f)
+                        scaleY = 1 - (iconProgress * 0.05f)
+                    }
+                    .background(Color.White)
+                    .onGloballyPositioned { coordinates ->
+                        if (iconY != 0f) return@onGloballyPositioned
+                        val y = coordinates.positionInWindow().y
+                        val size = coordinates.size
+                        iconY = y + size.height
                     },
-                ),
-                text = "Miuix",
+            ) {
+                Image(
+                    modifier = Modifier.size(74.dp),
+                    painter = painterResource(Res.drawable.ic_launcher),
+                    contentDescription = null,
+                )
+            }
+            Text(
+                modifier = Modifier.padding(top = 12.dp, bottom = 5.dp)
+                    .onGloballyPositioned { coordinates ->
+                        if (projectNameY != 0f) return@onGloballyPositioned
+                        val y = coordinates.positionInWindow().y
+                        val size = coordinates.size
+                        projectNameY = y + size.height
+                    }
+                    .graphicsLayer {
+                        alpha = 1 - projectNameProgress
+                        scaleX = 1 - (projectNameProgress * 0.05f)
+                        scaleY = 1 - (projectNameProgress * 0.05f)
+                    }
+                    .foregroundBlur(
+                        backdrop = backdrop,
+                        shape = RoundedRectangle(16.dp),
+                        blurRadius = 200f,
+                        noiseCoefficient = noiseCoefficient,
+                        colors = BlurColors(
+                            blendColors = logoBlend,
+                        ),
+                        enabled = blurEnable
+                    ),
+                text = "Miuix for Compose",
                 fontWeight = FontWeight.Bold,
-                fontSize = 60.sp,
+                fontSize = 35.sp,
             )
             Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .graphicsLayer {
+                        alpha = 1 - versionCodeProgress
+                        scaleX = 1 - (versionCodeProgress * 0.05f)
+                        scaleY = 1 - (versionCodeProgress * 0.05f)
+                    }
+                    .onGloballyPositioned { coordinates ->
+                        if (versionCodeY != 0f) return@onGloballyPositioned
+                        val y = coordinates.positionInWindow().y
+                        val size = coordinates.size
+                        versionCodeY = y + size.height
+                    },
+                color = colorScheme.onSurfaceVariantSummary,
                 text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
-                fontSize = 18.sp,
+                fontSize = 14.sp,
                 textAlign = TextAlign.Center,
             )
         }
@@ -297,41 +367,40 @@ private fun AboutContent(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(logoHeightDp + 52.dp + 98.dp),
+                        .height(logoHeightDp + 52.dp + 98.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures() {
+                                showTextureSet = true
+                            }
+                        }
+                        .onGloballyPositioned { coordinates ->
+                            val y = coordinates.positionInWindow().y
+                            val size = coordinates.size
+                            logoAreaY = y + size.height
+                        },
                     contentAlignment = Alignment.TopCenter,
-                ) {
-                    Spacer(
-                        Modifier
-                            .padding(top = 52.dp)
-                            .size(88.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .clickable { showTextureSet = true },
-                    )
-                }
+                    content = {  },
+                )
             }
 
             item(key = "about") {
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp)
-                        .then(
-                            if (blurEnable) {
-                                Modifier.textureBlur(
-                                    backdrop = backdrop,
-                                    shape = RoundedRectangle(16.dp),
-                                    blurRadius = blurRadius,
-                                    noiseCoefficient = noiseCoefficient,
-                                    colors = BlurColors(
-                                        blendColors = currentBlend.second,
-                                        brightness = brightness,
-                                        contrast = contrast,
-                                        saturation = saturation,
-                                    ),
-                                )
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
+                        .textureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedRectangle(16.dp),
+                            blurRadius = blurRadius,
+                            noiseCoefficient = noiseCoefficient,
+                            colors = BlurColors(
+                                blendColors = currentConfigValue,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
+                            enabled = blurEnable
+                        )
+                    ,
+                    colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
                 ) {
                     SuperArrow(
                         title = "View Source",
@@ -339,7 +408,7 @@ private fun AboutContent(
                             Text(
                                 text = "GitHub",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                color = colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
@@ -350,7 +419,7 @@ private fun AboutContent(
                             Text(
                                 text = "Telegram",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                color = colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
@@ -360,25 +429,20 @@ private fun AboutContent(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
                         .padding(top = 12.dp)
-                        .then(
-                            if (blurEnable) {
-                                Modifier.textureBlur(
-                                    backdrop = backdrop,
-                                    shape = RoundedRectangle(16.dp),
-                                    blurRadius = blurRadius,
-                                    noiseCoefficient = noiseCoefficient,
-                                    colors = BlurColors(
-                                        blendColors = currentBlend.second,
-                                        brightness = brightness,
-                                        contrast = contrast,
-                                        saturation = saturation,
-                                    ),
-                                )
-                            } else {
-                                Modifier
-                            },
+                        .textureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedRectangle(16.dp),
+                            blurRadius = blurRadius,
+                            noiseCoefficient = noiseCoefficient,
+                            colors = BlurColors(
+                                blendColors = currentConfigValue,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
+                            enabled = blurEnable
                         ),
-                    colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
+                    colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
                 ) {
                     SuperArrow(
                         title = "License",
@@ -386,7 +450,7 @@ private fun AboutContent(
                             Text(
                                 text = "Apache-2.0",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                color = colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = {
@@ -427,10 +491,10 @@ private fun AboutContent(
                         effectBackground.value,
                         {
                             effectBackground.value = it
-                        },
+                        }
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
             )
             BasicComponent(
                 title = "Dynamic Background Enabled",
@@ -439,10 +503,10 @@ private fun AboutContent(
                         dynamicBackground.value,
                         {
                             dynamicBackground.value = it
-                        },
+                        }
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
             )
             BasicComponent(
                 title = "Blur Enable",
@@ -451,10 +515,10 @@ private fun AboutContent(
                         blurEnable,
                         {
                             blurEnable = it
-                        },
+                        }
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
             )
             // Blur radius
             BasicComponent(
@@ -522,12 +586,12 @@ private fun AboutContent(
             )
 
             // Blend mode
-            val sheetBlend = blendConfigs[blendModeIndex]
-            val modeId = sheetBlend.second.firstOrNull()?.mode
+            val currentConfigName = configEntries.getOrNull(blendModeIndex)?.key ?: "Default"
+            val modeId = blendConfigs[currentConfigName]
             BasicComponent(
                 title = "Blend Mode",
                 endActions = {
-                    ValueText(sheetBlend.first + if (modeId != null) " ($modeId)" else "")
+                    ValueText(currentConfigName + if (modeId != null) " ($modeId)" else "")
                 },
                 bottomAction = {
                     Row(
@@ -562,6 +626,6 @@ private fun ValueText(text: String) {
     Text(
         text = text,
         fontSize = MiuixTheme.textStyles.body2.fontSize,
-        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+        color = colorScheme.onSurfaceVariantActions,
     )
 }
