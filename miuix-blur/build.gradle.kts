@@ -36,15 +36,14 @@ kotlin {
         browser()
     }
 
-    sourceSets {
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
-        }
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 
+    sourceSets {
         commonMain.dependencies {
             implementation(projects.miuix)
             implementation(libs.jetbrains.compose.foundation)
-            implementation(libs.kyant.shapes)
         }
 
         val skikoMain by creating {

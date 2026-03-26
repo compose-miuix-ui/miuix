@@ -23,7 +23,7 @@ import top.yukonga.miuix.kmp.blur.internal.noiseDither
  */
 fun Modifier.textureEffect(
     backdrop: Backdrop,
-    shape: () -> Shape,
+    shape: Shape,
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
@@ -52,7 +52,7 @@ fun Modifier.textureEffect(
  */
 fun Modifier.textureEffect(
     backdrop: Backdrop,
-    shape: () -> Shape,
+    shape: Shape,
     blurRadiusX: Float,
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
@@ -67,7 +67,7 @@ fun Modifier.textureEffect(
 
     return this.drawPlainBackdrop(
         backdrop = backdrop,
-        shape = shape,
+        shape = { shape },
         effects = {
             BlurEffects.applyBlur(this, clampedX, clampedY)
             noiseDither(noiseCoefficient)

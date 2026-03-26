@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Shape
  * custom modes (100-121, 200-203, runtime shader). See [BlendMode].
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
- * @param shape Shape provider for the blur region clipping.
+ * @param shape The shape provider for the blur region clipping.
  * @param blurRadius The blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Shape
  */
 fun Modifier.textureBlur(
     backdrop: Backdrop,
-    shape: () -> Shape,
+    shape: Shape,
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
@@ -39,7 +39,7 @@ fun Modifier.textureBlur(
  * Applies background blur with independent horizontal and vertical radii.
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
- * @param shape Shape provider for the blur region clipping.
+ * @param shape The shape provider for the blur region clipping.
  * @param blurRadiusX The horizontal blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param blurRadiusY The vertical blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
@@ -48,7 +48,7 @@ fun Modifier.textureBlur(
  */
 fun Modifier.textureBlur(
     backdrop: Backdrop,
-    shape: () -> Shape,
+    shape: Shape,
     blurRadiusX: Float,
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,

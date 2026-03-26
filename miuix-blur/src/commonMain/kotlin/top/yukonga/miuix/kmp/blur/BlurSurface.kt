@@ -6,15 +6,14 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A surface composable with background blur effect.
@@ -43,7 +42,7 @@ fun BlurSurface(
     contentColor: Color = MiuixTheme.colorScheme.onSurface,
     content: @Composable () -> Unit,
 ) {
-    val shape = remember(cornerRadius) { { RoundedRectangle(cornerRadius) } }
+    val shape = miuixShape(cornerRadius)
 
     CompositionLocalProvider(
         LocalContentColor provides contentColor,

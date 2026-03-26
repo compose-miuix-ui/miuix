@@ -45,6 +45,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 fun LazyListScope.blurSection() {
     item(key = "blur") {
@@ -122,7 +123,7 @@ private fun BlurDemo() {
                         .align(Alignment.Center)
                         .textureBlur(
                             backdrop = backdrop,
-                            shape = { RoundedRectangle(16.dp) },
+                            shape = miuixShape(16.dp),
                             blurRadiusX = blurRadiusX,
                             blurRadiusY = blurRadiusY,
                             noiseCoefficient = noiseCoefficient,
