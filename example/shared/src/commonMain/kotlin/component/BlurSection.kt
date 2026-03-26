@@ -4,6 +4,7 @@
 package component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -46,6 +49,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
+import kotlin.math.roundToInt
 
 fun LazyListScope.blurSection() {
     item(key = "blur") {
@@ -92,7 +96,8 @@ private fun BlurDemo() {
         )
     }
     val currentBlend = blendConfigs[blendModeIndex]
-
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
     Column(
         modifier = Modifier
             .padding(horizontal = 12.dp),
@@ -121,6 +126,7 @@ private fun BlurDemo() {
                         .fillMaxWidth(0.8f)
                         .height(140.dp)
                         .align(Alignment.Center)
+                        .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                         .textureBlur(
                             backdrop = backdrop,
                             shape = miuixShape(16.dp),
@@ -133,7 +139,14 @@ private fun BlurDemo() {
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
-                        ),
+                        )
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                offsetX += dragAmount.x
+                                offsetY += dragAmount.y
+                            }
+                        },
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

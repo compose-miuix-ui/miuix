@@ -72,8 +72,8 @@ object BlendMode {
     const val OVERLAY = 15
     const val DARKEN = 16
     const val LIGHTEN = 17
-    const val COLOR_DODGE_STD = 18
-    const val COLOR_BURN_STD = 19
+    const val COLOR_DODGE = 18
+    const val COLOR_BURN = 19
     const val HARD_LIGHT = 20
     const val SOFT_LIGHT = 21
     const val DIFFERENCE_STD = 22
@@ -158,8 +158,8 @@ object BlendMode {
         OVERLAY -> androidx.compose.ui.graphics.BlendMode.Overlay
         DARKEN -> androidx.compose.ui.graphics.BlendMode.Darken
         LIGHTEN -> androidx.compose.ui.graphics.BlendMode.Lighten
-        COLOR_DODGE_STD -> androidx.compose.ui.graphics.BlendMode.ColorDodge
-        COLOR_BURN_STD -> androidx.compose.ui.graphics.BlendMode.ColorBurn
+        COLOR_DODGE -> androidx.compose.ui.graphics.BlendMode.ColorDodge
+        COLOR_BURN -> androidx.compose.ui.graphics.BlendMode.ColorBurn
         HARD_LIGHT -> androidx.compose.ui.graphics.BlendMode.Hardlight
         SOFT_LIGHT -> androidx.compose.ui.graphics.BlendMode.Softlight
         DIFFERENCE_STD -> androidx.compose.ui.graphics.BlendMode.Difference
