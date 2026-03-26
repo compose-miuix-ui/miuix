@@ -49,13 +49,13 @@ import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.materialBlur
+import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.blurSection() {
     item(key = "blur") {
-        SmallTitle(text = "Material Blur")
+        SmallTitle(text = "Texture Blur")
         BlurDemo()
     }
 }
@@ -128,7 +128,7 @@ private fun BlurDemo() {
                         .fillMaxWidth(0.8f)
                         .height(140.dp)
                         .align(Alignment.Center)
-                        .materialBlur(
+                        .textureBlur(
                             backdrop = backdrop,
                             shape = { RoundedRectangle(16.dp) },
                             blurRadius = blurRadius,
@@ -139,7 +139,7 @@ private fun BlurDemo() {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Material Blur",
+                            text = "Texture Blur",
                             style = MiuixTheme.textStyles.headline2,
                         )
                         Spacer(Modifier.height(4.dp))

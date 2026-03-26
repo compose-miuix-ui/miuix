@@ -11,8 +11,8 @@ import top.yukonga.miuix.kmp.blur.internal.drawStandardBlendColors
 import top.yukonga.miuix.kmp.blur.internal.noiseDither
 
 /**
- * Applies the complete MIUI HyperMaterial effect: backdrop blur + color blending
- * (with all Xiaomi custom blend modes).
+ * Applies the complete texture effect: backdrop blur + color blending
+ * (with all custom blend modes).
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape Shape provider for the blur region clipping.
@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.blur.internal.noiseDither
  * @param colors Color adjustments and blend layers applied after blur.
  * @param enabled Whether the effect is active. When false, the modifier is a no-op.
  */
-fun Modifier.materialEffect(
+fun Modifier.textureEffect(
     backdrop: Backdrop,
     shape: () -> Shape,
     blurRadius: Float = BlurDefaults.BlurRadius,

@@ -18,9 +18,9 @@ private const val MAX_LAYERS = 8
 /**
  * Applies blend color layers from [colors].
  *
- * - **Xiaomi custom modes (>=100)**: Applied as a [RuntimeShaderEffect] using the
- *   complete `getBlendModeColor` dispatch from libhwui.so with Lab color space,
- *   linear light, plus darker/lighter, etc.
+ * - **Custom modes (>=100)**: Applied as a [RuntimeShaderEffect] using the
+ *   `getBlendModeColor` dispatch with Lab color space, linear light,
+ *   plus darker/lighter, etc.
  * - **Standard SkBlendMode (0-29)**: Drawn later via [drawStandardBlendColors]
  *   using Compose's native GPU hardware blend unit.
  *

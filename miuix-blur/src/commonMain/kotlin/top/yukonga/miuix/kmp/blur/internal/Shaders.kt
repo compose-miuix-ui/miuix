@@ -5,8 +5,6 @@ package top.yukonga.miuix.kmp.blur.internal
 
 /**
  * LM Gaussian blur shader — N-tap symmetric bidirectional sampling.
- * Derived from Xiaomi's libhwui `createLMBlurEffect`.
- *
  * Uses up to 7 tap pairs (14 samples total) with precomputed offsets and weights.
  * Applied twice (horizontal then vertical) for separable 2D convolution.
  *
@@ -15,7 +13,7 @@ package top.yukonga.miuix.kmp.blur.internal
  * - `in_blurOffset[14]`: Sampling offsets. [0..6]=X components, [7..13]=Y components.
  * - `in_blurWeight[7]`: Sampling weights for each tap pair.
  * Edge handling: Out-of-bounds samples return black. We mirror the
- * offset to reflect back into the texture, matching Xiaomi's approach.
+ * offset to reflect back into the texture.
  */
 internal const val LM_GAUSSIAN_BLUR_SHADER = """
     uniform shader child;
@@ -47,7 +45,6 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
 
 /**
  * Noise dithering shader — 3-channel pseudo-random anti-banding.
- * Derived from Xiaomi's libhwui LM upsampling noise implementation.
  */
 internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
@@ -76,17 +73,16 @@ internal const val NOISE_DITHER_SHADER = """
 """
 
 /**
- * Xiaomi custom blend mode shader — complete `getBlendModeColor` dispatch.
- * Extracted from libhwui.so via IDA Pro reverse engineering.
+ * Custom blend mode shader — complete `getBlendModeColor` dispatch.
  *
- * Supports all Xiaomi custom blend modes (100-121, 200-203) including
+ * Supports all custom blend modes (100-121, 200-203) including
  * Lab color space operations, linear light blending, and alpha-aware
  * plus darker/lighter operations.
  *
  * Uniforms:
  * - `child`: Input blurred image shader.
  * - `layerCount`: Number of active blend layers (max 8).
- * - `blendModes[8]`: Xiaomi blend mode ID for each layer.
+ * - `blendModes[8]`: Blend mode ID for each layer.
  * - `layerColors[8]`: RGBA color for each layer.
  * - `uSaturation`: Saturation factor for mode 201.
  * - `uBrightness`: Brightness offset for mode 202.
@@ -226,7 +222,7 @@ internal const val MI_BLEND_MODE_SHADER = """
 
     half3 lab2rgb(half3 lab) { return xyz2rgb(lab2xyz(lab)); }
 
-    // ======== Xiaomi Lab Blend Functions ========
+    // ======== Lab Blend Functions ========
 
     half4 labLighten(half4 c, half a) {
         half3 lab = rgb2lab(c.rgb);
@@ -304,7 +300,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(mix(sc, half3(adj), mix_factor) * alpha, c.a);
     }
 
-    // ======== Main Dispatch (matches libhwui getBlendModeColor) ========
+    // ======== Main Dispatch ========
 
     half4 getBlendModeColor(half4 bg, half4 ch, int mode, half4 bc) {
         if (mode == 3)   return blendSrcOver(bc, bg).xyz1;

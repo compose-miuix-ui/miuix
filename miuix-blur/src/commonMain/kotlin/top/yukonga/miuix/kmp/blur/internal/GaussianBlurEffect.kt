@@ -13,18 +13,18 @@ import kotlin.math.sqrt
 
 /**
  * Maximum number of tap pairs for the Gaussian blur shader.
- * Matches Xiaomi's libhwui which supports up to 7 shader variants (1-7 pairs).
+ * Supports up to 7 shader variants (1-7 pairs).
  */
 private const val MAX_TAPS = 7
 
-/** Xiaomi's radius-to-sigma conversion coefficient for Gaussian blur. */
+/** Radius-to-sigma conversion coefficient for Gaussian blur. */
 private const val RADIUS_TO_SIGMA = 0.45f
 
 /** Minimum combined weight for a merged pair to be considered valid. */
 private const val WEIGHT_THRESHOLD = 0.002
 
 /**
- * Applies LM-style separable Gaussian blur using Xiaomi's algorithm:
+ * Applies LM-style separable Gaussian blur:
  * 1. Compute adaptive downscale factor and adjusted variance from sigma
  * 2. Horizontal pass with N-tap symmetric sampling (up to 7 pairs)
  * 3. Vertical pass with N-tap symmetric sampling (up to 7 pairs)
@@ -109,7 +109,7 @@ internal data class DownScaleParams(val adjustedVariance: Float, val downScale: 
 
 /**
  * Computes the adaptive downscale factor and adjusted Gaussian variance
- * from the input sigma, following Xiaomi's `getSampleCountFromSigma` algorithm.
+ * from the input sigma.
  *
  * The downscale factor is chosen based on sigma² thresholds to balance
  * performance and quality. The variance is adjusted with a piecewise-linear
@@ -157,8 +157,7 @@ internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
 }
 
 /**
- * Computes Gaussian blur sampling parameters from variance, following Xiaomi's
- * `getRadiusFromSigma` algorithm.
+ * Computes Gaussian blur sampling parameters from variance.
  *
  * Generates a discrete Gaussian kernel over 27 taps (-13..+13), normalizes it,
  * then merges adjacent weight pairs using linear interpolation to reduce the

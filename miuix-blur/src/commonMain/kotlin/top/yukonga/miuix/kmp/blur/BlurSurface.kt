@@ -17,7 +17,7 @@ import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * A surface composable with MIUI-style background blur effect.
+ * A surface composable with background blur effect.
  *
  * This is the highest-level entry point for common use cases. The caller must provide a
  * [Backdrop] instance obtained via [rememberLayerBackdrop] and capture content
@@ -53,7 +53,7 @@ fun BlurSurface(
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 }
-                .materialEffect(
+                .textureEffect(
                     backdrop = backdrop,
                     shape = shape,
                     blurRadius = blurRadius,

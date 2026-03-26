@@ -30,7 +30,7 @@ data class BlurColors(
  * A single color blend entry applied over the blurred backdrop.
  *
  * Supports both standard SkBlendMode values (0-29, handled by GPU hardware)
- * and Xiaomi custom modes (100-121, 200-203, handled by runtime shader).
+ * and custom modes (100-121, 200-203, handled by runtime shader).
  * See [BlendMode] for all available constants.
  *
  * @param color The color to blend.
@@ -44,11 +44,11 @@ data class BlendColorEntry(
 
 /**
  * Blend mode constants covering both standard SkBlendMode (0-29) and
- * Xiaomi custom modes (100-121, 200-203) from libhwui.so.
+ * custom modes (100-121, 200-203).
  *
  * Standard modes (0-29) are executed by the GPU hardware blend unit via
  * Compose's native [androidx.compose.ui.graphics.BlendMode].
- * Xiaomi custom modes (>=100) are executed by a runtime shader implementing
+ * Custom modes (>=100) are executed by a runtime shader implementing
  * Lab color space operations, linear light blending, and more.
  */
 object BlendMode {
@@ -86,7 +86,7 @@ object BlendMode {
 
     // endregion
 
-    // region Xiaomi custom modes (>=100) — runtime shader path
+    // region Custom modes (>=100) — runtime shader path
 
     /** Linear light blend. */
     const val LINEAR_LIGHT = 100
@@ -94,7 +94,7 @@ object BlendMode {
     /** Linear light with greyscale modulation. */
     const val LINEAR_LIGHT_WITH_GREYSCALE = 101
 
-    /** Absolute difference blend (Xiaomi variant). */
+    /** Absolute difference blend. */
     const val MI_DIFFERENCE = 102
 
     /** Lab lighten with greyscale modulation. */
@@ -109,10 +109,10 @@ object BlendMode {
     /** Linear light in Lab color space. */
     const val LINEAR_LIGHT_LAB = 107
 
-    /** Color dodge with Xiaomi's V2 implementation. */
+    /** Color dodge V2. */
     const val MI_COLOR_DODGE = 118
 
-    /** Color burn with Xiaomi's V2 implementation. */
+    /** Color burn V2. */
     const val MI_COLOR_BURN = 119
 
     /** Plus darker with alpha-aware compositing. */
@@ -135,7 +135,7 @@ object BlendMode {
 
     // endregion
 
-    /** Returns true if [mode] is a Xiaomi custom mode handled by shader. */
+    /** Returns true if [mode] is a custom mode handled by shader. */
     fun isCustomMode(mode: Int): Boolean = mode >= 100
 
     /** Maps a standard SkBlendMode integer ID (0-28) to Compose [BlendMode][androidx.compose.ui.graphics.BlendMode]. */
@@ -174,7 +174,7 @@ object BlendMode {
 }
 
 /**
- * Default values for material blur effects.
+ * Default values for texture blur effects.
  */
 object BlurDefaults {
 

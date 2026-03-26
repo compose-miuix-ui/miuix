@@ -6,7 +6,7 @@ package top.yukonga.miuix.kmp.blur.internal
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 
 /**
- * Applies blur effect to the backdrop using Xiaomi's LM Gaussian algorithm.
+ * Applies blur effect to the backdrop using LM Gaussian algorithm.
  */
 internal object BlurEffects {
 
