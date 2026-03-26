@@ -10,8 +10,10 @@ import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -51,6 +53,7 @@ fun Modifier.drawPlainBackdrop(
     onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit = DefaultOnDrawBackdrop,
     onDrawSurface: (DrawScope.() -> Unit)? = null,
     onDrawFront: (DrawScope.() -> Unit)? = null,
+    contentBlendMode: BlendMode? = null,
 ): Modifier {
     val shapeProvider = ShapeProvider(shape)
     return this
@@ -67,6 +70,7 @@ fun Modifier.drawPlainBackdrop(
                 onDrawBackdrop = onDrawBackdrop,
                 onDrawSurface = onDrawSurface,
                 onDrawFront = onDrawFront,
+                contentBlendMode = contentBlendMode,
             ),
         )
 }
@@ -80,6 +84,7 @@ private class DrawBackdropElement(
     val onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
     val onDrawSurface: (DrawScope.() -> Unit)?,
     val onDrawFront: (DrawScope.() -> Unit)?,
+    val contentBlendMode: BlendMode? = null,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
@@ -91,6 +96,7 @@ private class DrawBackdropElement(
         onDrawBackdrop = onDrawBackdrop,
         onDrawSurface = onDrawSurface,
         onDrawFront = onDrawFront,
+        contentBlendMode = contentBlendMode,
     )
 
     override fun update(node: DrawBackdropNode) {
@@ -102,6 +108,7 @@ private class DrawBackdropElement(
         node.onDrawBackdrop = onDrawBackdrop
         node.onDrawSurface = onDrawSurface
         node.onDrawFront = onDrawFront
+        node.contentBlendMode = contentBlendMode
         node.invalidateDrawCache()
     }
 
@@ -121,6 +128,7 @@ private class DrawBackdropElement(
         if (onDrawBackdrop != other.onDrawBackdrop) return false
         if (onDrawSurface != other.onDrawSurface) return false
         if (onDrawFront != other.onDrawFront) return false
+        if (contentBlendMode != other.contentBlendMode) return false
         return true
     }
 
@@ -133,6 +141,7 @@ private class DrawBackdropElement(
         result = 31 * result + onDrawBackdrop.hashCode()
         result = 31 * result + (onDrawSurface?.hashCode() ?: 0)
         result = 31 * result + (onDrawFront?.hashCode() ?: 0)
+        result = 31 * result + (contentBlendMode?.hashCode() ?: 0)
         return result
     }
 }
@@ -146,6 +155,7 @@ private class DrawBackdropNode(
     var onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
     var onDrawSurface: (DrawScope.() -> Unit)?,
     var onDrawFront: (DrawScope.() -> Unit)?,
+    var contentBlendMode: BlendMode? = null,
 ) : Modifier.Node(),
     LayoutModifierNode,
     DrawModifierNode,
@@ -244,6 +254,8 @@ private class DrawBackdropNode(
         }
     }
 
+    private val contentPaint by lazy { Paint() }
+
     override fun ContentDrawScope.draw() {
         if (effectScope.update(this)) {
             updateEffects()
@@ -251,7 +263,20 @@ private class DrawBackdropNode(
         onDrawBehind?.invoke(this)
         drawBackdropLayer()
         onDrawSurface?.invoke(this)
-        drawContent()
+
+        val blendMode = contentBlendMode
+        if (blendMode != null) {
+            contentPaint.blendMode = blendMode
+            drawContext.canvas.saveLayer(
+                androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
+                contentPaint,
+            )
+            drawContent()
+            drawContext.canvas.restore()
+        } else {
+            drawContent()
+        }
+
         onDrawFront?.invoke(this)
     }
 

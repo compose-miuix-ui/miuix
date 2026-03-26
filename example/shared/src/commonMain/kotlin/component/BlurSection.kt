@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -32,8 +33,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -44,6 +48,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.foregroundBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -56,6 +61,10 @@ fun LazyListScope.blurSection() {
     item(key = "blur") {
         SmallTitle(text = "Texture Blur")
         BlurDemo()
+    }
+    item(key = "foreground_blur") {
+        SmallTitle(text = "Foreground Blur")
+        ForegroundBlurDemo()
     }
 }
 
@@ -179,7 +188,9 @@ private fun BlurDemo() {
         Spacer(Modifier.height(12.dp))
 
         // Controls
-        Card {
+        Card(
+            modifier = Modifier.padding(bottom = 12.dp),
+        ) {
             // Blur radius
             BasicComponent(
                 title = "Blur Radius",
@@ -249,6 +260,184 @@ private fun BlurDemo() {
             )
 
             // Blend mode
+            val modeId = currentBlend.second.firstOrNull()?.mode
+            BasicComponent(
+                title = "Blend Mode",
+                endActions = {
+                    ValueText(currentBlend.first + if (modeId != null) " ($modeId)" else "")
+                },
+                bottomAction = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextButton(
+                            text = "Prev",
+                            onClick = {
+                                blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(
+                            text = "Next",
+                            onClick = {
+                                blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForegroundBlurDemo() {
+    var blurRadiusX by remember { mutableFloatStateOf(60f) }
+    var blurRadiusY by remember { mutableFloatStateOf(60f) }
+    var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
+    var brightness by remember { mutableFloatStateOf(0f) }
+    var contrast by remember { mutableFloatStateOf(1f) }
+    var saturation by remember { mutableFloatStateOf(1f) }
+
+    val backdrop = rememberLayerBackdrop()
+    val onBackground = MiuixTheme.colorScheme.onBackground
+    val blendConfigs = remember {
+        listOf(
+            "None" to emptyList(),
+            "SrcOver" to listOf(BlendColorEntry(onBackground, BlendMode.SRC_OVER)),
+            "Screen" to listOf(BlendColorEntry(onBackground, BlendMode.SCREEN)),
+            "Multiply" to listOf(BlendColorEntry(onBackground, BlendMode.MULTIPLY)),
+            "Overlay" to listOf(BlendColorEntry(onBackground, BlendMode.OVERLAY)),
+            "Soft Light" to listOf(BlendColorEntry(onBackground, BlendMode.SOFT_LIGHT)),
+            "Linear Light" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT)),
+            "Linear Light Grey" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
+            "Linear Light Lab" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_LAB)),
+            "Lab Lighten" to listOf(BlendColorEntry(onBackground, BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
+            "Lab Darken" to listOf(BlendColorEntry(onBackground, BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
+            "MI Difference" to listOf(BlendColorEntry(onBackground, BlendMode.MI_DIFFERENCE)),
+            "MI Color Dodge" to listOf(BlendColorEntry(onBackground, BlendMode.MI_COLOR_DODGE)),
+            "MI Color Burn" to listOf(BlendColorEntry(onBackground, BlendMode.MI_COLOR_BURN)),
+            "Plus Lighter" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_LIGHTER)),
+            "Plus Darker" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_DARKER)),
+        )
+    }
+    val defaultBlendIndex = 8
+    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
+    val currentBlend = blendConfigs[blendModeIndex]
+
+    Column(
+        modifier = Modifier.padding(horizontal = 12.dp),
+    ) {
+        Card {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp),
+            ) {
+                // Background layer (captured by layerBackdrop)
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .layerBackdrop(backdrop),
+                ) {
+                    StaticBackground()
+                }
+
+                // Foreground blur text
+                Text(
+                    text = "Foreground Blur\n\nTEST TEST TEST",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .foregroundBlur(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(0.dp),
+                            blurRadiusX = blurRadiusX,
+                            blurRadiusY = blurRadiusY,
+                            noiseCoefficient = noiseCoefficient,
+                            colors = BlurColors(
+                                blendColors = currentBlend.second,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
+                        ),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Controls
+        Card {
+            BasicComponent(
+                title = "Blur Radius",
+                endActions = { ValueText("${blurRadiusX.toInt()}") },
+                bottomAction = {
+                    Slider(
+                        value = blurRadiusX / 200f,
+                        onValueChange = {
+                            blurRadiusX = it * 200f
+                            blurRadiusY = it * 200f
+                        },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            BasicComponent(
+                title = "Noise",
+                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                bottomAction = {
+                    Slider(
+                        value = noiseCoefficient / 0.1f,
+                        onValueChange = { noiseCoefficient = it * 0.1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            BasicComponent(
+                title = "Brightness",
+                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = (brightness + 1f) / 2f,
+                        onValueChange = { brightness = it * 2f - 1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            BasicComponent(
+                title = "Contrast",
+                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = contrast / 3f,
+                        onValueChange = { contrast = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            BasicComponent(
+                title = "Saturation",
+                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = saturation / 3f,
+                        onValueChange = { saturation = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
             val modeId = currentBlend.second.firstOrNull()?.mode
             BasicComponent(
                 title = "Blend Mode",
