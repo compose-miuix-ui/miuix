@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import org.intellij.lang.annotations.Language
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.colorFilterEffect
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
@@ -100,7 +99,7 @@ fun BackdropEffectScope.effect(effect: RenderEffect) {
  */
 fun BackdropEffectScope.runtimeShaderEffect(
     key: String,
-    @Language("AGSL") shaderString: String,
+    shaderString: String,
     uniformShaderName: String,
     block: RuntimeShader.() -> Unit,
 ) {

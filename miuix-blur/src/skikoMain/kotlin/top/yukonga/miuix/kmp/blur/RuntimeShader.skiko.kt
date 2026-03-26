@@ -6,11 +6,10 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
-import org.intellij.lang.annotations.Language
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
 
-actual fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader = SkikoRuntimeShader(RuntimeShaderBuilder(RuntimeEffect.makeForShader(shaderString)))
+actual fun RuntimeShader(shaderString: String): RuntimeShader = SkikoRuntimeShader(RuntimeShaderBuilder(RuntimeEffect.makeForShader(shaderString)))
 
 actual fun RuntimeShader.asComposeShader(): Shader = asSkikoRuntimeShader().makeShader()
 
@@ -54,7 +53,10 @@ private class SkikoRuntimeShader(val shader: RuntimeShaderBuilder) : RuntimeShad
         shader.uniform(name, value1, value2, value3, value4)
     }
 
-    override fun setIntUniform(name: String, values: IntArray): Unit = throw UnsupportedOperationException("Setting int array uniforms is not supported on Skia RuntimeShader.")
+    override fun setIntUniform(name: String, values: IntArray) {
+        val floats = FloatArray(values.size) { values[it].toFloat() }
+        shader.uniform(name, floats)
+    }
 
     override fun setColorUniform(name: String, color: Color) {
         val srgb = color.convert(ColorSpaces.Srgb)

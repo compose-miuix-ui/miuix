@@ -3,8 +3,6 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-import org.intellij.lang.annotations.Language
-
 /**
  * LM Gaussian blur shader — N-tap symmetric bidirectional sampling.
  * Derived from Xiaomi's libhwui `createLMBlurEffect`.
@@ -19,7 +17,6 @@ import org.intellij.lang.annotations.Language
  * Edge handling: Out-of-bounds samples return black. We mirror the
  * offset to reflect back into the texture, matching Xiaomi's approach.
  */
-@Language("AGSL")
 internal const val LM_GAUSSIAN_BLUR_SHADER = """
     uniform shader child;
     uniform float in_blurOffset[14];
@@ -52,7 +49,6 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
  * Noise dithering shader — 3-channel pseudo-random anti-banding.
  * Derived from Xiaomi's libhwui LM upsampling noise implementation.
  */
-@Language("AGSL")
 internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
     uniform float noise_coeff;
@@ -97,7 +93,6 @@ internal const val NOISE_DITHER_SHADER = """
  * - `uLuminanceAmount`: Luminance mix factor for mode 203.
  * - `uLuminanceValues`: Luminance curve control points for mode 203.
  */
-@Language("AGSL")
 internal const val MI_BLEND_MODE_SHADER = """
     uniform shader child;
 

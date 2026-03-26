@@ -5,12 +5,10 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
-import org.intellij.lang.annotations.Language
-
 /**
  * Creates a platform-specific [RuntimeShader] from the given AGSL/SkSL shader string.
  */
-expect fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader
+expect fun RuntimeShader(shaderString: String): RuntimeShader
 
 /**
  * Converts this [RuntimeShader] to a Compose [Shader] for use with Paint.

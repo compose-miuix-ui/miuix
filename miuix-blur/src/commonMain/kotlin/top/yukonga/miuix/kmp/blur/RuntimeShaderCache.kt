@@ -3,8 +3,6 @@
 
 package top.yukonga.miuix.kmp.blur
 
-import org.intellij.lang.annotations.Language
-
 /**
  * Cache for compiled [RuntimeShader] instances, avoiding recompilation each frame.
  */
@@ -13,7 +11,7 @@ sealed interface RuntimeShaderCache {
     /**
      * Returns a cached [RuntimeShader] for the given [key], compiling from [string] if not yet cached.
      */
-    fun obtainRuntimeShader(key: String, @Language("AGSL") string: String): RuntimeShader
+    fun obtainRuntimeShader(key: String, string: String): RuntimeShader
 }
 
 internal class RuntimeShaderCacheImpl : RuntimeShaderCache {
