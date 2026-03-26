@@ -226,8 +226,12 @@ private fun BlurDemo() {
 @Composable
 private fun StaticBackground() {
     val colors = listOf(
-        Color(0xFFFF6B6B), Color(0xFFFFE66D), Color(0xFF4ECDC4),
-        Color(0xFF45B7D1), Color(0xFF96CEB4), Color(0xFFDDA0DD),
+        Color(0xFFFF6B6B),
+        Color(0xFFFFE66D),
+        Color(0xFF4ECDC4),
+        Color(0xFF45B7D1),
+        Color(0xFF96CEB4),
+        Color(0xFFDDA0DD),
     )
     Box(Modifier.fillMaxSize()) {
         val cols = 4
@@ -276,9 +280,14 @@ private fun DynamicBackground() {
     )
 
     val colors = listOf(
-        Color(0xFFFF6B6B), Color(0xFFFFE66D), Color(0xFF4ECDC4),
-        Color(0xFF45B7D1), Color(0xFF96CEB4), Color(0xFFDDA0DD),
-        Color(0xFFFF9A76), Color(0xFF6C5CE7),
+        Color(0xFFFF6B6B),
+        Color(0xFFFFE66D),
+        Color(0xFF4ECDC4),
+        Color(0xFF45B7D1),
+        Color(0xFF96CEB4),
+        Color(0xFFDDA0DD),
+        Color(0xFFFF9A76),
+        Color(0xFF6C5CE7),
     )
 
     Box(Modifier.fillMaxSize()) {

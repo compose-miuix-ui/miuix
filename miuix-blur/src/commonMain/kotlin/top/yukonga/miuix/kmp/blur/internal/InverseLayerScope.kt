@@ -36,7 +36,7 @@ internal class InverseLayerScope : GraphicsLayerScope {
 
     override var scaleX: Float = 1f
     override var scaleY: Float = 1f
-    override var alpha: Float = 0f
+    override var alpha: Float = 1f
     override var translationX: Float = 0f
     override var translationY: Float = 0f
     override var shadowElevation: Float = 0f

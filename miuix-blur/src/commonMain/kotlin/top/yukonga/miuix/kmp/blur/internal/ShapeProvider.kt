@@ -3,7 +3,7 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.LayoutDirection
 /**
  * Caches [Shape] outlines to avoid recomputation each frame.
  */
-@Immutable
+@Stable
 internal class ShapeProvider(val shapeBlock: () -> Shape) {
 
     private var cachedShape: Shape? = null

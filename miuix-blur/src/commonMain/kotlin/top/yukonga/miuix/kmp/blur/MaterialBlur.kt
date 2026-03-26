@@ -5,10 +5,6 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import top.yukonga.miuix.kmp.blur.internal.BlurEffects
-import top.yukonga.miuix.kmp.blur.internal.applyBlendColors
-import top.yukonga.miuix.kmp.blur.internal.drawStandardBlendColors
-import top.yukonga.miuix.kmp.blur.internal.noiseDither
 
 /**
  * Applies MIUI-style background blur to the content behind this composable.
@@ -30,24 +26,11 @@ fun Modifier.materialBlur(
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
     enabled: Boolean = true,
-): Modifier {
-    if (!enabled) return this
-
-    val clampedRadius = blurRadius.coerceIn(0f, BlurDefaults.MaxBlurRadius)
-    val hasStandardBlend = colors.blendColors.any { !BlendMode.isCustomMode(it.mode) }
-
-    return this.drawPlainBackdrop(
-        backdrop = backdrop,
-        shape = shape,
-        effects = {
-            BlurEffects.applyBlur(this, clampedRadius)
-            noiseDither(noiseCoefficient)
-            applyBlendColors(colors)
-        },
-        onDrawSurface = if (hasStandardBlend) {
-            { drawStandardBlendColors(colors.blendColors) }
-        } else {
-            null
-        },
-    )
-}
+): Modifier = materialEffect(
+    backdrop = backdrop,
+    shape = shape,
+    blurRadius = blurRadius,
+    noiseCoefficient = noiseCoefficient,
+    colors = colors,
+    enabled = enabled,
+)

@@ -16,8 +16,6 @@ import org.intellij.lang.annotations.Language
  * - `child`: Input image shader.
  * - `in_blurOffset[14]`: Sampling offsets. [0..6]=X components, [7..13]=Y components.
  * - `in_blurWeight[7]`: Sampling weights for each tap pair.
- * - `self`: When > 0, preserves alpha; when <= 0, forces alpha to 1.0.
- *
  * Edge handling: Out-of-bounds samples return black. We mirror the
  * offset to reflect back into the texture, matching Xiaomi's approach.
  */
@@ -27,7 +25,6 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
     uniform float in_blurOffset[14];
     uniform float in_blurWeight[7];
     uniform float2 in_texSize;
-    uniform int self;
 
     // Mirror coordinate into [0, size] range
     float2 mirror(float2 coord, float2 size) {
@@ -44,7 +41,7 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
             float2 c2 = mirror(xy - offset, in_texSize);
             color += (child.eval(c1) + child.eval(c2)) * in_blurWeight[i];
         }
-        return self > 0 ? color : half4(color.rgb, 1.0);
+        return half4(color.rgb, 1.0);
     }
 """
 

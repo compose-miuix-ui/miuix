@@ -40,6 +40,7 @@ fun Modifier.materialEffect(
         effects = {
             BlurEffects.applyBlur(this, clampedRadius)
             noiseDither(noiseCoefficient)
+            colorControls(colors.brightness, colors.contrast, colors.saturation)
             applyBlendColors(colors)
         },
         onDrawSurface = if (hasStandardBlend) {

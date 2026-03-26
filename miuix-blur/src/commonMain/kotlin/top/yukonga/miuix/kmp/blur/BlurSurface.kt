@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +33,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param content The composable content displayed on top of the blur.
  */
 @Composable
-@NonRestartableComposable
 fun BlurSurface(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,

@@ -66,7 +66,6 @@ internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
         setFloatUniform("in_blurOffset", offsets)
         setFloatUniform("in_blurWeight", params.weights.copyOf(MAX_TAPS))
         setFloatUniform("in_texSize", texW, texH)
-        setIntUniform("self", 0)
     }
 
     // Vertical pass
@@ -83,7 +82,6 @@ internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
         setFloatUniform("in_blurOffset", offsets)
         setFloatUniform("in_blurWeight", params.weights.copyOf(MAX_TAPS))
         setFloatUniform("in_texSize", texW, texH)
-        setIntUniform("self", 0)
     }
 }
 
@@ -130,11 +128,13 @@ internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
             adjustedVariance = 0.015625f * sigmaSquared - 0.140625f
             downScaleExp = 3
         }
+
         sigmaSquared >= 90.25f -> {
             // Medium-large blur: 4x base downscale
             adjustedVariance = 0.0625f * sigmaSquared - 0.47265625f
             downScaleExp = 2
         }
+
         else -> {
             // Small blur: no base downscale
             adjustedVariance = sigmaSquared
