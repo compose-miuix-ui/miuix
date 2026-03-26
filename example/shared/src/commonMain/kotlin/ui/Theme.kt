@@ -3,7 +3,10 @@
 
 package ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -11,6 +14,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
+
+val LocalColorMode = compositionLocalOf<Int> { 0 }
 
 @Composable
 fun AppTheme(
@@ -33,11 +38,24 @@ fun AppTheme(
             else -> ThemeController(ColorSchemeMode.System)
         }
     }
-    return MiuixTheme(
-        controller = controller,
-        smoothRounding = smoothRounding,
-        content = content,
-    )
+    CompositionLocalProvider(LocalColorMode provides colorMode) {
+        MiuixTheme(
+            controller = controller,
+            smoothRounding = smoothRounding,
+            content = content,
+        )
+    }
+}
+
+@Composable
+fun isInDarkTheme(): Boolean = when (LocalColorMode.current) {
+    1, 4 -> false
+
+    // Force light mode
+    2, 5, 6 -> true
+
+    // Force dark mode
+    else -> isSystemInDarkTheme() // Follow system (0 or default)
 }
 
 val KeyColors: List<Pair<String, Color>> = listOf(

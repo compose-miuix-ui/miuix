@@ -6,7 +6,6 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -78,7 +78,7 @@ import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import ui.isInDarkTheme
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 
@@ -108,8 +108,8 @@ fun AboutPage(
             SmallTopAppBar(
                 title = "About",
                 scrollBehavior = topAppBarScrollBehavior,
-                color = colorScheme.surface.copy(alpha = scrollProgress),
-                titleColor = colorScheme.onSurface.copy(alpha = scrollProgress),
+                color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
+                titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
                 navigationIcon = {
                     BackNavigationIcon(
@@ -144,16 +144,14 @@ private fun AboutContent(
     val isWideScreen = LocalIsWideScreen.current
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
+
     val backdrop = rememberLayerBackdrop()
     var showTextureSet by remember { mutableStateOf(false) }
-
     var blurRadius by remember { mutableFloatStateOf(60f) }
     var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
-    val defaultBlendIndex = if (isSystemInDarkTheme()) 2 else 1
-    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
     val contentPadding = pageContentPadding(
         padding,
         padding,
@@ -163,44 +161,46 @@ private fun AboutContent(
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
 
+    val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
     val blendConfigs = remember {
         listOf(
             // No blend
             "None" to emptyList(),
             // Standard SkBlendMode (GPU hardware)
-            "SrcOver White" to listOf(BlendColorEntry(Color.White.copy(alpha = 0.3f), BlendMode.SRC_OVER)),
-            "SrcOver Black" to listOf(BlendColorEntry(Color.Black.copy(alpha = 0.2f), BlendMode.SRC_OVER)),
-            "Screen" to listOf(BlendColorEntry(Color(0xFF1565C0).copy(alpha = 0.3f), BlendMode.SCREEN)),
-            "Multiply" to listOf(BlendColorEntry(Color(0xFFE91E63).copy(alpha = 0.3f), BlendMode.MULTIPLY)),
-            "Overlay" to listOf(BlendColorEntry(Color(0xFF6750A4).copy(alpha = 0.4f), BlendMode.OVERLAY)),
-            "Soft Light" to listOf(BlendColorEntry(Color(0xFFFFB74D).copy(alpha = 0.4f), BlendMode.SOFT_LIGHT)),
+            "SrcOver" to listOf(BlendColorEntry(surface, BlendMode.SRC_OVER)),
+            "Screen" to listOf(BlendColorEntry(surface, BlendMode.SCREEN)),
+            "Multiply" to listOf(BlendColorEntry(surface, BlendMode.MULTIPLY)),
+            "Overlay" to listOf(BlendColorEntry(surface, BlendMode.OVERLAY)),
+            "Soft Light" to listOf(BlendColorEntry(surface, BlendMode.SOFT_LIGHT)),
             // Xiaomi custom modes (runtime shader)
-            "Linear Light" to listOf(BlendColorEntry(Color(0xFF6750A4).copy(alpha = 0.3f), BlendMode.LINEAR_LIGHT)),
-            "Linear Light Grey" to listOf(BlendColorEntry(Color(0xFF90A4AE).copy(alpha = 0.4f), BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
-            "Linear Light Lab" to listOf(BlendColorEntry(Color(0xFF5C6BC0).copy(alpha = 0.3f), BlendMode.LINEAR_LIGHT_LAB)),
-            "Lab Lighten" to listOf(BlendColorEntry(Color.White.copy(alpha = 0.5f), BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
-            "Lab Darken" to listOf(BlendColorEntry(Color.Black.copy(alpha = 0.5f), BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
-            "MI Difference" to listOf(BlendColorEntry(Color(0xFF00BCD4).copy(alpha = 0.4f), BlendMode.MI_DIFFERENCE)),
-            "MI Color Dodge" to listOf(BlendColorEntry(Color(0xFFFF7043).copy(alpha = 0.3f), BlendMode.MI_COLOR_DODGE)),
-            "MI Color Burn" to listOf(BlendColorEntry(Color(0xFF8D6E63).copy(alpha = 0.3f), BlendMode.MI_COLOR_BURN)),
-            "Plus Darker" to listOf(BlendColorEntry(Color(0xFF006D40).copy(alpha = 0.4f), BlendMode.PLUS_DARKER)),
-            "Plus Lighter" to listOf(BlendColorEntry(Color(0xFF1A237E).copy(alpha = 0.4f), BlendMode.PLUS_LIGHTER)),
+            "Linear Light" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT)),
+            "Linear Light Grey" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
+            "Linear Light Lab" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_LAB)),
+            "Lab Lighten" to listOf(BlendColorEntry(surface, BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
+            "Lab Darken" to listOf(BlendColorEntry(surface, BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
+            "MI Difference" to listOf(BlendColorEntry(surface, BlendMode.MI_DIFFERENCE)),
+            "MI Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_DODGE)),
+            "MI Color Burn" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_BURN)),
+            "Plus Lighter" to listOf(BlendColorEntry(surface, BlendMode.PLUS_LIGHTER)),
+            "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
+    val defaultBlendIndex = if (isInDarkTheme()) 15 else 14
+    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
     val currentBlend = blendConfigs[blendModeIndex]
 
-    val cardColor = colorScheme.surfaceContainer.copy(alpha = scrollProgress)
+    val cardColor = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = scrollProgress)
 
-    // Calculate the logo spacer height in dp from measured pixel height
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(300.dp) }
 
     BgEffectBackground(
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier.background(Color.White).layerBackdrop(backdrop),
+        bgModifier = Modifier
+            .background(MiuixTheme.colorScheme.surface)
+            .layerBackdrop(backdrop),
         bgAlpha = 1f - scrollProgress,
     ) {
-        // Fixed logo overlay (below LazyColumn in z-order, fades with scroll)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -219,16 +219,13 @@ private fun AboutContent(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(90.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Color.White)
-                    .clickable {
-                        showTextureSet = true
-                    },
+                    .size(88.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White),
             ) {
                 Image(
                     modifier = Modifier
-                        .size(72.dp),
+                        .size(74.dp),
                     painter = painterResource(Res.drawable.ic_launcher),
                     contentDescription = null,
                 )
@@ -237,13 +234,13 @@ private fun AboutContent(
                 modifier = Modifier.padding(top = 12.dp),
                 text = "Miuix",
                 fontWeight = FontWeight.Medium,
-                fontSize = 26.sp,
+                fontSize = 28.sp,
             )
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
                 text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 textAlign = TextAlign.Center,
             )
         }
@@ -260,11 +257,20 @@ private fun AboutContent(
         ) {
             // Transparent spacer matching logo height
             item(key = "logoSpacer") {
-                Spacer(
+                Box(
                     Modifier
                         .fillMaxWidth()
                         .height(logoHeightDp + 52.dp + 98.dp),
-                )
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    Spacer(
+                        Modifier
+                            .padding(top = 52.dp)
+                            .size(88.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .clickable { showTextureSet = true },
+                    )
+                }
             }
 
             item(key = "about") {
@@ -290,7 +296,7 @@ private fun AboutContent(
                             Text(
                                 text = "GitHub",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
@@ -301,7 +307,7 @@ private fun AboutContent(
                             Text(
                                 text = "Telegram",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
@@ -331,7 +337,7 @@ private fun AboutContent(
                             Text(
                                 text = "Apache-2.0",
                                 fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                             )
                         },
                         onClick = {
@@ -357,7 +363,8 @@ private fun AboutContent(
     }
 
     SuperBottomSheet(
-        showTextureSet,
+        show = showTextureSet,
+        title = "Texture Set",
         onDismissRequest = {
             showTextureSet = false
         },
@@ -440,13 +447,12 @@ private fun AboutContent(
                 bottomAction = {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         TextButton(
                             text = "Prev",
                             onClick = {
-                                blendModeIndex =
-                                    (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
+                                blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
                             },
                             modifier = Modifier.weight(1f),
                         )
@@ -460,6 +466,7 @@ private fun AboutContent(
                     }
                 },
             )
+            Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
 }
@@ -470,6 +477,6 @@ private fun ValueText(text: String) {
     Text(
         text = text,
         fontSize = MiuixTheme.textStyles.body2.fontSize,
-        color = colorScheme.onSurfaceVariantActions,
+        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
     )
 }

@@ -3,47 +3,30 @@
 
 package component.effect
 
-import LocalAppState
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.asComposeShader
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import ui.isInDarkTheme
 
 private fun getLayerList(isDarkMode: Boolean): List<Pair<Color, Int>> = if (isDarkMode) {
     listOf(
@@ -66,12 +49,10 @@ inline fun BgEffectBackground(
     bgAlpha: Float = 1f,
     crossinline content: @Composable (BoxScope.() -> Unit),
 ) {
-    val appState = LocalAppState.current
-
     val painter = remember { BgEffectPainter() }
 
     val currentBrush: MutableState<ShaderBrush?> = remember { mutableStateOf(null) }
-    val isDark = isSystemInDarkTheme()
+    val isDark = isInDarkTheme()
 
     var targetSize by remember { mutableStateOf(IntSize.Zero) }
     val logoHeight = remember { mutableFloatStateOf(0f) }
@@ -121,14 +102,18 @@ inline fun BgEffectBackground(
             targetSize = it
         },
     ) {
+        val surface = MiuixTheme.colorScheme.surface
         currentBrush.value?.let { brush ->
             Canvas(
-                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = bgAlpha }.then(bgModifier),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { alpha = bgAlpha }
+                    .then(bgModifier),
             ) {
                 with(drawContext.density) {
                     logoHeight.value = 410.dp.toPx()
                 }
-                drawRect(Color.White)
+                drawRect(surface)
                 drawRect(brush)
             }
             content()
