@@ -14,4 +14,9 @@ internal object BlurEffects {
         if (radius <= 0f) return
         scope.gaussianBlur(radius)
     }
+
+    fun applyBlur(scope: BackdropEffectScope, radiusX: Float, radiusY: Float) {
+        if (radiusX <= 0f && radiusY <= 0f) return
+        scope.gaussianBlur(radiusX, radiusY)
+    }
 }

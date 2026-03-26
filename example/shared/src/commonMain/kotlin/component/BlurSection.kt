@@ -3,16 +3,11 @@
 
 package component
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,25 +27,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kyant.shapes.RoundedRectangle
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.blurSection() {
@@ -62,10 +55,14 @@ fun LazyListScope.blurSection() {
 
 @Composable
 private fun BlurDemo() {
-    var blurRadius by remember { mutableFloatStateOf(60f) }
+    var separateXY by remember { mutableStateOf(false) }
+    var blurRadiusX by remember { mutableFloatStateOf(60f) }
+    var blurRadiusY by remember { mutableFloatStateOf(60f) }
     var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
+    var brightness by remember { mutableFloatStateOf(0f) }
+    var contrast by remember { mutableFloatStateOf(1f) }
+    var saturation by remember { mutableFloatStateOf(1f) }
     var blendModeIndex by remember { mutableIntStateOf(0) }
-    var dynamicBg by remember { mutableStateOf(false) }
 
     val backdrop = rememberLayerBackdrop()
 
@@ -97,8 +94,7 @@ private fun BlurDemo() {
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 12.dp),
+            .padding(horizontal = 12.dp),
     ) {
         // Preview area
         Card(
@@ -115,11 +111,7 @@ private fun BlurDemo() {
                         .matchParentSize()
                         .layerBackdrop(backdrop),
                 ) {
-                    if (dynamicBg) {
-                        DynamicBackground()
-                    } else {
-                        StaticBackground()
-                    }
+                    StaticBackground()
                 }
 
                 // Blur overlay
@@ -131,9 +123,15 @@ private fun BlurDemo() {
                         .textureBlur(
                             backdrop = backdrop,
                             shape = { RoundedRectangle(16.dp) },
-                            blurRadius = blurRadius,
+                            blurRadiusX = blurRadiusX,
+                            blurRadiusY = blurRadiusY,
                             noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(blendColors = currentBlend.second),
+                            colors = BlurColors(
+                                blendColors = currentBlend.second,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -144,7 +142,11 @@ private fun BlurDemo() {
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "R=${blurRadius.toInt()} | ${currentBlend.first}",
+                            text = if (separateXY) {
+                                "X=${blurRadiusX.toInt()} Y=${blurRadiusY.toInt()} | ${currentBlend.first}"
+                            } else {
+                                "R=${blurRadiusX.toInt()} | ${currentBlend.first}"
+                            },
                             style = MiuixTheme.textStyles.body2,
                             color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                         )
@@ -158,86 +160,114 @@ private fun BlurDemo() {
         // Controls
         Card {
             // Blur radius
-            Text(
-                text = "Blur Radius: ${blurRadius.toInt()}",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp),
-            )
-            Slider(
-                value = blurRadius / 200f,
-                onValueChange = { blurRadius = it * 200f },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+            BasicComponent(
+                title = "Blur Radius",
+                endActions = { ValueText("${blurRadiusX.toInt()}") },
+                bottomAction = {
+                    Slider(
+                        value = blurRadiusX / 200f,
+                        onValueChange = {
+                            blurRadiusX = it * 200f
+                            blurRadiusY = it * 200f
+                        },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
             // Noise
-            Text(
-                text = "Noise: ${(noiseCoefficient * 1000).toInt() / 1000f}",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
+            BasicComponent(
+                title = "Noise",
+                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                bottomAction = {
+                    Slider(
+                        value = noiseCoefficient / 0.1f,
+                        onValueChange = { noiseCoefficient = it * 0.1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
-            Slider(
-                value = noiseCoefficient / 0.1f,
-                onValueChange = { noiseCoefficient = it * 0.1f },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+
+            // Brightness
+            BasicComponent(
+                title = "Brightness",
+                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = (brightness + 1f) / 2f,
+                        onValueChange = { brightness = it * 2f - 1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            // Contrast
+            BasicComponent(
+                title = "Contrast",
+                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = contrast / 3f,
+                        onValueChange = { contrast = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            // Saturation
+            BasicComponent(
+                title = "Saturation",
+                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = saturation / 3f,
+                        onValueChange = { saturation = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
             // Blend mode
             val modeId = currentBlend.second.firstOrNull()?.mode
-            Text(
-                text = "Blend Mode: ${currentBlend.first}" + if (modeId != null) " ($modeId)" else "",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
+            BasicComponent(
+                title = "Blend Mode",
+                endActions = {
+                    ValueText(currentBlend.first + if (modeId != null) " ($modeId)" else "")
+                },
+                bottomAction = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextButton(
+                            text = "Prev",
+                            onClick = {
+                                blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(
+                            text = "Next",
+                            onClick = {
+                                blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                },
             )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(
-                    text = "Prev",
-                    onClick = {
-                        blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(
-                    text = "Next",
-                    onClick = {
-                        blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            // Dynamic background toggle
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "Dynamic Background", fontSize = 14.sp)
-                Switch(
-                    checked = dynamicBg,
-                    onCheckedChange = { dynamicBg = it },
-                )
-            }
         }
     }
+}
+
+@Suppress("FunctionName")
+@Composable
+private fun ValueText(text: String) {
+    Text(
+        text = text,
+        fontSize = MiuixTheme.textStyles.body2.fontSize,
+        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+    )
 }
 
 @Composable
@@ -309,107 +339,5 @@ private fun StaticBackground() {
                 .rotate(10f)
                 .background(Color(0xCC6C5CE7), RoundedRectangle(18.dp)),
         )
-    }
-}
-
-@Composable
-private fun DynamicBackground() {
-    val transition = rememberInfiniteTransition()
-
-    // Multiple animation drivers at different speeds
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-    )
-    val drift by transition.animateFloat(
-        initialValue = -40f,
-        targetValue = 40f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-    )
-    val pulse by transition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-    )
-
-    data class AnimBlock(
-        val color: Color,
-        val x: Int,
-        val y: Int,
-        val w: Int,
-        val h: Int,
-        val cornerRadius: Int,
-    )
-
-    val blocks = remember {
-        listOf(
-            AnimBlock(Color(0xFFFF6B6B), 10, 10, 100, 80, 20),
-            AnimBlock(Color(0xFFFFE66D), 130, 30, 80, 100, 16),
-            AnimBlock(Color(0xFF4ECDC4), 240, 5, 120, 70, 30),
-            AnimBlock(Color(0xFF45B7D1), 50, 110, 90, 90, 45),
-            AnimBlock(Color(0xFF96CEB4), 170, 100, 110, 80, 12),
-            AnimBlock(Color(0xFFDDA0DD), 300, 80, 70, 110, 22),
-            AnimBlock(Color(0xFFFF9A76), 20, 200, 130, 60, 30),
-            AnimBlock(Color(0xFF6C5CE7), 180, 190, 80, 80, 40),
-            AnimBlock(Color(0xFFE17055), 290, 200, 100, 70, 18),
-            AnimBlock(Color(0xFF00B894), 100, 160, 60, 100, 14),
-            AnimBlock(Color(0xFFFDCB6E), 250, 150, 90, 50, 25),
-            AnimBlock(Color(0xFF74B9FF), 350, 30, 60, 130, 16),
-        )
-    }
-
-    // Opaque gradient base
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF0F2027),
-                        Color(0xFF203A43),
-                        Color(0xFF2C5364),
-                    ),
-                ),
-            ),
-    ) {
-        for (i in blocks.indices) {
-            val b = blocks[i]
-            val angle = phase * (if (i % 2 == 0) 1f else -0.7f) + i * 30f
-            val xOff = drift * (
-                if (i % 3 == 0) {
-                    1f
-                } else if (i % 3 == 1) {
-                    -0.6f
-                } else {
-                    0.3f
-                }
-                )
-            val yOff = drift * (if (i % 2 == 0) -0.4f else 0.8f) * (if (i % 5 == 0) 1.5f else 1f)
-            val s = if (i % 4 == 0) {
-                pulse
-            } else if (i % 4 == 2) {
-                2f - pulse
-            } else {
-                1f
-            }
-            Box(
-                modifier = Modifier
-                    .size(b.w.dp, b.h.dp)
-                    .offset(x = b.x.dp + xOff.dp, y = b.y.dp + yOff.dp)
-                    .scale(s)
-                    .rotate(angle)
-                    .background(b.color.copy(alpha = 0.85f), RoundedRectangle(b.cornerRadius.dp)),
-            )
-        }
     }
 }

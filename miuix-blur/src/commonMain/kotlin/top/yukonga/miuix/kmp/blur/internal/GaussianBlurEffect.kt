@@ -3,10 +3,12 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
+import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
-import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sqrt
@@ -24,66 +26,132 @@ private const val RADIUS_TO_SIGMA = 0.45f
 private const val WEIGHT_THRESHOLD = 0.002
 
 /**
- * Applies LM-style separable Gaussian blur:
- * 1. Compute adaptive downscale factor and adjusted variance from sigma
+ * Result of creating a Gaussian blur [RenderEffect].
+ *
+ * @param renderEffect The chained horizontal + vertical blur render effect.
+ * @param downscaleFactor Adaptive downsampling factor (1, 2, 4, 8, or 16).
+ */
+internal data class GaussianBlurResult(
+    val renderEffect: RenderEffect,
+    val downscaleFactor: Int,
+)
+
+/**
+ * Creates an LM-style separable Gaussian blur [RenderEffect] with independent
+ * horizontal and vertical blur radii:
+ * 1. Compute adaptive downscale factor and adjusted variance from each sigma
  * 2. Horizontal pass with N-tap symmetric sampling (up to 7 pairs)
  * 3. Vertical pass with N-tap symmetric sampling (up to 7 pairs)
  *
- * Falls back to standard Compose [blur] when RuntimeShader is unavailable.
+ * When [radiusX] and [radiusY] differ, each axis is computed independently.
+ * The shared [GaussianBlurResult.downscaleFactor] is the maximum of both axes.
  *
- * @param radius The blur radius in pixels.
+ * @param radiusX The horizontal blur radius in pixels.
+ * @param radiusY The vertical blur radius in pixels.
+ * @param size The size of the content to blur.
+ * @param shaderCache Cache for compiled runtime shaders.
+ * @return [GaussianBlurResult] with the chained render effect and downscale factor,
+ *         or null if both radii are non-positive or produce no valid taps.
  */
-internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
-    if (!isRuntimeShaderSupported()) {
-        blur(radius)
-        return
-    }
-    if (radius <= 0f) return
+internal fun createGaussianBlurEffect(
+    radiusX: Float,
+    radiusY: Float,
+    size: Size,
+    shaderCache: RuntimeShaderCache,
+): GaussianBlurResult? {
+    if (radiusX <= 0f && radiusY <= 0f) return null
 
-    val sigma = radius * RADIUS_TO_SIGMA
-    val (adjustedVariance, downScale) = computeDownScaleParams(sigma)
-    val params = computeGaussianParams(adjustedVariance)
-    if (params.tapCount == 0) return
+    val sigmaX = radiusX * RADIUS_TO_SIGMA
+    val sigmaY = radiusY * RADIUS_TO_SIGMA
+    val (adjustedVarianceX, downScaleX) = computeDownScaleParams(sigmaX)
+    val (adjustedVarianceY, downScaleY) = computeDownScaleParams(sigmaY)
+    val paramsX = if (radiusX > 0f) computeGaussianParams(adjustedVarianceX) else null
+    val paramsY = if (radiusY > 0f) computeGaussianParams(adjustedVarianceY) else null
+    if (paramsX?.tapCount == 0 && paramsY?.tapCount == 0) return null
 
-    // Set adaptive downsampling — effects execute on reduced-area texture
-    downscaleFactor = downScale
+    val downScale = maxOf(downScaleX, downScaleY)
 
     // Texture size must use the same integer arithmetic as drawBackdropLayer
     // to avoid precision mismatch where the shader samples beyond the texture bounds.
     val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
     val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
 
+    var effect: RenderEffect? = null
+
     // Horizontal pass
-    runtimeShaderEffect(
-        key = "LMGaussH",
-        shaderString = LM_GAUSSIAN_BLUR_SHADER,
-        uniformShaderName = "child",
-    ) {
-        val offsets = FloatArray(MAX_TAPS * 2)
-        for (i in 0 until params.tapCount) {
-            offsets[i] = params.offsets[i]
-            offsets[i + MAX_TAPS] = 0f
+    if (paramsX != null && paramsX.tapCount > 0) {
+        val hShader = shaderCache.obtainRuntimeShader("LMGaussH", LM_GAUSSIAN_BLUR_SHADER).apply {
+            val offsets = FloatArray(MAX_TAPS * 2)
+            for (i in 0 until paramsX.tapCount) {
+                offsets[i] = paramsX.offsets[i]
+                offsets[i + MAX_TAPS] = 0f
+            }
+            setFloatUniform("in_blurOffset", offsets)
+            setFloatUniform("in_blurWeight", paramsX.weights.copyOf(MAX_TAPS))
+            setFloatUniform("in_texSize", texW, texH)
         }
-        setFloatUniform("in_blurOffset", offsets)
-        setFloatUniform("in_blurWeight", params.weights.copyOf(MAX_TAPS))
-        setFloatUniform("in_texSize", texW, texH)
+        effect = runtimeShaderEffect(hShader, "child")
     }
 
     // Vertical pass
-    runtimeShaderEffect(
-        key = "LMGaussV",
-        shaderString = LM_GAUSSIAN_BLUR_SHADER,
-        uniformShaderName = "child",
-    ) {
-        val offsets = FloatArray(MAX_TAPS * 2)
-        for (i in 0 until params.tapCount) {
-            offsets[i] = 0f
-            offsets[i + MAX_TAPS] = params.offsets[i]
+    if (paramsY != null && paramsY.tapCount > 0) {
+        val vShader = shaderCache.obtainRuntimeShader("LMGaussV", LM_GAUSSIAN_BLUR_SHADER).apply {
+            val offsets = FloatArray(MAX_TAPS * 2)
+            for (i in 0 until paramsY.tapCount) {
+                offsets[i] = 0f
+                offsets[i + MAX_TAPS] = paramsY.offsets[i]
+            }
+            setFloatUniform("in_blurOffset", offsets)
+            setFloatUniform("in_blurWeight", paramsY.weights.copyOf(MAX_TAPS))
+            setFloatUniform("in_texSize", texW, texH)
         }
-        setFloatUniform("in_blurOffset", offsets)
-        setFloatUniform("in_blurWeight", params.weights.copyOf(MAX_TAPS))
-        setFloatUniform("in_texSize", texW, texH)
+        effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
+            ?: runtimeShaderEffect(vShader, "child")
     }
+
+    return effect?.let { GaussianBlurResult(renderEffect = it, downscaleFactor = downScale) }
+}
+
+/**
+ * Creates an LM-style separable Gaussian blur [RenderEffect] with uniform radius.
+ *
+ * @see createGaussianBlurEffect
+ */
+internal fun createGaussianBlurEffect(
+    radius: Float,
+    size: Size,
+    shaderCache: RuntimeShaderCache,
+): GaussianBlurResult? = createGaussianBlurEffect(radius, radius, size, shaderCache)
+
+/**
+ * Applies LM-style separable Gaussian blur to the backdrop with independent
+ * horizontal and vertical blur radii.
+ * Falls back to standard Compose [blur] when RuntimeShader is unavailable.
+ *
+ * @param radiusX The horizontal blur radius in pixels.
+ * @param radiusY The vertical blur radius in pixels.
+ */
+internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
+    if (!isRuntimeShaderSupported()) {
+        blur(maxOf(radiusX, radiusY))
+        return
+    }
+
+    val result = createGaussianBlurEffect(radiusX, radiusY, size, this) ?: return
+
+    // Set adaptive downsampling — effects execute on reduced-area texture
+    downscaleFactor = result.downscaleFactor
+    renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect
+}
+
+/**
+ * Applies LM-style separable Gaussian blur to the backdrop.
+ * Falls back to standard Compose [blur] when RuntimeShader is unavailable.
+ *
+ * @param radius The blur radius in pixels.
+ */
+internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
+    gaussianBlur(radius, radius)
 }
 
 /**
