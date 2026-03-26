@@ -26,11 +26,14 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
     uniform float in_blurWeight[7];
     uniform float2 in_texSize;
 
-    // Mirror coordinate into [0, size] range
+    // Mirror coordinate into valid texture range.
+    // Clamps to [0.5, size-0.5] (pixel centers) to avoid sampling
+    // beyond the texture boundary where GPUs may return black.
     float2 mirror(float2 coord, float2 size) {
+        float2 limit = size - 0.5;
         coord = abs(coord);
-        coord = size - abs(coord - size);
-        return coord;
+        coord = limit - abs(coord - limit);
+        return clamp(coord, float2(0.5), limit);
     }
 
     half4 main(float2 xy) {
