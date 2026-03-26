@@ -159,9 +159,9 @@ private fun AboutContent(
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
 
-    var blurEnable by remember { mutableStateOf(true)}
-    val dynamicBackground = remember { mutableStateOf(true)}
-    val effectBackground = remember { mutableStateOf(true)}
+    var blurEnable by remember { mutableStateOf(true) }
+    val dynamicBackground = remember { mutableStateOf(true) }
+    val effectBackground = remember { mutableStateOf(true) }
 
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
     val blendConfigs = remember {
@@ -196,7 +196,7 @@ private fun AboutContent(
             listOf(
                 BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
                 BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af500), BlendMode.LAB)
+                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
             )
         } else {
             listOf(
@@ -217,11 +217,11 @@ private fun AboutContent(
         dynamicBackground = dynamicBackground,
         modifier = Modifier.fillMaxSize(),
         bgModifier = Modifier.then(
-            if (blurEnable){
+            if (blurEnable) {
                 Modifier.layerBackdrop(backdrop)
             } else {
                 Modifier
-            }.alpha(1f - scrollProgress)
+            }.alpha(1f - scrollProgress),
         ),
     ) {
         Column(
@@ -255,7 +255,7 @@ private fun AboutContent(
 //            }
             Text(
                 modifier = Modifier.padding(top = 12.dp).then(
-                    if (blurEnable){
+                    if (blurEnable) {
                         Modifier.foregroundBlur(
                             backdrop = backdrop,
                             shape = RoundedRectangle(16.dp),
@@ -263,11 +263,11 @@ private fun AboutContent(
                             noiseCoefficient = noiseCoefficient,
                             colors = BlurColors(
                                 blendColors = logoBlend,
-                            )
+                            ),
                         )
                     } else {
                         Modifier
-                    }
+                    },
                 ),
                 text = "Miuix",
                 fontWeight = FontWeight.Bold,
@@ -314,7 +314,7 @@ private fun AboutContent(
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp)
                         .then(
-                            if (blurEnable){
+                            if (blurEnable) {
                                 Modifier.textureBlur(
                                     backdrop = backdrop,
                                     shape = RoundedRectangle(16.dp),
@@ -329,7 +329,7 @@ private fun AboutContent(
                                 )
                             } else {
                                 Modifier
-                            }
+                            },
                         ),
                     colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
@@ -361,7 +361,7 @@ private fun AboutContent(
                         .padding(horizontal = 12.dp)
                         .padding(top = 12.dp)
                         .then(
-                            if (blurEnable){
+                            if (blurEnable) {
                                 Modifier.textureBlur(
                                     backdrop = backdrop,
                                     shape = RoundedRectangle(16.dp),
@@ -376,7 +376,7 @@ private fun AboutContent(
                                 )
                             } else {
                                 Modifier
-                            }
+                            },
                         ),
                     colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
@@ -427,10 +427,10 @@ private fun AboutContent(
                         effectBackground.value,
                         {
                             effectBackground.value = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             BasicComponent(
                 title = "Dynamic Background Enabled",
@@ -439,10 +439,10 @@ private fun AboutContent(
                         dynamicBackground.value,
                         {
                             dynamicBackground.value = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             BasicComponent(
                 title = "Blur Enable",
@@ -451,10 +451,10 @@ private fun AboutContent(
                         blurEnable,
                         {
                             blurEnable = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             // Blur radius
             BasicComponent(

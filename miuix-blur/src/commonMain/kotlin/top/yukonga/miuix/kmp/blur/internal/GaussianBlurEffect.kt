@@ -13,12 +13,6 @@ import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sqrt
 
-/**
- * Maximum number of tap pairs for the Gaussian blur shader.
- * Supports up to 7 shader variants (1-7 pairs).
- */
-private const val MAX_TAPS = 7
-
 /** Radius-to-sigma conversion coefficient for Gaussian blur. */
 private const val RADIUS_TO_SIGMA = 0.45f
 
@@ -78,31 +72,39 @@ internal fun createGaussianBlurEffect(
 
     var effect: RenderEffect? = null
 
-    // Horizontal pass
+    // Horizontal pass — shader specialized to exact tap count
     if (paramsX != null && paramsX.tapCount > 0) {
-        val hShader = shaderCache.obtainRuntimeShader("LMGaussH", LM_GAUSSIAN_BLUR_SHADER).apply {
-            val offsets = FloatArray(MAX_TAPS * 2)
-            for (i in 0 until paramsX.tapCount) {
+        val n = paramsX.tapCount
+        val hShader = shaderCache.obtainRuntimeShader(
+            "LMGaussH$n",
+            buildGaussianBlurShader(n),
+        ).apply {
+            val offsets = FloatArray(n * 2)
+            for (i in 0 until n) {
                 offsets[i] = paramsX.offsets[i]
-                offsets[i + MAX_TAPS] = 0f
+                offsets[i + n] = 0f
             }
             setFloatUniform("in_blurOffset", offsets)
-            setFloatUniform("in_blurWeight", paramsX.weights.copyOf(MAX_TAPS))
+            setFloatUniform("in_blurWeight", paramsX.weights.copyOf(n))
             setFloatUniform("in_texSize", texW, texH)
         }
         effect = runtimeShaderEffect(hShader, "child")
     }
 
-    // Vertical pass
+    // Vertical pass — shader specialized to exact tap count
     if (paramsY != null && paramsY.tapCount > 0) {
-        val vShader = shaderCache.obtainRuntimeShader("LMGaussV", LM_GAUSSIAN_BLUR_SHADER).apply {
-            val offsets = FloatArray(MAX_TAPS * 2)
-            for (i in 0 until paramsY.tapCount) {
+        val n = paramsY.tapCount
+        val vShader = shaderCache.obtainRuntimeShader(
+            "LMGaussV$n",
+            buildGaussianBlurShader(n),
+        ).apply {
+            val offsets = FloatArray(n * 2)
+            for (i in 0 until n) {
                 offsets[i] = 0f
-                offsets[i + MAX_TAPS] = paramsY.offsets[i]
+                offsets[i + n] = paramsY.offsets[i]
             }
             setFloatUniform("in_blurOffset", offsets)
-            setFloatUniform("in_blurWeight", paramsY.weights.copyOf(MAX_TAPS))
+            setFloatUniform("in_blurWeight", paramsY.weights.copyOf(n))
             setFloatUniform("in_texSize", texW, texH)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
@@ -236,7 +238,7 @@ internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
  * Subsequent pairs merge (2,3), (4,5), ..., (12,13).
  *
  * @param variance The Gaussian variance (sigma²) in downsampled pixel space.
- * @return [GaussianParams] with up to [MAX_TAPS] offset/weight pairs.
+ * @return [GaussianParams] with up to [MAX_BLUR_TAPS] offset/weight pairs.
  */
 internal fun computeGaussianParams(variance: Float): GaussianParams {
     if (variance <= 0.25f) return GaussianParams.EMPTY
@@ -254,8 +256,8 @@ internal fun computeGaussianParams(variance: Float): GaussianParams {
     for (i in 1..13) total += raw[i] * 2.0
     for (i in 0..13) raw[i] /= total
 
-    val offsets = FloatArray(MAX_TAPS)
-    val weights = FloatArray(MAX_TAPS)
+    val offsets = FloatArray(MAX_BLUR_TAPS)
+    val weights = FloatArray(MAX_BLUR_TAPS)
     var tapCount = 0
 
     // 3. Pair 0: merge center (offset 0) with offset 1.
@@ -271,7 +273,7 @@ internal fun computeGaussianParams(variance: Float): GaussianParams {
 
     // 4. Pairs 1-6: merge (2,3), (4,5), ..., (12,13)
     var i = 2
-    while (i < 14 && tapCount < MAX_TAPS) {
+    while (i < 14 && tapCount < MAX_BLUR_TAPS) {
         val wa = raw[i]
         val wb = if (i + 1 < 14) raw[i + 1] else 0.0
         val combined = wa + wb

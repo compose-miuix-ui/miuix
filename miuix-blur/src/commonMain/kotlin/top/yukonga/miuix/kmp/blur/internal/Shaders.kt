@@ -4,26 +4,29 @@
 package top.yukonga.miuix.kmp.blur.internal
 
 /**
- * LM Gaussian blur shader — N-tap symmetric bidirectional sampling.
- * Uses up to 7 tap pairs (14 samples total) with precomputed offsets and weights.
+ * Builds a tap-count-specialized LM Gaussian blur shader.
+ *
+ * Array sizes and loop bounds match the actual [tapCount] to minimize
+ * texture samples (2 × tapCount per pixel). This mirrors libhwui's
+ * approach of 7 specialized shader variants (1–7 taps).
+ *
  * Applied twice (horizontal then vertical) for separable 2D convolution.
  *
  * Uniforms:
  * - `child`: Input image shader.
- * - `in_blurOffset[14]`: Sampling offsets. [0..6]=X components, [7..13]=Y components.
- * - `in_blurWeight[7]`: Sampling weights for each tap pair.
- * Edge handling: Out-of-bounds samples return black. We mirror the
- * offset to reflect back into the texture.
+ * - `in_blurOffset[tapCount*2]`: Sampling offsets. [0..N-1]=X, [N..2N-1]=Y.
+ * - `in_blurWeight[tapCount]`: Sampling weights for each tap pair.
+ * - `in_texSize`: Texture dimensions for mirror boundary clamping.
  */
-internal const val LM_GAUSSIAN_BLUR_SHADER = """
+internal fun buildGaussianBlurShader(tapCount: Int): String {
+    require(tapCount in 1..MAX_BLUR_TAPS)
+    val offsetSize = tapCount * 2
+    return """
     uniform shader child;
-    uniform float in_blurOffset[14];
-    uniform float in_blurWeight[7];
+    uniform float in_blurOffset[$offsetSize];
+    uniform float in_blurWeight[$tapCount];
     uniform float2 in_texSize;
 
-    // Mirror coordinate into valid texture range.
-    // Clamps to [0.5, size-0.5] (pixel centers) to avoid sampling
-    // beyond the texture boundary where GPUs may return black.
     float2 mirror(float2 coord, float2 size) {
         float2 limit = size - 0.5;
         coord = abs(coord);
@@ -33,19 +36,22 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
 
     half4 main(float2 xy) {
         half4 color = half4(0);
-        for (int i = 0; i < 7; i++) {
-            float2 offset = float2(in_blurOffset[i], in_blurOffset[i + 7]);
+        for (int i = 0; i < $tapCount; i++) {
+            float2 offset = float2(in_blurOffset[i], in_blurOffset[i + $tapCount]);
             float2 c1 = mirror(xy + offset, in_texSize);
             float2 c2 = mirror(xy - offset, in_texSize);
             color += (child.eval(c1) + child.eval(c2)) * in_blurWeight[i];
         }
-        // Un-premultiply alpha to recover the true blurred color, then force opaque.
         if (color.a > 0.001) {
             return half4(color.rgb / color.a, 1.0);
         }
         return color;
     }
 """
+}
+
+/** Maximum number of tap pairs for the Gaussian blur shader. */
+internal const val MAX_BLUR_TAPS = 7
 
 /**
  * Noise dithering shader — 3-channel pseudo-random anti-banding.
