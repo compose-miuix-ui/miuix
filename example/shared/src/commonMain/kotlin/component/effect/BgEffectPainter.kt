@@ -9,7 +9,7 @@ import kotlin.time.TimeSource
 class BgEffectPainter {
     val shaderCode by lazy { OS2_BG_FRAG }
     private var bound: FloatArray = FloatArray(4)
-    val runtimeShader: RuntimeShader? by lazy { RuntimeShader(shaderCode) }
+    val runtimeShader by lazy { RuntimeShader(shaderCode) }
     private var uResolution: FloatArray = floatArrayOf(0f, 0f)
     private var uAnimTime = TimeSource.Monotonic.markNow().elapsedNow().inWholeNanoseconds / 1_000_000_000.0f
 
@@ -95,7 +95,7 @@ class BgEffectPainter {
     }
 
     private fun initializeShader() {
-        runtimeShader?.apply {
+        runtimeShader.apply {
             setFloatUniform("uTranslateY", U_TRANSLATE_Y)
             setFloatUniform("uNoiseScale", U_NOISE_SCALE)
             setFloatUniform("uPointOffset", U_POINT_OFFSET)
@@ -117,7 +117,7 @@ class BgEffectPainter {
     }
 
     fun updateMaterials() {
-        runtimeShader?.apply {
+        runtimeShader.apply {
             setFloatUniform("uAnimTime", uAnimTime)
             setFloatUniform("uResolution", uResolution)
         }
@@ -137,27 +137,27 @@ class BgEffectPainter {
 
     private fun setColors(fArr: FloatArray) {
         uColors = fArr.copyOf()
-        runtimeShader?.setFloatUniform("uColors", fArr)
+        runtimeShader.setFloatUniform("uColors", fArr)
     }
 
     private fun setPoints(fArr: FloatArray) {
         uPoints = fArr.copyOf()
-        runtimeShader?.setFloatUniform("uPoints", fArr)
+        runtimeShader.setFloatUniform("uPoints", fArr)
     }
 
     private fun setBound(fArr: FloatArray) {
         this.uBgBound = fArr.copyOf()
-        this.runtimeShader?.setFloatUniform("uBound", fArr)
+        this.runtimeShader.setFloatUniform("uBound", fArr)
     }
 
     private fun setLightOffset(f: Float) {
         this.uLightOffset = f
-        this.runtimeShader?.setFloatUniform("uLightOffset", f)
+        this.runtimeShader.setFloatUniform("uLightOffset", f)
     }
 
     private fun setSaturateOffset(f: Float) {
         this.uSaturateOffset = f
-        this.runtimeShader?.setFloatUniform("uSaturateOffset", f)
+        this.runtimeShader.setFloatUniform("uSaturateOffset", f)
     }
 
     fun setDeviceType(type: DeviceType) {

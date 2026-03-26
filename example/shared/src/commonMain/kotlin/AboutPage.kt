@@ -3,8 +3,6 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -53,7 +52,6 @@ import component.BackNavigationIcon
 import component.effect.BgEffectBackground
 import misc.VersionInfo
 import navigation3.Route
-import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -62,6 +60,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
@@ -69,14 +68,13 @@ import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.foregroundBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
-import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.pageContentPadding
@@ -108,7 +106,7 @@ fun AboutPage(
             SmallTopAppBar(
                 title = "About",
                 scrollBehavior = topAppBarScrollBehavior,
-                color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
+                color = MiuixTheme.colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f),
                 titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
                 navigationIcon = {
@@ -161,6 +159,10 @@ private fun AboutContent(
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
 
+    var blurEnable by remember { mutableStateOf(true)}
+    val dynamicBackground = remember { mutableStateOf(true)}
+    val effectBackground = remember { mutableStateOf(true)}
+
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
     val blendConfigs = remember {
         listOf(
@@ -185,9 +187,25 @@ private fun AboutContent(
             "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
+    val isInDark = isInDarkTheme()
     val defaultBlendIndex = if (isInDarkTheme()) 15 else 14
     var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
     val currentBlend = blendConfigs[blendModeIndex]
+    val logoBlend = remember(isInDark) {
+        if (isInDark) {
+            listOf(
+                BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
+                BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
+                BlendColorEntry(Color(0xff1af500), BlendMode.LAB)
+            )
+        } else {
+            listOf(
+                BlendColorEntry(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
+                BlendColorEntry(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
+                BlendColorEntry(Color(0xff1af200), BlendMode.LAB),
+            )
+        }
+    }
 
     val cardColor = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = scrollProgress)
 
@@ -195,11 +213,16 @@ private fun AboutContent(
     var logoHeightDp by remember { mutableStateOf(300.dp) }
 
     BgEffectBackground(
+        effectBackground = effectBackground,
+        dynamicBackground = dynamicBackground,
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier
-            .background(MiuixTheme.colorScheme.surface)
-            .layerBackdrop(backdrop),
-        bgAlpha = 1f - scrollProgress,
+        bgModifier = Modifier.then(
+            if (blurEnable){
+                Modifier.layerBackdrop(backdrop)
+            } else {
+                Modifier
+            }.alpha(1f - scrollProgress)
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -216,25 +239,39 @@ private fun AboutContent(
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White),
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(74.dp),
-                    painter = painterResource(Res.drawable.ic_launcher),
-                    contentDescription = null,
-                )
-            }
+//            Box(
+//                contentAlignment = Alignment.Center,
+//                modifier = Modifier
+//                    .size(88.dp)
+//                    .clip(RoundedCornerShape(24.dp))
+//                    .background(Color.White),
+//            ) {
+//                Image(
+//                    modifier = Modifier
+//                        .size(74.dp),
+//                    painter = painterResource(Res.drawable.ic_launcher),
+//                    contentDescription = null,
+//                )
+//            }
             Text(
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.padding(top = 12.dp).then(
+                    if (blurEnable){
+                        Modifier.foregroundBlur(
+                            backdrop = backdrop,
+                            shape = RoundedRectangle(16.dp),
+                            blurRadius = 200f,
+                            noiseCoefficient = noiseCoefficient,
+                            colors = BlurColors(
+                                blendColors = logoBlend,
+                            )
+                        )
+                    } else {
+                        Modifier
+                    }
+                ),
                 text = "Miuix",
-                fontWeight = FontWeight.Medium,
-                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 60.sp,
             )
             Text(
                 modifier = Modifier
@@ -276,17 +313,23 @@ private fun AboutContent(
             item(key = "about") {
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedRectangle(16.dp),
-                            blurRadius = blurRadius,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
-                                blendColors = currentBlend.second,
-                                brightness = brightness,
-                                contrast = contrast,
-                                saturation = saturation,
-                            ),
+                        .then(
+                            if (blurEnable){
+                                Modifier.textureBlur(
+                                    backdrop = backdrop,
+                                    shape = RoundedRectangle(16.dp),
+                                    blurRadius = blurRadius,
+                                    noiseCoefficient = noiseCoefficient,
+                                    colors = BlurColors(
+                                        blendColors = currentBlend.second,
+                                        brightness = brightness,
+                                        contrast = contrast,
+                                        saturation = saturation,
+                                    ),
+                                )
+                            } else {
+                                Modifier
+                            }
                         ),
                     colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
@@ -317,17 +360,23 @@ private fun AboutContent(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
                         .padding(top = 12.dp)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedRectangle(16.dp),
-                            blurRadius = blurRadius,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
-                                blendColors = currentBlend.second,
-                                brightness = brightness,
-                                contrast = contrast,
-                                saturation = saturation,
-                            ),
+                        .then(
+                            if (blurEnable){
+                                Modifier.textureBlur(
+                                    backdrop = backdrop,
+                                    shape = RoundedRectangle(16.dp),
+                                    blurRadius = blurRadius,
+                                    noiseCoefficient = noiseCoefficient,
+                                    colors = BlurColors(
+                                        blendColors = currentBlend.second,
+                                        brightness = brightness,
+                                        contrast = contrast,
+                                        saturation = saturation,
+                                    ),
+                                )
+                            } else {
+                                Modifier
+                            }
                         ),
                     colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
@@ -371,6 +420,42 @@ private fun AboutContent(
         insideMargin = DpSize(0.dp, 0.dp),
     ) {
         Card {
+            BasicComponent(
+                title = "Effect Background Enabled",
+                endActions = {
+                    Switch(
+                        effectBackground.value,
+                        {
+                            effectBackground.value = it
+                        }
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+            )
+            BasicComponent(
+                title = "Dynamic Background Enabled",
+                endActions = {
+                    Switch(
+                        dynamicBackground.value,
+                        {
+                            dynamicBackground.value = it
+                        }
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+            )
+            BasicComponent(
+                title = "Blur Enable",
+                endActions = {
+                    Switch(
+                        blurEnable,
+                        {
+                            blurEnable = it
+                        }
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+            )
             // Blur radius
             BasicComponent(
                 title = "Blur Radius",
