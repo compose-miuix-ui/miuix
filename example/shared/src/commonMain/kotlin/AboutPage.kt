@@ -6,6 +6,7 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +23,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,9 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +54,7 @@ import component.effect.BgEffectBackground
 import misc.VersionInfo
 import navigation3.Route
 import org.jetbrains.compose.resources.painterResource
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -54,7 +62,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
@@ -79,19 +86,32 @@ import utils.pageScrollModifiers
 fun AboutPage(
     padding: PaddingValues,
 ) {
-    val appState = LocalAppState.current
-    val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
+    val lazyListState = rememberLazyListState()
+    var logoHeightPx by remember { mutableIntStateOf(0) }
+
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (logoHeightPx <= 0) {
+                0f
+            } else {
+                val index = lazyListState.firstVisibleItemIndex
+                val offset = lazyListState.firstVisibleItemScrollOffset
+                if (index > 0) 1f else (offset.toFloat() / logoHeightPx).coerceIn(0f, 1f)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
-
             SmallTopAppBar(
                 title = "About",
                 scrollBehavior = topAppBarScrollBehavior,
-                color = Color.Transparent,// colorScheme.surface,
+                color = colorScheme.surface.copy(alpha = scrollProgress),
+                titleColor = colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
-                navigationIcon =  {
+                navigationIcon = {
                     BackNavigationIcon(
                         onClick = { navigator.pop() },
                     )
@@ -105,6 +125,9 @@ fun AboutPage(
                 bottom = padding.calculateBottomPadding(),
             ),
             topAppBarScrollBehavior = topAppBarScrollBehavior,
+            lazyListState = lazyListState,
+            scrollProgress = scrollProgress,
+            onLogoHeightChanged = { logoHeightPx = it },
         )
     }
 }
@@ -113,19 +136,24 @@ fun AboutPage(
 private fun AboutContent(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
+    lazyListState: LazyListState,
+    scrollProgress: Float,
+    onLogoHeightChanged: (Int) -> Unit,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
-    val lazyListState = rememberLazyListState()
     val backdrop = rememberLayerBackdrop()
     var showTextureSet by remember { mutableStateOf(false) }
 
     var blurRadius by remember { mutableFloatStateOf(60f) }
     var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
-    var blendModeIndex by remember { mutableIntStateOf(0) }
-    var dynamicBg by remember { mutableStateOf(false) }
+    var brightness by remember { mutableFloatStateOf(0f) }
+    var contrast by remember { mutableFloatStateOf(1f) }
+    var saturation by remember { mutableFloatStateOf(1f) }
+    val defaultBlendIndex = if (isSystemInDarkTheme()) 2 else 1
+    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
     val contentPadding = pageContentPadding(
         padding,
         padding,
@@ -161,10 +189,66 @@ private fun AboutContent(
     }
     val currentBlend = blendConfigs[blendModeIndex]
 
+    val cardColor = colorScheme.surfaceContainer.copy(alpha = scrollProgress)
+
+    // Calculate the logo spacer height in dp from measured pixel height
+    val density = LocalDensity.current
+    var logoHeightDp by remember { mutableStateOf(300.dp) }
+
     BgEffectBackground(
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier.background(Color.White).layerBackdrop(backdrop)
+        bgModifier = Modifier.background(Color.White).layerBackdrop(backdrop),
+        bgAlpha = 1f - scrollProgress,
     ) {
+        // Fixed logo overlay (below LazyColumn in z-order, fades with scroll)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { alpha = 1f - scrollProgress }
+                .padding(
+                    top = contentPadding.calculateTopPadding() + 52.dp,
+                    start = contentPadding.calculateLeftPadding(LayoutDirection.Ltr),
+                    end = contentPadding.calculateRightPadding(LayoutDirection.Ltr),
+                )
+                .onSizeChanged { size ->
+                    onLogoHeightChanged(size.height)
+                    with(density) { logoHeightDp = size.height.toDp() }
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color.White)
+                    .clickable {
+                        showTextureSet = true
+                    },
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(72.dp),
+                    painter = painterResource(Res.drawable.ic_launcher),
+                    contentDescription = null,
+                )
+            }
+            Text(
+                modifier = Modifier.padding(top = 12.dp),
+                text = "Miuix",
+                fontWeight = FontWeight.Medium,
+                fontSize = 26.sp,
+            )
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        // Scrollable content
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.fillMaxSize().pageScrollModifiers(
@@ -174,43 +258,13 @@ private fun AboutContent(
             ),
             contentPadding = contentPadding,
         ) {
-            item(key = "Logo") {
-                Column(
-                    modifier = Modifier
+            // Transparent spacer matching logo height
+            item(key = "logoSpacer") {
+                Spacer(
+                    Modifier
                         .fillMaxWidth()
-                        .clickable(){
-                            showTextureSet = true
-                        }
-                        .padding(top = 52.dp, bottom = 98.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(Color.White),
-                    ) {
-                        Image(
-                            modifier = Modifier.size(80.dp),
-                            painter = painterResource(Res.drawable.ic_launcher),
-                            contentDescription = null,
-                        )
-                    }
-                    Text(
-                        modifier = Modifier.padding(top = 12.dp),
-                        text = "Miuix",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 26.sp,
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                    )
-                }
+                        .height(logoHeightDp + 52.dp + 98.dp),
+                )
             }
 
             item(key = "about") {
@@ -221,10 +275,14 @@ private fun AboutContent(
                             shape = RoundedRectangle(16.dp),
                             blurRadius = blurRadius,
                             noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(blendColors = currentBlend.second),
+                            colors = BlurColors(
+                                blendColors = currentBlend.second,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
                         ),
-
-                    colors = CardDefaults.defaultColors(Color.Transparent, Color.Transparent),
+                    colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
                     SuperArrow(
                         title = "View Source",
@@ -258,9 +316,14 @@ private fun AboutContent(
                             shape = RoundedRectangle(16.dp),
                             blurRadius = blurRadius,
                             noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(blendColors = currentBlend.second),
+                            colors = BlurColors(
+                                blendColors = currentBlend.second,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
                         ),
-                    colors = CardDefaults.defaultColors(Color.Transparent, Color.Transparent),
+                    colors = CardDefaults.defaultColors(cardColor, Color.Transparent),
                 ) {
                     SuperArrow(
                         title = "License",
@@ -295,96 +358,118 @@ private fun AboutContent(
 
     SuperBottomSheet(
         showTextureSet,
-        onDismissFinished = {
-            showTextureSet = false
-        },
         onDismissRequest = {
             showTextureSet = false
-
         },
+        insideMargin = DpSize(0.dp, 0.dp),
     ) {
         Card {
             // Blur radius
-            Text(
-                text = "Blur Radius: ${blurRadius.toInt()}",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp),
-            )
-            Slider(
-                value = blurRadius / 200f,
-                onValueChange = { blurRadius = it * 200f },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+            BasicComponent(
+                title = "Blur Radius",
+                endActions = { ValueText("${blurRadius.toInt()}") },
+                bottomAction = {
+                    Slider(
+                        value = blurRadius / 200f,
+                        onValueChange = { blurRadius = it * 200f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
             // Noise
-            Text(
-                text = "Noise: ${(noiseCoefficient * 1000).toInt() / 1000f}",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
+            BasicComponent(
+                title = "Noise",
+                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                bottomAction = {
+                    Slider(
+                        value = noiseCoefficient / 0.1f,
+                        onValueChange = { noiseCoefficient = it * 0.1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
-            Slider(
-                value = noiseCoefficient / 0.1f,
-                onValueChange = { noiseCoefficient = it * 0.1f },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+
+            // Brightness
+            BasicComponent(
+                title = "Brightness",
+                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = (brightness + 1f) / 2f,
+                        onValueChange = { brightness = it * 2f - 1f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            // Contrast
+            BasicComponent(
+                title = "Contrast",
+                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = contrast / 3f,
+                        onValueChange = { contrast = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            // Saturation
+            BasicComponent(
+                title = "Saturation",
+                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
+                bottomAction = {
+                    Slider(
+                        value = saturation / 3f,
+                        onValueChange = { saturation = it * 3f },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
             // Blend mode
-            val modeId = currentBlend.second.firstOrNull()?.mode
-            Text(
-                text = "Blend Mode: ${currentBlend.first}" + if (modeId != null) " ($modeId)" else "",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
+            val sheetBlend = blendConfigs[blendModeIndex]
+            val modeId = sheetBlend.second.firstOrNull()?.mode
+            BasicComponent(
+                title = "Blend Mode",
+                endActions = {
+                    ValueText(sheetBlend.first + if (modeId != null) " ($modeId)" else "")
+                },
+                bottomAction = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextButton(
+                            text = "Prev",
+                            onClick = {
+                                blendModeIndex =
+                                    (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(
+                            text = "Next",
+                            onClick = {
+                                blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                },
             )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(
-                    text = "Prev",
-                    onClick = {
-                        blendModeIndex =
-                            (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(
-                    text = "Next",
-                    onClick = {
-                        blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            // Dynamic background toggle
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "Dynamic Background", fontSize = 14.sp)
-                Switch(
-                    checked = dynamicBg,
-                    onCheckedChange = { dynamicBg = it },
-                )
-            }
         }
     }
 }
 
+@Suppress("FunctionName")
+@Composable
+private fun ValueText(text: String) {
+    Text(
+        text = text,
+        fontSize = MiuixTheme.textStyles.body2.fontSize,
+        color = colorScheme.onSurfaceVariantActions,
+    )
+}

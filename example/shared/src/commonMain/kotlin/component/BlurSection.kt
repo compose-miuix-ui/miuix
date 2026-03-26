@@ -5,6 +5,7 @@ package component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.kyant.shapes.RoundedRectangle
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
@@ -96,20 +96,26 @@ private fun BlurDemo() {
         )
     }
     val currentBlend = blendConfigs[blendModeIndex]
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
     Column(
         modifier = Modifier
             .padding(horizontal = 12.dp),
     ) {
         // Preview area
-        Card(
-            colors = CardDefaults.defaultColors(color = Color(0xFF1A1A2E)),
-        ) {
+        Card {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(280.dp),
+                    .height(280.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
+                        )
+                    },
             ) {
                 // Background layer (captured by layerBackdrop)
                 Box(
@@ -127,6 +133,13 @@ private fun BlurDemo() {
                         .height(140.dp)
                         .align(Alignment.Center)
                         .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                offsetX += dragAmount.x
+                                offsetY += dragAmount.y
+                            }
+                        }
                         .textureBlur(
                             backdrop = backdrop,
                             shape = miuixShape(16.dp),
@@ -139,14 +152,7 @@ private fun BlurDemo() {
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
-                        )
-                        .pointerInput(Unit) {
-                            detectDragGestures { change, dragAmount ->
-                                change.consume()
-                                offsetX += dragAmount.x
-                                offsetY += dragAmount.y
-                            }
-                        },
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -1,3 +1,6 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package component.effect
 
 import LocalAppState
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -41,29 +45,26 @@ import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.asComposeShader
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private fun getLayerList(isDarkMode: Boolean): List<Pair<Color, Int>> {
-    return if (isDarkMode) {
-        listOf(
-            Pair(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
-            Pair(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-            Pair(Color(0xff1af500), BlendMode.LAB)
-        )
-    } else {
-        listOf(
-            Pair(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
-            Pair(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
-            Pair(Color(0xff1af200), BlendMode.LAB)
-        )
-    }
+private fun getLayerList(isDarkMode: Boolean): List<Pair<Color, Int>> = if (isDarkMode) {
+    listOf(
+        Pair(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
+        Pair(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
+        Pair(Color(0xff1af500), BlendMode.LAB),
+    )
+} else {
+    listOf(
+        Pair(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
+        Pair(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
+        Pair(Color(0xff1af200), BlendMode.LAB),
+    )
 }
-
-
 
 @Composable
 inline fun BgEffectBackground(
     modifier: Modifier = Modifier,
     bgModifier: Modifier = Modifier,
-    crossinline content:  @Composable (BoxScope.() -> Unit)
+    bgAlpha: Float = 1f,
+    crossinline content: @Composable (BoxScope.() -> Unit),
 ) {
     val appState = LocalAppState.current
 
@@ -81,7 +82,7 @@ inline fun BgEffectBackground(
                 logoHeight.value,
                 targetSize.height.toFloat(),
                 targetSize.width.toFloat(),
-                isDark
+                isDark,
             )
             painter.updateMode(isDark)
         }
@@ -103,8 +104,8 @@ inline fun BgEffectBackground(
                     painter.setResolution(
                         floatArrayOf(
                             targetSize.width.toFloat(),
-                            targetSize.height.toFloat()
-                        )
+                            targetSize.height.toFloat(),
+                        ),
                     )
                     painter.updateMaterials()
                     painter.runtimeShader?.let { shader ->
@@ -118,13 +119,13 @@ inline fun BgEffectBackground(
     Box(
         modifier = modifier.onSizeChanged {
             targetSize = it
-        }
+        },
     ) {
         currentBrush.value?.let { brush ->
             Canvas(
-                modifier = Modifier.fillMaxSize().then(bgModifier)
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = bgAlpha }.then(bgModifier),
             ) {
-                with(drawContext.density){
+                with(drawContext.density) {
                     logoHeight.value = 410.dp.toPx()
                 }
                 drawRect(Color.White)

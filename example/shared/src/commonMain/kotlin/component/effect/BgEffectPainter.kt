@@ -1,15 +1,13 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package component.effect
 
-
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asComposeShader
-import kotlin.getValue
 import kotlin.time.TimeSource
 
-class BgEffectPainter() {
-    val shaderCode by lazy { OS2BgFrag }
+class BgEffectPainter {
+    val shaderCode by lazy { OS3_BG_FRAG }
     private var bound: FloatArray = FloatArray(4)
     val runtimeShader: RuntimeShader? by lazy { RuntimeShader(shaderCode) }
     private var uResolution: FloatArray = floatArrayOf(0f, 0f)
@@ -31,50 +29,50 @@ class BgEffectPainter() {
         // 预设配置
         private val PHONE_LIGHT_POINTS = floatArrayOf(
             0.67f, 0.42f, 1.0f, 0.69f, 0.75f, 1.0f,
-            0.14f, 0.71f, 0.95f, 0.14f, 0.27f, 0.8f
+            0.14f, 0.71f, 0.95f, 0.14f, 0.27f, 0.8f,
         )
 
         private val PHONE_LIGHT_COLORS = floatArrayOf(
             0.57f, 0.76f, 0.98f, 1.0f,
             0.98f, 0.85f, 0.68f, 1.0f,
             0.98f, 0.75f, 0.93f, 1.0f,
-            0.73f, 0.7f, 0.98f, 1.0f
+            0.73f, 0.7f, 0.98f, 1.0f,
         )
 
         private val PHONE_DARK_POINTS = floatArrayOf(
             0.63f, 0.5f, 0.88f, 0.69f, 0.75f, 0.8f,
-            0.17f, 0.66f, 0.81f, 0.14f, 0.24f, 0.72f
+            0.17f, 0.66f, 0.81f, 0.14f, 0.24f, 0.72f,
         )
 
         private val PHONE_DARK_COLORS = floatArrayOf(
             0.0f, 0.31f, 0.58f, 1.0f,
             0.53f, 0.29f, 0.15f, 1.0f,
             0.46f, 0.06f, 0.27f, 1.0f,
-            0.16f, 0.12f, 0.45f, 1.0f
+            0.16f, 0.12f, 0.45f, 1.0f,
         )
 
         private val PAD_LIGHT_POINTS = floatArrayOf(
             0.67f, 0.37f, 0.88f, 0.54f, 0.66f, 1.0f,
-            0.37f, 0.71f, 0.68f, 0.28f, 0.26f, 0.62f
+            0.37f, 0.71f, 0.68f, 0.28f, 0.26f, 0.62f,
         )
 
         private val PAD_LIGHT_COLORS = floatArrayOf(
             0.57f, 0.76f, 0.98f, 1.0f,
             0.98f, 0.85f, 0.68f, 1.0f,
             0.98f, 0.75f, 0.93f, 0.95f,
-            0.73f, 0.7f, 0.98f, 0.9f
+            0.73f, 0.7f, 0.98f, 0.9f,
         )
 
         private val PAD_DARK_POINTS = floatArrayOf(
             0.55f, 0.42f, 1.0f, 0.56f, 0.75f, 1.0f,
-            0.4f, 0.59f, 0.71f, 0.43f, 0.09f, 0.75f
+            0.4f, 0.59f, 0.71f, 0.43f, 0.09f, 0.75f,
         )
 
         private val PAD_DARK_COLORS = floatArrayOf(
             0.0f, 0.31f, 0.58f, 1.0f,
             0.53f, 0.29f, 0.15f, 1.0f,
             0.46f, 0.06f, 0.27f, 1.0f,
-            0.16f, 0.12f, 0.45f, 1.0f
+            0.16f, 0.12f, 0.45f, 1.0f,
         )
     }
 
@@ -88,7 +86,8 @@ class BgEffectPainter() {
     private var deviceType: DeviceType = DeviceType.PHONE
 
     enum class DeviceType {
-        PHONE, PAD
+        PHONE,
+        PAD,
     }
 
     init {
@@ -114,10 +113,8 @@ class BgEffectPainter() {
             // 设置动态参数
             setFloatUniform("uPoints", uPoints)
             setFloatUniform("uColors", uColors)
-
         }
     }
-
 
     fun updateMaterials() {
         runtimeShader?.apply {
@@ -227,5 +224,4 @@ class BgEffectPainter() {
             floatArrayOf(xOffset, 1.0f - heightRatio, widthRatio, heightRatio)
         }
     }
-
 }

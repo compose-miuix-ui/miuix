@@ -39,7 +39,11 @@ internal const val LM_GAUSSIAN_BLUR_SHADER = """
             float2 c2 = mirror(xy - offset, in_texSize);
             color += (child.eval(c1) + child.eval(c2)) * in_blurWeight[i];
         }
-        return half4(color.rgb, 1.0);
+        // Un-premultiply alpha to recover the true blurred color, then force opaque.
+        if (color.a > 0.001) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;
     }
 """
 

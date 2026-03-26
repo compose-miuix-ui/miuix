@@ -1,6 +1,9 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package component.effect
 
-const val OS2BgFrag  = """
+const val OS2_BG_FRAG = """
     uniform vec2 uResolution;
     uniform shader uTex;
     uniform shader uTexBitmap;
