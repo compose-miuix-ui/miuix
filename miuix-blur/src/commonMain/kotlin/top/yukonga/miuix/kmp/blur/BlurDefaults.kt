@@ -43,16 +43,16 @@ data class BlendColorEntry(
 )
 
 /**
- * Blend mode constants covering both standard SkBlendMode (0-29) and
+ * Blend mode constants covering both standard SkBlendMode (0-31) and
  * custom modes (100-121, 200-203).
  *
- * Standard modes (0-29) are executed by the GPU hardware blend unit via
- * Compose's native [androidx.compose.ui.graphics.BlendMode].
- * Custom modes (>=100) are executed by a runtime shader implementing
+ * All modes are executed by a runtime shader matching libhwui's
+ * premultiplied-alpha blend implementations. Standard modes (0-31)
+ * use Skia-compatible formulas; custom modes (100+) implement
  * Lab color space operations, linear light blending, and more.
  */
 object BlendMode {
-    // region Standard SkBlendMode (0-29) — GPU hardware path
+    // region Standard SkBlendMode (0-31)
 
     const val CLEAR = 0
     const val SRC = 1
@@ -86,7 +86,7 @@ object BlendMode {
 
     // endregion
 
-    // region Custom modes (>=100) — runtime shader path
+    // region Custom modes (>=100)
 
     /** Linear light blend. */
     const val LINEAR_LIGHT = 100
@@ -134,43 +134,6 @@ object BlendMode {
     const val MI_LUMINANCE = 203
 
     // endregion
-
-    /** Returns true if [mode] is a custom mode handled by shader. */
-    fun isCustomMode(mode: Int): Boolean = mode >= 100
-
-    /** Maps a standard SkBlendMode integer ID (0-28) to Compose [BlendMode][androidx.compose.ui.graphics.BlendMode]. */
-    fun toComposeBlendMode(mode: Int): androidx.compose.ui.graphics.BlendMode = when (mode) {
-        CLEAR -> androidx.compose.ui.graphics.BlendMode.Clear
-        SRC -> androidx.compose.ui.graphics.BlendMode.Src
-        DST -> androidx.compose.ui.graphics.BlendMode.Dst
-        SRC_OVER -> androidx.compose.ui.graphics.BlendMode.SrcOver
-        DST_OVER -> androidx.compose.ui.graphics.BlendMode.DstOver
-        SRC_IN -> androidx.compose.ui.graphics.BlendMode.SrcIn
-        DST_IN -> androidx.compose.ui.graphics.BlendMode.DstIn
-        SRC_OUT -> androidx.compose.ui.graphics.BlendMode.SrcOut
-        DST_OUT -> androidx.compose.ui.graphics.BlendMode.DstOut
-        SRC_ATOP -> androidx.compose.ui.graphics.BlendMode.SrcAtop
-        DST_ATOP -> androidx.compose.ui.graphics.BlendMode.DstAtop
-        XOR -> androidx.compose.ui.graphics.BlendMode.Xor
-        PLUS -> androidx.compose.ui.graphics.BlendMode.Plus
-        MODULATE -> androidx.compose.ui.graphics.BlendMode.Modulate
-        SCREEN -> androidx.compose.ui.graphics.BlendMode.Screen
-        OVERLAY -> androidx.compose.ui.graphics.BlendMode.Overlay
-        DARKEN -> androidx.compose.ui.graphics.BlendMode.Darken
-        LIGHTEN -> androidx.compose.ui.graphics.BlendMode.Lighten
-        COLOR_DODGE -> androidx.compose.ui.graphics.BlendMode.ColorDodge
-        COLOR_BURN -> androidx.compose.ui.graphics.BlendMode.ColorBurn
-        HARD_LIGHT -> androidx.compose.ui.graphics.BlendMode.Hardlight
-        SOFT_LIGHT -> androidx.compose.ui.graphics.BlendMode.Softlight
-        DIFFERENCE_STD -> androidx.compose.ui.graphics.BlendMode.Difference
-        EXCLUSION -> androidx.compose.ui.graphics.BlendMode.Exclusion
-        MULTIPLY -> androidx.compose.ui.graphics.BlendMode.Multiply
-        HUE -> androidx.compose.ui.graphics.BlendMode.Hue
-        SATURATION_STD -> androidx.compose.ui.graphics.BlendMode.Saturation
-        COLOR -> androidx.compose.ui.graphics.BlendMode.Color
-        LUMINOSITY -> androidx.compose.ui.graphics.BlendMode.Luminosity
-        else -> androidx.compose.ui.graphics.BlendMode.SrcOver
-    }
 }
 
 /**

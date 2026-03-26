@@ -77,11 +77,11 @@ internal const val NOISE_DITHER_SHADER = """
 """
 
 /**
- * Custom blend mode shader — complete `getBlendModeColor` dispatch.
+ * Blend mode shader — complete dispatch for all standard (0-31) and custom (100+) modes.
  *
- * Supports all custom blend modes (100-121, 200-203) including
- * Lab color space operations, linear light blending, and alpha-aware
- * plus darker/lighter operations.
+ * Standard modes (0-31) use premultiplied-alpha formulas from libhwui/Skia.
+ * Custom modes (100-121, 200-203) implement Lab color space operations,
+ * linear light blending, and alpha-aware plus darker/lighter operations.
  *
  * Uniforms:
  * - `child`: Input blurred image shader.
@@ -105,8 +105,220 @@ internal const val MI_BLEND_MODE_SHADER = """
     uniform float uLuminanceAmount;
     uniform vec4 uLuminanceValues;
 
-    // ======== SrcOver compositing ========
+    // ================================================================
+    // Standard blend modes (0-31) — premultiplied alpha, from libhwui
+    // ================================================================
 
+    const half kMinNormalHalf = 0.00006103515625;
+    const half kGuardedDivideEpsilon = 0.00000001;
+
+    half guarded_divide(half n, half d) {
+        return n / (d + kGuardedDivideEpsilon);
+    }
+
+    half3 guarded_divide(half3 n, half d) {
+        return n / (d + kGuardedDivideEpsilon);
+    }
+
+    // Porter-Duff modes
+    half4 mi_blend_clear(half4 src, half4 dst) { return half4(0); }
+    half4 mi_blend_src(half4 src, half4 dst) { return src; }
+    half4 mi_blend_dst(half4 src, half4 dst) { return dst; }
+    half4 mi_blend_src_over(half4 src, half4 dst) { return src + (1 - src.a)*dst; }
+    half4 mi_blend_dst_over(half4 src, half4 dst) { return (1 - dst.a)*src + dst; }
+    half4 mi_blend_src_in(half4 src, half4 dst) { return src*dst.a; }
+    half4 mi_blend_dst_in(half4 src, half4 dst) { return dst*src.a; }
+    half4 mi_blend_src_out(half4 src, half4 dst) { return (1 - dst.a)*src; }
+    half4 mi_blend_dst_out(half4 src, half4 dst) { return (1 - src.a)*dst; }
+    half4 mi_blend_src_atop(half4 src, half4 dst) { return dst.a*src + (1 - src.a)*dst; }
+    half4 mi_blend_dst_atop(half4 src, half4 dst) { return (1 - dst.a)*src + src.a*dst; }
+    half4 mi_blend_xor(half4 src, half4 dst) { return (1 - dst.a)*src + (1 - src.a)*dst; }
+    half4 mi_blend_plus(half4 src, half4 dst) { return min(src + dst, 1); }
+    half4 mi_blend_modulate(half4 src, half4 dst) { return src*dst; }
+
+    // Separable blend modes
+    half4 mi_blend_screen(half4 src, half4 dst) { return src + (1 - src)*dst; }
+
+    half mi_blend_overlay_component(half2 s, half2 d) {
+        return (2*d.x <= d.y) ? 2*s.x*d.x
+                              : s.y*d.y - 2*(d.y - d.x)*(s.y - s.x);
+    }
+
+    half4 mi_blend_overlay(half4 src, half4 dst) {
+        half4 result = half4(mi_blend_overlay_component(src.ra, dst.ra),
+                            mi_blend_overlay_component(src.ga, dst.ga),
+                            mi_blend_overlay_component(src.ba, dst.ba),
+                            src.a + (1 - src.a)*dst.a);
+        result.rgb += dst.rgb*(1 - src.a) + src.rgb*(1 - dst.a);
+        return result;
+    }
+
+    half4 mi_blend_darken(half4 src, half4 dst) {
+        half4 a = mi_blend_src_over(src, dst);
+        half3 b = (1 - dst.a) * src.rgb + dst.rgb;
+        a.rgb = min(a.rgb, b.rgb);
+        return a;
+    }
+
+    half4 mi_blend_lighten(half4 src, half4 dst) {
+        half4 result = mi_blend_src_over(src, dst);
+        result.rgb = max(result.rgb, (1 - dst.a)*src.rgb + dst.rgb);
+        return result;
+    }
+
+    half color_dodge_component(half2 s, half2 d) {
+        half delta = min(d.y, abs(s.y - s.x) >= kMinNormalHalf
+                                        ? guarded_divide(d.x * s.y, s.y - s.x)
+                                        : d.y);
+        return delta*s.y + s.x*(1 - d.y) + d.x*(1 - s.y);
+    }
+
+    half4 mi_blend_color_dodge(half4 src, half4 dst) {
+        return half4(color_dodge_component(src.ra, dst.ra),
+                    color_dodge_component(src.ga, dst.ga),
+                    color_dodge_component(src.ba, dst.ba),
+                    src.a + (1 - src.a)*dst.a);
+    }
+
+    half color_burn_component(half2 s, half2 d) {
+        half delta = abs(s.x) >= kMinNormalHalf
+                            ? d.y - min(d.y, guarded_divide((d.y - d.x) * s.y, s.x))
+                            : 0;
+        return delta*s.y + s.x*(1 - d.y) + d.x*(1 - s.y);
+    }
+
+    half4 mi_blend_color_burn(half4 src, half4 dst) {
+        return half4(color_burn_component(src.ra, dst.ra),
+                    color_burn_component(src.ga, dst.ga),
+                    color_burn_component(src.ba, dst.ba),
+                    src.a + (1 - src.a)*dst.a);
+    }
+
+    half4 mi_blend_hard_light(half4 src, half4 dst) {
+        return mi_blend_overlay(dst, src);
+    }
+
+    half soft_light_component(half2 s, half2 d) {
+        if (2*s.x <= s.y) {
+            return guarded_divide(d.x*d.x*(s.y - 2*s.x), d.y) + (1 - d.y)*s.x + d.x*(-s.y + 2*s.x + 1);
+        } else if (4.0 * d.x <= d.y) {
+            half DSqd = d.x*d.x;
+            half DCub = DSqd*d.x;
+            half DaSqd = d.y*d.y;
+            half DaCub = DaSqd*d.y;
+            return guarded_divide(DaSqd*(s.x - d.x*(3*s.y - 6*s.x - 1)) + 12*d.y*DSqd*(s.y - 2*s.x)
+                                - 16*DCub * (s.y - 2*s.x) - DaCub*s.x, DaSqd);
+        } else {
+            return d.x*(s.y - 2*s.x + 1) + s.x - sqrt(d.y*d.x)*(s.y - 2*s.x) - d.y*s.x;
+        }
+    }
+
+    half4 mi_blend_soft_light(half4 src, half4 dst) {
+        return (dst.a == 0) ? src : half4(soft_light_component(src.ra, dst.ra),
+                                        soft_light_component(src.ga, dst.ga),
+                                        soft_light_component(src.ba, dst.ba),
+                                        src.a + (1 - src.a)*dst.a);
+    }
+
+    half4 mi_blend_difference(half4 src, half4 dst) {
+        return half4(src.rgb + dst.rgb - 2*min(src.rgb*dst.a, dst.rgb*src.a),
+                    src.a + (1 - src.a)*dst.a);
+    }
+
+    half4 mi_blend_exclusion(half4 src, half4 dst) {
+        return half4(dst.rgb + src.rgb - 2*dst.rgb*src.rgb, src.a + (1 - src.a)*dst.a);
+    }
+
+    half4 mi_blend_multiply(half4 src, half4 dst) {
+        return half4((1 - src.a)*dst.rgb + (1 - dst.a)*src.rgb + src.rgb*dst.rgb,
+                    src.a + (1 - src.a)*dst.a);
+    }
+
+    // Non-separable (HSL) blend modes
+    half mi_blend_color_luminance(half3 color) { return dot(half3(0.3, 0.59, 0.11), color); }
+
+    half3 mi_blend_set_color_luminance(half3 hueSatColor, half alpha, half3 lumColor) {
+        half lum = mi_blend_color_luminance(lumColor);
+        half3 result = lum - mi_blend_color_luminance(hueSatColor) + hueSatColor;
+        half minComp = min(min(result.r, result.g), result.b);
+        half maxComp = max(max(result.r, result.g), result.b);
+        if (minComp < 0 && lum != minComp) {
+            result = lum + (result - lum) * guarded_divide(lum, (lum - minComp) + kMinNormalHalf);
+        }
+        if (maxComp > alpha && maxComp != lum) {
+            result = lum + guarded_divide((result - lum) * (alpha - lum), (maxComp - lum) + kMinNormalHalf);
+        }
+        return result;
+    }
+
+    half mi_blend_color_saturation(half3 color) {
+        return max(max(color.r, color.g), color.b) - min(min(color.r, color.g), color.b);
+    }
+
+    half3 mi_blend_set_color_saturation(half3 color, half3 satColor) {
+        half mn = min(min(color.r, color.g), color.b);
+        half mx = max(max(color.r, color.g), color.b);
+        return (mx > mn) ? ((color - mn) * mi_blend_color_saturation(satColor)) / (mx - mn) : half3(0);
+    }
+
+    half4 mi_blend_hslc(half2 flipSat, half4 src, half4 dst) {
+        half alpha = dst.a * src.a;
+        half3 sda = src.rgb * dst.a;
+        half3 dsa = dst.rgb * src.a;
+        half3 l = bool(flipSat.x) ? dsa : sda;
+        half3 r = bool(flipSat.x) ? sda : dsa;
+        if (bool(flipSat.y)) {
+            l = mi_blend_set_color_saturation(l, r);
+            r = dsa;
+        }
+        return half4(mi_blend_set_color_luminance(l, alpha, r) + dst.rgb - dsa + src.rgb - sda,
+                    src.a + dst.a - alpha);
+    }
+
+    half4 mi_blend_hue(half4 src, half4 dst) { return mi_blend_hslc(half2(0, 1), src, dst); }
+    half4 mi_blend_saturation(half4 src, half4 dst) { return mi_blend_hslc(half2(1), src, dst); }
+    half4 mi_blend_color(half4 src, half4 dst) { return mi_blend_hslc(half2(0), src, dst); }
+    half4 mi_blend_luminosity(half4 src, half4 dst) { return mi_blend_hslc(half2(1, 0), src, dst); }
+
+    // Standard mode dispatch (0-31)
+    half4 doBlend(int mode, half4 blendColor, half4 background) {
+        if (mode == 0)  { background = mi_blend_clear(blendColor, background); }
+        else if (mode == 1)  { background = mi_blend_src(blendColor, background); }
+        else if (mode == 2)  { background = mi_blend_dst(blendColor, background); }
+        else if (mode == 3)  { background = mi_blend_src_over(blendColor, background); }
+        else if (mode == 4)  { background = mi_blend_dst_over(blendColor, background); }
+        else if (mode == 5)  { background = mi_blend_src_in(blendColor, background); }
+        else if (mode == 6)  { background = mi_blend_dst_in(blendColor, background); }
+        else if (mode == 7)  { background = mi_blend_src_out(blendColor, background); }
+        else if (mode == 8)  { background = mi_blend_dst_out(blendColor, background); }
+        else if (mode == 9)  { background = mi_blend_src_atop(blendColor, background); }
+        else if (mode == 10) { background = mi_blend_dst_atop(blendColor, background); }
+        else if (mode == 11) { background = mi_blend_xor(blendColor, background); }
+        else if (mode == 12) { background = mi_blend_plus(blendColor, background); }
+        else if (mode == 13) { background = mi_blend_modulate(blendColor, background); }
+        else if (mode == 14 || mode == 29) { background = mi_blend_screen(blendColor, background); }
+        else if (mode == 15) { background = mi_blend_overlay(blendColor, background); }
+        else if (mode == 16) { background = mi_blend_darken(blendColor, background); }
+        else if (mode == 17) { background = mi_blend_lighten(blendColor, background); }
+        else if (mode == 18) { background = mi_blend_color_dodge(blendColor, background); }
+        else if (mode == 19) { background = mi_blend_color_burn(blendColor, background); }
+        else if (mode == 20) { background = mi_blend_hard_light(blendColor, background); }
+        else if (mode == 21) { background = mi_blend_soft_light(blendColor, background); }
+        else if (mode == 22) { background = mi_blend_difference(blendColor, background); }
+        else if (mode == 23) { background = mi_blend_exclusion(blendColor, background); }
+        else if (mode == 24 || mode == 30) { background = mi_blend_multiply(blendColor, background); }
+        else if (mode == 25) { background = mi_blend_hue(blendColor, background); }
+        else if (mode == 26) { background = mi_blend_saturation(blendColor, background); }
+        else if (mode == 27) { background = mi_blend_color(blendColor, background); }
+        else if (mode == 28 || mode == 31) { background = mi_blend_luminosity(blendColor, background); }
+        return background;
+    }
+
+    // ================================================================
+    // Custom blend modes (100+) — Mi extensions
+    // ================================================================
+
+    // SrcOver compositing (used by custom modes only)
     half4 blendSrcOver(half4 src, half4 dst) {
         if (src.a == 0.0) return dst;
         half srcAlpha = src.a;
@@ -117,8 +329,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(outColor.rgb, outAlpha);
     }
 
-    // ======== Color Burn ========
-
+    // Color Burn (unpremultiplied, used by custom modes 118/119)
     half blendColorBurn(half base, half blend) {
         return (blend == 0.0) ? blend : max((1.0 - ((1.0 - base) / blend)), 0.0);
     }
@@ -132,8 +343,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(blendColorBurn(dst.rgb, src.rgb, src.a), dst.a);
     }
 
-    // ======== Color Dodge ========
-
+    // Color Dodge (unpremultiplied, used by custom modes 118/119)
     half blendColorDodge(half base, half blend) {
         return (blend == 1.0) ? blend : min(base / (1.0 - blend), 1.0);
     }
@@ -147,8 +357,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(blendColorDodge(dst.rgb, src.rgb, src.a), dst.a);
     }
 
-    // ======== Linear Dodge / Burn / Light ========
-
+    // Linear Dodge / Burn / Light
     half blendLinearDodge(half base, half blend) { return min(base + blend, 1.0); }
     half3 blendLinearDodge(half3 base, half3 blend) { return min(base + blend, half3(1.0)); }
     half3 blendLinearDodge(half3 base, half3 blend, half opacity) {
@@ -174,12 +383,10 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(blendLinearLight(dst.rgb, src.rgb, src.a), dst.a);
     }
 
-    // ======== Greyscale ========
-
+    // Greyscale
     half greyscale(half3 color) { return 0.3 * color.r + 0.59 * color.g + 0.11 * color.b; }
 
-    // ======== Lab Color Space (sRGB ↔ XYZ ↔ Lab, D65) ========
-
+    // Lab Color Space (sRGB <-> XYZ <-> Lab, D65)
     half3 rgb2xyz(half3 c) {
         c.r = c.r > 0.04045 ? pow((c.r + 0.055) / 1.055, 2.4) : c.r / 12.92;
         c.g = c.g > 0.04045 ? pow((c.g + 0.055) / 1.055, 2.4) : c.g / 12.92;
@@ -226,8 +433,6 @@ internal const val MI_BLEND_MODE_SHADER = """
 
     half3 lab2rgb(half3 lab) { return xyz2rgb(lab2xyz(lab)); }
 
-    // ======== Lab Blend Functions ========
-
     half4 labLighten(half4 c, half a) {
         half3 lab = rgb2lab(c.rgb);
         lab.r = (100.0 - a) / 55.0 * lab.r + (100.0 * a - 4500.0) / 55.0;
@@ -255,15 +460,12 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(lab2rgb(labDenormalized(blendLinearLight(labDst, labSrc))), 1.0);
     }
 
-    // ======== Difference ========
-
     half3 blendDifference(half3 base, half3 blend) { return abs(base - blend); }
     half3 blendDifference(half3 base, half3 blend, half opacity) {
         return (blendDifference(base, blend) * opacity + base * (1.0 - opacity));
     }
 
-    // ======== Plus Darker / Lighter (V2 alpha-aware) ========
-
+    // Plus Darker / Lighter (V2 alpha-aware)
     half4 blendPlusDarker(half4 src, half4 dst) {
         src.rgb *= src.a; dst.rgb *= dst.a;
         half3 c = max(half3(0.0), 1.0 - ((1.0 - dst.rgb) * dst.a + (1.0 - src.rgb) * src.a));
@@ -278,8 +480,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(c / a, a);
     }
 
-    // ======== Color Adjustment (modes 201-203) ========
-
+    // Color Adjustment (modes 201-203)
     half4 adjust_saturation(half4 c, float sa) {
         half lum = dot(c.rgb, half3(0.2125, 0.7153, 0.0721));
         return half4(sa * c.rgb + (1.0 - sa) * lum, c.a);
@@ -304,10 +505,14 @@ internal const val MI_BLEND_MODE_SHADER = """
         return half4(mix(sc, half3(adj), mix_factor) * alpha, c.a);
     }
 
-    // ======== Main Dispatch ========
+    // ================================================================
+    // Main Dispatch
+    // ================================================================
 
     half4 getBlendModeColor(half4 bg, half4 ch, int mode, half4 bc) {
-        if (mode == 3)   return blendSrcOver(bc, bg).xyz1;
+        // Standard modes (0-31): premultiplied alpha, direct result
+        if (mode <= 31) return doBlend(mode, bc, bg);
+        // Custom modes (100+): unpremultiplied formulas
         if (mode == 100) return blendLinearLight(bc, bg).xyz1;
         if (mode == 101) { half g = greyscale(ch.rgb); return mix(ch, blendLinearLight(half4(bc.rgb, g), bg), bc.a); }
         if (mode == 102) return half4(blendDifference(bg.rgb, bc.rgb, bc.a), 1.0);
@@ -315,7 +520,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         if (mode == 105) { half g = greyscale(ch.rgb) * 100.0; return mix(ch, labDarken(bg, 45.0 - 0.15 * g), bc.a); }
         if (mode == 106) return mix(ch, labColor(bg, bc.r, bc.g), bc.a);
         if (mode == 107) return mix(ch, blendLinearLightLab(bc, bg), bc.a);
-        if (mode == 118) return blendColorDodge(bc, bg);
+        if (mode == 118) return blendColorDodge(bc, bg).xyz1;
         if (mode == 119) return blendColorBurn(bc, bg).xyz1;
         if (mode == 120) return blendPlusDarker(bc, bg);
         if (mode == 121) return blendPlusLighter(bc, bg);
@@ -336,13 +541,18 @@ internal const val MI_BLEND_MODE_SHADER = """
             if (i >= count) break;
             half4 layerColor = layerColors[i];
             int mode = int(blendModes[i]);
-            half4 blended = getBlendModeColor(currentColor, currentColor, mode, layerColor);
-            half3 dstRgb = currentColor.rgb;
-            half dstA = currentColor.a;
-            half srcA = layerColor.a;
-            half3 resultRgb = blended.rgb * srcA + dstRgb * (1.0 - srcA);
-            half resultA = srcA + dstA * (1.0 - srcA);
-            currentColor = half4(resultRgb, resultA);
+            // Standard modes produce premultiplied result directly
+            if (mode <= 31) {
+                currentColor = doBlend(mode, layerColor, currentColor);
+            } else {
+                half4 blended = getBlendModeColor(currentColor, currentColor, mode, layerColor);
+                half3 dstRgb = currentColor.rgb;
+                half dstA = currentColor.a;
+                half srcA = layerColor.a;
+                half3 resultRgb = blended.rgb * srcA + dstRgb * (1.0 - srcA);
+                half resultA = srcA + dstA * (1.0 - srcA);
+                currentColor = half4(resultRgb, resultA);
+            }
         }
         return currentColor;
     }

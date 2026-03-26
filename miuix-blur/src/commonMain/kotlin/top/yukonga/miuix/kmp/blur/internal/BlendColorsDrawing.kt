@@ -4,10 +4,7 @@
 package top.yukonga.miuix.kmp.blur.internal
 
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
-import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
@@ -16,22 +13,16 @@ import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 private const val MAX_LAYERS = 8
 
 /**
- * Applies blend color layers from [colors].
+ * Applies all blend color layers from [colors] as a [RuntimeShaderEffect].
  *
- * - **Custom modes (>=100)**: Applied as a [RuntimeShaderEffect] using the
- *   `getBlendModeColor` dispatch with Lab color space, linear light,
- *   plus darker/lighter, etc.
- * - **Standard SkBlendMode (0-29)**: Drawn later via [drawStandardBlendColors]
- *   using Compose's native GPU hardware blend unit.
- *
- * This function only applies the custom shader modes in the effect chain.
+ * All blend modes (standard 0-31 and custom 100+) are processed by the
+ * runtime shader using libhwui-compatible premultiplied-alpha formulas.
  */
 internal fun BackdropEffectScope.applyBlendColors(colors: BlurColors) {
-    val customLayers = colors.blendColors.filter { BlendMode.isCustomMode(it.mode) }
-    if (customLayers.isEmpty()) return
+    if (colors.blendColors.isEmpty()) return
     if (!isRuntimeShaderSupported()) return
 
-    val layers = customLayers.take(MAX_LAYERS)
+    val layers = colors.blendColors.take(MAX_LAYERS)
 
     runtimeShaderEffect(
         key = "MiBlendModes",
@@ -64,22 +55,5 @@ internal fun BackdropEffectScope.applyBlendColors(colors: BlurColors) {
         setFloatUniform("uBrightness", colors.brightness)
         setFloatUniform("uLuminanceAmount", 0f)
         setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
-    }
-}
-
-/**
- * Draws standard SkBlendMode (0-29) color overlays using Compose's native
- * GPU hardware blend unit. Called in the draw phase (not effect chain).
- *
- * @param blendColors All blend entries; only standard modes are drawn here.
- */
-internal fun DrawScope.drawStandardBlendColors(blendColors: List<BlendColorEntry>) {
-    for (entry in blendColors) {
-        if (!BlendMode.isCustomMode(entry.mode)) {
-            drawRect(
-                color = entry.color,
-                blendMode = BlendMode.toComposeBlendMode(entry.mode),
-            )
-        }
     }
 }

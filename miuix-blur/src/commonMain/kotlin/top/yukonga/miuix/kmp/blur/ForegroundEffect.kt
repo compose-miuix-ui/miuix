@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import top.yukonga.miuix.kmp.blur.internal.BlurEffects
 import top.yukonga.miuix.kmp.blur.internal.applyBlendColors
-import top.yukonga.miuix.kmp.blur.internal.drawStandardBlendColors
 import top.yukonga.miuix.kmp.blur.internal.noiseDither
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
@@ -53,7 +52,6 @@ fun Modifier.foregroundEffect(
 
     val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
     val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
-    val hasStandardBlend = colors.blendColors.any { !BlendMode.isCustomMode(it.mode) }
 
     return this.drawPlainBackdrop(
         backdrop = backdrop,
@@ -63,11 +61,6 @@ fun Modifier.foregroundEffect(
             noiseDither(noiseCoefficient)
             colorControls(colors.brightness, colors.contrast, colors.saturation)
             applyBlendColors(colors)
-        },
-        onDrawSurface = if (hasStandardBlend) {
-            { drawStandardBlendColors(colors.blendColors) }
-        } else {
-            null
         },
         contentBlendMode = ComposeBlendMode.DstIn,
     )

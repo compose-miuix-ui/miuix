@@ -54,7 +54,6 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
-import ui.isInDarkTheme
 import kotlin.math.roundToInt
 
 fun LazyListScope.blurSection() {
@@ -80,7 +79,7 @@ private fun BlurDemo() {
 
     val backdrop = rememberLayerBackdrop()
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
-    val blendConfigs = remember {
+    val blendConfigs = remember(surface) {
         listOf(
             // No blend
             "None" to emptyList(),
@@ -90,6 +89,8 @@ private fun BlurDemo() {
             "Multiply" to listOf(BlendColorEntry(surface, BlendMode.MULTIPLY)),
             "Overlay" to listOf(BlendColorEntry(surface, BlendMode.OVERLAY)),
             "Soft Light" to listOf(BlendColorEntry(surface, BlendMode.SOFT_LIGHT)),
+            "Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.COLOR_DODGE)),
+            "Color Burn" to listOf(BlendColorEntry(surface, BlendMode.COLOR_BURN)),
             // Xiaomi custom modes (runtime shader)
             "Linear Light" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT)),
             "Linear Light Grey" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
@@ -103,8 +104,8 @@ private fun BlurDemo() {
             "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
-    val defaultBlendIndex = if (isInDarkTheme()) 15 else 14
-    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
+    val defaultBlendIndex = 16
+    var blendModeIndex by remember(defaultBlendIndex) { mutableIntStateOf(defaultBlendIndex) }
     val currentBlend = blendConfigs[blendModeIndex]
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
@@ -303,7 +304,7 @@ private fun ForegroundBlurDemo() {
 
     val backdrop = rememberLayerBackdrop()
     val onBackground = MiuixTheme.colorScheme.onBackground
-    val blendConfigs = remember {
+    val blendConfigs = remember(onBackground) {
         listOf(
             "None" to emptyList(),
             "SrcOver" to listOf(BlendColorEntry(onBackground, BlendMode.SRC_OVER)),
@@ -311,6 +312,8 @@ private fun ForegroundBlurDemo() {
             "Multiply" to listOf(BlendColorEntry(onBackground, BlendMode.MULTIPLY)),
             "Overlay" to listOf(BlendColorEntry(onBackground, BlendMode.OVERLAY)),
             "Soft Light" to listOf(BlendColorEntry(onBackground, BlendMode.SOFT_LIGHT)),
+            "Color Dodge" to listOf(BlendColorEntry(onBackground, BlendMode.COLOR_DODGE)),
+            "Color Burn" to listOf(BlendColorEntry(onBackground, BlendMode.COLOR_BURN)),
             "Linear Light" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT)),
             "Linear Light Grey" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
             "Linear Light Lab" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_LAB)),
@@ -323,7 +326,7 @@ private fun ForegroundBlurDemo() {
             "Plus Darker" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_DARKER)),
         )
     }
-    val defaultBlendIndex = 8
+    val defaultBlendIndex = 10
     var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
     val currentBlend = blendConfigs[blendModeIndex]
 
