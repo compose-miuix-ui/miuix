@@ -19,6 +19,16 @@ interface Backdrop {
     val isCoordinatesDependent: Boolean
 
     /**
+     * Sub-pixel offset residual from rounding, in full-resolution pixels.
+     * Used by the drawing step to compensate for rounding, ensuring smooth
+     * final positioning while the recording content remains pixel-grid-stable.
+     */
+    val offsetResidualX: Float get() = 0f
+
+    /** @see offsetResidualX */
+    val offsetResidualY: Float get() = 0f
+
+    /**
      * Draws the backdrop content into the given [DrawScope].
      *
      * @param density The current density for unit conversion.

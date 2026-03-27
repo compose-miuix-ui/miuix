@@ -48,8 +48,9 @@ import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlendMode
+import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -62,6 +63,7 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 fun LazyListScope.blurSection() {
+    if (!isRenderEffectSupported()) return
     item(key = "blur") {
         SmallTitle(text = "Texture Blur")
         BlurDemo()
@@ -99,23 +101,23 @@ private fun BlurDemo() {
             "Overlay Thin" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Overlay_Thin_Light,
             "Overlay Thick" to if (isInDark) ColorBlendToken.Overlay_Thick_Dark else ColorBlendToken.Overlay_Thick_Light,
             // Single-mode blends
-            "SrcOver" to listOf(BlendColorEntry(surface, BlendMode.SRC_OVER)),
-            "Screen" to listOf(BlendColorEntry(surface, BlendMode.SCREEN)),
-            "Multiply" to listOf(BlendColorEntry(surface, BlendMode.MULTIPLY)),
-            "Overlay" to listOf(BlendColorEntry(surface, BlendMode.OVERLAY)),
-            "Soft Light" to listOf(BlendColorEntry(surface, BlendMode.SOFT_LIGHT)),
-            "Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.COLOR_DODGE)),
-            "Color Burn" to listOf(BlendColorEntry(surface, BlendMode.COLOR_BURN)),
-            "Linear Light" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT)),
-            "Linear Light Grey" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
-            "Linear Light Lab" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_LAB)),
-            "Lab Lighten" to listOf(BlendColorEntry(surface, BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
-            "Lab Darken" to listOf(BlendColorEntry(surface, BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
-            "MI Difference" to listOf(BlendColorEntry(surface, BlendMode.MI_DIFFERENCE)),
-            "MI Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_DODGE)),
-            "MI Color Burn" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_BURN)),
-            "Plus Lighter" to listOf(BlendColorEntry(surface, BlendMode.PLUS_LIGHTER)),
-            "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
+            "SrcOver" to listOf(BlendColorEntry(surface, BlurBlendMode.SrcOver)),
+            "Screen" to listOf(BlendColorEntry(surface, BlurBlendMode.Screen)),
+            "Multiply" to listOf(BlendColorEntry(surface, BlurBlendMode.Multiply)),
+            "Overlay" to listOf(BlendColorEntry(surface, BlurBlendMode.Overlay)),
+            "Soft Light" to listOf(BlendColorEntry(surface, BlurBlendMode.SoftLight)),
+            "Color Dodge" to listOf(BlendColorEntry(surface, BlurBlendMode.ColorDodge)),
+            "Color Burn" to listOf(BlendColorEntry(surface, BlurBlendMode.ColorBurn)),
+            "Linear Light" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLight)),
+            "Linear Light Grey" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLightWithGreyscale)),
+            "Linear Light Lab" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLightLab)),
+            "Lab Lighten" to listOf(BlendColorEntry(surface, BlurBlendMode.LabLightenWithGreyscale)),
+            "Lab Darken" to listOf(BlendColorEntry(surface, BlurBlendMode.LabDarkenWithGreyscale)),
+            "MI Difference" to listOf(BlendColorEntry(surface, BlurBlendMode.MiDifference)),
+            "MI Color Dodge" to listOf(BlendColorEntry(surface, BlurBlendMode.MiColorDodge)),
+            "MI Color Burn" to listOf(BlendColorEntry(surface, BlurBlendMode.MiColorBurn)),
+            "Plus Lighter" to listOf(BlendColorEntry(surface, BlurBlendMode.PlusLighter)),
+            "Plus Darker" to listOf(BlendColorEntry(surface, BlurBlendMode.PlusDarker)),
         )
     }
     var blendModeIndex by remember { mutableIntStateOf(5) }
@@ -325,15 +327,15 @@ private fun ForegroundBlurDemo() {
     val logoBlend = remember(isInDark) {
         if (isInDark) {
             listOf(
-                BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
-                BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
+                BlendColorEntry(Color(0xe6a1a1a1), BlurBlendMode.ColorDodge),
+                BlendColorEntry(Color(0x4de6e6e6), BlurBlendMode.LinearLight),
+                BlendColorEntry(Color(0xff1af500), BlurBlendMode.Lab),
             )
         } else {
             listOf(
-                BlendColorEntry(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
-                BlendColorEntry(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af200), BlendMode.LAB),
+                BlendColorEntry(Color(0xcc4a4a4a), BlurBlendMode.ColorBurn),
+                BlendColorEntry(Color(0xff4f4f4f), BlurBlendMode.LinearLight),
+                BlendColorEntry(Color(0xff1af200), BlurBlendMode.Lab),
             )
         }
     }
@@ -349,23 +351,23 @@ private fun ForegroundBlurDemo() {
             "Overlay Thin" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Overlay_Thin_Light,
             "Info Colored" to ColorBlendToken.Info_Colored_Regular,
             // Single-mode blends
-            "SrcOver" to listOf(BlendColorEntry(onBackground, BlendMode.SRC_OVER)),
-            "Screen" to listOf(BlendColorEntry(onBackground, BlendMode.SCREEN)),
-            "Multiply" to listOf(BlendColorEntry(onBackground, BlendMode.MULTIPLY)),
-            "Overlay" to listOf(BlendColorEntry(onBackground, BlendMode.OVERLAY)),
-            "Soft Light" to listOf(BlendColorEntry(onBackground, BlendMode.SOFT_LIGHT)),
-            "Color Dodge" to listOf(BlendColorEntry(onBackground, BlendMode.COLOR_DODGE)),
-            "Color Burn" to listOf(BlendColorEntry(onBackground, BlendMode.COLOR_BURN)),
-            "Linear Light" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT)),
-            "Linear Light Grey" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
-            "Linear Light Lab" to listOf(BlendColorEntry(onBackground, BlendMode.LINEAR_LIGHT_LAB)),
-            "Lab Lighten" to listOf(BlendColorEntry(onBackground, BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
-            "Lab Darken" to listOf(BlendColorEntry(onBackground, BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
-            "MI Difference" to listOf(BlendColorEntry(onBackground, BlendMode.MI_DIFFERENCE)),
-            "MI Color Dodge" to listOf(BlendColorEntry(onBackground, BlendMode.MI_COLOR_DODGE)),
-            "MI Color Burn" to listOf(BlendColorEntry(onBackground, BlendMode.MI_COLOR_BURN)),
-            "Plus Lighter" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_LIGHTER)),
-            "Plus Darker" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_DARKER)),
+            "SrcOver" to listOf(BlendColorEntry(onBackground, BlurBlendMode.SrcOver)),
+            "Screen" to listOf(BlendColorEntry(onBackground, BlurBlendMode.Screen)),
+            "Multiply" to listOf(BlendColorEntry(onBackground, BlurBlendMode.Multiply)),
+            "Overlay" to listOf(BlendColorEntry(onBackground, BlurBlendMode.Overlay)),
+            "Soft Light" to listOf(BlendColorEntry(onBackground, BlurBlendMode.SoftLight)),
+            "Color Dodge" to listOf(BlendColorEntry(onBackground, BlurBlendMode.ColorDodge)),
+            "Color Burn" to listOf(BlendColorEntry(onBackground, BlurBlendMode.ColorBurn)),
+            "Linear Light" to listOf(BlendColorEntry(onBackground, BlurBlendMode.LinearLight)),
+            "Linear Light Grey" to listOf(BlendColorEntry(onBackground, BlurBlendMode.LinearLightWithGreyscale)),
+            "Linear Light Lab" to listOf(BlendColorEntry(onBackground, BlurBlendMode.LinearLightLab)),
+            "Lab Lighten" to listOf(BlendColorEntry(onBackground, BlurBlendMode.LabLightenWithGreyscale)),
+            "Lab Darken" to listOf(BlendColorEntry(onBackground, BlurBlendMode.LabDarkenWithGreyscale)),
+            "MI Difference" to listOf(BlendColorEntry(onBackground, BlurBlendMode.MiDifference)),
+            "MI Color Dodge" to listOf(BlendColorEntry(onBackground, BlurBlendMode.MiColorDodge)),
+            "MI Color Burn" to listOf(BlendColorEntry(onBackground, BlurBlendMode.MiColorBurn)),
+            "Plus Lighter" to listOf(BlendColorEntry(onBackground, BlurBlendMode.PlusLighter)),
+            "Plus Darker" to listOf(BlendColorEntry(onBackground, BlurBlendMode.PlusDarker)),
         )
     }
     var blendModeIndex by remember { mutableIntStateOf(1) }

@@ -34,7 +34,7 @@ internal fun BackdropEffectScope.applyBlendColors(colors: BlurColors) {
         // Pack blend modes as float array (Skiko lacks IntArray uniform support)
         val modes = FloatArray(MAX_LAYERS)
         for (i in layers.indices) {
-            modes[i] = layers[i].mode.toFloat()
+            modes[i] = layers[i].mode.value.toFloat()
         }
         setFloatUniform("blendModes", modes)
 

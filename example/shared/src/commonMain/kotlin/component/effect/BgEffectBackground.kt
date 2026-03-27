@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.asComposeShader
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 
@@ -34,7 +35,8 @@ inline fun BgEffectBackground(
     alpha: Float = 1f,
     content: @Composable (BoxScope.() -> Unit),
 ) {
-    val painter = remember { BgEffectPainter() }
+    val shaderSupported = isRuntimeShaderSupported()
+    val painter = remember { if (shaderSupported) BgEffectPainter() else null }
 
     var currentBrush by remember { mutableStateOf<ShaderBrush?>(null) }
     val isDark = isInDarkTheme()
@@ -43,6 +45,7 @@ inline fun BgEffectBackground(
     val logoHeight = with(LocalDensity.current) { 600.dp.toPx() }
 
     LaunchedEffect(targetSize, isDark, effectBackground, dynamicBackground) {
+        if (painter == null) return@LaunchedEffect
         if (!effectBackground) return@LaunchedEffect
         if (targetSize.width <= 0 || targetSize.height <= 0) return@LaunchedEffect
         painter.showRuntimeShader(

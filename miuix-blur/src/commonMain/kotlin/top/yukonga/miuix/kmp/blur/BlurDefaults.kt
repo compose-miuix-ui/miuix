@@ -31,109 +31,113 @@ data class BlurColors(
  *
  * Supports both standard SkBlendMode values (0-29, handled by GPU hardware)
  * and custom modes (100-121, 200-203, handled by runtime shader).
- * See [BlendMode] for all available constants.
+ * See [BlurBlendMode] for all available constants.
  *
  * @param color The color to blend.
- * @param mode The blend mode ID. Defaults to [BlendMode.SRC_OVER].
+ * @param mode The blend mode. Defaults to [BlurBlendMode.SrcOver].
  */
 @Immutable
 data class BlendColorEntry(
     val color: Color,
-    val mode: Int = BlendMode.SRC_OVER,
+    val mode: BlurBlendMode = BlurBlendMode.SrcOver,
 )
 
 /**
- * Blend mode constants covering both standard SkBlendMode (0-31) and
- * custom modes (100-121, 200-203).
+ * Blend mode for blur color blending.
  *
+ * Wraps both standard SkBlendMode (0-31) and custom modes (100-121, 200-203).
  * All modes are executed by a runtime shader matching libhwui's
  * premultiplied-alpha blend implementations. Standard modes (0-31)
  * use Skia-compatible formulas; custom modes (100+) implement
  * Lab color space operations, linear light blending, and more.
  */
-object BlendMode {
-    // region Standard SkBlendMode (0-31)
+@JvmInline
+value class BlurBlendMode(val value: Int) {
 
-    const val CLEAR = 0
-    const val SRC = 1
-    const val DST = 2
-    const val SRC_OVER = 3
-    const val DST_OVER = 4
-    const val SRC_IN = 5
-    const val DST_IN = 6
-    const val SRC_OUT = 7
-    const val DST_OUT = 8
-    const val SRC_ATOP = 9
-    const val DST_ATOP = 10
-    const val XOR = 11
-    const val PLUS = 12
-    const val MODULATE = 13
-    const val SCREEN = 14
-    const val OVERLAY = 15
-    const val DARKEN = 16
-    const val LIGHTEN = 17
-    const val COLOR_DODGE = 18
-    const val COLOR_BURN = 19
-    const val HARD_LIGHT = 20
-    const val SOFT_LIGHT = 21
-    const val DIFFERENCE_STD = 22
-    const val EXCLUSION = 23
-    const val MULTIPLY = 24
-    const val HUE = 25
-    const val SATURATION_STD = 26
-    const val COLOR = 27
-    const val LUMINOSITY = 28
+    companion object {
+        // region Standard SkBlendMode (0-31)
 
-    // endregion
+        val Clear = BlurBlendMode(0)
+        val Src = BlurBlendMode(1)
+        val Dst = BlurBlendMode(2)
+        val SrcOver = BlurBlendMode(3)
+        val DstOver = BlurBlendMode(4)
+        val SrcIn = BlurBlendMode(5)
+        val DstIn = BlurBlendMode(6)
+        val SrcOut = BlurBlendMode(7)
+        val DstOut = BlurBlendMode(8)
+        val SrcAtop = BlurBlendMode(9)
+        val DstAtop = BlurBlendMode(10)
+        val Xor = BlurBlendMode(11)
+        val Plus = BlurBlendMode(12)
+        val Modulate = BlurBlendMode(13)
+        val Screen = BlurBlendMode(14)
+        val Overlay = BlurBlendMode(15)
+        val Darken = BlurBlendMode(16)
+        val Lighten = BlurBlendMode(17)
+        val ColorDodge = BlurBlendMode(18)
+        val ColorBurn = BlurBlendMode(19)
+        val HardLight = BlurBlendMode(20)
+        val SoftLight = BlurBlendMode(21)
+        val Difference = BlurBlendMode(22)
+        val Exclusion = BlurBlendMode(23)
+        val Multiply = BlurBlendMode(24)
+        val Hue = BlurBlendMode(25)
+        val Saturation = BlurBlendMode(26)
+        val Color = BlurBlendMode(27)
+        val Luminosity = BlurBlendMode(28)
 
-    // region Custom modes (>=100)
+        // endregion
 
-    /** Linear light blend. */
-    const val LINEAR_LIGHT = 100
+        // region Custom modes (>=100)
 
-    /** Linear light with greyscale modulation. */
-    const val LINEAR_LIGHT_WITH_GREYSCALE = 101
+        /** Linear light blend. */
+        val LinearLight = BlurBlendMode(100)
 
-    /** Absolute difference blend. */
-    const val MI_DIFFERENCE = 102
+        /** Linear light with greyscale modulation. */
+        val LinearLightWithGreyscale = BlurBlendMode(101)
 
-    /** Lab lighten with greyscale modulation. */
-    const val LAB_LIGHTEN_WITH_GREYSCALE = 103
+        /** Absolute difference blend. */
+        val MiDifference = BlurBlendMode(102)
 
-    /** Lab darken with greyscale modulation. */
-    const val LAB_DARKEN_WITH_GREYSCALE = 105
+        /** Lab lighten with greyscale modulation. */
+        val LabLightenWithGreyscale = BlurBlendMode(103)
 
-    /** Lab color mapping. Uses color.r as m, color.g as n. */
-    const val LAB = 106
+        /** Lab darken with greyscale modulation. */
+        val LabDarkenWithGreyscale = BlurBlendMode(105)
 
-    /** Linear light in Lab color space. */
-    const val LINEAR_LIGHT_LAB = 107
+        /** Lab color mapping. Uses color.r as m, color.g as n. */
+        val Lab = BlurBlendMode(106)
 
-    /** Color dodge V2. */
-    const val MI_COLOR_DODGE = 118
+        /** Linear light in Lab color space. */
+        val LinearLightLab = BlurBlendMode(107)
 
-    /** Color burn V2. */
-    const val MI_COLOR_BURN = 119
+        /** Color dodge V2. */
+        val MiColorDodge = BlurBlendMode(118)
 
-    /** Plus darker with alpha-aware compositing. */
-    const val PLUS_DARKER = 120
+        /** Color burn V2. */
+        val MiColorBurn = BlurBlendMode(119)
 
-    /** Plus lighter with alpha-aware compositing. */
-    const val PLUS_LIGHTER = 121
+        /** Plus darker with alpha-aware compositing. */
+        val PlusDarker = BlurBlendMode(120)
 
-    /** Alpha blend with child modulation. */
-    const val ALPHA_BLEND = 200
+        /** Plus lighter with alpha-aware compositing. */
+        val PlusLighter = BlurBlendMode(121)
 
-    /** Saturation adjustment. Requires [BlurColors.saturation]. */
-    const val MI_SATURATION = 201
+        /** Alpha blend with child modulation. */
+        val AlphaBlend = BlurBlendMode(200)
 
-    /** Brightness adjustment. Requires [BlurColors.brightness]. */
-    const val MI_BRIGHTNESS = 202
+        /** Saturation adjustment. Requires [BlurColors.saturation]. */
+        val MiSaturation = BlurBlendMode(201)
 
-    /** Luminance curve adjustment. */
-    const val MI_LUMINANCE = 203
+        /** Brightness adjustment. Requires [BlurColors.brightness]. */
+        val MiBrightness = BlurBlendMode(202)
 
-    // endregion
+        /** Luminance curve adjustment. */
+        val MiLuminance = BlurBlendMode(203)
+
+        // endregion
+    }
 }
 
 /**

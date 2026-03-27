@@ -24,6 +24,7 @@ import top.yukonga.miuix.kmp.theme.miuixShape
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param modifier The modifier to be applied to the surface.
+ * @param enabled Whether the blur effect is active. When false, the surface renders without blur.
  * @param cornerRadius The corner radius of the blurred surface.
  * @param blurRadius The blur radius in pixels.
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
@@ -35,6 +36,7 @@ import top.yukonga.miuix.kmp.theme.miuixShape
 fun BlurSurface(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     cornerRadius: Dp = BlurDefaults.CornerRadius,
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
@@ -58,6 +60,7 @@ fun BlurSurface(
                     blurRadius = blurRadius,
                     noiseCoefficient = noiseCoefficient,
                     colors = colors,
+                    enabled = enabled,
                 ),
             propagateMinConstraints = true,
         ) {

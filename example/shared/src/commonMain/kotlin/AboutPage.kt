@@ -74,8 +74,10 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlendMode
+import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -161,7 +163,14 @@ private fun AboutContent(
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
-    val contentPadding = pageContentPadding(
+    val scrollPadding = pageContentPadding(
+        padding,
+        padding,
+        isWideScreen,
+        extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+        extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+    )
+    val logoPadding = pageContentPadding(
         padding,
         padding,
         isWideScreen,
@@ -171,9 +180,9 @@ private fun AboutContent(
     )
 
     val isInDark = isInDarkTheme()
-    var blurEnable by remember { mutableStateOf(true) }
-    val dynamicBackground = remember { mutableStateOf(true) }
-    val effectBackground = remember { mutableStateOf(true) }
+    var blurEnable by remember { mutableStateOf(isRenderEffectSupported()) }
+    val dynamicBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
+    val effectBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
 
     val surface = colorScheme.surface.copy(alpha = 0.6f)
     val blendConfigs = remember(isInDark) {
@@ -182,22 +191,22 @@ private fun AboutContent(
             "Default" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light,
             "None" to emptyList(),
             // Standard SkBlendMode (GPU hardware)
-            "SrcOver" to listOf(BlendColorEntry(surface, BlendMode.SRC_OVER)),
-            "Screen" to listOf(BlendColorEntry(surface, BlendMode.SCREEN)),
-            "Multiply" to listOf(BlendColorEntry(surface, BlendMode.MULTIPLY)),
-            "Overlay" to listOf(BlendColorEntry(surface, BlendMode.OVERLAY)),
-            "Soft Light" to listOf(BlendColorEntry(surface, BlendMode.SOFT_LIGHT)),
+            "SrcOver" to listOf(BlendColorEntry(surface, BlurBlendMode.SrcOver)),
+            "Screen" to listOf(BlendColorEntry(surface, BlurBlendMode.Screen)),
+            "Multiply" to listOf(BlendColorEntry(surface, BlurBlendMode.Multiply)),
+            "Overlay" to listOf(BlendColorEntry(surface, BlurBlendMode.Overlay)),
+            "Soft Light" to listOf(BlendColorEntry(surface, BlurBlendMode.SoftLight)),
             // Xiaomi custom modes (runtime shader)
-            "Linear Light" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT)),
-            "Linear Light Grey" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
-            "Linear Light Lab" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_LAB)),
-            "Lab Lighten" to listOf(BlendColorEntry(surface, BlendMode.LAB_LIGHTEN_WITH_GREYSCALE)),
-            "Lab Darken" to listOf(BlendColorEntry(surface, BlendMode.LAB_DARKEN_WITH_GREYSCALE)),
-            "MI Difference" to listOf(BlendColorEntry(surface, BlendMode.MI_DIFFERENCE)),
-            "MI Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_DODGE)),
-            "MI Color Burn" to listOf(BlendColorEntry(surface, BlendMode.MI_COLOR_BURN)),
-            "Plus Lighter" to listOf(BlendColorEntry(surface, BlendMode.PLUS_LIGHTER)),
-            "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
+            "Linear Light" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLight)),
+            "Linear Light Grey" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLightWithGreyscale)),
+            "Linear Light Lab" to listOf(BlendColorEntry(surface, BlurBlendMode.LinearLightLab)),
+            "Lab Lighten" to listOf(BlendColorEntry(surface, BlurBlendMode.LabLightenWithGreyscale)),
+            "Lab Darken" to listOf(BlendColorEntry(surface, BlurBlendMode.LabDarkenWithGreyscale)),
+            "MI Difference" to listOf(BlendColorEntry(surface, BlurBlendMode.MiDifference)),
+            "MI Color Dodge" to listOf(BlendColorEntry(surface, BlurBlendMode.MiColorDodge)),
+            "MI Color Burn" to listOf(BlendColorEntry(surface, BlurBlendMode.MiColorBurn)),
+            "Plus Lighter" to listOf(BlendColorEntry(surface, BlurBlendMode.PlusLighter)),
+            "Plus Darker" to listOf(BlendColorEntry(surface, BlurBlendMode.PlusDarker)),
         )
     }
     val configEntries = blendConfigs.entries.toList()
@@ -206,15 +215,15 @@ private fun AboutContent(
     val logoBlend = remember(isInDark) {
         if (isInDark) {
             listOf(
-                BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
-                BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
+                BlendColorEntry(Color(0xe6a1a1a1), BlurBlendMode.ColorDodge),
+                BlendColorEntry(Color(0x4de6e6e6), BlurBlendMode.LinearLight),
+                BlendColorEntry(Color(0xff1af500), BlurBlendMode.Lab),
             )
         } else {
             listOf(
-                BlendColorEntry(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
-                BlendColorEntry(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af200), BlendMode.LAB),
+                BlendColorEntry(Color(0xcc4a4a4a), BlurBlendMode.ColorBurn),
+                BlendColorEntry(Color(0xff4f4f4f), BlurBlendMode.LinearLight),
+                BlendColorEntry(Color(0xff1af200), BlurBlendMode.Lab),
             )
         }
     }
@@ -229,6 +238,7 @@ private fun AboutContent(
     var iconProgress by remember { mutableFloatStateOf(0f) }
     var projectNameProgress by remember { mutableFloatStateOf(0f) }
     var versionCodeProgress by remember { mutableFloatStateOf(0f) }
+    var initialLogoAreaY by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(lazyListState) {
         snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
@@ -239,14 +249,23 @@ private fun AboutContent(
                     if (iconProgress != 1f) iconProgress = 1f
                     return@onEach
                 }
-                val stage1TotalLength = logoAreaY - versionCodeY
+
+                if (initialLogoAreaY == 0f && logoAreaY > 0f) {
+                    initialLogoAreaY = logoAreaY
+                }
+                val refLogoAreaY = if (initialLogoAreaY > 0f) initialLogoAreaY else logoAreaY
+
+                val stage1TotalLength = refLogoAreaY - versionCodeY
                 val stage2TotalLength = versionCodeY - projectNameY
                 val stage3TotalLength = projectNameY - iconY
 
-                versionCodeProgress = (offset.toFloat().coerceAtMost(stage1TotalLength) / stage1TotalLength).coerceIn(0f, 1f)
-                projectNameProgress =
-                    ((offset.toFloat().coerceAtMost(stage1TotalLength + stage2TotalLength) - stage1TotalLength) / stage2TotalLength).coerceIn(0f, 1f)
-                iconProgress = ((offset.toFloat().coerceAtMost(iconY) - stage1TotalLength - stage3TotalLength) / stage3TotalLength).coerceIn(0f, 1f)
+                val versionCodeDelay = stage1TotalLength * 0.5f
+                versionCodeProgress = ((offset.toFloat() - versionCodeDelay) / (stage1TotalLength - versionCodeDelay).coerceAtLeast(1f))
+                    .coerceIn(0f, 1f)
+                projectNameProgress = ((offset.toFloat() - stage1TotalLength) / stage2TotalLength.coerceAtLeast(1f))
+                    .coerceIn(0f, 1f)
+                iconProgress = ((offset.toFloat() - stage1TotalLength - stage2TotalLength) / stage3TotalLength.coerceAtLeast(1f))
+                    .coerceIn(0f, 1f)
             }
             .collect { }
     }
@@ -262,12 +281,11 @@ private fun AboutContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = contentPadding.calculateTopPadding() + 52.dp,
-                    start = contentPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    end = contentPadding.calculateRightPadding(LayoutDirection.Ltr),
+                    top = logoPadding.calculateTopPadding() + 52.dp,
+                    start = logoPadding.calculateLeftPadding(LayoutDirection.Ltr),
+                    end = logoPadding.calculateRightPadding(LayoutDirection.Ltr),
                 )
                 .onSizeChanged { size ->
-                    onLogoHeightChanged(size.height)
                     with(density) { logoHeightDp = size.height.toDp() }
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -353,14 +371,23 @@ private fun AboutContent(
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
             ),
-            contentPadding = contentPadding,
+            contentPadding = PaddingValues(
+                top = scrollPadding.calculateTopPadding(),
+                start = scrollPadding.calculateLeftPadding(LayoutDirection.Ltr),
+                end = scrollPadding.calculateRightPadding(LayoutDirection.Ltr),
+            ),
         ) {
             // Transparent spacer matching logo height
             item(key = "logoSpacer") {
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(logoHeightDp + 52.dp + 98.dp)
+                        .height(
+                            logoHeightDp + 52.dp + logoPadding.calculateTopPadding() - scrollPadding.calculateTopPadding() + 126.dp,
+                        )
+                        .onSizeChanged { size ->
+                            onLogoHeightChanged(size.height)
+                        }
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 showTextureSet = true
@@ -377,93 +404,102 @@ private fun AboutContent(
             }
 
             item(key = "about") {
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedRectangle(16.dp),
-                            blurRadius = blurRadius,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
-                                blendColors = currentConfigValue,
-                                brightness = brightness,
-                                contrast = contrast,
-                                saturation = saturation,
-                            ),
-                            enabled = blurEnable,
-                        ),
-                    colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
-                ) {
-                    SuperArrow(
-                        title = "View Source",
-                        endActions = {
-                            Text(
-                                text = "GitHub",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
-                            )
-                        },
-                        onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
-                    )
-                    SuperArrow(
-                        title = "Join Group",
-                        endActions = {
-                            Text(
-                                text = "Telegram",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
-                            )
-                        },
-                        onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
-                    )
-                }
-                Card(
+                Column(
                     modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(top = 12.dp)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedRectangle(16.dp),
-                            blurRadius = blurRadius,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
-                                blendColors = currentConfigValue,
-                                brightness = brightness,
-                                contrast = contrast,
-                                saturation = saturation,
-                            ),
-                            enabled = blurEnable,
-                        ),
-                    colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
+                        .fillParentMaxHeight()
+                        .padding(bottom = scrollPadding.calculateBottomPadding()),
                 ) {
-                    SuperArrow(
-                        title = "License",
-                        endActions = {
-                            Text(
-                                text = "Apache-2.0",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                color = colorScheme.onSurfaceVariantActions,
-                            )
-                        },
-                        onClick = {
-                            uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                        },
-                    )
-                    SuperArrow(
-                        title = "Third Party Licenses",
-                        onClick = { navigator.push(Route.License) },
-                    )
+                    Card(
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                            .textureBlur(
+                                backdrop = backdrop,
+                                shape = RoundedRectangle(16.dp),
+                                blurRadius = blurRadius,
+                                noiseCoefficient = noiseCoefficient,
+                                colors = BlurColors(
+                                    blendColors = currentConfigValue,
+                                    brightness = brightness,
+                                    contrast = contrast,
+                                    saturation = saturation,
+                                ),
+                                enabled = blurEnable,
+                            ),
+                        colors = CardDefaults.defaultColors(
+                            if (blurEnable) Color.Transparent else colorScheme.surfaceContainer,
+                            Color.Transparent,
+                        ),
+                    ) {
+                        SuperArrow(
+                            title = "View Source",
+                            endActions = {
+                                Text(
+                                    text = "GitHub",
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
+                        )
+                        SuperArrow(
+                            title = "Join Group",
+                            endActions = {
+                                Text(
+                                    text = "Telegram",
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
+                        )
+                    }
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(top = 12.dp)
+                            .textureBlur(
+                                backdrop = backdrop,
+                                shape = RoundedRectangle(16.dp),
+                                blurRadius = blurRadius,
+                                noiseCoefficient = noiseCoefficient,
+                                colors = BlurColors(
+                                    blendColors = currentConfigValue,
+                                    brightness = brightness,
+                                    contrast = contrast,
+                                    saturation = saturation,
+                                ),
+                                enabled = blurEnable,
+                            ),
+                        colors = CardDefaults.defaultColors(
+                            if (blurEnable) Color.Transparent else colorScheme.surfaceContainer,
+                            Color.Transparent,
+                        ),
+                    ) {
+                        SuperArrow(
+                            title = "License",
+                            endActions = {
+                                Text(
+                                    text = "Apache-2.0",
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = {
+                                uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                            },
+                        )
+                        SuperArrow(
+                            title = "Third Party Licenses",
+                            onClick = { navigator.push(Route.License) },
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            item {
-                Spacer(Modifier.fillMaxWidth().height(500.dp))
             }
         }
         VerticalScrollBar(
             adapter = rememberScrollBarAdapter(lazyListState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            trackPadding = contentPadding,
+            trackPadding = scrollPadding,
         )
     }
 

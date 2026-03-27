@@ -57,15 +57,10 @@ class LayerBackdrop internal constructor(
 
     internal var layerCoordinates: LayoutCoordinates? by mutableStateOf(null)
 
-    /**
-     * Sub-pixel offset residual from rounding, in full-resolution pixels.
-     * Used by the drawing step to compensate for the rounding, ensuring smooth
-     * final positioning while the recording content remains pixel-grid-stable.
-     */
-    internal var offsetResidualX: Float = 0f
-        private set
-    internal var offsetResidualY: Float = 0f
-        private set
+    override var offsetResidualX: Float = 0f
+        internal set
+    override var offsetResidualY: Float = 0f
+        internal set
 
     private var inverseLayerScope: InverseLayerScope? = null
 

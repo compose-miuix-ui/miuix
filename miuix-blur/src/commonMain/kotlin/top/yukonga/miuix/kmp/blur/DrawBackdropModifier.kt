@@ -42,9 +42,9 @@ import top.yukonga.miuix.kmp.blur.internal.recordLayer
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 
 /**
- * Applies a backdrop effect without highlight, shadow, or inner shadow decorations.
+ * Applies a backdrop effect to this composable.
  */
-fun Modifier.drawPlainBackdrop(
+fun Modifier.drawBackdrop(
     backdrop: Backdrop,
     shape: () -> Shape,
     effects: BackdropEffectScope.() -> Unit,
@@ -237,8 +237,8 @@ private class DrawBackdropNode(
                     } else {
                         IntOffset.Zero
                     }
-                val residualX = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualX else 0f
-                val residualY = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualY else 0f
+                val residualX = backdrop.offsetResidualX
+                val residualY = backdrop.offsetResidualY
                 drawContext.canvas.translate(-residualX, -residualY)
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
                 drawContext.canvas.translate(residualX, residualY)
@@ -269,8 +269,8 @@ private class DrawBackdropNode(
                     } else {
                         IntOffset.Zero
                     }
-                val residualX = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualX else 0f
-                val residualY = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualY else 0f
+                val residualX = backdrop.offsetResidualX
+                val residualY = backdrop.offsetResidualY
                 drawContext.canvas.translate(-residualX, -residualY)
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
                 drawContext.canvas.translate(residualX, residualY)
@@ -288,7 +288,7 @@ private class DrawBackdropNode(
         }
     }
 
-    private val contentPaint by lazy { Paint() }
+    private val contentPaint = Paint()
 
     override fun ContentDrawScope.draw() {
         if (effectScope.update(this)) {

@@ -17,7 +17,7 @@ kotlin {
     android {
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
         compileSdk = BuildConfig.COMPILE_SDK
-        minSdk = BuildConfig.MIN_SDK
+        minSdk = 31
         namespace = "${BuildConfig.LIBRARY_ID}.blur"
     }
 
