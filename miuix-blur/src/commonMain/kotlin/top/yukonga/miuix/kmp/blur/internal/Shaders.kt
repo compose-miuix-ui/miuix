@@ -7,16 +7,13 @@ package top.yukonga.miuix.kmp.blur.internal
  * Builds a tap-count-specialized LM Gaussian blur shader.
  *
  * Array sizes and loop bounds match the actual [tapCount] to minimize
- * texture samples (2 × tapCount per pixel). This mirrors libhwui's
- * approach of 7 specialized shader variants (1–7 taps).
+ * texture samples (2 × tapCount per pixel), with 7 specialized shader
+ * variants (1–7 taps).
  *
  * Applied twice (horizontal then vertical) for separable 2D convolution.
  *
- * Uniforms:
- * - `child`: Input image shader.
- * - `in_blurOffset[tapCount*2]`: Sampling offsets. [0..N-1]=X, [N..2N-1]=Y.
- * - `in_blurWeight[tapCount]`: Sampling weights for each tap pair.
- * - `in_texSize`: Texture dimensions for mirror boundary clamping.
+ * Coordinates are clamped to `[0.5, in_texSize - 0.5]` to prevent
+ * out-of-bounds sampling that may return transparent black on some platforms.
  */
 internal fun buildGaussianBlurShader(tapCount: Int): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
@@ -27,19 +24,13 @@ internal fun buildGaussianBlurShader(tapCount: Int): String {
     uniform float in_blurWeight[$tapCount];
     uniform float2 in_texSize;
 
-    float2 mirror(float2 coord, float2 size) {
-        float2 limit = size - 0.5;
-        coord = abs(coord);
-        coord = limit - abs(coord - limit);
-        return clamp(coord, float2(0.5), limit);
-    }
-
     half4 main(float2 xy) {
         half4 color = half4(0);
+        float2 maxCoord = in_texSize - 0.5;
         for (int i = 0; i < $tapCount; i++) {
             float2 offset = float2(in_blurOffset[i], in_blurOffset[i + $tapCount]);
-            float2 c1 = mirror(xy + offset, in_texSize);
-            float2 c2 = mirror(xy - offset, in_texSize);
+            float2 c1 = clamp(xy + offset, float2(0.5), maxCoord);
+            float2 c2 = clamp(xy - offset, float2(0.5), maxCoord);
             color += (child.eval(c1) + child.eval(c2)) * in_blurWeight[i];
         }
         if (color.a > 0.001) {

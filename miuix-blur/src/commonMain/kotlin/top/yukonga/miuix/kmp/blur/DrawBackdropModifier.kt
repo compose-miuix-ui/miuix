@@ -167,6 +167,7 @@ private class DrawBackdropNode(
     }
 
     private var graphicsLayer: GraphicsLayer? = null
+    private var cascadeLayer: GraphicsLayer? = null
 
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
@@ -181,10 +182,9 @@ private class DrawBackdropNode(
 
     private val recordBackdropBlock: (DrawScope.() -> Unit) = {
         val currentPadding = padding
-        val scaleFactor = downscaleFactor
+        val scaleFactor = cascadeFirstStepScale
         if (currentPadding != 0f) {
-            // Padding is in full-resolution pixels; when downsampling, scale it
-            val scaledPadding = if (scaleFactor > 1) currentPadding / scaleFactor else currentPadding
+            val scaledPadding = if (scaleFactor > 1) (currentPadding / scaleFactor).toInt().toFloat() else currentPadding
             drawContext.canvas.translate(scaledPadding, scaledPadding)
         }
         onDrawBackdrop {
@@ -198,10 +198,13 @@ private class DrawBackdropNode(
             }
         }
         if (currentPadding != 0f) {
-            val scaledPadding = if (scaleFactor > 1) currentPadding / scaleFactor else currentPadding
+            val scaledPadding = if (scaleFactor > 1) (currentPadding / scaleFactor).toInt().toFloat() else currentPadding
             drawContext.canvas.translate(-scaledPadding, -scaledPadding)
         }
     }
+
+    /** First step downscale for cascade (backdrop draw uses this, not the total factor). */
+    private var cascadeFirstStepScale: Int = 1
 
     private val drawBackdropLayer: DrawScope.() -> Unit = {
         val layer = graphicsLayer
@@ -211,28 +214,9 @@ private class DrawBackdropNode(
             val fullWidth = size.width.toInt() + currentPadding.toInt() * 2
             val fullHeight = size.height.toInt() + currentPadding.toInt() * 2
 
-            // Record at reduced resolution when downsampling
-            val recordWidth = if (scaleFactor > 1) (fullWidth / scaleFactor).coerceAtLeast(1) else fullWidth
-            val recordHeight = if (scaleFactor > 1) (fullHeight / scaleFactor).coerceAtLeast(1) else fullHeight
-            recordLayer(
-                layer,
-                size = IntSize(recordWidth, recordHeight),
-                block = recordBackdropBlock,
-            )
-
-            if (scaleFactor > 1) {
-                val scaleUp = scaleFactor.toFloat()
-                layer.topLeft =
-                    if (currentPadding != 0f) {
-                        val dsPadding = (currentPadding / scaleFactor).toInt()
-                        IntOffset(-dsPadding, -dsPadding)
-                    } else {
-                        IntOffset.Zero
-                    }
-                scale(scaleUp, scaleUp, Offset.Zero) {
-                    drawLayer(layer)
-                }
-            } else {
+            if (scaleFactor <= 1) {
+                cascadeFirstStepScale = 1
+                recordLayer(layer, size = IntSize(fullWidth, fullHeight), block = recordBackdropBlock)
                 layer.topLeft =
                     if (currentPadding != 0f) {
                         IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
@@ -240,6 +224,56 @@ private class DrawBackdropNode(
                         IntOffset.Zero
                     }
                 drawLayer(layer)
+            } else if (scaleFactor <= 2) {
+                // Single 2x step — no cascade needed
+                cascadeFirstStepScale = 2
+                val w = (fullWidth / 2).coerceAtLeast(1)
+                val h = (fullHeight / 2).coerceAtLeast(1)
+                recordLayer(layer, size = IntSize(w, h), block = recordBackdropBlock)
+                val scaleUp = scaleFactor.toFloat()
+                layer.topLeft =
+                    if (currentPadding != 0f) {
+                        IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
+                    } else {
+                        IntOffset.Zero
+                    }
+                val residualX = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualX else 0f
+                val residualY = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualY else 0f
+                drawContext.canvas.translate(-residualX, -residualY)
+                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+                drawContext.canvas.translate(residualX, residualY)
+            } else {
+                // Two-step cascade: backdrop at 1/(sf/2), then bilinear 2x.
+                // Matches libhwui pattern: 4→2x→2x, 8→4x→2x, 16→8x→2x.
+                val firstStep = scaleFactor / 2
+                cascadeFirstStepScale = firstStep
+                val intermediateW = (fullWidth / firstStep).coerceAtLeast(1)
+                val intermediateH = (fullHeight / firstStep).coerceAtLeast(1)
+                val finalW = (intermediateW / 2).coerceAtLeast(1)
+                val finalH = (intermediateH / 2).coerceAtLeast(1)
+
+                // Step 1: record backdrop at 1/firstStep into cascade layer
+                val intermediate = cascadeLayer
+                    ?: requireGraphicsContext().createGraphicsLayer().also { cascadeLayer = it }
+                recordLayer(intermediate, size = IntSize(intermediateW, intermediateH), block = recordBackdropBlock)
+
+                // Step 2: bilinear 2x from cascade layer into blur layer
+                recordLayer(layer, size = IntSize(finalW, finalH)) {
+                    scale(0.5f, 0.5f, Offset.Zero) { drawLayer(intermediate) }
+                }
+
+                val scaleUp = scaleFactor.toFloat()
+                layer.topLeft =
+                    if (currentPadding != 0f) {
+                        IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
+                    } else {
+                        IntOffset.Zero
+                    }
+                val residualX = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualX else 0f
+                val residualY = if (backdrop is LayerBackdrop) (backdrop as LayerBackdrop).offsetResidualY else 0f
+                drawContext.canvas.translate(-residualX, -residualY)
+                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+                drawContext.canvas.translate(residualX, residualY)
             }
         }
     }
@@ -318,10 +352,11 @@ private class DrawBackdropNode(
     }
 
     override fun onDetach() {
-        graphicsLayer?.let { layer ->
-            requireGraphicsContext().releaseGraphicsLayer(layer)
-            graphicsLayer = null
-        }
+        val ctx = requireGraphicsContext()
+        graphicsLayer?.let { ctx.releaseGraphicsLayer(it) }
+        graphicsLayer = null
+        cascadeLayer?.let { ctx.releaseGraphicsLayer(it) }
+        cascadeLayer = null
         effectScope.reset()
         layoutCoordinates = null
     }

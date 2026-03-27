@@ -16,6 +16,13 @@ import kotlin.math.sqrt
 /** Radius-to-sigma conversion coefficient for Gaussian blur. */
 private const val RADIUS_TO_SIGMA = 0.45f
 
+/**
+ * Maximum sampling reach of the blur kernel in downsampled pixels.
+ * The kernel merges 27 taps into up to 7 pairs; the outermost pair
+ * reaches approximately offset 12.5. Rounded up for safety.
+ */
+private const val KERNEL_REACH = 14
+
 /** Minimum combined weight for a merged pair to be considered valid. */
 private const val WEIGHT_THRESHOLD = 0.002
 
@@ -65,8 +72,8 @@ internal fun createGaussianBlurEffect(
 
     val downScale = maxOf(downScaleX, downScaleY)
 
-    // Texture size must use the same integer arithmetic as drawBackdropLayer
-    // to avoid precision mismatch where the shader samples beyond the texture bounds.
+    // Texture size uses the same integer arithmetic as drawBackdropLayer
+    // to match the actual recording dimensions (size includes padding).
     val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
     val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
 
@@ -139,7 +146,21 @@ internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
         return
     }
 
-    val result = createGaussianBlurEffect(radiusX, radiusY, size, this) ?: return
+    // Pre-compute downscale factor to set padding before creating the effect.
+    val sigmaMax = maxOf(radiusX, radiusY) * RADIUS_TO_SIGMA
+    val sf = computeDownScaleParams(sigmaMax).downScale
+
+    // Padding covers the blur kernel's maximum sampling reach, NOT the blur
+    // radius itself. This keeps recording dimensions stable across radius
+    // changes within the same downscale level, preventing content shifts
+    // that the blur kernel would amplify into visible jitter.
+    val kernelPadding = (KERNEL_REACH * sf).toFloat()
+    if (kernelPadding > padding) {
+        padding = kernelPadding
+    }
+
+    val paddedSize = Size(size.width + padding * 2f, size.height + padding * 2f)
+    val result = createGaussianBlurEffect(radiusX, radiusY, paddedSize, this) ?: return
 
     // Set adaptive downsampling — effects execute on reduced-area texture
     downscaleFactor = result.downscaleFactor

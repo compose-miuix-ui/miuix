@@ -118,7 +118,7 @@ private fun BlurDemo() {
             "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
-    var blendModeIndex by remember { mutableIntStateOf(0) }
+    var blendModeIndex by remember { mutableIntStateOf(5) }
     val currentBlend = blendConfigs[blendModeIndex]
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }

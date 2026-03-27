@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.Density
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
+import kotlin.math.roundToInt
 
 private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
 
@@ -56,6 +57,16 @@ class LayerBackdrop internal constructor(
 
     internal var layerCoordinates: LayoutCoordinates? by mutableStateOf(null)
 
+    /**
+     * Sub-pixel offset residual from rounding, in full-resolution pixels.
+     * Used by the drawing step to compensate for the rounding, ensuring smooth
+     * final positioning while the recording content remains pixel-grid-stable.
+     */
+    internal var offsetResidualX: Float = 0f
+        private set
+    internal var offsetResidualY: Float = 0f
+        private set
+
     private var inverseLayerScope: InverseLayerScope? = null
 
     override fun DrawScope.drawBackdrop(
@@ -78,13 +89,21 @@ class LayerBackdrop internal constructor(
                 with(obtainInverseLayerScope()) { inverseTransform(density, layerBlock) }
             }
             if (downscaleFactor > 1) {
-                // When downsampling, scale the offset and source layer to fit the smaller
-                // recording surface. The offset from localPositionOf is in full-resolution
-                // pixels, so we divide by the scale factor.
                 val inv = 1f / downscaleFactor
-                translate(-offset.x * inv, -offset.y * inv)
+                // Round to nearest even integer in downsampled space for stable
+                // rasterization. Even alignment ensures that subsequent cascade 2x
+                // steps (scale 0.5) also land on integer pixel boundaries.
+                val scaledX = offset.x * inv
+                val scaledY = offset.y * inv
+                val roundedX = kotlin.math.round(scaledX * 0.5f).toInt().toFloat() * 2f
+                val roundedY = kotlin.math.round(scaledY * 0.5f).toInt().toFloat() * 2f
+                offsetResidualX = (scaledX - roundedX) * downscaleFactor
+                offsetResidualY = (scaledY - roundedY) * downscaleFactor
+                translate(-roundedX, -roundedY)
                 scale(inv, inv, Offset.Zero)
             } else {
+                offsetResidualX = 0f
+                offsetResidualY = 0f
                 translate(-offset.x, -offset.y)
             }
         }) {
