@@ -519,12 +519,13 @@ private fun TextFieldDecorationBox(
                 val bw = borderWidth()
                 if (bw > 0.dp) {
                     val strokePx = bw.toPx()
+                    if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
                     val halfStroke = strokePx / 2f
-                    val cr = cornerRadius.toPx()
+                    val cr = (cornerRadius.toPx() - halfStroke).coerceAtLeast(0f)
                     inset(halfStroke) {
                         drawRoundRect(
                             color = borderColor(),
-                            cornerRadius = CornerRadius(cr - halfStroke, cr - halfStroke),
+                            cornerRadius = CornerRadius(cr, cr),
                             style = Stroke(width = strokePx),
                         )
                     }
