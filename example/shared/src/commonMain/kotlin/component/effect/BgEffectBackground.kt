@@ -48,12 +48,12 @@ inline fun BgEffectBackground(
     LaunchedEffect(targetSize, isDark, effectBackground.value, dynamicBackground.value) {
         if (!effectBackground.value) return@LaunchedEffect
         if (targetSize.width <= 0 || targetSize.height <= 0) return@LaunchedEffect
-            painter.showRuntimeShader(
-                logoHeight,
-                targetSize.height.toFloat(),
-                targetSize.width.toFloat(),
-                isDark,
-            )
+        painter.showRuntimeShader(
+            logoHeight,
+            targetSize.height.toFloat(),
+            targetSize.width.toFloat(),
+            isDark,
+        )
 
         var startTime: Long? = null
         while (dynamicBackground.value) {
@@ -62,17 +62,15 @@ inline fun BgEffectBackground(
                     startTime = frameTime
                 }
                 val animTime = ((frameTime - startTime) / 1_000_000_000f) % 62.831852f
-                    painter.setAnimTime(animTime)
-                    painter.setResolution(
-                        floatArrayOf(
-                            targetSize.width.toFloat(),
-                            targetSize.height.toFloat(),
-                        ),
-                    )
-                    painter.updateMaterials()
+                painter.setAnimTime(animTime)
+                painter.setResolution(
+                    floatArrayOf(
+                        targetSize.width.toFloat(),
+                        targetSize.height.toFloat(),
+                    ),
+                )
+                painter.updateMaterials()
                 currentBrush.value = ShaderBrush(painter.runtimeShader.asComposeShader())
-
-
             }
         }
     }

@@ -180,9 +180,9 @@ private fun AboutContent(
     )
 
     val isInDark = isInDarkTheme()
-    var blurEnable by remember { mutableStateOf(true)}
-    val dynamicBackground = remember { mutableStateOf(true)}
-    val effectBackground = remember { mutableStateOf(true)}
+    var blurEnable by remember { mutableStateOf(true) }
+    val dynamicBackground = remember { mutableStateOf(true) }
+    val effectBackground = remember { mutableStateOf(true) }
 
     val surface = colorScheme.surface.copy(alpha = 0.6f)
     val blendConfigs = remember(isInDark) {
@@ -217,7 +217,7 @@ private fun AboutContent(
             listOf(
                 BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
                 BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
-                BlendColorEntry(Color(0xff1af500), BlendMode.LAB)
+                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
             )
         } else {
             listOf(
@@ -256,7 +256,7 @@ private fun AboutContent(
                 projectNameProgress = ((offset.toFloat().coerceAtMost(stage1TotalLength + stage2TotalLength) - stage1TotalLength) / stage2TotalLength).coerceIn(0f, 1f)
                 iconProgress = ((offset.toFloat().coerceAtMost(iconY) - stage1TotalLength - stage3TotalLength) / stage3TotalLength).coerceIn(0f, 1f)
             }
-            .collect {  }
+            .collect { }
     }
 
     BgEffectBackground(
@@ -326,7 +326,7 @@ private fun AboutContent(
                         colors = BlurColors(
                             blendColors = logoBlend,
                         ),
-                        enabled = blurEnable
+                        enabled = blurEnable,
                     ),
                 text = "Miuix for Compose",
                 fontWeight = FontWeight.Bold,
@@ -369,7 +369,7 @@ private fun AboutContent(
                         .fillMaxWidth()
                         .height(logoHeightDp + 52.dp + 98.dp)
                         .pointerInput(Unit) {
-                            detectTapGestures() {
+                            detectTapGestures {
                                 showTextureSet = true
                             }
                         }
@@ -379,7 +379,7 @@ private fun AboutContent(
                             logoAreaY = y + size.height
                         },
                     contentAlignment = Alignment.TopCenter,
-                    content = {  },
+                    content = { },
                 )
             }
 
@@ -397,9 +397,8 @@ private fun AboutContent(
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
-                            enabled = blurEnable
-                        )
-                    ,
+                            enabled = blurEnable,
+                        ),
                     colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
                 ) {
                     SuperArrow(
@@ -440,7 +439,7 @@ private fun AboutContent(
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
-                            enabled = blurEnable
+                            enabled = blurEnable,
                         ),
                     colors = CardDefaults.defaultColors(if (blurEnable) Color.Transparent else colorScheme.surfaceContainer, Color.Transparent),
                 ) {
@@ -491,10 +490,10 @@ private fun AboutContent(
                         effectBackground.value,
                         {
                             effectBackground.value = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             BasicComponent(
                 title = "Dynamic Background Enabled",
@@ -503,10 +502,10 @@ private fun AboutContent(
                         dynamicBackground.value,
                         {
                             dynamicBackground.value = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             BasicComponent(
                 title = "Blur Enable",
@@ -515,10 +514,10 @@ private fun AboutContent(
                         blurEnable,
                         {
                             blurEnable = it
-                        }
+                        },
                     )
                 },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp)
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             // Blur radius
             BasicComponent(
