@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
 
-val generatedSrcDir = layout.buildDirectory.dir("generated/miuix-example")
+val generatedSrcDir: Provider<Directory> = layout.buildDirectory.dir("generated/miuix-example")
 
 kotlin {
     android {

@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 /**
  * Applies background blur to the content behind this composable.
@@ -17,6 +18,9 @@ import androidx.compose.ui.graphics.Shape
  * @param blurRadius The blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
+ * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
+ *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
+ *   null means content draws normally on top.
  * @param enabled Whether blur is active. When false, the modifier is a no-op.
  */
 fun Modifier.textureBlur(
@@ -25,6 +29,7 @@ fun Modifier.textureBlur(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
+    contentBlendMode: ComposeBlendMode? = null,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -32,6 +37,7 @@ fun Modifier.textureBlur(
     blurRadius = blurRadius,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
+    contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
 
@@ -44,6 +50,9 @@ fun Modifier.textureBlur(
  * @param blurRadiusY The vertical blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
+ * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
+ *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
+ *   null means content draws normally on top.
  * @param enabled Whether blur is active. When false, the modifier is a no-op.
  */
 fun Modifier.textureBlur(
@@ -53,6 +62,7 @@ fun Modifier.textureBlur(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
+    contentBlendMode: ComposeBlendMode? = null,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -61,5 +71,6 @@ fun Modifier.textureBlur(
     blurRadiusY = blurRadiusY,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
+    contentBlendMode = contentBlendMode,
     enabled = enabled,
 )

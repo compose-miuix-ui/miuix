@@ -3,7 +3,7 @@
 
 package component
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -29,32 +28,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kyant.shapes.RoundedRectangle
+import component.blend.ColorBlendToken
+import component.effect.BgEffectBackground
+import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
-import top.yukonga.miuix.kmp.blur.foregroundBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.shared.generated.resources.Res
+import top.yukonga.miuix.kmp.shared.generated.resources.blur_test_bg
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
+import ui.isInDarkTheme
 import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 fun LazyListScope.blurSection() {
     item(key = "blur") {
@@ -69,21 +74,31 @@ fun LazyListScope.blurSection() {
 
 @Composable
 private fun BlurDemo() {
-    var separateXY by remember { mutableStateOf(false) }
-    var blurRadiusX by remember { mutableFloatStateOf(60f) }
-    var blurRadiusY by remember { mutableFloatStateOf(60f) }
+    var blurRadiusX by remember { mutableFloatStateOf(100f) }
+    var blurRadiusY by remember { mutableFloatStateOf(100f) }
     var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
 
+    val isInDark = isInDarkTheme()
+
     val backdrop = rememberLayerBackdrop()
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
-    val blendConfigs = remember(surface) {
+    val blendConfigs = remember(isInDark, surface) {
         listOf(
-            // No blend
             "None" to emptyList(),
-            // Standard SkBlendMode (GPU hardware)
+            // Token presets (theme-aware)
+            "Info Thin" to if (isInDark) ColorBlendToken.Info_Thin_Dark else ColorBlendToken.Info_Thin_Light,
+            "Info Regular" to if (isInDark) ColorBlendToken.Info_Regular_Dark else ColorBlendToken.Info_Regular_Light,
+            "Colored Thin" to if (isInDark) ColorBlendToken.Colored_Thin_Dark else ColorBlendToken.Colored_Thin_Light,
+            "Colored Regular" to if (isInDark) ColorBlendToken.Colored_Regular_Dark else ColorBlendToken.Colored_Regular_Light,
+            "Colored Thick" to if (isInDark) ColorBlendToken.Colored_Thick_Dark else ColorBlendToken.Colored_Thick_Light,
+            "Pured Regular" to if (isInDark) ColorBlendToken.Pured_Regular_Dark else ColorBlendToken.Pured_Regular_Light,
+            "Pured Thick" to if (isInDark) ColorBlendToken.Pured_Thick_Dark else ColorBlendToken.Pured_Thick_Light,
+            "Overlay Thin" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Overlay_Thin_Light,
+            "Overlay Thick" to if (isInDark) ColorBlendToken.Overlay_Thick_Dark else ColorBlendToken.Overlay_Thick_Light,
+            // Single-mode blends
             "SrcOver" to listOf(BlendColorEntry(surface, BlendMode.SRC_OVER)),
             "Screen" to listOf(BlendColorEntry(surface, BlendMode.SCREEN)),
             "Multiply" to listOf(BlendColorEntry(surface, BlendMode.MULTIPLY)),
@@ -91,7 +106,6 @@ private fun BlurDemo() {
             "Soft Light" to listOf(BlendColorEntry(surface, BlendMode.SOFT_LIGHT)),
             "Color Dodge" to listOf(BlendColorEntry(surface, BlendMode.COLOR_DODGE)),
             "Color Burn" to listOf(BlendColorEntry(surface, BlendMode.COLOR_BURN)),
-            // Xiaomi custom modes (runtime shader)
             "Linear Light" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT)),
             "Linear Light Grey" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_WITH_GREYSCALE)),
             "Linear Light Lab" to listOf(BlendColorEntry(surface, BlendMode.LINEAR_LIGHT_LAB)),
@@ -104,8 +118,7 @@ private fun BlurDemo() {
             "Plus Darker" to listOf(BlendColorEntry(surface, BlendMode.PLUS_DARKER)),
         )
     }
-    val defaultBlendIndex = 16
-    var blendModeIndex by remember(defaultBlendIndex) { mutableIntStateOf(defaultBlendIndex) }
+    var blendModeIndex by remember { mutableIntStateOf(0) }
     val currentBlend = blendConfigs[blendModeIndex]
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
@@ -173,11 +186,7 @@ private fun BlurDemo() {
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = if (separateXY) {
-                                "X=${blurRadiusX.toInt()} Y=${blurRadiusY.toInt()} | ${currentBlend.first}"
-                            } else {
-                                "R=${blurRadiusX.toInt()} | ${currentBlend.first}"
-                            },
+                            text = "R=${blurRadiusX.toInt()} | ${currentBlend.first}",
                             style = MiuixTheme.textStyles.body2,
                             color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                         )
@@ -261,11 +270,17 @@ private fun BlurDemo() {
             )
 
             // Blend mode
-            val modeId = currentBlend.second.firstOrNull()?.mode
+            val modeInfo = currentBlend.second.let { entries ->
+                when {
+                    entries.size == 1 -> " (${entries.first().mode})"
+                    entries.size > 1 -> " (${entries.size} layers)"
+                    else -> ""
+                }
+            }
             BasicComponent(
                 title = "Blend Mode",
                 endActions = {
-                    ValueText(currentBlend.first + if (modeId != null) " ($modeId)" else "")
+                    ValueText(currentBlend.first + modeInfo)
                 },
                 bottomAction = {
                     Row(
@@ -295,18 +310,45 @@ private fun BlurDemo() {
 
 @Composable
 private fun ForegroundBlurDemo() {
-    var blurRadiusX by remember { mutableFloatStateOf(60f) }
-    var blurRadiusY by remember { mutableFloatStateOf(60f) }
+    var blurRadiusX by remember { mutableFloatStateOf(200f) }
+    var blurRadiusY by remember { mutableFloatStateOf(200f) }
     var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
 
+    val isInDark = isInDarkTheme()
+    val dynamicBackground = remember { mutableStateOf(true) }
+
     val backdrop = rememberLayerBackdrop()
     val onBackground = MiuixTheme.colorScheme.onBackground
-    val blendConfigs = remember(onBackground) {
+    val logoBlend = remember(isInDark) {
+        if (isInDark) {
+            listOf(
+                BlendColorEntry(Color(0xe6a1a1a1), BlendMode.COLOR_DODGE),
+                BlendColorEntry(Color(0x4de6e6e6), BlendMode.LINEAR_LIGHT),
+                BlendColorEntry(Color(0xff1af500), BlendMode.LAB),
+            )
+        } else {
+            listOf(
+                BlendColorEntry(Color(0xcc4a4a4a), BlendMode.COLOR_BURN),
+                BlendColorEntry(Color(0xff4f4f4f), BlendMode.LINEAR_LIGHT),
+                BlendColorEntry(Color(0xff1af200), BlendMode.LAB),
+            )
+        }
+    }
+    val blendConfigs = remember(isInDark, onBackground) {
         listOf(
             "None" to emptyList(),
+            // Multi-layer presets
+            "Logo Blend" to logoBlend,
+            "Colored Thin" to if (isInDark) ColorBlendToken.Colored_Thin_Dark else ColorBlendToken.Colored_Thin_Light,
+            "Colored Regular" to if (isInDark) ColorBlendToken.Colored_Regular_Dark else ColorBlendToken.Colored_Regular_Light,
+            "Colored Thick" to if (isInDark) ColorBlendToken.Colored_Thick_Dark else ColorBlendToken.Colored_Thick_Light,
+            "Pured Regular" to if (isInDark) ColorBlendToken.Pured_Regular_Dark else ColorBlendToken.Pured_Regular_Light,
+            "Overlay Thin" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Overlay_Thin_Light,
+            "Info Colored" to ColorBlendToken.Info_Colored_Regular,
+            // Single-mode blends
             "SrcOver" to listOf(BlendColorEntry(onBackground, BlendMode.SRC_OVER)),
             "Screen" to listOf(BlendColorEntry(onBackground, BlendMode.SCREEN)),
             "Multiply" to listOf(BlendColorEntry(onBackground, BlendMode.MULTIPLY)),
@@ -326,38 +368,32 @@ private fun ForegroundBlurDemo() {
             "Plus Darker" to listOf(BlendColorEntry(onBackground, BlendMode.PLUS_DARKER)),
         )
     }
-    val defaultBlendIndex = 10
-    var blendModeIndex by remember { mutableIntStateOf(defaultBlendIndex) }
+    var blendModeIndex by remember { mutableIntStateOf(1) }
     val currentBlend = blendConfigs[blendModeIndex]
 
     Column(
         modifier = Modifier.padding(horizontal = 12.dp),
     ) {
-        Card {
-            Box(
+        Card(
+            colors = CardDefaults.defaultColors(Color.Transparent),
+        ) {
+            BgEffectBackground(
+                dynamicBackground = dynamicBackground.value,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp),
+                bgModifier = Modifier.layerBackdrop(backdrop),
             ) {
-                // Background layer (captured by layerBackdrop)
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .layerBackdrop(backdrop),
-                ) {
-                    StaticBackground()
-                }
-
                 // Foreground blur text
                 Text(
-                    text = "Foreground Blur\n\nTEST TEST TEST",
+                    text = "Foreground Blur\nMiuix Demo",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.Center)
-                        .foregroundBlur(
+                        .textureBlur(
                             backdrop = backdrop,
                             shape = RoundedCornerShape(0.dp),
                             blurRadiusX = blurRadiusX,
@@ -369,6 +405,7 @@ private fun ForegroundBlurDemo() {
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
+                            contentBlendMode = ComposeBlendMode.DstIn,
                         ),
                 )
             }
@@ -378,6 +415,18 @@ private fun ForegroundBlurDemo() {
 
         // Controls
         Card {
+            // Dynamic Background toggle
+            BasicComponent(
+                title = "Dynamic Background",
+                endActions = {
+                    Switch(
+                        dynamicBackground.value,
+                        { dynamicBackground.value = it },
+                    )
+                },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
             BasicComponent(
                 title = "Blur Radius",
                 endActions = { ValueText("${blurRadiusX.toInt()}") },
@@ -441,11 +490,17 @@ private fun ForegroundBlurDemo() {
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            val modeId = currentBlend.second.firstOrNull()?.mode
+            val modeInfo = currentBlend.second.let { entries ->
+                when {
+                    entries.size == 1 -> " (${entries.first().mode})"
+                    entries.size > 1 -> " (${entries.size} layers)"
+                    else -> ""
+                }
+            }
             BasicComponent(
                 title = "Blend Mode",
                 endActions = {
-                    ValueText(currentBlend.first + if (modeId != null) " ($modeId)" else "")
+                    ValueText(currentBlend.first + modeInfo)
                 },
                 bottomAction = {
                     Row(
@@ -485,72 +540,10 @@ private fun ValueText(text: String) {
 
 @Composable
 private fun StaticBackground() {
-    // Opaque gradient base — eliminates transparent gaps that cause dark blur halos
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF2D1B69),
-                        Color(0xFF11998E),
-                        Color(0xFFFC5C7D),
-                        Color(0xFF6A82FB),
-                    ),
-                ),
-            ),
-    ) {
-        // Overlapping shapes for rich detail
-        Box(
-            Modifier
-                .size(120.dp, 100.dp)
-                .offset(x = 10.dp, y = 20.dp)
-                .background(Color(0xCCFF6B6B), RoundedRectangle(20.dp)),
-        )
-        Box(
-            Modifier
-                .size(90.dp, 130.dp)
-                .offset(x = 100.dp, y = 60.dp)
-                .background(Color(0xCCFFE66D), RoundedRectangle(16.dp)),
-        )
-        Box(
-            Modifier
-                .size(140.dp, 80.dp)
-                .offset(x = 180.dp, y = 10.dp)
-                .background(Color(0xCC4ECDC4), RoundedRectangle(50.dp)),
-        )
-        Box(
-            Modifier
-                .size(100.dp)
-                .offset(x = 60.dp, y = 150.dp)
-                .rotate(25f)
-                .background(Color(0xCC45B7D1), RoundedRectangle(24.dp)),
-        )
-        Box(
-            Modifier
-                .size(130.dp, 70.dp)
-                .offset(x = 200.dp, y = 120.dp)
-                .background(Color(0xCCDDA0DD), RoundedRectangle(50.dp)),
-        )
-        Box(
-            Modifier
-                .size(80.dp, 110.dp)
-                .offset(x = 280.dp, y = 50.dp)
-                .rotate(-15f)
-                .background(Color(0xCC96CEB4), RoundedRectangle(12.dp)),
-        )
-        Box(
-            Modifier
-                .size(110.dp, 60.dp)
-                .offset(x = 150.dp, y = 200.dp)
-                .background(Color(0xCCFF9A76), RoundedRectangle(30.dp)),
-        )
-        Box(
-            Modifier
-                .size(70.dp, 90.dp)
-                .offset(x = 310.dp, y = 180.dp)
-                .rotate(10f)
-                .background(Color(0xCC6C5CE7), RoundedRectangle(18.dp)),
-        )
-    }
+    Image(
+        painter = painterResource(Res.drawable.blur_test_bg),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
+    )
 }

@@ -5,9 +5,7 @@
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.snapping.SnapPosition.Center.position
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,14 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -57,12 +51,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import com.kyant.shapes.RoundedRectangle
 import component.BackNavigationIcon
-import component.blend.BlendTokenConfig
-import component.blend.BlurToken
 import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
 import kotlinx.coroutines.flow.onEach
@@ -85,7 +76,6 @@ import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
-import top.yukonga.miuix.kmp.blur.foregroundBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -99,6 +89,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import ui.isInDarkTheme
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 @Composable
 fun AboutPage(
@@ -253,18 +244,19 @@ private fun AboutContent(
                 val stage3TotalLength = projectNameY - iconY
 
                 versionCodeProgress = (offset.toFloat().coerceAtMost(stage1TotalLength) / stage1TotalLength).coerceIn(0f, 1f)
-                projectNameProgress = ((offset.toFloat().coerceAtMost(stage1TotalLength + stage2TotalLength) - stage1TotalLength) / stage2TotalLength).coerceIn(0f, 1f)
+                projectNameProgress =
+                    ((offset.toFloat().coerceAtMost(stage1TotalLength + stage2TotalLength) - stage1TotalLength) / stage2TotalLength).coerceIn(0f, 1f)
                 iconProgress = ((offset.toFloat().coerceAtMost(iconY) - stage1TotalLength - stage3TotalLength) / stage3TotalLength).coerceIn(0f, 1f)
             }
             .collect { }
     }
 
     BgEffectBackground(
-        effectBackground = effectBackground,
-        dynamicBackground = dynamicBackground,
-        alpha = 1f - scrollProgress,
+        dynamicBackground = dynamicBackground.value,
         modifier = Modifier.fillMaxSize(),
         bgModifier = Modifier.layerBackdrop(backdrop),
+        effectBackground = effectBackground.value,
+        alpha = 1f - scrollProgress,
     ) {
         Column(
             modifier = Modifier
@@ -318,7 +310,7 @@ private fun AboutContent(
                         scaleX = 1 - (projectNameProgress * 0.05f)
                         scaleY = 1 - (projectNameProgress * 0.05f)
                     }
-                    .foregroundBlur(
+                    .textureBlur(
                         backdrop = backdrop,
                         shape = RoundedRectangle(16.dp),
                         blurRadius = 200f,
@@ -326,6 +318,7 @@ private fun AboutContent(
                         colors = BlurColors(
                             blendColors = logoBlend,
                         ),
+                        contentBlendMode = ComposeBlendMode.DstIn,
                         enabled = blurEnable,
                     ),
                 text = "Miuix for Compose",

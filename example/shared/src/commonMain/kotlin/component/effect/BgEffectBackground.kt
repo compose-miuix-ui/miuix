@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,12 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.blur.RuntimeShader
 import top.yukonga.miuix.kmp.blur.asComposeShader
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
@@ -30,23 +27,23 @@ import ui.isInDarkTheme
 @Suppress("SuspiciousIndentation")
 @Composable
 inline fun BgEffectBackground(
-    effectBackground: MutableState<Boolean>,
-    dynamicBackground: MutableState<Boolean>,
+    dynamicBackground: Boolean,
     modifier: Modifier = Modifier,
     bgModifier: Modifier = Modifier,
+    effectBackground: Boolean = true,
     alpha: Float = 1f,
     content: @Composable (BoxScope.() -> Unit),
 ) {
     val painter = remember { BgEffectPainter() }
 
-    val currentBrush: MutableState<ShaderBrush?> = remember { mutableStateOf(null) }
+    var currentBrush by remember { mutableStateOf<ShaderBrush?>(null) }
     val isDark = isInDarkTheme()
 
     var targetSize by remember { mutableStateOf(IntSize.Zero) }
     val logoHeight = with(LocalDensity.current) { 600.dp.toPx() }
 
-    LaunchedEffect(targetSize, isDark, effectBackground.value, dynamicBackground.value) {
-        if (!effectBackground.value) return@LaunchedEffect
+    LaunchedEffect(targetSize, isDark, effectBackground, dynamicBackground) {
+        if (!effectBackground) return@LaunchedEffect
         if (targetSize.width <= 0 || targetSize.height <= 0) return@LaunchedEffect
         painter.showRuntimeShader(
             logoHeight,
@@ -56,7 +53,7 @@ inline fun BgEffectBackground(
         )
 
         var startTime: Long? = null
-        while (dynamicBackground.value) {
+        while (dynamicBackground) {
             withFrameNanos { frameTime ->
                 if (startTime == null) {
                     startTime = frameTime
@@ -70,7 +67,7 @@ inline fun BgEffectBackground(
                     ),
                 )
                 painter.updateMaterials()
-                currentBrush.value = ShaderBrush(painter.runtimeShader.asComposeShader())
+                currentBrush = ShaderBrush(painter.runtimeShader.asComposeShader())
             }
         }
     }
@@ -81,8 +78,8 @@ inline fun BgEffectBackground(
         },
     ) {
         val surface = MiuixTheme.colorScheme.surface
-        currentBrush.value?.let { brush ->
-            if (!effectBackground.value) return@let
+        currentBrush?.let { brush ->
+            if (!effectBackground) return@let
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()

@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Shape
 import top.yukonga.miuix.kmp.blur.internal.BlurEffects
 import top.yukonga.miuix.kmp.blur.internal.applyBlendColors
 import top.yukonga.miuix.kmp.blur.internal.noiseDither
+import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 /**
  * Applies the complete texture effect: backdrop blur + color blending
@@ -18,6 +19,9 @@ import top.yukonga.miuix.kmp.blur.internal.noiseDither
  * @param blurRadius The blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
+ * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
+ *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
+ *   null means content draws normally on top.
  * @param enabled Whether the effect is active. When false, the modifier is a no-op.
  */
 fun Modifier.textureEffect(
@@ -26,6 +30,7 @@ fun Modifier.textureEffect(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
+    contentBlendMode: ComposeBlendMode? = null,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -34,6 +39,7 @@ fun Modifier.textureEffect(
     blurRadiusY = blurRadius,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
+    contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
 
@@ -47,6 +53,9 @@ fun Modifier.textureEffect(
  * @param blurRadiusY The vertical blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
+ * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
+ *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
+ *   null means content draws normally on top.
  * @param enabled Whether the effect is active. When false, the modifier is a no-op.
  */
 fun Modifier.textureEffect(
@@ -56,6 +65,7 @@ fun Modifier.textureEffect(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
+    contentBlendMode: ComposeBlendMode? = null,
     enabled: Boolean = true,
 ): Modifier {
     if (!enabled) return this
@@ -72,5 +82,6 @@ fun Modifier.textureEffect(
             colorControls(colors.brightness, colors.contrast, colors.saturation)
             applyBlendColors(colors)
         },
+        contentBlendMode = contentBlendMode,
     )
 }
