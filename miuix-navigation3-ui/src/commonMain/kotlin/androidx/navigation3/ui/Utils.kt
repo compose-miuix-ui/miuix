@@ -4,9 +4,16 @@
 package androidx.navigation3.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 
 /**
  * Returns whether the current device is in multi-window mode.
  */
 @Composable
 expect fun isInMultiWindowMode(): Boolean
+
+/**
+ * Returns the rounded corner radius of the current device display.
+ */
+@Composable
+expect fun getRoundedCorner(): Dp
