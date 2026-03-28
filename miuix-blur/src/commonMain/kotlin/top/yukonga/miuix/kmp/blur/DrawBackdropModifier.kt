@@ -36,8 +36,10 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
+import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 
@@ -257,10 +259,29 @@ private class DrawBackdropNode(
                     ?: requireGraphicsContext().createGraphicsLayer().also { cascadeLayer = it }
                 recordLayer(intermediate, size = IntSize(intermediateW, intermediateH), block = recordBackdropBlock)
 
-                // Step 2: bilinear 2x from cascade layer into blur layer
+                // Step 2: box-filter 2x from cascade layer into blur layer.
+                // Apply a 4-point box filter as RenderEffect on the cascade layer
+                // so that drawLayer produces pre-filtered output. The subsequent
+                // scale(0.5) then downsamples from pre-filtered content, matching
+                // libhwui's dedicated downsample shader quality.
+                if (isRuntimeShaderSupported()) {
+                    intermediate.renderEffect = runtimeShaderEffect(
+                        runtimeShader = effectScope.obtainRuntimeShader(
+                            "Downsample2x",
+                            DOWNSAMPLE_2X_SHADER,
+                        ).apply {
+                            setFloatUniform(
+                                "imageWH",
+                                floatArrayOf(intermediateW.toFloat(), intermediateH.toFloat()),
+                            )
+                        },
+                        uniformShaderName = "child",
+                    )
+                }
                 recordLayer(layer, size = IntSize(finalW, finalH)) {
                     scale(0.5f, 0.5f, Offset.Zero) { drawLayer(intermediate) }
                 }
+                intermediate.renderEffect = null
 
                 val scaleUp = scaleFactor.toFloat()
                 layer.topLeft =

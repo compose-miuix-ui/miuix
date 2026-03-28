@@ -149,7 +149,7 @@ object BlurDefaults {
     val BlurRadius: Float = 60f
 
     /** Default noise dithering coefficient for anti-banding. 0 disables noise. */
-    val NoiseCoefficient: Float = 0.02f
+    val NoiseCoefficient: Float = 0.0045f
 
     /** Maximum allowed blur radius in pixels. */
     val MaxBlurRadius: Float = 400f

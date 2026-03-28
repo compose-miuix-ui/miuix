@@ -50,6 +50,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -78,7 +79,7 @@ fun LazyListScope.blurSection() {
 private fun BlurDemo() {
     var blurRadiusX by remember { mutableFloatStateOf(100f) }
     var blurRadiusY by remember { mutableFloatStateOf(100f) }
-    var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
+    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
@@ -222,7 +223,7 @@ private fun BlurDemo() {
             // Noise
             BasicComponent(
                 title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
                 bottomAction = {
                     Slider(
                         value = noiseCoefficient / 0.1f,
@@ -314,7 +315,7 @@ private fun BlurDemo() {
 private fun ForegroundBlurDemo() {
     var blurRadiusX by remember { mutableFloatStateOf(200f) }
     var blurRadiusY by remember { mutableFloatStateOf(200f) }
-    var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
+    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
@@ -446,7 +447,7 @@ private fun ForegroundBlurDemo() {
 
             BasicComponent(
                 title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
                 bottomAction = {
                     Slider(
                         value = noiseCoefficient / 0.1f,

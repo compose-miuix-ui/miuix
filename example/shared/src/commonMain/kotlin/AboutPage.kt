@@ -76,6 +76,7 @@ import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -159,7 +160,7 @@ private fun AboutContent(
     val backdrop = rememberLayerBackdrop()
     var showTextureSet by remember { mutableStateOf(false) }
     var blurRadius by remember { mutableFloatStateOf(60f) }
-    var noiseCoefficient by remember { mutableFloatStateOf(0.001f) }
+    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
@@ -564,7 +565,7 @@ private fun AboutContent(
             // Noise
             BasicComponent(
                 title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 1000).toInt() / 1000f}") },
+                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
                 bottomAction = {
                     Slider(
                         value = noiseCoefficient / 0.1f,

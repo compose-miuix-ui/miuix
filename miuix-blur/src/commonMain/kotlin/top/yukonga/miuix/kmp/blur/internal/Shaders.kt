@@ -14,6 +14,11 @@ package top.yukonga.miuix.kmp.blur.internal
  *
  * Coordinates are clamped to `[0.5, in_texSize - 0.5]` to prevent
  * out-of-bounds sampling that may return transparent black on some platforms.
+ *
+ * The blur accumulation and un-premultiply division use `float` (32-bit)
+ * precision to avoid amplifying quantization errors that cause visible
+ * color banding on smooth gradients. `half` (16-bit) has only ~3 decimal
+ * digits of precision; `float` provides ~7 digits.
  */
 internal fun buildGaussianBlurShader(tapCount: Int): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
@@ -25,18 +30,18 @@ internal fun buildGaussianBlurShader(tapCount: Int): String {
     uniform float2 in_texSize;
 
     half4 main(float2 xy) {
-        half4 color = half4(0);
+        float4 color = float4(0);
         float2 maxCoord = in_texSize - 0.5;
         for (int i = 0; i < $tapCount; i++) {
             float2 offset = float2(in_blurOffset[i], in_blurOffset[i + $tapCount]);
             float2 c1 = clamp(xy + offset, float2(0.5), maxCoord);
             float2 c2 = clamp(xy - offset, float2(0.5), maxCoord);
-            color += (child.eval(c1) + child.eval(c2)) * in_blurWeight[i];
+            color += (float4(child.eval(c1)) + float4(child.eval(c2))) * in_blurWeight[i];
         }
         if (color.a > 0.001) {
             return half4(color.rgb / color.a, 1.0);
         }
-        return color;
+        return half4(color);
     }
 """
 }
@@ -72,6 +77,33 @@ internal const val NOISE_DITHER_SHADER = """
         return color;
     }
 """
+
+/**
+ * 2x downsample shader — 4-point box filter.
+ *
+ * Samples 4 sub-pixel positions at (0.25, 0.25), (0.25, 0.75), (0.75, 0.25),
+ * (0.75, 0.75) within each output pixel's footprint, producing a proper
+ * area-average that captures all source pixels. Matches libhwui's 2x
+ * downsampling shader.
+ *
+ * Uniforms:
+ * - `child`: Input image shader.
+ * - `imageWH[2]`: Source image width and height.
+ */
+internal const val DOWNSAMPLE_2X_SHADER = """
+    uniform shader child;
+    uniform float imageWH[2];
+    half4 main(float2 xy) {
+        float2 center = float2(xy.x - 0.5, xy.y - 0.5);
+        center = clamp(center, float2(0), float2(imageWH[0] - 1, imageWH[1] - 1));
+        half4 color = child.eval(center + float2(0.25, 0.25));
+        color += child.eval(center + float2(0.25, 0.75));
+        color += child.eval(center + float2(0.75, 0.25));
+        color += child.eval(center + float2(0.75, 0.75));
+        return color * 0.25;
+    }
+"""
+
 
 /**
  * Blend mode shader — complete dispatch for all standard (0-31) and custom (100+) modes.
