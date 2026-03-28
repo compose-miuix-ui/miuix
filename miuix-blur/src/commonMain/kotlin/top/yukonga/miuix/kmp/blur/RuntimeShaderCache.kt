@@ -3,9 +3,10 @@
 
 package top.yukonga.miuix.kmp.blur
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.SynchronizedObject
+import kotlinx.coroutines.internal.synchronized
 
 /**
  * Cache for compiled [RuntimeShader] instances, avoiding recompilation each frame.
@@ -29,15 +30,10 @@ val LocalRuntimeShaderCache = staticCompositionLocalOf<RuntimeShaderCache> {
     RuntimeShaderCacheImpl()
 }
 
-/**
- * Remembers a [RuntimeShaderCache] instance scoped to the current composition.
- */
-@Composable
-fun rememberRuntimeShaderCache(): RuntimeShaderCache = remember { RuntimeShaderCacheImpl() }
-
+@OptIn(InternalCoroutinesApi::class)
 internal class RuntimeShaderCacheImpl : RuntimeShaderCache {
 
-    private val lock = Any()
+    private val lock = SynchronizedObject()
     private val runtimeShaders = mutableMapOf<String, RuntimeShader>()
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = synchronized(lock) {

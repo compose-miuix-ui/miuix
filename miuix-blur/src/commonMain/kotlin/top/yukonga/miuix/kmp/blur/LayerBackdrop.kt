@@ -30,7 +30,7 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * Creates and remembers a [LayerBackdrop] that captures content from a [GraphicsLayer].
  *
  * Use [Modifier.layerBackdrop][layerBackdrop] on the content container to capture its
- * rendered output, then pass this [LayerBackdrop] to blur modifiers or [BlurSurface].
+ * rendered output, then pass this [LayerBackdrop] to blur modifiers.
  *
  * @param graphicsLayer The graphics layer to record content into.
  * @param onDraw Custom draw logic for the layer content.

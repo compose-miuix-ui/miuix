@@ -7,8 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlin.jvm.JvmInline
 
 /**
@@ -154,9 +152,6 @@ object BlurDefaults {
 
     /** Maximum allowed blur radius in pixels. */
     val MaxBlurRadius: Float = 400f
-
-    /** Default corner radius for [BlurSurface]. */
-    val CornerRadius: Dp = 16.dp
 
     /**
      * Creates a [BlurColors] instance with the given parameters.
