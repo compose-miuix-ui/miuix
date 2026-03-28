@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.jvm.JvmInline
 
 /**
  * Color configuration applied after blur processing.

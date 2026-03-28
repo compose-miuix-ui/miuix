@@ -56,24 +56,24 @@ internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
     uniform float noise_coeff;
 
-    half random1(float2 st) {
+    float random1(float2 st) {
         return fract(sin(dot(st.xy, float2(6.9898, 78.233))) * 43734.5453);
     }
-    half random2(float2 st) {
+    float random2(float2 st) {
         return fract(sin(dot(st.xy, float2(7.9898, 78.233))) * 43745.5453);
     }
-    half random3(float2 st) {
+    float random3(float2 st) {
         return fract(sin(dot(st.xy, float2(8.9898, 78.233))) * 43767.5453);
     }
 
     half4 main(float2 xy) {
-        half noise1 = (random1(xy) - 0.5) * noise_coeff;
-        half noise2 = (random2(xy) - 0.5) * noise_coeff;
-        half noise3 = (random3(xy) - 0.5) * noise_coeff;
+        float noise1 = (random1(xy) - 0.5) * noise_coeff;
+        float noise2 = (random2(xy) - 0.5) * noise_coeff;
+        float noise3 = (random3(xy) - 0.5) * noise_coeff;
         half4 color = child.eval(xy);
-        color.rg += noise1;
-        color.rb += noise2;
-        color.gb += noise3;
+        color.rg += half(noise1);
+        color.rb += half(noise2);
+        color.gb += half(noise3);
         return color;
     }
 """
@@ -96,14 +96,13 @@ internal const val DOWNSAMPLE_2X_SHADER = """
     half4 main(float2 xy) {
         float2 center = float2(xy.x - 0.5, xy.y - 0.5);
         center = clamp(center, float2(0), float2(imageWH[0] - 1, imageWH[1] - 1));
-        half4 color = child.eval(center + float2(0.25, 0.25));
-        color += child.eval(center + float2(0.25, 0.75));
-        color += child.eval(center + float2(0.75, 0.25));
-        color += child.eval(center + float2(0.75, 0.75));
-        return color * 0.25;
+        float4 color = float4(child.eval(center + float2(0.25, 0.25)));
+        color += float4(child.eval(center + float2(0.25, 0.75)));
+        color += float4(child.eval(center + float2(0.75, 0.25)));
+        color += float4(child.eval(center + float2(0.75, 0.75)));
+        return half4(color * 0.25);
     }
 """
-
 
 /**
  * Blend mode shader — complete dispatch for all standard (0-31) and custom (100+) modes.
@@ -227,25 +226,25 @@ internal const val MI_BLEND_MODE_SHADER = """
         return mi_blend_overlay(dst, src);
     }
 
-    half soft_light_component(half2 s, half2 d) {
+    float soft_light_component(float2 s, float2 d) {
         if (2*s.x <= s.y) {
-            return guarded_divide(d.x*d.x*(s.y - 2*s.x), d.y) + (1 - d.y)*s.x + d.x*(-s.y + 2*s.x + 1);
+            return float(guarded_divide(half(d.x*d.x*(s.y - 2*s.x)), half(d.y))) + (1 - d.y)*s.x + d.x*(-s.y + 2*s.x + 1);
         } else if (4.0 * d.x <= d.y) {
-            half DSqd = d.x*d.x;
-            half DCub = DSqd*d.x;
-            half DaSqd = d.y*d.y;
-            half DaCub = DaSqd*d.y;
-            return guarded_divide(DaSqd*(s.x - d.x*(3*s.y - 6*s.x - 1)) + 12*d.y*DSqd*(s.y - 2*s.x)
-                                - 16*DCub * (s.y - 2*s.x) - DaCub*s.x, DaSqd);
+            float DSqd = d.x*d.x;
+            float DCub = DSqd*d.x;
+            float DaSqd = d.y*d.y;
+            float DaCub = DaSqd*d.y;
+            return float(guarded_divide(half(DaSqd*(s.x - d.x*(3*s.y - 6*s.x - 1)) + 12*d.y*DSqd*(s.y - 2*s.x)
+                                - 16*DCub * (s.y - 2*s.x) - DaCub*s.x), half(DaSqd)));
         } else {
             return d.x*(s.y - 2*s.x + 1) + s.x - sqrt(d.y*d.x)*(s.y - 2*s.x) - d.y*s.x;
         }
     }
 
     half4 mi_blend_soft_light(half4 src, half4 dst) {
-        return (dst.a == 0) ? src : half4(soft_light_component(src.ra, dst.ra),
-                                        soft_light_component(src.ga, dst.ga),
-                                        soft_light_component(src.ba, dst.ba),
+        return (dst.a == 0) ? src : half4(half(soft_light_component(float2(src.ra), float2(dst.ra))),
+                                        half(soft_light_component(float2(src.ga), float2(dst.ga))),
+                                        half(soft_light_component(float2(src.ba), float2(dst.ba))),
                                         src.a + (1 - src.a)*dst.a);
     }
 
@@ -359,11 +358,11 @@ internal const val MI_BLEND_MODE_SHADER = """
     }
 
     // Color Burn (unpremultiplied, used by custom modes 118/119)
-    half blendColorBurn(half base, half blend) {
+    float blendColorBurn(float base, float blend) {
         return (blend == 0.0) ? blend : max((1.0 - ((1.0 - base) / blend)), 0.0);
     }
     half3 blendColorBurn(half3 base, half3 blend) {
-        return half3(blendColorBurn(base.r, blend.r), blendColorBurn(base.g, blend.g), blendColorBurn(base.b, blend.b));
+        return half3(blendColorBurn(float(base.r), float(blend.r)), blendColorBurn(float(base.g), float(blend.g)), blendColorBurn(float(base.b), float(blend.b)));
     }
     half3 blendColorBurn(half3 base, half3 blend, half opacity) {
         return (blendColorBurn(base, blend) * opacity + base * (1.0 - opacity));
@@ -373,11 +372,11 @@ internal const val MI_BLEND_MODE_SHADER = """
     }
 
     // Color Dodge (unpremultiplied, used by custom modes 118/119)
-    half blendColorDodge(half base, half blend) {
+    float blendColorDodge(float base, float blend) {
         return (blend == 1.0) ? blend : min(base / (1.0 - blend), 1.0);
     }
     half3 blendColorDodge(half3 base, half3 blend) {
-        return half3(blendColorDodge(base.r, blend.r), blendColorDodge(base.g, blend.g), blendColorDodge(base.b, blend.b));
+        return half3(blendColorDodge(float(base.r), float(blend.r)), blendColorDodge(float(base.g), float(blend.g)), blendColorDodge(float(base.b), float(blend.b)));
     }
     half3 blendColorDodge(half3 base, half3 blend, half opacity) {
         return (blendColorDodge(base, blend) * opacity + base * (1.0 - opacity));
@@ -416,77 +415,79 @@ internal const val MI_BLEND_MODE_SHADER = """
     half greyscale(half3 color) { return 0.3 * color.r + 0.59 * color.g + 0.11 * color.b; }
 
     // Lab Color Space (sRGB <-> XYZ <-> Lab, D65)
-    half3 rgb2xyz(half3 c) {
+    // All conversions use float precision to avoid error amplification
+    // in pow(), large-scale multiplication, and matrix operations.
+    float3 rgb2xyz(float3 c) {
         c.r = c.r > 0.04045 ? pow((c.r + 0.055) / 1.055, 2.4) : c.r / 12.92;
         c.g = c.g > 0.04045 ? pow((c.g + 0.055) / 1.055, 2.4) : c.g / 12.92;
         c.b = c.b > 0.04045 ? pow((c.b + 0.055) / 1.055, 2.4) : c.b / 12.92;
         c *= 100.0;
-        return half3(
+        return float3(
             c.r * 0.4124 + c.g * 0.3576 + c.b * 0.1805,
             c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722,
             c.r * 0.0193 + c.g * 0.1192 + c.b * 0.9505);
     }
 
-    half3 xyz2lab(half3 c) {
-        half3 w = half3(95.047, 100.0, 108.883);
+    float3 xyz2lab(float3 c) {
+        float3 w = float3(95.047, 100.0, 108.883);
         c /= w;
         c.x = c.x > 0.008856 ? pow(c.x, 1.0/3.0) : 7.787 * c.x + 16.0/116.0;
         c.y = c.y > 0.008856 ? pow(c.y, 1.0/3.0) : 7.787 * c.y + 16.0/116.0;
         c.z = c.z > 0.008856 ? pow(c.z, 1.0/3.0) : 7.787 * c.z + 16.0/116.0;
-        return half3(116.0 * c.y - 16.0, 500.0 * (c.x - c.y), 200.0 * (c.y - c.z));
+        return float3(116.0 * c.y - 16.0, 500.0 * (c.x - c.y), 200.0 * (c.y - c.z));
     }
 
-    half3 rgb2lab(half3 c) { return xyz2lab(rgb2xyz(c)); }
+    float3 rgb2lab(float3 c) { return xyz2lab(rgb2xyz(c)); }
 
-    half3 lab2xyz(half3 lab) {
-        half y = (lab.x + 16.0) / 116.0;
-        half x = lab.y / 500.0 + y;
-        half z = y - lab.z / 200.0;
+    float3 lab2xyz(float3 lab) {
+        float y = (lab.x + 16.0) / 116.0;
+        float x = lab.y / 500.0 + y;
+        float z = y - lab.z / 200.0;
         y = pow(y, 3.0) > 0.008856 ? pow(y, 3.0) : (y - 16.0/116.0) / 7.787;
         x = pow(x, 3.0) > 0.008856 ? pow(x, 3.0) : (x - 16.0/116.0) / 7.787;
         z = pow(z, 3.0) > 0.008856 ? pow(z, 3.0) : (z - 16.0/116.0) / 7.787;
-        half3 w = half3(95.047, 100.0, 108.883);
-        return half3(x * w.x, y * w.y, z * w.z);
+        float3 w = float3(95.047, 100.0, 108.883);
+        return float3(x * w.x, y * w.y, z * w.z);
     }
 
-    half3 xyz2rgb(half3 xyz) {
+    float3 xyz2rgb(float3 xyz) {
         xyz /= 100.0;
-        half r = xyz.x *  3.2406 + xyz.y * -1.5372 + xyz.z * -0.4986;
-        half g = xyz.x * -0.9689 + xyz.y *  1.8758 + xyz.z *  0.0415;
-        half b = xyz.x *  0.0557 + xyz.y * -0.2040 + xyz.z *  1.0570;
+        float r = xyz.x *  3.2406 + xyz.y * -1.5372 + xyz.z * -0.4986;
+        float g = xyz.x * -0.9689 + xyz.y *  1.8758 + xyz.z *  0.0415;
+        float b = xyz.x *  0.0557 + xyz.y * -0.2040 + xyz.z *  1.0570;
         r = r > 0.0031308 ? 1.055 * pow(r, 1.0/2.4) - 0.055 : 12.92 * r;
         g = g > 0.0031308 ? 1.055 * pow(g, 1.0/2.4) - 0.055 : 12.92 * g;
         b = b > 0.0031308 ? 1.055 * pow(b, 1.0/2.4) - 0.055 : 12.92 * b;
-        return half3(clamp(r, 0.0, 1.0), clamp(g, 0.0, 1.0), clamp(b, 0.0, 1.0));
+        return float3(clamp(r, 0.0, 1.0), clamp(g, 0.0, 1.0), clamp(b, 0.0, 1.0));
     }
 
-    half3 lab2rgb(half3 lab) { return xyz2rgb(lab2xyz(lab)); }
+    float3 lab2rgb(float3 lab) { return xyz2rgb(lab2xyz(lab)); }
 
     half4 labLighten(half4 c, half a) {
-        half3 lab = rgb2lab(c.rgb);
-        lab.r = (100.0 - a) / 55.0 * lab.r + (100.0 * a - 4500.0) / 55.0;
-        return half4(lab2rgb(lab), c.a);
+        float3 lab = rgb2lab(float3(c.rgb));
+        lab.r = (100.0 - float(a)) / 55.0 * lab.r + (100.0 * float(a) - 4500.0) / 55.0;
+        return half4(half3(lab2rgb(lab)), c.a);
     }
 
     half4 labDarken(half4 c, half a) {
-        half3 lab = rgb2lab(c.rgb);
-        lab.r = a / 45.0 * lab.r;
-        return half4(lab2rgb(lab), c.a);
+        float3 lab = rgb2lab(float3(c.rgb));
+        lab.r = float(a) / 45.0 * lab.r;
+        return half4(half3(lab2rgb(lab)), c.a);
     }
 
     half4 labColor(half4 c, half m, half n) {
-        half3 lab = rgb2lab(c.rgb);
-        lab.r = (n - m) * lab.r + m * 100.0;
-        return half4(lab2rgb(lab), c.a);
+        float3 lab = rgb2lab(float3(c.rgb));
+        lab.r = (float(n) - float(m)) * lab.r + float(m) * 100.0;
+        return half4(half3(lab2rgb(lab)), c.a);
     }
 
-    half3 labNormalized(half3 lab) { return half3(lab.r / 100.0, (lab.g + 128.0) / 255.0, (lab.b + 128.0) / 255.0); }
-    half3 labDenormalized(half3 lab) { return half3(lab.r * 100.0, lab.g * 255.0 - 128.0, lab.b * 255.0 - 128.0); }
+    float3 labNormalized(float3 lab) { return float3(lab.r / 100.0, (lab.g + 128.0) / 255.0, (lab.b + 128.0) / 255.0); }
+    float3 labDenormalized(float3 lab) { return float3(lab.r * 100.0, lab.g * 255.0 - 128.0, lab.b * 255.0 - 128.0); }
 
     half4 blendLinearLightLab(half4 src, half4 dst) {
-        half3 labSrc = labNormalized(rgb2lab(src.rgb));
-        half3 labDst = labNormalized(rgb2lab(dst.rgb));
-        return half4(lab2rgb(labDenormalized(blendLinearLight(labDst, labSrc))), 1.0);
+        float3 labSrc = labNormalized(rgb2lab(float3(src.rgb)));
+        float3 labDst = labNormalized(rgb2lab(float3(dst.rgb)));
+        return half4(half3(lab2rgb(labDenormalized(blendLinearLight(half3(labDst), half3(labSrc))))), 1.0);
     }
 
     half3 blendDifference(half3 base, half3 blend) { return abs(base - blend); }
@@ -563,7 +564,7 @@ internal const val MI_BLEND_MODE_SHADER = """
     // ======== Main ========
 
     half4 main(float2 fragCoord) {
-        half4 currentColor = child.eval(fragCoord);
+        float4 currentColor = float4(child.eval(fragCoord));
         int count = int(layerCount);
 
         for (int i = 0; i < 8; i++) {
@@ -572,17 +573,17 @@ internal const val MI_BLEND_MODE_SHADER = """
             int mode = int(blendModes[i]);
             // Standard modes produce premultiplied result directly
             if (mode <= 31) {
-                currentColor = doBlend(mode, layerColor, currentColor);
+                currentColor = float4(doBlend(mode, layerColor, half4(currentColor)));
             } else {
-                half4 blended = getBlendModeColor(currentColor, currentColor, mode, layerColor);
-                half3 dstRgb = currentColor.rgb;
-                half dstA = currentColor.a;
-                half srcA = layerColor.a;
-                half3 resultRgb = blended.rgb * srcA + dstRgb * (1.0 - srcA);
-                half resultA = srcA + dstA * (1.0 - srcA);
-                currentColor = half4(resultRgb, resultA);
+                half4 blended = getBlendModeColor(half4(currentColor), half4(currentColor), mode, layerColor);
+                float3 dstRgb = currentColor.rgb;
+                float dstA = currentColor.a;
+                float srcA = float(layerColor.a);
+                float3 resultRgb = float3(blended.rgb) * srcA + dstRgb * (1.0 - srcA);
+                float resultA = srcA + dstA * (1.0 - srcA);
+                currentColor = float4(resultRgb, resultA);
             }
         }
-        return currentColor;
+        return half4(currentColor);
     }
 """

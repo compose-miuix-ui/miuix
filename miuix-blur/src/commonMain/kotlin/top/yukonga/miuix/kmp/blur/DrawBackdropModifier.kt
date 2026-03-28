@@ -213,8 +213,8 @@ private class DrawBackdropNode(
         if (layer != null) {
             val currentPadding = padding
             val scaleFactor = downscaleFactor
-            val fullWidth = size.width.toInt() + currentPadding.toInt() * 2
-            val fullHeight = size.height.toInt() + currentPadding.toInt() * 2
+            val fullWidth = (size.width + currentPadding * 2).toInt()
+            val fullHeight = (size.height + currentPadding * 2).toInt()
 
             if (scaleFactor <= 1) {
                 cascadeFirstStepScale = 1
