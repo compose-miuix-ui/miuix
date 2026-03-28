@@ -159,7 +159,9 @@ internal abstract class BackdropEffectScopeImpl :
     override var renderEffect: RenderEffect? = null
     override var downscaleFactor: Int = 1
 
-    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = GlobalRuntimeShaderCache.obtainRuntimeShader(key, string)
+    var runtimeShaderCache: RuntimeShaderCache = RuntimeShaderCacheImpl()
+
+    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
 
     fun update(scope: DrawScope): Boolean {
         val newDensity = scope.density

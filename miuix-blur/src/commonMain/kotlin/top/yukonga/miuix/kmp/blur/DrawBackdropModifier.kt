@@ -25,11 +25,13 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
+import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
@@ -162,7 +164,8 @@ private class DrawBackdropNode(
     LayoutModifierNode,
     DrawModifierNode,
     GlobalPositionAwareModifierNode,
-    ObserverModifierNode {
+    ObserverModifierNode,
+    CompositionLocalConsumerModifierNode {
 
     private val effectScope = object : BackdropEffectScopeImpl() {
         override val shape: Shape get() = shapeProvider.innerShape
@@ -368,6 +371,7 @@ private class DrawBackdropNode(
     }
 
     override fun onAttach() {
+        effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
         graphicsLayer = requireGraphicsContext().createGraphicsLayer()
         observeEffects()
     }

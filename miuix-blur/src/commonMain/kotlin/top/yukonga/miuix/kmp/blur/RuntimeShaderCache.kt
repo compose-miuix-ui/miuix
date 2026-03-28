@@ -3,6 +3,10 @@
 
 package top.yukonga.miuix.kmp.blur
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+
 /**
  * Cache for compiled [RuntimeShader] instances, avoiding recompilation each frame.
  */
@@ -15,11 +19,23 @@ sealed interface RuntimeShaderCache {
 }
 
 /**
- * Global shader cache shared across all backdrop effect scopes.
- * Shader compilation is expensive (especially on GPU), so compiled shaders
- * are retained for the lifetime of the process.
+ * CompositionLocal providing a shared [RuntimeShaderCache] within the composition tree.
+ *
+ * All backdrop effect scopes within the same composition share this cache,
+ * avoiding redundant shader compilation while allowing the cache to be
+ * garbage-collected when the composition is disposed.
  */
-internal object GlobalRuntimeShaderCache : RuntimeShaderCache {
+val LocalRuntimeShaderCache = staticCompositionLocalOf<RuntimeShaderCache> {
+    RuntimeShaderCacheImpl()
+}
+
+/**
+ * Remembers a [RuntimeShaderCache] instance scoped to the current composition.
+ */
+@Composable
+fun rememberRuntimeShaderCache(): RuntimeShaderCache = remember { RuntimeShaderCacheImpl() }
+
+internal class RuntimeShaderCacheImpl : RuntimeShaderCache {
 
     private val lock = Any()
     private val runtimeShaders = mutableMapOf<String, RuntimeShader>()
