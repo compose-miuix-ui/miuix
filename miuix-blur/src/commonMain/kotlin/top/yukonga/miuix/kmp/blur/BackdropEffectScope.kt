@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.blur.internal.chain
@@ -158,9 +159,7 @@ internal abstract class BackdropEffectScopeImpl :
     override var renderEffect: RenderEffect? = null
     override var downscaleFactor: Int = 1
 
-    private val runtimeShaderCache = RuntimeShaderCacheImpl()
-
-    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
+    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = GlobalRuntimeShaderCache.obtainRuntimeShader(key, string)
 
     fun update(scope: DrawScope): Boolean {
         val newDensity = scope.density
@@ -198,7 +197,6 @@ internal abstract class BackdropEffectScopeImpl :
         padding = 0f
         renderEffect = null
         downscaleFactor = 1
-        runtimeShaderCache.clear()
     }
 }
 

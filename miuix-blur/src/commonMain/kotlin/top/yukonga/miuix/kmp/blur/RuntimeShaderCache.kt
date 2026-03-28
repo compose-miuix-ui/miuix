@@ -14,13 +14,17 @@ sealed interface RuntimeShaderCache {
     fun obtainRuntimeShader(key: String, string: String): RuntimeShader
 }
 
-internal class RuntimeShaderCacheImpl : RuntimeShaderCache {
+/**
+ * Global shader cache shared across all backdrop effect scopes.
+ * Shader compilation is expensive (especially on GPU), so compiled shaders
+ * are retained for the lifetime of the process.
+ */
+internal object GlobalRuntimeShaderCache : RuntimeShaderCache {
 
+    private val lock = Any()
     private val runtimeShaders = mutableMapOf<String, RuntimeShader>()
 
-    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaders.getOrPut(key) { RuntimeShader(string) }
-
-    fun clear() {
-        runtimeShaders.clear()
+    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = synchronized(lock) {
+        runtimeShaders.getOrPut(key) { RuntimeShader(string) }
     }
 }
