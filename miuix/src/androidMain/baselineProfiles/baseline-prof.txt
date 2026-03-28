@@ -140,7 +140,9 @@ HSPLtop/yukonga/miuix/kmp/utils/MiuixOverscrollFactory;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/MiuixPopupUtils;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/MiuixPopupUtilsKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/OverScrollState;->**(**)**
+HSPLtop/yukonga/miuix/kmp/utils/OverscrollElement;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/OverscrollKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/utils/OverscrollNode;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/Platform;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/PressFeedbackType;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/PressableElement;->**(**)**

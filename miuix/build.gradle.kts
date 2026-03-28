@@ -109,7 +109,24 @@ val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::clas
         layout.projectDirectory.file("src/androidMain/baselineProfiles/baseline-prof.txt"),
     )
     targetPackage.set("top/yukonga/miuix/kmp/")
-    excludePackages.set(listOf("top/yukonga/miuix/kmp/icon/extended/"))
+    excludePackages.set(
+        listOf(
+            "top/yukonga/miuix/kmp/icon/extended/",
+            "top/yukonga/miuix/kmp/shared/",
+        ),
+    )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/blur/",
+        rootProject.layout.projectDirectory.file(
+            "miuix-blur/src/androidMain/baselineProfiles/baseline-prof.txt",
+        ).asFile.absolutePath,
+    )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/navigation3/ui/",
+        rootProject.layout.projectDirectory.file(
+            "miuix-navigation3-ui/src/androidMain/baselineProfiles/baseline-prof.txt",
+        ).asFile.absolutePath,
+    )
 }
 
 tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
