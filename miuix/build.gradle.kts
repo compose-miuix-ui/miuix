@@ -40,6 +40,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.miuixCore)
             api(libs.jetbrains.compose.foundation)
 
             implementation(libs.jetbrains.androidx.navigationevent)

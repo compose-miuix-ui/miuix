@@ -25,6 +25,15 @@ repositories {
 
 3. Add dependencies to your project's `build.gradle.kts`:
 
+Miuix is composed of several modules that can be used independently:
+
+| Module | Description |
+|---|---|
+| `miuix` | Core UI component library (automatically includes `miuix-core`) |
+| `miuix-icons` | Extended icon library, can be used independently or together with `miuix` (automatically includes `miuix-core`) |
+| `miuix-blur` | Blur effect library, can be used independently |
+| `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
+
 - For Compose Multiplatform projects:
 
 ```kotlin

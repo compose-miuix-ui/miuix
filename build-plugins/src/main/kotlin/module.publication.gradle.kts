@@ -30,8 +30,10 @@ val sonatypePackageUrl = layout.buildDirectory.dir("publishing/mavenCentral")
 val localPackageUrl = layout.buildDirectory.dir("repository/local")
 
 val miuixDescription = "A UI library for Compose Multiplatform"
-val miuixIconsDescription = "An extended icon library for Miuix"
-val miuixNavigation3UiDescription = "A navigation3 UI library for Miuix"
+val miuixBlurDescription = "Blur effect library for Miuix"
+val miuixCoreDescription = "Core utilities for Miuix"
+val miuixIconsDescription = "Extended icon library for Miuix"
+val miuixNavigation3UiDescription = "Navigation3 UI library for Miuix"
 
 val localPropertiesFile: File = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -68,6 +70,8 @@ publishing {
             name.set(project.name)
             description.set(
                 when (project.name) {
+                    "miuix-blur" -> miuixBlurDescription
+                    "miuix-core" -> miuixCoreDescription
                     "miuix-icons" -> miuixIconsDescription
                     "miuix-navigation3-ui" -> miuixNavigation3UiDescription
                     else -> miuixDescription

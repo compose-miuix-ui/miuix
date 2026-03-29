@@ -25,6 +25,15 @@ repositories {
 
 3. 在项目的 build.gradle.kts 中添加依赖：
 
+Miuix 由多个可独立使用的模块组成：
+
+| 模块 | 说明 |
+|---|---|
+| `miuix` | 核心 UI 组件库（自动包含 `miuix-core`） |
+| `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix` 同时使用（自动包含 `miuix-core`） |
+| `miuix-blur` | 模糊效果库，可独立使用 |
+| `miuix-navigation3-ui` | Navigation3 UI 库，可独立使用 |
+
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
 ```kotlin
@@ -37,7 +46,6 @@ kotlin {
         }
     }
 }
-
 ```
 
 - 在 Android Compose 项目目录的 build.gradle.kts 中：
