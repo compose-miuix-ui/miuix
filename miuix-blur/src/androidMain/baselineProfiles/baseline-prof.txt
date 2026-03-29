@@ -21,6 +21,7 @@ PLtop/yukonga/miuix/kmp/blur/LayerBackdropElement;->**(**)**
 PLtop/yukonga/miuix/kmp/blur/LayerBackdropKt**->**(**)**
 PLtop/yukonga/miuix/kmp/blur/LayerBackdropModifierKt**->**(**)**
 PLtop/yukonga/miuix/kmp/blur/LayerBackdropNode;->**(**)**
+PLtop/yukonga/miuix/kmp/blur/RuntimeShaderCacheKt**->**(**)**
 PLtop/yukonga/miuix/kmp/blur/RuntimeShader_androidKt**->**(**)**
 PLtop/yukonga/miuix/kmp/blur/internal/DownScaleParams;->**(**)**
 PLtop/yukonga/miuix/kmp/blur/internal/GaussianBlurResult;->**(**)**
