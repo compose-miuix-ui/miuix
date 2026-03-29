@@ -30,6 +30,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 | [TextField](../components/textfield)                       | 接收用户文本输入       | 表单填写、搜索框     |
 | [Switch](../components/switch)                             | 双态切换控件           | 设置项开关、功能启用 |
 | [Checkbox](../components/checkbox)                         | 多选控件               | 多项选择、条款同意   |
+| [RadioButton](../components/radiobutton)                   | 单选控件               | 单项选择、选项切换   |
 | [Slider](../components/slider)                             | 调节值的滑动控件       | 音量调节、范围选择   |
 | [NumberPicker](../components/numberpicker)                 | 垂直滚动数字选择器     | 时间选择、数量选择   |
 | [ProgressIndicator](../components/progressindicator)       | 展示操作进度状态       | 加载中、进度展示     |
