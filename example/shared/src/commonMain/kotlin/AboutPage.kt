@@ -512,139 +512,143 @@ private fun AboutContent(
         },
         insideMargin = DpSize(0.dp, 0.dp),
     ) {
-        Card {
-            BasicComponent(
-                title = "Effect Background Enabled",
-                endActions = {
-                    Switch(
-                        effectBackground.value,
-                        {
-                            effectBackground.value = it
+        LazyColumn {
+            item {
+                Card {
+                    BasicComponent(
+                        title = "Effect Background Enabled",
+                        endActions = {
+                            Switch(
+                                effectBackground.value,
+                                {
+                                    effectBackground.value = it
+                                },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+                    BasicComponent(
+                        title = "Dynamic Background Enabled",
+                        endActions = {
+                            Switch(
+                                dynamicBackground.value,
+                                {
+                                    dynamicBackground.value = it
+                                },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+                    BasicComponent(
+                        title = "Blur Enable",
+                        endActions = {
+                            Switch(
+                                blurEnable,
+                                {
+                                    blurEnable = it
+                                },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+                    // Blur radius
+                    BasicComponent(
+                        title = "Blur Radius",
+                        endActions = { ValueText("${blurRadius.toInt()}") },
+                        bottomAction = {
+                            Slider(
+                                value = blurRadius / 200f,
+                                onValueChange = { blurRadius = it * 200f },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+
+                    // Noise
+                    BasicComponent(
+                        title = "Noise",
+                        endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
+                        bottomAction = {
+                            Slider(
+                                value = noiseCoefficient / 0.1f,
+                                onValueChange = { noiseCoefficient = it * 0.1f },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+
+                    // Brightness
+                    BasicComponent(
+                        title = "Brightness",
+                        endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
+                        bottomAction = {
+                            Slider(
+                                value = (brightness + 1f) / 2f,
+                                onValueChange = { brightness = it * 2f - 1f },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+
+                    // Contrast
+                    BasicComponent(
+                        title = "Contrast",
+                        endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
+                        bottomAction = {
+                            Slider(
+                                value = contrast / 3f,
+                                onValueChange = { contrast = it * 3f },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+
+                    // Saturation
+                    BasicComponent(
+                        title = "Saturation",
+                        endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
+                        bottomAction = {
+                            Slider(
+                                value = saturation / 3f,
+                                onValueChange = { saturation = it * 3f },
+                            )
+                        },
+                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                    )
+
+                    // Blend mode
+                    val currentConfigName = configEntries.getOrNull(blendModeIndex)?.key ?: "Default"
+                    val modeId = blendConfigs[currentConfigName]
+                    BasicComponent(
+                        title = "Blend Mode",
+                        endActions = {
+                            ValueText(currentConfigName + if (modeId != null) " ($modeId)" else "")
+                        },
+                        bottomAction = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                TextButton(
+                                    text = "Prev",
+                                    onClick = {
+                                        blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                TextButton(
+                                    text = "Next",
+                                    onClick = {
+                                        blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
                         },
                     )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-            BasicComponent(
-                title = "Dynamic Background Enabled",
-                endActions = {
-                    Switch(
-                        dynamicBackground.value,
-                        {
-                            dynamicBackground.value = it
-                        },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-            BasicComponent(
-                title = "Blur Enable",
-                endActions = {
-                    Switch(
-                        blurEnable,
-                        {
-                            blurEnable = it
-                        },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-            // Blur radius
-            BasicComponent(
-                title = "Blur Radius",
-                endActions = { ValueText("${blurRadius.toInt()}") },
-                bottomAction = {
-                    Slider(
-                        value = blurRadius / 200f,
-                        onValueChange = { blurRadius = it * 200f },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-
-            // Noise
-            BasicComponent(
-                title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
-                bottomAction = {
-                    Slider(
-                        value = noiseCoefficient / 0.1f,
-                        onValueChange = { noiseCoefficient = it * 0.1f },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-
-            // Brightness
-            BasicComponent(
-                title = "Brightness",
-                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = (brightness + 1f) / 2f,
-                        onValueChange = { brightness = it * 2f - 1f },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-
-            // Contrast
-            BasicComponent(
-                title = "Contrast",
-                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = contrast / 3f,
-                        onValueChange = { contrast = it * 3f },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-
-            // Saturation
-            BasicComponent(
-                title = "Saturation",
-                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = saturation / 3f,
-                        onValueChange = { saturation = it * 3f },
-                    )
-                },
-                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-            )
-
-            // Blend mode
-            val currentConfigName = configEntries.getOrNull(blendModeIndex)?.key ?: "Default"
-            val modeId = blendConfigs[currentConfigName]
-            BasicComponent(
-                title = "Blend Mode",
-                endActions = {
-                    ValueText(currentConfigName + if (modeId != null) " ($modeId)" else "")
-                },
-                bottomAction = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        TextButton(
-                            text = "Prev",
-                            onClick = {
-                                blendModeIndex = (blendModeIndex - 1 + blendConfigs.size) % blendConfigs.size
-                            },
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(
-                            text = "Next",
-                            onClick = {
-                                blendModeIndex = (blendModeIndex + 1) % blendConfigs.size
-                            },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                },
-            )
-            Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+                    Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+                }
+            }
         }
     }
 }
