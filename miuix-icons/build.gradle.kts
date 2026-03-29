@@ -38,7 +38,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.miuix)
+            api(projects.miuixCore)
             implementation(libs.jetbrains.compose.foundation)
         }
     }

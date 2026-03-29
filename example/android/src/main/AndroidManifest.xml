@@ -5,6 +5,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
+
     <application
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"

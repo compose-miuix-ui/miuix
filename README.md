@@ -24,6 +24,15 @@ A UI library for Compose Multiplatform.
 [![WasmJs](https://img.shields.io/badge/Demo-WasmJs-654FF0?logo=webassembly&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
 [![Other](https://img.shields.io/badge/Demo-Other-white?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
 
+### Modules
+
+| Module | Description |
+|---|---|
+| `miuix` | Core UI component library (automatically includes `miuix-core`) |
+| `miuix-icons` | Extended icon library, can be used independently or with `miuix` (automatically includes `miuix-core`) |
+| `miuix-blur` | Blur effect library, can be used independently |
+| `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
+
 ### Getting Started
 
 ```diff
@@ -33,6 +42,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            // Optional: Add miuix-blur for blur effects
+            implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-navigation3-ui for navigation3 support
             implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
             // Other dependencies...

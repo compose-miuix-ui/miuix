@@ -98,9 +98,6 @@ import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.utils.Platform
-import top.yukonga.miuix.kmp.utils.getRoundedCorner
-import top.yukonga.miuix.kmp.utils.platform
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
@@ -784,9 +781,7 @@ fun <T : Any> NavDisplay(
                         initialZIndex != targetZIndex
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
-                val corner =
-                    if (Platform.Android == platform() && !isInMultiWindowMode()) getRoundedCorner()
-                    else 0.dp
+                val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
                 val shape = remember(corner, shouldFlipDirection, isRtl) {
                     if (shouldFlipDirection xor isRtl) {
                         UnevenRoundedRectangle(topEnd = corner, bottomEnd = corner)

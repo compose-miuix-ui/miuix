@@ -41,7 +41,6 @@ kotlin {
             implementation(libs.androidx.activity)
         }
         commonMain.dependencies {
-            implementation(projects.miuix)
             implementation(libs.androidx.collection)
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.jetbrains.androidx.navigationevent)

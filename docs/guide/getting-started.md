@@ -25,6 +25,15 @@ repositories {
 
 3. Add dependencies to your project's `build.gradle.kts`:
 
+Miuix is composed of several modules that can be used independently:
+
+| Module | Description |
+|---|---|
+| `miuix` | Core UI component library (automatically includes `miuix-core`) |
+| `miuix-icons` | Extended icon library, can be used independently or together with `miuix` (automatically includes `miuix-core`) |
+| `miuix-blur` | Blur effect library, can be used independently |
+| `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
+
 - For Compose Multiplatform projects:
 
 ```kotlin
@@ -34,6 +43,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            // Optional: Add miuix-blur for blur effects
+            implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
+            // Optional: Add miuix-navigation3-ui for Navigation3 support
+            implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
         }
     }
 }
@@ -46,6 +59,10 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
     // Optional: Add miuix-icons for more icons
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
+    // Optional: Add miuix-blur for blur effects (requires minSdk 31)
+    implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
+    // Optional: Add miuix-navigation3-ui for Navigation3 support
+    implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
 }
 ```
 
@@ -58,6 +75,20 @@ implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+// Optional: Add miuix-blur
+implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-js:<version>")
+// Optional: Add miuix-navigation3-ui
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-js:<version>")
 // Optional: Add miuix-icons
 implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")

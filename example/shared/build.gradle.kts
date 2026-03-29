@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
 
-val generatedSrcDir = layout.buildDirectory.dir("generated/miuix-example")
+val generatedSrcDir: Provider<Directory> = layout.buildDirectory.dir("generated/miuix-example")
 
 kotlin {
     android {
@@ -53,6 +53,7 @@ kotlin {
             dependencies {
                 api(projects.miuix)
                 api(libs.jetbrains.compose.components.resources)
+                implementation(projects.miuixBlur)
                 implementation(projects.miuixIcons)
                 implementation(projects.miuixNavigation3Ui)
                 implementation(libs.androidx.navigation3.runtime)
