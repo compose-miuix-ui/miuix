@@ -23,20 +23,24 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Run WasmJs demo     | `./gradlew :example:wasmJs:wasmJsBrowserRun`            |
 | Run Js demo         | `./gradlew :example:js:jsBrowserDevelopmentRun`         |
 | Run macOS demo      | `./gradlew :example:macos:runDebugExecutableMacosArm64` |
+| Run iOS demo        | Open `example/ios/iosApp.xcodeproj` in Xcode and run    |
 
 **ALWAYS run `./gradlew spotlessApply` before committing.** CI will reject formatting violations.
 
 ## Repository Structure
 
-| Directory                | Purpose                                           |
-| :----------------------- | :------------------------------------------------ |
-| `miuix/`                 | Core library — all UI components                  |
-| `miuix-icons/`           | Extended icon resources                           |
-| `miuix-navigation3-ui/`  | Navigation 3 UI implementation                    |
-| `example/`               | Demo app — showcases and tests all components     |
-| `docs/`                  | VitePress documentation site                      |
-| `build-plugins/`         | Custom Gradle plugins for build logic reuse       |
-| `gradle/`                | Version catalog (`libs.versions.toml`) and wrapper|
+| Directory                | Purpose                                                        |
+| :----------------------- | :------------------------------------------------------------- |
+| `miuix-core/`            | Core utilities and MiuixIcons base; depended on by `miuix` and `miuix-icons` |
+| `miuix/`                 | Main UI library — all components, theme, colors, animations    |
+| `miuix-blur/`            | Blur/backdrop effects (Android minSdk=31)                      |
+| `miuix-icons/`           | Extended icon resources                                        |
+| `miuix-navigation3-ui/`  | Navigation 3 UI implementation (independent, no miuix dependency) |
+| `example/`               | Demo app — showcases and tests all components                  |
+| `baselineprofile/`       | Android baseline profile generation                            |
+| `docs/`                  | VitePress documentation site                                   |
+| `build-plugins/`         | Custom Gradle plugins for build logic reuse                    |
+| `gradle/`                | Version catalog (`libs.versions.toml`) and wrapper             |
 
 ### Component Source Layout
 
@@ -44,11 +48,11 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/
 ├── basic/       # Fundamental components (Button, Switch, TextField, Surface, etc.)
 ├── extra/       # Composite components (SuperArrow, SuperCheckbox, SuperDropdown, etc.)
-├── theme/       # MiuixTheme, Colors, TextStyles, ThemeController
+├── theme/       # MiuixTheme, Colors, TextStyles, ThemeController, SmoothRounding, DynamicColors, etc.
 ├── color/       # Color utilities, Material Color
 ├── anim/        # Animation utilities
 ├── utils/       # General utilities
-├── icon/        # Icons
+├── icon/        # Built-in basic icons (ArrowRight, Check, Search, etc.)
 └── interfaces/
 ```
 
@@ -56,14 +60,15 @@ miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/
 
 ```
 commonMain
-├── skikoMain (Skiko rendering)
-│   ├── darwinMain (iOS + macOS)
-│   │   ├── iosMain
-│   │   └── macosMain
-│   ├── desktopMain (JVM)
-│   └── webMain
-│       ├── wasmJsMain
-│       └── jsMain
+├── androidMain
+└── skikoMain (Skiko rendering — all non-Android targets)
+    ├── darwinMain (iOS + macOS)
+    │   ├── iosMain
+    │   └── macosMain
+    ├── desktopMain (JVM)
+    └── webMain
+        ├── wasmJsMain
+        └── jsMain
 ```
 
 99% of UI logic lives in `commonMain`. Only use platform source sets for genuinely platform-specific code.
@@ -74,10 +79,12 @@ commonMain
 - **License header** (required on all `.kt` and `.kts` files):
 
   ```
-  // Copyright 2026, compose-miuix-ui contributors
+  // Copyright $YEAR, compose-miuix-ui contributors
   // SPDX-License-Identifier: Apache-2.0
   ```
 
+  Spotless auto-fills `$YEAR` with the current year. Do not manually change years in existing file headers.
+- **Spotless exclusions**: Icon files (`**/icon/**/*.kt`) and navigation3 files (`**/navigation3/**/*.kt`) are excluded from formatting.
 - Line endings: platform-native
 - Composable function names may use PascalCase (ktlint rule disabled for `@Composable`)
 
@@ -115,14 +122,23 @@ Each component provides a `ComponentDefaults` object:
 ```kotlin
 object ButtonDefaults {
     val MinWidth = 58.dp                    // Constant dimensions as val
+    val MinHeight = 40.dp
     val CornerRadius = 16.dp
+    val InsideMargin = PaddingValues(horizontal = 16.dp, vertical = 13.dp)
 
     @Composable
     fun buttonColors(                       // Color factories must be @Composable
         color: Color = MiuixTheme.colorScheme.secondaryVariant,
         disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
-    ): ButtonColors = remember(color, disabledColor) {
-        ButtonColors(color = color, disabledColor = disabledColor)
+        contentColor: Color = MiuixTheme.colorScheme.onSecondaryVariant,
+        disabledContentColor: Color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+    ): ButtonColors = remember(color, disabledColor, contentColor, disabledContentColor) {
+        ButtonColors(
+            color = color,
+            disabledColor = disabledColor,
+            contentColor = contentColor,
+            disabledContentColor = disabledContentColor,
+        )
     }
 }
 ```
@@ -131,19 +147,21 @@ object ButtonDefaults {
 
 ```kotlin
 @Immutable
-data class ComponentColors(
+data class ButtonColors(
     val color: Color,
     val disabledColor: Color,
+    val contentColor: Color,
+    val disabledContentColor: Color,
 )
 ```
 
 ### Key Patterns
 
 - **`rememberUpdatedState`** for callbacks that must always reflect the latest value without restarting an effect or invalidating a Modifier: use inside `LaunchedEffect`/`DisposableEffect` to avoid stale closures, and inside lambdas captured by Modifier factories (`clickable`, `toggleable`, etc.) to stabilize the lambda identity; do NOT use when passing a callback directly as a composable parameter (e.g., `Button(onClick = onClick)`) — Compose's skip mechanism handles that
-- **`remember` with keys** for derived values: `val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }`
+- **`remember` with keys** for derived values: `val alpha = remember(enabled) { if (enabled) 1f else 0.38f }`
 - **`@NonRestartableComposable`** on thin wrapper composables that fully delegate to other composables and read no state themselves; avoid on composables with multiple internal state reads (they benefit from smart recomposition)
 - **`@Immutable`** on color/style data classes
-- **Shapes**: Use `com.kyant.shapes.RoundedRectangle` / `Capsule`, not Compose's built-in shapes
+- **Shapes**: Use `miuixShape(cornerRadius)`, `miuixCapsuleShape()`, `miuixUnevenShape(...)` from `theme/SmoothRounding.kt` — these auto-select smooth (`com.kyant.shapes`) or standard shapes based on `MiuixTheme.smoothRounding`. Do not use `RoundedRectangle`/`Capsule`/`RoundedCornerShape` directly in components
 - **Theme colors**: Always use `MiuixTheme.colorScheme.*`, never hardcode colors
 - **Text styles**: Always use `MiuixTheme.textStyles.*` (e.g., `MiuixTheme.textStyles.button`)
 
@@ -157,8 +175,8 @@ data class ComponentColors(
 
 - `LaunchedEffect` keys: only include values actually read in the effect body
 - `minIntrinsicWidth`/`maxIntrinsicWidth` triggers full subtree traversal — defer to overflow branch when possible
-- Use `@Immutable` on truly immutable data classes (all `val`, never mutated); use `@Stable` on classes whose mutable properties notify Compose via `MutableState`; `@Stable` may also be applied to pure/deterministic functions and extension functions to declare referential transparency (e.g., `@Stable internal fun color(enabled: Boolean): Color`)
-- Standard collections (`List`, `Set`, `Map`) are unstable to Compose; prefer `kotlinx.collections.immutable` (`ImmutableList` etc.) or `@Immutable` wrapper classes as composable parameters
+- Use `@Immutable` on truly immutable data classes (all `val`, never mutated); use `@Stable` on classes whose mutable properties notify Compose via `MutableState`; `@Stable` is also the standard pattern for internal helper functions within `@Immutable` data classes (e.g., `@Stable internal fun color(enabled: Boolean): Color`)
+- Standard collections (`List`, `Set`, `Map`) are unstable to Compose; wrap in `@Immutable` data classes when passing as composable parameters
 
 ## Workflows
 
