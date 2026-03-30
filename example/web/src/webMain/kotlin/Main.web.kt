@@ -13,7 +13,7 @@ import androidx.compose.ui.window.ComposeViewport
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    hideLoading()
+    platformHideLoading()
     ComposeViewport(viewportContainerId = "composeApp") {
         var insetTopPx by remember { mutableDoubleStateOf(0.0) }
         var insetBottomPx by remember { mutableDoubleStateOf(0.0) }
@@ -21,10 +21,10 @@ fun main() {
         var insetEndPx by remember { mutableDoubleStateOf(0.0) }
 
         LaunchedEffect(Unit) {
-            insetTopPx = getCssVar("--safe-area-inset-top")
-            insetStartPx = getCssVar("--safe-area-inset-left")
-            insetEndPx = getCssVar("--safe-area-inset-right")
-            insetBottomPx = getCssVar("--safe-area-inset-bottom")
+            insetTopPx = platformGetCssVar("--safe-area-inset-top")
+            insetStartPx = platformGetCssVar("--safe-area-inset-left")
+            insetEndPx = platformGetCssVar("--safe-area-inset-right")
+            insetBottomPx = platformGetCssVar("--safe-area-inset-bottom")
         }
 
         App(
@@ -37,7 +37,3 @@ fun main() {
         )
     }
 }
-
-private fun hideLoading() = platformHideLoading()
-
-private fun getCssVar(name: String): Double = platformGetCssVar(name)
