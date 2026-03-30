@@ -39,9 +39,10 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":miuix")
-include(":miuix-blur")
 include(":miuix-core")
+include(":miuix-ui")
+include(":miuix-preference")
+include(":miuix-blur")
 include(":miuix-icons")
 include(":miuix-navigation3-ui")
 

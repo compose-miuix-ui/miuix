@@ -7,7 +7,7 @@
 </div>
 
 ::: warning
-The Scaffold component provides a suitable container for cross-platform popup windows. Components such as `SuperDialog`, `SuperDropdown`, `SuperSpinner`, and `ListPopup` are all implemented based on this and therefore need to be wrapped by this component.
+The Scaffold component provides a suitable container for cross-platform popup windows. Components such as `OverlayDialog`, `OverlayDropdownPreference`, `OverlaySpinnerPreference`, and `OverlayListPopup` are all implemented based on this and therefore need to be wrapped by this component.
 :::
 
 ::: info
@@ -130,7 +130,7 @@ Scaffold(
                 .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
         ) {
             items(20) { index ->
-                SuperArrow(
+                ArrowPreference(
                     title = "Item $index",
                     onClick = { /* Handle click */ }
                 )

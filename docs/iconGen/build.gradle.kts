@@ -6,12 +6,12 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.miuix)
+    implementation(projects.miuixUi)
 }
 
 val iconsSourceDir =
     rootProject.layout.projectDirectory
-        .dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .dir("miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
         .asFile
 val extendedIconsSourceDir =
     rootProject.layout.projectDirectory

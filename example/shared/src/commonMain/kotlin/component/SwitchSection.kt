@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.switchSection() {
@@ -66,7 +66,7 @@ fun LazyListScope.switchSection() {
                     enabled = false,
                 )
             }
-            SuperSwitch(
+            SwitchPreference(
                 title = "Switch",
                 summary = "Click to expand a Switch",
                 checked = superSwitchAnimState.value,
@@ -80,7 +80,7 @@ fun LazyListScope.switchSection() {
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
-                SuperSwitch(
+                SwitchPreference(
                     title = "Switch",
                     checked = superSwitchState.value,
                     endActions = {
@@ -95,7 +95,7 @@ fun LazyListScope.switchSection() {
                     },
                 )
             }
-            SuperSwitch(
+            SwitchPreference(
                 title = "Disabled Switch",
                 checked = true,
                 enabled = false,

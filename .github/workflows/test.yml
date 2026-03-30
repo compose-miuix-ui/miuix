@@ -22,13 +22,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: ":miuix:iosSimulatorArm64Test"
+          - target: "iosSimulatorArm64Test"
             os: macos-latest
-          - target: ":miuix:desktopTest"
+          - target: "desktopTest"
             os: ubuntu-latest
-          - target: ":miuix:assembleAndroidTest"
+          - target: "assembleAndroidTest"
             os: ubuntu-latest
-          - target: ":miuix:wasmJsBrowserTest"
+          - target: "wasmJsBrowserTest"
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:

@@ -19,8 +19,8 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SuperSpinner
-import top.yukonga.miuix.kmp.extra.WindowSpinner
+import top.yukonga.miuix.kmp.preference.OverlaySpinnerPreference
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 
 fun LazyListScope.spinnerSection() {
     item(key = "spinner") {
@@ -87,43 +87,43 @@ fun LazyListScope.spinnerSection() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperSpinner(
-                title = "SuperSpinner",
+            OverlaySpinnerPreference(
+                title = "SpinnerPref",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelected.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelected.value = newOption },
             )
-            WindowSpinner(
-                title = "WindowSpinner",
+            WindowSpinnerPreference(
+                title = "WindowSpinnerPref",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelected.value,
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
             )
-            SuperSpinner(
-                title = "SuperSpinner",
-                summary = "As SuperDialog",
+            OverlaySpinnerPreference(
+                title = "SpinnerPref",
+                summary = "As OverlayDialog",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
             )
-            WindowSpinner(
-                title = "WindowSpinner",
+            WindowSpinnerPreference(
+                title = "WindowSpinnerPref",
                 summary = "As WindowDialog",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
             )
-            SuperSpinner(
-                title = "Disabled SuperSpinner",
+            OverlaySpinnerPreference(
+                title = "Disabled SpinnerPref",
                 items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,
             )
-            WindowSpinner(
-                title = "Disabled WindowSpinner",
+            WindowSpinnerPreference(
+                title = "Disabled WindowSpinnerPref",
                 items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},

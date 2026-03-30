@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 
 @Composable
 fun SuperDropdownDemo() {
@@ -46,20 +46,20 @@ fun SuperDropdownDemo() {
                 val options2 = listOf("Chinese", "English", "Japanese")
 
                 Card {
-                    SuperDropdown(
+                    OverlayDropdownPreference(
                         title = "Dropdown Menu",
                         items = options1,
                         selectedIndex = selectedIndex1,
                         onSelectedIndexChange = { selectedIndex1 = it },
                     )
-                    SuperDropdown(
+                    OverlayDropdownPreference(
                         title = "Language Settings",
                         summary = "Choose your preferred language",
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it },
                     )
-                    SuperDropdown(
+                    OverlayDropdownPreference(
                         title = "Disabled Dropdown",
                         summary = "This dropdown menu is currently unavailable",
                         items = listOf("Option 1"),

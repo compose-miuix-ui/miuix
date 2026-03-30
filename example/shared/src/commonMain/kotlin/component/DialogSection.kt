@@ -20,10 +20,10 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDialog
-import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 fun LazyListScope.dialogSection() {
     item(key = "dialog") {
@@ -38,16 +38,16 @@ fun LazyListScope.dialogSection() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperArrow(
-                title = "SuperDialog",
-                summary = "Click to show a SuperDialog",
+            ArrowPreference(
+                title = "OverlayDialog",
+                summary = "Click to show an OverlayDialog",
                 onClick = {
                     showSuperDialog = true
                     superDialogHoldDown = true
                 },
                 holdDownState = superDialogHoldDown,
             )
-            SuperArrow(
+            ArrowPreference(
                 title = "WindowDialog",
                 summary = "Click to show a WindowDialog",
                 onClick = {
@@ -77,9 +77,9 @@ private fun SuperDialogDemo(
     onDismissRequest: () -> Unit,
     onDismissFinished: () -> Unit,
 ) {
-    SuperDialog(
+    OverlayDialog(
         show = show,
-        title = "SuperDialog",
+        title = "OverlayDialog",
         summary = "A dialog component inside MiuixPopupHost.",
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

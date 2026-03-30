@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun SuperSwitchDemo() {
@@ -44,18 +44,18 @@ fun SuperSwitchDemo() {
             Card(
                 modifier = Modifier.weight(0.5f),
             ) {
-                SuperSwitch(
+                SwitchPreference(
                     title = "Switch Option",
                     checked = isChecked,
                     onCheckedChange = { isChecked = it },
                 )
-                SuperSwitch(
+                SwitchPreference(
                     title = "WiFi",
                     summary = "Turn on to connect to wireless networks",
                     checked = wifiEnabled,
                     onCheckedChange = { wifiEnabled = it },
                 )
-                SuperSwitch(
+                SwitchPreference(
                     title = "Disabled Switch",
                     summary = "This switch is currently unavailable",
                     checked = true,

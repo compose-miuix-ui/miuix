@@ -14,7 +14,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Action              | Command                                                 |
 | :------------------ | :------------------------------------------------------ |
 | Build (full)        | `./gradlew assemble`                                    |
-| Build (quick check) | `./gradlew :miuix:compileKotlinDesktop`                 |
+| Build (quick check) | `./gradlew compileKotlinDesktop`                        |
 | Test                | `./gradlew check`                                       |
 | Check formatting    | `./gradlew spotlessCheck`                               |
 | **Fix formatting**  | `./gradlew spotlessApply`                               |
@@ -31,29 +31,35 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 
 | Directory                | Purpose                                                        |
 | :----------------------- | :------------------------------------------------------------- |
-| `miuix-core/`            | Core utilities and MiuixIcons base; depended on by `miuix` and `miuix-icons` |
-| `miuix/`                 | Main UI library — all components, theme, colors, animations    |
-| `miuix-blur/`            | Blur/backdrop effects (Android minSdk=31)                      |
-| `miuix-icons/`           | Extended icon resources                                        |
-| `miuix-navigation3-ui/`  | Navigation 3 UI implementation (independent, no miuix dependency) |
-| `example/`               | Demo app — showcases and tests all components                  |
-| `baselineprofile/`       | Android baseline profile generation                            |
-| `docs/`                  | VitePress documentation site                                   |
-| `build-plugins/`         | Custom Gradle plugins for build logic reuse                    |
-| `gradle/`                | Version catalog (`libs.versions.toml`) and wrapper             |
+| `miuix-core/`           | Core utilities and MiuixIcons base; depended on by `miuix-ui` and `miuix-icons` |
+| `miuix-ui/`             | Main UI library — basic components, theme, colors, animations, overlay/window/layout |
+| `miuix-preference/`     | Preference components (SwitchPreference, CheckboxPreference, etc.)                  |
+| `miuix-blur/`           | Blur/backdrop effects (Android minSdk=31)                                           |
+| `miuix-icons/`          | Extended icon resources                                                             |
+| `miuix-navigation3-ui/` | Navigation 3 UI implementation (independent, no miuix dependency)                   |
+| `example/`              | Demo app — showcases and tests all components                                       |
+| `baselineprofile/`      | Android baseline profile generation                                                 |
+| `docs/`                 | VitePress documentation site                                                        |
+| `build-plugins/`        | Custom Gradle plugins for build logic reuse                                         |
+| `gradle/`               | Version catalog (`libs.versions.toml`) and wrapper                                  |
 
 ### Component Source Layout
 
 ```
-miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/
+miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/
 ├── basic/       # Fundamental components (Button, Switch, TextField, Surface, etc.)
-├── extra/       # Composite components (SuperArrow, SuperCheckbox, SuperDropdown, etc.)
+├── overlay/     # Scaffold-hosted overlay components (OverlayDialog, OverlayBottomSheet, etc.)
+├── window/      # Platform window components (WindowDialog, WindowBottomSheet, etc.)
+├── layout/      # Shared layout components (DialogContentLayout, BottomSheetContentLayout, etc.)
 ├── theme/       # MiuixTheme, Colors, TextStyles, ThemeController, SmoothRounding, DynamicColors, etc.
 ├── color/       # Color utilities, Material Color
 ├── anim/        # Animation utilities
 ├── utils/       # General utilities
 ├── icon/        # Built-in basic icons (ArrowRight, Check, Search, etc.)
 └── interfaces/
+
+miuix-preference/src/commonMain/kotlin/top/yukonga/miuix/kmp/
+└── preference/  # Preference components (SwitchPreference, CheckboxPreference, ArrowPreference, etc.)
 ```
 
 ### Platform Source Sets
@@ -182,7 +188,7 @@ data class ButtonColors(
 
 ### Adding a New Component
 
-1. Create the `@Composable` function in `miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/basic/` (or `extra/` for composite components)
+1. Create the `@Composable` function in `miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/basic/` (or `preference/` in `miuix-preference` for preference components)
 2. Follow API conventions above (parameter ordering, Defaults object, Colors data class)
 3. Add a demo section in `example/shared/src/commonMain/kotlin/component/`
 4. Register the demo in the example app
@@ -201,7 +207,7 @@ When changing a component's API, defaults, or behavior, check and update all rel
 ### Fixing Bugs
 
 1. Reproduce in the `example` app
-2. Fix in `miuix/`
+2. Fix in `miuix-ui/` or `miuix-preference/`
 3. If platform-specific, verify the fix across affected platforms
 
 ## Git Commit Style

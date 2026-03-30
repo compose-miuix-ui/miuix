@@ -64,29 +64,4 @@ fun interface SceneStrategy<T : Any> {
      *   returned Scene.
      */
     fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>?
-
-    /**
-     * Chains this [SceneStrategy] with another [sceneStrategy] to return a combined
-     * [SceneStrategy]. For the returned [SceneStrategy], [calculateScene] will use the first
-     * non-null result from the calculation.
-     */
-    @Deprecated(
-        message =
-            "Deprecated in favor of List<SceneStrategy> APIs that take the output of this operator" +
-                    " has been refactored to take a list of strategies instead.",
-        level = DeprecationLevel.WARNING,
-    )
-    infix fun then(sceneStrategy: SceneStrategy<T>): SceneStrategy<T> {
-        val firstStrategy = this
-        return SceneStrategy { entries ->
-            with(firstStrategy) {
-                // with original scene strategy
-                calculateScene(entries)
-            }
-                ?: with(sceneStrategy) {
-                    // the chained scene strategy
-                    calculateScene(entries)
-                }
-        }
-    }
 }

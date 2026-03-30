@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.extra.SuperRadioButton
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 fun LazyListScope.radioButtonSection() {
     item(key = "radioButton") {
@@ -25,7 +25,7 @@ fun LazyListScope.radioButtonSection() {
                 .padding(bottom = 12.dp),
         ) {
             SuperRadioButtonDemo()
-            SuperRadioButton(
+            RadioButtonPreference(
                 title = "Disabled RadioButton",
                 selected = true,
                 enabled = false,
@@ -39,19 +39,19 @@ fun LazyListScope.radioButtonSection() {
 private fun SuperRadioButtonDemo() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "Option A",
         summary = "Selected: ${selectedIndex == 0}",
         selected = selectedIndex == 0,
         onClick = { selectedIndex = 0 },
     )
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "Option B",
         summary = "Selected: ${selectedIndex == 1}",
         selected = selectedIndex == 1,
         onClick = { selectedIndex = 1 },
     )
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "Option C",
         summary = "Selected: ${selectedIndex == 2}",
         selected = selectedIndex == 2,

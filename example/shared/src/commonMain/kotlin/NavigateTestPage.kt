@@ -42,13 +42,13 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -108,7 +108,7 @@ fun NavTestPage(
                             .padding(all = 12.dp),
                     ) {
                         val navigator = LocalNavigator.current
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Push another Navigate Test Page",
                             onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                         )
@@ -120,7 +120,7 @@ fun NavTestPage(
                             .padding(horizontal = 12.dp)
                             .padding(bottom = 12.dp),
                     ) {
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                             summary = "Summary",
                             startAction = {
@@ -133,7 +133,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
                             startAction = {
@@ -146,7 +146,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Summary",
                             startAction = {
@@ -159,7 +159,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Summary",
                             startAction = {
@@ -173,7 +173,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                             summary = "Summary",
                             startAction = {
@@ -184,7 +184,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                             summary = "Summary",
                             startAction = {
@@ -198,7 +198,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Summary",
                             startAction = {
@@ -212,7 +212,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
                             endActions = {
@@ -223,7 +223,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Long Title Long Title Long Title Long Title Long Title Long Title Long Title Long Title",
                             summary = "Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary Long Summary",
                             endActions = {
@@ -231,7 +231,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Long Title Long Title Long Title Long Title",
                             summary = "Summary",
                             endActions = {
@@ -239,7 +239,7 @@ fun NavTestPage(
                             },
                             enabled = true,
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Title",
                             summary = "Long Summary Long Summary Long Summary Long Summary",
                             endActions = {

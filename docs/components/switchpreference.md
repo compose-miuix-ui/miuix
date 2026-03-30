@@ -1,0 +1,213 @@
+# SwitchPreference
+
+`SwitchPreference` is a switch component in Miuix that provides a title, summary, and a switch control on the right. It supports click interaction and is commonly used in settings items and preference toggles.
+
+<div style="position: relative; max-width: 700px; height: 231px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superSwitch" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
+## Import
+
+```kotlin
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+```
+
+## Basic Usage
+
+The SwitchPreference component provides basic switch functionality:
+
+```kotlin
+var isChecked by remember { mutableStateOf(false) }
+
+SwitchPreference(
+    title = "Switch Option",
+    checked = isChecked,
+    onCheckedChange = { isChecked = it }
+)
+```
+
+## Switch with Summary
+
+```kotlin
+var wifiEnabled by remember { mutableStateOf(false) }
+
+SwitchPreference(
+    title = "WiFi",
+    summary = "Turn on to connect to wireless networks",
+    checked = wifiEnabled,
+    onCheckedChange = { wifiEnabled = it }
+)
+```
+
+## Component States
+
+### Disabled State
+
+```kotlin
+SwitchPreference(
+    title = "Disabled Switch",
+    summary = "This switch is currently unavailable",
+    checked = true,
+    onCheckedChange = {},
+    enabled = false
+)
+```
+
+## Properties
+
+### SwitchPreference Properties
+
+| Property Name   | Type                            | Description                             | Default Value                         | Required |
+| --------------- | ------------------------------- | --------------------------------------- | ------------------------------------- | -------- |
+| checked         | Boolean                         | Switch checked state                    | -                                     | Yes      |
+| onCheckedChange | (Boolean) -> Unit               | Switch state change callback            | -                                     | Yes      |
+| title           | String                          | Switch item title                       | -                                     | Yes      |
+| modifier        | Modifier                        | Component modifier                      | Modifier                              | No       |
+| titleColor      | BasicComponentColors            | Title text color configuration          | BasicComponentDefaults.titleColor()   | No       |
+| summary         | String?                         | Switch item summary                     | null                                  | No       |
+| summaryColor    | BasicComponentColors            | Summary text color configuration        | BasicComponentDefaults.summaryColor() | No       |
+| startAction     | @Composable (() -> Unit)?       | Custom start side content               | null                                  | No       |
+| endActions      | @Composable RowScope.() -> Unit | Custom end side content (before switch) | {}                                    | No       |
+| bottomAction    | @Composable (() -> Unit)?       | Custom bottom side content              | null                                  | No       |
+| switchColors    | SwitchColors                    | Switch control color configuration      | SwitchDefaults.switchColors()         | No       |
+| insideMargin    | PaddingValues                   | Component internal content padding      | BasicComponentDefaults.InsideMargin   | No       |
+| holdDownState   | Boolean                         | Whether the component is held down      | false                                 | No       |
+| enabled         | Boolean                         | Component interactive state             | true                                  | No       |
+
+## Advanced Usage
+
+### With Start Icon
+
+```kotlin
+var enabled by remember { mutableStateOf(false) }
+
+SwitchPreference(
+    title = "Test",
+    summary = "Enable to allow testing",
+    checked = enabled,
+    onCheckedChange = { enabled = it },
+    startAction = {
+        Icon(
+            imageVector = MiuixIcons.Sort,
+            contentDescription = "Command Icon",
+            tint = MiuixTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+    }
+)
+```
+
+### With End Actions
+
+```kotlin
+var locationEnabled by remember { mutableStateOf(false) }
+
+SwitchPreference(
+    title = "Location Services",
+    summary = "Allow apps to access location information",
+    checked = locationEnabled,
+    onCheckedChange = { locationEnabled = it },
+    endActions = {
+        Text(
+            text = if (locationEnabled) "Enabled" else "Disabled",
+            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+            modifier = Modifier.padding(end = 6.dp)
+        )
+    }
+)
+```
+
+### With Animated Content Visibility
+
+```kotlin
+var parentEnabled by remember { mutableStateOf(false) }
+var childEnabled by remember { mutableStateOf(false) }
+
+Column {
+    SwitchPreference(
+        title = "Main Setting",
+        summary = "Turn on to show more options",
+        checked = parentEnabled,
+        onCheckedChange = { parentEnabled = it }
+    )
+    AnimatedVisibility(
+        visible = parentEnabled
+    ) {
+        SwitchPreference(
+            title = "Sub Setting",
+            summary = "Only available when main setting is enabled",
+            checked = childEnabled,
+            onCheckedChange = { childEnabled = it }
+        )
+    }
+}
+```
+
+### Custom Colors
+
+```kotlin
+var customEnabled by remember { mutableStateOf(false) }
+
+SwitchPreference(
+    title = "Custom Colors",
+    titleColor = BasicComponentDefaults.titleColor(
+        color = MiuixTheme.colorScheme.primary
+    ),
+    summary = "Switch with custom colors",
+    summaryColor = BasicComponentDefaults.summaryColor(
+        color = MiuixTheme.colorScheme.secondary
+    ),
+    checked = customEnabled,
+    onCheckedChange = { customEnabled = it },
+    switchColors = SwitchDefaults.switchColors(
+        checkedThumbColor = MiuixTheme.colorScheme.primary,
+        checkedTrackColor = MiuixTheme.colorScheme.primary.copy(alpha = 0.2f)
+    )
+)
+```
+
+### Use with Dialog
+
+```kotlin
+var showDialog by remember { mutableStateOf(false) }
+var option by remember { mutableStateOf(false) }
+
+Scaffold {
+    ArrowPreference(
+        title = "Advanced Settings",
+        onClick = { showDialog = true },
+        holdDownState = showDialog
+    )
+    OverlayDialog(
+        title = "Advanced Settings",
+        show = showDialog,
+        onDismissRequest = { showDialog = false }
+    ) {
+        Card {
+            SwitchPreference(
+                title = "Experimental Features",
+                summary = "Enable features under development",
+                checked = option,
+                onCheckedChange = { option = it }
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
+            TextButton(
+                text = "Cancel",
+                onClick = { showDialog = false },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(16.dp))
+            TextButton(
+                text = "Confirm",
+                onClick = { showDialog = false },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+}
+```

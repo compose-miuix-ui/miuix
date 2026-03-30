@@ -28,7 +28,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SuperSpinner
+import top.yukonga.miuix.kmp.preference.OverlaySpinnerPreference
 
 @Composable
 fun SuperSpinnerDemo() {
@@ -94,20 +94,20 @@ fun SuperSpinnerDemo() {
                 )
 
                 Card {
-                    SuperSpinner(
+                    OverlaySpinnerPreference(
                         title = "Dropdown Selector",
                         items = options1,
                         selectedIndex = selectedIndex1,
                         onSelectedIndexChange = { selectedIndex1 = it },
                     )
-                    SuperSpinner(
+                    OverlaySpinnerPreference(
                         title = "Function Selection",
                         summary = "Choose the action you want to perform",
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it },
                     )
-                    SuperSpinner(
+                    OverlaySpinnerPreference(
                         title = "Disabled Selector",
                         summary = "This selector is currently unavailable",
                         items = listOf(SpinnerEntry(title = "Option 1")),

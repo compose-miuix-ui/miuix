@@ -184,21 +184,3 @@ LazyColumn {
     }
 }
 ```
-
-## Migration from Deprecated API
-
-The old `checked: Boolean` / `onCheckedChange` API is deprecated. Migrate as follows:
-
-```kotlin
-// Before (deprecated)
-Checkbox(
-    checked = checked,
-    onCheckedChange = { checked = it }
-)
-
-// After
-Checkbox(
-    state = ToggleableState(checked),
-    onClick = { checked = !checked }
-)
-```

@@ -61,7 +61,7 @@ Scaffold {
         )
     }
     // Define dialog elsewhere
-    SuperDialog(
+    OverlayDialog(
         title = "Dialog",
         show = showDialog,
         onDismissRequest = { showDialog = false }

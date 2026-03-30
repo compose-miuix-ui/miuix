@@ -28,10 +28,10 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun TopAppBarDemo() {
@@ -98,7 +98,7 @@ fun TopAppBarDemo() {
                                         .padding(horizontal = 16.dp)
                                         .padding(bottom = 8.dp),
                                 ) {
-                                    SuperArrow(
+                                    ArrowPreference(
                                         title = "Something",
                                     )
                                 }
@@ -148,7 +148,7 @@ fun TopAppBarDemo() {
                                         .padding(horizontal = 16.dp)
                                         .padding(bottom = 8.dp),
                                 ) {
-                                    SuperArrow(
+                                    ArrowPreference(
                                         title = "Something",
                                     )
                                 }

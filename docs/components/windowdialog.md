@@ -23,7 +23,7 @@ This component is independent of `Scaffold` and can be used in any composable sc
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 ```
 

@@ -75,7 +75,7 @@ Column {
     Card(
         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
     ) {
-        SuperSwitch(
+        SwitchPreference(
             title = "蓝牙",
             checked = checked,
                onCheckedChange = { checked = it }

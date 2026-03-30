@@ -61,7 +61,7 @@ Scaffold {
         )
     }
     // 在其他地方定义对话框
-    SuperDialog(
+    OverlayDialog(
         title = "对话框",
         show = showDialog,
         onDismissRequest = { showDialog = false } // 关闭对话框

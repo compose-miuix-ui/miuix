@@ -20,8 +20,8 @@ import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
-import top.yukonga.miuix.kmp.extra.WindowListPopup
+import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun WindowListPopupDemo() {
@@ -31,7 +31,7 @@ fun WindowListPopupDemo() {
             .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
         contentAlignment = Alignment.Center,
     ) {
-        val showPopup = remember { mutableStateOf(false) }
+        var showPopup by remember { mutableStateOf(false) }
         var selectedIndex by remember { mutableIntStateOf(0) }
         val items = listOf("Option 1", "Option 2", "Option 3")
         Box(
@@ -41,15 +41,15 @@ fun WindowListPopupDemo() {
             Box {
                 TextButton(
                     text = "Show WindowListPopup",
-                    onClick = { showPopup.value = true },
+                    onClick = { showPopup = true },
                     modifier = Modifier.padding(top = 16.dp),
                 )
                 WindowListPopup(
                     show = showPopup,
                     alignment = PopupPositionProvider.Align.TopStart,
-                    onDismissRequest = { showPopup.value = false },
+                    onDismissRequest = { showPopup = false },
                 ) {
-                    val dismiss = LocalWindowListPopupState.current
+                    val dismissState = LocalDismissState.current
                     ListPopupColumn {
                         items.forEachIndexed { index, string ->
                             DropdownImpl(
@@ -58,7 +58,7 @@ fun WindowListPopupDemo() {
                                 isSelected = selectedIndex == index,
                                 onSelectedIndexChange = { selectedIdx ->
                                     selectedIndex = selectedIdx
-                                    dismiss()
+                                    dismissState?.invoke()
                                 },
                                 index = index,
                             )

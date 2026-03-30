@@ -20,12 +20,12 @@ The RadioButton component is typically used within a mutually exclusive group:
 var selectedIndex by remember { mutableIntStateOf(0) }
 
 Column {
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "Option A",
         selected = selectedIndex == 0,
         onClick = { selectedIndex = 0 }
     )
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "Option B",
         selected = selectedIndex == 1,
         onClick = { selectedIndex = 1 }
@@ -98,7 +98,7 @@ var selectedIndex by remember { mutableIntStateOf(0) }
 
 Card {
     options.forEachIndexed { index, option ->
-        SuperRadioButton(
+        RadioButtonPreference(
             title = option,
             selected = selectedIndex == index,
             onClick = { selectedIndex = index }

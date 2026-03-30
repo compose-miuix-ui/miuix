@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.SuperArrow
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun SuperArrowDemo() {
@@ -40,16 +40,16 @@ fun SuperArrowDemo() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Card {
-                    SuperArrow(
+                    ArrowPreference(
                         title = "Setting Item",
                         onClick = { /* Handle click event */ },
                     )
-                    SuperArrow(
+                    ArrowPreference(
                         title = "Wireless Network",
                         summary = "Connected to WIFI-HOME",
                         onClick = { /* Handle click event */ },
                     )
-                    SuperArrow(
+                    ArrowPreference(
                         title = "Disabled Item",
                         summary = "This item is currently unavailable",
                         enabled = false,

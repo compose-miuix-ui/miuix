@@ -23,7 +23,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.miuix)
+            api(projects.miuixUi)
+            api(projects.miuixPreference)
             implementation(projects.miuixIcons)
             implementation(libs.androidx.navigation3.runtime)
             implementation(projects.miuixNavigation3Ui)

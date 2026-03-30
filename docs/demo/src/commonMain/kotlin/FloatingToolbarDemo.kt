@@ -24,10 +24,10 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -82,7 +82,7 @@ fun FloatingToolbarDemo() {
                             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
-                                SuperArrow(
+                                ArrowPreference(
                                     title = "Something",
                                 )
                             }
@@ -123,7 +123,7 @@ fun FloatingToolbarDemo() {
                             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
                         ) {
                             items(100) {
-                                SuperArrow(
+                                ArrowPreference(
                                     title = "Something",
                                 )
                             }

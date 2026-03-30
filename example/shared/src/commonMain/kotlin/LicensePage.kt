@@ -29,8 +29,8 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import utils.AdaptiveTopAppBar
 import utils.Library
@@ -98,7 +98,7 @@ fun LicensePage(
                                 .padding(horizontal = 12.dp)
                                 .padding(top = 12.dp),
                         ) {
-                            SuperArrow(
+                            ArrowPreference(
                                 title = library.name,
                                 summary = "${library.artifactVersion}, ${library.licenses.firstOrNull()}",
                                 onClick = {

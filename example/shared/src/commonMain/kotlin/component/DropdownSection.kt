@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 
 fun LazyListScope.dropdownSection() {
     item(key = "dropdown") {
@@ -43,27 +43,27 @@ fun LazyListScope.dropdownSection() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperDropdown(
-                title = "SuperDropdown",
+            OverlayDropdownPreference(
+                title = "DropdownPref",
                 items = dropdownOptions,
                 selectedIndex = superDropdownOptionSelected.value,
                 onSelectedIndexChange = { newOption -> superDropdownOptionSelected.value = newOption },
             )
-            WindowDropdown(
-                title = "WindowDropdown",
+            WindowDropdownPreference(
+                title = "WindowDropdownPref",
                 items = dropdownLongOptions,
                 selectedIndex = windowDropdownOptionSelected.value,
                 onSelectedIndexChange = { newOption -> windowDropdownOptionSelected.value = newOption },
             )
-            SuperDropdown(
-                title = "Disabled SuperDropdown",
+            OverlayDropdownPreference(
+                title = "Disabled DropdownPref",
                 items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,
             )
-            WindowDropdown(
-                title = "Disabled WindowDropdown",
+            WindowDropdownPreference(
+                title = "Disabled WindowDropdownPref",
                 items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},

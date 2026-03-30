@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.SuperRadioButton
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 @Composable
 fun RadioButtonDemo() {
@@ -41,17 +41,17 @@ fun RadioButtonDemo() {
             var selectedIndex by remember { mutableIntStateOf(0) }
 
             Card {
-                SuperRadioButton(
+                RadioButtonPreference(
                     title = "Option A",
                     selected = selectedIndex == 0,
                     onClick = { selectedIndex = 0 },
                 )
-                SuperRadioButton(
+                RadioButtonPreference(
                     title = "Option B",
                     selected = selectedIndex == 1,
                     onClick = { selectedIndex = 1 },
                 )
-                SuperRadioButton(
+                RadioButtonPreference(
                     title = "Option C",
                     selected = selectedIndex == 2,
                     onClick = { selectedIndex = 2 },

@@ -29,9 +29,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
       - name: Build Docs
         run: |
-          ./gradlew :miuix:dokkaGenerate -Prelease
+          ./gradlew :miuix-ui:dokkaGenerate -Prelease
           mkdir -p ./docs/public/dokka
-          mv ./miuix/build/dokka/html/* ./docs/public/dokka
+          mv ./miuix-ui/build/dokka/html/* ./docs/public/dokka
           ./gradlew :docs:demo:jsBrowserDistribution
           mkdir -p ./docs/public/compose
           mv ./docs/demo/build/dist/js/productionExecutable/* ./docs/public/compose

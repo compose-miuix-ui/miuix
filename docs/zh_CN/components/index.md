@@ -9,7 +9,7 @@ Miuix 提供了丰富的 UI 组件，严格遵循 Xiaomi HyperOS 设计规范。
 | [Scaffold](../components/scaffold) | 应用的基础布局 | 页面结构、内容展示 |
 
 ::: warning 注意
-Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`SuperDialog`、`SuperDropdown`、`SuperSpinner`、`ListPopup` 等组件都基于此实现弹出窗口，因此都需要被该组件包裹。
+Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`OverlayDialog`、`OverlayDropdownPreference`、`OverlaySpinnerPreference`、`OverlayListPopup` 等组件都基于此实现弹出窗口，因此都需要被该组件包裹。
 :::
 
 ## 基础组件
@@ -48,16 +48,16 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 
 | 组件                                                 | 描述                                                                               | 常见用途               |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------- |
-| [SuperArrow](../components/superarrow)               | 基于 BasicComponent 的带箭头组件                                                   | 指示可点击、导航提示   |
-| [SuperSwitch](../components/superswitch)             | 基于 BasicComponent 的开关组件                                                     | 设置项开关、功能启用   |
-| [SuperCheckbox](../components/supercheckbox)         | 基于 BasicComponent 的复选框组件                                                   | 多项选择、条款同意     |
-| [SuperListPopup](../components/superlistpopup)       | 基于 BasicComponent 的列表弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
-| [SuperDropdown](../components/superdropdown)         | 基于 BasicComponent 的下拉菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
-| [SuperSpinner](../components/superspinner)           | 基于 BasicComponent 的高级菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 进阶选项选择、功能列表 |
-| [SuperBottomSheet](../components/superbottomsheet)   | 基于 BasicComponent 的底部抽屉组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 底部抽屉、附加选项     |
-| [SuperDialog](../components/superdialog)             | 基于 BasicComponent 的对话弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 提示、确认操作         |
+| [ArrowPreference](../components/arrowpreference)               | 基于 BasicComponent 的带箭头组件                                                   | 指示可点击、导航提示   |
+| [SwitchPreference](../components/switchpreference)             | 基于 BasicComponent 的开关组件                                                     | 设置项开关、功能启用   |
+| [CheckboxPreference](../components/checkboxpreference)         | 基于 BasicComponent 的复选框组件                                                   | 多项选择、条款同意     |
+| [OverlayListPopup](../components/overlaylistpopup)             | 基于 BasicComponent 的列表弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
+| [OverlayDropdownPreference](../components/overlaydropdownpreference) | 基于 BasicComponent 的下拉菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
+| [OverlaySpinnerPreference](../components/overlayspinnerpreference) | 基于 BasicComponent 的高级菜单组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 进阶选项选择、功能列表 |
+| [OverlayBottomSheet](../components/overlaybottomsheet)         | 基于 BasicComponent 的底部抽屉组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 底部抽屉、附加选项     |
+| [OverlayDialog](../components/overlaydialog)                   | 基于 BasicComponent 的对话弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 提示、确认操作         |
 | [WindowListPopup](../components/windowlistpopup)     | 窗口级列表弹窗组件                                                                 | 选项选择、功能列表     |
-| [WindowSpinner](../components/windowspinner)         | 窗口级高级菜单组件                                                                 | 进阶选项选择、功能列表 |
-| [WindowDropdown](../components/windowdropdown)       | 窗口级下拉菜单组件                                                                 | 选项选择、功能列表     |
+| [WindowSpinnerPreference](../components/windowspinnerpreference) | 窗口级高级菜单组件                                                                 | 进阶选项选择、功能列表 |
+| [WindowDropdownPreference](../components/windowdropdownpreference) | 窗口级下拉菜单组件                                                                 | 选项选择、功能列表     |
 | [WindowBottomSheet](../components/windowbottomsheet) | 窗口级底部抽屉组件                                                                 | 底部抽屉、附加选项     |
 | [WindowDialog](../components/windowdialog)           | 窗口级对话框组件                                                                   | 提示、确认操作         |
