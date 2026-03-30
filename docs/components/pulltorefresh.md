@@ -42,7 +42,7 @@ Surface {
             modifier = Modifier.fillMaxSize()
         ) {
             items(items) { index ->
-                SuperArrow(
+                ArrowPreference(
                     title = "Item $index",
                     modifier = Modifier.padding(horizontal = 16.dp),
                     onClick = { /* Click event */ }

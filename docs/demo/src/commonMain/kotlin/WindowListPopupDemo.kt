@@ -20,8 +20,8 @@ import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
-import top.yukonga.miuix.kmp.extra.WindowListPopup
+import top.yukonga.miuix.kmp.window.LocalWindowListPopupState
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun WindowListPopupDemo() {

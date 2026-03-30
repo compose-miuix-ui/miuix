@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 @Composable
 fun SuperDialogDemo() {
@@ -44,11 +44,11 @@ fun SuperDialogDemo() {
                 var showDialog by remember { mutableStateOf(false) }
                 Card {
                     TextButton(
-                        text = "Show a SuperDialog",
+                        text = "Show an OverlayDialog",
                         onClick = { showDialog = true },
                     )
-                    SuperDialog(
-                        title = "SuperDialog Title",
+                    OverlayDialog(
+                        title = "OverlayDialog Title",
                         summary = "This is a basic dialog example that can contain various content.",
                         show = showDialog,
                         onDismissRequest = { showDialog = false },

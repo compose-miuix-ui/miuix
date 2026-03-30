@@ -7,7 +7,7 @@
 </div>
 
 ::: warning 注意
-Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`SuperDialog`、`SuperDropdown`、`SuperSpinner`、`ListPopup` 等组件都基于此实现弹出窗口，因此都需要被该组件包裹。
+Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`OverlayDialog`、`OverlayDropdownPreference`、`OverlaySpinnerPreference`、`OverlayListPopup` 等组件都基于此实现弹出窗口，因此都需要被该组件包裹。
 :::
 
 ::: info 信息
@@ -130,7 +130,7 @@ Scaffold(
                 .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
         ) {
             items(20) { index ->
-                SuperArrow(
+                ArrowPreference(
                     title = "Item $index",
                     onClick = { /* 处理点击 */ }
                 )

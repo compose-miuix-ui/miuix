@@ -37,9 +37,9 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
@@ -125,8 +125,8 @@ fun DropdownPage(
                                 .background(colorScheme.surfaceContainer),
                         ) {
                             if (i % 2 == 0) {
-                                SuperDropdown(
-                                    title = "SuperDropdown ${i + 1}",
+                                OverlayDropdownPreference(
+                                    title = "OverlayDropdownPref ${i + 1}",
                                     items = dropdownOptions,
                                     selectedIndex = dropdownSelectedOption,
                                     onSelectedIndexChange = { newOption ->
@@ -134,8 +134,8 @@ fun DropdownPage(
                                     },
                                 )
                             } else {
-                                WindowDropdown(
-                                    title = "WindowDropdown ${i + 1}",
+                                WindowDropdownPreference(
+                                    title = "WindowDropdownPref ${i + 1}",
                                     items = dropdownOptions,
                                     selectedIndex = dropdownSelectedOption,
                                     onSelectedIndexChange = { newOption ->

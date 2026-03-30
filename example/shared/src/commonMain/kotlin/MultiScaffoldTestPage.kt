@@ -25,7 +25,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.AdaptiveTopAppBar
@@ -92,7 +92,7 @@ fun MultiScaffoldTestPage(
                         Card(
                             modifier = Modifier.padding(horizontal = 12.dp),
                         ) {
-                            SuperDropdown(
+                            OverlayDropdownPreference(
                                 title = "Dropdown",
                                 items = dropdownOptions,
                                 selectedIndex = topLeftSelected.intValue,
@@ -112,7 +112,7 @@ fun MultiScaffoldTestPage(
                         Card(
                             modifier = Modifier.padding(horizontal = 12.dp),
                         ) {
-                            SuperDropdown(
+                            OverlayDropdownPreference(
                                 title = "Dropdown",
                                 items = dropdownOptions,
                                 selectedIndex = topRightSelected.intValue,
@@ -137,7 +137,7 @@ fun MultiScaffoldTestPage(
                         Card(
                             modifier = Modifier.padding(horizontal = 12.dp),
                         ) {
-                            SuperDropdown(
+                            OverlayDropdownPreference(
                                 title = "Dropdown",
                                 items = dropdownOptions,
                                 selectedIndex = bottomLeftSelected.intValue,
@@ -157,7 +157,7 @@ fun MultiScaffoldTestPage(
                         Card(
                             modifier = Modifier.padding(horizontal = 12.dp),
                         ) {
-                            SuperDropdown(
+                            OverlayDropdownPreference(
                                 title = "Dropdown",
                                 items = dropdownOptions,
                                 selectedIndex = bottomRightSelected.intValue,

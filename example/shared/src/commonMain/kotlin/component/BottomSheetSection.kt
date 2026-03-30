@@ -29,19 +29,19 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.extra.WindowBottomSheet
-import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
 private val BottomSheetDropdownOptions = listOf("Option 1", "Option 2")
 
@@ -60,16 +60,16 @@ fun LazyListScope.bottomSheetSection() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperArrow(
-                title = "SuperBottomSheet",
-                summary = "Click to show a SuperBottomSheet",
+            ArrowPreference(
+                title = "OverlayBottomSheet",
+                summary = "Click to show an OverlayBottomSheet",
                 onClick = {
                     showSuperBottomSheet = true
                     superBottomSheetHoldDown = true
                 },
                 holdDownState = superBottomSheetHoldDown,
             )
-            SuperArrow(
+            ArrowPreference(
                 title = "WindowBottomSheet",
                 summary = "Click to show a WindowBottomSheet",
                 onClick = {
@@ -114,8 +114,8 @@ private fun SuperBottomSheetDemo(
     var allowDismiss by remember { mutableStateOf(true) }
     var enableNestedScroll by remember { mutableStateOf(true) }
 
-    SuperBottomSheet(
-        title = "SuperBottomSheet",
+    OverlayBottomSheet(
+        title = "OverlayBottomSheet",
         show = show,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
@@ -157,13 +157,13 @@ private fun SuperBottomSheetDemo(
                         color = MiuixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
-                    SuperSwitch(
+                    SwitchPreference(
                         title = "Allow Dismiss",
                         summary = "Drag or Back to dismiss",
                         checked = allowDismiss,
                         onCheckedChange = { allowDismiss = it },
                     )
-                    SuperSwitch(
+                    SwitchPreference(
                         title = "Enable NestedScroll",
                         summary = "Scroll content vs Drag sheet",
                         checked = enableNestedScroll,
@@ -191,14 +191,14 @@ private fun SuperBottomSheetDemo(
                         color = MiuixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
-                    SuperDropdown(
-                        title = "SuperDropdown",
+                    OverlayDropdownPreference(
+                        title = "DropdownPref",
                         items = BottomSheetDropdownOptions,
                         selectedIndex = dropdownSelectedIndex,
                         onSelectedIndexChange = onDropdownSelectedIndexChange,
                     )
-                    SuperSwitch(
-                        title = "SuperSwitch",
+                    SwitchPreference(
+                        title = "SwitchPref",
                         checked = switchChecked,
                         onCheckedChange = onSwitchCheckedChange,
                     )
@@ -272,13 +272,13 @@ private fun WindowBottomSheetDemo(
                         color = MiuixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
-                    SuperSwitch(
+                    SwitchPreference(
                         title = "Allow Dismiss",
                         summary = "Drag or Back to dismiss",
                         checked = allowDismiss,
                         onCheckedChange = { allowDismiss = it },
                     )
-                    SuperSwitch(
+                    SwitchPreference(
                         title = "Enable NestedScroll",
                         summary = "Scroll content vs Drag sheet",
                         checked = enableNestedScroll,
@@ -306,14 +306,14 @@ private fun WindowBottomSheetDemo(
                         color = MiuixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
-                    WindowDropdown(
-                        title = "WindowDropdown",
+                    WindowDropdownPreference(
+                        title = "WindowDropdownPref",
                         items = BottomSheetDropdownOptions,
                         selectedIndex = dropdownSelectedIndex,
                         onSelectedIndexChange = onDropdownSelectedIndexChange,
                     )
-                    SuperSwitch(
-                        title = "SuperSwitch",
+                    SwitchPreference(
+                        title = "SwitchPref",
                         checked = switchChecked,
                         onCheckedChange = onSwitchCheckedChange,
                     )

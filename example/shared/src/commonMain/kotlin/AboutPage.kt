@@ -82,9 +82,9 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -430,7 +430,7 @@ private fun AboutContent(
                             Color.Transparent,
                         ),
                     ) {
-                        SuperArrow(
+                        ArrowPreference(
                             title = "View Source",
                             endActions = {
                                 Text(
@@ -441,7 +441,7 @@ private fun AboutContent(
                             },
                             onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Join Group",
                             endActions = {
                                 Text(
@@ -475,7 +475,7 @@ private fun AboutContent(
                             Color.Transparent,
                         ),
                     ) {
-                        SuperArrow(
+                        ArrowPreference(
                             title = "License",
                             endActions = {
                                 Text(
@@ -488,7 +488,7 @@ private fun AboutContent(
                                 uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
                             },
                         )
-                        SuperArrow(
+                        ArrowPreference(
                             title = "Third Party Licenses",
                             onClick = { navigator.push(Route.License) },
                         )
@@ -504,7 +504,7 @@ private fun AboutContent(
         )
     }
 
-    SuperBottomSheet(
+    OverlayBottomSheet(
         show = showTextureSet,
         title = "Texture Set",
         onDismissRequest = {

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 
 @Composable
 fun SuperBottomSheetDemo() {
@@ -47,7 +47,7 @@ fun SuperBottomSheetDemo() {
                         text = "Show a BottomSheet",
                         onClick = { showBottomSheet = true },
                     )
-                    SuperBottomSheet(
+                    OverlayBottomSheet(
                         title = "BottomSheet Title",
                         show = showBottomSheet,
                         onDismissRequest = { showBottomSheet = false },

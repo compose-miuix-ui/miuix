@@ -9,7 +9,7 @@ Miuix provides a rich set of UI components that strictly follow Xiaomi HyperOS D
 | [Scaffold](../components/scaffold) | Basic layout for applications | Page structure, content display |
 
 ::: warning
-The Scaffold component provides a suitable container for cross-platform popup windows. Components such as `SuperDialog`, `SuperDropdown`, `SuperSpinner`, and `ListPopup` are all implemented based on this and therefore need to be wrapped by this component.
+The Scaffold component provides a suitable container for cross-platform popup windows. Components such as `OverlayDialog`, `OverlayDropdownPreference`, `OverlaySpinnerPreference`, and `OverlayListPopup` are all implemented based on this and therefore need to be wrapped by this component.
 :::
 
 ## Basic Components
@@ -48,16 +48,16 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 
 | Component                                            | Description                                                                              | Common Usage                           |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------- |
-| [SuperArrow](../components/superarrow)               | Arrow component based on BasicComponent                                                  | Clickable indication, navigation hints |
-| [SuperSwitch](../components/superswitch)             | Switch component based on BasicComponent                                                 | Setting switches, feature enabling     |
-| [SuperCheckbox](../components/supercheckbox)         | Checkbox component based on BasicComponent                                               | Multiple selection, terms agreement    |
-| [SuperListPopup](../components/superlistpopup)       | List popup component based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list         |
-| [SuperDropdown](../components/superdropdown)         | Dropdown menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Option selection, feature list         |
-| [SuperSpinner](../components/superspinner)           | Advanced menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Advanced options, feature list         |
-| [SuperBottomSheet](../components/superbottomsheet)   | Bottom sheet based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)         | Bottom drawer, additional options      |
-| [SuperDialog](../components/superdialog)             | Dialog window based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Prompts, action confirmation           |
+| [ArrowPreference](../components/arrowpreference)               | Arrow component based on BasicComponent                                                  | Clickable indication, navigation hints |
+| [SwitchPreference](../components/switchpreference)             | Switch component based on BasicComponent                                                 | Setting switches, feature enabling     |
+| [CheckboxPreference](../components/checkboxpreference)         | Checkbox component based on BasicComponent                                               | Multiple selection, terms agreement    |
+| [OverlayListPopup](../components/overlaylistpopup)             | List popup component based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`) | Option selection, feature list         |
+| [OverlayDropdownPreference](../components/overlaydropdownpreference) | Dropdown menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Option selection, feature list         |
+| [OverlaySpinnerPreference](../components/overlayspinnerpreference) | Advanced menu based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Advanced options, feature list         |
+| [OverlayBottomSheet](../components/overlaybottomsheet)         | Bottom sheet based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)         | Bottom drawer, additional options      |
+| [OverlayDialog](../components/overlaydialog)                   | Dialog window based on BasicComponent (uses MiuixPopupUtils; requires `Scaffold`)        | Prompts, action confirmation           |
 | [WindowListPopup](../components/windowlistpopup)     | Window-level list popup component                                                        | Option selection, feature list         |
-| [WindowDropdown](../components/windowdropdown)       | Window-level dropdown menu component                                                     | Option selection, feature list         |
-| [WindowSpinner](../components/windowspinner)         | Window-level advanced menu component                                                     | Advanced options, feature list         |
+| [WindowDropdownPreference](../components/windowdropdownpreference) | Window-level dropdown menu component                                                     | Option selection, feature list         |
+| [WindowSpinnerPreference](../components/windowspinnerpreference)   | Window-level advanced menu component                                                     | Advanced options, feature list         |
 | [WindowBottomSheet](../components/windowbottomsheet) | Window-level bottom sheet component                                                      | Bottom drawer, additional options      |
 | [WindowDialog](../components/windowdialog)           | Window-level dialog component                                                            | Prompts, action confirmation           |

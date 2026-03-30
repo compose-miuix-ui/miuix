@@ -27,10 +27,10 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.arrowSection() {
@@ -45,7 +45,7 @@ fun LazyListScope.arrowSection() {
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperArrow(
+            ArrowPreference(
                 title = "Arrow",
                 startAction = {
                     Box(
@@ -67,7 +67,7 @@ fun LazyListScope.arrowSection() {
                 },
                 onClick = {},
             )
-            SuperArrow(
+            ArrowPreference(
                 title = "Arrow + Slider + Dialog",
                 endActions = {
                     Text(
@@ -88,7 +88,7 @@ fun LazyListScope.arrowSection() {
                     )
                 },
             )
-            SuperArrow(
+            ArrowPreference(
                 title = "Disabled Arrow",
                 endActions = {
                     Text(
@@ -117,7 +117,7 @@ private fun SliderDialog(
     onVolumeChange: (Float) -> Unit,
     onDismissFinished: () -> Unit,
 ) {
-    SuperDialog(
+    OverlayDialog(
         show = showDialog.value,
         title = "Adjust Volume",
         summary = "Enter 0-100",

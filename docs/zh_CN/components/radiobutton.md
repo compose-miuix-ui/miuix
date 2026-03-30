@@ -20,12 +20,12 @@ RadioButton 组件通常在互斥选择组中使用：
 var selectedIndex by remember { mutableIntStateOf(0) }
 
 Column {
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "选项 A",
         selected = selectedIndex == 0,
         onClick = { selectedIndex = 0 }
     )
-    SuperRadioButton(
+    RadioButtonPreference(
         title = "选项 B",
         selected = selectedIndex == 1,
         onClick = { selectedIndex = 1 }
@@ -98,7 +98,7 @@ var selectedIndex by remember { mutableIntStateOf(0) }
 
 Card {
     options.forEachIndexed { index, option ->
-        SuperRadioButton(
+        RadioButtonPreference(
             title = option,
             selected = selectedIndex == index,
             onClick = { selectedIndex = index }

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.WindowSpinner
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 
 @Composable
 fun WindowSpinnerDemo() {
@@ -98,27 +98,27 @@ fun WindowSpinnerDemo() {
             )
 
             Card {
-                WindowSpinner(
+                WindowSpinnerPreference(
                     title = "Dropdown Selector",
                     items = options1,
                     selectedIndex = selectedIndex1,
                     onSelectedIndexChange = { selectedIndex1 = it },
                 )
-                WindowSpinner(
+                WindowSpinnerPreference(
                     title = "Function Selection",
                     summary = "Choose the action you want to perform",
                     items = options2,
                     selectedIndex = selectedIndex2,
                     onSelectedIndexChange = { selectedIndex2 = it },
                 )
-                WindowSpinner(
+                WindowSpinnerPreference(
                     title = "Dialog Selector",
                     items = options3,
                     selectedIndex = selectedIndex3,
                     onSelectedIndexChange = { selectedIndex3 = it },
                     dialogButtonString = "Cancel",
                 )
-                WindowSpinner(
+                WindowSpinnerPreference(
                     title = "Disabled Selector",
                     summary = "This selector is currently unavailable",
                     items = listOf(SpinnerEntry(title = "Option 1")),

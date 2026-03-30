@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.CheckboxLocation
-import top.yukonga.miuix.kmp.extra.SuperCheckbox
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 @Composable
 fun SuperCheckboxDemo() {
@@ -44,25 +44,25 @@ fun SuperCheckboxDemo() {
             var notificationsEnabled by remember { mutableStateOf(false) }
 
             Card {
-                SuperCheckbox(
+                CheckboxPreference(
                     title = "Checkbox Option",
                     checked = isChecked,
                     onCheckedChange = { isChecked = it },
                 )
-                SuperCheckbox(
+                CheckboxPreference(
                     title = "Notifications",
                     summary = "Receive push notifications from the app",
                     checked = notificationsEnabled,
                     onCheckedChange = { notificationsEnabled = it },
                 )
-                SuperCheckbox(
+                CheckboxPreference(
                     title = "End Checkbox",
                     summary = "Checkbox is on the end side",
                     checked = rightChecked,
                     onCheckedChange = { rightChecked = it },
                     checkboxLocation = CheckboxLocation.End,
                 )
-                SuperCheckbox(
+                CheckboxPreference(
                     title = "Disabled Checkbox",
                     summary = "This checkbox is currently unavailable",
                     checked = true,

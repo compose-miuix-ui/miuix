@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 
 @Composable
 fun SuperListPopupDemo() {
@@ -45,7 +45,7 @@ fun SuperListPopupDemo() {
                         onClick = { showPopup.value = true },
                         modifier = Modifier.padding(top = 16.dp),
                     )
-                    SuperListPopup(
+                    OverlayListPopup(
                         show = showPopup,
                         alignment = PopupPositionProvider.Align.TopStart,
                         onDismissRequest = { showPopup.value = false }, // Close the popup menu

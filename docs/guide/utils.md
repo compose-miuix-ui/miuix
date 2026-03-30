@@ -30,7 +30,7 @@ DialogLayout(
 }
 ```
 
-Normally, you don't need to use it actively. See the [SuperDialog](../components/superdialog.md) or [SuperBottomSheet](../components/basiccomponent.md) documentation for details.
+Normally, you don't need to use it actively. See the [OverlayDialog](../components/overlaydialog.md) or [OverlayBottomSheet](../components/overlaybottomsheet.md) documentation for details.
 
 ### PopupLayout
 
@@ -51,7 +51,7 @@ PopupLayout(
 }
 ```
 
-Normally, you don't need to use it actively. See the [SuperListPopup](../components/superlistpopup) documentation for details.
+Normally, you don't need to use it actively. See the [OverlayListPopup](../components/overlaylistpopup) documentation for details.
 
 ## Overscroll Effects
 

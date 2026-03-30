@@ -149,7 +149,7 @@ Scaffold {
         text = "选择颜色",
         onClick = { showColorDialog = true }
     )
-    SuperDialog(
+    OverlayDialog(
         title = "选择颜色",
         show = showColorDialog,
         onDismissRequest = { showColorDialog = false } // 关闭对话框

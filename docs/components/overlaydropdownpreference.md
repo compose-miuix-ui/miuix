@@ -1,0 +1,110 @@
+---
+title: OverlayDropdownPreference
+requiresScaffoldHost: true
+prerequisites:
+  - Must be used within `Scaffold` to provide `MiuixPopupHost`
+  - Using outside `Scaffold` will cause popup content not to render
+  - Multiple nested or side-by-side `Scaffold`s are supported without extra configuration
+hostComponent: Scaffold
+popupHost: MiuixPopupHost
+---
+
+# OverlayDropdownPreference
+
+`OverlayDropdownPreference` is a dropdown menu component in Miuix that provides a title, summary, and a list of dropdown options. It supports click interaction and is commonly used in option settings and list selections.
+
+<div style="position: relative; max-width: 700px; height: 285px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superDropdown" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
+::: danger Prerequisite
+This component depends on `Scaffold` providing `MiuixPopupHost` to render popup content. It must be used within `Scaffold`, otherwise popup content will not render correctly.
+:::
+
+## Import
+
+```kotlin
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+```
+
+## Basic Usage
+
+The OverlayDropdownPreference component provides basic dropdown menu functionality:
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+val options = listOf("Option 1", "Option 2", "Option 3")
+
+Scaffold {
+    OverlayDropdownPreference(
+        title = "Dropdown Menu",
+        items = options,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { selectedIndex = it }
+    )
+}
+```
+
+## Dropdown with Summary
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+val options = listOf("中文", "English", "日本語")
+
+Scaffold {
+    OverlayDropdownPreference(
+        title = "Language Settings",
+        summary = "Choose your preferred language",
+        items = options,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { selectedIndex = it }
+    )
+}
+```
+
+## Component States
+
+### Disabled State
+
+```kotlin
+OverlayDropdownPreference(
+    title = "Disabled Dropdown",
+    summary = "This dropdown menu is currently unavailable",
+    items = listOf("Option 1"),
+    selectedIndex = 0,
+    onSelectedIndexChange = {},
+    enabled = false
+)
+```
+
+## Properties
+
+### OverlayDropdownPreference Properties
+
+| Property Name         | Type                      | Description                       | Default Value                         | Required |
+| --------------------- | ------------------------- | --------------------------------- | ------------------------------------- | -------- |
+| items                 | List\<String>             | List of dropdown options          | -                                     | Yes      |
+| selectedIndex         | Int                       | Index of currently selected item  | -                                     | Yes      |
+| title                 | String                    | Title of the dropdown menu        | -                                     | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component | Modifier                              | No       |
+| titleColor            | BasicComponentColors      | Title text color configuration    | BasicComponentDefaults.titleColor()   | No       |
+| summary               | String?                   | Summary description of dropdown   | null                                  | No       |
+| summaryColor          | BasicComponentColors      | Summary text color configuration  | BasicComponentDefaults.summaryColor() | No       |
+| dropdownColors        | DropdownColors            | Color configuration for dropdown  | DropdownDefaults.dropdownColors()     | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content         | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content        | null                                  | No       |
+| insideMargin          | PaddingValues             | Internal content padding          | BasicComponentDefaults.InsideMargin   | No       |
+| maxHeight             | Dp?                       | Maximum height of dropdown menu   | null                                  | No       |
+| enabled               | Boolean                   | Whether component is interactive  | true                                  | No       |
+| showValue             | Boolean                   | Whether to show selected value    | true                                  | No       |
+| renderInRootScaffold  | Boolean                   | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation | true | No |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Callback when selection changes   | -                                     | No       |
+
+### DropdownColors Properties
+
+| Property Name          | Type  | Description                    |
+| ---------------------- | ----- | ------------------------------ |
+| contentColor           | Color | Option text color              |
+| containerColor         | Color | Option background color        |
+| selectedContentColor   | Color | Selected item text color       |
+| selectedContainerColor | Color | Selected item background color |

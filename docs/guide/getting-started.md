@@ -139,7 +139,7 @@ Scaffold(
 
 ::: warning
 The Scaffold component provides a suitable container for cross-platform popup windows.
-Components such as `SuperDialog`, `SuperDropdown`, `SuperSpinner`, and `ListPopup` are
+Components such as `OverlayDialog`, `OverlayDropdownPreference`, `OverlaySpinnerPreference`, and `OverlayListPopup` are
 all implemented based on this and therefore need to be wrapped by this component.
 :::
 

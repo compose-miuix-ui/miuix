@@ -30,7 +30,7 @@ DialogLayout(
 }
 ```
 
-正常情况下无需主动使用。详见 [SuperDialog](../components/superdialog.md) 或 [SuperBottomSheet](../components//basiccomponent.md) 文档。
+正常情况下无需主动使用。详见 [OverlayDialog](../components/overlaydialog.md) 或 [OverlayBottomSheet](../components/overlaybottomsheet.md) 文档。
 
 ### 弹出窗口布局 (PopupLayout)
 
@@ -51,7 +51,7 @@ PopupLayout(
 }
 ```
 
-正常情况下无需主动使用。详见 [SuperListPopup](../components/superlistpopup) 文档。
+正常情况下无需主动使用。详见 [OverlayListPopup](../components/overlaylistpopup) 文档。
 
 ## 越界回弹效果 (Overscroll)
 

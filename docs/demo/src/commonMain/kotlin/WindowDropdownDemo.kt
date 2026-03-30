@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 
 @Composable
 fun WindowDropdownDemo() {
@@ -44,20 +44,20 @@ fun WindowDropdownDemo() {
             val options2 = listOf("Chinese", "English", "Japanese")
 
             Card {
-                WindowDropdown(
+                WindowDropdownPreference(
                     title = "Dropdown Menu",
                     items = options1,
                     selectedIndex = selectedIndex1,
                     onSelectedIndexChange = { selectedIndex1 = it },
                 )
-                WindowDropdown(
+                WindowDropdownPreference(
                     title = "Language Settings",
                     summary = "Choose your preferred language",
                     items = options2,
                     selectedIndex = selectedIndex2,
                     onSelectedIndexChange = { selectedIndex2 = it },
                 )
-                WindowDropdown(
+                WindowDropdownPreference(
                     title = "Disabled Dropdown",
                     summary = "This dropdown menu is currently unavailable",
                     items = listOf("Option 1"),

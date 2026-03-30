@@ -51,7 +51,8 @@ kotlin {
         commonMain {
             kotlin.srcDir(generatedSrcDir.map { it.dir("kotlin") })
             dependencies {
-                api(projects.miuix)
+                api(projects.miuixUi)
+                api(projects.miuixPreference)
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.miuixBlur)
                 implementation(projects.miuixIcons)

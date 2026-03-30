@@ -20,8 +20,8 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Checkbox
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.CheckboxLocation
-import top.yukonga.miuix.kmp.extra.SuperCheckbox
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.checkboxSection() {
@@ -35,7 +35,7 @@ fun LazyListScope.checkboxSection() {
             CheckboxRow()
             SuperEndCheckboxDemo()
             SuperCheckboxDemo()
-            SuperCheckbox(
+            CheckboxPreference(
                 title = "Disabled Checkbox",
                 checked = true,
                 enabled = false,
@@ -102,7 +102,7 @@ private fun CheckboxRow() {
 private fun SuperEndCheckboxDemo() {
     var checked by remember { mutableStateOf(false) }
 
-    SuperCheckbox(
+    CheckboxPreference(
         checkboxLocation = CheckboxLocation.End,
         title = "Checkbox",
         checked = checked,
@@ -121,7 +121,7 @@ private fun SuperEndCheckboxDemo() {
 private fun SuperCheckboxDemo() {
     var checked by remember { mutableStateOf(false) }
 
-    SuperCheckbox(
+    CheckboxPreference(
         title = "Checkbox",
         summary = "State: $checked",
         checked = checked,
