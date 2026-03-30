@@ -32,7 +32,7 @@ fun Modifier.textureBlur(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    contentBlendMode: ComposeBlendMode? = null,
+    contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -65,7 +65,7 @@ fun Modifier.textureBlur(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    contentBlendMode: ComposeBlendMode? = null,
+    contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -98,7 +98,7 @@ fun Modifier.textureEffect(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    contentBlendMode: ComposeBlendMode? = null,
+    contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
     backdrop = backdrop,
@@ -133,7 +133,7 @@ fun Modifier.textureEffect(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    contentBlendMode: ComposeBlendMode? = null,
+    contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier {
     if (!enabled) return this

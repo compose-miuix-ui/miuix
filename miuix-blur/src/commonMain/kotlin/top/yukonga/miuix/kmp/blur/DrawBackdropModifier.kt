@@ -57,7 +57,7 @@ fun Modifier.drawBackdrop(
     onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit = DefaultOnDrawBackdrop,
     onDrawSurface: (DrawScope.() -> Unit)? = null,
     onDrawFront: (DrawScope.() -> Unit)? = null,
-    contentBlendMode: BlendMode? = null,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
 ): Modifier {
     val shapeProvider = ShapeProvider(shape)
     return this
@@ -88,7 +88,7 @@ private class DrawBackdropElement(
     val onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
     val onDrawSurface: (DrawScope.() -> Unit)?,
     val onDrawFront: (DrawScope.() -> Unit)?,
-    val contentBlendMode: BlendMode? = null,
+    val contentBlendMode: BlendMode = BlendMode.SrcOver,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
@@ -145,7 +145,7 @@ private class DrawBackdropElement(
         result = 31 * result + onDrawBackdrop.hashCode()
         result = 31 * result + (onDrawSurface?.hashCode() ?: 0)
         result = 31 * result + (onDrawFront?.hashCode() ?: 0)
-        result = 31 * result + (contentBlendMode?.hashCode() ?: 0)
+        result = 31 * result + contentBlendMode.hashCode()
         return result
     }
 }
@@ -159,7 +159,7 @@ private class DrawBackdropNode(
     var onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
     var onDrawSurface: (DrawScope.() -> Unit)?,
     var onDrawFront: (DrawScope.() -> Unit)?,
-    var contentBlendMode: BlendMode? = null,
+    var contentBlendMode: BlendMode = BlendMode.SrcOver,
 ) : Modifier.Node(),
     LayoutModifierNode,
     DrawModifierNode,
@@ -322,18 +322,13 @@ private class DrawBackdropNode(
         drawBackdropLayer()
         onDrawSurface?.invoke(this)
 
-        val blendMode = contentBlendMode
-        if (blendMode != null) {
-            contentPaint.blendMode = blendMode
-            drawContext.canvas.saveLayer(
-                androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
-                contentPaint,
-            )
-            drawContent()
-            drawContext.canvas.restore()
-        } else {
-            drawContent()
-        }
+        contentPaint.blendMode = contentBlendMode
+        drawContext.canvas.saveLayer(
+            androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
+            contentPaint,
+        )
+        drawContent()
+        drawContext.canvas.restore()
 
         onDrawFront?.invoke(this)
     }

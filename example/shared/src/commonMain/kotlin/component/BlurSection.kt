@@ -382,6 +382,7 @@ private fun ForegroundBlurDemo() {
         ) {
             BgEffectBackground(
                 dynamicBackground = dynamicBackground.value,
+                isFullSize = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp),

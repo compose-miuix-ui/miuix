@@ -276,7 +276,7 @@ private fun AboutContent(
         modifier = Modifier.fillMaxSize(),
         bgModifier = Modifier.layerBackdrop(backdrop),
         effectBackground = effectBackground.value,
-        alpha = 1f - scrollProgress,
+        alpha = { 1f - scrollProgress },
     ) {
         Column(
             modifier = Modifier
@@ -341,6 +341,7 @@ private fun AboutContent(
                         enabled = blurEnable,
                     ),
                 text = "Miuix for Compose",
+                color = colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 fontSize = 35.sp,
             )
