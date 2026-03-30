@@ -37,26 +37,6 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
  * @param onBack a callback for handling system back press.
  * @sample androidx.navigation3.scene.samples.SceneStateSample
  */
-@Deprecated(
-    message =
-        "Deprecated in favor of rememberSceneState that supports sharedTransitionScope, " +
-                "sceneDecoratorStrategies, and list of SceneStrategies",
-    level = DeprecationLevel.HIDDEN,
-)
-@Composable
-fun <T : Any> rememberSceneState(
-    entries: List<NavEntry<T>>,
-    sceneStrategy: SceneStrategy<T>,
-    onBack: () -> Unit,
-): SceneState<T> {
-    return rememberSceneState(
-        entries = entries,
-        sceneStrategies = listOf(sceneStrategy),
-        sharedTransitionScope = null,
-        onBack = onBack,
-    )
-}
-
 /**
  * Returns a [SceneState] that is remembered across compositions based on the parameters.
  *

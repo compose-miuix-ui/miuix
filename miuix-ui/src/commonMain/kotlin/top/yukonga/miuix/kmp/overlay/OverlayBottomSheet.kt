@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -99,76 +98,4 @@ fun OverlayBottomSheet(
         enableNestedScroll = enableNestedScroll,
         content = content,
     )
-}
-
-/**
- * A bottom sheet that slides up from the bottom of the screen.
- */
-@Deprecated(
-    message = "Use OverlayBottomSheet with show: Boolean parameter instead for unidirectional data flow.",
-    replaceWith = ReplaceWith(
-        "OverlayBottomSheet(show = show.value, modifier = modifier, title = title, startAction = startAction, endAction = endAction, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, cornerRadius = cornerRadius, sheetMaxWidth = sheetMaxWidth, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, dragHandleColor = dragHandleColor, allowDismiss = allowDismiss, enableNestedScroll = enableNestedScroll, renderInRootScaffold = renderInRootScaffold, content = content)",
-    ),
-)
-@Composable
-fun OverlayBottomSheet(
-    show: MutableState<Boolean>,
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    startAction: @Composable (() -> Unit)? = null,
-    endAction: @Composable (() -> Unit)? = null,
-    backgroundColor: Color = BottomSheetDefaults.backgroundColor(),
-    enableWindowDim: Boolean = true,
-    cornerRadius: Dp = BottomSheetDefaults.cornerRadius,
-    sheetMaxWidth: Dp = BottomSheetDefaults.maxWidth,
-    onDismissRequest: (() -> Unit)? = null,
-    onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize = BottomSheetDefaults.outsideMargin,
-    insideMargin: DpSize = BottomSheetDefaults.insideMargin,
-    defaultWindowInsetsPadding: Boolean = true,
-    dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
-    allowDismiss: Boolean = true,
-    enableNestedScroll: Boolean = true,
-    renderInRootScaffold: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    OverlayBottomSheet(
-        show = show.value,
-        modifier = modifier,
-        title = title,
-        startAction = startAction,
-        endAction = endAction,
-        backgroundColor = backgroundColor,
-        enableWindowDim = enableWindowDim,
-        cornerRadius = cornerRadius,
-        sheetMaxWidth = sheetMaxWidth,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-        outsideMargin = outsideMargin,
-        insideMargin = insideMargin,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        dragHandleColor = dragHandleColor,
-        allowDismiss = allowDismiss,
-        enableNestedScroll = enableNestedScroll,
-        renderInRootScaffold = renderInRootScaffold,
-        content = content,
-    )
-}
-
-@Deprecated("Use BottomSheetDefaults instead", ReplaceWith("BottomSheetDefaults"))
-object OverlayBottomSheetDefaults {
-
-    @Composable
-    fun backgroundColor() = BottomSheetDefaults.backgroundColor()
-
-    @Composable
-    fun dragHandleColor() = BottomSheetDefaults.dragHandleColor()
-
-    val cornerRadius get() = BottomSheetDefaults.cornerRadius
-
-    val maxWidth get() = BottomSheetDefaults.maxWidth
-
-    val outsideMargin get() = BottomSheetDefaults.outsideMargin
-
-    val insideMargin get() = BottomSheetDefaults.insideMargin
 }

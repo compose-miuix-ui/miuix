@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -83,52 +82,6 @@ fun OverlayDialog(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        content = content,
-    )
-}
-
-/**
- * A dialog with a title, a summary, and other contents.
- */
-@Deprecated(
-    message = "Use OverlayDialog with show: Boolean parameter instead for unidirectional data flow.",
-    replaceWith = ReplaceWith(
-        "OverlayDialog(show = show.value, modifier = modifier, title = title, titleColor = titleColor, summary = summary, summaryColor = summaryColor, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, renderInRootScaffold = renderInRootScaffold, content = content)",
-    ),
-)
-@Composable
-fun OverlayDialog(
-    show: MutableState<Boolean>,
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    titleColor: Color = DialogDefaults.titleColor(),
-    summary: String? = null,
-    summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
-    enableWindowDim: Boolean = true,
-    onDismissRequest: (() -> Unit)? = null,
-    onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize = DialogDefaults.outsideMargin,
-    insideMargin: DpSize = DialogDefaults.insideMargin,
-    defaultWindowInsetsPadding: Boolean = true,
-    renderInRootScaffold: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    OverlayDialog(
-        show = show.value,
-        modifier = modifier,
-        title = title,
-        titleColor = titleColor,
-        summary = summary,
-        summaryColor = summaryColor,
-        backgroundColor = backgroundColor,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-        outsideMargin = outsideMargin,
-        insideMargin = insideMargin,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        renderInRootScaffold = renderInRootScaffold,
         content = content,
     )
 }

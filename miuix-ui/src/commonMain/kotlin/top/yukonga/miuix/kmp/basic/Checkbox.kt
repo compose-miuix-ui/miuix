@@ -225,43 +225,6 @@ fun Checkbox(
     ) {}
 }
 
-/**
- * A [Checkbox] component with Miuix style.
- *
- * @param checked The current state of the [Checkbox].
- * @param onCheckedChange The callback to be called when the state of the [Checkbox] changes.
- * @param modifier The modifier to be applied to the [Checkbox].
- * @param colors The [CheckboxColors] of the [Checkbox].
- * @param enabled Whether the [Checkbox] is enabled.
- */
-@Deprecated(
-    message = "Use Checkbox with ToggleableState instead.",
-    replaceWith = ReplaceWith(
-        expression = "Checkbox(state = ToggleableState(checked), onClick = if (onCheckedChange != null) { { onCheckedChange(!checked) } } else null, modifier = modifier, colors = colors, enabled = enabled)",
-        imports = ["androidx.compose.ui.state.ToggleableState"],
-    ),
-)
-@Composable
-fun Checkbox(
-    checked: Boolean,
-    onCheckedChange: ((Boolean) -> Unit)?,
-    modifier: Modifier = Modifier,
-    colors: CheckboxColors = CheckboxDefaults.checkboxColors(),
-    enabled: Boolean = true,
-) {
-    Checkbox(
-        state = ToggleableState(checked),
-        onClick = if (onCheckedChange != null) {
-            { onCheckedChange(!checked) }
-        } else {
-            null
-        },
-        modifier = modifier,
-        colors = colors,
-        enabled = enabled,
-    )
-}
-
 private data class CheckmarkCache(
     val startPoint: Offset,
     val middlePoint: Offset,

@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
@@ -27,7 +25,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
 /**
  * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
  *
- * Use [LocalWindowDialogState] inside `content` to request dismissal from inner composables.
+ * Use [LocalDismissState] inside `content` to request dismissal from inner composables.
  *
  * @param show Whether the [WindowDialog] is shown.
  * @param modifier The modifier to be applied to the [WindowDialog].
@@ -105,49 +103,5 @@ fun WindowDialog(
                 content()
             }
         },
-    )
-}
-
-/**
- * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
- */
-@Deprecated(
-    message = "Use WindowDialog with show: Boolean parameter instead for unidirectional data flow.",
-    replaceWith = ReplaceWith(
-        "WindowDialog(show = show.value, modifier = modifier, title = title, titleColor = titleColor, summary = summary, summaryColor = summaryColor, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, content = content)",
-    ),
-)
-@Composable
-fun WindowDialog(
-    show: MutableState<Boolean>,
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    titleColor: Color = DialogDefaults.titleColor(),
-    summary: String? = null,
-    summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
-    enableWindowDim: Boolean = true,
-    onDismissRequest: (() -> Unit)? = null,
-    onDismissFinished: (() -> Unit)? = null,
-    outsideMargin: DpSize = DialogDefaults.outsideMargin,
-    insideMargin: DpSize = DialogDefaults.insideMargin,
-    defaultWindowInsetsPadding: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    WindowDialog(
-        show = show.value,
-        modifier = modifier,
-        title = title,
-        titleColor = titleColor,
-        summary = summary,
-        summaryColor = summaryColor,
-        backgroundColor = backgroundColor,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-        outsideMargin = outsideMargin,
-        insideMargin = insideMargin,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        content = content,
     )
 }

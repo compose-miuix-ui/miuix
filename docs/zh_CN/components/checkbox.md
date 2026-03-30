@@ -183,21 +183,3 @@ LazyColumn {
     }
 }
 ```
-
-## 从旧 API 迁移
-
-旧版 `checked: Boolean` / `onCheckedChange` API 已弃用，迁移方式如下：
-
-```kotlin
-// 旧版（已弃用）
-Checkbox(
-    checked = checked,
-    onCheckedChange = { checked = it }
-)
-
-// 新版
-Checkbox(
-    state = ToggleableState(checked),
-    onClick = { checked = !checked }
-)
-```

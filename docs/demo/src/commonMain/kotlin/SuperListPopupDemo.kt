@@ -32,7 +32,7 @@ fun SuperListPopupDemo() {
                 .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
             contentAlignment = Alignment.Center,
         ) {
-            val showPopup = remember { mutableStateOf(false) }
+            var showPopup by remember { mutableStateOf(false) }
             var selectedIndex by remember { mutableIntStateOf(0) }
             val items = listOf("Option 1", "Option 2", "Option 3")
             Box(
@@ -42,13 +42,13 @@ fun SuperListPopupDemo() {
                 Box {
                     TextButton(
                         text = "Click to show menu",
-                        onClick = { showPopup.value = true },
+                        onClick = { showPopup = true },
                         modifier = Modifier.padding(top = 16.dp),
                     )
                     OverlayListPopup(
                         show = showPopup,
                         alignment = PopupPositionProvider.Align.TopStart,
-                        onDismissRequest = { showPopup.value = false }, // Close the popup menu
+                        onDismissRequest = { showPopup = false }, // Close the popup menu
                     ) {
                         ListPopupColumn {
                             items.forEachIndexed { index, string ->
@@ -58,7 +58,7 @@ fun SuperListPopupDemo() {
                                     isSelected = selectedIndex == index,
                                     onSelectedIndexChange = { selectedIdx ->
                                         selectedIndex = selectedIdx
-                                        showPopup.value = false // Close the popup menu
+                                        showPopup = false // Close the popup menu
                                     },
                                     index = index,
                                 )

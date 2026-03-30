@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -73,44 +72,6 @@ fun OverlayListPopup(
         onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
-        content = content,
-    )
-}
-
-/**
- * A popup with a list of items.
- */
-@Deprecated(
-    message = "Use OverlayListPopup with show: Boolean parameter instead for unidirectional data flow.",
-    replaceWith = ReplaceWith(
-        "OverlayListPopup(show = show.value, popupModifier = popupModifier, popupPositionProvider = popupPositionProvider, alignment = alignment, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, maxHeight = maxHeight, minWidth = minWidth, renderInRootScaffold = renderInRootScaffold, content = content)",
-    ),
-)
-@Composable
-fun OverlayListPopup(
-    show: MutableState<Boolean>,
-    popupModifier: Modifier = Modifier,
-    popupPositionProvider: PopupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
-    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.Start,
-    enableWindowDim: Boolean = true,
-    onDismissRequest: (() -> Unit)? = null,
-    onDismissFinished: (() -> Unit)? = null,
-    maxHeight: Dp? = null,
-    minWidth: Dp = 200.dp,
-    renderInRootScaffold: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    OverlayListPopup(
-        show = show.value,
-        popupModifier = popupModifier,
-        popupPositionProvider = popupPositionProvider,
-        alignment = alignment,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-        maxHeight = maxHeight,
-        minWidth = minWidth,
-        renderInRootScaffold = renderInRootScaffold,
         content = content,
     )
 }
