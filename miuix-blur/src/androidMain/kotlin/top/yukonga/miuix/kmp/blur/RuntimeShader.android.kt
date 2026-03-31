@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
 import org.intellij.lang.annotations.Language
 
@@ -15,10 +16,14 @@ actual fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader 
 
 actual fun RuntimeShader.asComposeShader(): Shader = asAndroidRuntimeShader()
 
+actual fun RuntimeShader.asBrush(): ShaderBrush = (this as AndroidRuntimeShader).brush
+
 internal fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader = (this as AndroidRuntimeShader).shader
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private class AndroidRuntimeShader(val shader: android.graphics.RuntimeShader) : RuntimeShader {
+
+    val brush: ShaderBrush = ShaderBrush(shader)
 
     override fun setFloatUniform(name: String, value: Float) {
         shader.setFloatUniform(name, value)

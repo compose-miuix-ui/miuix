@@ -10,8 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ShaderBrush
-import top.yukonga.miuix.kmp.blur.asComposeShader
+import top.yukonga.miuix.kmp.blur.asBrush
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
@@ -37,7 +36,6 @@ inline fun BgEffectBackground(
         val surface = MiuixTheme.colorScheme.surface
         val painter = remember { BgEffectPainter() }
         val animTime = rememberFrameTimeSeconds(dynamicBackground)
-        val currentBrush = remember(painter) { ShaderBrush(painter.runtimeShader.asComposeShader()) }
         val isDark = isInDarkTheme()
 
         Canvas(
@@ -59,7 +57,7 @@ inline fun BgEffectBackground(
                     isDark,
                 )
                 painter.updateAnimTime(animTime())
-                drawRect(currentBrush, alpha = alpha())
+                drawRect(painter.runtimeShader.asBrush(), alpha = alpha())
             }
         }
         content()
