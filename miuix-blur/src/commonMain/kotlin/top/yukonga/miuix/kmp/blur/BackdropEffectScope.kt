@@ -4,13 +4,11 @@
 package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ColorMatrixColorFilter
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
@@ -46,27 +44,6 @@ sealed interface BackdropEffectScope :
      * rather than in the RenderEffect chain, so that each screen pixel gets independent noise.
      */
     var noiseCoefficient: Float
-}
-
-// region Effect extensions
-
-/**
- * Applies a Gaussian blur effect to the backdrop.
- */
-fun BackdropEffectScope.blur(
-    radius: Float,
-    edgeTreatment: TileMode = TileMode.Clamp,
-) {
-    if (!isRenderEffectSupported()) return
-    if (radius <= 0f) return
-
-    if (edgeTreatment != TileMode.Clamp || renderEffect != null) {
-        if (radius > padding) {
-            padding = radius
-        }
-    }
-
-    renderEffect = BlurEffect(renderEffect, radius, radius, edgeTreatment)
 }
 
 /**

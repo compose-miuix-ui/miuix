@@ -18,7 +18,7 @@ private const val MAX_LAYERS = 8
  * All blend modes (standard 0-31 and custom 100+) are processed by the
  * runtime shader using libhwui-compatible premultiplied-alpha formulas.
  */
-internal fun BackdropEffectScope.applyBlendColors(colors: BlurColors) {
+internal fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
     if (!isRuntimeShaderSupported()) return
 
@@ -50,7 +50,6 @@ internal fun BackdropEffectScope.applyBlendColors(colors: BlurColors) {
             colorData[i * 4 + 3] = a
         }
         setFloatUniform("layerColors", colorData)
-
         setFloatUniform("uSaturation", colors.saturation)
         setFloatUniform("uBrightness", colors.brightness)
         setFloatUniform("uLuminanceAmount", 0f)

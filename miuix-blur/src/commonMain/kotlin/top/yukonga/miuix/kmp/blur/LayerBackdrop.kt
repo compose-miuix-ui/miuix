@@ -88,6 +88,7 @@ class LayerBackdrop internal constructor(
                 // Round to nearest even integer in downsampled space for stable
                 // rasterization. Even alignment ensures that subsequent cascade 2x
                 // steps (scale 0.5) also land on integer pixel boundaries.
+                // The residual provides smooth sub-pixel positioning after upscale.
                 val scaledX = offset.x * inv
                 val scaledY = offset.y * inv
                 val roundedX = kotlin.math.round(scaledX * 0.5f).toInt().toFloat() * 2f

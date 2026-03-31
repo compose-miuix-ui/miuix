@@ -7,7 +7,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
-import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import kotlin.math.PI
 import kotlin.math.exp
@@ -122,38 +121,32 @@ internal fun createGaussianBlurEffect(
 }
 
 /**
- * Creates an LM-style separable Gaussian blur [RenderEffect] with uniform radius.
- *
- * @see createGaussianBlurEffect
- */
-internal fun createGaussianBlurEffect(
-    radius: Float,
-    size: Size,
-    shaderCache: RuntimeShaderCache,
-): GaussianBlurResult? = createGaussianBlurEffect(radius, radius, size, shaderCache)
-
-/**
  * Applies LM-style separable Gaussian blur to the backdrop with independent
  * horizontal and vertical blur radii.
- * Falls back to standard Compose [blur] when RuntimeShader is unavailable.
  *
- * @param radiusX The horizontal blur radius in pixels.
- * @param radiusY The vertical blur radius in pixels.
+ * This function updates the scope's mutable state as side effects:
+ * - [BackdropEffectScope.padding] is increased (if needed) to cover the blur
+ *   kernel's maximum sampling reach in original pixel space.
+ * - [BackdropEffectScope.downscaleFactor] is set to the adaptive downsampling
+ *   factor derived from the larger sigma.
+ * - [BackdropEffectScope.renderEffect] is chained with the horizontal and/or
+ *   vertical blur passes.
+ *
+ * No-op when runtime shaders are not supported on the current platform.
+ *
+ * @param radiusX The horizontal blur radius in pixels. Non-positive skips the horizontal pass.
+ * @param radiusY The vertical blur radius in pixels. Non-positive skips the vertical pass.
  */
 internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
-    if (!isRuntimeShaderSupported()) {
-        blur(maxOf(radiusX, radiusY))
-        return
-    }
+    if (!isRuntimeShaderSupported()) return
 
     // Pre-compute downscale factor to set padding before creating the effect.
     val sigmaMax = maxOf(radiusX, radiusY) * RADIUS_TO_SIGMA
     val sf = computeDownScaleParams(sigmaMax).downScale
 
-    // Padding covers the blur kernel's maximum sampling reach, NOT the blur
-    // radius itself. This keeps recording dimensions stable across radius
-    // changes within the same downscale level, preventing content shifts
-    // that the blur kernel would amplify into visible jitter.
+    // Padding covers the blur kernel's maximum sampling reach in original
+    // pixel space. This keeps recording dimensions stable across radius
+    // changes within the same downscale level.
     val kernelPadding = (KERNEL_REACH * sf).toFloat()
     if (kernelPadding > padding) {
         padding = kernelPadding
@@ -168,17 +161,39 @@ internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
 }
 
 /**
- * Applies LM-style separable Gaussian blur to the backdrop.
- * Falls back to standard Compose [blur] when RuntimeShader is unavailable.
+ * Registers noise dithering to reduce color banding artifacts in the backdrop.
  *
- * @param radius The blur radius in pixels.
+ * Stores the [coefficient] into [BackdropEffectScope.noiseCoefficient] for later
+ * application by the backdrop drawing pipeline. The noise shader adds 3-channel
+ * pseudo-random offsets per pixel, breaking up visible quantization steps that
+ * appear in smooth gradients after blur and color adjustments.
+ *
+ * Non-positive values are ignored (noise remains disabled).
+ *
+ * @param coefficient Noise intensity multiplier. Higher values produce stronger
+ *   dithering. The default is [BlurDefaults.NoiseCoefficient] (0.0045);
+ *   0 or negative disables noise.
+ * @see BackdropEffectScope.noiseCoefficient
  */
-internal fun BackdropEffectScope.gaussianBlur(radius: Float) {
-    gaussianBlur(radius, radius)
+internal fun BackdropEffectScope.noiseDither(coefficient: Float) {
+    if (coefficient <= 0f) return
+    noiseCoefficient = coefficient
 }
 
 /**
- * Precomputed Gaussian blur parameters: tap offsets and weights.
+ * Precomputed Gaussian blur parameters for one axis of a separable pass.
+ *
+ * Each entry represents a merged pair of adjacent discrete Gaussian taps,
+ * combined via linear interpolation so a single texture fetch at the
+ * interpolated [offsets] reproduces both original weights.
+ * The shader samples symmetrically at ±offset, so [tapCount] pairs produce
+ * 2 × [tapCount] texture fetches covering the full kernel.
+ *
+ * @param offsets Interpolated sample offsets in downsampled pixels, one per pair.
+ * @param weights Combined weight for each merged pair. The center pair (index 0)
+ *   carries the residual weight that ensures the total sums to 1.0.
+ * @param tapCount Number of valid pairs in [offsets] and [weights]
+ *   (up to [MAX_BLUR_TAPS]).
  */
 internal class GaussianParams(
     val offsets: FloatArray,

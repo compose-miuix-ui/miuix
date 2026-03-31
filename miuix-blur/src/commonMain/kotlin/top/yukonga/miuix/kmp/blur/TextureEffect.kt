@@ -5,7 +5,7 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import top.yukonga.miuix.kmp.blur.internal.applyBlendColors
+import top.yukonga.miuix.kmp.blur.internal.blendColors
 import top.yukonga.miuix.kmp.blur.internal.gaussianBlur
 import top.yukonga.miuix.kmp.blur.internal.noiseDither
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
@@ -145,8 +145,8 @@ fun Modifier.textureEffect(
         effects = {
             noiseDither(noiseCoefficient)
             colorControls(colors.brightness, colors.contrast, colors.saturation)
-            applyBlendColors(colors)
             gaussianBlur(clampedX, clampedY)
+            blendColors(colors)
         },
         contentBlendMode = contentBlendMode,
         enabled = enabled,

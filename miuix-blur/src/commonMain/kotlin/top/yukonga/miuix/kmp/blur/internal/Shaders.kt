@@ -105,6 +105,30 @@ internal const val DOWNSAMPLE_2X_SHADER = """
 """
 
 /**
+ * Edge feather shader — fades blur alpha near the content boundary to mask
+ * edge jitter caused by downsampled position quantization.
+ *
+ * Uniforms:
+ * - `child`: Input blurred image shader.
+ * - `contentBounds[4]`: Content area bounds (left, top, right, bottom) in texture pixels.
+ * - `featherWidth`: Fade width in texture pixels.
+ */
+internal const val EDGE_FEATHER_SHADER = """
+    uniform shader child;
+    uniform float contentBounds[4];
+    uniform float featherWidth;
+    half4 main(float2 fragCoord) {
+        half4 color = child.eval(fragCoord);
+        float dL = fragCoord.x - contentBounds[0];
+        float dT = fragCoord.y - contentBounds[1];
+        float dR = contentBounds[2] - fragCoord.x;
+        float dB = contentBounds[3] - fragCoord.y;
+        float d = min(min(dL, dR), min(dT, dB));
+        return color * half(smoothstep(0.0, featherWidth, d));
+    }
+"""
+
+/**
  * Blend mode shader — complete dispatch for all standard (0-31) and custom (100+) modes.
  *
  * Standard modes (0-31) use premultiplied-alpha formulas from libhwui/Skia.
@@ -484,10 +508,18 @@ internal const val MI_BLEND_MODE_SHADER = """
     float3 labNormalized(float3 lab) { return float3(lab.r / 100.0, (lab.g + 128.0) / 255.0, (lab.b + 128.0) / 255.0); }
     float3 labDenormalized(float3 lab) { return float3(lab.r * 100.0, lab.g * 255.0 - 128.0, lab.b * 255.0 - 128.0); }
 
+    // float-precision linear light to avoid half truncation before labDenormalized
+    float blendLinearLightF(float base, float blend) {
+        return blend < 0.5 ? max(base + 2.0 * blend - 1.0, 0.0) : min(base + 2.0 * (blend - 0.5), 1.0);
+    }
+    float3 blendLinearLightF(float3 base, float3 blend) {
+        return float3(blendLinearLightF(base.r, blend.r), blendLinearLightF(base.g, blend.g), blendLinearLightF(base.b, blend.b));
+    }
+
     half4 blendLinearLightLab(half4 src, half4 dst) {
         float3 labSrc = labNormalized(rgb2lab(float3(src.rgb)));
         float3 labDst = labNormalized(rgb2lab(float3(dst.rgb)));
-        return half4(half3(lab2rgb(labDenormalized(blendLinearLight(half3(labDst), half3(labSrc))))), 1.0);
+        return half4(half3(lab2rgb(labDenormalized(blendLinearLightF(labDst, labSrc)))), 1.0);
     }
 
     half3 blendDifference(half3 base, half3 blend) { return abs(base - blend); }
@@ -542,23 +574,23 @@ internal const val MI_BLEND_MODE_SHADER = """
     half4 getBlendModeColor(half4 bg, half4 ch, int mode, half4 bc) {
         // Standard modes (0-31): premultiplied alpha, direct result
         if (mode <= 31) return doBlend(mode, bc, bg);
-        // Custom modes (100+): unpremultiplied formulas
-        if (mode == 100) return blendLinearLight(bc, bg).xyz1;
+        // Custom modes (100+): unpremultiplied inputs, alpha handled internally
+        if (mode == 100) return blendLinearLight(bc, bg);
         if (mode == 101) { half g = greyscale(ch.rgb); return mix(ch, blendLinearLight(half4(bc.rgb, g), bg), bc.a); }
-        if (mode == 102) return half4(blendDifference(bg.rgb, bc.rgb, bc.a), 1.0);
+        if (mode == 102) return half4(blendDifference(bg.rgb, bc.rgb, bc.a), bg.a);
         if (mode == 103) { half g = greyscale(ch.rgb) * 100.0; return mix(ch, labLighten(bg, 0.4 * g + 45.0), bc.a); }
         if (mode == 105) { half g = greyscale(ch.rgb) * 100.0; return mix(ch, labDarken(bg, 45.0 - 0.15 * g), bc.a); }
         if (mode == 106) return mix(ch, labColor(bg, bc.r, bc.g), bc.a);
         if (mode == 107) return mix(ch, blendLinearLightLab(bc, bg), bc.a);
-        if (mode == 118) return blendColorDodge(bc, bg).xyz1;
-        if (mode == 119) return blendColorBurn(bc, bg).xyz1;
+        if (mode == 118) return blendColorDodge(bc, bg);
+        if (mode == 119) return blendColorBurn(bc, bg);
         if (mode == 120) return blendPlusDarker(bc, bg);
         if (mode == 121) return blendPlusLighter(bc, bg);
-        if (mode == 200) { half4 r = (1.0 - bc.a) * bg + bc.a * bc; half a = (1.0 - bc.a) * (1.0 - ch.r) + ch.r; return half4(r.xyz * a, 1.0); }
-        if (mode == 201) return adjust_saturation(bg, uSaturation);
-        if (mode == 202) return adjust_brightness(bg, uBrightness);
-        if (mode == 203) return luminance_curve(bg, uLuminanceValues, uLuminanceAmount);
-        return blendSrcOver(bc, bg).xyz1;
+        if (mode == 200) { half4 r = (1.0 - bc.a) * bg + bc.a * bc; half a = (1.0 - bc.a) * (1.0 - ch.r) + ch.r; return half4(r.xyz * a, bg.a); }
+        if (mode == 201) { half4 adj = adjust_saturation(bg, uSaturation); return half4(mix(bg.rgb, adj.rgb, bc.a), bg.a); }
+        if (mode == 202) { half4 adj = adjust_brightness(bg, uBrightness); return half4(mix(bg.rgb, adj.rgb, bc.a), bg.a); }
+        if (mode == 203) { half4 adj = luminance_curve(bg, uLuminanceValues, uLuminanceAmount); return half4(mix(bg.rgb, adj.rgb, bc.a), bg.a); }
+        return blendSrcOver(bc, bg);
     }
 
     // ======== Main ========
@@ -575,13 +607,21 @@ internal const val MI_BLEND_MODE_SHADER = """
             if (mode <= 31) {
                 currentColor = float4(doBlend(mode, layerColor, half4(currentColor)));
             } else {
-                half4 blended = getBlendModeColor(half4(currentColor), half4(currentColor), mode, layerColor);
-                float3 dstRgb = currentColor.rgb;
-                float dstA = currentColor.a;
-                float srcA = float(layerColor.a);
-                float3 resultRgb = float3(blended.rgb) * srcA + dstRgb * (1.0 - srcA);
-                float resultA = srcA + dstA * (1.0 - srcA);
-                currentColor = float4(resultRgb, resultA);
+                // Unpremultiply for custom modes (they expect straight alpha)
+                float bgA = currentColor.a;
+                float3 bgStr = bgA > 0.0001 ? currentColor.rgb / bgA : float3(0.0);
+                half lcA = layerColor.a;
+                half3 lcStr = lcA > 0.0 ? layerColor.rgb / lcA : half3(0.0);
+
+                half4 bg = half4(half3(bgStr), half(bgA));
+                half4 lc = half4(lcStr, lcA);
+
+                // getBlendModeColor handles alpha internally, returns unpremultiplied result
+                half4 blended = getBlendModeColor(bg, bg, mode, lc);
+
+                // Re-premultiply
+                float outA = float(blended.a);
+                currentColor = float4(float3(blended.rgb) * outA, outA);
             }
         }
         return half4(currentColor);
