@@ -5,10 +5,13 @@ on:
     branches: ["main"]
     tags: ["*"]
     paths:
-      - "miuix/**"
+      - "miuix-core/**"
+      - "miuix-ui/**"
+      - "miuix-preference/**"
+      - "miuix-blur/**"
       - "miuix-icons/**"
       - "miuix-navigation3-ui/**"
-      - "build-plugin/**"
+      - "build-plugins/**"
       - "gradle/**"
       - "settings.gradle.kts"
       - "build.gradle.kts"
