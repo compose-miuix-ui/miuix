@@ -1,3 +1,6 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package component.effect
 
 internal object BgEffectConfig {
@@ -6,7 +9,7 @@ internal object BgEffectConfig {
         val points: FloatArray,
         val colors: FloatArray,
         val lightOffset: Float,
-        val saturateOffset: Float
+        val saturateOffset: Float,
     )
 
     /*
@@ -24,7 +27,7 @@ internal object BgEffectConfig {
             0.73f, 0.70f, 0.98f, 1.0f,
         ),
         lightOffset = 0.1f,
-        saturateOffset = 0.2f
+        saturateOffset = 0.2f,
     )
 
     /*
@@ -42,7 +45,7 @@ internal object BgEffectConfig {
             0.16f, 0.12f, 0.45f, 1.0f,
         ),
         lightOffset = -0.1f,
-        saturateOffset = 0.2f
+        saturateOffset = 0.2f,
     )
 
     /*
@@ -60,7 +63,7 @@ internal object BgEffectConfig {
             0.73f, 0.70f, 0.98f, 0.90f,
         ),
         lightOffset = 0.1f,
-        saturateOffset = 0f
+        saturateOffset = 0f,
     )
 
     /*
@@ -78,7 +81,7 @@ internal object BgEffectConfig {
             0.16f, 0.12f, 0.45f, 1.0f,
         ),
         lightOffset = -0.1f,
-        saturateOffset = 0.2f
+        saturateOffset = 0.2f,
     )
 
     /**
@@ -86,20 +89,17 @@ internal object BgEffectConfig {
      */
     internal fun get(
         deviceType: DeviceType,
-        isDark: Boolean
-    ): Config {
+        isDark: Boolean,
+    ): Config = when (deviceType) {
+        DeviceType.PHONE if !isDark ->
+            PHONE_LIGHT
 
-        return when (deviceType) {
-            DeviceType.PHONE if !isDark ->
-                PHONE_LIGHT
+        DeviceType.PHONE if isDark ->
+            PHONE_DARK
 
-            DeviceType.PHONE if isDark ->
-                PHONE_DARK
+        DeviceType.PAD if !isDark ->
+            PAD_LIGHT
 
-            DeviceType.PAD if !isDark ->
-                PAD_LIGHT
-
-            else -> PAD_DARK
-        }
+        else -> PAD_DARK
     }
 }

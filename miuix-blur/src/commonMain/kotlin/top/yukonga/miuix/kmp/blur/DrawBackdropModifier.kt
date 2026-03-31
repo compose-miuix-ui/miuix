@@ -322,13 +322,17 @@ private class DrawBackdropNode(
         drawBackdropLayer()
         onDrawSurface?.invoke(this)
 
-        contentPaint.blendMode = contentBlendMode
-        drawContext.canvas.saveLayer(
-            androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
-            contentPaint,
-        )
-        drawContent()
-        drawContext.canvas.restore()
+        if (contentBlendMode == BlendMode.SrcOver) {
+            drawContent()
+        } else {
+            contentPaint.blendMode = contentBlendMode
+            drawContext.canvas.saveLayer(
+                androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
+                contentPaint,
+            )
+            drawContent()
+            drawContext.canvas.restore()
+        }
 
         onDrawFront?.invoke(this)
     }

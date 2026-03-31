@@ -1,3 +1,6 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package component.effect
 
 import top.yukonga.miuix.kmp.blur.RuntimeShader
@@ -36,7 +39,6 @@ class BgEffectPainter {
     }
 
     private fun initStaticUniforms(shader: RuntimeShader) {
-
         shader.setFloatUniform("uTranslateY", U_TRANSLATE_Y)
         shader.setFloatUniform("uNoiseScale", U_NOISE_SCALE)
         shader.setFloatUniform("uPointOffset", U_POINT_OFFSET)
@@ -44,22 +46,22 @@ class BgEffectPainter {
 
         shader.setFloatUniform(
             "uShadowColorMulti",
-            U_SHADOW_COLOR_MULTI
+            U_SHADOW_COLOR_MULTI,
         )
 
         shader.setFloatUniform(
             "uShadowColorOffset",
-            U_SHADOW_COLOR_OFFSET
+            U_SHADOW_COLOR_OFFSET,
         )
 
         shader.setFloatUniform(
             "uShadowOffset",
-            U_SHADOW_OFFSET
+            U_SHADOW_OFFSET,
         )
 
         shader.setFloatUniform(
             "uShadowNoiseScale",
-            U_SHADOW_NOISE_SCALE
+            U_SHADOW_NOISE_SCALE,
         )
 
         shader.setFloatUniform("uAlphaMulti", U_ALPHA_MULTI)
@@ -67,7 +69,6 @@ class BgEffectPainter {
     }
 
     fun setDeviceType(type: DeviceType) {
-
         if (deviceType == type) return
 
         deviceType = type
@@ -75,30 +76,30 @@ class BgEffectPainter {
     }
 
     fun updateResolution(width: Float, height: Float) {
-
         if (
             resolution[0] == width &&
             resolution[1] == height
-        ) return
+        ) {
+            return
+        }
 
         resolution[0] = width
         resolution[1] = height
 
         runtimeShader.setFloatUniform(
             "uResolution",
-            resolution
+            resolution,
         )
     }
 
     fun updateAnimTime(time: Float) {
-
         if (animTime == time) return
 
         animTime = time
 
         runtimeShader.setFloatUniform(
             "uAnimTime",
-            animTime
+            animTime,
         )
     }
 
@@ -106,19 +107,20 @@ class BgEffectPainter {
         logoHeight: Float,
         height: Float,
         width: Float,
-        isDark: Boolean
+        isDark: Boolean,
     ) {
-
         if (
             presetApplied &&
             isDarkCached == isDark &&
             deviceTypeCached == deviceType
-        ) return
+        ) {
+            return
+        }
 
         updateBound(
             logoHeight,
             height,
-            width
+            width,
         )
 
         applyPreset(isDark)
@@ -129,41 +131,39 @@ class BgEffectPainter {
     }
 
     private fun applyPreset(isDark: Boolean) {
-
         val preset = BgEffectConfig.get(deviceType, isDark)
 
         runtimeShader.setFloatUniform(
             "uPoints",
-            preset.points
+            preset.points,
         )
 
         runtimeShader.setFloatUniform(
             "uColors",
-            preset.colors
+            preset.colors,
         )
 
         runtimeShader.setFloatUniform(
             "uLightOffset",
-            preset.lightOffset
+            preset.lightOffset,
         )
 
         runtimeShader.setFloatUniform(
             "uSaturateOffset",
-            preset.saturateOffset
+            preset.saturateOffset,
         )
 
         runtimeShader.setFloatUniform(
             "uBound",
-            bound
+            bound,
         )
     }
 
     private fun updateBound(
         logoHeight: Float,
         totalHeight: Float,
-        totalWidth: Float
+        totalWidth: Float,
     ) {
-
         val heightRatio = logoHeight / totalHeight
         if (totalWidth <= totalHeight) {
             bound[0] = 0f

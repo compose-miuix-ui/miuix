@@ -16,7 +16,6 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 
-
 @Composable
 inline fun BgEffectBackground(
     dynamicBackground: Boolean,
@@ -38,7 +37,7 @@ inline fun BgEffectBackground(
         val surface = MiuixTheme.colorScheme.surface
         val painter = remember { BgEffectPainter() }
         val animTime = rememberFrameTimeSeconds(dynamicBackground)
-        val currentBrush = remember(painter.runtimeShader) { ShaderBrush(painter.runtimeShader.asComposeShader()) }
+        val currentBrush = remember(painter) { ShaderBrush(painter.runtimeShader.asComposeShader()) }
         val isDark = isInDarkTheme()
 
         Canvas(
@@ -51,13 +50,13 @@ inline fun BgEffectBackground(
                 val drawHeight = if (isFullSize) size.height else size.height * 0.78f
                 painter.updateResolution(
                     size.width,
-                    size.height
+                    size.height,
                 )
                 painter.updatePresetIfNeeded(
                     drawHeight,
                     size.height,
                     size.width,
-                    isDark
+                    isDark,
                 )
                 painter.updateAnimTime(animTime())
                 drawRect(currentBrush, alpha = alpha())
@@ -65,5 +64,4 @@ inline fun BgEffectBackground(
         }
         content()
     }
-
 }
