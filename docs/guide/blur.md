@@ -320,7 +320,7 @@ Box(
 | noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
 | colors | BlurColors | Color adjustments and blend layers applied after blur | BlurColors() | No |
 | contentBlendMode | BlendMode? | Blend mode for compositing content over the blur | null | No |
-| enabled | Boolean | Whether blur is active, when false the modifier is a no-op | true | No |
+| enabled | Boolean | Whether blur is active, when false the effect is skipped and content draws normally | true | No |
 
 \* Required only in the independent radii overload.
 
