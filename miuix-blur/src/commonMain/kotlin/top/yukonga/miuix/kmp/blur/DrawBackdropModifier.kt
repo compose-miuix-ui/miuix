@@ -395,10 +395,8 @@ private class DrawBackdropNode(
         downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
     }
 
-    private fun ensureGraphicsLayer(): GraphicsLayer {
-        return graphicsLayer ?: requireGraphicsContext().createGraphicsLayer().also {
-            graphicsLayer = it
-        }
+    private fun ensureGraphicsLayer(): GraphicsLayer = graphicsLayer ?: requireGraphicsContext().createGraphicsLayer().also {
+        graphicsLayer = it
     }
 
     override fun onAttach() {
