@@ -32,6 +32,7 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
@@ -58,6 +59,7 @@ fun Modifier.drawBackdrop(
     onDrawSurface: (DrawScope.() -> Unit)? = null,
     onDrawFront: (DrawScope.() -> Unit)? = null,
     contentBlendMode: BlendMode? = null,
+    enabled: Boolean = true,
 ): Modifier {
     val shapeProvider = ShapeProvider(shape)
     return this
@@ -75,6 +77,7 @@ fun Modifier.drawBackdrop(
                 onDrawSurface = onDrawSurface,
                 onDrawFront = onDrawFront,
                 contentBlendMode = contentBlendMode,
+                enabled = enabled,
             ),
         )
 }
@@ -89,6 +92,7 @@ private class DrawBackdropElement(
     val onDrawSurface: (DrawScope.() -> Unit)?,
     val onDrawFront: (DrawScope.() -> Unit)?,
     val contentBlendMode: BlendMode? = null,
+    val enabled: Boolean = true,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
@@ -101,9 +105,11 @@ private class DrawBackdropElement(
         onDrawSurface = onDrawSurface,
         onDrawFront = onDrawFront,
         contentBlendMode = contentBlendMode,
+        enabled = enabled,
     )
 
     override fun update(node: DrawBackdropNode) {
+        val enabledChanged = node.enabled != enabled
         node.backdrop = backdrop
         node.shapeProvider = shapeProvider
         node.effects = effects
@@ -113,12 +119,20 @@ private class DrawBackdropElement(
         node.onDrawSurface = onDrawSurface
         node.onDrawFront = onDrawFront
         node.contentBlendMode = contentBlendMode
+        node.enabled = enabled
+        if (enabledChanged) {
+            if (!enabled) {
+                node.releaseGraphicsLayers()
+            }
+            node.invalidateMeasurement()
+        }
         node.invalidateDrawCache()
     }
 
     override fun InspectorInfo.inspectableProperties() {
         name = "drawBackdrop"
         properties["backdrop"] = backdrop
+        properties["enabled"] = enabled
     }
 
     override fun equals(other: Any?): Boolean {
@@ -133,6 +147,7 @@ private class DrawBackdropElement(
         if (onDrawSurface != other.onDrawSurface) return false
         if (onDrawFront != other.onDrawFront) return false
         if (contentBlendMode != other.contentBlendMode) return false
+        if (enabled != other.enabled) return false
         return true
     }
 
@@ -146,6 +161,7 @@ private class DrawBackdropElement(
         result = 31 * result + (onDrawSurface?.hashCode() ?: 0)
         result = 31 * result + (onDrawFront?.hashCode() ?: 0)
         result = 31 * result + (contentBlendMode?.hashCode() ?: 0)
+        result = 31 * result + enabled.hashCode()
         return result
     }
 }
@@ -160,6 +176,7 @@ private class DrawBackdropNode(
     var onDrawSurface: (DrawScope.() -> Unit)?,
     var onDrawFront: (DrawScope.() -> Unit)?,
     var contentBlendMode: BlendMode? = null,
+    var enabled: Boolean = true,
 ) : Modifier.Node(),
     LayoutModifierNode,
     DrawModifierNode,
@@ -308,13 +325,21 @@ private class DrawBackdropNode(
     ): MeasureResult {
         val placeable = measurable.measure(constraints)
         return layout(placeable.width, placeable.height) {
-            placeable.placeWithLayer(IntOffset.Zero, layerBlock = layoutLayerBlock)
+            if (enabled) {
+                placeable.placeWithLayer(IntOffset.Zero, layerBlock = layoutLayerBlock)
+            } else {
+                placeable.place(IntOffset.Zero)
+            }
         }
     }
 
     private val contentPaint = Paint()
 
     override fun ContentDrawScope.draw() {
+        if (!enabled) {
+            drawContent()
+            return
+        }
         if (effectScope.update(this)) {
             updateEffects()
         }
@@ -363,26 +388,39 @@ private class DrawBackdropNode(
     }
 
     private fun updateEffects() {
-        if (!isRenderEffectSupported()) return
+        if (!enabled || !isRenderEffectSupported()) return
+        ensureGraphicsLayer()
         effectScope.apply(effects)
         graphicsLayer?.renderEffect = effectScope.renderEffect
         padding = effectScope.padding
         downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
     }
 
-    override fun onAttach() {
-        effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
-        graphicsLayer = requireGraphicsContext().createGraphicsLayer()
-        observeEffects()
+    private fun ensureGraphicsLayer(): GraphicsLayer {
+        return graphicsLayer ?: requireGraphicsContext().createGraphicsLayer().also {
+            graphicsLayer = it
+        }
     }
 
-    override fun onDetach() {
+    override fun onAttach() {
+        effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
+        if (enabled) {
+            ensureGraphicsLayer()
+            observeEffects()
+        }
+    }
+
+    fun releaseGraphicsLayers() {
         val ctx = requireGraphicsContext()
         graphicsLayer?.let { ctx.releaseGraphicsLayer(it) }
         graphicsLayer = null
         cascadeLayer?.let { ctx.releaseGraphicsLayer(it) }
         cascadeLayer = null
         effectScope.reset()
+    }
+
+    override fun onDetach() {
+        releaseGraphicsLayers()
         layoutCoordinates = null
     }
 }

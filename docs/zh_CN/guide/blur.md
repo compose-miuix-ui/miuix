@@ -320,7 +320,7 @@ Box(
 | noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0.0045f | 否 |
 | colors | BlurColors | 模糊后应用的颜色调整和混合图层 | BlurColors() | 否 |
 | contentBlendMode | BlendMode? | 内容在模糊上方合成的混合模式 | null | 否 |
-| enabled | Boolean | 是否启用模糊，为 false 时 Modifier 为空操作 | true | 否 |
+| enabled | Boolean | 是否启用模糊，为 false 时跳过效果并正常绘制内容 | true | 否 |
 
 \* 仅在独立半径重载中必须。
 

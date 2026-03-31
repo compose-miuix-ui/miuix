@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
- * @param enabled Whether blur is active. When false, the modifier is a no-op.
+ * @param enabled Whether blur is active. When false, the effect is skipped and content draws normally.
  */
 fun Modifier.textureBlur(
     backdrop: Backdrop,
@@ -56,7 +56,7 @@ fun Modifier.textureBlur(
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
- * @param enabled Whether blur is active. When false, the modifier is a no-op.
+ * @param enabled Whether blur is active. When false, the effect is skipped and content draws normally.
  */
 fun Modifier.textureBlur(
     backdrop: Backdrop,
@@ -90,7 +90,7 @@ fun Modifier.textureBlur(
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
- * @param enabled Whether the effect is active. When false, the modifier is a no-op.
+ * @param enabled Whether the effect is active. When false, the effect is skipped and content draws normally.
  */
 fun Modifier.textureEffect(
     backdrop: Backdrop,
@@ -124,7 +124,7 @@ fun Modifier.textureEffect(
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
- * @param enabled Whether the effect is active. When false, the modifier is a no-op.
+ * @param enabled Whether the effect is active. When false, the effect is skipped and content draws normally.
  */
 fun Modifier.textureEffect(
     backdrop: Backdrop,
@@ -136,8 +136,6 @@ fun Modifier.textureEffect(
     contentBlendMode: ComposeBlendMode? = null,
     enabled: Boolean = true,
 ): Modifier {
-    if (!enabled) return this
-
     val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
     val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
 
@@ -151,5 +149,6 @@ fun Modifier.textureEffect(
             applyBlendColors(colors)
         },
         contentBlendMode = contentBlendMode,
+        enabled = enabled,
     )
 }
