@@ -305,6 +305,7 @@ Box(
 | `padding` | Float | Extra padding for blur overflow |
 | `renderEffect` | RenderEffect? | Accumulated effect chain |
 | `downscaleFactor` | Int | Downsampling factor (1, 2, 4, 8, 16) |
+| `noiseCoefficient` | Float | Noise dithering coefficient for full-resolution application |
 
 ## Properties
 

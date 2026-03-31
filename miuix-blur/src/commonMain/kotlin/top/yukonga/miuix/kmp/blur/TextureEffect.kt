@@ -143,10 +143,10 @@ fun Modifier.textureEffect(
         backdrop = backdrop,
         shape = { shape },
         effects = {
-            gaussianBlur(clampedX, clampedY)
             noiseDither(noiseCoefficient)
             colorControls(colors.brightness, colors.contrast, colors.saturation)
             applyBlendColors(colors)
+            gaussianBlur(clampedX, clampedY)
         },
         contentBlendMode = contentBlendMode,
         enabled = enabled,

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
+import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
@@ -190,6 +191,7 @@ private class DrawBackdropNode(
 
     private var graphicsLayer: GraphicsLayer? = null
     private var cascadeLayer: GraphicsLayer? = null
+    private var noiseLayer: GraphicsLayer? = null
 
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
@@ -252,18 +254,16 @@ private class DrawBackdropNode(
                 val w = (fullWidth / 2).coerceAtLeast(1)
                 val h = (fullHeight / 2).coerceAtLeast(1)
                 recordLayer(layer, size = IntSize(w, h), block = recordBackdropBlock)
-                val scaleUp = scaleFactor.toFloat()
-                layer.topLeft =
-                    if (currentPadding != 0f) {
-                        IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
-                    } else {
-                        IntOffset.Zero
-                    }
-                val residualX = backdrop.offsetResidualX
-                val residualY = backdrop.offsetResidualY
-                drawContext.canvas.translate(-residualX, -residualY)
-                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
-                drawContext.canvas.translate(residualX, residualY)
+                drawUpscaledLayer(
+                    layer,
+                    scaleFactor.toFloat(),
+                    currentPadding,
+                    scaleFactor,
+                    backdrop.offsetResidualX,
+                    backdrop.offsetResidualY,
+                    fullWidth,
+                    fullHeight,
+                )
             } else {
                 // Two-step cascade: backdrop at 1/(sf/2), then bilinear 2x.
                 // Matches libhwui pattern: 4→2x→2x, 8→4x→2x, 16→8x→2x.
@@ -303,18 +303,16 @@ private class DrawBackdropNode(
                 }
                 intermediate.renderEffect = null
 
-                val scaleUp = scaleFactor.toFloat()
-                layer.topLeft =
-                    if (currentPadding != 0f) {
-                        IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
-                    } else {
-                        IntOffset.Zero
-                    }
-                val residualX = backdrop.offsetResidualX
-                val residualY = backdrop.offsetResidualY
-                drawContext.canvas.translate(-residualX, -residualY)
-                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
-                drawContext.canvas.translate(residualX, residualY)
+                drawUpscaledLayer(
+                    layer,
+                    scaleFactor.toFloat(),
+                    currentPadding,
+                    scaleFactor,
+                    backdrop.offsetResidualX,
+                    backdrop.offsetResidualY,
+                    fullWidth,
+                    fullHeight,
+                )
             }
         }
     }
@@ -390,6 +388,21 @@ private class DrawBackdropNode(
         if (!enabled || !isRenderEffectSupported()) return
         ensureGraphicsLayer()
         effectScope.apply(effects)
+
+        // When not downscaled, noise can go directly in the RenderEffect chain
+        // at full resolution. When downscaled, noise is deferred to a separate
+        // full-resolution layer in drawBackdropLayer.
+        val noiseCoeff = effectScope.noiseCoefficient
+        if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1 && isRuntimeShaderSupported()) {
+            effectScope.runtimeShaderEffect(
+                key = "NoiseDither",
+                shaderString = NOISE_DITHER_SHADER,
+                uniformShaderName = "child",
+            ) {
+                setFloatUniform("noise_coeff", noiseCoeff)
+            }
+        }
+
         graphicsLayer?.renderEffect = effectScope.renderEffect
         padding = effectScope.padding
         downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
@@ -407,12 +420,65 @@ private class DrawBackdropNode(
         }
     }
 
+    /**
+     * Draws the downscaled [layer] upscaled to full resolution.
+     * When noise dithering is active, the upscaled content is recorded into a
+     * full-resolution [noiseLayer] and noise is applied per-pixel, avoiding the
+     * coarse block artifacts that occur when noise is applied at downscaled resolution.
+     */
+    private fun DrawScope.drawUpscaledLayer(
+        layer: GraphicsLayer,
+        scaleUp: Float,
+        currentPadding: Float,
+        scaleFactor: Int,
+        residualX: Float,
+        residualY: Float,
+        fullWidth: Int,
+        fullHeight: Int,
+    ) {
+        val noiseCoeff = effectScope.noiseCoefficient
+        if (noiseCoeff > 0f && isRuntimeShaderSupported()) {
+            // Record the upscaled blur into a full-resolution layer for per-pixel noise
+            layer.topLeft = IntOffset.Zero
+            val noiseL = noiseLayer
+                ?: requireGraphicsContext().createGraphicsLayer().also { noiseLayer = it }
+            recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
+                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+            }
+            val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
+            noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
+            noiseL.renderEffect = runtimeShaderEffect(noiseShader, "child")
+            noiseL.topLeft =
+                if (currentPadding != 0f) {
+                    IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
+                } else {
+                    IntOffset.Zero
+                }
+            drawContext.canvas.translate(-residualX, -residualY)
+            drawLayer(noiseL)
+            drawContext.canvas.translate(residualX, residualY)
+            noiseL.renderEffect = null
+        } else {
+            layer.topLeft =
+                if (currentPadding != 0f) {
+                    IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
+                } else {
+                    IntOffset.Zero
+                }
+            drawContext.canvas.translate(-residualX, -residualY)
+            scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+            drawContext.canvas.translate(residualX, residualY)
+        }
+    }
+
     fun releaseGraphicsLayers() {
         val ctx = requireGraphicsContext()
         graphicsLayer?.let { ctx.releaseGraphicsLayer(it) }
         graphicsLayer = null
         cascadeLayer?.let { ctx.releaseGraphicsLayer(it) }
         cascadeLayer = null
+        noiseLayer?.let { ctx.releaseGraphicsLayer(it) }
+        noiseLayer = null
         effectScope.reset()
     }
 

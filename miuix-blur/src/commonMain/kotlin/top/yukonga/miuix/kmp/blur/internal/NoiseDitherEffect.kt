@@ -4,21 +4,16 @@
 package top.yukonga.miuix.kmp.blur.internal
 
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
-import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 
 /**
- * Applies noise dithering to reduce color banding artifacts.
+ * Registers noise dithering to reduce color banding artifacts.
+ *
+ * The actual noise application strategy depends on the current [BackdropEffectScope.downscaleFactor]:
+ * - When downscaleFactor <= 1 (full resolution), noise is added as a RenderEffect in the chain.
+ * - When downscaleFactor > 1 (downsampled), the coefficient is stored for full-resolution
+ *   application after upscaling, so each screen pixel gets independent noise.
  */
 internal fun BackdropEffectScope.noiseDither(coefficient: Float) {
-    if (!isRuntimeShaderSupported()) return
     if (coefficient <= 0f) return
-
-    runtimeShaderEffect(
-        key = "NoiseDither",
-        shaderString = NOISE_DITHER_SHADER,
-        uniformShaderName = "child",
-    ) {
-        setFloatUniform("noise_coeff", coefficient)
-    }
+    noiseCoefficient = coefficient
 }

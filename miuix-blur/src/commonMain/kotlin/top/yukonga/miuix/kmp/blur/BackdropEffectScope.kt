@@ -39,6 +39,13 @@ sealed interface BackdropEffectScope :
 
     /** Downscale factor for the backdrop layer recording. 1 = full resolution, 4 = 1/16 area. */
     var downscaleFactor: Int
+
+    /**
+     * Noise dithering coefficient for full-resolution application.
+     * When [downscaleFactor] > 1, noise is applied at full resolution after upscaling
+     * rather than in the RenderEffect chain, so that each screen pixel gets independent noise.
+     */
+    var noiseCoefficient: Float
 }
 
 // region Effect extensions
@@ -158,6 +165,7 @@ internal abstract class BackdropEffectScopeImpl :
     override var padding: Float = 0f
     override var renderEffect: RenderEffect? = null
     override var downscaleFactor: Int = 1
+    override var noiseCoefficient: Float = 0f
 
     var runtimeShaderCache: RuntimeShaderCache = RuntimeShaderCacheImpl()
 
@@ -188,6 +196,7 @@ internal abstract class BackdropEffectScopeImpl :
         padding = 0f
         renderEffect = null
         downscaleFactor = 1
+        noiseCoefficient = 0f
         effects()
     }
 
@@ -199,6 +208,7 @@ internal abstract class BackdropEffectScopeImpl :
         padding = 0f
         renderEffect = null
         downscaleFactor = 1
+        noiseCoefficient = 0f
     }
 }
 

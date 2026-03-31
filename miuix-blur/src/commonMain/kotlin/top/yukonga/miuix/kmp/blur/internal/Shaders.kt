@@ -71,9 +71,9 @@ internal const val NOISE_DITHER_SHADER = """
         float noise2 = (random2(xy) - 0.5) * noise_coeff;
         float noise3 = (random3(xy) - 0.5) * noise_coeff;
         half4 color = child.eval(xy);
-        color.rg += half(noise1);
-        color.rb += half(noise2);
-        color.gb += half(noise3);
+        color.r += half(noise1);
+        color.g += half(noise2);
+        color.b += half(noise3);
         return color;
     }
 """
