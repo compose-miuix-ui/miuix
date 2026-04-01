@@ -139,6 +139,8 @@ TopAppBar(
 | titleColor                 | Color                           | Color of the collapsed small title text        | MiuixTheme.colorScheme.onSurface | No       |
 | largeTitle                 | String                          | Large title text                               | title                           | No       |
 | largeTitleColor            | Color                           | Color of the expanded large title text         | MiuixTheme.colorScheme.onSurface | No       |
+| subtitle                   | String                          | Subtitle text displayed below the title bar    | ""                              | No       |
+| subtitleColor              | Color                           | Color of the subtitle text                     | MiuixTheme.colorScheme.onSurfaceVariantSummary | No       |
 | navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
@@ -146,6 +148,7 @@ TopAppBar(
 | titlePadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.TitlePadding | No       |
 | navigationIconPadding      | Dp                              | Start padding of the navigation icon           | TopAppBarDefaults.NavigationIconPadding | No       |
 | actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
+| bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area | {} | No |
 
 ### SmallTopAppBar Properties
 
@@ -155,6 +158,8 @@ TopAppBar(
 | modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
 | color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
 | titleColor                 | Color                           | Color of the title text                        | MiuixTheme.colorScheme.onSurface | No       |
+| subtitle                   | String                          | Subtitle text displayed below the title bar    | ""                              | No       |
+| subtitleColor              | Color                           | Color of the subtitle text                     | MiuixTheme.colorScheme.onSurfaceVariantSummary | No       |
 | navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area   | {}                              | No       |
 | actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area    | {}                              | No       |
 | scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior               | null                            | No       |
@@ -162,6 +167,7 @@ TopAppBar(
 | titlePadding          | Dp                              | Horizontal content padding                     | TopAppBarDefaults.TitlePadding | No       |
 | navigationIconPadding      | Dp                              | Start padding of the navigation icon           | TopAppBarDefaults.NavigationIconPadding | No       |
 | actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
+| bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area | {} | No |
 
 ### TopAppBarDefaults Object
 
@@ -174,8 +180,10 @@ The TopAppBarDefaults object provides default values for TopAppBar and SmallTopA
 | TitlePadding    | Dp   | Horizontal padding of the title and large title    | 26.dp         |
 | NavigationIconPadding      | Dp   | Start padding of the navigation icon              | 16.dp         |
 | ActionIconPadding          | Dp   | End padding of the action icons                   | 16.dp         |
-| CollapsedHeight            | Dp   | Collapsed height of the TopAppBar                 | 56.dp         |
-| SmallTopAppBarCenterHeight | Dp   | Vertical center height for SmallTopAppBar layout  | 60.dp         |
+| CollapsedHeight            | Dp   | Collapsed height of the TopAppBar                 | 52.dp         |
+| SmallTopAppBarCenterHeight | Dp   | Vertical center height for SmallTopAppBar layout  | 50.dp         |
+| LargeTitleBottomPadding    | Dp   | Bottom padding below the large title when no subtitle is present | 4.dp |
+| SubtitleBottomPadding      | Dp   | Bottom padding below the subtitle (both large and small) | 8.dp  |
 
 ### ScrollBehavior
 

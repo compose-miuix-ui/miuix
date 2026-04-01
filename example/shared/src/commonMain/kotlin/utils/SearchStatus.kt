@@ -3,9 +3,6 @@
 
 package utils
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -39,11 +36,6 @@ data class SearchStatus(
         visible: Boolean = shouldCollapsed(),
         content: @Composable () -> Unit,
     ) {
-        val topAppBarAlpha = animateFloatAsState(
-            if (visible) 1f else 0f,
-            animationSpec = tween(if (visible) 550 else 0, easing = FastOutSlowInEasing),
-            label = "TopAppBarAlpha",
-        )
         Box(modifier = modifier) {
             Box(
                 modifier = Modifier
@@ -52,7 +44,7 @@ data class SearchStatus(
             )
             Box(
                 modifier = Modifier
-                    .graphicsLayer { alpha = topAppBarAlpha.value },
+                    .graphicsLayer { this.alpha = if (visible) 1f else 0f },
             ) { content() }
         }
     }

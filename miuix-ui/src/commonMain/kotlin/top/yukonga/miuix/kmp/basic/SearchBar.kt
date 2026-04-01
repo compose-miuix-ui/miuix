@@ -223,7 +223,7 @@ fun InputField(
     // SearchBar from closing. Workaround: disable the TextField when collapsed and use
     // pointerInput to handle tap-to-expand. https://issuetracker.google.com/issues/433382598
     val workaroundEnabled = !hasFocusReassignBug || expanded
-    val expandOnTapModifier = if (workaroundEnabled) {
+    val expandOnTapModifier = if (workaroundEnabled || !enabled) {
         Modifier
     } else {
         Modifier.pointerInput(Unit) { detectTapGestures { currentOnExpandedChange(true) } }
