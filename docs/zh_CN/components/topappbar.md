@@ -139,6 +139,8 @@ TopAppBar(
 | titleColor                 | Color                           | 折叠时小标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
 | largeTitle                 | String                          | 大标题文本                     | title                             | 否       |
 | largeTitleColor            | Color                           | 展开时大标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
+| subtitle                   | String                          | 显示在标题栏下方的副标题文本   | ""                                | 否       |
+| subtitleColor              | Color                           | 副标题文字颜色                 | MiuixTheme.colorScheme.onSurfaceVariantSummary  | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数       | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数       | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为             | null                              | 否       |
@@ -146,6 +148,7 @@ TopAppBar(
 | titlePadding          | Dp                              | 水平内容边距                   | TopAppBarDefaults.TitlePadding | 否       |
 | navigationIconPadding      | Dp                              | 导航图标的起始边距             | TopAppBarDefaults.NavigationIconPadding | 否       |
 | actionIconPadding          | Dp                              | 操作图标的末尾边距             | TopAppBarDefaults.ActionIconPadding | 否       |
+| bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的可组合内容 | {}                                | 否       |
 
 ### SmallTopAppBar 属性
 
@@ -155,6 +158,8 @@ TopAppBar(
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符     | Modifier                          | 否       |
 | color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.surface    | 否       |
 | titleColor                 | Color                           | 标题文字颜色             | MiuixTheme.colorScheme.onSurface  | 否       |
+| subtitle                   | String                          | 显示在标题栏下方的副标题文本 | ""                                | 否       |
+| subtitleColor              | Color                           | 副标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数 | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数 | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为       | null                              | 否       |
@@ -162,6 +167,7 @@ TopAppBar(
 | titlePadding          | Dp                              | 水平内容边距             | TopAppBarDefaults.TitlePadding | 否       |
 | navigationIconPadding      | Dp                              | 导航图标的起始边距       | TopAppBarDefaults.NavigationIconPadding | 否       |
 | actionIconPadding          | Dp                              | 操作图标的末尾边距       | TopAppBarDefaults.ActionIconPadding | 否       |
+| bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的可组合内容 | {}                                | 否       |
 
 ### TopAppBarDefaults 对象
 
@@ -174,8 +180,10 @@ TopAppBarDefaults 对象提供了 TopAppBar 和 SmallTopAppBar 组件的默认�
 | TitlePadding    | Dp   | 标题和大标题的水平内边距          | 26.dp  |
 | NavigationIconPadding      | Dp   | 导航图标的起始边距               | 16.dp  |
 | ActionIconPadding          | Dp   | 操作图标的末尾边距               | 16.dp  |
-| CollapsedHeight            | Dp   | TopAppBar 折叠时的高度           | 56.dp  |
-| SmallTopAppBarCenterHeight | Dp   | SmallTopAppBar 布局的垂直中心高度 | 60.dp  |
+| CollapsedHeight            | Dp   | TopAppBar 折叠时的高度           | 52.dp  |
+| SmallTopAppBarCenterHeight | Dp   | SmallTopAppBar 布局的垂直中心高度 | 50.dp  |
+| LargeTitleBottomPadding    | Dp   | 无副标题时大标题下方的底部边距   | 4.dp   |
+| SubtitleBottomPadding      | Dp   | 副标题下方的底部边距（大小标题均适用） | 8.dp   |
 
 ### ScrollBehavior
 

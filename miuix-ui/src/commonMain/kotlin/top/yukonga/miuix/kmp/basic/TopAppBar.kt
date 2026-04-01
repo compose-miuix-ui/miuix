@@ -17,12 +17,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
@@ -56,6 +56,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -86,6 +87,8 @@ import kotlin.math.roundToInt
  * @param titleColor The color of the collapsed small title text.
  * @param largeTitle The large title of the [TopAppBar].
  * @param largeTitleColor The color of the expanded large title text.
+ * @param subtitle The subtitle displayed below the title bar area.
+ * @param subtitleColor The color of the subtitle text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
@@ -93,6 +96,7 @@ import kotlin.math.roundToInt
  * @param titlePadding The horizontal padding of the [TopAppBar]'s title & large title.
  * @param navigationIconPadding The start padding of the navigation icon.
  * @param actionIconPadding The end padding of the action icons.
+ * @param bottomContent The [Composable] content displayed below the title bar area.
  */
 @Composable
 fun TopAppBar(
@@ -102,6 +106,8 @@ fun TopAppBar(
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
     largeTitle: String = title,
     largeTitleColor: Color = MiuixTheme.colorScheme.onSurface,
+    subtitle: String = "",
+    subtitleColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
@@ -109,6 +115,7 @@ fun TopAppBar(
     titlePadding: Dp = TopAppBarDefaults.TitlePadding,
     navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val largeTitleHeight = remember { mutableIntStateOf(0) }
     val expandedHeightPx by remember {
@@ -143,6 +150,8 @@ fun TopAppBar(
         color = color,
         titleColor = titleColor,
         largeTitleColor = largeTitleColor,
+        subtitle = subtitle,
+        subtitleColor = subtitleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
         titlePadding = titlePadding,
@@ -154,6 +163,7 @@ fun TopAppBar(
         modifier = modifier,
         largeTitle = largeTitle,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        bottomContent = bottomContent,
     )
 }
 
@@ -166,6 +176,8 @@ fun TopAppBar(
  * @param modifier The modifier to be applied to the  [SmallTopAppBar].
  * @param color The background color of the [SmallTopAppBar].
  * @param titleColor The color of the title text.
+ * @param subtitle The subtitle displayed below the title bar area.
+ * @param subtitleColor The color of the subtitle text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [SmallTopAppBar].
@@ -173,6 +185,7 @@ fun TopAppBar(
  * @param titlePadding The horizontal padding of the [SmallTopAppBar]'s title.
  * @param navigationIconPadding The start padding of the navigation icon.
  * @param actionIconPadding The end padding of the action icons.
+ * @param bottomContent The [Composable] content displayed below the title bar area.
  */
 @Composable
 @NonRestartableComposable
@@ -181,6 +194,8 @@ fun SmallTopAppBar(
     modifier: Modifier = Modifier,
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    subtitle: String = "",
+    subtitleColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
@@ -188,6 +203,7 @@ fun SmallTopAppBar(
     titlePadding: Dp = TopAppBarDefaults.TitlePadding,
     navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
+    bottomContent: @Composable () -> Unit = {},
 ) {
     SideEffect {
         // Sets the height offset limit of the SmallTopAppBar to 0f
@@ -213,6 +229,8 @@ fun SmallTopAppBar(
         title = title,
         color = color,
         titleColor = titleColor,
+        subtitle = subtitle,
+        subtitleColor = subtitleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
         titlePadding = titlePadding,
@@ -220,6 +238,7 @@ fun SmallTopAppBar(
         actionIconPadding = actionIconPadding,
         modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        bottomContent = bottomContent,
     )
 }
 
@@ -391,10 +410,16 @@ object TopAppBarDefaults {
     val ActionIconPadding = 16.dp
 
     /** The default collapsed height of the [TopAppBar]. */
-    val CollapsedHeight = 56.dp
+    val CollapsedHeight = 52.dp
 
     /** The vertical center height used for [SmallTopAppBar] layout. */
-    val SmallTopAppBarCenterHeight = 60.dp
+    val SmallTopAppBarCenterHeight = 50.dp
+
+    /** The bottom padding below the large title when no subtitle is present. */
+    val LargeTitleBottomPadding = 4.dp
+
+    /** The bottom padding below the subtitle (both large and small). */
+    val SubtitleBottomPadding = 8.dp
 }
 
 @Stable
@@ -590,17 +615,20 @@ private fun interface ScrolledOffset {
  * @param color the background color of the [TopAppBar].
  * @param titleColor the color of the collapsed small title text.
  * @param largeTitleColor the color of the expanded large title text.
+ * @param subtitle the subtitle text displayed below the title bar area.
+ * @param subtitleColor the color of the subtitle text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param titlePadding the horizontal padding of the [TopAppBar]'s title & large title.
  * @param navigationIconPadding the start padding of the navigation icon.
  * @param actionIconPadding the end padding of the action icons.
  * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
- * @param largeTitleHeight a mutable state that holds the height of the large title.
+ * @param largeTitleHeight a mutable state that holds the height of the large title content (including subtitle).
  * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
+ * @param bottomContent the composable content displayed below the title bar area.
  */
 @Composable
 private fun TopAppBarLayout(
@@ -608,6 +636,8 @@ private fun TopAppBarLayout(
     color: Color,
     titleColor: Color,
     largeTitleColor: Color,
+    subtitle: String,
+    subtitleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     titlePadding: Dp,
@@ -619,6 +649,7 @@ private fun TopAppBarLayout(
     modifier: Modifier = Modifier,
     largeTitle: String = title,
     defaultWindowInsetsPadding: Boolean = true,
+    bottomContent: @Composable () -> Unit = {},
 ) {
     // Subtract the scrolledOffset from the maxHeight
     val heightOffset by remember(scrolledOffset) {
@@ -669,6 +700,10 @@ private fun TopAppBarLayout(
         targetValue = largeTitleColor,
         animationSpec = tween(durationMillis = 50),
     )
+    val animatedSubtitleColor by animateColorAsState(
+        targetValue = subtitleColor,
+        animationSpec = tween(durationMillis = 50),
+    )
 
     Layout(
         {
@@ -711,16 +746,45 @@ private fun TopAppBarLayout(
                     .padding(horizontal = titlePadding)
                     .graphicsLayer { alpha = largeTitleAlpha },
             ) {
-                Text(
-                    modifier = Modifier.offset { IntOffset(0, heightOffset) },
-                    text = largeTitle,
-                    color = animatedLargeTitleColor,
-                    fontSize = MiuixTheme.textStyles.title1.fontSize,
-                    fontWeight = FontWeight.Normal,
-                    onTextLayout = {
-                        largeTitleHeight.value = it.size.height
-                    },
-                )
+                Column(
+                    modifier = Modifier
+                        .offset { IntOffset(0, heightOffset) }
+                        .onSizeChanged { largeTitleHeight.value = it.height },
+                ) {
+                    Text(
+                        text = largeTitle,
+                        color = animatedLargeTitleColor,
+                        fontSize = MiuixTheme.textStyles.title1.fontSize,
+                        fontWeight = FontWeight.Normal,
+                    )
+                    if (subtitle.isNotEmpty()) {
+                        Text(
+                            text = subtitle,
+                            color = animatedSubtitleColor,
+                            style = MiuixTheme.textStyles.body2,
+                        )
+                    }
+                }
+            }
+            if (subtitle.isNotEmpty()) {
+                // Small subtitle: appears with small title when collapsed
+                Box(
+                    Modifier
+                        .layoutId("smallSubtitle")
+                        .graphicsLayer {
+                            alpha = smallTitleAlpha.value
+                            translationY = smallTitleTranslationY.value
+                        },
+                ) {
+                    Text(
+                        text = subtitle,
+                        color = animatedSubtitleColor,
+                        style = MiuixTheme.textStyles.body2,
+                    )
+                }
+            }
+            Box(Modifier.layoutId("bottomContent")) {
+                bottomContent()
             }
         },
         modifier = modifier
@@ -768,13 +832,23 @@ private fun TopAppBarLayout(
                     ),
                 )
 
+        val smallSubtitlePlaceable =
+            measurables
+                .firstOrNull { it.layoutId == "smallSubtitle" }
+                ?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+
+        val bottomContentPlaceable =
+            measurables
+                .fastFirst { it.layoutId == "bottomContent" }
+                .measure(constraints.copy(minWidth = 0, minHeight = 0))
+
         val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
         val expandedHeight = maxOf(
             collapsedHeight,
             largeTitlePlaceable.height,
         )
 
-        val layoutHeight = lerp(
+        val barHeight = lerp(
             start = collapsedHeight,
             stop = expandedHeight,
             fraction = if (expandedHeightPx > 0f) {
@@ -785,9 +859,18 @@ private fun TopAppBarLayout(
             },
         ).toFloat().roundToInt()
 
-        layout(constraints.maxWidth, layoutHeight) {
-            val verticalCenter = collapsedHeight / 2
+        val verticalCenter = collapsedHeight / 2
+        val smallSubtitleHeight = smallSubtitlePlaceable?.height ?: 0
+        val smallSubtitleBottom = verticalCenter + titlePlaceable.height / 2 + smallSubtitleHeight
+        val expandedBottomPadding = if (smallSubtitlePlaceable != null) {
+            TopAppBarDefaults.SubtitleBottomPadding.roundToPx()
+        } else {
+            TopAppBarDefaults.LargeTitleBottomPadding.roundToPx()
+        }
+        val contentTop = maxOf(barHeight + expandedBottomPadding, smallSubtitleBottom + expandedBottomPadding)
+        val layoutHeight = contentTop + bottomContentPlaceable.height
 
+        layout(constraints.maxWidth, layoutHeight) {
             // Navigation icon
             navigationIconPlaceable.placeRelative(
                 x = 0,
@@ -806,16 +889,28 @@ private fun TopAppBarLayout(
                 y = verticalCenter - titlePlaceable.height / 2,
             )
 
+            // Small subtitle (centered below small title, same alpha as small title)
+            smallSubtitlePlaceable?.placeRelative(
+                x = (constraints.maxWidth - smallSubtitlePlaceable.width) / 2,
+                y = verticalCenter + titlePlaceable.height / 2,
+            )
+
             // Action icons
             actionIconsPlaceable.placeRelative(
                 x = constraints.maxWidth - actionIconsPlaceable.width,
                 y = verticalCenter - actionIconsPlaceable.height / 2,
             )
 
-            // Large title
+            // Large title (includes large subtitle in a Column)
             largeTitlePlaceable.placeRelative(
                 x = 0,
                 y = 0,
+            )
+
+            // Bottom content (pinned, below bar and subtitle)
+            bottomContentPlaceable.placeRelative(
+                x = 0,
+                y = contentTop,
             )
         }
     }
@@ -829,6 +924,8 @@ private fun TopAppBarLayout(
  * @param title the [SmallTopAppBar] title (header).
  * @param color the background color of the [SmallTopAppBar].
  * @param titleColor the color of the title text.
+ * @param subtitle the subtitle text displayed below the title bar area.
+ * @param subtitleColor the color of the subtitle text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
  * @param titlePadding the horizontal padding of the [SmallTopAppBar]'s title.
@@ -836,12 +933,15 @@ private fun TopAppBarLayout(
  * @param actionIconPadding the end padding of the action icons.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [SmallTopAppBar].
+ * @param bottomContent the composable content displayed below the title bar area.
  */
 @Composable
 private fun SmallTopAppBarLayout(
     title: String,
     color: Color,
     titleColor: Color,
+    subtitle: String,
+    subtitleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
     titlePadding: Dp,
@@ -849,6 +949,7 @@ private fun SmallTopAppBarLayout(
     actionIconPadding: Dp,
     modifier: Modifier = Modifier,
     defaultWindowInsetsPadding: Boolean = true,
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val titleModifier = remember(titlePadding) {
         Modifier
@@ -859,6 +960,10 @@ private fun SmallTopAppBarLayout(
     // Title color transition animation
     val animatedTitleColor by animateColorAsState(
         targetValue = titleColor,
+        animationSpec = tween(durationMillis = 50),
+    )
+    val animatedSubtitleColor by animateColorAsState(
+        targetValue = subtitleColor,
         animationSpec = tween(durationMillis = 50),
     )
 
@@ -889,6 +994,18 @@ private fun SmallTopAppBarLayout(
             ) {
                 actions()
             }
+            if (subtitle.isNotEmpty()) {
+                Box(Modifier.layoutId("subtitle")) {
+                    Text(
+                        text = subtitle,
+                        color = animatedSubtitleColor,
+                        style = MiuixTheme.textStyles.body2,
+                    )
+                }
+            }
+            Box(Modifier.layoutId("bottomContent")) {
+                bottomContent()
+            }
         },
         modifier = modifier
             .then(Modifier.background(color))
@@ -902,7 +1019,6 @@ private fun SmallTopAppBarLayout(
                 },
             )
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-            .heightIn(max = TopAppBarDefaults.CollapsedHeight)
             .clipToBounds()
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
@@ -925,16 +1041,25 @@ private fun SmallTopAppBarLayout(
                 .fastFirst { it.layoutId == "title" }
                 .measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
 
-        val layoutHeight =
-            if (constraints.maxHeight == Constraints.Infinity) {
-                constraints.maxHeight
-            } else {
-                constraints.maxHeight
-            }
+        val subtitlePlaceable =
+            measurables
+                .firstOrNull { it.layoutId == "subtitle" }
+                ?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+
+        val bottomContentPlaceable =
+            measurables
+                .fastFirst { it.layoutId == "bottomContent" }
+                .measure(constraints.copy(minWidth = 0, minHeight = 0))
+
+        val subtitleHeight = subtitlePlaceable?.height ?: 0
+        val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
+        val verticalCenter = TopAppBarDefaults.SmallTopAppBarCenterHeight.roundToPx() / 2
+        val subtitleY = verticalCenter + titlePlaceable.height / 2
+        val subtitleBottomPadding = if (subtitlePlaceable != null) TopAppBarDefaults.SubtitleBottomPadding.roundToPx() else 0
+        val contentTop = maxOf(collapsedHeight, subtitleY + subtitleHeight + subtitleBottomPadding)
+        val layoutHeight = contentTop + bottomContentPlaceable.height
 
         layout(constraints.maxWidth, layoutHeight) {
-            val verticalCenter = TopAppBarDefaults.SmallTopAppBarCenterHeight.roundToPx() / 2
-
             // Navigation icon
             navigationIconPlaceable.placeRelative(
                 x = 0,
@@ -957,6 +1082,18 @@ private fun SmallTopAppBarLayout(
             actionIconsPlaceable.placeRelative(
                 x = constraints.maxWidth - actionIconsPlaceable.width,
                 y = verticalCenter - actionIconsPlaceable.height / 2,
+            )
+
+            // Subtitle (centered, right below title)
+            subtitlePlaceable?.placeRelative(
+                x = (constraints.maxWidth - subtitlePlaceable.width) / 2,
+                y = subtitleY,
+            )
+
+            // Bottom content (below subtitle)
+            bottomContentPlaceable.placeRelative(
+                x = 0,
+                y = contentTop,
             )
         }
     }

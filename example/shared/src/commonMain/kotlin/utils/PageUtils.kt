@@ -62,24 +62,30 @@ fun AdaptiveTopAppBar(
     showTopAppBar: Boolean,
     isWideScreen: Boolean,
     scrollBehavior: ScrollBehavior,
+    subtitle: String = "",
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
+    bottomContent: @Composable () -> Unit = {},
 ) {
     if (showTopAppBar) {
         if (isWideScreen) {
             SmallTopAppBar(
                 title = title,
+                subtitle = subtitle,
                 scrollBehavior = scrollBehavior,
                 defaultWindowInsetsPadding = false,
                 navigationIcon = navigationIcon,
                 actions = actions,
+                bottomContent = bottomContent,
             )
         } else {
             TopAppBar(
                 title = title,
+                subtitle = subtitle,
                 scrollBehavior = scrollBehavior,
                 navigationIcon = navigationIcon,
                 actions = actions,
+                bottomContent = bottomContent,
             )
         }
     }

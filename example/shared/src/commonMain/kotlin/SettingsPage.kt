@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import misc.VersionInfo
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -63,6 +64,7 @@ fun SettingsPage(
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
+                subtitle = "v${VersionInfo.VERSION_NAME} (${VersionInfo.VERSION_CODE})",
             )
         },
     ) { innerPadding ->
