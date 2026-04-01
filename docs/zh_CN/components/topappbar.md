@@ -159,7 +159,7 @@ TopAppBar(
 | color                      | Color                           | 顶部栏背景颜色           | MiuixTheme.colorScheme.surface    | 否       |
 | titleColor                 | Color                           | 标题文字颜色             | MiuixTheme.colorScheme.onSurface  | 否       |
 | subtitle                   | String                          | 显示在标题栏下方的副标题文本 | ""                                | 否       |
-| subtitleColor              | Color                           | 副标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
+| subtitleColor              | Color                           | 副标题文字颜色           | MiuixTheme.colorScheme.onSurfaceVariantSummary  | 否       |
 | navigationIcon             | @Composable () -> Unit          | 导航图标区域的可组合函数 | {}                                | 否       |
 | actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的可组合函数 | {}                                | 否       |
 | scrollBehavior             | ScrollBehavior?                 | 控制顶部栏滚动行为       | null                              | 否       |

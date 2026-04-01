@@ -835,7 +835,7 @@ private fun TopAppBarLayout(
         val smallSubtitlePlaceable =
             measurables
                 .firstOrNull { it.layoutId == "smallSubtitle" }
-                ?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                ?.measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
 
         val bottomContentPlaceable =
             measurables
@@ -1044,7 +1044,7 @@ private fun SmallTopAppBarLayout(
         val subtitlePlaceable =
             measurables
                 .firstOrNull { it.layoutId == "subtitle" }
-                ?.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                ?.measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
 
         val bottomContentPlaceable =
             measurables
