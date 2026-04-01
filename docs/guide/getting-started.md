@@ -21,7 +21,7 @@ repositories {
 ```
 
 2. Check the latest version on Maven Central:
-   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
+   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix-ui)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 
 3. Add dependencies to your project's `build.gradle.kts`:
 
@@ -29,8 +29,9 @@ Miuix is composed of several modules that can be used independently:
 
 | Module | Description |
 |---|---|
-| `miuix` | Core UI component library (automatically includes `miuix-core`) |
-| `miuix-icons` | Extended icon library, can be used independently or together with `miuix` (automatically includes `miuix-core`) |
+| `miuix-ui` | Core UI component library (automatically includes `miuix-core`) |
+| `miuix-preference` | Preference components (SwitchPreference, CheckboxPreference, etc.), depends on `miuix-ui` |
+| `miuix-icons` | Extended icon library, can be used independently or together with `miuix-ui` (automatically includes `miuix-core`) |
 | `miuix-blur` | Blur effect library, can be used independently |
 | `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
 
@@ -40,7 +41,9 @@ Miuix is composed of several modules that can be used independently:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix:<version>")
+            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+            // Optional: Add miuix-preference for preference components
+            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // Optional: Add miuix-blur for blur effects
@@ -56,7 +59,9 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
+    // Optional: Add miuix-preference for preference components
+    implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // Optional: Add miuix-icons for more icons
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 31)
@@ -69,12 +74,12 @@ dependencies {
 - For other projects, add platform-specific dependencies as needed:
 
 ```kotlin
-implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-js:<version>")
 // Optional: Add miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")

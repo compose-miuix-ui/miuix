@@ -21,7 +21,7 @@ repositories {
 ```
 
 2. 检查 Maven Central 当前最新版本：
-   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
+   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix-ui)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 
 3. 在项目的 build.gradle.kts 中添加依赖：
 
@@ -29,8 +29,9 @@ Miuix 由多个可独立使用的模块组成：
 
 | 模块 | 说明 |
 |---|---|
-| `miuix` | 核心 UI 组件库（自动包含 `miuix-core`） |
-| `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix` 同时使用（自动包含 `miuix-core`） |
+| `miuix-ui` | 核心 UI 组件库（自动包含 `miuix-core`） |
+| `miuix-preference` | Preference 组件（SwitchPreference、CheckboxPreference 等），依赖 `miuix-ui` |
+| `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix-ui` 同时使用（自动包含 `miuix-core`） |
 | `miuix-blur` | 模糊效果库，可独立使用 |
 | `miuix-navigation3-ui` | Navigation3 UI 库，可独立使用 |
 
@@ -40,7 +41,9 @@ Miuix 由多个可独立使用的模块组成：
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix:<version>")
+            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+            // 可选：添加 miuix-preference 以获取 Preference 组件
+            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // 可选：添加 miuix-icons 以获取更多图标
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // 可选：添加 miuix-blur 以获取模糊效果
@@ -56,7 +59,9 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
+    // 可选：添加 miuix-preference 以获取 Preference 组件
+    implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // 可选：添加 miuix-icons 以获取更多图标
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 31）
@@ -69,12 +74,12 @@ dependencies {
 - 在其他常规项目中使用，则只需要根据需要添加对应平台后缀的依赖即可：
 
 ```kotlin
-implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-js:<version>")
 // 可选：添加 miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")

@@ -4,12 +4,12 @@ Miuix provides a rich built-in icon system that meets the primary design needs o
 
 ## Installation
 
-The basic `miuix` library includes only a small set of essential icons. To access the full collection of Miuix icons, you need to add the `miuix-icons` dependency to your project.
+The basic `miuix-ui` library includes only a small set of essential icons. To access the full collection of Miuix icons, you need to add the `miuix-icons` dependency to your project.
 
 ```kotlin
 // build.gradle.kts
 commonMain.dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix:<version>")
+    implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
     // Add the extended icon library
     implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
 }
