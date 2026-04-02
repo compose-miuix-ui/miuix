@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kyant.shapes.RoundedRectangle
 import component.BackNavigationIcon
 import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
@@ -85,6 +84,7 @@ import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.shapes.SmoothRoundedCornerShape
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -331,7 +331,7 @@ private fun AboutContent(
                     }
                     .textureBlur(
                         backdrop = backdrop,
-                        shape = RoundedRectangle(16.dp),
+                        shape = SmoothRoundedCornerShape(16.dp),
                         blurRadius = 200f,
                         noiseCoefficient = noiseCoefficient,
                         colors = BlurColors(
@@ -415,7 +415,7 @@ private fun AboutContent(
                         modifier = Modifier.padding(horizontal = 12.dp)
                             .textureBlur(
                                 backdrop = backdrop,
-                                shape = RoundedRectangle(16.dp),
+                                shape = SmoothRoundedCornerShape(16.dp),
                                 blurRadius = blurRadius,
                                 noiseCoefficient = noiseCoefficient,
                                 colors = BlurColors(
@@ -460,7 +460,7 @@ private fun AboutContent(
                             .padding(top = 12.dp)
                             .textureBlur(
                                 backdrop = backdrop,
-                                shape = RoundedRectangle(16.dp),
+                                shape = SmoothRoundedCornerShape(16.dp),
                                 blurRadius = blurRadius,
                                 noiseCoefficient = noiseCoefficient,
                                 colors = BlurColors(

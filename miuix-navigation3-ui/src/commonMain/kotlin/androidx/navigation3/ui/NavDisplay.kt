@@ -94,7 +94,7 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.kyant.shapes.UnevenRoundedRectangle
+import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -784,9 +784,9 @@ fun <T : Any> NavDisplay(
                 val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
                 val shape = remember(corner, shouldFlipDirection, isRtl) {
                     if (shouldFlipDirection xor isRtl) {
-                        UnevenRoundedRectangle(topEnd = corner, bottomEnd = corner)
+                        SmoothUnevenRoundedCornerShape(topEnd = corner, bottomEnd = corner)
                     } else {
-                        UnevenRoundedRectangle(topStart = corner, bottomStart = corner)
+                        SmoothUnevenRoundedCornerShape(topStart = corner, bottomStart = corner)
                     }
                 }
                 Modifier.clip(shape)

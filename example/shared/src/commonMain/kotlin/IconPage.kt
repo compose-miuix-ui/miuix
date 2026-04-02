@@ -34,7 +34,6 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.UnevenRoundedRectangle
 import component.SearchBarFake
 import component.SearchPager
 import kotlinx.coroutines.delay
@@ -49,6 +48,7 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
@@ -57,8 +57,8 @@ import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 
-private val IconListTopShape = UnevenRoundedRectangle(topStart = 16.dp, topEnd = 16.dp)
-private val IconListBottomShape = UnevenRoundedRectangle(bottomStart = 16.dp, bottomEnd = 16.dp)
+private val IconListTopShape = SmoothUnevenRoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+private val IconListBottomShape = SmoothUnevenRoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun IconsPage(

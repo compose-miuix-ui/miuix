@@ -47,7 +47,7 @@ kotlin {
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.lifecycle.runtime.compose)
-            implementation(libs.kyant.shapes)
+            implementation(projects.miuixShapes)
         }
 
         val skikoMain by creating {

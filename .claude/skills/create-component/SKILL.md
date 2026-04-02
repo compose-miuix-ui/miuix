@@ -67,9 +67,9 @@ package top.yukonga.miuix.kmp.extra   // extra 组件
 
 导入规则：
 
-- 按来源分组：Foundation/Layout、Runtime、UI、`com.kyant.shapes`、`top.yukonga.miuix`
+- 按来源分组：Foundation/Layout、Runtime、UI、`top.yukonga.miuix`
 - 禁止通配符导入（`*`），只导入实际使用的内容
-- 圆角形状使用 `com.kyant.shapes.RoundedRectangle` / `Capsule`，**不要**用 `androidx.compose.foundation.shape.RoundedCornerShape`
+- 圆角形状使用 `miuixShape(cornerRadius)` / `miuixCapsuleShape()` / `miuixUnevenShape(...)`，**不要**直接使用 `RoundedCornerShape` / `CircleShape`
 - 具体导入内容参照所选参考文件的 import 部分
 
 #### 3.4 KDoc 文档
@@ -104,8 +104,8 @@ package top.yukonga.miuix.kmp.extra   // extra 组件
 // 稳定回调引用
 val currentOnClick by rememberUpdatedState(onClick)
 
-// 缓存形状
-val shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
+// 形状（通过 SmoothRounding.kt 的 wrapper 函数使用）
+val shape = miuixShape(cornerRadius)
 
 // 根据状态计算颜色
 val color = remember(enabled, colors) { if (enabled) colors.color else colors.disabledColor }
@@ -260,7 +260,7 @@ data class ChipColors(
 ## 规则
 
 1. **禁止使用 Material Design 相关组件** — 这是自定义 UI 库
-2. **使用 `com.kyant.shapes.RoundedRectangle`** 作为圆角形状，不要用 `androidx.compose.foundation.shape.RoundedCornerShape`
+2. **使用 `miuixShape(cornerRadius)` / `miuixCapsuleShape()`** 作为圆角形状，不要直接用 `RoundedCornerShape` / `CircleShape`
 3. **所有公开 API 必须有 KDoc**，包含 `@param` 标签
 4. **对所有回调参数使用 `rememberUpdatedState`**
 5. **使用 `remember`** 并传入合适的 key 来缓存计算值
