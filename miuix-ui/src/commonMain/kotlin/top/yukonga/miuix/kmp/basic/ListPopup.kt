@@ -294,7 +294,7 @@ object ListPopupDefaults {
             )
         }
 
-        override fun getMargins(): PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 0.dp)
+        override fun getMargins(): PaddingValues = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
     }
 }
 
