@@ -38,6 +38,7 @@ import component.dropdownSection
 import component.numberPickerSection
 import component.progressIndicatorSection
 import component.radioButtonSection
+import component.shapeComparisonSection
 import component.sliderSection
 import component.snackbarSection
 import component.spinnerSection
@@ -166,6 +167,7 @@ fun MainPage(
                     numberPickerSection()
                     colorPickerSection()
                     cardSection()
+                    shapeComparisonSection()
                     blurSection()
                     item { Spacer(modifier = Modifier.height(12.dp)) }
                 }

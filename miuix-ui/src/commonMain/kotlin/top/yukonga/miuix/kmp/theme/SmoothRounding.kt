@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.theme
@@ -16,45 +16,45 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.Capsule
-import com.kyant.shapes.RoundedRectangle
-import com.kyant.shapes.UnevenRoundedRectangle
+import top.yukonga.miuix.kmp.shapes.SmoothCapsuleShape
+import top.yukonga.miuix.kmp.shapes.SmoothRoundedCornerShape
+import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 
 /**
  * CompositionLocal to control whether Miuix components use G2-continuity smooth rounded corners
- * (from com.kyant.shapes) or standard [RoundedCornerShape].
+ * or standard [RoundedCornerShape].
  *
- * When `true` (default), components use [RoundedRectangle] / [Capsule] for smoother corners.
- * When `false`, components fall back to [RoundedCornerShape] / [CircleShape] for better HWUI performance.
+ * When `true` (default), components use [SmoothRoundedCornerShape] / [SmoothCapsuleShape] for smoother corners.
+ * When `false`, components fall back to [RoundedCornerShape] / [CircleShape].
  */
 internal val LocalSmoothRounding = staticCompositionLocalOf { true }
 
 /**
- * Returns a [RoundedRectangle] shape when smooth rounding is enabled,
+ * Returns a [SmoothRoundedCornerShape] when smooth rounding is enabled,
  * or a [RoundedCornerShape] when disabled.
  */
 @Composable
 fun miuixShape(cornerRadius: Dp): Shape {
     val smooth = MiuixTheme.smoothRounding
     return remember(cornerRadius, smooth) {
-        if (smooth) CachedOutlineShape(RoundedRectangle(cornerRadius)) else RoundedCornerShape(cornerRadius)
+        if (smooth) CachedOutlineShape(SmoothRoundedCornerShape(cornerRadius)) else RoundedCornerShape(cornerRadius)
     }
 }
 
 /**
- * Returns a [Capsule] shape when smooth rounding is enabled,
+ * Returns a [SmoothCapsuleShape] when smooth rounding is enabled,
  * or a [CircleShape] when disabled.
  */
 @Composable
 fun miuixCapsuleShape(): Shape {
     val smooth = MiuixTheme.smoothRounding
     return remember(smooth) {
-        if (smooth) CachedOutlineShape(Capsule()) else CircleShape
+        if (smooth) CachedOutlineShape(SmoothCapsuleShape()) else CircleShape
     }
 }
 
 /**
- * Returns an [UnevenRoundedRectangle] shape when smooth rounding is enabled,
+ * Returns a [SmoothUnevenRoundedCornerShape] when smooth rounding is enabled,
  * or a [RoundedCornerShape] with individual corner radii when disabled.
  */
 @Composable
@@ -68,7 +68,7 @@ fun miuixUnevenShape(
     return remember(topStart, topEnd, bottomEnd, bottomStart, smooth) {
         if (smooth) {
             CachedOutlineShape(
-                UnevenRoundedRectangle(
+                SmoothUnevenRoundedCornerShape(
                     topStart = topStart,
                     topEnd = topEnd,
                     bottomEnd = bottomEnd,

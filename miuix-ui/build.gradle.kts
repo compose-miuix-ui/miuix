@@ -42,11 +42,11 @@ kotlin {
         commonMain.dependencies {
             api(projects.miuixCore)
             api(libs.jetbrains.compose.foundation)
+            api(projects.miuixShapes)
 
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
 
-            implementation(libs.kyant.shapes) // Capsule for Multiplatform
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }
 

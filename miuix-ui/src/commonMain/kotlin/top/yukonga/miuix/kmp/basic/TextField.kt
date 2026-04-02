@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,10 +32,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.takeOrElse
@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [TextField] component with Miuix style.
@@ -113,7 +114,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    val borderShape = miuixShape(cornerRadius)
     val labelState by remember(label, useLabelAsPlaceholder) {
         derivedStateOf {
             when {
@@ -179,7 +180,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -253,7 +253,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    val borderShape = miuixShape(cornerRadius)
     val labelState = remember(value.text, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
@@ -319,7 +319,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -392,7 +391,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    val borderShape = miuixShape(cornerRadius)
     val labelState = remember(value, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
@@ -458,7 +457,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -502,8 +500,7 @@ private fun TextFieldDecorationBox(
     backgroundColor: Color,
     borderWidth: () -> Dp,
     borderColor: () -> Color,
-    borderShape: RoundedCornerShape,
-    cornerRadius: Dp,
+    borderShape: Shape,
     paddingModifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -521,11 +518,11 @@ private fun TextFieldDecorationBox(
                     val strokePx = bw.toPx()
                     if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
                     val halfStroke = strokePx / 2f
-                    val cr = (cornerRadius.toPx() - halfStroke).coerceAtLeast(0f)
                     inset(halfStroke) {
-                        drawRoundRect(
+                        val outline = borderShape.createOutline(size, layoutDirection, Density(density, fontScale))
+                        drawOutline(
+                            outline = outline,
                             color = borderColor(),
-                            cornerRadius = CornerRadius(cr, cr),
                             style = Stroke(width = strokePx),
                         )
                     }

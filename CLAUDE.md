@@ -36,6 +36,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-preference/`     | Preference components (SwitchPreference, CheckboxPreference, etc.)                  |
 | `miuix-blur/`           | Blur/backdrop effects (Android minSdk=31)                                           |
 | `miuix-icons/`          | Extended icon resources                                                             |
+| `miuix-shapes/`         | Smooth rounded corner shapes (SmoothRoundedCornerShape, SmoothCapsuleShape, etc.)   |
 | `miuix-navigation3-ui/` | Navigation 3 UI implementation (independent, no miuix dependency)                   |
 | `example/`              | Demo app — showcases and tests all components                                       |
 | `baselineprofile/`      | Android baseline profile generation                                                 |
@@ -167,7 +168,7 @@ data class ButtonColors(
 - **`remember` with keys** for derived values: `val alpha = remember(enabled) { if (enabled) 1f else 0.38f }`
 - **`@NonRestartableComposable`** on thin wrapper composables that fully delegate to other composables and read no state themselves; avoid on composables with multiple internal state reads (they benefit from smart recomposition)
 - **`@Immutable`** on color/style data classes
-- **Shapes**: Use `miuixShape(cornerRadius)`, `miuixCapsuleShape()`, `miuixUnevenShape(...)` from `theme/SmoothRounding.kt` — these auto-select smooth (`com.kyant.shapes`) or standard shapes based on `MiuixTheme.smoothRounding`. Do not use `RoundedRectangle`/`Capsule`/`RoundedCornerShape` directly in components
+- **Shapes**: Use `miuixShape(cornerRadius)`, `miuixCapsuleShape()`, `miuixUnevenShape(...)` from `theme/SmoothRounding.kt` — these auto-select smooth (`miuix-shapes`) or standard shapes based on `MiuixTheme.smoothRounding`. Do not use `RoundedCornerShape`/`CircleShape` directly in components
 - **Theme colors**: Always use `MiuixTheme.colorScheme.*`, never hardcode colors
 - **Text styles**: Always use `MiuixTheme.textStyles.*` (e.g., `MiuixTheme.textStyles.button`)
 

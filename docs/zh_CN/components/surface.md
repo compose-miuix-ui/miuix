@@ -89,7 +89,7 @@ Surface(
 ```kotlin
 Surface(
     modifier = Modifier.size(200.dp).padding(16.dp),
-    shape = Capsule(),
+    shape = SmoothCapsuleShape(),
     color = MiuixTheme.colorScheme.secondaryContainer,
     border = BorderStroke(2.dp, MiuixTheme.colorScheme.secondary),
     shadowElevation = 8.dp
