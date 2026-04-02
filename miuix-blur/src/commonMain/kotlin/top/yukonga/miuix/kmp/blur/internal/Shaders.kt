@@ -162,7 +162,7 @@ internal const val MI_BLEND_MODE_SHADER = """
     // ================================================================
 
     const half kMinNormalHalf = 0.00006103515625;
-    const half kGuardedDivideEpsilon = 0.00000001;
+    const float kGuardedDivideEpsilon = 0.00000001;
 
     half guarded_divide(half n, half d) {
         return n / (d + kGuardedDivideEpsilon);
