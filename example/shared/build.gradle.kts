@@ -17,7 +17,12 @@ kotlin {
     android {
         androidResources.enable = true
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
-        compileSdk = BuildConfig.COMPILE_SDK
+        compileSdk {
+            version =
+                release(BuildConfig.COMPILE_SDK) {
+                    minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
+                }
+        }
         minSdk = BuildConfig.MIN_SDK
         namespace = BuildConfig.APPLICATION_SHARED_ID
     }

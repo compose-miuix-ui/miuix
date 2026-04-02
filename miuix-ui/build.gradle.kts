@@ -18,7 +18,12 @@ kotlin {
 
     android {
         buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
-        compileSdk = BuildConfig.COMPILE_SDK
+        compileSdk {
+            version =
+                release(BuildConfig.COMPILE_SDK) {
+                    minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
+                }
+        }
         minSdk = BuildConfig.MIN_SDK
         namespace = "${BuildConfig.LIBRARY_ID}.ui"
     }

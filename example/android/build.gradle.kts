@@ -19,7 +19,12 @@ dependencies {
 @Suppress("UnstableApiUsage")
 android {
     buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
-    compileSdk = BuildConfig.COMPILE_SDK
+    compileSdk {
+        version =
+            release(BuildConfig.COMPILE_SDK) {
+                minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
+            }
+    }
     defaultConfig {
         applicationId = BuildConfig.APPLICATION_ID
         minSdk = BuildConfig.MIN_SDK

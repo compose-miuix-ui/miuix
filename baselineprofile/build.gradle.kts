@@ -9,17 +9,21 @@ plugins {
 }
 
 android {
-    namespace = "top.yukonga.baselineprofile"
-
     buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
-    compileSdk = BuildConfig.COMPILE_SDK
-
+    compileSdk {
+        version =
+            release(BuildConfig.COMPILE_SDK) {
+                minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
+            }
+    }
     defaultConfig {
         minSdk = BuildConfig.MIN_SDK
         targetSdk = BuildConfig.TARGET_SDK
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    namespace = "top.yukonga.baselineprofile"
 
     targetProjectPath = ":example:android"
 
