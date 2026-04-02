@@ -103,6 +103,7 @@ HSPLtop/yukonga/miuix/kmp/layout/ListPopupLayoutKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/overlay/OverlayBottomSheetKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/overlay/OverlayDialogKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/overlay/OverlayListPopupKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/theme/CachedOutlineShape;->**(**)**
 HSPLtop/yukonga/miuix/kmp/theme/ColorSchemeMode;->**(**)**
 HSPLtop/yukonga/miuix/kmp/theme/Colors;->**(**)**
 HSPLtop/yukonga/miuix/kmp/theme/ColorsKt**->**(**)**
@@ -137,8 +138,6 @@ HSPLtop/yukonga/miuix/kmp/utils/ScrollEndHapticKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/ScrollEndHapticNode;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/SinkFeedback;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/SpringEngine;->**(**)**
-HSPLtop/yukonga/miuix/kmp/utils/SpringMath;->**(**)**
-HSPLtop/yukonga/miuix/kmp/utils/SpringOperator;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/TiltFeedback;->**(**)**
 HSPLtop/yukonga/miuix/kmp/utils/Utils_androidKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/window/WindowBottomSheetKt**->**(**)**
@@ -155,3 +154,5 @@ PLtop/yukonga/miuix/kmp/basic/RefreshState;->**(**)**
 PLtop/yukonga/miuix/kmp/theme/DynamicColors_androidKt**->**(**)**
 PLtop/yukonga/miuix/kmp/theme/MonetMappingKt**->**(**)**
 PLtop/yukonga/miuix/kmp/theme/MonetRoles;->**(**)**
+PLtop/yukonga/miuix/kmp/utils/SpringMath;->**(**)**
+PLtop/yukonga/miuix/kmp/utils/SpringOperator;->**(**)**
