@@ -60,8 +60,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
@@ -94,7 +92,7 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
+import top.yukonga.miuix.kmp.shapes.AbsoluteSmoothUnevenRoundedCornerShape
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -713,7 +711,6 @@ fun <T : Any> NavDisplay(
 
     val shouldFlipDirection = transitionEffects.popDirectionFollowsSwipeEdge &&
             (if (inPredictiveBack) swipeEdge else lastSwipeEdge) == NavigationEvent.EDGE_RIGHT
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val contentTransform: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
         when {
@@ -782,11 +779,11 @@ fun <T : Any> NavDisplay(
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
                 val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
-                val shape = remember(corner, shouldFlipDirection, isRtl) {
-                    if (shouldFlipDirection xor isRtl) {
-                        SmoothUnevenRoundedCornerShape(topEnd = corner, bottomEnd = corner)
+                val shape = remember(corner, shouldFlipDirection) {
+                    if (shouldFlipDirection) {
+                        AbsoluteSmoothUnevenRoundedCornerShape(topRight = corner, bottomRight = corner)
                     } else {
-                        SmoothUnevenRoundedCornerShape(topStart = corner, bottomStart = corner)
+                        AbsoluteSmoothUnevenRoundedCornerShape(topLeft = corner, bottomLeft = corner)
                     }
                 }
                 Modifier.clip(shape)

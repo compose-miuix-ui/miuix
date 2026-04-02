@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.shapes
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -25,7 +26,7 @@ class SmoothRoundedCornerShape(private val cornerRadius: Dp) : Shape {
         layoutDirection: LayoutDirection,
         density: Density,
     ): Outline {
-        val radiusPx = with(density) { cornerRadius.toPx() }
+        val radiusPx = with(density) { cornerRadius.toPx() }.coerceAtLeast(0f)
         if (radiusPx <= 0f || size.width <= 0f || size.height <= 0f) {
             return Outline.Rectangle(Rect(0f, 0f, size.width, size.height))
         }

@@ -77,6 +77,26 @@ Box(
 )
 ```
 
+### AbsoluteSmoothUnevenRoundedCornerShape
+
+与 `SmoothUnevenRoundedCornerShape` 类似，但使用绝对（物理）角位置 — `topLeft`、`topRight`、`bottomRight`、`bottomLeft` — 不受布局方向影响。适用于需要匹配屏幕物理角位置的场景（如匹配设备屏幕圆角）。
+
+```kotlin
+Box(
+    modifier = Modifier
+        .size(200.dp)
+        .clip(
+            AbsoluteSmoothUnevenRoundedCornerShape(
+                topLeft = 32.dp,
+                topRight = 8.dp,
+                bottomRight = 32.dp,
+                bottomLeft = 8.dp,
+            )
+        )
+        .background(Color.Blue)
+)
+```
+
 ## 配合 MiuixTheme 使用
 
 使用 `miuix-ui` 时，推荐使用 `SmoothRounding.kt` 中的主题感知包装函数。这些函数会根据 `MiuixTheme.smoothRounding` 自动切换平滑和标准形状：

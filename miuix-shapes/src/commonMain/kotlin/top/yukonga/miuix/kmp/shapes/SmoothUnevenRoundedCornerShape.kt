@@ -38,10 +38,10 @@ class SmoothUnevenRoundedCornerShape(
             return Outline.Rectangle(Rect(0f, 0f, size.width, size.height))
         }
 
-        val tsrPx = with(density) { topStart.toPx() }
-        val terPx = with(density) { topEnd.toPx() }
-        val berPx = with(density) { bottomEnd.toPx() }
-        val bsrPx = with(density) { bottomStart.toPx() }
+        val tsrPx = with(density) { topStart.toPx() }.coerceAtLeast(0f)
+        val terPx = with(density) { topEnd.toPx() }.coerceAtLeast(0f)
+        val berPx = with(density) { bottomEnd.toPx() }.coerceAtLeast(0f)
+        val bsrPx = with(density) { bottomStart.toPx() }.coerceAtLeast(0f)
 
         // Resolve for layout direction
         val rTsr: Float

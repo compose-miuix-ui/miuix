@@ -32,11 +32,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.takeOrElse
@@ -180,7 +180,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -320,7 +319,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -459,7 +457,6 @@ fun TextField(
                 borderWidth = { borderWidthState.value },
                 borderColor = { borderColorState.value },
                 borderShape = borderShape,
-                cornerRadius = cornerRadius,
                 paddingModifier = paddingModifier,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -504,7 +501,6 @@ private fun TextFieldDecorationBox(
     borderWidth: () -> Dp,
     borderColor: () -> Color,
     borderShape: Shape,
-    cornerRadius: Dp,
     paddingModifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -522,11 +518,11 @@ private fun TextFieldDecorationBox(
                     val strokePx = bw.toPx()
                     if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
                     val halfStroke = strokePx / 2f
-                    val cr = (cornerRadius.toPx() - halfStroke).coerceAtLeast(0f)
                     inset(halfStroke) {
-                        drawRoundRect(
+                        val outline = borderShape.createOutline(size, layoutDirection, Density(density, fontScale))
+                        drawOutline(
+                            outline = outline,
                             color = borderColor(),
-                            cornerRadius = CornerRadius(cr, cr),
                             style = Stroke(width = strokePx),
                         )
                     }

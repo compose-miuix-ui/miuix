@@ -77,6 +77,26 @@ Box(
 )
 ```
 
+### AbsoluteSmoothUnevenRoundedCornerShape
+
+Similar to `SmoothUnevenRoundedCornerShape`, but uses absolute (physical) corner positions — `topLeft`, `topRight`, `bottomRight`, `bottomLeft` — that remain fixed regardless of layout direction. Use this when you need corners at specific physical screen positions (e.g. matching device screen corners).
+
+```kotlin
+Box(
+    modifier = Modifier
+        .size(200.dp)
+        .clip(
+            AbsoluteSmoothUnevenRoundedCornerShape(
+                topLeft = 32.dp,
+                topRight = 8.dp,
+                bottomRight = 32.dp,
+                bottomLeft = 8.dp,
+            )
+        )
+        .background(Color.Blue)
+)
+```
+
 ## Using with MiuixTheme
 
 When using `miuix-ui`, prefer the theme-aware wrapper functions from `SmoothRounding.kt`. These automatically switch between smooth and standard shapes based on `MiuixTheme.smoothRounding`:
