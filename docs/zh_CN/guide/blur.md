@@ -80,6 +80,24 @@ Box(
         contentScale = ContentScale.Crop
     )
 }
+```
+
+::: tip 背景色
+`layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。如果捕获的内容存在透明区域（如无背景的文字），模糊时颜色会扩散到透明像素中，产生明显的色块。
+
+为避免此问题，请在 `onDraw` lambda 中绘制不透明背景：
+
+```kotlin
+val backgroundColor = MaterialTheme.colorScheme.surface
+val backdrop = rememberLayerBackdrop {
+    drawRect(backgroundColor) // 确保捕获到不透明背景
+    drawContent()
+}
+```
+
+:::
+
+```kotlin
 
 // 第 3 步：在叠加层上应用模糊
 Box(
@@ -236,7 +254,7 @@ Text(
         .textureBlur(
             backdrop = backdrop,
             shape = RectangleShape,
-            blurRadius = 200f,
+            blurRadius = 150f,
             contentBlendMode = ComposeBlendMode.DstIn // 内容 Alpha 遮罩模糊
         )
 )
@@ -315,9 +333,9 @@ Box(
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop | 提供模糊背景内容的 Backdrop | - | 是 |
 | shape | Shape | 模糊区域裁剪的形状 | - | 是 |
-| blurRadius | Float | 模糊半径（像素），限制在 [0, 400] 范围内 | 60f | 否 |
-| blurRadiusX | Float | 水平模糊半径（独立半径重载） | - | 是* |
-| blurRadiusY | Float | 垂直模糊半径（独立半径重载） | - | 是* |
+| blurRadius | Float | 模糊半径（dp），库内部自动转换为像素。限制在 [0, 150] 范围内 | 20f | 否 |
+| blurRadiusX | Float | 水平模糊半径（dp，独立半径重载） | - | 是* |
+| blurRadiusY | Float | 垂直模糊半径（dp，独立半径重载） | - | 是* |
 | noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0.0045f | 否 |
 | colors | BlurColors | 模糊后应用的颜色调整和混合图层 | BlurColors() | 否 |
 | contentBlendMode | BlendMode? | 内容在模糊上方合成的混合模式 | null | 否 |
@@ -338,9 +356,9 @@ Box(
 
 | 常量 | 类型 | 说明 | 值 |
 | --- | --- | --- | --- |
-| BlurRadius | Float | 默认模糊半径（像素） | 60f |
+| BlurRadius | Float | 默认模糊半径（dp） | 20f |
 | NoiseCoefficient | Float | 默认噪声抖动系数 | 0.0045f |
-| MaxBlurRadius | Float | 最大允许模糊半径 | 400f |
+| MaxBlurRadius | Float | 最大允许模糊半径（dp） | 150f |
 
 | 方法 | 返回类型 | 说明 |
 | --- | --- | --- |

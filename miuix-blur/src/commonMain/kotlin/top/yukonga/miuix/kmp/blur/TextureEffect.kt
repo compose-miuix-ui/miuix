@@ -18,7 +18,8 @@ import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape The shape provider for the blur region clipping.
- * @param blurRadius The blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadius The blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -49,8 +50,10 @@ fun Modifier.textureBlur(
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape The shape provider for the blur region clipping.
- * @param blurRadiusX The horizontal blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
- * @param blurRadiusY The vertical blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadiusX The horizontal blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadiusY The vertical blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -84,7 +87,8 @@ fun Modifier.textureBlur(
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape Shape provider for the blur region clipping.
- * @param blurRadius The blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadius The blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -117,8 +121,10 @@ fun Modifier.textureEffect(
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape Shape provider for the blur region clipping.
- * @param blurRadiusX The horizontal blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
- * @param blurRadiusY The vertical blur radius in pixels. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadiusX The horizontal blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param blurRadiusY The vertical blur radius in dp. Internally converted to pixels using display density.
+ *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -145,7 +151,7 @@ fun Modifier.textureEffect(
         effects = {
             noiseDither(noiseCoefficient)
             colorControls(colors.brightness, colors.contrast, colors.saturation)
-            gaussianBlur(clampedX, clampedY)
+            gaussianBlur(clampedX * density, clampedY * density)
             blendColors(colors)
         },
         contentBlendMode = contentBlendMode,

@@ -80,6 +80,24 @@ Box(
         contentScale = ContentScale.Crop
     )
 }
+```
+
+::: tip Background Color
+`layerBackdrop` only captures the content drawn by the composable it is applied to — it does **not** include backgrounds from parent composables (e.g., Scaffold's Surface). If the captured content has transparent areas (such as text without a background), the blur will spread colors into transparency, producing visible color artifacts.
+
+To avoid this, draw an opaque background in the `onDraw` lambda:
+
+```kotlin
+val backgroundColor = MaterialTheme.colorScheme.surface
+val backdrop = rememberLayerBackdrop {
+    drawRect(backgroundColor) // Ensures an opaque background is captured
+    drawContent()
+}
+```
+
+:::
+
+```kotlin
 
 // Step 3: Apply blur on an overlay surface
 Box(
@@ -236,7 +254,7 @@ Text(
         .textureBlur(
             backdrop = backdrop,
             shape = RectangleShape,
-            blurRadius = 200f,
+            blurRadius = 150f,
             contentBlendMode = ComposeBlendMode.DstIn // Content alpha masks the blur
         )
 )
@@ -315,9 +333,9 @@ Box(
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop | The backdrop providing background content to blur | - | Yes |
 | shape | Shape | Shape for the blur region clipping | - | Yes |
-| blurRadius | Float | Blur radius in pixels, clamped to [0, 400] | 60f | No |
-| blurRadiusX | Float | Horizontal blur radius (independent radii overload) | - | Yes* |
-| blurRadiusY | Float | Vertical blur radius (independent radii overload) | - | Yes* |
+| blurRadius | Float | Blur radius in dp, internally converted to pixels using display density. Clamped to [0, 150] | 20f | No |
+| blurRadiusX | Float | Horizontal blur radius in dp (independent radii overload) | - | Yes* |
+| blurRadiusY | Float | Vertical blur radius in dp (independent radii overload) | - | Yes* |
 | noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
 | colors | BlurColors | Color adjustments and blend layers applied after blur | BlurColors() | No |
 | contentBlendMode | BlendMode? | Blend mode for compositing content over the blur | null | No |
@@ -338,9 +356,9 @@ Box(
 
 | Constant | Type | Description | Value |
 | --- | --- | --- | --- |
-| BlurRadius | Float | Default blur radius in pixels | 60f |
+| BlurRadius | Float | Default blur radius in dp | 20f |
 | NoiseCoefficient | Float | Default noise dithering coefficient | 0.0045f |
-| MaxBlurRadius | Float | Maximum allowed blur radius | 400f |
+| MaxBlurRadius | Float | Maximum allowed blur radius in dp | 150f |
 
 | Method | Return Type | Description |
 | --- | --- | --- |

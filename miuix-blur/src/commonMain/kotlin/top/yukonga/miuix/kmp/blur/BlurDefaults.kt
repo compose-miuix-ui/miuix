@@ -144,14 +144,14 @@ value class BlurBlendMode(val value: Int) {
  */
 object BlurDefaults {
 
-    /** Default blur radius in pixels. */
-    val BlurRadius: Float = 60f
+    /** Default blur radius in dp. Internally converted to pixels using display density. */
+    val BlurRadius: Float = 20f
 
     /** Default noise dithering coefficient for anti-banding. 0 disables noise. */
     val NoiseCoefficient: Float = 0.0045f
 
-    /** Maximum allowed blur radius in pixels. */
-    val MaxBlurRadius: Float = 400f
+    /** Maximum allowed blur radius in dp. */
+    val MaxBlurRadius: Float = 150f
 
     /**
      * Creates a [BlurColors] instance with the given parameters.
