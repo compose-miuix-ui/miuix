@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import misc.VersionInfo
 import navigation3.Route
@@ -25,15 +26,21 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 import utils.AdaptiveTopAppBar
+import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.rememberBlurBackdrop
 import kotlin.random.Random
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
@@ -55,17 +62,23 @@ fun SettingsPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
+    val backdrop = rememberBlurBackdrop()
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
     Scaffold(
         topBar = {
-            AdaptiveTopAppBar(
-                title = "Settings",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                subtitle = "v${VersionInfo.VERSION_NAME} (${VersionInfo.VERSION_CODE})",
-            )
+            BlurredBar(backdrop, blurActive) {
+                AdaptiveTopAppBar(
+                    title = "Settings",
+                    showTopAppBar = appState.showTopAppBar,
+                    isWideScreen = isWideScreen,
+                    scrollBehavior = topAppBarScrollBehavior,
+                    color = barColor,
+                    subtitle = "v${VersionInfo.VERSION_NAME} (${VersionInfo.VERSION_CODE})",
+                )
+            }
         },
     ) { innerPadding ->
         SettingsContent(
@@ -74,6 +87,7 @@ fun SettingsPage(
                 bottom = padding.calculateBottomPadding(),
             ),
             topAppBarScrollBehavior = topAppBarScrollBehavior,
+            backdrop = backdrop,
         )
     }
 }
@@ -82,6 +96,7 @@ fun SettingsPage(
 private fun SettingsContent(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
+    backdrop: LayerBackdrop?,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
@@ -90,7 +105,7 @@ private fun SettingsContent(
     val lazyListState = rememberLazyListState()
 
     val contentPadding = pageContentPadding(padding, padding, isWideScreen)
-    Box {
+    Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.pageScrollModifiers(
@@ -109,6 +124,13 @@ private fun SettingsContent(
                         checked = appState.showFPSMonitor,
                         onCheckedChange = { updateAppState { state -> state.copy(showFPSMonitor = it) } },
                     )
+                    AnimatedVisibility(visible = isRenderEffectSupported()) {
+                        SwitchPreference(
+                            title = "Enable Blur Effect",
+                            checked = appState.enableBlur,
+                            onCheckedChange = { updateAppState { state -> state.copy(enableBlur = it) } },
+                        )
+                    }
                     SwitchPreference(
                         title = "Show TopAppBar",
                         checked = appState.showTopAppBar,

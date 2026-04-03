@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
@@ -34,13 +35,14 @@ data class SearchStatus(
     fun TopAppBarAnim(
         modifier: Modifier = Modifier,
         visible: Boolean = shouldCollapsed(),
+        backgroundColor: Color = colorScheme.surface,
         content: @Composable () -> Unit,
     ) {
         Box(modifier = modifier) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(colorScheme.surface),
+                    .background(backgroundColor),
             )
             Box(
                 modifier = Modifier

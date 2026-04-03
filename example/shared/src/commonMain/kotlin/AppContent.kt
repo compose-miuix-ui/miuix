@@ -53,6 +53,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
@@ -91,6 +93,12 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -102,7 +110,9 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import utils.BlurredBar
 import utils.FPSMonitor
+import utils.rememberBlurBackdrop
 import utils.shouldShowSplitPane
 import kotlin.math.abs
 
@@ -277,20 +287,26 @@ private fun WideScreenContent(
     mainPagerState: MainPagerState,
 ) {
     val appState = LocalAppState.current
+    val backdrop = rememberBlurBackdrop()
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val page = mainPagerState.selectedPage
     Row {
         if (appState.showNavigationBar) {
-            NavigationRail(
-                modifier = Modifier.background(MiuixTheme.colorScheme.surface),
-                mode = NavigationRailDisplayMode.entries[appState.navigationRailMode],
-            ) {
-                navigationItems.forEachIndexed { index, item ->
-                    NavigationRailItem(
-                        selected = page == index,
-                        onClick = { mainPagerState.animateToPage(index) },
-                        icon = item.icon,
-                        label = item.label,
-                    )
+            BlurredBar(backdrop, blurActive) {
+                NavigationRail(
+                    modifier = Modifier.background(barColor),
+                    color = barColor,
+                    mode = NavigationRailDisplayMode.entries[appState.navigationRailMode],
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        NavigationRailItem(
+                            selected = page == index,
+                            onClick = { mainPagerState.animateToPage(index) },
+                            icon = item.icon,
+                            label = item.label,
+                        )
+                    }
                 }
             }
         }
@@ -315,14 +331,16 @@ private fun WideScreenContent(
             },
             floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
         ) { padding ->
-            AppPager(
-                snackbarHostState = snackbarHostState,
-                padding = PaddingValues(top = padding.calculateTopPadding()),
-                pagerState = mainPagerState.pagerState,
-                modifier = Modifier
-                    .imePadding()
-                    .padding(end = padding.calculateEndPadding(layoutDirection)),
-            )
+            Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+                AppPager(
+                    snackbarHostState = snackbarHostState,
+                    padding = PaddingValues(top = padding.calculateTopPadding()),
+                    pagerState = mainPagerState.pagerState,
+                    modifier = Modifier
+                        .imePadding()
+                        .padding(end = padding.calculateEndPadding(layoutDirection)),
+                )
+            }
         }
     }
 }
@@ -334,13 +352,19 @@ private fun CompactScreenLayout(
     padding: PaddingValues,
     mainPagerState: MainPagerState,
 ) {
+    val surfaceColor = MiuixTheme.colorScheme.surface
     val appState = LocalAppState.current
+    val backdrop = rememberLayerBackdrop {
+        drawRect(surfaceColor)
+        drawContent()
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
                 navigationItems = navigationItems,
                 mainPagerState = mainPagerState,
+                backdrop = backdrop,
                 modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
             )
         },
@@ -359,18 +383,20 @@ private fun CompactScreenLayout(
             SnackbarHost(state = snackbarHostState)
         },
     ) { innerPadding ->
-        AppPager(
-            snackbarHostState = snackbarHostState,
-            padding = innerPadding,
-            pagerState = mainPagerState.pagerState,
-            modifier = Modifier
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    start = padding.calculateStartPadding(LocalLayoutDirection.current),
-                    end = padding.calculateEndPadding(LocalLayoutDirection.current),
-                )
-                .imePadding(),
-        )
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+            AppPager(
+                snackbarHostState = snackbarHostState,
+                padding = innerPadding,
+                pagerState = mainPagerState.pagerState,
+                modifier = Modifier
+                    .padding(
+                        top = padding.calculateTopPadding(),
+                        start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                        end = padding.calculateEndPadding(LocalLayoutDirection.current),
+                    )
+                    .imePadding(),
+            )
+        }
     }
 }
 
@@ -378,9 +404,12 @@ private fun CompactScreenLayout(
 private fun NavigationBar(
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
+    backdrop: LayerBackdrop?,
     modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
+    val blurActive = appState.enableBlur && backdrop != null
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val page = mainPagerState.selectedPage
     AnimatedVisibility(
         visible = appState.showNavigationBar,
@@ -394,7 +423,23 @@ private fun NavigationBar(
         ) {
             Box(
                 modifier = Modifier
-                    .background(MiuixTheme.colorScheme.surface)
+                    .then(
+                        if (blurActive) {
+                            Modifier.textureBlur(
+                                backdrop = backdrop,
+                                shape = RectangleShape,
+                                blurRadius = 25f,
+                                colors = BlurColors(
+                                    blendColors = listOf(
+                                        BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
+                                    ),
+                                ),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .background(barColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -404,6 +449,7 @@ private fun NavigationBar(
             ) {
                 NavigationBar(
                     modifier = Modifier,
+                    color = barColor,
                     mode = NavigationBarDisplayMode.entries[appState.navigationBarMode],
                 ) {
                     navigationItems.forEachIndexed { index, item ->

@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
@@ -42,14 +43,19 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.window.WindowListPopup
 import utils.AdaptiveTopAppBar
+import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.random.Random
@@ -63,25 +69,40 @@ fun NavTestPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
+    val blurSupported = isRenderEffectSupported()
+    val surfaceColor = MiuixTheme.colorScheme.surface
+    val backdrop = if (blurSupported) {
+        rememberLayerBackdrop {
+            drawRect(surfaceColor)
+            drawContent()
+        }
+    } else {
+        null
+    }
+    val blurActive = appState.enableBlur && blurSupported
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
 
     Scaffold(
         topBar = {
-            AdaptiveTopAppBar(
-                title = "Navigate Test $index",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                navigationIcon = {
-                    BackNavigationIcon(
-                        onClick = { navigator.pop() },
-                    )
-                },
-                actions = {
-                    TopBarActions()
-                },
-            )
+            BlurredBar(backdrop, blurActive) {
+                AdaptiveTopAppBar(
+                    title = "Navigate Test $index",
+                    showTopAppBar = appState.showTopAppBar,
+                    isWideScreen = isWideScreen,
+                    scrollBehavior = topAppBarScrollBehavior,
+                    color = barColor,
+                    navigationIcon = {
+                        BackNavigationIcon(
+                            onClick = { navigator.pop() },
+                        )
+                    },
+                    actions = {
+                        TopBarActions()
+                    },
+                )
+            }
         },
     ) { innerPadding ->
         val lazyListState = rememberLazyListState()
@@ -92,7 +113,7 @@ fun NavTestPage(
             extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        Box {
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.pageScrollModifiers(

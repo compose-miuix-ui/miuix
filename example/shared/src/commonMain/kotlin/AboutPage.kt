@@ -332,7 +332,7 @@ private fun AboutContent(
                     .textureBlur(
                         backdrop = backdrop,
                         shape = SmoothRoundedCornerShape(16.dp),
-                        blurRadius = 200f,
+                        blurRadius = 150f,
                         noiseCoefficient = noiseCoefficient,
                         colors = BlurColors(
                             blendColors = logoBlend,

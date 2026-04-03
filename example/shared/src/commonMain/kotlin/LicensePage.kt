@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -29,10 +30,15 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
+import utils.BlurredBar
 import utils.Library
 import utils.SimpleJsonParser
 import utils.pageContentPadding
@@ -44,6 +50,18 @@ fun LicensePage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
+    val blurSupported = isRenderEffectSupported()
+    val surfaceColor = MiuixTheme.colorScheme.surface
+    val backdrop = if (blurSupported) {
+        rememberLayerBackdrop {
+            drawRect(surfaceColor)
+            drawContent()
+        }
+    } else {
+        null
+    }
+    val blurActive = appState.enableBlur && blurSupported
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
 
@@ -59,17 +77,20 @@ fun LicensePage(
 
     Scaffold(
         topBar = {
-            AdaptiveTopAppBar(
-                title = "Third Party Licenses",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                navigationIcon = {
-                    BackNavigationIcon(
-                        onClick = { navigator.pop() },
-                    )
-                },
-            )
+            BlurredBar(backdrop, blurActive) {
+                AdaptiveTopAppBar(
+                    title = "Third Party Licenses",
+                    showTopAppBar = appState.showTopAppBar,
+                    isWideScreen = isWideScreen,
+                    scrollBehavior = topAppBarScrollBehavior,
+                    color = barColor,
+                    navigationIcon = {
+                        BackNavigationIcon(
+                            onClick = { navigator.pop() },
+                        )
+                    },
+                )
+            }
         },
     ) { innerPadding ->
         val uriHandler = LocalUriHandler.current
@@ -81,7 +102,7 @@ fun LicensePage(
             extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        Box {
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.pageScrollModifiers(

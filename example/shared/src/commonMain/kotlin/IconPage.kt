@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
@@ -53,9 +54,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.All
+import utils.BlurredBar
 import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.rememberBlurBackdrop
 
 private val IconListTopShape = SmoothUnevenRoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private val IconListBottomShape = SmoothUnevenRoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
@@ -104,40 +107,48 @@ fun IconsPage(
         }
     }
 
+    // Blur state
+    val backdrop = rememberBlurBackdrop()
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) colorScheme.surface.copy(alpha = 0f) else colorScheme.surface
+
     // Scroll state
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
-            searchStatus.TopAppBarAnim {
-                AdaptiveTopAppBar(
-                    title = "Icon",
-                    showTopAppBar = appState.showTopAppBar,
-                    isWideScreen = isWideScreen,
-                    scrollBehavior = topAppBarScrollBehavior,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .alpha(if (searchStatus.isCollapsed()) 1f else 0f)
-                            .onGloballyPositioned { coordinates ->
-                                with(density) {
-                                    searchOffsetY = coordinates.positionInWindow().y.toDp()
-                                }
-                            }
-                            .then(
-                                if (searchStatus.isCollapsed()) {
-                                    Modifier.pointerInput(Unit) {
-                                        detectTapGestures {
-                                            updateSearchStatus(searchStatus.copy(current = SearchStatus.Status.EXPANDING))
-                                        }
-                                    }
-                                } else {
-                                    Modifier
-                                },
-                            ),
+            BlurredBar(backdrop, blurActive) {
+                searchStatus.TopAppBarAnim(backgroundColor = barColor) {
+                    AdaptiveTopAppBar(
+                        title = "Icon",
+                        showTopAppBar = appState.showTopAppBar,
+                        isWideScreen = isWideScreen,
+                        scrollBehavior = topAppBarScrollBehavior,
+                        color = barColor,
                     ) {
-                        SearchBarFake(searchStatus.label)
+                        Box(
+                            modifier = Modifier
+                                .alpha(if (searchStatus.isCollapsed()) 1f else 0f)
+                                .onGloballyPositioned { coordinates ->
+                                    with(density) {
+                                        searchOffsetY = coordinates.positionInWindow().y.toDp()
+                                    }
+                                }
+                                .then(
+                                    if (searchStatus.isCollapsed()) {
+                                        Modifier.pointerInput(Unit) {
+                                            detectTapGestures {
+                                                updateSearchStatus(searchStatus.copy(current = SearchStatus.Status.EXPANDING))
+                                            }
+                                        }
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                        ) {
+                            SearchBarFake(searchStatus.label)
+                        }
                     }
                 }
             }
@@ -191,7 +202,7 @@ fun IconsPage(
             padding,
             isWideScreen,
         )
-        Box {
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.pageScrollModifiers(

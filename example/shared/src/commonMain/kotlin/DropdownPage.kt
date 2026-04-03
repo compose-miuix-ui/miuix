@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -36,14 +37,17 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
+import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.rememberBlurBackdrop
 
 private val DropdownListTopShape = SmoothUnevenRoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private val DropdownListBottomShape = SmoothUnevenRoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
@@ -57,6 +61,10 @@ fun DropdownPage(
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+
+    val backdrop = rememberBlurBackdrop()
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
 
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
     var dropdownSelectedOption by remember { mutableIntStateOf(0) }
@@ -72,86 +80,91 @@ fun DropdownPage(
 
     Scaffold(
         topBar = {
-            AdaptiveTopAppBar(
-                title = "Dropdown",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-            )
+            BlurredBar(backdrop, blurActive) {
+                AdaptiveTopAppBar(
+                    title = "Dropdown",
+                    showTopAppBar = appState.showTopAppBar,
+                    isWideScreen = isWideScreen,
+                    scrollBehavior = topAppBarScrollBehavior,
+                    color = barColor,
+                )
+            }
         },
     ) { innerPadding ->
-        PullToRefresh(
-            isRefreshing = isRefreshing,
-            onRefresh = { isRefreshing = true },
-            pullToRefreshState = pullToRefreshState,
-            topAppBarScrollBehavior = if (appState.showTopAppBar) topAppBarScrollBehavior else null,
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding() + 12.dp,
-                bottom = if (isWideScreen) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                } else {
-                    0.dp
-                },
-            ),
-        ) {
-            val lazyListState = rememberLazyListState()
-            val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp)
-            Box {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.pageScrollModifiers(
-                        appState.enableScrollEndHaptic,
-                        appState.showTopAppBar,
-                        topAppBarScrollBehavior,
-                    ),
-                    contentPadding = contentPadding,
-                ) {
-                    items(
-                        count = dropdownCount,
-                        key = { "dropdown_$it" },
-                    ) { i ->
-                        val isFirst = i == 0
-                        val isLast = i == dropdownCount - 1
-                        val shape = when {
-                            isFirst -> DropdownListTopShape
-                            isLast -> DropdownListBottomShape
-                            else -> RectangleShape
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                                .clip(shape)
-                                .background(colorScheme.surfaceContainer),
-                        ) {
-                            if (i % 2 == 0) {
-                                OverlayDropdownPreference(
-                                    title = "OverlayDropdownPref ${i + 1}",
-                                    items = dropdownOptions,
-                                    selectedIndex = dropdownSelectedOption,
-                                    onSelectedIndexChange = { newOption ->
-                                        dropdownSelectedOption = newOption
-                                    },
-                                )
-                            } else {
-                                WindowDropdownPreference(
-                                    title = "WindowDropdownPref ${i + 1}",
-                                    items = dropdownOptions,
-                                    selectedIndex = dropdownSelectedOption,
-                                    onSelectedIndexChange = { newOption ->
-                                        dropdownSelectedOption = newOption
-                                    },
-                                )
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+            PullToRefresh(
+                isRefreshing = isRefreshing,
+                onRefresh = { isRefreshing = true },
+                pullToRefreshState = pullToRefreshState,
+                topAppBarScrollBehavior = if (appState.showTopAppBar) topAppBarScrollBehavior else null,
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding() + 12.dp,
+                    bottom = if (isWideScreen) {
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    } else {
+                        0.dp
+                    },
+                ),
+            ) {
+                val lazyListState = rememberLazyListState()
+                val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp)
+                Box {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.pageScrollModifiers(
+                            appState.enableScrollEndHaptic,
+                            appState.showTopAppBar,
+                            topAppBarScrollBehavior,
+                        ),
+                        contentPadding = contentPadding,
+                    ) {
+                        items(
+                            count = dropdownCount,
+                            key = { "dropdown_$it" },
+                        ) { i ->
+                            val isFirst = i == 0
+                            val isLast = i == dropdownCount - 1
+                            val shape = when {
+                                isFirst -> DropdownListTopShape
+                                isLast -> DropdownListBottomShape
+                                else -> RectangleShape
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                                    .clip(shape)
+                                    .background(MiuixTheme.colorScheme.surfaceContainer),
+                            ) {
+                                if (i % 2 == 0) {
+                                    OverlayDropdownPreference(
+                                        title = "OverlayDropdownPref ${i + 1}",
+                                        items = dropdownOptions,
+                                        selectedIndex = dropdownSelectedOption,
+                                        onSelectedIndexChange = { newOption ->
+                                            dropdownSelectedOption = newOption
+                                        },
+                                    )
+                                } else {
+                                    WindowDropdownPreference(
+                                        title = "WindowDropdownPref ${i + 1}",
+                                        items = dropdownOptions,
+                                        selectedIndex = dropdownSelectedOption,
+                                        onSelectedIndexChange = { newOption ->
+                                            dropdownSelectedOption = newOption
+                                        },
+                                    )
+                                }
                             }
                         }
+                        item { Spacer(modifier = Modifier.height(12.dp)) }
                     }
-                    item { Spacer(modifier = Modifier.height(12.dp)) }
+                    VerticalScrollBar(
+                        adapter = rememberScrollBarAdapter(lazyListState),
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        trackPadding = contentPadding,
+                    )
                 }
-                VerticalScrollBar(
-                    adapter = rememberScrollBarAdapter(lazyListState),
-                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                    trackPadding = contentPadding,
-                )
             }
         }
     }

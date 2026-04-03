@@ -33,6 +33,8 @@ data class AppState(
     val enableDim: Boolean = true,
     val blockInputDuringTransition: Boolean = true,
     val popDirectionFollowsSwipeEdge: Boolean = false,
+    // Blur
+    val enableBlur: Boolean = true,
 )
 
 val LocalAppState = compositionLocalOf<AppState> {
