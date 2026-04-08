@@ -13,12 +13,18 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,6 +45,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -47,6 +54,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CompletableDeferred
@@ -59,6 +67,7 @@ import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.theme.miuixShape
+import kotlin.math.roundToInt
 
 /**
  * Possible durations of the [Snackbar].
@@ -120,6 +129,12 @@ interface SnackbarData {
 
     /** Perform the action of the Snackbar. */
     suspend fun performAction()
+}
+
+private enum class SnackbarSwipeToDismissValue {
+    StartToEnd,
+    EndToStart,
+    Settled,
 }
 
 /**
@@ -242,12 +257,14 @@ internal fun SnackbarDuration.toMillis(
  *
  * @param state state of the [SnackbarHost]
  * @param modifier modifier to be applied to the [SnackbarHost]
+ * @param canSwipeToDismiss flag of can be dismissed by swipe of the current [SnackbarHost]
  * @param content content of the [SnackbarHost]
  */
 @Composable
 fun SnackbarHost(
     state: SnackbarHostState,
     modifier: Modifier = Modifier,
+    canSwipeToDismiss: Boolean = true,
     content: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
@@ -261,6 +278,12 @@ fun SnackbarHost(
                 val visibleState = remember { MutableTransitionState(false) }
                 val accessibilityManager = LocalAccessibilityManager.current
 
+                val anchoredDraggableState = remember {
+                    AnchoredDraggableState(
+                        initialValue = SnackbarSwipeToDismissValue.Settled,
+                    )
+                }
+
                 visibleState.targetState = entry.visible
 
                 if (!visibleState.targetState && visibleState.isIdle) {
@@ -273,19 +296,54 @@ fun SnackbarHost(
                         accessibilityManager,
                     )
                     delay(duration)
+
+                    if (anchoredDraggableState.currentValue != SnackbarSwipeToDismissValue.Settled) return@LaunchedEffect
                     entry.data.dismiss()
                 }
 
+                LaunchedEffect(anchoredDraggableState.currentValue) {
+                    if (anchoredDraggableState.currentValue != SnackbarSwipeToDismissValue.Settled) {
+                        entry.data.dismiss()
+                    }
+                }
+
                 AnimatedVisibility(
+                    modifier = Modifier
+                        .onSizeChanged { size ->
+                            val width = size.width.toFloat()
+
+                            val anchors = DraggableAnchors {
+                                SnackbarSwipeToDismissValue.Settled at 0f
+                                SnackbarSwipeToDismissValue.StartToEnd at width
+                                SnackbarSwipeToDismissValue.EndToStart at -width
+                            }
+                            anchoredDraggableState.updateAnchors(anchors)
+                        }
+                        .anchoredDraggable(
+                            state = anchoredDraggableState,
+                            orientation = Orientation.Horizontal,
+                            enabled = entry.visible && canSwipeToDismiss,
+                            flingBehavior = AnchoredDraggableDefaults.flingBehavior(
+                                state = anchoredDraggableState,
+                                positionalThreshold = { distance: Float -> distance * 0.5f },
+                            ),
+                        )
+                        .offset {
+                            val offset = try {
+                                anchoredDraggableState.requireOffset()
+                            } catch (_: IllegalStateException) {
+                                0f
+                            }
+                            IntOffset(offset.roundToInt(), 0)
+                        }
+                        .zIndex((state.currentSnackbars.size - index).toFloat())
+                        .then(if (entry.visible) Modifier.animateItem() else Modifier),
                     visibleState = visibleState,
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut() + shrinkVertically(
                         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                         shrinkTowards = Alignment.Bottom,
                     ),
-                    modifier = Modifier
-                        .zIndex((state.currentSnackbars.size - index).toFloat())
-                        .then(if (entry.visible) Modifier.animateItem() else Modifier),
                 ) {
                     content(entry.data)
                 }
