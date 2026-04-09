@@ -24,6 +24,7 @@ package androidx.navigation3.ui
 
 import androidx.collection.mutableObjectFloatMapOf
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SharedTransitionScope
@@ -36,6 +37,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -75,6 +77,7 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.LocalCurrentScene
 import androidx.navigation3.scene.LocalEntriesToExcludeFromCurrentScene
+import androidx.navigation3.scene.NavigationBackHandler
 import androidx.navigation3.scene.OverlayScene
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneDecoratorStrategy
@@ -82,6 +85,7 @@ import androidx.navigation3.scene.SceneInfo
 import androidx.navigation3.scene.SceneState
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
+import androidx.navigation3.scene.rememberNavigationEventState
 import androidx.navigation3.scene.rememberSceneState
 import androidx.navigation3.ui.NavDisplay.popTransitionSpec
 import androidx.navigation3.ui.NavDisplay.predictivePopTransitionSpec
@@ -89,13 +93,12 @@ import androidx.navigation3.ui.NavDisplay.transitionSpec
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventTransitionState.Idle
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
-import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
-import androidx.navigationevent.compose.rememberNavigationEventState
-import top.yukonga.miuix.kmp.shapes.AbsoluteSmoothUnevenRoundedCornerShape
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.shapes.AbsoluteSmoothUnevenRoundedCornerShape
+import top.yukonga.miuix.kmp.shapes.LocalSmoothRounding
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
@@ -400,29 +403,14 @@ fun <T : Any> NavDisplay(
             sharedTransitionScope,
             onBack,
         )
-    val scene = sceneState.currentScene
 
     // Predictive Back Handling
-    val currentInfo = SceneInfo(scene)
-    val previousSceneInfos = sceneState.previousScenes.map { SceneInfo(it) }
-    val gestureState =
-        rememberNavigationEventState(currentInfo = currentInfo, backInfo = previousSceneInfos)
-
-    NavigationBackHandler(
-        state = gestureState,
-        isBackEnabled = scene.previousEntries.isNotEmpty(),
-        onBackCompleted = {
-            // If `enabled` becomes stale (e.g., it was set to false but a gesture was
-            // dispatched in the same frame), this may result in no entries being popped
-            // due to entries.size being smaller than scene.previousEntries.size
-            // but that's preferable to crashing with an IndexOutOfBoundsException
-            repeat(entries.size - scene.previousEntries.size) { onBack() }
-        },
-    )
+    val navigationEventState = rememberNavigationEventState(sceneState)
+    NavigationBackHandler(sceneState, navigationEventState, onBack)
 
     NavDisplay(
         sceneState,
-        gestureState,
+        navigationEventState,
         modifier,
         contentAlignment,
         sizeTransform,
@@ -486,14 +474,23 @@ fun <T : Any> NavDisplay(
     val transition = rememberTransition(transitionState, label = "scene")
 
     // Transition Handling
-    val currentEntriesState = remember { mutableStateOf(sceneState.entries) }
-    val isPopState = remember { mutableStateOf(false) }
-
-    if (currentEntriesState.value != sceneState.entries) {
-        isPopState.value = isPop(currentEntriesState.value, sceneState.entries)
-        currentEntriesState.value = sceneState.entries
+    // Track content keys (value-based) to reliably detect pop vs push, even during
+    // rapid consecutive navigations where entry references may be recreated.
+    // Uses a ref-holder to avoid writing mutableStateOf during composition.
+    val currentContentKeys = remember(sceneState.entries) {
+        sceneState.entries.map { it.contentKey }
     }
-    val isPop = isPopState.value
+    val isPopRef = remember {
+        object {
+            var previousKeys = currentContentKeys
+            var isPop = false
+        }
+    }
+    if (isPopRef.previousKeys != currentContentKeys) {
+        isPopRef.isPop = isPop(isPopRef.previousKeys, currentContentKeys)
+        isPopRef.previousKeys = currentContentKeys
+    }
+    val isPop = isPopRef.isPop
 
     // Set up Gesture Back tracking
     val previousScene = sceneState.previousScenes.lastOrNull()
@@ -739,6 +736,10 @@ fun <T : Any> NavDisplay(
         }
     }
 
+    // allows OverlayScenes to access animatedContentScope even if it's no-op so that
+    // LocalNavAnimatedContentScope doesn't need to be nullable
+    lateinit var animatedContentScope: AnimatedContentScope
+
     transition.AnimatedContent(
         contentKey = { scene -> AnimatedSceneKey(scene) },
         contentAlignment = contentAlignment,
@@ -759,11 +760,14 @@ fun <T : Any> NavDisplay(
         val isSettled = transition.currentState == transition.targetState
         val sceneLifecycleOwner =
             rememberLifecycleOwner(
-                maxLifecycle = if (isSettled) Lifecycle.State.RESUMED else Lifecycle.State.STARTED
+                maxLifecycle =
+                    if (isSettled && currentOverlayScenes.isEmpty()) Lifecycle.State.RESUMED
+                    else Lifecycle.State.STARTED
             )
+        animatedContentScope = remember { this }
         CompositionLocalProvider(
             LocalLifecycleOwner provides sceneLifecycleOwner,
-            LocalNavAnimatedContentScope provides this,
+            LocalNavAnimatedContentScope provides animatedContentScope,
             LocalCurrentScene provides targetScene,
             LocalEntriesToExcludeFromCurrentScene provides
                     sceneToExcludedEntryMap.getValue(AnimatedSceneKey(targetScene)),
@@ -779,11 +783,20 @@ fun <T : Any> NavDisplay(
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
                 val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
-                val shape = remember(corner, shouldFlipDirection) {
-                    if (shouldFlipDirection) {
-                        AbsoluteSmoothUnevenRoundedCornerShape(topRight = corner, bottomRight = corner)
+                val smoothRounding = LocalSmoothRounding.current
+                val shape = remember(corner, shouldFlipDirection, smoothRounding) {
+                    if (smoothRounding) {
+                        if (shouldFlipDirection) {
+                            AbsoluteSmoothUnevenRoundedCornerShape(topRight = corner, bottomRight = corner)
+                        } else {
+                            AbsoluteSmoothUnevenRoundedCornerShape(topLeft = corner, bottomLeft = corner)
+                        }
                     } else {
-                        AbsoluteSmoothUnevenRoundedCornerShape(topLeft = corner, bottomLeft = corner)
+                        if (shouldFlipDirection) {
+                            AbsoluteRoundedCornerShape(topRight = corner, bottomRight = corner)
+                        } else {
+                            AbsoluteRoundedCornerShape(topLeft = corner, bottomLeft = corner)
+                        }
                     }
                 }
                 Modifier.clip(shape)
@@ -828,10 +841,10 @@ fun <T : Any> NavDisplay(
                                     alpha = if (!settled) {
                                         if (isCurrentScene) {
                                             transitionState.fraction *
-                                                transitionEffects.dimAmount
+                                                    transitionEffects.dimAmount
                                         } else {
                                             (1f - transitionState.fraction) *
-                                                transitionEffects.dimAmount
+                                                    transitionEffects.dimAmount
                                         }
                                     } else {
                                         0f
@@ -865,22 +878,31 @@ fun <T : Any> NavDisplay(
 
     // Show all OverlayScene instances above the AnimatedContent
     currentOverlayScenes.fastForEachReversed { overlayScene ->
-        key(AnimatedSceneKey(overlayScene)) {
-            val scope = rememberCoroutineScope()
+        val scope = rememberCoroutineScope()
+        key(overlayScene) {
+            val overlaySceneLifecycleOwner =
+                rememberLifecycleOwner(
+                    maxLifecycle =
+                        if (overlayScenes.firstOrNull() == overlayScene) Lifecycle.State.RESUMED
+                        else Lifecycle.State.STARTED
+                )
+
             CompositionLocalProvider(
+                LocalLifecycleOwner provides overlaySceneLifecycleOwner,
                 LocalEntriesToExcludeFromCurrentScene provides
                         sceneToExcludedEntryMap.getValue(AnimatedSceneKey(overlayScene)),
                 LocalCurrentScene provides overlayScene,
+                LocalNavAnimatedContentScope provides animatedContentScope,
             ) {
-                overlayScene.content.invoke()
+                overlayScene.content()
             }
-            // if the overlay scene is popped, let onRemoved finish before
-            // removing from composition to ensure animations can complete
-            if (overlayScene !in overlayScenes) {
-                scope.launch {
-                    overlayScene.onRemove()
-                    currentOverlayScenes.remove(overlayScene)
-                }
+        }
+        // if the overlay scene is popped, let onRemoved finish before
+        // removing from composition to ensure animations can complete
+        if (overlayScene !in overlayScenes) {
+            scope.launch {
+                overlayScene.onRemove()
+                currentOverlayScenes.remove(overlayScene)
             }
         }
     }

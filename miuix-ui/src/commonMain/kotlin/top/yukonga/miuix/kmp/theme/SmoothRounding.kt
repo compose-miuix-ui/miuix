@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
@@ -16,18 +15,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.shapes.LocalSmoothRounding
 import top.yukonga.miuix.kmp.shapes.SmoothCapsuleShape
 import top.yukonga.miuix.kmp.shapes.SmoothRoundedCornerShape
 import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
-
-/**
- * CompositionLocal to control whether Miuix components use G2-continuity smooth rounded corners
- * or standard [RoundedCornerShape].
- *
- * When `true` (default), components use [SmoothRoundedCornerShape] / [SmoothCapsuleShape] for smoother corners.
- * When `false`, components fall back to [RoundedCornerShape] / [CircleShape].
- */
-internal val LocalSmoothRounding = staticCompositionLocalOf { true }
 
 /**
  * Returns a [SmoothRoundedCornerShape] when smooth rounding is enabled,

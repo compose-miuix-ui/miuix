@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import top.yukonga.miuix.kmp.shapes.LocalSmoothRounding
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
