@@ -31,11 +31,6 @@ class BgEffectPainter {
         private const val U_NOISE_SCALE = 1.5f
         private const val U_POINT_OFFSET = 0.1f
         private const val U_POINT_RADIUS_MULTI = 1f
-        private const val U_ALPHA_OFFSET = 0.5f
-        private const val U_SHADOW_COLOR_MULTI = 0.3f
-        private const val U_SHADOW_COLOR_OFFSET = 0.3f
-        private const val U_SHADOW_NOISE_SCALE = 5f
-        private const val U_SHADOW_OFFSET = 0.01f
     }
 
     private fun initStaticUniforms(shader: RuntimeShader) {
@@ -43,29 +38,7 @@ class BgEffectPainter {
         shader.setFloatUniform("uNoiseScale", U_NOISE_SCALE)
         shader.setFloatUniform("uPointOffset", U_POINT_OFFSET)
         shader.setFloatUniform("uPointRadiusMulti", U_POINT_RADIUS_MULTI)
-
-        shader.setFloatUniform(
-            "uShadowColorMulti",
-            U_SHADOW_COLOR_MULTI,
-        )
-
-        shader.setFloatUniform(
-            "uShadowColorOffset",
-            U_SHADOW_COLOR_OFFSET,
-        )
-
-        shader.setFloatUniform(
-            "uShadowOffset",
-            U_SHADOW_OFFSET,
-        )
-
-        shader.setFloatUniform(
-            "uShadowNoiseScale",
-            U_SHADOW_NOISE_SCALE,
-        )
-
         shader.setFloatUniform("uAlphaMulti", U_ALPHA_MULTI)
-        shader.setFloatUniform("uAlphaOffset", U_ALPHA_OFFSET)
     }
 
     fun setDeviceType(type: DeviceType) {
@@ -171,12 +144,12 @@ class BgEffectPainter {
             bound[2] = 1f
             bound[3] = heightRatio
         } else {
-            val widthRatio = logoHeight / totalWidth
-            val xOffset = (totalWidth - logoHeight) / 2f / totalWidth
-            bound[0] = xOffset
-            bound[1] = 1f - heightRatio
-            bound[2] = widthRatio
-            bound[3] = heightRatio
+            val aspectRatio = totalWidth / totalHeight
+            val contentCenterY = 1f - heightRatio / 2f
+            bound[0] = 0f
+            bound[1] = contentCenterY - aspectRatio / 2f
+            bound[2] = 1f
+            bound[3] = aspectRatio
         }
     }
 }
