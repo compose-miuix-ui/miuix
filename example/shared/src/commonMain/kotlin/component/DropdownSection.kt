@@ -23,8 +23,6 @@ fun LazyListScope.dropdownSection() {
         val windowDropdownOptionSelected = remember { mutableIntStateOf(0) }
         var overlayExpanded by remember { mutableStateOf(false) }
         var windowExpanded by remember { mutableStateOf(false) }
-        var disabledOverlayExpanded by remember { mutableStateOf(false) }
-        var disabledWindowExpanded by remember { mutableStateOf(false) }
         val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
         val dropdownLongOptions =
             remember {
@@ -68,21 +66,17 @@ fun LazyListScope.dropdownSection() {
             )
             OverlayDropdownPreference(
                 title = "Disabled DropdownPref",
-                summary = if (disabledOverlayExpanded) "Expanded" else "Collapsed",
                 items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,
-                onExpandedChange = { disabledOverlayExpanded = it },
             )
             WindowDropdownPreference(
                 title = "Disabled WindowDropdownPref",
-                summary = if (disabledWindowExpanded) "Expanded" else "Collapsed",
                 items = listOf("Option 1"),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
                 enabled = false,
-                onExpandedChange = { disabledWindowExpanded = it },
             )
         }
     }
