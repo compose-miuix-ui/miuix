@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ fun SuperDropdownDemo() {
                 val options1 = listOf("Option 1", "Option 2", "Option 3")
                 var selectedIndex2 by remember { mutableIntStateOf(0) }
                 val options2 = listOf("Chinese", "English", "Japanese")
+                var expanded by remember { mutableStateOf(false) }
 
                 Card {
                     OverlayDropdownPreference(
@@ -54,10 +56,11 @@ fun SuperDropdownDemo() {
                     )
                     OverlayDropdownPreference(
                         title = "Language Settings",
-                        summary = "Choose your preferred language",
+                        summary = if (expanded) "Expanded" else "Choose your preferred language",
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it },
+                        onExpandedChange = { expanded = it },
                     )
                     OverlayDropdownPreference(
                         title = "Disabled Dropdown",

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,6 +55,7 @@ fun SuperSpinnerDemo() {
                     SpinnerEntry(title = "Option 3"),
                 )
                 var selectedIndex2 by remember { mutableIntStateOf(0) }
+                var expanded by remember { mutableStateOf(false) }
 
                 // Create a rounded rectangle Painter
                 class RoundedRectanglePainter(
@@ -102,10 +104,11 @@ fun SuperSpinnerDemo() {
                     )
                     OverlaySpinnerPreference(
                         title = "Function Selection",
-                        summary = "Choose the action you want to perform",
+                        summary = if (expanded) "Expanded" else "Choose the action you want to perform",
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it },
+                        onExpandedChange = { expanded = it },
                     )
                     OverlaySpinnerPreference(
                         title = "Disabled Selector",
