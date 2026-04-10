@@ -141,6 +141,29 @@ Scaffold {
 }
 ```
 
+## Observe Expanded State
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+var expanded by remember { mutableStateOf(false) }
+val options = listOf(
+    SpinnerEntry(title = "Option 1"),
+    SpinnerEntry(title = "Option 2"),
+    SpinnerEntry(title = "Option 3"),
+)
+
+Scaffold {
+    OverlaySpinnerPreference(
+        title = "Dropdown Selector",
+        summary = if (expanded) "Expanded" else "Collapsed",
+        items = options,
+        selectedIndex = selectedIndex,
+        onExpandedChange = { expanded = it },
+        onSelectedIndexChange = { selectedIndex = it }
+    )
+}
+```
+
 ## Properties
 
 ### OverlaySpinnerPreference Properties (Dropdown Mode)
@@ -162,6 +185,7 @@ Scaffold {
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
 | renderInRootScaffold  | Boolean                   | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation | true | No |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### OverlaySpinnerPreference Properties (Dialog Mode)
@@ -184,6 +208,7 @@ Scaffold {
 | enabled               | Boolean                   | Interactive state               | true                                  | No       |
 | showValue             | Boolean                   | Show current selected value     | true                                  | No       |
 | renderInRootScaffold  | Boolean                   | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
 ### SpinnerEntry Properties

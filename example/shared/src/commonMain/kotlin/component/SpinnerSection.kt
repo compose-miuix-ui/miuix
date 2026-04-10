@@ -5,8 +5,11 @@ package component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -28,6 +31,10 @@ fun LazyListScope.spinnerSection() {
         val windowSpinnerOptionSelected = remember { mutableIntStateOf(1) }
         val superSpinnerOptionSelectedDialog = remember { mutableIntStateOf(2) }
         val windowSpinnerOptionSelectedDialog = remember { mutableIntStateOf(3) }
+        var overlayExpanded by remember { mutableStateOf(false) }
+        var windowExpanded by remember { mutableStateOf(false) }
+        var overlayDialogExpanded by remember { mutableStateOf(false) }
+        var windowDialogExpanded by remember { mutableStateOf(false) }
         val spinnerOptions = remember {
             listOf(
                 SpinnerEntry(
@@ -89,34 +96,41 @@ fun LazyListScope.spinnerSection() {
         ) {
             OverlaySpinnerPreference(
                 title = "SpinnerPref",
+                summary = if (overlayExpanded) "Expanded" else "Collapsed",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelected.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelected.value = newOption },
+                onExpandedChange = { overlayExpanded = it },
             )
             WindowSpinnerPreference(
                 title = "WindowSpinnerPref",
+                summary = if (windowExpanded) "Expanded" else "Collapsed",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelected.value,
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
+                onExpandedChange = { windowExpanded = it },
             )
             OverlaySpinnerPreference(
                 title = "SpinnerPref",
-                summary = "As OverlayDialog",
+                summary = "As OverlayDialog" + if (overlayDialogExpanded) " (Expanded)" else " (Collapsed)",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
+                onExpandedChange = { overlayDialogExpanded = it },
             )
             WindowSpinnerPreference(
                 title = "WindowSpinnerPref",
-                summary = "As WindowDialog",
+                summary = "As WindowDialog" + if (windowDialogExpanded) " (Expanded)" else " (Collapsed)",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
+                onExpandedChange = { windowDialogExpanded = it },
             )
             OverlaySpinnerPreference(
                 title = "Disabled SpinnerPref",
+                summary = "Collapsed",
                 items = listOf(SpinnerEntry(icon = null, title = "Option 5")),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},
@@ -124,6 +138,7 @@ fun LazyListScope.spinnerSection() {
             )
             WindowSpinnerPreference(
                 title = "Disabled WindowSpinnerPref",
+                summary = "Collapsed",
                 items = listOf(SpinnerEntry(icon = null, title = "Option 6")),
                 selectedIndex = 0,
                 onSelectedIndexChange = {},

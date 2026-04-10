@@ -53,6 +53,23 @@ WindowDropdownPreference(
 )
 ```
 
+## Observe Expanded State
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+var expanded by remember { mutableStateOf(false) }
+val options = listOf("Option 1", "Option 2", "Option 3")
+
+WindowDropdownPreference(
+    title = "Dropdown Menu",
+    summary = if (expanded) "Expanded" else "Collapsed",
+    items = options,
+    selectedIndex = selectedIndex,
+    onExpandedChange = { expanded = it },
+    onSelectedIndexChange = { selectedIndex = it }
+)
+```
+
 ## Component States
 
 ### Disabled State
@@ -88,6 +105,7 @@ WindowDropdownPreference(
 | maxHeight             | Dp?                       | Maximum height of dropdown menu    | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### DropdownColors Properties

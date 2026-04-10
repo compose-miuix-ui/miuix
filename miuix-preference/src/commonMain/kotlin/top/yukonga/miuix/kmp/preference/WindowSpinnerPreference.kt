@@ -59,6 +59,7 @@ import top.yukonga.miuix.kmp.window.WindowListPopup
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowSpinnerPreference] is enabled.
  * @param showValue Whether to show the value of the [WindowSpinnerPreference].
+ * @param onExpandedChange The callback to be invoked when the expanded state of the [WindowSpinnerPreference] changes.
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [WindowSpinnerPreference] is changed.
  */
 @Composable
@@ -77,6 +78,7 @@ fun WindowSpinnerPreference(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -84,6 +86,15 @@ fun WindowSpinnerPreference(
     val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentOnExpandedChange = rememberUpdatedState(onExpandedChange)
+    val setExpanded: (Boolean) -> Unit = remember {
+        { expanded ->
+            if (isDropdownExpanded.value != expanded) {
+                isDropdownExpanded.value = expanded
+                currentOnExpandedChange.value?.invoke(expanded)
+            }
+        }
+    }
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -97,7 +108,7 @@ fun WindowSpinnerPreference(
     val handleClick = remember(actualEnabled) {
         {
             if (actualEnabled) {
-                isDropdownExpanded.value = !isDropdownExpanded.value
+                setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
                     currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -136,7 +147,7 @@ fun WindowSpinnerPreference(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
-                    onDismiss = { isDropdownExpanded.value = false },
+                    onDismiss = { setExpanded(false) },
                     onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     hapticFeedback = hapticFeedback,
@@ -217,6 +228,7 @@ private fun WindowSpinnerPreferencePopup(
  * @param insideMargin the [PaddingValues] to be applied inside the [WindowSpinnerPreference].
  * @param enabled whether the [WindowSpinnerPreference] is enabled.
  * @param showValue whether to show the value of the [WindowSpinnerPreference].
+ * @param onExpandedChange the callback to be invoked when the expanded state of the [WindowSpinnerPreference] changes.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [WindowSpinnerPreference] is changed.
  */
 @Composable
@@ -236,12 +248,22 @@ fun WindowSpinnerPreference(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
     val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
+    val currentOnExpandedChange = rememberUpdatedState(onExpandedChange)
+    val setExpanded: (Boolean) -> Unit = remember {
+        { expanded ->
+            if (isDropdownExpanded.value != expanded) {
+                isDropdownExpanded.value = expanded
+                currentOnExpandedChange.value?.invoke(expanded)
+            }
+        }
+    }
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -255,7 +277,7 @@ fun WindowSpinnerPreference(
     val handleClick = remember(actualEnabled) {
         {
             if (actualEnabled) {
-                isDropdownExpanded.value = !isDropdownExpanded.value
+                setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
                 }
@@ -294,7 +316,7 @@ fun WindowSpinnerPreference(
                 title = title,
                 dialogButtonString = dialogButtonString,
                 isDropdownExpanded = isDropdownExpanded.value,
-                onDismiss = { isDropdownExpanded.value = false },
+                onDismiss = { setExpanded(false) },
                 onDismissFinished = { isHoldDown.value = false },
                 hapticFeedback = hapticFeedback,
                 spinnerColors = spinnerColors,
