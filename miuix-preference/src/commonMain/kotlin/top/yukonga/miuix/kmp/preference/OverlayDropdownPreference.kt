@@ -53,6 +53,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param renderInRootScaffold Whether to render the popup in the root (outermost) Scaffold.
  *   When true (default), the popup covers the full screen. When false, it renders within the
  *   current Scaffold's bounds with position compensation.
+ * @param onExpandedChange The callback to be invoked when the expanded state of the [OverlayDropdownPreference] changes.
  * @param onSelectedIndexChange The callback when the selected index of the [OverlayDropdownPreference] is changed.
  */
 @Composable
@@ -72,6 +73,7 @@ fun OverlayDropdownPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -79,6 +81,15 @@ fun OverlayDropdownPreference(
     val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentOnExpandedChange = rememberUpdatedState(onExpandedChange)
+    val setExpanded: (Boolean) -> Unit = remember {
+        { expanded ->
+            if (isDropdownExpanded.value != expanded) {
+                isDropdownExpanded.value = expanded
+                currentOnExpandedChange.value?.invoke(expanded)
+            }
+        }
+    }
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -92,7 +103,7 @@ fun OverlayDropdownPreference(
     val handleClick = remember(actualEnabled) {
         {
             if (actualEnabled) {
-                isDropdownExpanded.value = !isDropdownExpanded.value
+                setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
                     currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -131,7 +142,7 @@ fun OverlayDropdownPreference(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
-                    onDismiss = { isDropdownExpanded.value = false },
+                    onDismiss = { setExpanded(false) },
                     onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,

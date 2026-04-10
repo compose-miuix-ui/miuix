@@ -51,6 +51,7 @@ import top.yukonga.miuix.kmp.window.WindowListPopup
  * @param maxHeight The maximum height of the [WindowListPopup].
  * @param enabled Whether the [WindowDropdownPreference] is enabled.
  * @param showValue Whether to show the selected value of the [WindowDropdownPreference].
+ * @param onExpandedChange The callback to be invoked when the expanded state of the [WindowDropdownPreference] changes.
  * @param onSelectedIndexChange The callback when the selected index of the [WindowDropdownPreference] is changed.
  */
 @Composable
@@ -69,6 +70,7 @@ fun WindowDropdownPreference(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -76,6 +78,15 @@ fun WindowDropdownPreference(
     val isHoldDown = remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentOnExpandedChange = rememberUpdatedState(onExpandedChange)
+    val setExpanded: (Boolean) -> Unit = remember {
+        { expanded ->
+            if (isDropdownExpanded.value != expanded) {
+                isDropdownExpanded.value = expanded
+                currentOnExpandedChange.value?.invoke(expanded)
+            }
+        }
+    }
 
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
@@ -89,7 +100,7 @@ fun WindowDropdownPreference(
     val handleClick = remember(actualEnabled) {
         {
             if (actualEnabled) {
-                isDropdownExpanded.value = !isDropdownExpanded.value
+                setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
                     currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -128,7 +139,7 @@ fun WindowDropdownPreference(
                     items = items,
                     selectedIndex = selectedIndex,
                     isDropdownExpanded = isDropdownExpanded.value,
-                    onDismiss = { isDropdownExpanded.value = false },
+                    onDismiss = { setExpanded(false) },
                     onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,

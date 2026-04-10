@@ -123,6 +123,27 @@ WindowSpinnerPreference(
 )
 ```
 
+## Observe Expanded State
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+var expanded by remember { mutableStateOf(false) }
+val options = listOf(
+    SpinnerEntry(title = "Option A"),
+    SpinnerEntry(title = "Option B"),
+    SpinnerEntry(title = "Option C")
+)
+
+WindowSpinnerPreference(
+    title = "Dropdown Selector",
+    summary = if (expanded) "Expanded" else "Collapsed",
+    items = options,
+    selectedIndex = selectedIndex,
+    onExpandedChange = { expanded = it },
+    onSelectedIndexChange = { selectedIndex = it }
+)
+```
+
 ## Properties
 
 ### WindowSpinnerPreference Properties (Popup Mode)
@@ -143,6 +164,7 @@ WindowSpinnerPreference(
 | maxHeight             | Dp?                       | Maximum height of popup            | null                                  | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### WindowSpinnerPreference Properties (Dialog Mode)
@@ -164,6 +186,7 @@ WindowSpinnerPreference(
 | insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
 | enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
 | showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
 
 ### SpinnerEntry Properties

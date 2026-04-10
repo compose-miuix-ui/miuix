@@ -62,6 +62,25 @@ Scaffold {
 }
 ```
 
+## 监听展开状态
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+var expanded by remember { mutableStateOf(false) }
+val options = listOf("选项 1", "选项 2", "选项 3")
+
+Scaffold {
+    OverlayDropdownPreference(
+        title = "下拉菜单",
+        summary = if (expanded) "展开" else "收起",
+        items = options,
+        selectedIndex = selectedIndex,
+        onExpandedChange = { expanded = it },
+        onSelectedIndexChange = { selectedIndex = it }
+    )
+}
+```
+
 ## 组件状态
 
 ### 禁用状态
@@ -98,6 +117,7 @@ OverlayDropdownPreference(
 | enabled               | Boolean                   | 组件是否可交互       | true                                  | 否       |
 | showValue             | Boolean                   | 是否显示当前选中的值 | true                                  | 否       |
 | renderInRootScaffold  | Boolean                   | 是否在根（最外层）Scaffold 中渲染弹窗。为 true 时，弹窗覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染并进行位置补偿 | true | 否 |
+| onExpandedChange      | ((Boolean) -> Unit)?      | 展开状态变化时的回调 | null                                  | 否       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | 选中项变化时的回调   | -                                     | 否       |
 
 ### DropdownColors 属性

@@ -62,6 +62,25 @@ Scaffold {
 }
 ```
 
+## Observe Expanded State
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+var expanded by remember { mutableStateOf(false) }
+val options = listOf("Option 1", "Option 2", "Option 3")
+
+Scaffold {
+    OverlayDropdownPreference(
+        title = "Dropdown Menu",
+        summary = if (expanded) "Expanded" else "Collapsed",
+        items = options,
+        selectedIndex = selectedIndex,
+        onExpandedChange = { expanded = it },
+        onSelectedIndexChange = { selectedIndex = it }
+    )
+}
+```
+
 ## Component States
 
 ### Disabled State
@@ -98,6 +117,7 @@ OverlayDropdownPreference(
 | enabled               | Boolean                   | Whether component is interactive  | true                                  | No       |
 | showValue             | Boolean                   | Whether to show selected value    | true                                  | No       |
 | renderInRootScaffold  | Boolean                   | Whether to render the popup in the root (outermost) Scaffold. When true, the popup covers the full screen. When false, it renders within the current Scaffold's bounds with position compensation | true | No |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Callback when selection changes   | -                                     | No       |
 
 ### DropdownColors Properties
