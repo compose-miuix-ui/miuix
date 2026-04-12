@@ -6,6 +6,7 @@ package component
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,12 +30,14 @@ fun LazyListScope.tabRowSection() {
         val tabTexts = remember { listOf("Tab 1", "Tab 2", "Tab 3") }
         val tabTexts1 = remember { listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5", "Tab 6") }
         var selectedTabIndex by remember { mutableIntStateOf(0) }
+        val tabListState = rememberLazyListState()
         TabRow(
             tabs = tabTexts,
             selectedTabIndex = selectedTabIndex,
             onTabSelected = {
                 selectedTabIndex = it
             },
+            listState = tabListState,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
@@ -48,6 +51,7 @@ fun LazyListScope.tabRowSection() {
         ) {
             val scope = rememberCoroutineScope()
             val pagerState = rememberPagerState(pageCount = { tabTexts1.size })
+            val contourTabListState = rememberLazyListState()
             TabRowWithContour(
                 tabs = tabTexts1,
                 selectedTabIndex = pagerState.currentPage,
@@ -56,6 +60,7 @@ fun LazyListScope.tabRowSection() {
                         pagerState.animateScrollToPage(it)
                     }
                 },
+                listState = contourTabListState,
             )
             HorizontalPager(
                 state = pagerState,

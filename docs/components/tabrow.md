@@ -41,6 +41,21 @@ TabRowWithContour(
 )
 ```
 
+### Preserve Scroll Position
+
+```kotlin
+val tabs = listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+var selectedTabIndex by remember { mutableStateOf(3) }
+val tabListState = rememberLazyListState()
+
+TabRowWithContour(
+    tabs = tabs,
+    selectedTabIndex = selectedTabIndex,
+    onTabSelected = { selectedTabIndex = it },
+    listState = tabListState,
+)
+```
+
 ## Properties
 
 ### TabRow Properties
@@ -58,6 +73,7 @@ TabRowWithContour(
 | cornerRadius      | Dp                        | Corner radius of tabs            | TabRowDefaults.TabRowCornerRadius | No       |
 | itemSpacing       | Dp                        | Spacing between tabs             | 9.dp                              | No       |
 | contentAlignment  | Alignment                 | Alignment of tab content         | Alignment.Center                  | No       |
+| listState         | LazyListState?            | External scroll state for tabs   | null                              | No       |
 | interactionSource | MutableInteractionSource? | Interaction source for tab items | null                              | No       |
 | indication        | Indication?               | Indication for tab items         | null                              | No       |
 
@@ -76,6 +92,7 @@ TabRowWithContour(
 | cornerRadius      | Dp                        | Corner radius of tabs            | TabRowDefaults.TabRowWithContourCornerRadius | No       |
 | itemSpacing       | Dp                        | Spacing between tabs             | 5.dp                                         | No       |
 | contentAlignment  | Alignment                 | Alignment of tab content         | Alignment.Center                             | No       |
+| listState         | LazyListState?            | External scroll state for tabs   | null                                         | No       |
 | interactionSource | MutableInteractionSource? | Interaction source for tab items | null                                         | No       |
 | indication        | Indication?               | Indication for tab items         | null                                         | No       |
 

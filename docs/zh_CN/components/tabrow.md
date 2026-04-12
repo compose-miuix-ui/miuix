@@ -41,6 +41,21 @@ TabRowWithContour(
 )
 ```
 
+### 记住滚动位置
+
+```kotlin
+val tabs = listOf("标签1", "标签2", "标签3", "标签4", "标签5")
+var selectedTabIndex by remember { mutableStateOf(3) }
+val tabListState = rememberLazyListState()
+
+TabRowWithContour(
+    tabs = tabs,
+    selectedTabIndex = selectedTabIndex,
+    onTabSelected = { selectedTabIndex = it },
+    listState = tabListState,
+)
+```
+
 ## 属性
 
 ### TabRow 属性
@@ -58,6 +73,7 @@ TabRowWithContour(
 | cornerRadius      | Dp                        | 标签的圆角半径       | TabRowDefaults.TabRowCornerRadius | 否       |
 | itemSpacing       | Dp                        | 标签之间的间距       | 9.dp                              | 否       |
 | contentAlignment  | Alignment                 | 标签内容的对齐方式   | Alignment.Center                  | 否       |
+| listState         | LazyListState?            | 标签列表的外部滚动状态 | null                            | 否       |
 | interactionSource | MutableInteractionSource? | 标签项的交互源       | null                              | 否       |
 | indication        | Indication?               | 标签项的点击反馈效果 | null                              | 否       |
 
@@ -76,6 +92,7 @@ TabRowWithContour(
 | cornerRadius      | Dp                        | 标签的圆角半径       | TabRowDefaults.TabRowWithContourCornerRadius | 否       |
 | itemSpacing       | Dp                        | 标签之间的间距       | 5.dp                                         | 否       |
 | contentAlignment  | Alignment                 | 标签内容的对齐方式   | Alignment.Center                             | 否       |
+| listState         | LazyListState?            | 标签列表的外部滚动状态 | null                                      | 否       |
 | interactionSource | MutableInteractionSource? | 标签项的交互源       | null                                         | 否       |
 | indication        | Indication?               | 标签项的点击反馈效果 | null                                         | 否       |
 
