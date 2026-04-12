@@ -247,7 +247,7 @@ private fun AboutContent(
                 if (lazyListState.firstVisibleItemIndex > 0) {
                     if (iconProgress != 1f) iconProgress = 1f
                     if (projectNameProgress != 1f) projectNameProgress = 1f
-                    if (iconProgress != 1f) iconProgress = 1f
+                    if (versionCodeProgress != 1f) versionCodeProgress = 1f
                     return@onEach
                 }
 
