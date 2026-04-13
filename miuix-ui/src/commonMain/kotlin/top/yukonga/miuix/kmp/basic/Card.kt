@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -26,6 +28,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixShape
@@ -79,6 +82,7 @@ fun Card(
  * @param colors [CardColors] that will be used to resolve the color(s) used for the [Card].
  * @param pressFeedbackType The press feedback type of the [Card].
  * @param showIndication Whether to show indication of the [Card].
+ * @param holdDownState Whether the [Card] is in a hold-down state.
  * @param onClick The callback to be invoked when the [Card] is clicked.
  * @param onLongPress The callback to be invoked when the [Card] is long pressed.
  * @param content The [Composable] content of the [Card].
@@ -91,6 +95,7 @@ fun Card(
     colors: CardColors = CardDefaults.defaultColors(),
     pressFeedbackType: PressFeedbackType = PressFeedbackType.None,
     showIndication: Boolean = false,
+    holdDownState: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -98,6 +103,24 @@ fun Card(
     val interactionSource = remember { MutableInteractionSource() }
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongPress by rememberUpdatedState(onLongPress)
+
+    val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
+    LaunchedEffect(holdDownState, interactionSource) {
+        suspend fun releaseHoldDown() {
+            holdDown.value?.let { oldValue ->
+                interactionSource.emit(HoldDownInteraction.Release(oldValue))
+                holdDown.value = null
+            }
+        }
+        if (holdDownState) {
+            releaseHoldDown()
+            val interaction = HoldDownInteraction.HoldDown()
+            holdDown.value = interaction
+            interactionSource.emit(interaction)
+        } else {
+            releaseHoldDown()
+        }
+    }
 
     val pressFeedback = remember(pressFeedbackType) {
         when (pressFeedbackType) {
