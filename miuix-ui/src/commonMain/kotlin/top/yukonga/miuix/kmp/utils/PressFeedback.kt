@@ -25,6 +25,7 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
 
 @Immutable
 data class SinkFeedback(
@@ -41,8 +42,11 @@ data class SinkFeedback(
         LayoutModifierNode {
 
         private val animatedScale = Animatable(1f)
+        private var isPressed = false
+        private var isHoldDown = false
 
-        private fun animateToSink(target: Float) {
+        private fun updateState() {
+            val target = if (isPressed || isHoldDown) sinkAmount else 1f
             coroutineScope.launch { animatedScale.animateTo(target, animationSpec) }
         }
 
@@ -50,10 +54,13 @@ data class SinkFeedback(
             coroutineScope.launch {
                 interactionSource.interactions.collect { interaction: Interaction ->
                     when (interaction) {
-                        is PressInteraction.Press -> animateToSink(sinkAmount)
-                        is PressInteraction.Release -> animateToSink(1f)
-                        is PressInteraction.Cancel -> animateToSink(1f)
+                        is PressInteraction.Press -> isPressed = true
+                        is PressInteraction.Release, is PressInteraction.Cancel -> isPressed = false
+                        is HoldDownInteraction.HoldDown -> isHoldDown = true
+                        is HoldDownInteraction.Release -> isHoldDown = false
+                        else -> return@collect
                     }
+                    updateState()
                 }
             }
         }
@@ -93,23 +100,30 @@ data class TiltFeedback(
         private var targetY = 0f
         private val animatedTiltX = Animatable(0f)
         private val animatedTiltY = Animatable(0f)
+        private var isPressed = false
+        private var isHoldDown = false
 
-        private fun animateToTilt(
-            x: Float,
-            y: Float,
-        ) {
-            coroutineScope.launch { animatedTiltX.animateTo(x, animationSpec) }
-            coroutineScope.launch { animatedTiltY.animateTo(y, animationSpec) }
+        private fun updateState() {
+            if (isPressed || isHoldDown) {
+                coroutineScope.launch { animatedTiltX.animateTo(targetX, animationSpec) }
+                coroutineScope.launch { animatedTiltY.animateTo(targetY, animationSpec) }
+            } else {
+                coroutineScope.launch { animatedTiltX.animateTo(0f, animationSpec) }
+                coroutineScope.launch { animatedTiltY.animateTo(0f, animationSpec) }
+            }
         }
 
         override fun onAttach() {
             coroutineScope.launch {
                 interactionSource.interactions.collect { interaction: Interaction ->
                     when (interaction) {
-                        is PressInteraction.Press -> animateToTilt(targetX, targetY)
-                        is PressInteraction.Release -> animateToTilt(0f, 0f)
-                        is PressInteraction.Cancel -> animateToTilt(0f, 0f)
+                        is PressInteraction.Press -> isPressed = true
+                        is PressInteraction.Release, is PressInteraction.Cancel -> isPressed = false
+                        is HoldDownInteraction.HoldDown -> isHoldDown = true
+                        is HoldDownInteraction.Release -> isHoldDown = false
+                        else -> return@collect
                     }
+                    updateState()
                 }
             }
         }

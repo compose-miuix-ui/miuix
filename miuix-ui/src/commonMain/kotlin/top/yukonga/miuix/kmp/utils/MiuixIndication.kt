@@ -64,7 +64,7 @@ class MiuixIndication(
             var targetAlpha = 0.0f
             if (isHovered) targetAlpha += HOVER_ALPHA_DELTA
             if (isFocused) targetAlpha += FOCUS_ALPHA_DELTA
-            if (isPressed) targetAlpha += PRESS_ALPHA_DELTA
+            if (isPressed && !isHoldDown) targetAlpha += PRESS_ALPHA_DELTA
             if (isHoldDown) targetAlpha += HOLD_DOWN_ALPHA_DELTA
 
             if (targetAlpha == 0.0f) {
