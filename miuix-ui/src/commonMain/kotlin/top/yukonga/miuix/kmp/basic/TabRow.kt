@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,8 +30,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +67,7 @@ import kotlin.math.roundToInt
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
+ * @param listState The [LazyListState] to be used for the [TabRow].
  * @param interactionSource The [MutableInteractionSource] to be used for the [TabRow].
  * @param indication The [Indication] to be used for the [TabRow].
  */
@@ -80,6 +84,7 @@ fun TabRow(
     cornerRadius: Dp = TabRowDefaults.TabRowCornerRadius,
     itemSpacing: Dp = 9.dp,
     contentAlignment: Alignment = Alignment.Center,
+    listState: LazyListState? = null,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = null,
 ) {
@@ -92,22 +97,40 @@ fun TabRow(
             .height(height)
             .background(color = colors.backgroundColor(false)),
     ) {
-        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, this.maxWidth)
+        val config = rememberTabRowConfig(
+            tabs = tabs,
+            minWidth = minWidth,
+            maxWidth = maxWidth,
+            cornerRadius = cornerRadius,
+            spacing = itemSpacing,
+            lazyRowAvailableWidth = this.maxWidth,
+            listState = listState,
+        )
         val density = LocalDensity.current
         val tabWidthPx = with(density) { config.tabWidth.toPx() }
         val spacingPx = with(density) { itemSpacing.toPx() }
         val indicatorOffset = remember { Animatable(0f) }
         val availableWidth = this.maxWidth
+        var lastSettledSelectedTabIndex by remember(config.listState) { mutableIntStateOf(-1) }
 
         LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
             val target = selectedTabIndex * (tabWidthPx + spacingPx)
-            indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
+                indicatorOffset.snapTo(target)
+            } else {
+                indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+            }
         }
 
-        LaunchedEffect(selectedTabIndex, availableWidth) {
+        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - config.tabWidth) / 2
             val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
-            config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
+                config.listState.scrollToItem(selectedTabIndex, offsetPx)
+            } else {
+                config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+            }
+            lastSettledSelectedTabIndex = selectedTabIndex
         }
 
         val scrollOffset by remember {
@@ -168,6 +191,7 @@ fun TabRow(
  * @param cornerRadius The round corner radius of the tab in [TabRow].
  * @param itemSpacing The spacing between tabs in [TabRow].
  * @param contentAlignment The content alignment of the tab in [TabRow].
+ * @param listState The [LazyListState] to be used for the [TabRow].
  * @param interactionSource The [MutableInteractionSource] to be used for the [TabRow].
  * @param indication The [Indication] to be used for the [TabRow].
  */
@@ -184,6 +208,7 @@ fun TabRowWithContour(
     cornerRadius: Dp = TabRowDefaults.TabRowWithContourCornerRadius,
     itemSpacing: Dp = 5.dp,
     contentAlignment: Alignment = Alignment.Center,
+    listState: LazyListState? = null,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = null,
 ) {
@@ -198,22 +223,40 @@ fun TabRowWithContour(
             .height(height),
     ) {
         val lazyRowAvailableWidth = this.maxWidth - (contourPadding * 2)
-        val config = rememberTabRowConfig(tabs, minWidth, maxWidth, cornerRadius, itemSpacing, lazyRowAvailableWidth)
+        val config = rememberTabRowConfig(
+            tabs = tabs,
+            minWidth = minWidth,
+            maxWidth = maxWidth,
+            cornerRadius = cornerRadius,
+            spacing = itemSpacing,
+            lazyRowAvailableWidth = lazyRowAvailableWidth,
+            listState = listState,
+        )
         val density = LocalDensity.current
         val tabWidthPx = with(density) { config.tabWidth.toPx() }
         val spacingPx = with(density) { itemSpacing.toPx() }
         val indicatorOffset = remember { Animatable(0f) }
         val availableWidth = this.maxWidth
+        var lastSettledSelectedTabIndex by remember(config.listState) { mutableIntStateOf(-1) }
 
         LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
             val target = selectedTabIndex * (tabWidthPx + spacingPx)
-            indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
+                indicatorOffset.snapTo(target)
+            } else {
+                indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
+            }
         }
 
-        LaunchedEffect(selectedTabIndex, availableWidth) {
+        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - (contourPadding * 2) - config.tabWidth) / 2
             val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
-            config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
+                config.listState.scrollToItem(selectedTabIndex, offsetPx)
+            } else {
+                config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
+            }
+            lastSettledSelectedTabIndex = selectedTabIndex
         }
 
         val scrollOffset by remember {
@@ -367,14 +410,15 @@ private fun rememberTabRowConfig(
     cornerRadius: Dp,
     spacing: Dp,
     lazyRowAvailableWidth: Dp,
+    listState: LazyListState? = null,
 ): TabRowConfig {
-    val listState = rememberLazyListState()
+    val resolvedListState = listState ?: rememberLazyListState()
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
     val shape = miuixShape(cornerRadius)
 
-    return TabRowConfig(tabWidth, shape, listState)
+    return TabRowConfig(tabWidth, shape, resolvedListState)
 }
 
 private fun calculateTabWidth(
