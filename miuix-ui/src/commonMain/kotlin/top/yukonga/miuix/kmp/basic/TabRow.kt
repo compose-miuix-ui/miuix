@@ -122,7 +122,7 @@ fun TabRow(
             }
         }
 
-        LaunchedEffect(selectedTabIndex, availableWidth) {
+        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - config.tabWidth) / 2
             val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
             if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
@@ -248,7 +248,7 @@ fun TabRowWithContour(
             }
         }
 
-        LaunchedEffect(selectedTabIndex, availableWidth) {
+        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - (contourPadding * 2) - config.tabWidth) / 2
             val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
             if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
