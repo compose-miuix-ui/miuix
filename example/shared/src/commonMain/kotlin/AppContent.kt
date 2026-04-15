@@ -178,7 +178,7 @@ fun AppContent(
 
     val backStack = rememberNavBackStack(
         configuration = savedStateConfig,
-        Route.Main
+        Route.Main,
     )
     val navigator = remember { Navigator(backStack) }
 
