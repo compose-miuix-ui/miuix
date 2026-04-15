@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 val generatedSrcDir: Provider<Directory> = layout.buildDirectory.dir("generated/miuix-example")
@@ -66,6 +67,7 @@ kotlin {
                 implementation(libs.androidx.navigation3.runtime)
                 implementation(libs.aboutlibraries.core)
                 implementation(libs.jetbrains.androidx.navigationevent)
+                implementation(libs.kotlinx.serialization.core)
             }
         }
 

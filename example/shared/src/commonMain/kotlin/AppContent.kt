@@ -44,7 +44,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,16 +61,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.NavDisplayTransitionEffects
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import navigation3.Navigator
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.FabPosition
@@ -154,7 +158,28 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    val backStack = remember { mutableStateListOf<NavKey>().apply { add(Route.Main) } }
+    val serializersModule = remember {
+        SerializersModule {
+            polymorphic(NavKey::class) {
+                subclass(Route.Main::class)
+                subclass(Route.About::class)
+                subclass(Route.License::class)
+                subclass(Route.NavTest::class)
+                subclass(Route.MultiScaffoldTest::class)
+            }
+        }
+    }
+
+    val savedStateConfig = remember(serializersModule) {
+        SavedStateConfiguration {
+            this.serializersModule = serializersModule
+        }
+    }
+
+    val backStack = rememberNavBackStack(
+        configuration = savedStateConfig,
+        Route.Main,
+    )
     val navigator = remember { Navigator(backStack) }
 
     val navigationItems = remember {
