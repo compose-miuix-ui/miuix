@@ -1,6 +1,7 @@
 [versions]
 agp = "9.1.1"
 kotlin = "2.3.20"
+kotlinx-serialization = "1.11.0"
 
 about-libraries = "14.0.1"
 androidx-activity = "1.13.0"
@@ -26,6 +27,7 @@ profileinstaller = "1.4.1"
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "about-libraries" }
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -49,6 +51,7 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 androidApplication = { id = "com.android.application" } # AGP
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library" } # AGP
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform" } # KGP
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "about-libraries" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
