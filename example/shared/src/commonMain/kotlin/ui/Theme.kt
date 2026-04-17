@@ -15,7 +15,7 @@ import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 
-val LocalColorMode = compositionLocalOf<Int> { 0 }
+val LocalColorMode = compositionLocalOf { 0 }
 
 @Composable
 fun AppTheme(
@@ -38,7 +38,9 @@ fun AppTheme(
             else -> ThemeController(ColorSchemeMode.System)
         }
     }
-    CompositionLocalProvider(LocalColorMode provides colorMode) {
+    CompositionLocalProvider(
+        LocalColorMode provides colorMode,
+    ) {
         MiuixTheme(
             controller = controller,
             smoothRounding = smoothRounding,
@@ -50,12 +52,8 @@ fun AppTheme(
 @Composable
 fun isInDarkTheme(): Boolean = when (LocalColorMode.current) {
     1, 4 -> false
-
-    // Force light mode
     2, 5, 6 -> true
-
-    // Force dark mode
-    else -> isSystemInDarkTheme() // Follow system (0 or default)
+    else -> isSystemInDarkTheme()
 }
 
 val KeyColors: List<Pair<String, Color>> = listOf(

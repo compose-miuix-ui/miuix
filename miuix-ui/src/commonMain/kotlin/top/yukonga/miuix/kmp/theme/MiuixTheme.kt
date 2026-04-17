@@ -39,6 +39,7 @@ fun MiuixTheme(
         LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,
         LocalIndication provides miuixIndication,
+        LocalContentColor provides miuixColors.onBackground,
         LocalColorSchemeMode provides controller.colorSchemeMode,
         LocalOverscrollFactory provides MiuixOverscrollFactory,
         LocalSmoothRounding provides smoothRounding,
