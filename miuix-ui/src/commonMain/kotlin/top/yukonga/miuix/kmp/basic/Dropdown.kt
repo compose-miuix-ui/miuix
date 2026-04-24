@@ -66,20 +66,27 @@ fun DropdownImpl(
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     onSelectedIndexChange: (Int) -> Unit,
+    enabled: Boolean = true,
 ) {
     val additionalTopPadding = if (index == 0) 20.dp else 12.dp
     val additionalBottomPadding = if (index == optionSize - 1) 20.dp else 12.dp
 
-    val (textColor, backgroundColor) = if (isSelected) {
-        dropdownColors.selectedContentColor to dropdownColors.selectedContainerColor
+    val backgroundColor = if (isSelected) {
+        dropdownColors.selectedContainerColor
     } else {
-        dropdownColors.contentColor to dropdownColors.containerColor
+        dropdownColors.containerColor
     }
 
-    val checkColor = if (isSelected) {
-        dropdownColors.selectedContentColor
-    } else {
-        Color.Transparent
+    val textColor = when {
+        !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        isSelected -> dropdownColors.selectedContentColor
+        else -> dropdownColors.contentColor
+    }
+
+    val checkColor = when {
+        !isSelected -> Color.Transparent
+        !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        else -> dropdownColors.selectedContentColor
     }
 
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
@@ -88,7 +95,7 @@ fun DropdownImpl(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .drawBehind { drawRect(backgroundColor) }
-            .clickable { currentOnSelectedIndexChange(index) }
+            .clickable(enabled = enabled) { currentOnSelectedIndexChange(index) }
             .padding(horizontal = 20.dp)
             .padding(
                 top = additionalTopPadding,
@@ -224,9 +231,16 @@ data class DropdownColors(
 
 @Immutable
 data class DropdownEntry(
-    val items: List<String>,
-    val selectedIndex: Int?,
-    val onSelectedIndexChange: ((Int) -> Unit)?,
+    val items: List<DropdownItem>,
+    val selectedIndex: Int? = null,
+    val onSelectedIndexChange: ((Int) -> Unit)? = null,
+)
+
+@Immutable
+data class DropdownItem(
+    val text: String,
+    val enabled: Boolean = true,
+    val onClick: (() -> Unit)? = null,
 )
 
 object DropdownDefaults {

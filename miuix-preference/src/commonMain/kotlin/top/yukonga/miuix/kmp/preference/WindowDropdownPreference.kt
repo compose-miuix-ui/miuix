@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
@@ -78,7 +79,7 @@ fun WindowDropdownPreference(
 ) {
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
-    ) { DropdownEntry(items, selectedIndex, onSelectedIndexChange) }
+    ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     return WindowDropdownPreference(
         entry = entry,
         title = title,
@@ -113,7 +114,7 @@ private fun WindowDropdownPreferencePopup(
 ) {
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
-    ) { DropdownEntry(items, selectedIndex, onSelectedIndexChange) }
+    ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     return WindowDropdownPreferencePopup(
         entry = entry,
         isDropdownExpanded = isDropdownExpanded,
@@ -191,9 +192,10 @@ fun WindowDropdownPreference(
         startAction = startAction,
         endActions = {
             if (showValue && itemsNotEmpty) {
-                if (entry.selectedIndex != null)
+                val text = entry.selectedIndex?.let { entry.items.getOrNull(it)?.text }
+                if (!text.isNullOrEmpty())
                     Text(
-                        text = entry.items[entry.selectedIndex!!],
+                        text = text,
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .align(Alignment.CenterVertically)
@@ -259,13 +261,14 @@ private fun WindowDropdownPreferencePopup(
             }
         }
         ListPopupColumn {
-            entry.items.forEachIndexed { index, string ->
+            entry.items.forEachIndexed { index, item ->
                 key(index) {
                     DropdownImpl(
-                        text = string,
+                        text = item.text,
                         optionSize = entry.items.size,
                         isSelected = entry.selectedIndex == index,
                         dropdownColors = dropdownColors,
+                        enabled = item.enabled,
                         onSelectedIndexChange = onItemSelected,
                         index = index,
                     )
@@ -340,7 +343,7 @@ fun WindowDropdownPreference(
         startAction = startAction,
         endActions = {
             val selectedValueText = entries.joinToString("\n") { group ->
-                group.selectedIndex?.let { index -> group.items.getOrNull(index) } ?: ""
+                group.selectedIndex?.let { index -> group.items.getOrNull(index)?.text } ?: ""
             }.ifBlank { null }
             if (showValue && entriesNotEmpty && !selectedValueText.isNullOrBlank()) {
                 Text(
@@ -411,10 +414,11 @@ private fun WindowDropdownPreferencePopup(
             entries.forEachIndexed { entryIdx, entry ->
                 entry.items.forEachIndexed { itemIdx, option ->
                     DropdownImpl(
-                        text = option,
+                        text = option.text,
                         optionSize = entry.items.size,
                         isSelected = entry.selectedIndex == itemIdx,
                         dropdownColors = dropdownColors,
+                        enabled = option.enabled,
                         onSelectedIndexChange = { selectedIdx ->
                             onItemSelected(entryIdx, selectedIdx)
                         },
