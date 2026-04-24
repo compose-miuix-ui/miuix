@@ -79,7 +79,7 @@ fun WindowDropdownPreference(
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
-    return WindowDropdownPreference(
+    WindowDropdownPreference(
         entry = entry,
         title = title,
         modifier = modifier,
@@ -113,7 +113,7 @@ private fun WindowDropdownPreferencePopup(
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
-    return WindowDropdownPreferencePopup(
+    WindowDropdownPreferencePopup(
         entry = entry,
         isDropdownExpanded = isDropdownExpanded,
         onDismiss = onDismiss,

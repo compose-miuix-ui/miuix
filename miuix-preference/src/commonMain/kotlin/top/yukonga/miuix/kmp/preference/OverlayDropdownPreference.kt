@@ -82,7 +82,7 @@ fun OverlayDropdownPreference(
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
-    return OverlayDropdownPreference(
+    OverlayDropdownPreference(
         entry = entry,
         title = title,
         modifier = modifier,
@@ -118,7 +118,7 @@ private fun OverlayDropdownPreferencePopup(
     val entry = remember(
         items, selectedIndex, onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
-    return OverlayDropdownPreferencePopup(
+    OverlayDropdownPreferencePopup(
         entry = entry,
         isDropdownExpanded = isDropdownExpanded,
         onDismiss = onDismiss,
@@ -423,7 +423,7 @@ private fun OverlayDropdownPreferencePopup(
         ListPopupColumn {
             entries.forEachIndexed { entryIdx, entry ->
                 entry.items.forEachIndexed { itemIdx, option ->
-                    key(entryIdx, itemIdx){
+                    key(entryIdx, itemIdx) {
                         DropdownImpl(
                             text = option.text,
                             optionSize = entry.items.size,
