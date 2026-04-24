@@ -87,6 +87,31 @@ Box {
 | ------- | ---------------------- | ---------------------- | ------ |
 | content | @Composable () -> Unit | 要在列内显示的列表内容 | -      |
 
+### DropdownImpl
+
+`DropdownImpl` 可作为 `ListPopupColumn` 内的标准选项行使用。设置 `enabled = false` 可以禁用某一行；禁用行不可点击，并使用禁用文本颜色。
+
+```kotlin
+DropdownImpl(
+    text = "禁用选项",
+    optionSize = items.size,
+    isSelected = false,
+    onSelectedIndexChange = {},
+    index = 1,
+    enabled = false
+)
+```
+
+| 属性名                | 类型          | 说明               | 默认值                            |
+| --------------------- | ------------- | ------------------ | --------------------------------- |
+| text                  | String        | 选项显示文本       | -                                 |
+| optionSize            | Int           | 选项总数           | -                                 |
+| isSelected            | Boolean       | 此选项是否被选中   | -                                 |
+| index                 | Int           | 此选项的索引       | -                                 |
+| dropdownColors        | DropdownColors | 选项颜色配置      | DropdownDefaults.dropdownColors() |
+| onSelectedIndexChange | (Int) -> Unit | 点击此选项时的回调 | -                                 |
+| enabled               | Boolean       | 此选项是否可点击   | true                              |
+
 ### PopupPositionProvider.Align
 
 | 值          | 说明                         |

@@ -125,6 +125,31 @@ OverlayListPopup(
 | ------------- | ---------------------- | ---------------------------------------------- | ------------- |
 | content       | @Composable () -> Unit | The list content to display inside the column. | -             |
 
+### DropdownImpl
+
+`DropdownImpl` can be used as a standard row inside `ListPopupColumn`. Set `enabled = false` to disable a row; disabled rows are not clickable and use the disabled text color.
+
+```kotlin
+DropdownImpl(
+    text = "Disabled option",
+    optionSize = items.size,
+    isSelected = false,
+    onSelectedIndexChange = {},
+    index = 1,
+    enabled = false
+)
+```
+
+| Property Name         | Type           | Description                                 | Default Value                     |
+| --------------------- | -------------- | ------------------------------------------- | --------------------------------- |
+| text                  | String         | Text shown for the option                   | -                                 |
+| optionSize            | Int            | Total number of options                     | -                                 |
+| isSelected            | Boolean        | Whether this option is selected             | -                                 |
+| index                 | Int            | Index of this option                        | -                                 |
+| dropdownColors        | DropdownColors | Color configuration for the option          | DropdownDefaults.dropdownColors() |
+| onSelectedIndexChange | (Int) -> Unit  | Callback when this option is clicked        | -                                 |
+| enabled               | Boolean        | Whether this option can be clicked          | true                              |
+
 ### PopupPositionProvider.Align
 
 | Value       | Description                                         |
