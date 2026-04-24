@@ -220,6 +220,13 @@ data class DropdownColors(
     val selectedContainerColor: Color,
 )
 
+@Immutable
+data class MultiGroupDropdownEntry(
+    val items: List<String>,
+    val selectedIndex: Int,
+    val onSelectedIndexChange: (Int) -> Unit,
+)
+
 object DropdownDefaults {
 
     @Composable

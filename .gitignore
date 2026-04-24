@@ -22,6 +22,7 @@
 .idea/deviceManager.xml
 .idea/gradle.xml
 .idea/copilot*
+.idea/material_theme_project_new.xml
 .fleet
 .vscode
 .DS_Store
