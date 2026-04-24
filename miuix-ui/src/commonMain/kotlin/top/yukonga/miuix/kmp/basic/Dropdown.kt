@@ -240,7 +240,7 @@ data class DropdownEntry(
 data class DropdownItem(
     val text: String,
     val enabled: Boolean = true,
-    val onClick: (() -> Unit)? = null,
+    val onClick: (() -> Unit)? = null, // TODO: use for dropdown menu
 )
 
 object DropdownDefaults {

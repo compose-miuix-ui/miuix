@@ -73,7 +73,6 @@ fun WindowDropdownPreference(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
-    // collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
@@ -109,7 +108,6 @@ private fun WindowDropdownPreferencePopup(
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
-    // collapseOnSelection: Boolean,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val entry = remember(
@@ -413,17 +411,19 @@ private fun WindowDropdownPreferencePopup(
         ListPopupColumn {
             entries.forEachIndexed { entryIdx, entry ->
                 entry.items.forEachIndexed { itemIdx, option ->
-                    DropdownImpl(
-                        text = option.text,
-                        optionSize = entry.items.size,
-                        isSelected = entry.selectedIndex == itemIdx,
-                        dropdownColors = dropdownColors,
-                        enabled = option.enabled,
-                        onSelectedIndexChange = { selectedIdx ->
-                            onItemSelected(entryIdx, selectedIdx)
-                        },
-                        index = itemIdx,
-                    )
+                    key(entryIdx, itemIdx) {
+                        DropdownImpl(
+                            text = option.text,
+                            optionSize = entry.items.size,
+                            isSelected = entry.selectedIndex == itemIdx,
+                            dropdownColors = dropdownColors,
+                            enabled = option.enabled,
+                            onSelectedIndexChange = { selectedIdx ->
+                                onItemSelected(entryIdx, selectedIdx)
+                            },
+                            index = itemIdx,
+                        )
+                    }
                 }
                 if (entryIdx != entries.lastIndex) {
                     HorizontalDivider(

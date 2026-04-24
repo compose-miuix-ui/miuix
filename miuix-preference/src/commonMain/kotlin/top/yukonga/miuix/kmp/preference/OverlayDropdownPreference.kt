@@ -76,7 +76,6 @@ fun OverlayDropdownPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    // collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
@@ -114,7 +113,6 @@ private fun OverlayDropdownPreferencePopup(
     dropdownColors: DropdownColors,
     hapticFeedback: HapticFeedback,
     renderInRootScaffold: Boolean,
-    // collapseOnSelection: Boolean,
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val entry = remember(
@@ -425,17 +423,19 @@ private fun OverlayDropdownPreferencePopup(
         ListPopupColumn {
             entries.forEachIndexed { entryIdx, entry ->
                 entry.items.forEachIndexed { itemIdx, option ->
-                    DropdownImpl(
-                        text = option.text,
-                        optionSize = entry.items.size,
-                        isSelected = entry.selectedIndex == itemIdx,
-                        dropdownColors = dropdownColors,
-                        enabled = option.enabled,
-                        onSelectedIndexChange = { selectedIdx ->
-                            onItemSelected(entryIdx, selectedIdx)
-                        },
-                        index = itemIdx,
-                    )
+                    key(entryIdx, itemIdx){
+                        DropdownImpl(
+                            text = option.text,
+                            optionSize = entry.items.size,
+                            isSelected = entry.selectedIndex == itemIdx,
+                            dropdownColors = dropdownColors,
+                            enabled = option.enabled,
+                            onSelectedIndexChange = { selectedIdx ->
+                                onItemSelected(entryIdx, selectedIdx)
+                            },
+                            index = itemIdx,
+                        )
+                    }
                 }
                 if (entryIdx != entries.lastIndex) {
                     HorizontalDivider(
