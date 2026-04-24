@@ -103,7 +103,8 @@ fun DropdownImpl(
             color = textColor,
         )
 
-        val checkColorFilter = remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
+        val checkColorFilter =
+            remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
@@ -200,7 +201,8 @@ fun SpinnerItemImpl(
                 }
             }
         }
-        val selectColorFilter = remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
+        val selectColorFilter =
+            remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
@@ -221,10 +223,10 @@ data class DropdownColors(
 )
 
 @Immutable
-data class MultiGroupDropdownEntry(
+data class DropdownEntry(
     val items: List<String>,
-    val selectedIndex: Int,
-    val onSelectedIndexChange: (Int) -> Unit,
+    val selectedIndex: Int?,
+    val onSelectedIndexChange: ((Int) -> Unit)?,
 )
 
 object DropdownDefaults {
@@ -235,7 +237,12 @@ object DropdownDefaults {
         containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
         selectedContentColor: Color = MiuixTheme.colorScheme.primary,
         selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-    ): DropdownColors = remember(contentColor, containerColor, selectedContentColor, selectedContainerColor) {
+    ): DropdownColors = remember(
+        contentColor,
+        containerColor,
+        selectedContentColor,
+        selectedContainerColor,
+    ) {
         DropdownColors(
             contentColor = contentColor,
             containerColor = containerColor,

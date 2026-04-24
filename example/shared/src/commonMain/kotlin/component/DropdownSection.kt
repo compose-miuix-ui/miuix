@@ -13,12 +13,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MultiGroupDropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
-import top.yukonga.miuix.kmp.preference.OverlayMultiGroupDropdownPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
-import top.yukonga.miuix.kmp.preference.WindowMultiGroupDropdownPreference
 
 fun LazyListScope.dropdownSection() {
     item(key = "dropdown") {
@@ -54,17 +52,17 @@ fun LazyListScope.dropdownSection() {
             overlayGroup3DropdownOptionSelected,
         ) {
             listOf(
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option A-1", "Option A-2"),
                     selectedIndex = overlayGroup1DropdownOptionSelected,
                     onSelectedIndexChange = { overlayGroup1DropdownOptionSelected = it },
                 ),
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option B-1", "Option B-2", "Option B-3"),
                     selectedIndex = overlayGroup2DropdownOptionSelected,
                     onSelectedIndexChange = { overlayGroup2DropdownOptionSelected = it },
                 ),
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option C-1", "Option C-2", "Option C-3", "Option C-4"),
                     selectedIndex = overlayGroup3DropdownOptionSelected,
                     onSelectedIndexChange = { overlayGroup3DropdownOptionSelected = it },
@@ -82,17 +80,17 @@ fun LazyListScope.dropdownSection() {
             windowGroup3DropdownOptionSelected,
         ) {
             listOf(
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option A-1", "Option A-2"),
                     selectedIndex = windowGroup1DropdownOptionSelected,
                     onSelectedIndexChange = { windowGroup1DropdownOptionSelected = it },
                 ),
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option B-1", "Option B-2", "Option B-3"),
                     selectedIndex = windowGroup2DropdownOptionSelected,
                     onSelectedIndexChange = { windowGroup2DropdownOptionSelected = it },
                 ),
-                MultiGroupDropdownEntry(
+                DropdownEntry(
                     items = listOf("Option C-1", "Option C-2", "Option C-3", "Option C-4"),
                     selectedIndex = windowGroup3DropdownOptionSelected,
                     onSelectedIndexChange = { windowGroup3DropdownOptionSelected = it },
@@ -140,14 +138,14 @@ fun LazyListScope.dropdownSection() {
                 onSelectedIndexChange = {},
                 enabled = false,
             )
-            OverlayMultiGroupDropdownPreference(
+            OverlayDropdownPreference(
                 title = "MultiGroup\nDropdownPref",
                 summary = if (overlayMultiGroupExpanded) "Expanded" else "Collapsed",
                 entries = overlayMultiGroupOptions,
                 collapseOnSelection = false,
                 onExpandedChange = { overlayMultiGroupExpanded = it },
             )
-            WindowMultiGroupDropdownPreference(
+            WindowDropdownPreference(
                 title = "WindowMultiGroup\nDropdownPref",
                 summary = if (windowMultiGroupExpanded) "Expanded" else "Collapsed",
                 entries = windowMultiGroupOptions,
