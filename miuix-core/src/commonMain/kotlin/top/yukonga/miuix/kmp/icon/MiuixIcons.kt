@@ -6,6 +6,8 @@ package top.yukonga.miuix.kmp.icon
 object MiuixIcons {
     object Basic
     object Light
+    object Normal
     object Regular
-    object Heavy
+    object Medium
+    object Demibold
 }

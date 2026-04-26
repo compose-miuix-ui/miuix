@@ -16,6 +16,8 @@ data class SvgPath(
     val transform: String = "",
 )
 
+private val WEIGHT_NAMES = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+
 /** Simple CLI entry that converts Compose vector icon definitions to SVG files. */
 fun main(args: Array<String>) {
     val map = mutableMapOf<String, String>()
@@ -270,15 +272,10 @@ fun main(args: Array<String>) {
                         file.path.contains("basic${File.separator}") || file.path.contains("basic/") || file.path.contains("basic\\")
                     val targetMap = if (isBasic) basicIconsMap else extendedIconsMap
 
-                    if (iconName.endsWith(".Regular")) {
-                        val simpleName = iconName.removeSuffix(".Regular")
-                        targetMap.getOrPut(simpleName) { mutableMapOf() }["Regular"] = relativePath
-                    } else if (iconName.endsWith(".Light")) {
-                        val simpleName = iconName.removeSuffix(".Light")
-                        targetMap.getOrPut(simpleName) { mutableMapOf() }["Light"] = relativePath
-                    } else if (iconName.endsWith(".Heavy")) {
-                        val simpleName = iconName.removeSuffix(".Heavy")
-                        targetMap.getOrPut(simpleName) { mutableMapOf() }["Heavy"] = relativePath
+                    val matchedWeight = WEIGHT_NAMES.firstOrNull { iconName.endsWith(".$it") }
+                    if (matchedWeight != null) {
+                        val simpleName = iconName.removeSuffix(".$matchedWeight")
+                        targetMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
                     } else if (!iconName.contains(".")) {
                         targetMap.getOrPut(iconName) { mutableMapOf() }["Regular"] = relativePath
                     }
@@ -289,24 +286,27 @@ fun main(args: Array<String>) {
 
     println("[iconGen] Generated $count SVG(s) into $dest")
     if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty())) {
-        fun generateTable(map: Map<String, Map<String, String>>, header: String): String {
+        val separator = "|" + "---|".repeat(WEIGHT_NAMES.size + 1)
+        fun generateTable(map: Map<String, Map<String, String>>, nameHeader: String): String {
             val sb = StringBuilder()
-            sb.append(header).append("\n")
-            sb.append("|---|---|---|---|\n")
+            sb.append("| $nameHeader | ").append(WEIGHT_NAMES.joinToString(" | ")).append(" |\n")
+            sb.append(separator).append("\n")
             map.keys.sorted().forEach { name ->
                 val variants = map[name]!!
-                val light = variants["Light"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
-                val regular = variants["Regular"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
-                val heavy = variants["Heavy"]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
-                sb.append("| `$name` | $light | $regular | $heavy |\n")
+                sb.append("| `$name` |")
+                WEIGHT_NAMES.forEach { weight ->
+                    val cell = variants[weight]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
+                    sb.append(" ").append(cell).append(" |")
+                }
+                sb.append("\n")
             }
             return sb.toString()
         }
 
         // Generate English Doc
         if (docFilePath != null || docFilePathZh == null) {
-            val basicTable = generateTable(basicIconsMap, "| Icon Name | Light | Regular | Heavy |")
-            val extendedTable = generateTable(extendedIconsMap, "| Icon Name | Light | Regular | Heavy |")
+            val basicTable = generateTable(basicIconsMap, "Icon Name")
+            val extendedTable = generateTable(extendedIconsMap, "Icon Name")
 
             val content = StringBuilder()
             content.append("### Basic Icons\n\n")
@@ -327,8 +327,8 @@ fun main(args: Array<String>) {
 
         // Generate Chinese Doc
         if (docFilePathZh != null) {
-            val basicTable = generateTable(basicIconsMap, "| 图标名称 | Light | Regular | Heavy |")
-            val extendedTable = generateTable(extendedIconsMap, "| 图标名称 | Light | Regular | Heavy |")
+            val basicTable = generateTable(basicIconsMap, "图标名称")
+            val extendedTable = generateTable(extendedIconsMap, "图标名称")
 
             val content = StringBuilder()
             content.append("### Basic（基础图标）\n\n")
