@@ -3,9 +3,12 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -48,6 +53,8 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.ExpandLess
+import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -79,10 +86,16 @@ fun IconsPage(
 
     // Icon data
     val allIcons = remember { MiuixIcons.All }
-    val lightIcons = remember(allIcons) { allIcons["Light"] ?: emptyList() }
     val regularIcons = remember(allIcons) { allIcons["Regular"] ?: emptyList() }
-    val heavyIcons = remember(allIcons) { allIcons["Heavy"] ?: emptyList() }
-    val iconNames = remember(lightIcons) { lightIcons.map { it.name.substringBefore(".") } }
+    val weightVariants: List<Pair<String, List<ImageVector>>> = remember(allIcons) {
+        listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
+            name to (allIcons[name] ?: emptyList())
+        }
+    }
+    val iconNames = remember(regularIcons) { regularIcons.map { it.name.substringBefore(".") } }
+
+    // Accordion state — only one row may be expanded at a time. -1 = none.
+    var expandedIndex by remember { mutableIntStateOf(-1) }
 
     // Search filtering
     val filteredIndices = remember(searchStatus.searchText, iconNames) {
@@ -226,80 +239,86 @@ fun IconsPage(
                     ) {
                         Text(
                             text = "Name",
-                            modifier = Modifier.weight(2f),
+                            modifier = Modifier.weight(1f),
                             style = MiuixTheme.textStyles.footnote1,
                             color = colorScheme.onSurfaceVariantActions,
                         )
                         Text(
-                            text = "Light",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
+                            text = "Tap to compare weights",
+                            style = MiuixTheme.textStyles.footnote2,
                             color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "Regular",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "Heavy",
-                            modifier = Modifier.weight(1f),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = colorScheme.onSurfaceVariantActions,
-                            textAlign = TextAlign.Center,
                         )
                     }
                 }
                 items(
-                    count = lightIcons.size,
+                    count = regularIcons.size,
                     key = { "icon_$it" },
                 ) { index ->
-                    val isLast = index == lightIcons.lastIndex
+                    val isLast = index == regularIcons.lastIndex
                     val shape = if (isLast) IconListBottomShape else RectangleShape
                     val bottomPadding = if (isLast) 6.dp else 0.dp
-                    Row(
+                    val expanded = expandedIndex == index
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp)
                             .clip(shape)
                             .background(colorScheme.surfaceContainer)
+                            .clickable { expandedIndex = if (expanded) -1 else index }
                             .padding(horizontal = 16.dp)
                             .padding(vertical = 6.dp)
                             .padding(bottom = bottomPadding),
-                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = iconNames[index],
-                            modifier = Modifier.weight(2f),
-                            style = MiuixTheme.textStyles.body2,
-                            color = colorScheme.onSurface,
-                        )
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = lightIcons[index],
-                                contentDescription = lightIcons[index].name,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = iconNames[index],
+                                modifier = Modifier.weight(1f),
+                                style = MiuixTheme.textStyles.body2,
+                                color = colorScheme.onSurface,
                             )
-                        }
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = regularIcons[index],
-                                contentDescription = regularIcons[index].name,
+                                contentDescription = iconNames[index],
                                 tint = colorScheme.onBackground,
                                 modifier = Modifier.size(24.dp),
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                            Icon(
+                                imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
+                                contentDescription = if (expanded) "Collapse" else "Expand",
+                                tint = colorScheme.onSurfaceVariantActions,
+                                modifier = Modifier.size(18.dp),
                             )
                         }
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = heavyIcons[index],
-                                contentDescription = heavyIcons[index].name,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
-                            )
+                        AnimatedVisibility(visible = expanded) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp, bottom = 4.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                weightVariants.forEach { (label, icons) ->
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Icon(
+                                            imageVector = icons[index],
+                                            contentDescription = "${iconNames[index]} ($label)",
+                                            tint = colorScheme.onBackground,
+                                            modifier = Modifier.size(28.dp),
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = label,
+                                            style = MiuixTheme.textStyles.footnote2,
+                                            color = colorScheme.onSurfaceVariantActions,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -408,7 +408,7 @@ private fun CompactScreenLayout(
             SnackbarHost(state = snackbarHostState)
         },
     ) { innerPadding ->
-        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+        Box(modifier = Modifier.layerBackdrop(backdrop)) {
             AppPager(
                 snackbarHostState = snackbarHostState,
                 padding = innerPadding,
