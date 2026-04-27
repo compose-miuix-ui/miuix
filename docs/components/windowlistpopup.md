@@ -49,11 +49,11 @@ Box {
                     text = string,
                     optionSize = items.size,
                     isSelected = selectedIndex == index,
+                    index = index,
                     onSelectedIndexChange = {
                         selectedIndex = index
                         dismiss?.invoke()
-                    },
-                    index = index
+                    }
                 )
             }
         }
@@ -82,6 +82,31 @@ Box {
 | Property Name | Type                   | Description                                    | Default Value |
 | ------------- | ---------------------- | ---------------------------------------------- | ------------- |
 | content       | @Composable () -> Unit | The list content to display inside the column. | -             |
+
+### DropdownImpl
+
+`DropdownImpl` can be used as a standard row inside `ListPopupColumn`. Set `enabled = false` to disable a row; disabled rows are not clickable and use the disabled text color.
+
+```kotlin
+DropdownImpl(
+    text = "Disabled option",
+    optionSize = items.size,
+    isSelected = false,
+    index = 1,
+    enabled = false,
+    onSelectedIndexChange = {}
+)
+```
+
+| Property Name         | Type           | Description                          | Default Value                     |
+| --------------------- | -------------- | ------------------------------------ | --------------------------------- |
+| text                  | String         | Text shown for the option            | -                                 |
+| optionSize            | Int            | Total number of options              | -                                 |
+| isSelected            | Boolean        | Whether this option is selected      | -                                 |
+| index                 | Int            | Index of this option                 | -                                 |
+| dropdownColors        | DropdownColors | Color configuration for the option   | DropdownDefaults.dropdownColors() |
+| enabled               | Boolean        | Whether this option can be clicked   | true                              |
+| onSelectedIndexChange | (Int) -> Unit  | Callback when this option is clicked | -                                 |
 
 ### PopupPositionProvider.Align
 

@@ -34,7 +34,7 @@ fun SuperListPopupDemo() {
         ) {
             var showPopup by remember { mutableStateOf(false) }
             var selectedIndex by remember { mutableIntStateOf(0) }
-            val items = listOf("Option 1", "Option 2", "Option 3")
+            val items = listOf("Option 1", "Disabled option", "Option 3")
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.TopCenter,
@@ -56,11 +56,12 @@ fun SuperListPopupDemo() {
                                     text = string,
                                     optionSize = items.size,
                                     isSelected = selectedIndex == index,
+                                    index = index,
+                                    enabled = index != 1,
                                     onSelectedIndexChange = { selectedIdx ->
                                         selectedIndex = selectedIdx
                                         showPopup = false // Close the popup menu
                                     },
-                                    index = index,
                                 )
                             }
                         }

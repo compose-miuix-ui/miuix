@@ -56,7 +56,9 @@ fun RowScope.DropdownArrowEndAction(
  * @param optionSize The size of the options.
  * @param isSelected Whether the option is selected.
  * @param index The index of the current option in the options.
- * @param onSelectedIndexChange The callback when the index is selected.
+ * @param dropdownColors The [DropdownColors] used to style the option row.
+ * @param enabled Whether the option is clickable. Disabled rows ignore clicks and use the disabled text color.
+ * @param onSelectedIndexChange The callback invoked with [index] when the option is selected.
  */
 @Composable
 fun DropdownImpl(
@@ -65,21 +67,28 @@ fun DropdownImpl(
     isSelected: Boolean,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
+    enabled: Boolean = true,
     onSelectedIndexChange: (Int) -> Unit,
 ) {
     val additionalTopPadding = if (index == 0) 20.dp else 12.dp
     val additionalBottomPadding = if (index == optionSize - 1) 20.dp else 12.dp
 
-    val (textColor, backgroundColor) = if (isSelected) {
-        dropdownColors.selectedContentColor to dropdownColors.selectedContainerColor
+    val backgroundColor = if (isSelected) {
+        dropdownColors.selectedContainerColor
     } else {
-        dropdownColors.contentColor to dropdownColors.containerColor
+        dropdownColors.containerColor
     }
 
-    val checkColor = if (isSelected) {
-        dropdownColors.selectedContentColor
-    } else {
-        Color.Transparent
+    val textColor = when {
+        !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        isSelected -> dropdownColors.selectedContentColor
+        else -> dropdownColors.contentColor
+    }
+
+    val checkColor = when {
+        !isSelected -> Color.Transparent
+        !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        else -> dropdownColors.selectedContentColor
     }
 
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
@@ -88,7 +97,7 @@ fun DropdownImpl(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .drawBehind { drawRect(backgroundColor) }
-            .clickable { currentOnSelectedIndexChange(index) }
+            .clickable(enabled = enabled) { currentOnSelectedIndexChange(index) }
             .padding(horizontal = 20.dp)
             .padding(
                 top = additionalTopPadding,
@@ -103,7 +112,8 @@ fun DropdownImpl(
             color = textColor,
         )
 
-        val checkColorFilter = remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
+        val checkColorFilter =
+            remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
@@ -122,6 +132,7 @@ fun DropdownImpl(
  * @param entryCount the count of the entries in the spinner.
  * @param isSelected whether the entry is selected.
  * @param index the index of the entry.
+ * @param spinnerColors the [SpinnerColors] used to style the entry row.
  * @param dialogMode whether the spinner is in dialog mode.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the spinner is changed.
  */
@@ -200,7 +211,8 @@ fun SpinnerItemImpl(
                 }
             }
         }
-        val selectColorFilter = remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
+        val selectColorFilter =
+            remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
@@ -220,6 +232,20 @@ data class DropdownColors(
     val selectedContainerColor: Color,
 )
 
+@Immutable
+data class DropdownEntry(
+    val items: List<DropdownItem>,
+    val selectedIndex: Int? = null,
+    val onSelectedIndexChange: ((Int) -> Unit)? = null,
+)
+
+@Immutable
+data class DropdownItem(
+    val text: String,
+    val enabled: Boolean = true,
+    val onClick: (() -> Unit)? = null, // TODO: use for dropdown menu
+)
+
 object DropdownDefaults {
 
     @Composable
@@ -228,7 +254,12 @@ object DropdownDefaults {
         containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
         selectedContentColor: Color = MiuixTheme.colorScheme.primary,
         selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-    ): DropdownColors = remember(contentColor, containerColor, selectedContentColor, selectedContainerColor) {
+    ): DropdownColors = remember(
+        contentColor,
+        containerColor,
+        selectedContentColor,
+        selectedContainerColor,
+    ) {
         DropdownColors(
             contentColor = contentColor,
             containerColor = containerColor,

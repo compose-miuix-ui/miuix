@@ -318,12 +318,12 @@ fun TopBarActions() {
                             text = string,
                             optionSize = TopBarPopupItems.size,
                             isSelected = selectedIndex == index,
+                            index = index,
                             onSelectedIndexChange = { selectedIdx ->
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                 selectedIndex = selectedIdx
                                 state?.invoke()
                             },
-                            index = index,
                         )
                     }
                 }
