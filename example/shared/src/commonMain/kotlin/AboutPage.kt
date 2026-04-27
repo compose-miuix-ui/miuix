@@ -573,8 +573,8 @@ private fun AboutContent(
                                             text = text,
                                             optionSize = effectVariantOptions.size,
                                             isSelected = selectedIndex == index,
-                                            dropdownColors = DropdownDefaults.dropdownColors(),
                                             index = index,
+                                            dropdownColors = DropdownDefaults.dropdownColors(),
                                             onSelectedIndexChange = { selectedIdx ->
                                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                                                 isOs3Effect = (selectedIdx == 1)

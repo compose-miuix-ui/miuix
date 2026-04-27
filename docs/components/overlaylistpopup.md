@@ -54,11 +54,11 @@ Scaffold {
                         text = string,
                         optionSize = items.size,
                         isSelected = selectedIndex == index,
+                        index = index,
                         onSelectedIndexChange = {
                             selectedIndex = index
                             showPopup = false // Close the popup menu
-                        },
-                        index = index
+                        }
                     )
                 }
             }
@@ -134,9 +134,9 @@ DropdownImpl(
     text = "Disabled option",
     optionSize = items.size,
     isSelected = false,
-    onSelectedIndexChange = {},
     index = 1,
-    enabled = false
+    enabled = false,
+    onSelectedIndexChange = {}
 )
 ```
 
@@ -147,8 +147,8 @@ DropdownImpl(
 | isSelected            | Boolean        | Whether this option is selected             | -                                 |
 | index                 | Int            | Index of this option                        | -                                 |
 | dropdownColors        | DropdownColors | Color configuration for the option          | DropdownDefaults.dropdownColors() |
-| onSelectedIndexChange | (Int) -> Unit  | Callback when this option is clicked        | -                                 |
 | enabled               | Boolean        | Whether this option can be clicked          | true                              |
+| onSelectedIndexChange | (Int) -> Unit  | Callback when this option is clicked        | -                                 |
 
 ### PopupPositionProvider.Align
 

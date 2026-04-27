@@ -56,12 +56,12 @@ fun WindowListPopupDemo() {
                                 text = string,
                                 optionSize = items.size,
                                 isSelected = selectedIndex == index,
+                                index = index,
                                 enabled = index != 1,
                                 onSelectedIndexChange = { selectedIdx ->
                                     selectedIndex = selectedIdx
                                     dismissState?.invoke()
                                 },
-                                index = index,
                             )
                         }
                     }

@@ -77,7 +77,9 @@ fun WindowDropdownPreference(
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val entry = remember(
-        items, selectedIndex, onSelectedIndexChange,
+        items,
+        selectedIndex,
+        onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     WindowDropdownPreference(
         entry = entry,
@@ -111,7 +113,9 @@ private fun WindowDropdownPreferencePopup(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val entry = remember(
-        items, selectedIndex, onSelectedIndexChange,
+        items,
+        selectedIndex,
+        onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     WindowDropdownPreferencePopup(
         entry = entry,
@@ -191,7 +195,7 @@ fun WindowDropdownPreference(
         endActions = {
             if (showValue && itemsNotEmpty) {
                 val text = entry.selectedIndex?.let { entry.items.getOrNull(it)?.text }
-                if (!text.isNullOrEmpty())
+                if (!text.isNullOrEmpty()) {
                     Text(
                         text = text,
                         modifier = Modifier
@@ -202,6 +206,7 @@ fun WindowDropdownPreference(
                         color = actionColor,
                         textAlign = TextAlign.End,
                     )
+                }
             }
             DropdownArrowEndAction(
                 actionColor = actionColor,
@@ -265,10 +270,10 @@ private fun WindowDropdownPreferencePopup(
                         text = item.text,
                         optionSize = entry.items.size,
                         isSelected = entry.selectedIndex == index,
+                        index = index,
                         dropdownColors = dropdownColors,
                         enabled = item.enabled,
                         onSelectedIndexChange = onItemSelected,
-                        index = index,
                     )
                 }
             }
@@ -416,12 +421,12 @@ private fun WindowDropdownPreferencePopup(
                             text = option.text,
                             optionSize = entry.items.size,
                             isSelected = entry.selectedIndex == itemIdx,
+                            index = itemIdx,
                             dropdownColors = dropdownColors,
                             enabled = option.enabled,
                             onSelectedIndexChange = { selectedIdx ->
                                 onItemSelected(entryIdx, selectedIdx)
                             },
-                            index = itemIdx,
                         )
                     }
                 }

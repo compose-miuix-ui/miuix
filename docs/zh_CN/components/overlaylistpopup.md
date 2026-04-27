@@ -54,11 +54,11 @@ Scaffold {
                         text = string,
                         optionSize = items.size,
                         isSelected = selectedIndex == index,
+                        index = index,
                         onSelectedIndexChange = {
                             selectedIndex = index
                             showPopup = false // 关闭弹窗菜单
-                        },
-                        index = index
+                        }
                     )
                 }
             }
@@ -135,9 +135,9 @@ DropdownImpl(
     text = "禁用选项",
     optionSize = items.size,
     isSelected = false,
-    onSelectedIndexChange = {},
     index = 1,
-    enabled = false
+    enabled = false,
+    onSelectedIndexChange = {}
 )
 ```
 
@@ -148,8 +148,8 @@ DropdownImpl(
 | isSelected            | Boolean        | 此选项是否被选中   | -                                 |
 | index                 | Int            | 此选项的索引       | -                                 |
 | dropdownColors        | DropdownColors | 选项颜色配置       | DropdownDefaults.dropdownColors() |
-| onSelectedIndexChange | (Int) -> Unit  | 点击此选项时的回调 | -                                 |
 | enabled               | Boolean        | 此选项是否可点击   | true                              |
+| onSelectedIndexChange | (Int) -> Unit  | 点击此选项时的回调 | -                                 |
 
 ### PopupPositionProvider.Align
 

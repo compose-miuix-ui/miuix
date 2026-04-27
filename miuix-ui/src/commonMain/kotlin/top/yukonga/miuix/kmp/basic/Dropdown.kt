@@ -56,7 +56,9 @@ fun RowScope.DropdownArrowEndAction(
  * @param optionSize The size of the options.
  * @param isSelected Whether the option is selected.
  * @param index The index of the current option in the options.
- * @param onSelectedIndexChange The callback when the index is selected.
+ * @param dropdownColors The [DropdownColors] used to style the option row.
+ * @param enabled Whether the option is clickable. Disabled rows ignore clicks and use the disabled text color.
+ * @param onSelectedIndexChange The callback invoked with [index] when the option is selected.
  */
 @Composable
 fun DropdownImpl(
@@ -65,8 +67,8 @@ fun DropdownImpl(
     isSelected: Boolean,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    onSelectedIndexChange: (Int) -> Unit,
     enabled: Boolean = true,
+    onSelectedIndexChange: (Int) -> Unit,
 ) {
     val additionalTopPadding = if (index == 0) 20.dp else 12.dp
     val additionalBottomPadding = if (index == optionSize - 1) 20.dp else 12.dp
@@ -130,6 +132,7 @@ fun DropdownImpl(
  * @param entryCount the count of the entries in the spinner.
  * @param isSelected whether the entry is selected.
  * @param index the index of the entry.
+ * @param spinnerColors the [SpinnerColors] used to style the entry row.
  * @param dialogMode whether the spinner is in dialog mode.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the spinner is changed.
  */

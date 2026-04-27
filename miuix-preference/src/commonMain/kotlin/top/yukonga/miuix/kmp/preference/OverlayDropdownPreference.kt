@@ -80,7 +80,9 @@ fun OverlayDropdownPreference(
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
     val entry = remember(
-        items, selectedIndex, onSelectedIndexChange,
+        items,
+        selectedIndex,
+        onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     OverlayDropdownPreference(
         entry = entry,
@@ -116,7 +118,9 @@ private fun OverlayDropdownPreferencePopup(
     onSelectedIndexChange: ((Int) -> Unit)?,
 ) {
     val entry = remember(
-        items, selectedIndex, onSelectedIndexChange,
+        items,
+        selectedIndex,
+        onSelectedIndexChange,
     ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
     OverlayDropdownPreferencePopup(
         entry = entry,
@@ -198,7 +202,7 @@ fun OverlayDropdownPreference(
         endActions = {
             if (showValue && itemsNotEmpty) {
                 val text = entry.selectedIndex?.let { entry.items.getOrNull(it)?.text }
-                if (!text.isNullOrEmpty())
+                if (!text.isNullOrEmpty()) {
                     Text(
                         text = text,
                         modifier = Modifier
@@ -209,6 +213,7 @@ fun OverlayDropdownPreference(
                         color = actionColor,
                         textAlign = TextAlign.End,
                     )
+                }
             }
             DropdownArrowEndAction(
                 actionColor = actionColor,
@@ -274,10 +279,10 @@ private fun OverlayDropdownPreferencePopup(
                         text = item.text,
                         optionSize = entry.items.size,
                         isSelected = entry.selectedIndex == index,
+                        index = index,
                         dropdownColors = dropdownColors,
                         enabled = item.enabled,
                         onSelectedIndexChange = onItemSelected,
-                        index = index,
                     )
                 }
             }
@@ -428,12 +433,12 @@ private fun OverlayDropdownPreferencePopup(
                             text = option.text,
                             optionSize = entry.items.size,
                             isSelected = entry.selectedIndex == itemIdx,
+                            index = itemIdx,
                             dropdownColors = dropdownColors,
                             enabled = option.enabled,
                             onSelectedIndexChange = { selectedIdx ->
                                 onItemSelected(entryIdx, selectedIdx)
                             },
-                            index = itemIdx,
                         )
                     }
                 }
