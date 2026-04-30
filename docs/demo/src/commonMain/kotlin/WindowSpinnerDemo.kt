@@ -26,8 +26,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 
 @Composable
@@ -48,11 +49,13 @@ fun WindowSpinnerDemo() {
         ) {
             var selectedIndex1 by remember { mutableIntStateOf(0) }
             val options1 = listOf(
-                SpinnerEntry(title = "Option 1"),
-                SpinnerEntry(title = "Option 2"),
-                SpinnerEntry(title = "Option 3"),
+                DropdownItem(text = "Option 1"),
+                DropdownItem(text = "Option 2"),
+                DropdownItem(text = "Option 3"),
             )
             var selectedIndex2 by remember { mutableIntStateOf(0) }
+            var firstGroupedSelectedIndex by remember { mutableIntStateOf(0) }
+            var secondGroupedSelectedIndex by remember { mutableIntStateOf(0) }
             var expanded by remember { mutableStateOf(false) }
 
             // Create a rounded rectangle Painter
@@ -71,32 +74,44 @@ fun WindowSpinnerDemo() {
             }
 
             val options2 = listOf(
-                SpinnerEntry(
+                DropdownItem(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
-                    title = "Red Theme",
+                    text = "Red Theme",
                     summary = "Vibrant red",
                 ),
-                SpinnerEntry(
+                DropdownItem(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
-                    title = "Blue Theme",
+                    text = "Blue Theme",
                     summary = "Calm blue",
                 ),
-                SpinnerEntry(
+                DropdownItem(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
-                    title = "Green Theme",
+                    text = "Green Theme",
                     summary = "Fresh green",
                 ),
-                SpinnerEntry(
+                DropdownItem(
                     icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
-                    title = "Yellow Theme",
+                    text = "Yellow Theme",
                     summary = "Bright yellow",
                 ),
             )
             var selectedIndex3 by remember { mutableIntStateOf(0) }
             val options3 = listOf(
-                SpinnerEntry(title = "Option A"),
-                SpinnerEntry(title = "Option B"),
-                SpinnerEntry(title = "Option C"),
+                DropdownItem(text = "Option A"),
+                DropdownItem(text = "Option B"),
+                DropdownItem(text = "Option C"),
+            )
+            val groupedOptions = listOf(
+                DropdownEntry(
+                    items = listOf("Small", "Medium").map { DropdownItem(text = it) },
+                    selectedIndex = firstGroupedSelectedIndex,
+                    onSelectedIndexChange = { firstGroupedSelectedIndex = it },
+                ),
+                DropdownEntry(
+                    items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
+                    selectedIndex = secondGroupedSelectedIndex,
+                    onSelectedIndexChange = { secondGroupedSelectedIndex = it },
+                ),
             )
 
             Card {
@@ -124,10 +139,15 @@ fun WindowSpinnerDemo() {
                 WindowSpinnerPreference(
                     title = "Disabled Selector",
                     summary = "This selector is currently unavailable",
-                    items = listOf(SpinnerEntry(title = "Option 1")),
+                    items = listOf(DropdownItem(text = "Option 1")),
                     selectedIndex = 0,
                     onSelectedIndexChange = {},
                     enabled = false,
+                )
+                WindowSpinnerPreference(
+                    title = "Grouped Selector",
+                    entries = groupedOptions,
+                    collapseOnSelection = false,
                 )
             }
         }

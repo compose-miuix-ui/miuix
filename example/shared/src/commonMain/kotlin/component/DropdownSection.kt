@@ -150,14 +150,14 @@ fun LazyListScope.dropdownSection() {
                 enabled = false,
             )
             OverlayDropdownPreference(
-                title = "GroupedDropdownPref",
+                title = "Grouped DropdownPref",
                 summary = if (overlayGroupedExpanded) "Expanded" else "Collapsed",
                 entries = overlayMultiGroupOptions,
                 collapseOnSelection = false,
                 onExpandedChange = { overlayGroupedExpanded = it },
             )
             WindowDropdownPreference(
-                title = "GroupedDropdownPref",
+                title = "Grouped WindowDropdownPref",
                 summary = if (windowGroupedExpanded) "Expanded" else "Collapsed",
                 entries = windowMultiGroupOptions,
                 collapseOnSelection = false,

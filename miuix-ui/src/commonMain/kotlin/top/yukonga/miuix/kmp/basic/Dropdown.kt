@@ -53,26 +53,28 @@ fun RowScope.DropdownArrowEndAction(
 /**
  * The implementation of the dropdown.
  *
- * @param text The text of the current option.
+ * @param item The item of the current option.
  * @param optionSize The size of the options.
  * @param isSelected Whether the option is selected.
  * @param index The index of the current option in the options.
  * @param dropdownColors The [DropdownColors] used to style the option row.
  * @param enabled Whether the option is clickable. Disabled rows ignore clicks and use the disabled text color.
+ * @param dialogMode Whether the item is shown in dialog mode.
  * @param onSelectedIndexChange The callback invoked with [index] when the option is selected.
  */
 @Composable
 fun DropdownImpl(
-    text: String,
+    item: DropdownItem,
     optionSize: Int,
     isSelected: Boolean,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     enabled: Boolean = true,
+    dialogMode: Boolean = false,
     onSelectedIndexChange: (Int) -> Unit,
 ) {
-    val additionalTopPadding = if (index == 0) 20.dp else 12.dp
-    val additionalBottomPadding = if (index == optionSize - 1) 20.dp else 12.dp
+    val additionalTopPadding = if (!dialogMode && index == 0) 20.dp else 12.dp
+    val additionalBottomPadding = if (!dialogMode && index == optionSize - 1) 20.dp else 12.dp
 
     val backgroundColor = if (isSelected) {
         dropdownColors.selectedContainerColor
@@ -80,16 +82,22 @@ fun DropdownImpl(
         dropdownColors.containerColor
     }
 
-    val textColor = when {
+    val checkColor = when {
+        !isSelected -> Color.Transparent
+        !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
+        else -> dropdownColors.selectedIndicatorColor
+    }
+
+    val titleColor = when {
         !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
         isSelected -> dropdownColors.selectedContentColor
         else -> dropdownColors.contentColor
     }
 
-    val checkColor = when {
-        !isSelected -> Color.Transparent
+    val summaryColor = when {
         !enabled -> MiuixTheme.colorScheme.disabledOnSecondaryVariant
-        else -> dropdownColors.selectedContentColor
+        isSelected -> dropdownColors.selectedSummaryColor
+        else -> dropdownColors.summaryColor
     }
 
     val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
@@ -99,80 +107,6 @@ fun DropdownImpl(
         modifier = Modifier
             .drawBehind { drawRect(backgroundColor) }
             .clickable(enabled = enabled) { currentOnSelectedIndexChange(index) }
-            .padding(horizontal = 20.dp)
-            .padding(
-                top = additionalTopPadding,
-                bottom = additionalBottomPadding,
-            ),
-    ) {
-        Text(
-            modifier = Modifier.widthIn(max = 200.dp),
-            text = text,
-            fontSize = MiuixTheme.textStyles.body1.fontSize,
-            fontWeight = FontWeight.Medium,
-            color = textColor,
-        )
-
-        val checkColorFilter =
-            remember(checkColor) { BlendModeColorFilter(checkColor, BlendMode.SrcIn) }
-        Image(
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .size(20.dp),
-            imageVector = MiuixIcons.Basic.Check,
-            colorFilter = checkColorFilter,
-            contentDescription = null,
-        )
-    }
-}
-
-/**
- * The implementation of the spinner.
- *
- * @param entry the [SpinnerEntry] to be shown in the spinner.
- * @param entryCount the count of the entries in the spinner.
- * @param isSelected whether the entry is selected.
- * @param index the index of the entry.
- * @param spinnerColors the [SpinnerColors] used to style the entry row.
- * @param dialogMode whether the spinner is in dialog mode.
- * @param onSelectedIndexChange the callback to be invoked when the selected index of the spinner is changed.
- */
-@Composable
-fun SpinnerItemImpl(
-    entry: SpinnerEntry,
-    entryCount: Int,
-    isSelected: Boolean,
-    index: Int,
-    spinnerColors: SpinnerColors,
-    dialogMode: Boolean = false,
-    onSelectedIndexChange: (Int) -> Unit,
-) {
-    val additionalTopPadding = if (!dialogMode && index == 0) 20.dp else 12.dp
-    val additionalBottomPadding = if (!dialogMode && index == entryCount - 1) 20.dp else 12.dp
-
-    val (titleColor, summaryColor, backgroundColor) = if (isSelected) {
-        Triple(
-            spinnerColors.selectedContentColor,
-            spinnerColors.selectedSummaryColor,
-            spinnerColors.selectedContainerColor,
-        )
-    } else {
-        Triple(
-            spinnerColors.contentColor,
-            spinnerColors.summaryColor,
-            spinnerColors.containerColor,
-        )
-    }
-
-    val selectColor = if (isSelected) spinnerColors.selectedIndicatorColor else Color.Transparent
-
-    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .drawBehind { drawRect(backgroundColor) }
-            .clickable { currentOnSelectedIndexChange(index) }
             .then(
                 if (dialogMode) {
                     Modifier
@@ -184,26 +118,31 @@ fun SpinnerItemImpl(
                     Modifier.padding(horizontal = 20.dp)
                 },
             )
-            .padding(top = additionalTopPadding, bottom = additionalBottomPadding),
+            .padding(
+                top = additionalTopPadding,
+                bottom = additionalBottomPadding,
+            ),
     ) {
         Row(
             modifier = if (dialogMode) Modifier else Modifier.widthIn(max = 216.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
-            entry.icon?.let {
-                it(Modifier.sizeIn(minWidth = 26.dp, minHeight = 26.dp).padding(end = 12.dp))
+            item.icon?.let {
+                it(
+                    Modifier
+                        .sizeIn(minWidth = 26.dp, minHeight = 26.dp)
+                        .padding(end = 12.dp)
+                )
             }
             Column {
-                entry.title?.let {
-                    Text(
-                        text = it,
-                        fontSize = MiuixTheme.textStyles.body1.fontSize,
-                        fontWeight = FontWeight.Medium,
-                        color = titleColor,
-                    )
-                }
-                entry.summary?.let {
+                Text(
+                    text = item.text,
+                    fontSize = MiuixTheme.textStyles.body1.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    color = titleColor,
+                )
+                item.summary?.let {
                     Text(
                         text = it,
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
@@ -212,126 +151,90 @@ fun SpinnerItemImpl(
                 }
             }
         }
-        val selectColorFilter =
-            remember(selectColor) { BlendModeColorFilter(selectColor, BlendMode.SrcIn) }
+
+        val checkColorFilter = remember(checkColor) {
+            BlendModeColorFilter(checkColor, BlendMode.SrcIn)
+        }
         Image(
             modifier = Modifier
                 .padding(start = 12.dp)
                 .size(20.dp),
             imageVector = MiuixIcons.Basic.Check,
-            colorFilter = selectColorFilter,
+            colorFilter = checkColorFilter,
             contentDescription = null,
         )
     }
 }
 
+@Composable
+fun DropdownImpl(
+    text: String,
+    optionSize: Int,
+    isSelected: Boolean,
+    index: Int,
+    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
+    enabled: Boolean = true,
+    dialogMode: Boolean = false,
+    onSelectedIndexChange: (Int) -> Unit,
+) {
+    DropdownImpl(
+        item = DropdownItem(text = text, enabled = enabled),
+        optionSize = optionSize,
+        isSelected = isSelected,
+        index = index,
+        dropdownColors = dropdownColors,
+        enabled = enabled,
+        dialogMode = dialogMode,
+        onSelectedIndexChange = onSelectedIndexChange,
+    )
+}
+
+/**
+ * The implementation of the spinner.
+ *
+ * @param entry the [DropdownItem] to be shown in the spinner.
+ * @param entryCount the count of the entries in the spinner.
+ * @param isSelected whether the entry is selected.
+ * @param index the index of the entry.
+ * @param spinnerColors the [DropdownColors] used to style the entry row.
+ * @param dialogMode whether the spinner is in dialog mode.
+ * @param onSelectedIndexChange the callback to be invoked when the selected index of the spinner is changed.
+ */
+@Composable
+fun SpinnerItemImpl(
+    entry: DropdownItem,
+    entryCount: Int,
+    isSelected: Boolean,
+    index: Int,
+    spinnerColors: DropdownColors,
+    dialogMode: Boolean = false,
+    onSelectedIndexChange: (Int) -> Unit,
+) {
+    DropdownImpl(
+        item = entry,
+        optionSize = entryCount,
+        isSelected = isSelected,
+        index = index,
+        dropdownColors = spinnerColors,
+        enabled = entry.enabled,
+        dialogMode = dialogMode,
+        onSelectedIndexChange = onSelectedIndexChange,
+    )
+}
+
+/**
+ * Colors used by dropdown option rows.
+ *
+ * @param contentColor The text color of an unselected option.
+ * @param summaryColor The summary text color of an unselected option.
+ * @param containerColor The background color of an unselected option.
+ * @param selectedContentColor The text color of the selected option.
+ * @param selectedSummaryColor The summary text color of the selected option.
+ * @param selectedContainerColor The background color of the selected option.
+ * @param selectedIndicatorColor The color of the selected indicator icon.
+ */
 @Immutable
 data class DropdownColors(
-    val contentColor: Color,
-    val containerColor: Color,
-    val selectedContentColor: Color,
-    val selectedContainerColor: Color,
-)
-
-@Stable
-data class DropdownEntry(
-    val items: List<DropdownItem>,
-    val selectedIndex: Int? = null,
-    val onSelectedIndexChange: ((Int) -> Unit)? = null,
-)
-
-@Stable
-data class DropdownItem(
-    val text: String,
-    val enabled: Boolean = true,
-    val onClick: (() -> Unit)? = null, // TODO: use for dropdown menu
-)
-
-object DropdownDefaults {
-
-    @Composable
-    fun dropdownColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-    ): DropdownColors = remember(
-        contentColor,
-        containerColor,
-        selectedContentColor,
-        selectedContainerColor,
-    ) {
-        DropdownColors(
-            contentColor = contentColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedContainerColor = selectedContainerColor,
-        )
-    }
-}
-
-object SpinnerDefaults {
-    @Composable
-    fun spinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
-        selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary,
-    ): SpinnerColors = remember(
-        contentColor,
-        summaryColor,
-        containerColor,
-        selectedContentColor,
-        selectedSummaryColor,
-        selectedContainerColor,
-        selectedIndicatorColor,
-    ) {
-        SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor,
-        )
-    }
-
-    @Composable
-    fun dialogSpinnerColors(
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        containerColor: Color = Color.Transparent,
-        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-        selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
-        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
-    ): SpinnerColors = remember(
-        contentColor,
-        summaryColor,
-        containerColor,
-        selectedContentColor,
-        selectedSummaryColor,
-        selectedContainerColor,
-        selectedIndicatorColor,
-    ) {
-        SpinnerColors(
-            contentColor = contentColor,
-            summaryColor = summaryColor,
-            containerColor = containerColor,
-            selectedContentColor = selectedContentColor,
-            selectedSummaryColor = selectedSummaryColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedIndicatorColor = selectedIndicatorColor,
-        )
-    }
-}
-
-@Immutable
-data class SpinnerColors(
     val contentColor: Color,
     val summaryColor: Color,
     val containerColor: Color,
@@ -342,11 +245,153 @@ data class SpinnerColors(
 )
 
 /**
- * The spinner entry.
+ * A group of dropdown items and optional selection state.
+ *
+ * When [selectedIndex] or [onSelectedIndexChange] is null, the group behaves like an action menu and does not
+ * show or remember selection state. [DropdownItem.onClick] is still invoked when an item is clicked.
+ *
+ * @param items Items shown in this dropdown group.
+ * @param selectedIndex The selected item index, or null to hide selection state.
+ * @param onSelectedIndexChange Callback invoked with the clicked item index.
  */
-@Immutable
-data class SpinnerEntry(
-    val icon: @Composable ((Modifier) -> Unit)? = null,
-    val title: String? = null,
-    val summary: String? = null,
+@Stable
+data class DropdownEntry(
+    val items: List<DropdownItem>,
+    val selectedIndex: Int? = null,
+    val onSelectedIndexChange: ((Int) -> Unit)? = null,
 )
+
+/**
+ * An item shown inside a dropdown, spinner, or dropdown menu.
+ *
+ * @param text Text shown for the item.
+ * @param enabled Whether the item can be clicked.
+ * @param onClick Callback invoked when the item is clicked.
+ * @param icon Optional icon shown before [text].
+ * @param summary Optional summary shown below [text].
+ */
+@Stable
+data class DropdownItem(
+    val text: String,
+    val enabled: Boolean = true,
+    val onClick: (() -> Unit)? = null,
+    val icon: @Composable ((Modifier) -> Unit)? = null,
+    val summary: String? = null,
+) {
+    constructor(
+        icon: @Composable ((Modifier) -> Unit)? = null,
+        title: String? = null,
+        summary: String? = null,
+    ) : this(
+        text = title.orEmpty(),
+        icon = icon,
+        summary = summary,
+    )
+}
+
+object DropdownDefaults {
+
+    @Composable
+    fun dropdownColors(
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
+        selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary,
+    ): DropdownColors = remember(
+        contentColor,
+        summaryColor,
+        containerColor,
+        selectedContentColor,
+        selectedSummaryColor,
+        selectedContainerColor,
+        selectedIndicatorColor,
+    ) {
+        DropdownColors(
+            contentColor = contentColor,
+            summaryColor = summaryColor,
+            containerColor = containerColor,
+            selectedContentColor = selectedContentColor,
+            selectedSummaryColor = selectedSummaryColor,
+            selectedContainerColor = selectedContainerColor,
+            selectedIndicatorColor = selectedIndicatorColor,
+        )
+    }
+
+    @Composable
+    fun dialogDropdownColors(
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        containerColor: Color = Color.Transparent,
+        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+        selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+    ): DropdownColors = dropdownColors(
+        contentColor = contentColor,
+        summaryColor = summaryColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedSummaryColor = selectedSummaryColor,
+        selectedContainerColor = selectedContainerColor,
+        selectedIndicatorColor = selectedIndicatorColor,
+    )
+}
+
+@Deprecated(
+    message = "Use DropdownDefaults instead.",
+    replaceWith = ReplaceWith("DropdownDefaults"),
+)
+object SpinnerDefaults {
+    @Composable
+    fun spinnerColors(
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        containerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.primary,
+        selectedSummaryColor: Color = MiuixTheme.colorScheme.primary,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.surfaceContainer,
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.primary,
+    ): DropdownColors = DropdownDefaults.dropdownColors(
+        contentColor = contentColor,
+        summaryColor = summaryColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedSummaryColor = selectedSummaryColor,
+        selectedContainerColor = selectedContainerColor,
+        selectedIndicatorColor = selectedIndicatorColor,
+    )
+
+    @Composable
+    fun dialogSpinnerColors(
+        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        summaryColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        containerColor: Color = Color.Transparent,
+        selectedContentColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+        selectedSummaryColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+        selectedContainerColor: Color = MiuixTheme.colorScheme.tertiaryContainer,
+        selectedIndicatorColor: Color = MiuixTheme.colorScheme.onTertiaryContainer,
+    ): DropdownColors = DropdownDefaults.dialogDropdownColors(
+        contentColor = contentColor,
+        summaryColor = summaryColor,
+        containerColor = containerColor,
+        selectedContentColor = selectedContentColor,
+        selectedSummaryColor = selectedSummaryColor,
+        selectedContainerColor = selectedContainerColor,
+        selectedIndicatorColor = selectedIndicatorColor,
+    )
+}
+
+@Deprecated(
+    message = "Use DropdownColors instead.",
+    replaceWith = ReplaceWith("DropdownColors"),
+)
+typealias SpinnerColors = DropdownColors
+
+@Deprecated(
+    message = "Use DropdownItem instead.",
+    replaceWith = ReplaceWith("DropdownItem"),
+)
+typealias SpinnerEntry = DropdownItem

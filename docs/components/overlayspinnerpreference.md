@@ -25,7 +25,8 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 
 ```kotlin
 import top.yukonga.miuix.kmp.preference.OverlaySpinnerPreference
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 ```
 
 ## Basic Usage
@@ -35,9 +36,9 @@ The OverlaySpinnerPreference component provides basic dropdown selector function
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3"),
+    DropdownItem(text = "Option 1"),
+    DropdownItem(text = "Option 2"),
+    DropdownItem(text = "Option 3"),
 )
 
 Scaffold {
@@ -70,24 +71,24 @@ class RoundedRectanglePainter(
 
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
-        title = "Red Theme",
+        text = "Red Theme",
         summary = "Vibrant red"
     ),
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
-        title = "Blue Theme",
+        text = "Blue Theme",
         summary = "Calm blue"
     ),
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
-        title = "Green Theme",
+        text = "Green Theme",
         summary = "Fresh green"
     ),
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
-        title = "Yellow Theme",
+        text = "Yellow Theme",
         summary = "Bright yellow"
     )
 )
@@ -111,7 +112,7 @@ Scaffold {
 OverlaySpinnerPreference(
     title = "Disabled Selector",
     summary = "This selector is currently unavailable",
-    items = listOf(SpinnerEntry(title = "Option 1")),
+    items = listOf(DropdownItem(text = "Option 1")),
     selectedIndex = 0,
     onSelectedIndexChange = {},
     enabled = false
@@ -125,9 +126,9 @@ OverlaySpinnerPreference also supports dialog mode, suitable for displaying a la
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3")
+    DropdownItem(text = "Option 1"),
+    DropdownItem(text = "Option 2"),
+    DropdownItem(text = "Option 3")
 )
 
 Scaffold {
@@ -141,15 +142,46 @@ Scaffold {
 }
 ```
 
+## Grouped Options
+
+Use `DropdownEntry` when you need a custom item list with disabled items, item callbacks, icons, or summaries. Use `entries` to show multiple option groups separated by dividers.
+
+```kotlin
+var firstSelectedIndex by remember { mutableStateOf(0) }
+var secondSelectedIndex by remember { mutableStateOf(0) }
+val entries = listOf(
+    DropdownEntry(
+        items = listOf("Small", "Medium").map { DropdownItem(text = it) },
+        selectedIndex = firstSelectedIndex,
+        onSelectedIndexChange = { firstSelectedIndex = it }
+    ),
+    DropdownEntry(
+        items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
+        selectedIndex = secondSelectedIndex,
+        onSelectedIndexChange = { secondSelectedIndex = it }
+    )
+)
+
+Scaffold {
+    OverlaySpinnerPreference(
+        title = "Grouped Selector",
+        entries = entries,
+        collapseOnSelection = false
+    )
+}
+```
+
+For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `false` so users can change multiple groups without reopening the popup. The same `entry` and `entries` overloads are also available in dialog mode by providing `dialogButtonString`.
+
 ## Observe Expanded State
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 var expanded by remember { mutableStateOf(false) }
 val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3"),
+    DropdownItem(text = "Option 1"),
+    DropdownItem(text = "Option 2"),
+    DropdownItem(text = "Option 3"),
 )
 
 Scaffold {
@@ -170,14 +202,14 @@ Scaffold {
 
 | Property Name         | Type                      | Description                     | Default Value                         | Required |
 | --------------------- | ------------------------- | ------------------------------- | ------------------------------------- | -------- |
-| items                 | List\<SpinnerEntry>       | Options list                    | -                                     | Yes      |
+| items                 | List\<DropdownItem>       | Options list                    | -                                     | Yes      |
 | selectedIndex         | Int                       | Current selected item index     | -                                     | Yes      |
 | title                 | String                    | Selector title                  | -                                     | Yes      |
 | modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
 | titleColor            | BasicComponentColors      | Title text color config         | BasicComponentDefaults.titleColor()   | No       |
 | summary               | String?                   | Selector description            | null                                  | No       |
 | summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
-| spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.spinnerColors()       | No       |
+| spinnerColors         | DropdownColors            | Color configuration for spinner | DropdownDefaults.dropdownColors()     | No       |
 | startAction           | @Composable (() -> Unit)? | Custom start side content       | null                                  | No       |
 | bottomAction          | @Composable (() -> Unit)? | Custom bottom side content      | null                                  | No       |
 | insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
@@ -188,45 +220,85 @@ Scaffold {
 | onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
 | onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
 
+### Entry Overload Properties
+
+| Property Name       | Type          | Description                                | Default Value | Required |
+| ------------------- | ------------- | ------------------------------------------ | ------------- | -------- |
+| entry               | DropdownEntry | Single dropdown entry group                | -             | Yes      |
+| collapseOnSelection | Boolean       | Whether to close the popup after selection | true          | No       |
+
+### Grouped Entries Overload Properties
+
+| Property Name        | Type                 | Description                                      | Default Value | Required |
+| -------------------- | -------------------- | ------------------------------------------------ | ------------- | -------- |
+| entries              | List\<DropdownEntry> | Dropdown entry groups separated by dividers      | -             | Yes      |
+| collapseOnSelection  | Boolean              | Whether to close the popup after each selection  | false         | No       |
+| renderInRootScaffold | Boolean              | Whether to render the popup in the root Scaffold | true          | No       |
+
 ### OverlaySpinnerPreference Properties (Dialog Mode)
 
-| Property Name         | Type                      | Description                     | Default Value                         | Required |
-| --------------------- | ------------------------- | ------------------------------- | ------------------------------------- | -------- |
-| items                 | List\<SpinnerEntry>       | Options list                    | -                                     | Yes      |
-| selectedIndex         | Int                       | Current selected item index     | -                                     | Yes      |
-| title                 | String                    | Selector title                  | -                                     | Yes      |
-| dialogButtonString    | String                    | Dialog bottom button text       | -                                     | Yes      |
-| modifier              | Modifier                  | Component modifier              | Modifier                              | No       |
-| popupModifier         | Modifier                  | Dialog popup modifier           | Modifier                              | No       |
-| titleColor            | BasicComponentColors      | Title text color config         | BasicComponentDefaults.titleColor()   | No       |
-| summary               | String?                   | Selector description            | null                                  | No       |
-| summaryColor          | BasicComponentColors      | Summary text color config       | BasicComponentDefaults.summaryColor() | No       |
-| spinnerColors         | SpinnerColors             | Color configuration for spinner | SpinnerDefaults.dialogSpinnerColors() | No       |
-| startAction           | @Composable (() -> Unit)? | Custom start side content       | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content      | null                                  | No       |
-| insideMargin          | PaddingValues             | Internal content padding        | BasicComponentDefaults.InsideMargin   | No       |
-| enabled               | Boolean                   | Interactive state               | true                                  | No       |
-| showValue             | Boolean                   | Show current selected value     | true                                  | No       |
+| Property Name         | Type                      | Description                          | Default Value                           | Required |
+| --------------------- | ------------------------- | ------------------------------------ | --------------------------------------- | -------- |
+| items                 | List\<DropdownItem>       | Options list                         | -                                       | Yes      |
+| selectedIndex         | Int                       | Current selected item index          | -                                       | Yes      |
+| title                 | String                    | Selector title                       | -                                       | Yes      |
+| dialogButtonString    | String                    | Dialog bottom button text            | -                                       | Yes      |
+| modifier              | Modifier                  | Component modifier                   | Modifier                                | No       |
+| popupModifier         | Modifier                  | Dialog popup modifier                | Modifier                                | No       |
+| titleColor            | BasicComponentColors      | Title text color config              | BasicComponentDefaults.titleColor()     | No       |
+| summary               | String?                   | Selector description                 | null                                    | No       |
+| summaryColor          | BasicComponentColors      | Summary text color config            | BasicComponentDefaults.summaryColor()   | No       |
+| spinnerColors         | DropdownColors            | Color configuration for spinner      | DropdownDefaults.dialogDropdownColors() | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content            | null                                    | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content           | null                                    | No       |
+| insideMargin          | PaddingValues             | Internal content padding             | BasicComponentDefaults.InsideMargin     | No       |
+| enabled               | Boolean                   | Interactive state                    | true                                    | No       |
+| showValue             | Boolean                   | Show current selected value          | true                                    | No       |
 | renderInRootScaffold  | Boolean                   | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback       | -                                     | No       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback            | -                                       | No       |
 
-### SpinnerEntry Properties
+### Dialog Entry Overload Properties
 
-| Property Name | Type                              | Description        |
-| ------------- | --------------------------------- | ------------------ |
-| icon          | @Composable ((Modifier) -> Unit)? | Option icon        |
-| title         | String?                           | Option title       |
-| summary       | String?                           | Option description |
+| Property Name      | Type          | Description                 | Default Value | Required |
+| ------------------ | ------------- | --------------------------- | ------------- | -------- |
+| entry              | DropdownEntry | Single dropdown entry group | -             | Yes      |
+| dialogButtonString | String        | Dialog bottom button text   | -             | Yes      |
 
-### SpinnerColors Properties
+### Dialog Grouped Entries Overload Properties
 
-| Property Name          | Type  | Description                    |
-| ---------------------- | ----- | ------------------------------ |
-| contentColor           | Color | Option title color             |
-| summaryColor           | Color | Option summary color           |
-| containerColor         | Color | Option background color        |
-| selectedContentColor   | Color | Selected item title color      |
-| selectedSummaryColor   | Color | Selected item summary color    |
-| selectedContainerColor | Color | Selected item background color |
-| selectedIndicatorColor | Color | Selected check icon color      |
+| Property Name        | Type                 | Description                                       | Default Value | Required |
+| -------------------- | -------------------- | ------------------------------------------------- | ------------- | -------- |
+| entries              | List\<DropdownEntry> | Dropdown entry groups separated by dividers       | -             | Yes      |
+| dialogButtonString   | String               | Dialog bottom button text                         | -             | Yes      |
+| renderInRootScaffold | Boolean              | Whether to render the dialog in the root Scaffold | true          | No       |
+
+### DropdownEntry Properties
+
+| Property Name         | Type                | Description                                     | Default Value | Required |
+| --------------------- | ------------------- | ----------------------------------------------- | ------------- | -------- |
+| items                 | List\<DropdownItem> | Items shown in this dropdown group              | -             | Yes      |
+| selectedIndex         | Int?                | Selected item index. Null hides selection state | null          | No       |
+| onSelectedIndexChange | ((Int) -> Unit)?    | Callback when an item is selected               | null          | No       |
+
+### DropdownItem Properties
+
+| Property Name | Type                              | Description                                              | Default Value | Required |
+| ------------- | --------------------------------- | -------------------------------------------------------- | ------------- | -------- |
+| text          | String                            | Text shown for the item                                  | -             | Yes      |
+| enabled       | Boolean                           | Whether the item can be clicked. Disabled items are gray | true          | No       |
+| onClick       | (() -> Unit)?                     | Callback invoked when the item is clicked                | null          | No       |
+| icon          | @Composable ((Modifier) -> Unit)? | Icon shown before the item text                          | null          | No       |
+| summary       | String?                           | Summary text shown below the item text                   | null          | No       |
+
+### DropdownColors Properties
+
+| Property Name          | Type  | Description                             |
+| ---------------------- | ----- | --------------------------------------- |
+| contentColor           | Color | Color of the option title               |
+| summaryColor           | Color | Color of the option summary             |
+| containerColor         | Color | Background color of the option          |
+| selectedContentColor   | Color | Title color of the selected option      |
+| selectedSummaryColor   | Color | Summary color of the selected option    |
+| selectedContainerColor | Color | Background color of the selected option |
+| selectedIndicatorColor | Color | Color of the selected indicator icon    |

@@ -204,17 +204,22 @@ OverlayDropdownPreference(
 
 ### DropdownItem 属性
 
-| 属性名  | 类型          | 说明                         | 默认值 | 是否必须 |
-| ------- | ------------- | ---------------------------- | ------ | -------- |
-| text    | String        | 条目显示文本                 | -      | 是       |
-| enabled | Boolean       | 条目是否可点击，禁用项会变灰 | true   | 否       |
-| onClick | (() -> Unit)? | 预留给动作式下拉条目使用     | null   | 否       |
+| 属性名  | 类型                              | 说明                         | 默认值 | 是否必须 |
+| ------- | --------------------------------- | ---------------------------- | ------ | -------- |
+| text    | String                            | 选项显示的文本               | -      | 是       |
+| enabled | Boolean                           | 选项是否可点击，禁用时置灰   | true   | 否       |
+| onClick | (() -> Unit)?                     | 点击选项时触发的回调         | null   | 否       |
+| icon    | @Composable ((Modifier) -> Unit)? | 显示在选项文本前的图标       | null   | 否       |
+| summary | String?                           | 显示在选项文本下方的摘要文本 | null   | 否       |
 
 ### DropdownColors 属性
 
-| 属性名                 | 类型  | 说明           |
-| ---------------------- | ----- | -------------- |
-| contentColor           | Color | 选项文本颜色   |
-| containerColor         | Color | 选项背景颜色   |
-| selectedContentColor   | Color | 选中项文本颜色 |
-| selectedContainerColor | Color | 选中项背景颜色 |
+| 属性名                 | 类型  | 说明             |
+| ---------------------- | ----- | ---------------- |
+| contentColor           | Color | 选项标题颜色     |
+| summaryColor           | Color | 选项摘要颜色     |
+| containerColor         | Color | 选项背景颜色     |
+| selectedContentColor   | Color | 选中项标题颜色   |
+| selectedSummaryColor   | Color | 选中项摘要颜色   |
+| selectedContainerColor | Color | 选中项背景颜色   |
+| selectedIndicatorColor | Color | 选中指示图标颜色 |

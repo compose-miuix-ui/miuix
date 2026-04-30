@@ -187,17 +187,22 @@ WindowDropdownPreference(
 
 ### DropdownItem Properties
 
-| Property Name | Type          | Description                                              | Default Value | Required |
-| ------------- | ------------- | -------------------------------------------------------- | ------------- | -------- |
-| text          | String        | Text shown for the item                                  | -             | Yes      |
-| enabled       | Boolean       | Whether the item can be clicked. Disabled items are gray | true          | No       |
-| onClick       | (() -> Unit)? | Reserved for action-style dropdown items                 | null          | No       |
+| Property Name | Type                              | Description                                              | Default Value | Required |
+| ------------- | --------------------------------- | -------------------------------------------------------- | ------------- | -------- |
+| text          | String                            | Text shown for the item                                  | -             | Yes      |
+| enabled       | Boolean                           | Whether the item can be clicked. Disabled items are gray | true          | No       |
+| onClick       | (() -> Unit)?                     | Callback invoked when the item is clicked                | null          | No       |
+| icon          | @Composable ((Modifier) -> Unit)? | Icon shown before the item text                          | null          | No       |
+| summary       | String?                           | Summary text shown below the item text                   | null          | No       |
 
 ### DropdownColors Properties
 
-| Property Name          | Type  | Description                    |
-| ---------------------- | ----- | ------------------------------ |
-| contentColor           | Color | Option text color              |
-| containerColor         | Color | Option background color        |
-| selectedContentColor   | Color | Selected item text color       |
-| selectedContainerColor | Color | Selected item background color |
+| Property Name          | Type  | Description                             |
+| ---------------------- | ----- | --------------------------------------- |
+| contentColor           | Color | Color of the option title               |
+| summaryColor           | Color | Color of the option summary             |
+| containerColor         | Color | Background color of the option          |
+| selectedContentColor   | Color | Title color of the selected option      |
+| selectedSummaryColor   | Color | Summary color of the selected option    |
+| selectedContainerColor | Color | Background color of the selected option |
+| selectedIndicatorColor | Color | Color of the selected indicator icon    |

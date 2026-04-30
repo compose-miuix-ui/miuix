@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
@@ -27,13 +25,9 @@ import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
-import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.DropdownItem
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.overlay.OverlayListPopup
+import top.yukonga.miuix.kmp.popup.OverlayDropdownPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -101,37 +95,6 @@ fun OverlayDropdownPreference(
         renderInRootScaffold = renderInRootScaffold,
         collapseOnSelection = true,
         onExpandedChange = onExpandedChange,
-    )
-}
-
-@Composable
-private fun OverlayDropdownPreferencePopup(
-    items: List<String>,
-    selectedIndex: Int,
-    isDropdownExpanded: Boolean,
-    onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
-    maxHeight: Dp?,
-    dropdownColors: DropdownColors,
-    hapticFeedback: HapticFeedback,
-    renderInRootScaffold: Boolean,
-    onSelectedIndexChange: ((Int) -> Unit)?,
-) {
-    val entry = remember(
-        items,
-        selectedIndex,
-        onSelectedIndexChange,
-    ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
-    OverlayDropdownPreferencePopup(
-        entry = entry,
-        isDropdownExpanded = isDropdownExpanded,
-        onDismiss = onDismiss,
-        onDismissFinished = onDismissFinished,
-        maxHeight = maxHeight,
-        dropdownColors = dropdownColors,
-        hapticFeedback = hapticFeedback,
-        renderInRootScaffold = renderInRootScaffold,
-        collapseOnSelection = true,
     )
 }
 
@@ -219,14 +182,13 @@ fun OverlayDropdownPreference(
                 actionColor = actionColor,
             )
             if (itemsNotEmpty) {
-                OverlayDropdownPreferencePopup(
+                OverlayDropdownPopup(
                     entry = entry,
-                    isDropdownExpanded = isDropdownExpanded.value,
+                    show = isDropdownExpanded.value,
                     onDismiss = { setExpanded(false) },
                     onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
-                    hapticFeedback = hapticFeedback,
                     renderInRootScaffold = renderInRootScaffold,
                     collapseOnSelection = collapseOnSelection,
                 )
@@ -237,57 +199,6 @@ fun OverlayDropdownPreference(
         holdDownState = isHoldDown.value,
         enabled = actualEnabled,
     )
-}
-
-@Composable
-private fun OverlayDropdownPreferencePopup(
-    entry: DropdownEntry,
-    isDropdownExpanded: Boolean,
-    onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
-    maxHeight: Dp?,
-    dropdownColors: DropdownColors,
-    hapticFeedback: HapticFeedback,
-    renderInRootScaffold: Boolean,
-    collapseOnSelection: Boolean,
-) {
-    val currentEntry by rememberUpdatedState(entry)
-    val currentCollapseOnSelection by rememberUpdatedState(collapseOnSelection)
-    val currentOnDismiss by rememberUpdatedState(onDismiss)
-    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
-    val onItemSelected: (Int) -> Unit = remember {
-        { selectedIdx ->
-            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-            currentEntry.onSelectedIndexChange?.let { it(selectedIdx) }
-            if (currentCollapseOnSelection) {
-                currentOnDismiss()
-            }
-        }
-    }
-    OverlayListPopup(
-        show = isDropdownExpanded,
-        alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = onDismiss,
-        onDismissFinished = onDismissFinished,
-        maxHeight = maxHeight,
-        renderInRootScaffold = renderInRootScaffold,
-    ) {
-        ListPopupColumn {
-            entry.items.forEachIndexed { index, item ->
-                key(index) {
-                    DropdownImpl(
-                        text = item.text,
-                        optionSize = entry.items.size,
-                        isSelected = entry.selectedIndex == index,
-                        index = index,
-                        dropdownColors = dropdownColors,
-                        enabled = item.enabled,
-                        onSelectedIndexChange = onItemSelected,
-                    )
-                }
-            }
-        }
-    }
 }
 
 @Composable
@@ -375,14 +286,13 @@ fun OverlayDropdownPreference(
                 actionColor = actionColor,
             )
             if (hasEntries) {
-                OverlayDropdownPreferencePopup(
+                OverlayDropdownPopup(
                     entries = nonEmptyEntries,
-                    isDropdownExpanded = isDropdownExpanded.value,
+                    show = isDropdownExpanded.value,
                     onDismiss = { setExpanded(false) },
                     onDismissFinished = { isHoldDown.value = false },
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
-                    hapticFeedback = hapticFeedback,
                     renderInRootScaffold = renderInRootScaffold,
                     collapseOnSelection = collapseOnSelection,
                 )
@@ -395,63 +305,3 @@ fun OverlayDropdownPreference(
     )
 }
 
-@Composable
-private fun OverlayDropdownPreferencePopup(
-    entries: List<DropdownEntry>,
-    isDropdownExpanded: Boolean,
-    onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
-    maxHeight: Dp?,
-    dropdownColors: DropdownColors,
-    hapticFeedback: HapticFeedback,
-    renderInRootScaffold: Boolean,
-    collapseOnSelection: Boolean,
-) {
-    val currentEntries by rememberUpdatedState(entries)
-    val currentCollapseOnSelection by rememberUpdatedState(collapseOnSelection)
-    val currentOnDismiss by rememberUpdatedState(onDismiss)
-    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
-    val onItemSelected: (Int, Int) -> Unit = remember {
-        { entryIdx, selectedIdx ->
-            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-            currentEntries.getOrNull(entryIdx)?.onSelectedIndexChange?.invoke(selectedIdx)
-            if (currentCollapseOnSelection) {
-                currentOnDismiss()
-            }
-        }
-    }
-    OverlayListPopup(
-        show = isDropdownExpanded,
-        alignment = PopupPositionProvider.Align.End,
-        onDismissRequest = onDismiss,
-        onDismissFinished = onDismissFinished,
-        maxHeight = maxHeight,
-        renderInRootScaffold = renderInRootScaffold,
-    ) {
-        ListPopupColumn {
-            entries.forEachIndexed { entryIdx, entry ->
-                entry.items.forEachIndexed { itemIdx, option ->
-                    key(entryIdx, itemIdx) {
-                        DropdownImpl(
-                            text = option.text,
-                            optionSize = entry.items.size,
-                            isSelected = entry.selectedIndex == itemIdx,
-                            index = itemIdx,
-                            dropdownColors = dropdownColors,
-                            enabled = option.enabled,
-                            onSelectedIndexChange = { selectedIdx ->
-                                onItemSelected(entryIdx, selectedIdx)
-                            },
-                        )
-                    }
-                }
-                if (entryIdx != entries.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        thickness = 1.dp,
-                    )
-                }
-            }
-        }
-    }
-}

@@ -24,7 +24,8 @@ This component does not rely on `Scaffold` and can be used in any Composable sco
 
 ```kotlin
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 ```
 
 ## Basic Usage
@@ -34,9 +35,9 @@ The WindowSpinnerPreference component provides basic dropdown selector functiona
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(title = "Option 1"),
-    SpinnerEntry(title = "Option 2"),
-    SpinnerEntry(title = "Option 3"),
+    DropdownItem(text = "Option 1"),
+    DropdownItem(text = "Option 2"),
+    DropdownItem(text = "Option 3"),
 )
 
 WindowSpinnerPreference(
@@ -66,14 +67,14 @@ private class RoundedRectanglePainter(
 
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
-        title = "Red Theme",
+        text = "Red Theme",
         summary = "Energetic Red"
     ),
-    SpinnerEntry(
+    DropdownItem(
         icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
-        title = "Blue Theme",
+        text = "Blue Theme",
         summary = "Calm Blue"
     ),
 )
@@ -95,7 +96,7 @@ WindowSpinnerPreference(
 WindowSpinnerPreference(
     title = "Disabled Spinner",
     summary = "This spinner is currently unavailable",
-    items = listOf(SpinnerEntry(title = "Option 1")),
+    items = listOf(DropdownItem(text = "Option 1")),
     selectedIndex = 0,
     onSelectedIndexChange = {},
     enabled = false
@@ -109,9 +110,9 @@ WindowSpinnerPreference also supports a dialog mode, which is useful for display
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val options = listOf(
-    SpinnerEntry(title = "Option A"),
-    SpinnerEntry(title = "Option B"),
-    SpinnerEntry(title = "Option C")
+    DropdownItem(text = "Option A"),
+    DropdownItem(text = "Option B"),
+    DropdownItem(text = "Option C")
 )
 
 WindowSpinnerPreference(
@@ -123,15 +124,44 @@ WindowSpinnerPreference(
 )
 ```
 
+## Grouped Options
+
+Use `DropdownEntry` when you need a custom item list with disabled items, item callbacks, icons, or summaries. Use `entries` to show multiple option groups separated by dividers.
+
+```kotlin
+var firstSelectedIndex by remember { mutableStateOf(0) }
+var secondSelectedIndex by remember { mutableStateOf(0) }
+val entries = listOf(
+    DropdownEntry(
+        items = listOf("Small", "Medium").map { DropdownItem(text = it) },
+        selectedIndex = firstSelectedIndex,
+        onSelectedIndexChange = { firstSelectedIndex = it }
+    ),
+    DropdownEntry(
+        items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
+        selectedIndex = secondSelectedIndex,
+        onSelectedIndexChange = { secondSelectedIndex = it }
+    )
+)
+
+WindowSpinnerPreference(
+    title = "Grouped Selector",
+    entries = entries,
+    collapseOnSelection = false
+)
+```
+
+For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `false` so users can change multiple groups without reopening the popup. The same `entry` and `entries` overloads are also available in dialog mode by providing `dialogButtonString`.
+
 ## Observe Expanded State
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 var expanded by remember { mutableStateOf(false) }
 val options = listOf(
-    SpinnerEntry(title = "Option A"),
-    SpinnerEntry(title = "Option B"),
-    SpinnerEntry(title = "Option C")
+    DropdownItem(text = "Option A"),
+    DropdownItem(text = "Option B"),
+    DropdownItem(text = "Option C")
 )
 
 WindowSpinnerPreference(
@@ -148,56 +178,94 @@ WindowSpinnerPreference(
 
 ### WindowSpinnerPreference Properties (Popup Mode)
 
-| Property Name         | Type                      | Description                        | Default Value                         | Required |
-| --------------------- | ------------------------- | ---------------------------------- | ------------------------------------- | -------- |
-| items                 | List\<SpinnerEntry>       | List of spinner entries            | -                                     | Yes      |
-| selectedIndex         | Int                       | Index of currently selected item   | -                                     | Yes      |
-| title                 | String                    | Title of the spinner               | -                                     | Yes      |
-| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
-| titleColor            | BasicComponentColors      | Title text color configuration     | BasicComponentDefaults.titleColor()   | No       |
-| summary               | String?                   | Summary description                | null                                  | No       |
-| summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
-| spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.spinnerColors()       | No       |
-| startAction           | @Composable (() -> Unit)? | Custom start side content          | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content         | null                                  | No       |
-| insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
-| maxHeight             | Dp?                       | Maximum height of popup            | null                                  | No       |
-| enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
-| showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
-| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
+| Property Name         | Type                      | Description                          | Default Value                         | Required |
+| --------------------- | ------------------------- | ------------------------------------ | ------------------------------------- | -------- |
+| items                 | List\<DropdownItem>       | List of dropdown items               | -                                     | Yes      |
+| selectedIndex         | Int                       | Index of currently selected item     | -                                     | Yes      |
+| title                 | String                    | Title of the spinner                 | -                                     | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component    | Modifier                              | No       |
+| titleColor            | BasicComponentColors      | Title text color configuration       | BasicComponentDefaults.titleColor()   | No       |
+| summary               | String?                   | Summary description                  | null                                  | No       |
+| summaryColor          | BasicComponentColors      | Summary text color configuration     | BasicComponentDefaults.summaryColor() | No       |
+| spinnerColors         | DropdownColors            | Color configuration for spinner      | DropdownDefaults.dropdownColors()     | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content            | null                                  | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content           | null                                  | No       |
+| insideMargin          | PaddingValues             | Internal content padding             | BasicComponentDefaults.InsideMargin   | No       |
+| maxHeight             | Dp?                       | Maximum height of popup              | null                                  | No       |
+| enabled               | Boolean                   | Whether component is interactive     | true                                  | No       |
+| showValue             | Boolean                   | Whether to show the selected value   | true                                  | No       |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                                  | No       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback            | -                                     | No       |
+
+### Entry Overload Properties
+
+| Property Name       | Type          | Description                                | Default Value | Required |
+| ------------------- | ------------- | ------------------------------------------ | ------------- | -------- |
+| entry               | DropdownEntry | Single dropdown entry group                | -             | Yes      |
+| collapseOnSelection | Boolean       | Whether to close the popup after selection | true          | No       |
+
+### Grouped Entries Overload Properties
+
+| Property Name       | Type                 | Description                                     | Default Value | Required |
+| ------------------- | -------------------- | ----------------------------------------------- | ------------- | -------- |
+| entries             | List\<DropdownEntry> | Dropdown entry groups separated by dividers     | -             | Yes      |
+| collapseOnSelection | Boolean              | Whether to close the popup after each selection | false         | No       |
 
 ### WindowSpinnerPreference Properties (Dialog Mode)
 
-| Property Name         | Type                      | Description                        | Default Value                         | Required |
-| --------------------- | ------------------------- | ---------------------------------- | ------------------------------------- | -------- |
-| items                 | List\<SpinnerEntry>       | List of spinner entries            | -                                     | Yes      |
-| selectedIndex         | Int                       | Index of currently selected item   | -                                     | Yes      |
-| title                 | String                    | Title of the spinner               | -                                     | Yes      |
-| dialogButtonString    | String                    | Text for the dialog button         | -                                     | Yes      |
-| modifier              | Modifier                  | Modifier applied to the component  | Modifier                              | No       |
-| popupModifier         | Modifier                  | Modifier for the popup dialog      | Modifier                              | No       |
-| titleColor            | BasicComponentColors      | Title text color configuration     | BasicComponentDefaults.titleColor()   | No       |
-| summary               | String?                   | Summary description                | null                                  | No       |
-| summaryColor          | BasicComponentColors      | Summary text color configuration   | BasicComponentDefaults.summaryColor() | No       |
-| spinnerColors         | SpinnerColors             | Color configuration for spinner    | SpinnerDefaults.dialogSpinnerColors() | No       |
-| startAction           | @Composable (() -> Unit)? | Custom start side content          | null                                  | No       |
-| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content         | null                                  | No       |
-| insideMargin          | PaddingValues             | Internal content padding           | BasicComponentDefaults.InsideMargin   | No       |
-| enabled               | Boolean                   | Whether component is interactive   | true                                  | No       |
-| showValue             | Boolean                   | Whether to show the selected value | true                                  | No       |
-| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                               | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback          | -                                     | No       |
+| Property Name         | Type                      | Description                          | Default Value                           | Required |
+| --------------------- | ------------------------- | ------------------------------------ | --------------------------------------- | -------- |
+| items                 | List\<DropdownItem>       | List of dropdown items               | -                                       | Yes      |
+| selectedIndex         | Int                       | Index of currently selected item     | -                                       | Yes      |
+| title                 | String                    | Title of the spinner                 | -                                       | Yes      |
+| dialogButtonString    | String                    | Text for the dialog button           | -                                       | Yes      |
+| modifier              | Modifier                  | Modifier applied to the component    | Modifier                                | No       |
+| popupModifier         | Modifier                  | Modifier for the popup dialog        | Modifier                                | No       |
+| titleColor            | BasicComponentColors      | Title text color configuration       | BasicComponentDefaults.titleColor()     | No       |
+| summary               | String?                   | Summary description                  | null                                    | No       |
+| summaryColor          | BasicComponentColors      | Summary text color configuration     | BasicComponentDefaults.summaryColor()   | No       |
+| spinnerColors         | DropdownColors            | Color configuration for spinner      | DropdownDefaults.dialogDropdownColors() | No       |
+| startAction           | @Composable (() -> Unit)? | Custom start side content            | null                                    | No       |
+| bottomAction          | @Composable (() -> Unit)? | Custom bottom side content           | null                                    | No       |
+| insideMargin          | PaddingValues             | Internal content padding             | BasicComponentDefaults.InsideMargin     | No       |
+| enabled               | Boolean                   | Whether component is interactive     | true                                    | No       |
+| showValue             | Boolean                   | Whether to show the selected value   | true                                    | No       |
+| onExpandedChange      | ((Boolean) -> Unit)?      | Callback when expanded state changes | null                                    | No       |
+| onSelectedIndexChange | ((Int) -> Unit)?          | Selection change callback            | -                                       | No       |
 
-### SpinnerEntry Properties
+### Dialog Entry Overload Properties
 
-| Property Name | Type                              | Description                       |
-| ------------- | --------------------------------- | --------------------------------- |
-| icon          | @Composable ((Modifier) -> Unit)? | Icon component for the option     |
-| title         | String?                           | Title of the option               |
-| summary       | String?                           | Summary description of the option |
+| Property Name      | Type          | Description                 | Default Value | Required |
+| ------------------ | ------------- | --------------------------- | ------------- | -------- |
+| entry              | DropdownEntry | Single dropdown entry group | -             | Yes      |
+| dialogButtonString | String        | Text for the dialog button  | -             | Yes      |
 
-### SpinnerColors Properties
+### Dialog Grouped Entries Overload Properties
+
+| Property Name      | Type                 | Description                                 | Default Value | Required |
+| ------------------ | -------------------- | ------------------------------------------- | ------------- | -------- |
+| entries            | List\<DropdownEntry> | Dropdown entry groups separated by dividers | -             | Yes      |
+| dialogButtonString | String               | Text for the dialog button                  | -             | Yes      |
+
+### DropdownEntry Properties
+
+| Property Name         | Type                | Description                                     | Default Value | Required |
+| --------------------- | ------------------- | ----------------------------------------------- | ------------- | -------- |
+| items                 | List\<DropdownItem> | Items shown in this dropdown group              | -             | Yes      |
+| selectedIndex         | Int?                | Selected item index. Null hides selection state | null          | No       |
+| onSelectedIndexChange | ((Int) -> Unit)?    | Callback when an item is selected               | null          | No       |
+
+### DropdownItem Properties
+
+| Property Name | Type                              | Description                                              | Default Value | Required |
+| ------------- | --------------------------------- | -------------------------------------------------------- | ------------- | -------- |
+| text          | String                            | Text shown for the item                                  | -             | Yes      |
+| enabled       | Boolean                           | Whether the item can be clicked. Disabled items are gray | true          | No       |
+| onClick       | (() -> Unit)?                     | Callback invoked when the item is clicked                | null          | No       |
+| icon          | @Composable ((Modifier) -> Unit)? | Icon shown before the item text                          | null          | No       |
+| summary       | String?                           | Summary text shown below the item text                   | null          | No       |
+
+### DropdownColors Properties
 
 | Property Name          | Type  | Description                             |
 | ---------------------- | ----- | --------------------------------------- |
@@ -207,4 +275,4 @@ WindowSpinnerPreference(
 | selectedContentColor   | Color | Title color of the selected option      |
 | selectedSummaryColor   | Color | Summary color of the selected option    |
 | selectedContainerColor | Color | Background color of the selected option |
-| selectedIndicatorColor | Color | Color of the selection indicator icon   |
+| selectedIndicatorColor | Color | Color of the selected indicator icon    |
