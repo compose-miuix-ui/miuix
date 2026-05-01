@@ -109,8 +109,8 @@ fun OverlayDropdownPopup(
                             index = itemIdx,
                             dropdownColors = dropdownColors,
                             enabled = entry.enabled && option.enabled,
-                            onSelectedIndexChange = {
-                                onItemClicked(entryIdx, itemIdx)
+                            onSelectedIndexChange = { index ->
+                                onItemClicked(entryIdx, index)
                             },
                         )
                     }
@@ -208,7 +208,9 @@ fun OverlayDropdownDialog(
                 content = {
                     LazyColumn {
                         entries.forEachIndexed { entryIdx, entry ->
-                            items(entry.items.size, key = { itemIdx -> "$entryIdx-$itemIdx" }) { itemIdx ->
+                            items(
+                                entry.items.size,
+                                key = { itemIdx -> "$entryIdx-$itemIdx" }) { itemIdx ->
                                 val item = entry.items[itemIdx]
                                 DropdownImpl(
                                     item = item,
@@ -218,13 +220,18 @@ fun OverlayDropdownDialog(
                                     dropdownColors = dropdownColors,
                                     enabled = entry.enabled && item.enabled,
                                     dialogMode = true,
-                                    onSelectedIndexChange = { onItemClicked(entryIdx, itemIdx) },
+                                    onSelectedIndexChange = { index ->
+                                        onItemClicked(entryIdx, index)
+                                    },
                                 )
                             }
                             if (entryIdx != entries.lastIndex) {
                                 item(key = "divider-$entryIdx") {
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 6.dp),
+                                        modifier = Modifier.padding(
+                                            horizontal = 28.dp,
+                                            vertical = 6.dp
+                                        ),
                                         thickness = 1.dp,
                                     )
                                 }
