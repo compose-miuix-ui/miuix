@@ -74,18 +74,16 @@ WindowDropdownPreference(
 
 ## Custom Entries
 
-Use `DropdownEntry` and `DropdownItem` when individual dropdown items need extra state, such as disabling a specific option.
+Use `DropdownEntry` and `DropdownItem` when individual dropdown items need extra state, such as selection, callbacks, or disabling a specific option.
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val entry = DropdownEntry(
     items = listOf(
-        DropdownItem(text = "Option 1"),
+        DropdownItem(text = "Option 1", selected = selectedIndex == 0, onClick = { selectedIndex = 0 }),
         DropdownItem(text = "Option 2", enabled = false),
-        DropdownItem(text = "Option 3"),
-    ),
-    selectedIndex = selectedIndex,
-    onSelectedIndexChange = { selectedIndex = it }
+        DropdownItem(text = "Option 3", selected = selectedIndex == 2, onClick = { selectedIndex = 2 }),
+    )
 )
 
 WindowDropdownPreference(
@@ -98,21 +96,21 @@ Disabled dropdown items are not clickable and their text and selected indicator 
 
 ## Grouped Dropdown
 
-Use `entries` to show multiple dropdown groups separated by dividers. Each group keeps its own selected index and callback.
+Use `entries` to show multiple dropdown groups separated by dividers. Each item keeps its own selected state and click callback.
 
 ```kotlin
 var firstSelectedIndex by remember { mutableStateOf(0) }
 var secondSelectedIndex by remember { mutableStateOf(0) }
 val entries = listOf(
     DropdownEntry(
-        items = listOf("Small", "Medium").map { DropdownItem(text = it) },
-        selectedIndex = firstSelectedIndex,
-        onSelectedIndexChange = { firstSelectedIndex = it }
+        items = listOf("Small", "Medium").mapIndexed { index, text ->
+            DropdownItem(text = text, selected = firstSelectedIndex == index, onClick = { firstSelectedIndex = index })
+        }
     ),
     DropdownEntry(
-        items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
-        selectedIndex = secondSelectedIndex,
-        onSelectedIndexChange = { secondSelectedIndex = it }
+        items = listOf("Red", "Green", "Blue").mapIndexed { index, text ->
+            DropdownItem(text = text, selected = secondSelectedIndex == index, onClick = { secondSelectedIndex = index })
+        }
     )
 )
 
@@ -124,6 +122,44 @@ WindowDropdownPreference(
 ```
 
 For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `entries.size <= 1`, so a single group closes after selection while multiple groups stay open for consecutive changes.
+
+## Multi Select
+
+Because selection state lives on `DropdownItem`, multiple items can be selected by keeping a set of selected values and toggling each item from `onClick`.
+
+```kotlin
+var selectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
+val entries = listOf(
+    DropdownEntry(
+        items = listOf("A1", "A2").map { text ->
+            DropdownItem(
+                text = text,
+                selected = text in selectedItems,
+                onClick = {
+                    selectedItems = if (text in selectedItems) selectedItems - text else selectedItems + text
+                }
+            )
+        }
+    ),
+    DropdownEntry(
+        items = listOf("B1", "B2", "B3").map { text ->
+            DropdownItem(
+                text = text,
+                selected = text in selectedItems,
+                onClick = {
+                    selectedItems = if (text in selectedItems) selectedItems - text else selectedItems + text
+                }
+            )
+        }
+    )
+)
+
+WindowDropdownPreference(
+    title = "Multi Select Dropdown",
+    entries = entries,
+    collapseOnSelection = false
+)
+```
 
 ## Component States
 
@@ -179,11 +215,12 @@ WindowDropdownPreference(
 
 ### DropdownEntry Properties
 
-| Property Name         | Type                | Description                                     | Default Value | Required |
-| --------------------- | ------------------- | ----------------------------------------------- | ------------- | -------- |
-| items                 | List\<DropdownItem> | Items shown in this dropdown group              | -             | Yes      |
-| selectedIndex         | Int?                | Selected item index. Null hides selection state | null          | No       |
-| onSelectedIndexChange | ((Int) -> Unit)?    | Callback when an item is selected               | null          | No       |
+| Property Name | Type                | Description                        | Default Value | Required |
+| ------------- | ------------------- | ---------------------------------- | ------------- | -------- |
+| items         | List\<DropdownItem> | Items shown in this dropdown group | -             | Yes      |
+| enabled       | Boolean             | Whether this group is enabled. False disables all items; true still respects each item's enabled state | true | No |
+
+Group titles are reserved for future use. The original MIUI dropdown style currently has no matching group-title presentation, so the `title` field is not exposed yet.
 
 ### DropdownItem Properties
 
@@ -191,6 +228,7 @@ WindowDropdownPreference(
 | ------------- | --------------------------------- | -------------------------------------------------------- | ------------- | -------- |
 | text          | String                            | Text shown for the item                                  | -             | Yes      |
 | enabled       | Boolean                           | Whether the item can be clicked. Disabled items are gray | true          | No       |
+| selected      | Boolean                           | Whether the item is selected                             | false         | No       |
 | onClick       | (() -> Unit)?                     | Callback invoked when the item is clicked                | null          | No       |
 | icon          | @Composable ((Modifier) -> Unit)? | Icon shown before the item text                          | null          | No       |
 | summary       | String?                           | Summary text shown below the item text                   | null          | No       |

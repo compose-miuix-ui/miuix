@@ -31,8 +31,8 @@ import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 /**
  * Overlay dropdown popup for a single [DropdownEntry].
  *
- * Selection changes call [DropdownEntry.onSelectedIndexChange], item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick],
- * and [collapseOnSelection] controls whether the popup is dismissed after a click.
+ * Item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
+ * controls whether the popup is dismissed after a click.
  */
 @Composable
 fun OverlayDropdownPopup(
@@ -83,7 +83,6 @@ fun OverlayDropdownPopup(
         { entryIdx, itemIdx ->
             currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
             currentEntries.getOrNull(entryIdx)?.let { entry ->
-                entry.onSelectedIndexChange?.invoke(itemIdx)
                 entry.items.getOrNull(itemIdx)?.onClick?.invoke()
             }
             if (currentCollapseOnSelection) {
@@ -106,10 +105,10 @@ fun OverlayDropdownPopup(
                         DropdownImpl(
                             item = option,
                             optionSize = entry.items.size,
-                            isSelected = entry.selectedIndex == itemIdx,
+                            isSelected = option.selected,
                             index = itemIdx,
                             dropdownColors = dropdownColors,
-                            enabled = option.enabled,
+                            enabled = entry.enabled && option.enabled,
                             onSelectedIndexChange = {
                                 onItemClicked(entryIdx, itemIdx)
                             },
@@ -130,8 +129,8 @@ fun OverlayDropdownPopup(
 /**
  * Overlay dialog for a [DropdownEntry].
  *
- * Selection changes call [DropdownEntry.onSelectedIndexChange], item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick],
- * and [collapseOnSelection] controls whether the dialog is dismissed after a click.
+ * Item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
+ * controls whether the dialog is dismissed after a click.
  */
 @Composable
 fun OverlayDropdownDialog(
@@ -164,8 +163,7 @@ fun OverlayDropdownDialog(
 /**
  * Overlay dialog for one or more [DropdownEntry] groups.
  *
- * Groups are separated by dividers. Selection changes call [DropdownEntry.onSelectedIndexChange],
- * item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
+ * Groups are separated by dividers. Item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
  * controls whether the dialog is dismissed after a click.
  */
 @Composable
@@ -190,7 +188,6 @@ fun OverlayDropdownDialog(
         { entryIdx, itemIdx ->
             currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
             currentEntries.getOrNull(entryIdx)?.let { entry ->
-                entry.onSelectedIndexChange?.invoke(itemIdx)
                 entry.items.getOrNull(itemIdx)?.onClick?.invoke()
             }
             if (currentCollapseOnSelection) {
@@ -216,10 +213,10 @@ fun OverlayDropdownDialog(
                                 DropdownImpl(
                                     item = item,
                                     optionSize = entry.items.size,
-                                    isSelected = entry.selectedIndex == itemIdx,
+                                    isSelected = item.selected,
                                     index = itemIdx,
                                     dropdownColors = dropdownColors,
-                                    enabled = item.enabled,
+                                    enabled = entry.enabled && item.enabled,
                                     dialogMode = true,
                                     onSelectedIndexChange = { onItemClicked(entryIdx, itemIdx) },
                                 )

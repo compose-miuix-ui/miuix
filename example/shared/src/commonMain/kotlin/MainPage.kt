@@ -65,6 +65,7 @@ import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.SelectAll
 import top.yukonga.miuix.kmp.icon.extended.Tune
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
@@ -150,21 +151,85 @@ fun MainPage(
         listOf(
             DropdownEntry(
                 items = listOf("Selection A-1", "Selection A-2")
-                    .map { DropdownItem(text = it) },
-                selectedIndex = selectedIndex1,
-                onSelectedIndexChange = { selectedIndex1 = it },
+                    .mapIndexed { index, text ->
+                        DropdownItem(
+                            text = text,
+                            selected = selectedIndex1 == index,
+                            onClick = { selectedIndex1 = index },
+                        )
+                    },
             ),
             DropdownEntry(
                 items = listOf("Selection B-1", "Selection B-2", "Selection B-3")
-                    .map { DropdownItem(text = it) },
-                selectedIndex = selectedIndex2,
-                onSelectedIndexChange = { selectedIndex2 = it },
+                    .mapIndexed { index, text ->
+                        DropdownItem(
+                            text = text,
+                            selected = selectedIndex2 == index,
+                            onClick = { selectedIndex2 = index },
+                        )
+                    },
             ),
             DropdownEntry(
                 items = listOf("Selection C-1", "Selection C-2", "Selection C-3", "Selection C-4")
-                    .map { DropdownItem(text = it) },
-                selectedIndex = selectedIndex3,
-                onSelectedIndexChange = { selectedIndex3 = it },
+                    .mapIndexed { index, text ->
+                        DropdownItem(
+                            text = text,
+                            selected = selectedIndex3 == index,
+                            onClick = { selectedIndex3 = index },
+                        )
+                    },
+            ),
+        )
+    }
+    var multiSelectedItems by remember {
+        mutableStateOf(
+            setOf(
+                "Multi selection A-1",
+                "Multi selection B-2",
+                "Multi selection B-3",
+            )
+        )
+    }
+    val multiSelectItems = remember(multiSelectedItems) {
+        listOf(
+            DropdownEntry(
+                items = listOf(
+                    "Multi selection A-1",
+                    "Multi selection A-2",
+                ).map { text ->
+                    DropdownItem(
+                        text = text,
+                        selected = text in multiSelectedItems,
+                        onClick = {
+                            multiSelectedItems =
+                                if (text in multiSelectedItems) {
+                                    multiSelectedItems - text
+                                } else {
+                                    multiSelectedItems + text
+                                }
+                        },
+                    )
+                },
+            ),
+            DropdownEntry(
+                items = listOf(
+                    "Multi selection B-1",
+                    "Multi selection B-2",
+                    "Multi selection B-3",
+                ).map { text ->
+                    DropdownItem(
+                        text = text,
+                        selected = text in multiSelectedItems,
+                        onClick = {
+                            multiSelectedItems =
+                                if (text in multiSelectedItems) {
+                                    multiSelectedItems - text
+                                } else {
+                                    multiSelectedItems + text
+                                }
+                        },
+                    )
+                },
             ),
         )
     }
@@ -180,6 +245,15 @@ fun MainPage(
                     color = barColor,
                     actions = {
                         OverlayIconDropdownMenu(
+                            entries = multiSelectItems,
+                            collapseOnSelection = false,
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.SelectAll,
+                                contentDescription = "Multiple selection",
+                            )
+                        }
+                        OverlayIconDropdownMenu(
                             entries = optionItems,
                             collapseOnSelection = false,
                         ) {
@@ -190,6 +264,7 @@ fun MainPage(
                         }
                         OverlayIconDropdownMenu(
                             entries = menuItems,
+                            collapseOnSelection = true,
                         ) {
                             Icon(
                                 imageVector = MiuixIcons.More,

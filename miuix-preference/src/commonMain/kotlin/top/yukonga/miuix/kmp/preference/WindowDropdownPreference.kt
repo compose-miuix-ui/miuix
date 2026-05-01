@@ -74,7 +74,17 @@ fun WindowDropdownPreference(
         items,
         selectedIndex,
         onSelectedIndexChange,
-    ) { DropdownEntry(items.map { DropdownItem(it) }, selectedIndex, onSelectedIndexChange) }
+    ) {
+        DropdownEntry(
+            items.mapIndexed { index, item ->
+                DropdownItem(
+                    text = item,
+                    selected = index == selectedIndex,
+                    onClick = { onSelectedIndexChange?.invoke(index) },
+                )
+            }
+        )
+    }
     WindowDropdownPreference(
         entry = entry,
         title = title,
@@ -159,7 +169,7 @@ fun WindowDropdownPreference(
         startAction = startAction,
         endActions = {
             if (showValue && itemsNotEmpty) {
-                val text = entry.selectedIndex?.let { entry.items.getOrNull(it)?.text }
+                val text = entry.items.firstOrNull { it.selected }?.text
                 if (!text.isNullOrEmpty()) {
                     Text(
                         text = text,
@@ -261,7 +271,10 @@ fun WindowDropdownPreference(
         startAction = startAction,
         endActions = {
             val selectedValueText = nonEmptyEntries
-                .mapNotNull { group -> group.selectedIndex?.let { idx -> group.items.getOrNull(idx)?.text } }
+                .asSequence()
+                .flatMap { group -> group.items }
+                .filter { it.selected }
+                .map { it.text }
                 .filter { it.isNotBlank() }
                 .joinToString("\n")
                 .ifBlank { null }

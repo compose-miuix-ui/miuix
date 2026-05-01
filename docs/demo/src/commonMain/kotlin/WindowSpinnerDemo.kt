@@ -56,6 +56,7 @@ fun WindowSpinnerDemo() {
             var selectedIndex2 by remember { mutableIntStateOf(0) }
             var firstGroupedSelectedIndex by remember { mutableIntStateOf(0) }
             var secondGroupedSelectedIndex by remember { mutableIntStateOf(0) }
+            var multiSelectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
             var expanded by remember { mutableStateOf(false) }
 
             // Create a rounded rectangle Painter
@@ -95,6 +96,38 @@ fun WindowSpinnerDemo() {
                     summary = "Bright yellow",
                 ),
             )
+            val multiSelectOptions = listOf(
+                DropdownEntry(
+                    items = listOf("A1", "A2").map { text ->
+                        DropdownItem(
+                            text = text,
+                            selected = text in multiSelectedItems,
+                            onClick = {
+                                multiSelectedItems = if (text in multiSelectedItems) {
+                                    multiSelectedItems - text
+                                } else {
+                                    multiSelectedItems + text
+                                }
+                            },
+                        )
+                    },
+                ),
+                DropdownEntry(
+                    items = listOf("B1", "B2", "B3").map { text ->
+                        DropdownItem(
+                            text = text,
+                            selected = text in multiSelectedItems,
+                            onClick = {
+                                multiSelectedItems = if (text in multiSelectedItems) {
+                                    multiSelectedItems - text
+                                } else {
+                                    multiSelectedItems + text
+                                }
+                            },
+                        )
+                    },
+                ),
+            )
             var selectedIndex3 by remember { mutableIntStateOf(0) }
             val options3 = listOf(
                 DropdownItem(text = "Option A"),
@@ -103,14 +136,22 @@ fun WindowSpinnerDemo() {
             )
             val groupedOptions = listOf(
                 DropdownEntry(
-                    items = listOf("Small", "Medium").map { DropdownItem(text = it) },
-                    selectedIndex = firstGroupedSelectedIndex,
-                    onSelectedIndexChange = { firstGroupedSelectedIndex = it },
+                    items = listOf("Small", "Medium").mapIndexed { index, text ->
+                        DropdownItem(
+                            text = text,
+                            selected = firstGroupedSelectedIndex == index,
+                            onClick = { firstGroupedSelectedIndex = index },
+                        )
+                    },
                 ),
                 DropdownEntry(
-                    items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
-                    selectedIndex = secondGroupedSelectedIndex,
-                    onSelectedIndexChange = { secondGroupedSelectedIndex = it },
+                    items = listOf("Red", "Green", "Blue").mapIndexed { index, text ->
+                        DropdownItem(
+                            text = text,
+                            selected = secondGroupedSelectedIndex == index,
+                            onClick = { secondGroupedSelectedIndex = index },
+                        )
+                    },
                 ),
             )
 
@@ -147,6 +188,11 @@ fun WindowSpinnerDemo() {
                 WindowSpinnerPreference(
                     title = "Grouped Selector",
                     entries = groupedOptions,
+                    collapseOnSelection = false,
+                )
+                WindowSpinnerPreference(
+                    title = "Multi Select Selector",
+                    entries = multiSelectOptions,
                     collapseOnSelection = false,
                 )
             }

@@ -246,20 +246,23 @@ data class DropdownColors(
 )
 
 /**
- * A group of dropdown items and optional selection state.
+ * A group of dropdown items.
  *
- * When [selectedIndex] or [onSelectedIndexChange] is null, the group behaves like an action menu and does not
- * show or remember selection state. [DropdownItem.onClick] is still invoked when an item is clicked.
+ * A [DropdownEntry] represents one visual group in a dropdown menu. Group titles are intentionally
+ * reserved for future use because the original MIUI dropdown style currently has no matching
+ * group-title presentation.
  *
  * @param items Items shown in this dropdown group.
- * @param selectedIndex The selected item index, or null to hide selection state.
- * @param onSelectedIndexChange Callback invoked with the clicked item index.
+ * @param enabled Whether this group is enabled. When false, all items in this group are disabled;
+ * when true, each item's [DropdownItem.enabled] value is still respected.
  */
 @Stable
 data class DropdownEntry(
     val items: List<DropdownItem>,
-    val selectedIndex: Int? = null,
-    val onSelectedIndexChange: ((Int) -> Unit)? = null,
+    val enabled: Boolean = true,
+
+    // naming the groups through this, but never appeared in MIUI design?
+    // val title: String? = null,
 )
 
 /**
@@ -267,6 +270,7 @@ data class DropdownEntry(
  *
  * @param text Text shown for the item.
  * @param enabled Whether the item can be clicked.
+ * @param selected Whether the item is selected.
  * @param onClick Callback invoked when the item is clicked.
  * @param icon Optional icon shown before [text].
  * @param summary Optional summary shown below [text].
@@ -275,10 +279,14 @@ data class DropdownEntry(
 data class DropdownItem(
     val text: String,
     val enabled: Boolean = true,
+    val selected: Boolean = false,
     val onClick: (() -> Unit)? = null,
     val icon: @Composable ((Modifier) -> Unit)? = null,
     val summary: String? = null,
 ) {
+    /**
+     * [SpinnerEntry] compatibility
+     */
     constructor(
         icon: @Composable ((Modifier) -> Unit)? = null,
         title: String? = null,

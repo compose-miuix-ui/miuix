@@ -73,9 +73,15 @@ fun WindowSpinnerPreference(
 ) {
     val entry = remember(items, selectedIndex, onSelectedIndexChange) {
         DropdownEntry(
-            items = items,
-            selectedIndex = selectedIndex,
-            onSelectedIndexChange = onSelectedIndexChange,
+            items = items.mapIndexed { index, item ->
+                item.copy(
+                    selected = index == selectedIndex,
+                    onClick = {
+                        onSelectedIndexChange?.invoke(index)
+                        item.onClick?.invoke()
+                    },
+                )
+            },
         )
     }
     WindowSpinnerPreference(
@@ -201,7 +207,10 @@ fun WindowSpinnerPreference(
         startAction = startAction,
         endActions = {
             val selectedValueText = nonEmptyEntries
-                .mapNotNull { group -> group.selectedIndex?.let { idx -> group.items.getOrNull(idx)?.text } }
+                .asSequence()
+                .flatMap { group -> group.items }
+                .filter { it.selected }
+                .map { it.text }
                 .filter { it.isNotBlank() }
                 .joinToString("\n")
                 .ifBlank { null }
@@ -215,7 +224,6 @@ fun WindowSpinnerPreference(
                     color = actionColor,
                     textAlign = TextAlign.End,
                     lineHeight = MiuixTheme.textStyles.body2.lineHeight,
-                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -284,9 +292,15 @@ fun WindowSpinnerPreference(
 ) {
     val entry = remember(items, selectedIndex, onSelectedIndexChange) {
         DropdownEntry(
-            items = items,
-            selectedIndex = selectedIndex,
-            onSelectedIndexChange = onSelectedIndexChange,
+            items = items.mapIndexed { index, item ->
+                item.copy(
+                    selected = index == selectedIndex,
+                    onClick = {
+                        onSelectedIndexChange?.invoke(index)
+                        item.onClick?.invoke()
+                    },
+                )
+            },
         )
     }
     WindowSpinnerPreference(
@@ -416,7 +430,10 @@ fun WindowSpinnerPreference(
         startAction = startAction,
         endActions = {
             val selectedValueText = nonEmptyEntries
-                .mapNotNull { group -> group.selectedIndex?.let { idx -> group.items.getOrNull(idx)?.text } }
+                .asSequence()
+                .flatMap { group -> group.items }
+                .filter { it.selected }
+                .map { it.text }
                 .filter { it.isNotBlank() }
                 .joinToString("\n")
                 .ifBlank { null }
@@ -430,7 +447,6 @@ fun WindowSpinnerPreference(
                     color = actionColor,
                     textAlign = TextAlign.End,
                     lineHeight = MiuixTheme.textStyles.body2.lineHeight,
-                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

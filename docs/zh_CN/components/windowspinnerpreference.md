@@ -126,21 +126,21 @@ WindowSpinnerPreference(
 
 ## 分组选项
 
-当选项需要禁用状态、点击回调、图标或摘要时，可以使用 `DropdownEntry`。使用 `entries` 可以显示多个分组，分组之间会用分割线隔开。
+当选项需要选中状态、禁用状态、点击回调、图标或摘要时，可以使用 `DropdownEntry`。使用 `entries` 可以显示多个分组，分组之间会用分割线隔开。
 
 ```kotlin
 var firstSelectedIndex by remember { mutableStateOf(0) }
 var secondSelectedIndex by remember { mutableStateOf(0) }
 val entries = listOf(
     DropdownEntry(
-        items = listOf("小", "中").map { DropdownItem(text = it) },
-        selectedIndex = firstSelectedIndex,
-        onSelectedIndexChange = { firstSelectedIndex = it }
+        items = listOf("小", "中").mapIndexed { index, text ->
+            DropdownItem(text = text, selected = firstSelectedIndex == index, onClick = { firstSelectedIndex = index })
+        }
     ),
     DropdownEntry(
-        items = listOf("红色", "绿色", "蓝色").map { DropdownItem(text = it) },
-        selectedIndex = secondSelectedIndex,
-        onSelectedIndexChange = { secondSelectedIndex = it }
+        items = listOf("红色", "绿色", "蓝色").mapIndexed { index, text ->
+            DropdownItem(text = text, selected = secondSelectedIndex == index, onClick = { secondSelectedIndex = index })
+        }
     )
 )
 
@@ -152,6 +152,44 @@ WindowSpinnerPreference(
 ```
 
 对于 `entries` 重载，`collapseOnSelection` 控制点击选项后是否关闭弹出框。默认值为 `entries.size <= 1`，单个分组会在选中后关闭，多个分组会保持打开以便连续选择。提供 `dialogButtonString` 后，对话框模式也支持相同的 `entry` 和 `entries` 重载。
+
+## 多选
+
+因为选中状态放在 `DropdownItem` 上，可以用集合保存多个选中值，并在每个条目的 `onClick` 中切换选中状态。
+
+```kotlin
+var selectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
+val entries = listOf(
+    DropdownEntry(
+        items = listOf("A1", "A2").map { text ->
+            DropdownItem(
+                text = text,
+                selected = text in selectedItems,
+                onClick = {
+                    selectedItems = if (text in selectedItems) selectedItems - text else selectedItems + text
+                }
+            )
+        }
+    ),
+    DropdownEntry(
+        items = listOf("B1", "B2", "B3").map { text ->
+            DropdownItem(
+                text = text,
+                selected = text in selectedItems,
+                onClick = {
+                    selectedItems = if (text in selectedItems) selectedItems - text else selectedItems + text
+                }
+            )
+        }
+    )
+)
+
+WindowSpinnerPreference(
+    title = "多选选择器",
+    entries = entries,
+    collapseOnSelection = false
+)
+```
 
 ## 监听展开状态
 
@@ -251,21 +289,23 @@ WindowSpinnerPreference(
 
 ### DropdownEntry 属性
 
-| 属性名                | 类型                | 说明                                 | 默认值 | 是否必须 |
-| --------------------- | ------------------- | ------------------------------------ | ------ | -------- |
-| items                 | List\<DropdownItem> | 此分组中显示的条目                   | -      | 是       |
-| selectedIndex         | Int?                | 选中项索引，为 null 时不显示选中状态 | null   | 否       |
-| onSelectedIndexChange | ((Int) -> Unit)?    | 选中条目时触发的回调                 | null   | 否       |
+| 属性名  | 类型                | 说明                       | 默认值 | 是否必须 |
+| ------- | ------------------- | -------------------------- | ------ | -------- |
+| items   | List\<DropdownItem> | 此分组中显示的条目         | -      | 是       |
+| enabled | Boolean             | 此分组是否启用。为 false 时禁用整组条目；为 true 时仍会遵循每个条目的 enabled 状态 | true   | 否       |
+
+分组标题预留给后续使用。原版 MIUI 下拉样式目前没有对应的分组标题表现，因此 `title` 字段暂不开放。
 
 ### DropdownItem 属性
 
-| 属性名  | 类型                              | 说明                         | 默认值 | 是否必须 |
-| ------- | --------------------------------- | ---------------------------- | ------ | -------- |
-| text    | String                            | 选项显示的文本               | -      | 是       |
-| enabled | Boolean                           | 选项是否可点击，禁用时置灰   | true   | 否       |
-| onClick | (() -> Unit)?                     | 点击选项时触发的回调         | null   | 否       |
-| icon    | @Composable ((Modifier) -> Unit)? | 显示在选项文本前的图标       | null   | 否       |
-| summary | String?                           | 显示在选项文本下方的摘要文本 | null   | 否       |
+| 属性名   | 类型                              | 说明                         | 默认值 | 是否必须 |
+| -------- | --------------------------------- | ---------------------------- | ------ | -------- |
+| text     | String                            | 选项显示的文本               | -      | 是       |
+| enabled  | Boolean                           | 选项是否可点击，禁用时置灰   | true   | 否       |
+| selected | Boolean                           | 选项是否处于选中状态         | false  | 否       |
+| onClick  | (() -> Unit)?                     | 点击选项时触发的回调         | null   | 否       |
+| icon     | @Composable ((Modifier) -> Unit)? | 显示在选项文本前的图标       | null   | 否       |
+| summary  | String?                           | 显示在选项文本下方的摘要文本 | null   | 否       |
 
 ### DropdownColors 属性
 

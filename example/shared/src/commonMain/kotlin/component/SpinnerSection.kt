@@ -268,24 +268,39 @@ private fun groupedSpinnerOptions(
 ): List<DropdownEntry> {
     return listOf(
         DropdownEntry(
-            items = spinnerOptions.take(2),
-            selectedIndex = group1SelectedIndex,
-            onSelectedIndexChange = onGroup1SelectedIndexChange,
+            items = spinnerOptions.take(2).mapIndexed { index, item ->
+                item.copy(
+                    selected = group1SelectedIndex == index,
+                    onClick = {
+                        onGroup1SelectedIndexChange(index)
+                        item.onClick?.invoke()
+                    },
+                )
+            },
         ),
         DropdownEntry(
-            items = spinnerOptions.drop(2),
-            selectedIndex = group2SelectedIndex,
-            onSelectedIndexChange = onGroup2SelectedIndexChange,
+            items = spinnerOptions.drop(2).mapIndexed { index, item ->
+                item.copy(
+                    selected = group2SelectedIndex == index,
+                    onClick = {
+                        onGroup2SelectedIndexChange(index)
+                        item.onClick?.invoke()
+                    },
+                )
+            },
         ),
         DropdownEntry(
             items = spinnerOptions.mapIndexed { index, item ->
                 item.copy(
-                    text = "Group ${index + 1}",
+                    text = "Option ${index + 1}",
                     enabled = index % 2 == 0,
+                    selected = group3SelectedIndex == index,
+                    onClick = {
+                        onGroup3SelectedIndexChange(index)
+                        item.onClick?.invoke()
+                    },
                 )
             },
-            selectedIndex = group3SelectedIndex,
-            onSelectedIndexChange = onGroup3SelectedIndexChange,
         ),
     )
 }

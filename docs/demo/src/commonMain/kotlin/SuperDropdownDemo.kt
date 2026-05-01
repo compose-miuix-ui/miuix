@@ -51,25 +51,72 @@ fun SuperDropdownDemo() {
                 var customSelectedIndex by remember { mutableIntStateOf(0) }
                 val customEntry = DropdownEntry(
                     items = listOf(
-                        DropdownItem(text = "Custom Option 1"),
+                        DropdownItem(
+                            text = "Custom Option 1",
+                            selected = customSelectedIndex == 0,
+                            onClick = { customSelectedIndex = 0 },
+                        ),
                         DropdownItem(text = "Custom Option 2", enabled = false),
-                        DropdownItem(text = "Custom Option 3"),
+                        DropdownItem(
+                            text = "Custom Option 3",
+                            selected = customSelectedIndex == 2,
+                            onClick = { customSelectedIndex = 2 },
+                        ),
                     ),
-                    selectedIndex = customSelectedIndex,
-                    onSelectedIndexChange = { customSelectedIndex = it },
                 )
                 var sizeSelectedIndex by remember { mutableIntStateOf(0) }
                 var colorSelectedIndex by remember { mutableIntStateOf(0) }
+                var multiSelectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
                 val groupedEntries = listOf(
                     DropdownEntry(
-                        items = listOf("Small", "Medium").map { DropdownItem(text = it) },
-                        selectedIndex = sizeSelectedIndex,
-                        onSelectedIndexChange = { sizeSelectedIndex = it },
+                        items = listOf("Small", "Medium").mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = sizeSelectedIndex == index,
+                                onClick = { sizeSelectedIndex = index },
+                            )
+                        },
                     ),
                     DropdownEntry(
-                        items = listOf("Red", "Green", "Blue").map { DropdownItem(text = it) },
-                        selectedIndex = colorSelectedIndex,
-                        onSelectedIndexChange = { colorSelectedIndex = it },
+                        items = listOf("Red", "Green", "Blue").mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = colorSelectedIndex == index,
+                                onClick = { colorSelectedIndex = index },
+                            )
+                        },
+                    ),
+                )
+                val multiSelectEntries = listOf(
+                    DropdownEntry(
+                        items = listOf("A1", "A2").map { text ->
+                            DropdownItem(
+                                text = text,
+                                selected = text in multiSelectedItems,
+                                onClick = {
+                                    multiSelectedItems = if (text in multiSelectedItems) {
+                                        multiSelectedItems - text
+                                    } else {
+                                        multiSelectedItems + text
+                                    }
+                                },
+                            )
+                        },
+                    ),
+                    DropdownEntry(
+                        items = listOf("B1", "B2", "B3").map { text ->
+                            DropdownItem(
+                                text = text,
+                                selected = text in multiSelectedItems,
+                                onClick = {
+                                    multiSelectedItems = if (text in multiSelectedItems) {
+                                        multiSelectedItems - text
+                                    } else {
+                                        multiSelectedItems + text
+                                    }
+                                },
+                            )
+                        },
                     ),
                 )
 
@@ -95,6 +142,11 @@ fun SuperDropdownDemo() {
                     OverlayDropdownPreference(
                         title = "Grouped Dropdown",
                         entries = groupedEntries,
+                        collapseOnSelection = false,
+                    )
+                    OverlayDropdownPreference(
+                        title = "Multi Select Dropdown",
+                        entries = multiSelectEntries,
                         collapseOnSelection = false,
                     )
                     OverlayDropdownPreference(

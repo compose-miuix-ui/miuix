@@ -55,23 +55,34 @@ fun LazyListScope.dropdownSection() {
             listOf(
                 DropdownEntry(
                     items = listOf("Option A-1", "Option A-2")
-                        .map { DropdownItem(it) },
-                    selectedIndex = overlayGroup1DropdownOptionSelected,
-                    onSelectedIndexChange = { overlayGroup1DropdownOptionSelected = it },
+                        .mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = overlayGroup1DropdownOptionSelected == index,
+                                onClick = { overlayGroup1DropdownOptionSelected = index },
+                            )
+                        },
                 ),
                 DropdownEntry(
                     items = listOf("Option B-1", "Option B-2", "Option B-3")
-                        .map { DropdownItem(it) },
-                    selectedIndex = overlayGroup2DropdownOptionSelected,
-                    onSelectedIndexChange = { overlayGroup2DropdownOptionSelected = it },
+                        .mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = overlayGroup2DropdownOptionSelected == index,
+                                onClick = { overlayGroup2DropdownOptionSelected = index },
+                            )
+                        },
                 ),
                 DropdownEntry(
                     items = listOf("Option C-1", "Option C-2", "Option C-3", "Option C-4")
                         .mapIndexed { index, string ->
-                            DropdownItem(text = string, enabled = index % 2 == 0)
+                            DropdownItem(
+                                text = string,
+                                enabled = index % 2 == 0,
+                                selected = overlayGroup3DropdownOptionSelected == index,
+                                onClick = { overlayGroup3DropdownOptionSelected = index },
+                            )
                         },
-                    selectedIndex = overlayGroup3DropdownOptionSelected,
-                    onSelectedIndexChange = { overlayGroup3DropdownOptionSelected = it },
                 ),
             )
         }
@@ -88,23 +99,34 @@ fun LazyListScope.dropdownSection() {
             listOf(
                 DropdownEntry(
                     items = listOf("Option A-1", "Option A-2")
-                        .map { DropdownItem(it) },
-                    selectedIndex = windowGroup1DropdownOptionSelected,
-                    onSelectedIndexChange = { windowGroup1DropdownOptionSelected = it },
+                        .mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = windowGroup1DropdownOptionSelected == index,
+                                onClick = { windowGroup1DropdownOptionSelected = index },
+                            )
+                        },
                 ),
                 DropdownEntry(
                     items = listOf("Option B-1", "Option B-2", "Option B-3")
-                        .map { DropdownItem(it) },
-                    selectedIndex = windowGroup2DropdownOptionSelected,
-                    onSelectedIndexChange = { windowGroup2DropdownOptionSelected = it },
+                        .mapIndexed { index, text ->
+                            DropdownItem(
+                                text = text,
+                                selected = windowGroup2DropdownOptionSelected == index,
+                                onClick = { windowGroup2DropdownOptionSelected = index },
+                            )
+                        },
                 ),
                 DropdownEntry(
                     items = listOf("Option C-1", "Option C-2", "Option C-3", "Option C-4")
                         .mapIndexed { index, string ->
-                            DropdownItem(text = string, enabled = index % 2 == 0)
+                            DropdownItem(
+                                text = string,
+                                enabled = index % 2 == 0,
+                                selected = windowGroup3DropdownOptionSelected == index,
+                                onClick = { windowGroup3DropdownOptionSelected = index },
+                            )
                         },
-                    selectedIndex = windowGroup3DropdownOptionSelected,
-                    onSelectedIndexChange = { windowGroup3DropdownOptionSelected = it },
                 ),
             )
         }
