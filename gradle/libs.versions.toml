@@ -3,7 +3,7 @@ agp = "9.2.0"
 kotlin = "2.3.21"
 kotlinx-serialization = "1.11.0"
 
-about-libraries = "14.0.1"
+about-libraries = "14.1.0"
 androidx-activity = "1.13.0"
 androidx-collection = "1.6.0"
 androidx-navigation3 = "1.1.1"
