@@ -217,7 +217,7 @@ fun OverlayDropdownPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    collapseOnSelection: Boolean = false,
+    collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }

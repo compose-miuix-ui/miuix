@@ -194,7 +194,7 @@ fun LazyListScope.spinnerSection() {
             OverlaySpinnerPreference(
                 title = "SpinnerPref",
                 summary = "As OverlayDialog" + if (overlayDialogExpanded) " (Expanded)" else " (Collapsed)",
-                dialogButtonString = "Cancel",
+                dialogButtonString = "OK",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
@@ -203,7 +203,7 @@ fun LazyListScope.spinnerSection() {
             WindowSpinnerPreference(
                 title = "WindowSpinnerPref",
                 summary = "As WindowDialog" + if (windowDialogExpanded) " (Expanded)" else " (Collapsed)",
-                dialogButtonString = "Cancel",
+                dialogButtonString = "OK",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelectedDialog.value = newOption },
@@ -242,14 +242,14 @@ fun LazyListScope.spinnerSection() {
             OverlaySpinnerPreference(
                 title = "Grouped SpinnerPref",
                 summary = "As OverlayDialog" + if (overlayGroupedDialogExpanded) " (Expanded)" else " (Collapsed)",
-                dialogButtonString = "Cancel",
+                dialogButtonString = "OK",
                 entries = overlayGroupedDialogSpinnerOptions,
                 onExpandedChange = { overlayGroupedDialogExpanded = it },
             )
             WindowSpinnerPreference(
                 title = "Grouped WindowSpinnerPref",
                 summary = "As WindowDialog" + if (windowGroupedDialogExpanded) " (Expanded)" else " (Collapsed)",
-                dialogButtonString = "Cancel",
+                dialogButtonString = "OK",
                 entries = windowGroupedDialogSpinnerOptions,
                 onExpandedChange = { windowGroupedDialogExpanded = it },
             )

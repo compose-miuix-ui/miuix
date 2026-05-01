@@ -69,7 +69,7 @@ fun DropdownImpl(
     isSelected: Boolean,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    enabled: Boolean = true,
+    enabled: Boolean = item.enabled,
     dialogMode: Boolean = false,
     onSelectedIndexChange: (Int) -> Unit,
 ) {
@@ -177,8 +177,9 @@ fun DropdownImpl(
     dialogMode: Boolean = false,
     onSelectedIndexChange: (Int) -> Unit,
 ) {
+    val item = remember(text, enabled) { DropdownItem(text = text, enabled = enabled) }
     DropdownImpl(
-        item = DropdownItem(text = text, enabled = enabled),
+        item = item,
         optionSize = optionSize,
         isSelected = isSelected,
         index = index,

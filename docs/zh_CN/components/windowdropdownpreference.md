@@ -127,7 +127,7 @@ WindowDropdownPreference(
 )
 ```
 
-对于 `entries` 重载，`collapseOnSelection` 控制选中条目后是否关闭弹窗。它默认是 `false`，便于用户在不重新打开弹窗的情况下修改多个分组。
+对于 `entries` 重载，`collapseOnSelection` 控制选中条目后是否关闭弹窗。它默认是 `entries.size <= 1`，单个分组会在选中后关闭，多个分组会保持打开以便连续修改。
 
 ## 组件状态
 
@@ -176,10 +176,10 @@ WindowDropdownPreference(
 
 ### Entries 分组重载属性
 
-| 属性名              | 类型                 | 说明                       | 默认值 | 是否必须 |
-| ------------------- | -------------------- | -------------------------- | ------ | -------- |
-| entries             | List\<DropdownEntry> | 由分割线隔开的下拉条目分组 | -      | 是       |
-| collapseOnSelection | Boolean              | 每次选中条目后是否关闭弹窗 | false  | 否       |
+| 属性名              | 类型                 | 说明                       | 默认值            | 是否必须 |
+| ------------------- | -------------------- | -------------------------- | ----------------- | -------- |
+| entries             | List\<DropdownEntry> | 由分割线隔开的下拉条目分组 | -                 | 是       |
+| collapseOnSelection | Boolean              | 每次选中条目后是否关闭弹窗 | entries.size <= 1 | 否       |
 
 ### DropdownEntry 属性
 

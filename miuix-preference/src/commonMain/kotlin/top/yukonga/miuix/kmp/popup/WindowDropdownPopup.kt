@@ -43,7 +43,7 @@ fun WindowDropdownPopup(
     onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
-    collapseOnSelection: Boolean,
+    collapseOnSelection: Boolean = true,
 ) {
     val entries = remember(entry) { listOf(entry) }
     WindowDropdownPopup(
@@ -70,7 +70,7 @@ fun WindowDropdownPopup(
     onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
-    collapseOnSelection: Boolean,
+    collapseOnSelection: Boolean = entries.size <= 1,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)
@@ -129,7 +129,7 @@ fun WindowDropdownPopup(
  * Window-layer dialog for a [DropdownEntry].
  *
  * Selection changes call [DropdownEntry.onSelectedIndexChange], item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick],
- * and the dialog is dismissed after an enabled item is clicked.
+ * and [collapseOnSelection] controls whether the dialog is dismissed after a click.
  */
 @Composable
 fun WindowDropdownDialog(
@@ -141,6 +141,7 @@ fun WindowDropdownDialog(
     onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
+    collapseOnSelection: Boolean = true,
 ) {
     val entries = remember(entry) { listOf(entry) }
     WindowDropdownDialog(
@@ -152,6 +153,7 @@ fun WindowDropdownDialog(
         onDismissFinished = onDismissFinished,
         dropdownColors = dropdownColors,
         popupModifier = popupModifier,
+        collapseOnSelection = collapseOnSelection,
     )
 }
 
@@ -159,8 +161,8 @@ fun WindowDropdownDialog(
  * Window-layer dialog for one or more [DropdownEntry] groups.
  *
  * Groups are separated by dividers. Selection changes call [DropdownEntry.onSelectedIndexChange],
- * item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and the dialog is dismissed
- * after an enabled item is clicked.
+ * item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
+ * controls whether the dialog is dismissed after a click.
  */
 @Composable
 fun WindowDropdownDialog(
@@ -172,9 +174,11 @@ fun WindowDropdownDialog(
     onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
+    collapseOnSelection: Boolean = entries.size <= 1,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)
+    val currentCollapseOnSelection by rememberUpdatedState(collapseOnSelection)
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     WindowDialog(
         show = show,
@@ -193,7 +197,9 @@ fun WindowDropdownDialog(
                         entry.onSelectedIndexChange?.invoke(itemIdx)
                         entry.items.getOrNull(itemIdx)?.onClick?.invoke()
                     }
-                    currentDismiss?.invoke()
+                    if (currentCollapseOnSelection) {
+                        currentDismiss?.invoke()
+                    }
                 }
             }
             Layout(

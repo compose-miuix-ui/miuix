@@ -161,7 +161,7 @@ Scaffold {
 }
 ```
 
-对于 `entries` 重载，`collapseOnSelection` 控制点击选项后是否关闭弹出框。默认值为 `false`，便于用户在多个分组中连续选择。提供 `dialogButtonString` 后，对话框模式也支持相同的 `entry` 和 `entries` 重载。
+对于 `entries` 重载，`collapseOnSelection` 控制点击选项后是否关闭弹出框。默认值为 `entries.size <= 1`，单个分组会在选中后关闭，多个分组会保持打开以便连续选择。提供 `dialogButtonString` 后，对话框模式也支持相同的 `entry` 和 `entries` 重载。
 
 ## 监听展开状态
 
@@ -219,11 +219,11 @@ Scaffold {
 
 ### Entries 分组重载属性
 
-| 属性名                | 类型                 | 说明                           | 默认值 | 是否必须 |
-| --------------------- | -------------------- | ------------------------------ | ------ | -------- |
-| entries               | List\<DropdownEntry> | 由分割线隔开的下拉选项分组     | -      | 是       |
-| collapseOnSelection   | Boolean              | 每次选中后是否关闭弹出框       | false  | 否       |
-| renderInRootScaffold  | Boolean              | 是否在根 Scaffold 中渲染弹出框 | true   | 否       |
+| 属性名                | 类型                 | 说明                           | 默认值            | 是否必须 |
+| --------------------- | -------------------- | ------------------------------ | ----------------- | -------- |
+| entries               | List\<DropdownEntry> | 由分割线隔开的下拉选项分组     | -                 | 是       |
+| collapseOnSelection   | Boolean              | 每次选中后是否关闭弹出框       | entries.size <= 1 | 否       |
+| renderInRootScaffold  | Boolean              | 是否在根 Scaffold 中渲染弹出框 | true              | 否       |
 
 ### OverlaySpinnerPreference 属性（对话框模式）
 
@@ -250,18 +250,20 @@ Scaffold {
 
 ### 对话框 Entry 重载属性
 
-| 属性名             | 类型          | 说明                 | 默认值 | 是否必须 |
-| ------------------ | ------------- | -------------------- | ------ | -------- |
-| entry              | DropdownEntry | 单个下拉选项分组     | -      | 是       |
-| dialogButtonString | String        | 对话框底部按钮的文本 | -      | 是       |
+| 属性名              | 类型          | 说明                 | 默认值 | 是否必须 |
+| ------------------- | ------------- | -------------------- | ------ | -------- |
+| entry               | DropdownEntry | 单个下拉选项分组     | -      | 是       |
+| dialogButtonString  | String        | 对话框底部按钮的文本 | -      | 是       |
+| collapseOnSelection | Boolean       | 选中后是否关闭对话框 | true   | 否       |
 
 ### 对话框 Entries 分组重载属性
 
-| 属性名                | 类型                 | 说明                           | 默认值 | 是否必须 |
-| --------------------- | -------------------- | ------------------------------ | ------ | -------- |
-| entries               | List\<DropdownEntry> | 由分割线隔开的下拉选项分组     | -      | 是       |
-| dialogButtonString    | String               | 对话框底部按钮的文本           | -      | 是       |
-| renderInRootScaffold  | Boolean              | 是否在根 Scaffold 中渲染对话框 | true   | 否       |
+| 属性名                | 类型                 | 说明                           | 默认值            | 是否必须 |
+| --------------------- | -------------------- | ------------------------------ | ----------------- | -------- |
+| entries               | List\<DropdownEntry> | 由分割线隔开的下拉选项分组     | -                 | 是       |
+| dialogButtonString    | String               | 对话框底部按钮的文本           | -                 | 是       |
+| collapseOnSelection   | Boolean              | 每次选中后是否关闭对话框       | entries.size <= 1 | 否       |
+| renderInRootScaffold  | Boolean              | 是否在根 Scaffold 中渲染对话框 | true              | 否       |
 
 ### DropdownEntry 属性
 

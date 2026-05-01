@@ -151,7 +151,7 @@ WindowSpinnerPreference(
 )
 ```
 
-For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `false` so users can change multiple groups without reopening the popup. The same `entry` and `entries` overloads are also available in dialog mode by providing `dialogButtonString`.
+For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `entries.size <= 1`, so a single group closes after selection while multiple groups stay open for consecutive changes. The same `entry` and `entries` overloads are also available in dialog mode by providing `dialogButtonString`.
 
 ## Observe Expanded State
 
@@ -206,10 +206,10 @@ WindowSpinnerPreference(
 
 ### Grouped Entries Overload Properties
 
-| Property Name       | Type                 | Description                                     | Default Value | Required |
-| ------------------- | -------------------- | ----------------------------------------------- | ------------- | -------- |
-| entries             | List\<DropdownEntry> | Dropdown entry groups separated by dividers     | -             | Yes      |
-| collapseOnSelection | Boolean              | Whether to close the popup after each selection | false         | No       |
+| Property Name       | Type                 | Description                                     | Default Value     | Required |
+| ------------------- | -------------------- | ----------------------------------------------- | ----------------- | -------- |
+| entries             | List\<DropdownEntry> | Dropdown entry groups separated by dividers     | -                 | Yes      |
+| collapseOnSelection | Boolean              | Whether to close the popup after each selection | entries.size <= 1 | No       |
 
 ### WindowSpinnerPreference Properties (Dialog Mode)
 
@@ -235,17 +235,19 @@ WindowSpinnerPreference(
 
 ### Dialog Entry Overload Properties
 
-| Property Name      | Type          | Description                 | Default Value | Required |
-| ------------------ | ------------- | --------------------------- | ------------- | -------- |
-| entry              | DropdownEntry | Single dropdown entry group | -             | Yes      |
-| dialogButtonString | String        | Text for the dialog button  | -             | Yes      |
+| Property Name      | Type          | Description                                 | Default Value | Required |
+| ------------------ | ------------- | ------------------------------------------- | ------------- | -------- |
+| entry              | DropdownEntry | Single dropdown entry group                 | -             | Yes      |
+| dialogButtonString | String        | Text for the dialog button                  | -             | Yes      |
+| collapseOnSelection | Boolean      | Whether to close the dialog after selection | true          | No       |
 
 ### Dialog Grouped Entries Overload Properties
 
-| Property Name      | Type                 | Description                                 | Default Value | Required |
-| ------------------ | -------------------- | ------------------------------------------- | ------------- | -------- |
-| entries            | List\<DropdownEntry> | Dropdown entry groups separated by dividers | -             | Yes      |
-| dialogButtonString | String               | Text for the dialog button                  | -             | Yes      |
+| Property Name      | Type                 | Description                                      | Default Value     | Required |
+| ------------------ | -------------------- | ------------------------------------------------ | ----------------- | -------- |
+| entries            | List\<DropdownEntry> | Dropdown entry groups separated by dividers      | -                 | Yes      |
+| dialogButtonString | String               | Text for the dialog button                       | -                 | Yes      |
+| collapseOnSelection | Boolean             | Whether to close the dialog after each selection | entries.size <= 1 | No       |
 
 ### DropdownEntry Properties
 

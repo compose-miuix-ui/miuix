@@ -83,7 +83,7 @@ fun OverlayDropdownMenu(
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    collapseOnSelection: Boolean = true,
+    collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }

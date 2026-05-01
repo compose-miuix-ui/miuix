@@ -68,7 +68,7 @@ fun OverlayIconDropdownMenu(
     maxHeight: Dp? = null,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     renderInRootScaffold: Boolean = true,
-    collapseOnSelection: Boolean = true,
+    collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -159,7 +160,7 @@ fun OverlaySpinnerPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    collapseOnSelection: Boolean = false,
+    collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -217,11 +218,15 @@ fun OverlaySpinnerPreference(
             if (showValue && hasEntries && !selectedValueText.isNullOrBlank()) {
                 Text(
                     text = selectedValueText,
-                    modifier = Modifier.padding(end = 8.dp),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .weight(1f, fill = false),
                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                     color = actionColor,
                     textAlign = TextAlign.End,
                     lineHeight = MiuixTheme.textStyles.body2.lineHeight,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             DropdownArrowEndAction(
@@ -288,6 +293,7 @@ fun OverlaySpinnerPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
@@ -314,6 +320,7 @@ fun OverlaySpinnerPreference(
         enabled = enabled,
         showValue = showValue,
         renderInRootScaffold = renderInRootScaffold,
+        collapseOnSelection = collapseOnSelection,
         onExpandedChange = onExpandedChange,
     )
 }
@@ -335,6 +342,7 @@ fun OverlaySpinnerPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
 ) {
     val entries = remember(entry) { listOf(entry) }
@@ -354,6 +362,7 @@ fun OverlaySpinnerPreference(
         enabled = enabled,
         showValue = showValue,
         renderInRootScaffold = renderInRootScaffold,
+        collapseOnSelection = collapseOnSelection,
         onExpandedChange = onExpandedChange,
     )
 }
@@ -375,6 +384,7 @@ fun OverlaySpinnerPreference(
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -432,11 +442,15 @@ fun OverlaySpinnerPreference(
             if (showValue && hasEntries && !selectedValueText.isNullOrBlank()) {
                 Text(
                     text = selectedValueText,
-                    modifier = Modifier.padding(end = 8.dp),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .weight(1f, fill = false),
                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                     color = actionColor,
                     textAlign = TextAlign.End,
                     lineHeight = MiuixTheme.textStyles.body2.lineHeight,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             DropdownArrowEndAction(
@@ -453,6 +467,7 @@ fun OverlaySpinnerPreference(
                     dropdownColors = spinnerColors,
                     popupModifier = popupModifier,
                     renderInRootScaffold = renderInRootScaffold,
+                    collapseOnSelection = collapseOnSelection,
                 )
             }
         },

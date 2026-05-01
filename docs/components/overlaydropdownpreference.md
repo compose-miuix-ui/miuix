@@ -138,7 +138,7 @@ Scaffold {
 }
 ```
 
-For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `false` so users can change multiple groups without reopening the popup.
+For the `entries` overload, `collapseOnSelection` controls whether the popup closes after an item is selected. It defaults to `entries.size <= 1`, so a single group closes after selection while multiple groups stay open for consecutive changes.
 
 ## Component States
 
@@ -188,11 +188,11 @@ OverlayDropdownPreference(
 
 ### Grouped Entries Overload Properties
 
-| Property Name        | Type                 | Description                                      | Default Value | Required |
-| -------------------- | -------------------- | ------------------------------------------------ | ------------- | -------- |
-| entries              | List\<DropdownEntry> | Dropdown entry groups separated by dividers      | -             | Yes      |
-| collapseOnSelection  | Boolean              | Whether to close the popup after each selection  | false         | No       |
-| renderInRootScaffold | Boolean              | Whether to render the popup in the root Scaffold | true          | No       |
+| Property Name        | Type                 | Description                                      | Default Value     | Required |
+| -------------------- | -------------------- | ------------------------------------------------ | ----------------- | -------- |
+| entries              | List\<DropdownEntry> | Dropdown entry groups separated by dividers      | -                 | Yes      |
+| collapseOnSelection  | Boolean              | Whether to close the popup after each selection  | entries.size <= 1 | No       |
+| renderInRootScaffold | Boolean              | Whether to render the popup in the root Scaffold | true              | No       |
 
 ### DropdownEntry Properties
 
