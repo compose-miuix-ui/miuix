@@ -108,7 +108,7 @@ fun MainPage(
         }
     }
 
-    val menuItems = remember {
+    val menuItems = remember(snackbarHostState) {
         listOf(
             DropdownEntry(
                 items = listOf("Item A-1", "Item A-2")

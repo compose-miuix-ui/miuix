@@ -285,7 +285,6 @@ fun WindowDropdownPreference(
                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                     color = actionColor,
                     textAlign = TextAlign.End,
-                    lineHeight = MiuixTheme.textStyles.body2.lineHeight,
                 )
             }
             DropdownArrowEndAction(
