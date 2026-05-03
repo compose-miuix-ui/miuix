@@ -260,9 +260,6 @@ data class DropdownColors(
 data class DropdownEntry(
     val items: List<DropdownItem>,
     val enabled: Boolean = true,
-
-    // naming the groups through this, but never appeared in MIUI design?
-    // val title: String? = null,
 )
 
 /**
