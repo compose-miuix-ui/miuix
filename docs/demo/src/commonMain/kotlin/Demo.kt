@@ -70,18 +70,22 @@ private val availableComponents = listOf(
     AvailableComponent("SearchBar", "searchBar") { SearchBarDemo() },
     AvailableComponent("ColorPicker", "colorPicker") { ColorPickerDemo() },
     AvailableComponent("ColorPalette", "colorPalette") { ColorPaletteDemo() },
-    AvailableComponent("ArrowPref", "superArrow") { SuperArrowDemo() },
-    AvailableComponent("SwitchPref", "superSwitch") { SuperSwitchDemo() },
-    AvailableComponent("CheckboxPref", "superCheckbox") { SuperCheckboxDemo() },
-    AvailableComponent("RadioButtonPref", "superRadioButton") { SuperRadioButtonDemo() },
-    AvailableComponent("OverlayListPopup", "superListPopup") { SuperListPopupDemo() },
-    AvailableComponent("DropdownPref", "superDropdown") { SuperDropdownDemo() },
-    AvailableComponent("SpinnerPref", "superSpinner") { SuperSpinnerDemo() },
-    AvailableComponent("OverlayBottomSheet", "superBottomSheet") { SuperBottomSheetDemo() },
-    AvailableComponent("OverlayDialog", "superDialog") { SuperDialogDemo() },
+    AvailableComponent("ArrowPreference", "arrowPreference") { ArrowPreferenceDemo() },
+    AvailableComponent("SwitchPreference", "switchPreference") { SwitchPreferenceDemo() },
+    AvailableComponent("CheckboxPreference", "checkboxPreference") { CheckboxPreferenceDemo() },
+    AvailableComponent("RadioButtonPreference", "radioButtonPreference") { RadioButtonPreferenceDemo() },
+    AvailableComponent("OverlayListPopup", "overlayListPopup") { OverlayListPopupDemo() },
+    AvailableComponent("OverlayDropdownPreference", "overlayDropdownPreference") { OverlayDropdownPreferenceDemo() },
+    AvailableComponent("OverlaySpinnerPreference", "overlaySpinnerPreference") { OverlaySpinnerPreferenceDemo() },
+    AvailableComponent("OverlayDropdownMenu", "overlayDropdownMenu") { OverlayDropdownMenuDemo() },
+    AvailableComponent("OverlayIconDropdownMenu", "overlayIconDropdownMenu") { OverlayIconDropdownMenuDemo() },
+    AvailableComponent("OverlayBottomSheet", "overlayBottomSheet") { OverlayBottomSheetDemo() },
+    AvailableComponent("OverlayDialog", "overlayDialog") { OverlayDialogDemo() },
     AvailableComponent("WindowListPopup", "windowListPopup") { WindowListPopupDemo() },
-    AvailableComponent("WindowDropdownPref", "windowDropdown") { WindowDropdownDemo() },
-    AvailableComponent("WindowSpinnerPref", "windowSpinner") { WindowSpinnerDemo() },
+    AvailableComponent("WindowDropdownPreference", "windowDropdownPreference") { WindowDropdownPreferenceDemo() },
+    AvailableComponent("WindowSpinnerPreference", "windowSpinnerPreference") { WindowSpinnerPreferenceDemo() },
+    AvailableComponent("WindowDropdownMenu", "windowDropdownMenu") { WindowDropdownMenuDemo() },
+    AvailableComponent("WindowIconDropdownMenu", "windowIconDropdownMenu") { WindowIconDropdownMenuDemo() },
     AvailableComponent("WindowBottomSheet", "windowBottomSheet") { WindowBottomSheetDemo() },
     AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
 )
@@ -95,7 +99,7 @@ private fun DemoSelection() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.background),
+                        .background(demoBackground()),
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(

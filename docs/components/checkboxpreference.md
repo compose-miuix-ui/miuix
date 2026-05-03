@@ -2,8 +2,8 @@
 
 `CheckboxPreference` is a checkbox component in Miuix that provides a title, summary, and checkbox control. It supports click interactions and is commonly used in multi-select settings and selection lists.
 
-<div style="position: relative; max-width: 700px; height: 293px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
-    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=superCheckbox" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+<div style="position: relative; height: 293px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=checkboxPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ## Import

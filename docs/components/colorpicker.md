@@ -4,7 +4,7 @@
 hue, saturation, brightness, and transparency. The component provides an intuitive slider interface
 with haptic feedback and real-time color preview.
 
-<div style="position: relative; max-width: 700px; height: 260px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 260px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=colorPicker" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

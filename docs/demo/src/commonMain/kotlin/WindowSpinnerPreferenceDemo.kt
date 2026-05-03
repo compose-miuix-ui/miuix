@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
@@ -32,11 +31,11 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 
 @Composable
-fun WindowSpinnerDemo() {
+fun WindowSpinnerPreferenceDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+            .background(demoBackground()),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -178,14 +177,6 @@ fun WindowSpinnerDemo() {
                     dialogButtonString = "Cancel",
                 )
                 WindowSpinnerPreference(
-                    title = "Disabled Selector",
-                    summary = "This selector is currently unavailable",
-                    items = listOf(DropdownItem(text = "Option 1")),
-                    selectedIndex = 0,
-                    onSelectedIndexChange = {},
-                    enabled = false,
-                )
-                WindowSpinnerPreference(
                     title = "Grouped Selector",
                     entries = groupedOptions,
                     collapseOnSelection = false,
@@ -194,6 +185,14 @@ fun WindowSpinnerDemo() {
                     title = "Multi Select Selector",
                     entries = multiSelectOptions,
                     collapseOnSelection = false,
+                )
+                WindowSpinnerPreference(
+                    title = "Disabled Selector",
+                    summary = "This selector is currently unavailable",
+                    items = listOf(DropdownItem(text = "Option 1")),
+                    selectedIndex = 0,
+                    onSelectedIndexChange = {},
+                    enabled = false,
                 )
             }
         }

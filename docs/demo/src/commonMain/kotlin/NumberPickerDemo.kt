@@ -16,8 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +27,7 @@ fun NumberPickerDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+            .background(demoBackground()),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -54,7 +52,6 @@ fun NumberPickerDemo() {
                 text = ":",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
             )
             NumberPicker(
                 value = minute,

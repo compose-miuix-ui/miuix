@@ -17,22 +17,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.OverlaySpinnerPreference
 
 @Composable
-fun SuperDropdownDemo() {
+fun OverlaySpinnerPreferenceDemo() {
     Scaffold {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+                .background(demoBackground()),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -44,36 +49,67 @@ fun SuperDropdownDemo() {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 var selectedIndex1 by remember { mutableIntStateOf(0) }
-                val options1 = listOf("Option 1", "Option 2", "Option 3")
+                val options1 = listOf(
+                    DropdownItem(text = "Option 1"),
+                    DropdownItem(text = "Option 2"),
+                    DropdownItem(text = "Option 3"),
+                )
                 var selectedIndex2 by remember { mutableIntStateOf(0) }
-                val options2 = listOf("Chinese", "English", "Japanese")
+                var selectedIndex3 by remember { mutableIntStateOf(0) }
+                var firstGroupedSelectedIndex by remember { mutableIntStateOf(0) }
+                var secondGroupedSelectedIndex by remember { mutableIntStateOf(0) }
+                var multiSelectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
                 var expanded by remember { mutableStateOf(false) }
-                var customSelectedIndex by remember { mutableIntStateOf(0) }
-                val customEntry = DropdownEntry(
-                    items = listOf(
-                        DropdownItem(
-                            text = "Custom Option 1",
-                            selected = customSelectedIndex == 0,
-                            onClick = { customSelectedIndex = 0 },
-                        ),
-                        DropdownItem(text = "Custom Option 2", enabled = false),
-                        DropdownItem(
-                            text = "Custom Option 3",
-                            selected = customSelectedIndex == 2,
-                            onClick = { customSelectedIndex = 2 },
-                        ),
+
+                // Create a rounded rectangle Painter
+                class RoundedRectanglePainter(
+                    val cornerRadius: Dp = 6.dp,
+                ) : Painter() {
+                    override val intrinsicSize = Size.Unspecified
+
+                    override fun DrawScope.onDraw() {
+                        drawRoundRect(
+                            color = Color.White,
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx()),
+                        )
+                    }
+                }
+
+                val options3 = listOf(
+                    DropdownItem(text = "Option A"),
+                    DropdownItem(text = "Option B"),
+                    DropdownItem(text = "Option C"),
+                )
+                val options2 = listOf(
+                    DropdownItem(
+                        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFF5B29)) },
+                        text = "Red Theme",
+                        summary = "Vibrant red",
+                    ),
+                    DropdownItem(
+                        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF3482FF)) },
+                        text = "Blue Theme",
+                        summary = "Calm blue",
+                    ),
+                    DropdownItem(
+                        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFF36D167)) },
+                        text = "Green Theme",
+                        summary = "Fresh green",
+                    ),
+                    DropdownItem(
+                        icon = { Icon(RoundedRectanglePainter(), "Icon", Modifier.padding(end = 12.dp), Color(0xFFFFB21D)) },
+                        text = "Yellow Theme",
+                        summary = "Bright yellow",
                     ),
                 )
-                var sizeSelectedIndex by remember { mutableIntStateOf(0) }
-                var colorSelectedIndex by remember { mutableIntStateOf(0) }
-                var multiSelectedItems by remember { mutableStateOf(setOf("A1", "B2")) }
-                val groupedEntries = listOf(
+                val groupedOptions = listOf(
                     DropdownEntry(
                         items = listOf("Small", "Medium").mapIndexed { index, text ->
                             DropdownItem(
                                 text = text,
-                                selected = sizeSelectedIndex == index,
-                                onClick = { sizeSelectedIndex = index },
+                                selected = firstGroupedSelectedIndex == index,
+                                onClick = { firstGroupedSelectedIndex = index },
                             )
                         },
                     ),
@@ -81,13 +117,13 @@ fun SuperDropdownDemo() {
                         items = listOf("Red", "Green", "Blue").mapIndexed { index, text ->
                             DropdownItem(
                                 text = text,
-                                selected = colorSelectedIndex == index,
-                                onClick = { colorSelectedIndex = index },
+                                selected = secondGroupedSelectedIndex == index,
+                                onClick = { secondGroupedSelectedIndex = index },
                             )
                         },
                     ),
                 )
-                val multiSelectEntries = listOf(
+                val multiSelectOptions = listOf(
                     DropdownEntry(
                         items = listOf("A1", "A2").map { text ->
                             DropdownItem(
@@ -121,38 +157,41 @@ fun SuperDropdownDemo() {
                 )
 
                 Card {
-                    OverlayDropdownPreference(
-                        title = "Dropdown Menu",
+                    OverlaySpinnerPreference(
+                        title = "Dropdown Selector",
                         items = options1,
                         selectedIndex = selectedIndex1,
                         onSelectedIndexChange = { selectedIndex1 = it },
                     )
-                    OverlayDropdownPreference(
-                        title = "Language Settings",
-                        summary = if (expanded) "Expanded" else "Choose your preferred language",
+                    OverlaySpinnerPreference(
+                        title = "Function Selection",
+                        summary = if (expanded) "Expanded" else "Choose the action you want to perform",
                         items = options2,
                         selectedIndex = selectedIndex2,
                         onSelectedIndexChange = { selectedIndex2 = it },
                         onExpandedChange = { expanded = it },
                     )
-                    OverlayDropdownPreference(
-                        title = "Custom Entry",
-                        entry = customEntry,
+                    OverlaySpinnerPreference(
+                        title = "Dialog Selector",
+                        items = options3,
+                        selectedIndex = selectedIndex3,
+                        onSelectedIndexChange = { selectedIndex3 = it },
+                        dialogButtonString = "Cancel",
                     )
-                    OverlayDropdownPreference(
-                        title = "Grouped Dropdown",
-                        entries = groupedEntries,
+                    OverlaySpinnerPreference(
+                        title = "Grouped Selector",
+                        entries = groupedOptions,
                         collapseOnSelection = false,
                     )
-                    OverlayDropdownPreference(
-                        title = "Multi Select Dropdown",
-                        entries = multiSelectEntries,
+                    OverlaySpinnerPreference(
+                        title = "Multi Select Selector",
+                        entries = multiSelectOptions,
                         collapseOnSelection = false,
                     )
-                    OverlayDropdownPreference(
-                        title = "Disabled Dropdown",
-                        summary = "This dropdown menu is currently unavailable",
-                        items = listOf("Option 1"),
+                    OverlaySpinnerPreference(
+                        title = "Disabled Selector",
+                        summary = "This selector is currently unavailable",
+                        items = listOf(DropdownItem(text = "Option 1")),
                         selectedIndex = 0,
                         onSelectedIndexChange = {},
                         enabled = false,

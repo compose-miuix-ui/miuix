@@ -2,7 +2,7 @@
 
 `NumberPicker` 是 Miuix 中的基础交互组件，用于通过垂直滚动从一组数字中选择值。选中项居中并高亮显示，周围的项目逐渐淡出并缩小。通过 `wrapAround` 参数支持无限循环滚动。
 
-<div style="position: relative; max-width: 700px; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=numberPicker" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

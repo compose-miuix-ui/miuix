@@ -16,21 +16,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 @Composable
-fun SuperBottomSheetDemo() {
+fun OverlayDialogDemo() {
     Scaffold {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+                .background(demoBackground()),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -41,21 +39,22 @@ fun SuperBottomSheetDemo() {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                var showBottomSheet by remember { mutableStateOf(false) }
+                var showDialog by remember { mutableStateOf(false) }
                 Card {
                     TextButton(
-                        text = "Show a BottomSheet",
-                        onClick = { showBottomSheet = true },
+                        text = "Show an OverlayDialog",
+                        onClick = { showDialog = true },
                     )
-                    OverlayBottomSheet(
-                        title = "BottomSheet Title",
-                        show = showBottomSheet,
-                        onDismissRequest = { showBottomSheet = false },
+                    OverlayDialog(
+                        title = "OverlayDialog Title",
+                        summary = "This is a basic dialog example that can contain various content.",
+                        show = showDialog,
+                        onDismissRequest = { showDialog = false },
                     ) {
                         TextButton(
                             text = "Confirm",
-                            onClick = { showBottomSheet = false },
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            onClick = { showDialog = false },
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }

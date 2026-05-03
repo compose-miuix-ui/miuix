@@ -12,7 +12,7 @@ popupHost: None
 
 `WindowListPopup` 是一个基于 `Dialog` 在窗口层级渲染的弹出列表组件。与 `OverlayListPopup` 不同，它不需要 `Scaffold` 或 `MiuixPopupHost`。
 
-<div style="position: relative; max-width: 700px; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=windowListPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

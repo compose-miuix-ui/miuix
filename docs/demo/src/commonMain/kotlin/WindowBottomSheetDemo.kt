@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -17,13 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
 @Composable
@@ -31,7 +34,7 @@ fun WindowBottomSheetDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+            .background(demoBackground()),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -43,6 +46,9 @@ fun WindowBottomSheetDemo() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             var showBottomSheet by remember { mutableStateOf(false) }
+            var notificationsEnabled by remember { mutableStateOf(true) }
+            var soundEnabled by remember { mutableStateOf(false) }
+
             Card {
                 TextButton(
                     text = "Show a WindowBottomSheet",
@@ -53,33 +59,38 @@ fun WindowBottomSheetDemo() {
                     title = "WindowBottomSheet Title",
                     startAction = {
                         val dismiss = LocalDismissState.current
-                        TextButton(
-                            text = "Cancel",
-                            onClick = { dismiss?.invoke() },
-                        )
+                        IconButton(onClick = { dismiss?.invoke() }) {
+                            Icon(
+                                imageVector = MiuixIcons.Close,
+                                contentDescription = "Cancel",
+                                tint = MiuixTheme.colorScheme.onBackground,
+                            )
+                        }
                     },
                     endAction = {
                         val dismiss = LocalDismissState.current
-                        TextButton(
-                            text = "Confirm",
-                            onClick = { dismiss?.invoke() },
-                        )
+                        IconButton(onClick = { dismiss?.invoke() }) {
+                            Icon(
+                                imageVector = MiuixIcons.Ok,
+                                contentDescription = "Confirm",
+                                tint = MiuixTheme.colorScheme.onBackground,
+                            )
+                        }
                     },
                     onDismissRequest = { showBottomSheet = false },
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text("This is a window-level bottom sheet that does not require MiuixPopupHost.")
-                        Box(modifier = Modifier.height(16.dp))
-                        val dismiss = LocalDismissState.current
-                        TextButton(
-                            text = "Close",
-                            onClick = { dismiss?.invoke() },
-                            modifier = Modifier.fillMaxWidth(),
+                    Card(modifier = Modifier.padding(bottom = 16.dp)) {
+                        SwitchPreference(
+                            title = "Notifications",
+                            summary = "Receive push notifications",
+                            checked = notificationsEnabled,
+                            onCheckedChange = { notificationsEnabled = it },
+                        )
+                        SwitchPreference(
+                            title = "Sound",
+                            summary = "Play sound on notification",
+                            checked = soundEnabled,
+                            onCheckedChange = { soundEnabled = it },
                         )
                     }
                 }

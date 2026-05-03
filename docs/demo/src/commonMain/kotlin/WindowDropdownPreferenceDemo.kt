@@ -17,8 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownEntry
@@ -26,11 +24,11 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 
 @Composable
-fun WindowDropdownDemo() {
+fun WindowDropdownPreferenceDemo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xff667eea), Color(0xff764ba2)))),
+            .background(demoBackground()),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -41,10 +39,8 @@ fun WindowDropdownDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var selectedIndex1 by remember { mutableIntStateOf(0) }
-            val options1 = listOf("Option 1", "Option 2", "Option 3")
-            var selectedIndex2 by remember { mutableIntStateOf(0) }
-            val options2 = listOf("Chinese", "English", "Japanese")
+            var selectedIndex by remember { mutableIntStateOf(0) }
+            val options = listOf("Chinese", "English", "Japanese")
             var expanded by remember { mutableStateOf(false) }
             var customSelectedIndex by remember { mutableIntStateOf(0) }
             val customEntry = DropdownEntry(
@@ -120,17 +116,11 @@ fun WindowDropdownDemo() {
 
             Card {
                 WindowDropdownPreference(
-                    title = "Dropdown Menu",
-                    items = options1,
-                    selectedIndex = selectedIndex1,
-                    onSelectedIndexChange = { selectedIndex1 = it },
-                )
-                WindowDropdownPreference(
                     title = "Language Settings",
                     summary = if (expanded) "Expanded" else "Choose your preferred language",
-                    items = options2,
-                    selectedIndex = selectedIndex2,
-                    onSelectedIndexChange = { selectedIndex2 = it },
+                    items = options,
+                    selectedIndex = selectedIndex,
+                    onSelectedIndexChange = { selectedIndex = it },
                     onExpandedChange = { expanded = it },
                 )
                 WindowDropdownPreference(
