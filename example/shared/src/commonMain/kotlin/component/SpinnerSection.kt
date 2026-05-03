@@ -192,7 +192,7 @@ fun LazyListScope.spinnerSection() {
                 onExpandedChange = { windowExpanded = it },
             )
             OverlaySpinnerPreference(
-                title = "SpinnerPref (O))",
+                title = "SpinnerPref (O)",
                 summary = "As Dialog (O)" + if (overlayDialogExpanded) " (Expanded)" else " (Collapsed)",
                 dialogButtonString = "OK",
                 items = spinnerOptions,
