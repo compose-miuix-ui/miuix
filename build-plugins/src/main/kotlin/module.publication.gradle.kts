@@ -35,7 +35,6 @@ val miuixCoreDescription = "Core utilities for Miuix"
 val miuixIconsDescription = "Extended icon library for Miuix"
 val miuixNavigation3UiDescription = "Navigation3 UI library for Miuix"
 val miuixPreferenceDescription = "Preference components for Miuix"
-val miuixShapesDescription = "Smooth rounded corner shapes for Miuix"
 
 val localPropertiesFile: File = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -77,7 +76,6 @@ publishing {
                     "miuix-icons" -> miuixIconsDescription
                     "miuix-navigation3-ui" -> miuixNavigation3UiDescription
                     "miuix-preference" -> miuixPreferenceDescription
-                    "miuix-shapes" -> miuixShapesDescription
                     else -> miuixUiDescription
                 }
             )

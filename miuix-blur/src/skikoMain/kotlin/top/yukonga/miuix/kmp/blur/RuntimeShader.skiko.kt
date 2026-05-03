@@ -66,4 +66,8 @@ private class SkikoRuntimeShader(val shader: RuntimeShaderBuilder) : RuntimeShad
         val a = srgb.alpha
         shader.uniform(name, srgb.red * a, srgb.green * a, srgb.blue * a, a)
     }
+
+    override fun setInputShader(name: String, shader: Shader) {
+        this.shader.child(name, shader)
+    }
 }

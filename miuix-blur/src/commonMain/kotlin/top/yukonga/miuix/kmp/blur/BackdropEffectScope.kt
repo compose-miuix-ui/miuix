@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import top.yukonga.miuix.kmp.blur.internal.COLOR_CONTROLS_SHADER
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.colorFilterEffect
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
@@ -56,6 +57,10 @@ fun BackdropEffectScope.colorFilter(colorFilter: ColorFilter) {
 
 /**
  * Applies brightness, contrast, and saturation adjustments to the backdrop.
+ *
+ * Brightness is applied in linear (gamma 2.2) space when runtime shader support is
+ * available, avoiding the hue shift of a linear `ColorMatrix` offset. Falls back to
+ * a `ColorMatrix` (sRGB-space) implementation otherwise.
  */
 fun BackdropEffectScope.colorControls(
     brightness: Float = 0f,
@@ -63,7 +68,20 @@ fun BackdropEffectScope.colorControls(
     saturation: Float = 1f,
 ) {
     if (brightness == 0f && contrast == 1f && saturation == 1f) return
-    colorFilter(colorControlsColorFilter(brightness, contrast, saturation))
+
+    if (isRuntimeShaderSupported()) {
+        runtimeShaderEffect(
+            key = "ColorControls",
+            shaderString = COLOR_CONTROLS_SHADER,
+            uniformShaderName = "child",
+        ) {
+            setFloatUniform("in_brightness", brightness)
+            setFloatUniform("in_contrast", contrast)
+            setFloatUniform("in_saturation", saturation)
+        }
+    } else {
+        colorFilter(colorControlsColorFilter(brightness, contrast, saturation))
+    }
 }
 
 /**

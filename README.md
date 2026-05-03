@@ -4,7 +4,7 @@ A UI library for Compose Multiplatform.
 
 > This library is experimental. APIs may change without notice.
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-7F52FF)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.21-7F52FF)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/compose-1.10.3-4285F4)](https://www.jetbrains.com/compose-multiplatform)
 [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix-ui)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 [![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
@@ -31,7 +31,6 @@ A UI library for Compose Multiplatform.
 | `miuix-ui` | Core UI component library (automatically includes `miuix-core`) |
 | `miuix-preference` | Preference components (SwitchPreference, CheckboxPreference, etc.), depends on `miuix-ui` |
 | `miuix-icons` | Extended icon library, can be used independently or with `miuix-ui` (automatically includes `miuix-core`) |
-| `miuix-shapes` | Smooth rounded corner shapes, can be used independently |
 | `miuix-blur` | Blur effect library, can be used independently |
 | `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
 
@@ -46,8 +45,6 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-shapes for smooth rounded corners
-            implementation("top.yukonga.miuix.kmp:miuix-shapes:<version>")
             // Optional: Add miuix-blur for blur effects
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-navigation3-ui for navigation3 support

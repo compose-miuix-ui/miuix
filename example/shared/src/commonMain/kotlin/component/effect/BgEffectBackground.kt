@@ -19,6 +19,8 @@ import kotlinx.coroutines.isActive
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.shouldShowSplitPane
+import kotlin.math.floor
 
 @Composable
 fun BgEffectBackground(
@@ -40,20 +42,23 @@ fun BgEffectBackground(
         modifier = modifier,
     ) {
         val surface = MiuixTheme.colorScheme.surface
-        val painter = remember(isOs3Effect) { BgEffectPainter(isOs3Effect) }
         val animTime = rememberFrameTimeSeconds(dynamicBackground)
-        val isDark = isInDarkTheme()
-        val deviceType = DeviceType.PHONE
+        val deviceType = if (shouldShowSplitPane()) DeviceType.PAD else DeviceType.PHONE
+        val isInDarkTheme = isInDarkTheme()
+        val painter = remember(isOs3Effect) { BgEffectPainter(isOs3Effect) }
 
-        val preset = remember(isDark, deviceType, isOs3Effect) {
-            BgEffectConfig.get(deviceType, isDark, isOs3Effect)
+        val preset = remember(deviceType, isInDarkTheme, isOs3Effect) {
+            BgEffectConfig.get(deviceType, isInDarkTheme, isOs3Effect)
         }
 
         val colorStage = remember { Animatable(0f) }
 
         LaunchedEffect(dynamicBackground, preset) {
             if (!dynamicBackground) return@LaunchedEffect
-            var targetStage = 1f
+            val animatesColors = preset.colors1 !== preset.colors2 || preset.colors2 !== preset.colors3
+            if (!animatesColors) return@LaunchedEffect
+
+            var targetStage = floor(colorStage.value) + 1f
             while (isActive) {
                 delay((preset.colorInterpPeriod * 500).toLong())
                 colorStage.animateTo(
@@ -74,29 +79,10 @@ fun BgEffectBackground(
                 if (effectBackground) {
                     val drawHeight = if (isFullSize) size.height else size.height * 0.78f
 
-                    val stage = colorStage.value
-                    val base = stage.toInt()
-                    val fraction = stage - base
-
-                    val getColors = { index: Int ->
-                        when (index % 4) {
-                            0 -> preset.colors2
-                            1 -> preset.colors1
-                            2 -> preset.colors2
-                            3 -> preset.colors3
-                            else -> preset.colors2
-                        }
-                    }
-
-                    val start = getColors(base)
-                    val end = getColors(base + 1)
-                    val currentColors = FloatArray(16) { i ->
-                        start[i] + (end[i] - start[i]) * fraction
-                    }
-
                     painter.updateResolution(size.width, size.height)
-                    painter.updatePresetIfNeeded(drawHeight, size.height, size.width, isDark)
-                    painter.updateColors(currentColors)
+                    painter.updateBoundIfNeeded(drawHeight, size.height, size.width)
+                    painter.updatePresetIfNeeded(deviceType, isInDarkTheme)
+                    painter.updateColors(preset, colorStage.value)
                     painter.updateAnimTime(animTime())
 
                     drawRect(painter.brush, alpha = alpha())

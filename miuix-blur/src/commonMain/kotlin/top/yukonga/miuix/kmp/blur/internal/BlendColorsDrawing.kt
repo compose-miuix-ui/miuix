@@ -12,12 +12,7 @@ import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 /** Maximum number of blend layers supported by the shader. */
 private const val MAX_LAYERS = 8
 
-/**
- * Applies all blend color layers from [colors] as a [RuntimeShaderEffect].
- *
- * All blend modes (standard 0-31 and custom 100+) are processed by the
- * runtime shader using libhwui-compatible premultiplied-alpha formulas.
- */
+/** Chains all blend color layers from [colors] as a runtime shader effect. */
 internal fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
     if (!isRuntimeShaderSupported()) return

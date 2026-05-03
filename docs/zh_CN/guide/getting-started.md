@@ -32,7 +32,6 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-ui` | 核心 UI 组件库（自动包含 `miuix-core`） |
 | `miuix-preference` | Preference 组件（SwitchPreference、CheckboxPreference 等），依赖 `miuix-ui` |
 | `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix-ui` 同时使用（自动包含 `miuix-core`） |
-| `miuix-shapes` | 平滑圆角形状库，可独立使用 |
 | `miuix-blur` | 模糊效果库，可独立使用 |
 | `miuix-navigation3-ui` | Navigation3 UI 库，可独立使用 |
 
@@ -47,8 +46,6 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // 可选：添加 miuix-icons 以获取更多图标
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // 可选：添加 miuix-shapes 以获取平滑圆角
-            implementation("top.yukonga.miuix.kmp:miuix-shapes:<version>")
             // 可选：添加 miuix-blur 以获取模糊效果
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
@@ -67,8 +64,6 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // 可选：添加 miuix-icons 以获取更多图标
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
-    // 可选：添加 miuix-shapes 以获取平滑圆角
-    implementation("top.yukonga.miuix.kmp:miuix-shapes-android:<version>")
     // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 31）
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持

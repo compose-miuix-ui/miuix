@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,7 +23,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [IconButton] component with Miuix style.
@@ -52,7 +52,7 @@ fun IconButton(
     minWidth: Dp = IconButtonDefaults.MinWidth,
     content: @Composable () -> Unit,
 ) {
-    val shape = miuixShape(cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
     val interactionSource = remember { MutableInteractionSource() }
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
 

@@ -226,11 +226,6 @@ private fun SettingsContent(
                         checked = appState.enablePageUserScroll,
                         onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                     )
-                    SwitchPreference(
-                        title = "G2 Smooth Rounded",
-                        checked = appState.smoothRounding,
-                        onCheckedChange = { updateAppState { state -> state.copy(smoothRounding = it) } },
-                    )
                     OverlayDropdownPreference(
                         title = "Color Mode",
                         items = ColorModeOptions,

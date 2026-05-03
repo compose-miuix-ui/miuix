@@ -36,7 +36,6 @@ export default defineConfig({
                         { text: "Icon System", link: "/guide/icons" },
                         { text: "Utility Functions", link: "/guide/utils" },
                         { text: "Navigation3 Support", link: "/guide/navigation3" },
-                        { text: "Smooth Shapes", link: "/guide/shapes" },
                         { text: "Blur Effects", link: "/guide/blur" },
                         { text: "Platform Support", link: "/guide/multiplatform" },
                         { text: "Best Practices", link: "/guide/best-practices" },

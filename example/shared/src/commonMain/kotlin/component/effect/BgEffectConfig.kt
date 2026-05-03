@@ -14,10 +14,6 @@ internal object BgEffectConfig {
         val lightOffset: Float,
         val saturateOffset: Float,
         val pointOffset: Float,
-        // OS3 Specific
-        val shadowColorMulti: Float = 0.3f,
-        val shadowColorOffset: Float = 0.3f,
-        val shadowNoiseScale: Float = 5.0f,
     )
 
     // OS2 Data

@@ -86,17 +86,6 @@ fun App() {
   }
   ```
 
-- **Smooth Rounding**
-
-  By default, Miuix uses G2-continuity smooth rounded corners (squircle) for all components. Set `smoothRounding = false` to fall back to standard `RoundedCornerShape` for better HWUI rendering performance on lower-end devices:
-
-  ```kotlin
-  MiuixTheme(
-      controller = controller,
-      smoothRounding = false // Disable G2-continuity corners
-  ) { /* Content */ }
-  ```
-
 - **Direct Usage**
 
   Provide a color scheme directly to `MiuixTheme(colors = ...)` for full customization without a controller:
@@ -173,7 +162,6 @@ val isDynamic = MiuixTheme.isDynamicColor
 | colorScheme | Colors | Current color scheme |
 | textStyles | TextStyles | Current text styles |
 | colorSchemeMode | ColorSchemeMode? | Current color scheme mode (null if using direct `colors` overload) |
-| smoothRounding | Boolean | Whether G2-continuity smooth rounding is enabled |
 | isDynamicColor | Boolean | Whether the current mode is a Monet dynamic color mode |
 
 ## Customizing the Theme

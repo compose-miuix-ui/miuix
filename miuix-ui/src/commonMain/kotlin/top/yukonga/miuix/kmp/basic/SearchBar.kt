@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,7 +61,6 @@ import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import top.yukonga.miuix.kmp.utils.hasFocusReassignBug
 
 /**
@@ -170,7 +170,7 @@ fun InputField(
     val currentOnSearch by rememberUpdatedState(onSearch)
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     val actualLeadingIcon = leadingIcon ?: {
         Icon(

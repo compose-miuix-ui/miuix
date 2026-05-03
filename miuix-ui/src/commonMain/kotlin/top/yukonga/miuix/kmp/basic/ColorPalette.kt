@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,8 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
-import top.yukonga.miuix.kmp.theme.miuixShape
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -115,7 +115,7 @@ fun ColorPalette(
     }
 
     val onColorChangedState = rememberUpdatedState(onColorChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     Column(
         modifier = modifier,
@@ -192,7 +192,7 @@ private fun PaletteCanvas(
 ) {
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
-    val shape = miuixShape(cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 

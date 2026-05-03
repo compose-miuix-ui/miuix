@@ -12,47 +12,19 @@ import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sqrt
 
-/** Radius-to-sigma conversion coefficient for Gaussian blur. */
 private const val RADIUS_TO_SIGMA = 0.45f
 
-/**
- * Maximum sampling reach of the blur kernel in downsampled pixels.
- * The kernel merges 27 taps into up to 7 pairs; the outermost pair
- * reaches approximately offset 12.5. Rounded up for safety.
- */
+/** Max kernel reach in downsampled pixels — outermost pair reaches ~offset 12.5, rounded up. */
 private const val KERNEL_REACH = 14
 
-/** Minimum combined weight for a merged pair to be considered valid. */
 private const val WEIGHT_THRESHOLD = 0.002
 
-/**
- * Result of creating a Gaussian blur [RenderEffect].
- *
- * @param renderEffect The chained horizontal + vertical blur render effect.
- * @param downscaleFactor Adaptive downsampling factor (1, 2, 4, 8, or 16).
- */
 internal data class GaussianBlurResult(
     val renderEffect: RenderEffect,
     val downscaleFactor: Int,
 )
 
-/**
- * Creates an LM-style separable Gaussian blur [RenderEffect] with independent
- * horizontal and vertical blur radii:
- * 1. Compute adaptive downscale factor and adjusted variance from each sigma
- * 2. Horizontal pass with N-tap symmetric sampling (up to 7 pairs)
- * 3. Vertical pass with N-tap symmetric sampling (up to 7 pairs)
- *
- * When [radiusX] and [radiusY] differ, each axis is computed independently.
- * The shared [GaussianBlurResult.downscaleFactor] is the maximum of both axes.
- *
- * @param radiusX The horizontal blur radius in pixels.
- * @param radiusY The vertical blur radius in pixels.
- * @param size The size of the content to blur.
- * @param shaderCache Cache for compiled runtime shaders.
- * @return [GaussianBlurResult] with the chained render effect and downscale factor,
- *         or null if both radii are non-positive or produce no valid taps.
- */
+/** Creates a separable Gaussian blur [RenderEffect] with independent horizontal / vertical radii. */
 internal fun createGaussianBlurEffect(
     radiusX: Float,
     radiusY: Float,
@@ -82,7 +54,7 @@ internal fun createGaussianBlurEffect(
     if (paramsX != null && paramsX.tapCount > 0) {
         val n = paramsX.tapCount
         val hShader = shaderCache.obtainRuntimeShader(
-            "LMGaussH$n",
+            "LMGauss$n",
             buildGaussianBlurShader(n),
         ).apply {
             val offsets = FloatArray(n * 2)
@@ -101,7 +73,7 @@ internal fun createGaussianBlurEffect(
     if (paramsY != null && paramsY.tapCount > 0) {
         val n = paramsY.tapCount
         val vShader = shaderCache.obtainRuntimeShader(
-            "LMGaussV$n",
+            "LMGauss$n",
             buildGaussianBlurShader(n),
         ).apply {
             val offsets = FloatArray(n * 2)
@@ -121,21 +93,9 @@ internal fun createGaussianBlurEffect(
 }
 
 /**
- * Applies LM-style separable Gaussian blur to the backdrop with independent
- * horizontal and vertical blur radii.
- *
- * This function updates the scope's mutable state as side effects:
- * - [BackdropEffectScope.padding] is increased (if needed) to cover the blur
- *   kernel's maximum sampling reach in original pixel space.
- * - [BackdropEffectScope.downscaleFactor] is set to the adaptive downsampling
- *   factor derived from the larger sigma.
- * - [BackdropEffectScope.renderEffect] is chained with the horizontal and/or
- *   vertical blur passes.
- *
- * No-op when runtime shaders are not supported on the current platform.
- *
- * @param radiusX The horizontal blur radius in pixels. Non-positive skips the horizontal pass.
- * @param radiusY The vertical blur radius in pixels. Non-positive skips the vertical pass.
+ * Chains a separable Gaussian blur into the scope's [BackdropEffectScope.renderEffect],
+ * adjusts [BackdropEffectScope.padding] to cover the kernel reach, and sets
+ * [BackdropEffectScope.downscaleFactor]. Non-positive radii skip that axis.
  */
 internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
     if (!isRuntimeShaderSupported()) return
@@ -160,40 +120,16 @@ internal fun BackdropEffectScope.gaussianBlur(radiusX: Float, radiusY: Float) {
     renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect
 }
 
-/**
- * Registers noise dithering to reduce color banding artifacts in the backdrop.
- *
- * Stores the [coefficient] into [BackdropEffectScope.noiseCoefficient] for later
- * application by the backdrop drawing pipeline. The noise shader adds 3-channel
- * pseudo-random offsets per pixel, breaking up visible quantization steps that
- * appear in smooth gradients after blur and color adjustments.
- *
- * Non-positive values are ignored (noise remains disabled).
- *
- * @param coefficient Noise intensity multiplier. Higher values produce stronger
- *   dithering. The default is [BlurDefaults.NoiseCoefficient] (0.0045);
- *   0 or negative disables noise.
- * @see BackdropEffectScope.noiseCoefficient
- */
+/** Registers a noise dither pass with the given [coefficient]. Non-positive values are ignored. */
 internal fun BackdropEffectScope.noiseDither(coefficient: Float) {
     if (coefficient <= 0f) return
     noiseCoefficient = coefficient
 }
 
 /**
- * Precomputed Gaussian blur parameters for one axis of a separable pass.
- *
- * Each entry represents a merged pair of adjacent discrete Gaussian taps,
- * combined via linear interpolation so a single texture fetch at the
- * interpolated [offsets] reproduces both original weights.
- * The shader samples symmetrically at ±offset, so [tapCount] pairs produce
- * 2 × [tapCount] texture fetches covering the full kernel.
- *
- * @param offsets Interpolated sample offsets in downsampled pixels, one per pair.
- * @param weights Combined weight for each merged pair. The center pair (index 0)
- *   carries the residual weight that ensures the total sums to 1.0.
- * @param tapCount Number of valid pairs in [offsets] and [weights]
- *   (up to [MAX_BLUR_TAPS]).
+ * Merged Gaussian taps for one axis. Each pair combines adjacent discrete taps via
+ * linear interpolation; the shader samples symmetrically at ±[offsets], so [tapCount]
+ * pairs produce 2 × [tapCount] texture fetches.
  */
 internal class GaussianParams(
     val offsets: FloatArray,
@@ -205,24 +141,11 @@ internal class GaussianParams(
     }
 }
 
-/**
- * Result of adaptive downscale computation.
- *
- * @param adjustedVariance Gaussian variance adjusted for the downsampled space.
- * @param downScale Downsampling factor (1, 2, 4, 8, or 16).
- */
 internal data class DownScaleParams(val adjustedVariance: Float, val downScale: Int)
 
 /**
- * Computes the adaptive downscale factor and adjusted Gaussian variance
- * from the input sigma.
- *
- * The downscale factor is chosen based on sigma² thresholds to balance
- * performance and quality. The variance is adjusted with a piecewise-linear
- * transform that compensates for the box-filter pre-filtering during downsampling.
- *
- * @param sigma The Gaussian sigma (standard deviation) in original pixel space.
- * @return [DownScaleParams] with adjusted variance and downscale factor.
+ * Picks an adaptive [DownScaleParams.downScale] (1/2/4/8/16) from σ² and returns the
+ * variance compensated for the box-filter pre-filtering applied during downsampling.
  */
 internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
     val sigmaSquared = sigma * sigma
@@ -263,18 +186,9 @@ internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
 }
 
 /**
- * Computes Gaussian blur sampling parameters from variance.
- *
- * Generates a discrete Gaussian kernel over 27 taps (-13..+13), normalizes it,
- * then merges adjacent weight pairs using linear interpolation to reduce the
- * number of texture fetches while maintaining accuracy.
- *
- * The first pair merges center (offset 0) with offset 1 — the shader samples
- * symmetrically at ±offset, so center weight is automatically captured.
- * Subsequent pairs merge (2,3), (4,5), ..., (12,13).
- *
- * @param variance The Gaussian variance (sigma²) in downsampled pixel space.
- * @return [GaussianParams] with up to [MAX_BLUR_TAPS] offset/weight pairs.
+ * Builds [GaussianParams] from [variance]: generates a 27-tap discrete kernel (-13..+13),
+ * normalizes, then merges adjacent pairs (0,1), (2,3), …, (12,13) via linear interpolation
+ * to reduce texture fetches. Returns up to [MAX_BLUR_TAPS] pairs.
  */
 internal fun computeGaussianParams(variance: Float): GaussianParams {
     if (variance <= 0.25f) return GaussianParams.EMPTY

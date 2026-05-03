@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -75,8 +76,6 @@ import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
-import top.yukonga.miuix.kmp.theme.miuixUnevenShape
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -547,7 +546,7 @@ private fun BottomSheetColumn(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val topCornerShape = miuixUnevenShape(topStart = cornerRadius, topEnd = cornerRadius)
+    val topCornerShape = RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius)
     val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
 
     Box(
@@ -619,7 +618,7 @@ private fun DragHandleArea(
     val isPressing = remember { mutableFloatStateOf(0f) }
     val pressScale = remember { Animatable(1f) }
     val pressWidth = remember { Animatable(45f) }
-    val handleShape = miuixShape(2.dp)
+    val handleShape = RoundedCornerShape(2.dp)
 
     Box(
         modifier = Modifier

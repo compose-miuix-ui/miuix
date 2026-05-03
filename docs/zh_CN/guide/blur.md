@@ -61,7 +61,6 @@ import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 // 第 1 步：创建 LayerBackdrop
 val backdrop = rememberLayerBackdrop()
@@ -105,7 +104,7 @@ Box(
         .size(200.dp)
         .textureBlur(
             backdrop = backdrop,
-            shape = miuixShape(16.dp)
+            shape = RoundedCornerShape(16.dp)
         )
 ) {
     Text(
@@ -140,7 +139,7 @@ Box(
     modifier = Modifier
         .textureBlur(
             backdrop = backdrop,
-            shape = miuixShape(16.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = colors
         )
 ) {
@@ -231,7 +230,7 @@ Box(
     modifier = Modifier
         .textureBlur(
             backdrop = backdrop,
-            shape = miuixShape(16.dp),
+            shape = RoundedCornerShape(16.dp),
             blurRadiusX = 100f,
             blurRadiusY = 20f
         )
@@ -269,7 +268,7 @@ Box(
     modifier = Modifier
         .textureBlur(
             backdrop = backdrop,
-            shape = miuixShape(16.dp),
+            shape = RoundedCornerShape(16.dp),
             noiseCoefficient = 0f // 禁用噪声抖动
         )
 )
@@ -286,7 +285,7 @@ Box(
     modifier = Modifier
         .drawBackdrop(
             backdrop = backdrop,
-            shape = { miuixShape(16.dp) },
+            shape = { RoundedCornerShape(16.dp) },
             effects = {
                 // 应用高斯模糊
                 blur(radius = 60f)
@@ -363,3 +362,153 @@ Box(
 | 方法 | 返回类型 | 说明 |
 | --- | --- | --- |
 | blurColors() | BlurColors | 创建被 remember 的 BlurColors 实例 |
+
+## 边缘高光
+
+`highlight` modifier 沿圆角形状绘制一条带两路定向光的玻璃质感边缘。配合 `Modifier.textureBlur` 使用可营造"模糊背景上的发光边缘"效果。
+
+```kotlin
+import androidx.compose.foundation.shape.RoundedCornerShape
+import top.yukonga.miuix.kmp.blur.highlight.Highlight
+import top.yukonga.miuix.kmp.blur.highlight.highlight
+
+Box(
+    modifier = Modifier
+        .size(200.dp, 100.dp)
+        .textureBlur(
+            backdrop = backdrop,
+            shape = RoundedCornerShape(24.dp),
+        )
+        .highlight(
+            shape = RoundedCornerShape(24.dp),
+            highlight = Highlight.GlassStrokeMiddleLight,
+        ),
+)
+```
+
+传给 `highlight` 的形状应与传给 `textureBlur` 的形状保持一致。传 `null`（或 `width = 0.dp` 的 `Highlight`）即可禁用。
+
+::: warning 注意
+边缘高光需要 `isRuntimeShaderSupported()` 支持。在不支持的平台或 API 级别上，modifier 会变为空操作。
+:::
+
+### 内置预设
+
+提供六个预设，按卡片尺寸和主题选用：
+
+| 预设 | innerBlurRadius | 视觉特征 |
+| --- | --- | --- |
+| `Highlight.GlassStrokeBigLight` | 3.5 dp | halo 最厚最柔 — 亮模式大卡片 |
+| `Highlight.GlassStrokeMiddleLight` | 2.8 dp | 标准亮模式卡片（默认） |
+| `Highlight.GlassStrokeSmallLight` | 2.6 dp | 紧凑、更锐利的亮模式卡片 |
+| `Highlight.GlassStrokeBigDark` | 1.7 dp | halo 最薄 — 暗模式大卡片 |
+| `Highlight.GlassStrokeMiddleDark` | 2.0 dp | 标准暗模式卡片 |
+| `Highlight.GlassStrokeSmallDark` | 2.3 dp | 紧凑、最锐利的暗模式卡片 |
+
+`Highlight.Default` 等价于 `GlassStrokeMiddleLight`。
+
+### 自定义 BloomStroke
+
+可基于 token 覆盖单个字段，或从零构建 `BloomStroke`：
+
+```kotlin
+import top.yukonga.miuix.kmp.blur.highlight.BloomStroke
+import top.yukonga.miuix.kmp.blur.highlight.LightPosition
+import top.yukonga.miuix.kmp.blur.highlight.LightSource
+
+val custom = Highlight(
+    width = 1.dp,
+    alpha = 0.8f,
+    style = BloomStroke(
+        color = Color.White.copy(alpha = 0.05f),
+        innerBlurRadius = 3.dp,
+        primaryLight = LightSource(
+            position = LightPosition(0.5f, 0.4f, -0.5f),
+            intensity = 0.4f,
+        ),
+        secondaryLight = LightSource(
+            position = LightPosition(0.5f, 0.85f, -0.5f),
+            intensity = 0.3f,
+        ),
+    ),
+)
+```
+
+`LightPosition` 使用归一化 UV 坐标，参考原点为 `(0.5, 0.7, 0)`。Shader 将 `(x − 0.5, y − 0.7, z)` 归一化后作为 3D 方向向量。负 `z` 把光放在表面平面之后（从内向外照亮边缘）— 所有内置预设均使用 `z < 0`。
+
+两路光在 shader 中被限制到相反的半球：`primaryLight` 照亮圆角矩形上半部，`secondaryLight` 照亮下半部。`y < 0.7` 让光偏上；`y > 0.7` 让光偏下。
+
+### 传感器驱动的视差
+
+`rememberTiltLight` 通过设备旋转传感器实时偏移基准位置。Android 上会产生跟随设备倾斜的视差边缘；Desktop / iOS / macOS / Web 上 tilt 始终为零，光斑保持静止。
+
+```kotlin
+import top.yukonga.miuix.kmp.blur.highlight.rememberTiltLight
+
+val baseStyle = Highlight.GlassStrokeMiddleLight.style as BloomStroke
+
+val tiltPrimary = rememberTiltLight(
+    basePosition = baseStyle.primaryLight.position,
+    intensity = baseStyle.primaryLight.intensity,
+    sensitivity = 0.15f,
+)
+val tiltSecondary = rememberTiltLight(
+    basePosition = baseStyle.secondaryLight.position,
+    intensity = baseStyle.secondaryLight.intensity,
+    sensitivity = 0.12f,
+)
+
+val highlight = Highlight.GlassStrokeMiddleLight.copy(
+    style = baseStyle.copy(
+        primaryLight = tiltPrimary,
+        secondaryLight = tiltSecondary,
+    ),
+)
+```
+
+`sensitivity` 控制每弧度倾斜对应的 UV 偏移量 — `0.1f` 表示在 1 rad 倾斜下光位置移动 10%。提高数值会放大视差幅度。
+
+### 边缘高光属性
+
+#### Highlight
+
+| 属性 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| width | Dp | 用 `style.color` 绘制的描边带宽度 | 0.8.dp |
+| alpha | Float | 整体不透明度倍数，范围 [0, 1] | 1f |
+| style | HighlightStyle | 着色模型（通常是 `BloomStroke`） | `HighlightStyle.Default` |
+
+#### BloomStroke
+
+| 属性 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| color | Color | 描边带的基础颜色；alpha 驱动描边亮度 | `White.copy(alpha = 0.05f)` |
+| blendMode | BlendMode | 高光叠加层的合成模式 | `BlendMode.Plus` |
+| innerBlurRadius | Dp | 光晕从圆角向内延伸的深度 — 决定 halo 的厚度与柔度 | 2.8.dp |
+| primaryLight | LightSource | 上半球定向光 | `LightPosition(0.5f, 0.5f, -0.5f)`，intensity 0.4 |
+| secondaryLight | LightSource | 下半球定向光 | `LightPosition(0.5f, 0.8f, -0.5f)`，intensity 0.25 |
+
+#### LightSource
+
+| 属性 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| position | LightPosition | 光的 UV 位置 | - |
+| color | Color | 光颜色（颜色 alpha 折入贡献缩放） | `White` |
+| intensity | Float | 亮度缩放，≥ 0 | 1f |
+
+#### LightPosition
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| x | Float | 归一化 UV x（参考原点：0.5） |
+| y | Float | 归一化 UV y（参考原点：0.7） |
+| z | Float | 有符号深度；负值把光放在表面之后 |
+
+#### rememberTiltLight 参数
+
+| 参数 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| basePosition | LightPosition | 零倾斜时的位置 | - |
+| color | Color | 光颜色 | `White` |
+| intensity | Float | 亮度缩放 | 1f |
+| sensitivity | Float | 每弧度倾斜对应的 UV 偏移量 | 0.1f |

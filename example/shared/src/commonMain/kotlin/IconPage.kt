@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,7 +57,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
@@ -67,8 +67,8 @@ import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
-private val IconListTopShape = SmoothUnevenRoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-private val IconListBottomShape = SmoothUnevenRoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+private val IconListTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+private val IconListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun IconsPage(

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import kotlin.math.absoluteValue
 
 /**
@@ -78,7 +78,7 @@ fun Switch(
     var rawDragOffset by remember { mutableFloatStateOf(0f) }
     var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
 
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
     val thumbOffsetSpringSpec = remember { spring<Dp>(dampingRatio = 0.7f, stiffness = 987f) }
     val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
 

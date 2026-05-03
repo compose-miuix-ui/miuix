@@ -16,6 +16,7 @@ actual fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader 
 
 actual fun RuntimeShader.asComposeShader(): Shader = asAndroidRuntimeShader()
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun RuntimeShader.asBrush(): ShaderBrush = (this as AndroidRuntimeShader).brush
 
 internal fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader = (this as AndroidRuntimeShader).shader
@@ -67,5 +68,9 @@ private class AndroidRuntimeShader(val shader: android.graphics.RuntimeShader) :
 
     override fun setColorUniform(name: String, color: Color) {
         shader.setColorUniform(name, color.toArgb())
+    }
+
+    override fun setInputShader(name: String, shader: Shader) {
+        this.shader.setInputShader(name, shader)
     }
 }

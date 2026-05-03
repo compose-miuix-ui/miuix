@@ -37,9 +37,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -97,8 +97,6 @@ import androidx.navigationevent.compose.NavigationEventState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.shapes.AbsoluteSmoothUnevenRoundedCornerShape
-import top.yukonga.miuix.kmp.shapes.LocalSmoothRounding
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
@@ -783,20 +781,11 @@ fun <T : Any> NavDisplay(
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
                 val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
-                val smoothRounding = LocalSmoothRounding.current
-                val shape = remember(corner, shouldFlipDirection, smoothRounding) {
-                    if (smoothRounding) {
-                        if (shouldFlipDirection) {
-                            AbsoluteSmoothUnevenRoundedCornerShape(topRight = corner, bottomRight = corner)
-                        } else {
-                            AbsoluteSmoothUnevenRoundedCornerShape(topLeft = corner, bottomLeft = corner)
-                        }
+                val shape = remember(corner, shouldFlipDirection) {
+                    if (shouldFlipDirection) {
+                        AbsoluteRoundedCornerShape(topRight = corner, bottomRight = corner)
                     } else {
-                        if (shouldFlipDirection) {
-                            AbsoluteRoundedCornerShape(topRight = corner, bottomRight = corner)
-                        } else {
-                            AbsoluteRoundedCornerShape(topLeft = corner, bottomLeft = corner)
-                        }
+                        AbsoluteRoundedCornerShape(topLeft = corner, bottomLeft = corner)
                     }
                 }
                 Modifier.clip(shape)

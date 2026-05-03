@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
@@ -25,7 +26,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [Button] component with Miuix style.
@@ -57,7 +57,7 @@ fun Button(
     indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val shape = miuixShape(cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
     Surface(
         onClick = onClick,
         enabled = enabled,

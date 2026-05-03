@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Alignment
@@ -17,7 +18,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 
 /**
  * A [FloatingActionButton] component with Miuix style.
@@ -36,7 +36,7 @@ import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 fun FloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = miuixCapsuleShape(),
+    shape: Shape = CircleShape,
     containerColor: Color = MiuixTheme.colorScheme.primary,
     shadowElevation: Dp = FloatingActionButtonDefaults.ShadowElevation,
     minWidth: Dp = FloatingActionButtonDefaults.MinWidth,

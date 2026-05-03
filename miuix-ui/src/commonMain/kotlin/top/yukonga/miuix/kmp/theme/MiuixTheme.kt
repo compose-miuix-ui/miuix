@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import top.yukonga.miuix.kmp.shapes.LocalSmoothRounding
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
@@ -19,16 +18,12 @@ import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
  *
  * @param controller The [ThemeController] that controls the current color scheme.
  * @param textStyles The text styles for the Miuix components.
- * @param smoothRounding Whether to use G2-continuity smooth rounded corners. Set to `false`
- *  to fall back to standard [androidx.compose.foundation.shape.RoundedCornerShape] for better
- *  HWUI performance on lower-end devices.
  * @param content The content of the Miuix theme.
  */
 @Composable
 fun MiuixTheme(
     controller: ThemeController,
     textStyles: TextStyles = MiuixTheme.textStyles,
-    smoothRounding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val rawColors = controller.currentColors()
@@ -42,7 +37,6 @@ fun MiuixTheme(
         LocalContentColor provides miuixColors.onBackground,
         LocalColorSchemeMode provides controller.colorSchemeMode,
         LocalOverscrollFactory provides MiuixOverscrollFactory,
-        LocalSmoothRounding provides smoothRounding,
     ) {
         content()
     }
@@ -54,16 +48,12 @@ fun MiuixTheme(
  *
  * @param colors The color scheme for the Miuix components.
  * @param textStyles The text styles for the Miuix components.
- * @param smoothRounding Whether to use G2-continuity smooth rounded corners. Set to `false`
- *  to fall back to standard [androidx.compose.foundation.shape.RoundedCornerShape] for better
- *  HWUI performance on lower-end devices.
  * @param content The content of the Miuix theme.
  */
 @Composable
 fun MiuixTheme(
     colors: Colors = MiuixTheme.colorScheme,
     textStyles: TextStyles = MiuixTheme.textStyles,
-    smoothRounding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
@@ -74,7 +64,6 @@ fun MiuixTheme(
         LocalTextStyles provides miuixTextStyles,
         LocalIndication provides miuixIndication,
         LocalOverscrollFactory provides MiuixOverscrollFactory,
-        LocalSmoothRounding provides smoothRounding,
     ) {
         content()
     }
@@ -92,10 +81,6 @@ object MiuixTheme {
     val colorSchemeMode: ColorSchemeMode?
         @Composable @ReadOnlyComposable
         get() = LocalColorSchemeMode.current
-
-    val smoothRounding: Boolean
-        @Composable @ReadOnlyComposable
-        get() = LocalSmoothRounding.current
 
     val isDynamicColor: Boolean
         @Composable @ReadOnlyComposable

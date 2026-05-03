@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,7 +51,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 import kotlin.math.roundToInt
 
 /**
@@ -214,7 +214,7 @@ fun TabRowWithContour(
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
-    val outerShape = miuixShape(cornerRadius + contourPadding)
+    val outerShape = RoundedCornerShape(cornerRadius + contourPadding)
 
     BoxWithConstraints(
         modifier = Modifier
@@ -416,7 +416,7 @@ private fun rememberTabRowConfig(
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
-    val shape = miuixShape(cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
 
     return TabRowConfig(tabWidth, shape, resolvedListState)
 }

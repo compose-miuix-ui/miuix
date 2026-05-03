@@ -5,7 +5,6 @@ package component.effect
 
 const val OS2_BG_FRAG = """
     uniform vec2 uResolution;
-    uniform shader uTex;
     uniform float uAnimTime;
     uniform vec4 uBound;
     uniform float uTranslateY;
@@ -106,18 +105,8 @@ const val OS2_BG_FRAG = """
         color.a = clamp(color.a, 0., 1.);
         color.a *= uAlphaMulti;
 
-        vec4 uiColor = uTex.eval(vec2(vUv.x, 1.0 - vUv.y)*uResolution);
-
-        vec4 fragColor;
-
         color.rgb += (10.0 / 255.0) * gradientNoise(fragCoord.xy) - (5.0 / 255.0);
 
-        if (uiColor.a < 0.01) {
-            fragColor = color;
-        } else {
-            fragColor = uiColor;
-        }
-
-        return vec4(fragColor.rgb*fragColor.a, fragColor.a);
+        return vec4(color.rgb*color.a, color.a);
     }
 """

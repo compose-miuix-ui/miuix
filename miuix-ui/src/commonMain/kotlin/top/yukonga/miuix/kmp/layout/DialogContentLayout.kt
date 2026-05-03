@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +64,6 @@ import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.getRoundedCorner
 
 /**
@@ -267,7 +267,7 @@ internal fun DialogContent(
         (roundedCorner - offset).coerceAtLeast(32.dp)
     }
 
-    val bottomCornerShape = miuixShape(bottomCornerRadius)
+    val bottomCornerShape = RoundedCornerShape(bottomCornerRadius)
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
     val calculatedTopInset = if (topInset != null) {

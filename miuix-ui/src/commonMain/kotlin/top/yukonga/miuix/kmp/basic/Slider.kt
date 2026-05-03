@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -58,7 +59,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -118,7 +118,7 @@ fun Slider(
     var layoutHeight by remember { mutableIntStateOf(0) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = miuixShape(height)
+    val shape = RoundedCornerShape(height)
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
@@ -322,7 +322,7 @@ fun VerticalSlider(
     var isHoveringThumb by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = miuixShape(width)
+    val shape = RoundedCornerShape(width)
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -531,7 +531,7 @@ fun RangeSlider(
     val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = miuixShape(height)
+    val shape = RoundedCornerShape(height)
     var lastDraggedIsStart by remember { mutableStateOf(true) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }

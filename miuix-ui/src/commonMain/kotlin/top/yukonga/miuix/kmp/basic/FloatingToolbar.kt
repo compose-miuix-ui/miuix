@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
@@ -20,7 +21,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [FloatingToolbar] that renders its content in a Card, arranged either horizontally or vertically.
@@ -46,7 +46,7 @@ fun FloatingToolbar(
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-    val roundedCornerShape = miuixShape(cornerRadius)
+    val roundedCornerShape = RoundedCornerShape(cornerRadius)
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
     val clipRequired = cornerRadius > 0.dp

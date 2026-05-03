@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [TextField] component with Miuix style.
@@ -114,7 +114,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = miuixShape(cornerRadius)
+    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState by remember(label, useLabelAsPlaceholder) {
         derivedStateOf {
             when {
@@ -253,7 +253,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = miuixShape(cornerRadius)
+    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState = remember(value.text, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
@@ -391,7 +391,7 @@ fun TextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = miuixShape(cornerRadius)
+    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState = remember(value, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden

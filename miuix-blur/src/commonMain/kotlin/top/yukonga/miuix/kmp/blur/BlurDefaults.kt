@@ -44,11 +44,8 @@ data class BlendColorEntry(
 /**
  * Blend mode for blur color blending.
  *
- * Wraps both standard SkBlendMode (0-31) and custom modes (100-121, 200-203).
- * All modes are executed by a runtime shader matching libhwui's
- * premultiplied-alpha blend implementations. Standard modes (0-31)
- * use Skia-compatible formulas; custom modes (100+) implement
- * Lab color space operations, linear light blending, and more.
+ * Wraps standard SkBlendMode values (0-31) plus extended modes (100-121, 200-203)
+ * implementing Lab color space operations, linear light blending, and more.
  */
 @JvmInline
 value class BlurBlendMode(val value: Int) {

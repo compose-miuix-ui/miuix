@@ -85,17 +85,6 @@ fun App() {
   }
   ```
 
-- **平滑圆角**
-
-  默认情况下，Miuix 对所有组件使用 G2 连续性平滑圆角。将 `smoothRounding` 设为 `false` 可回退到标准 `RoundedCornerShape`，以在低端设备上获得更好的 HWUI 渲染性能：
-
-  ```kotlin
-  MiuixTheme(
-      controller = controller,
-      smoothRounding = false // 禁用 G2 连续性圆角
-  ) { /* 内容 */ }
-  ```
-
 - **直接使用**
 
   直接传入颜色方案到 `MiuixTheme(colors = ...)`，用于在不使用 Controller 的情况下完全自定义：
@@ -172,7 +161,6 @@ val isDynamic = MiuixTheme.isDynamicColor
 | colorScheme | Colors | 当前颜色方案 |
 | textStyles | TextStyles | 当前文本样式 |
 | colorSchemeMode | ColorSchemeMode? | 当前配色模式（使用直接 `colors` 重载时为 null） |
-| smoothRounding | Boolean | 是否启用 G2 连续性平滑圆角 |
 | isDynamicColor | Boolean | 当前模式是否为 Monet 动态取色模式 |
 
 ## 自定义主题

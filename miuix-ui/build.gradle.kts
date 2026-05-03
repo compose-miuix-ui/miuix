@@ -47,7 +47,6 @@ kotlin {
         commonMain.dependencies {
             api(projects.miuixCore)
             api(libs.jetbrains.compose.foundation)
-            api(projects.miuixShapes)
 
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
@@ -140,13 +139,6 @@ val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::clas
         rootProject.layout.projectDirectory
             .file(
                 "miuix-navigation3-ui/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/shapes/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-shapes/src/androidMain/baselineProfiles/baseline-prof.txt",
             ).asFile.absolutePath,
     )
 }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +42,6 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
-import top.yukonga.miuix.kmp.shapes.SmoothUnevenRoundedCornerShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
@@ -49,8 +49,8 @@ import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
-private val DropdownListTopShape = SmoothUnevenRoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-private val DropdownListBottomShape = SmoothUnevenRoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+private val DropdownListTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+private val DropdownListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun DropdownPage(

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -50,7 +51,6 @@ import top.yukonga.miuix.kmp.color.space.Hsv
 import top.yukonga.miuix.kmp.color.space.OkHsv
 import top.yukonga.miuix.kmp.color.space.OkLab
 import top.yukonga.miuix.kmp.color.space.OkLch
-import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -135,7 +135,7 @@ fun HsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     // Initialize basic values, execute only once.
     val hsv = remember { color.toHsv() }
@@ -383,7 +383,7 @@ fun OkHsvColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     // Initialize basic values, execute only once.
     val okhsv = remember { Transforms.colorToOkhsv(color) }
@@ -635,7 +635,7 @@ fun OkLabColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     // Initialize basic values, execute only once.
     val ok = remember { color.toOkLab() }
@@ -765,7 +765,7 @@ fun OkLchColorPicker(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val currentOnColorChanged by rememberUpdatedState(onColorChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
 
     // Initialize basic values, execute only once.
     val oklch = remember { color.toOkLch() }
@@ -1156,7 +1156,7 @@ private fun ColorSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val onValueChangedState = rememberUpdatedState(onValueChanged)
-    val capsuleShape = miuixCapsuleShape()
+    val capsuleShape = CircleShape
     val density = LocalDensity.current
     val indicatorSizeDp = 20.dp
     val sliderHeightDp = 26.dp

@@ -45,7 +45,6 @@ include(":miuix-preference")
 include(":miuix-blur")
 include(":miuix-icons")
 include(":miuix-navigation3-ui")
-include(":miuix-shapes")
 
 include(":baselineprofile")
 

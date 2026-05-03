@@ -45,7 +45,6 @@ export default defineConfig({
                         { text: "图标系统", link: "/zh_CN/guide/icons" },
                         { text: "工具函数", link: "/zh_CN/guide/utils" },
                         { text: "导航支持", link: "/zh_CN/guide/navigation3" },
-                        { text: "平滑圆角", link: "/zh_CN/guide/shapes" },
                         { text: "模糊效果", link: "/zh_CN/guide/blur" },
                         { text: "平台支持", link: "/zh_CN/guide/multiplatform" },
                         { text: "最佳实践", link: "/zh_CN/guide/best-practices" },

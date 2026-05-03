@@ -32,7 +32,6 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-ui` | Core UI component library (automatically includes `miuix-core`) |
 | `miuix-preference` | Preference components (SwitchPreference, CheckboxPreference, etc.), depends on `miuix-ui` |
 | `miuix-icons` | Extended icon library, can be used independently or together with `miuix-ui` (automatically includes `miuix-core`) |
-| `miuix-shapes` | Smooth rounded corner shapes, can be used independently |
 | `miuix-blur` | Blur effect library, can be used independently |
 | `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
 
@@ -47,8 +46,6 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-shapes for smooth rounded corners
-            implementation("top.yukonga.miuix.kmp:miuix-shapes:<version>")
             // Optional: Add miuix-blur for blur effects
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-navigation3-ui for Navigation3 support
@@ -67,8 +64,6 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // Optional: Add miuix-icons for more icons
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
-    // Optional: Add miuix-shapes for smooth rounded corners
-    implementation("top.yukonga.miuix.kmp:miuix-shapes-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 31)
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // Optional: Add miuix-navigation3-ui for Navigation3 support

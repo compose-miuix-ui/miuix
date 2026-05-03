@@ -41,7 +41,7 @@ FloatingActionButton(
 | -------------------------- | ---------------------- | ------------------------ |--------------------------------| -------- |
 | onClick                    | () -> Unit             | 点击按钮时触发的回调     | -                              | 是       |
 | modifier                   | Modifier               | 应用于按钮的修饰符       | Modifier                       | 否       |
-| shape                      | Shape                  | 按钮的形状               | SmoothCapsuleShape()           | 否       |
+| shape                      | Shape                  | 按钮的形状               | CircleShape           | 否       |
 | containerColor             | Color                  | 按钮的背景颜色           | MiuixTheme.colorScheme.primary | 否       |
 | shadowElevation            | Dp                     | 按钮的阴影高度           | FloatingActionButtonDefaults.ShadowElevation | 否       |
 | minWidth                   | Dp                     | 按钮的最小宽度           | FloatingActionButtonDefaults.MinWidth        | 否       |
