@@ -138,7 +138,7 @@ fun LazyListScope.dropdownSection() {
                 .padding(bottom = 12.dp),
         ) {
             OverlayDropdownPreference(
-                title = "DropdownPref",
+                title = "DropdownPref (O)",
                 summary = if (overlayExpanded) "Expanded" else "Collapsed",
                 items = dropdownOptions,
                 selectedIndex = overlayDropdownOptionSelected,
@@ -148,7 +148,7 @@ fun LazyListScope.dropdownSection() {
                 onExpandedChange = { overlayExpanded = it },
             )
             WindowDropdownPreference(
-                title = "WindowDropdownPref",
+                title = "DropdownPref (W)",
                 summary = if (windowExpanded) "Expanded" else "Collapsed",
                 items = dropdownLongOptions,
                 selectedIndex = windowDropdownOptionSelected,
@@ -158,32 +158,32 @@ fun LazyListScope.dropdownSection() {
                 onExpandedChange = { windowExpanded = it },
             )
             OverlayDropdownPreference(
-                title = "Disabled DropdownPref",
-                items = listOf("Option 1"),
-                selectedIndex = 0,
-                onSelectedIndexChange = {},
-                enabled = false,
-            )
-            WindowDropdownPreference(
-                title = "Disabled WindowDropdownPref",
-                items = listOf("Option 1"),
-                selectedIndex = 0,
-                onSelectedIndexChange = {},
-                enabled = false,
-            )
-            OverlayDropdownPreference(
-                title = "Grouped DropdownPref",
+                title = "Grouped DropdownPref (O)",
                 summary = if (overlayGroupedExpanded) "Expanded" else "Collapsed",
                 entries = overlayMultiGroupOptions,
                 collapseOnSelection = false,
                 onExpandedChange = { overlayGroupedExpanded = it },
             )
             WindowDropdownPreference(
-                title = "Grouped WindowDropdownPref",
+                title = "Grouped DropdownPref (W)",
                 summary = if (windowGroupedExpanded) "Expanded" else "Collapsed",
                 entries = windowMultiGroupOptions,
                 collapseOnSelection = false,
                 onExpandedChange = { windowGroupedExpanded = it },
+            )
+            OverlayDropdownPreference(
+                title = "Disabled DropdownPref (O)",
+                items = listOf("Option 1"),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
+            )
+            WindowDropdownPreference(
+                title = "Disabled DropdownPref (W)",
+                items = listOf("Option 1"),
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                enabled = false,
             )
         }
     }

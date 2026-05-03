@@ -132,7 +132,7 @@ fun DropdownImpl(
                 it(
                     Modifier
                         .sizeIn(minWidth = 26.dp, minHeight = 26.dp)
-                        .padding(end = 12.dp)
+                        .padding(end = 12.dp),
                 )
             }
             Column {

@@ -85,7 +85,7 @@ fun OverlayDropdownPreference(
                     selected = index == selectedIndex,
                     onClick = { onSelectedIndexChange?.invoke(index) },
                 )
-            }
+            },
         )
     }
     OverlayDropdownPreference(
@@ -316,4 +316,3 @@ fun OverlayDropdownPreference(
         enabled = actualEnabled,
     )
 }
-

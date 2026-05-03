@@ -87,7 +87,7 @@ fun OverlaySpinnerPreference(
                         },
                     )
                 },
-            )
+            ),
         )
     }
     OverlaySpinnerPreference(

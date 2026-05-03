@@ -61,7 +61,7 @@ fun LazyListScope.bottomSheetSection() {
                 .padding(bottom = 12.dp),
         ) {
             ArrowPreference(
-                title = "OverlayBottomSheet",
+                title = "BottomSheet (O)",
                 summary = "Click to show an OverlayBottomSheet",
                 onClick = {
                     showSuperBottomSheet = true
@@ -70,7 +70,7 @@ fun LazyListScope.bottomSheetSection() {
                 holdDownState = superBottomSheetHoldDown,
             )
             ArrowPreference(
-                title = "WindowBottomSheet",
+                title = "BottomSheet (W)",
                 summary = "Click to show a WindowBottomSheet",
                 onClick = {
                     showWindowBottomSheet = true
@@ -115,7 +115,7 @@ private fun SuperBottomSheetDemo(
     var enableNestedScroll by remember { mutableStateOf(true) }
 
     OverlayBottomSheet(
-        title = "OverlayBottomSheet",
+        title = "BottomSheet (O)",
         show = show,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
@@ -150,7 +150,10 @@ private fun SuperBottomSheetDemo(
                 .overScrollVertical(),
         ) {
             item {
-                SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
+                SmallTitle(
+                    text = "Behavior Settings",
+                    insideMargin = PaddingValues(16.dp, 8.dp),
+                )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
@@ -192,7 +195,7 @@ private fun SuperBottomSheetDemo(
                     ),
                 ) {
                     OverlayDropdownPreference(
-                        title = "DropdownPref",
+                        title = "DropdownPref (O)",
                         items = BottomSheetDropdownOptions,
                         selectedIndex = dropdownSelectedIndex,
                         onSelectedIndexChange = onDropdownSelectedIndexChange,
@@ -228,7 +231,7 @@ private fun WindowBottomSheetDemo(
     var enableNestedScroll by remember { mutableStateOf(true) }
 
     WindowBottomSheet(
-        title = "WindowBottomSheet",
+        title = "BottomSheet (W)",
         show = show,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
@@ -265,7 +268,10 @@ private fun WindowBottomSheetDemo(
                 .overScrollVertical(),
         ) {
             item {
-                SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
+                SmallTitle(
+                    text = "Behavior Settings",
+                    insideMargin = PaddingValues(16.dp, 8.dp),
+                )
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
@@ -307,7 +313,7 @@ private fun WindowBottomSheetDemo(
                     ),
                 ) {
                     WindowDropdownPreference(
-                        title = "WindowDropdownPref",
+                        title = "DropdownPref (W)",
                         items = BottomSheetDropdownOptions,
                         selectedIndex = dropdownSelectedIndex,
                         onSelectedIndexChange = onDropdownSelectedIndexChange,

@@ -68,7 +68,7 @@ fun LazyListScope.arrowSection() {
                 onClick = {},
             )
             ArrowPreference(
-                title = "Arrow + Slider + Dialog",
+                title = "Arrow + Slider + Dialog (O)",
                 endActions = {
                     Text(
                         text = "${(volume * 100).toInt()}%",

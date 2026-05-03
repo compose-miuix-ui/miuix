@@ -64,11 +64,12 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.MoreCircle
 import top.yukonga.miuix.kmp.icon.extended.SelectAll
-import top.yukonga.miuix.kmp.icon.extended.Tune
+import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
@@ -187,7 +188,7 @@ fun MainPage(
                 "Multi selection A-1",
                 "Multi selection B-2",
                 "Multi selection B-3",
-            )
+            ),
         )
     }
     val multiSelectItems = remember(multiSelectedItems) {
@@ -245,6 +246,15 @@ fun MainPage(
                     color = barColor,
                     actions = {
                         OverlayIconDropdownMenu(
+                            entries = optionItems,
+                            collapseOnSelection = false,
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Sort,
+                                contentDescription = "Sort",
+                            )
+                        }
+                        OverlayIconDropdownMenu(
                             entries = multiSelectItems,
                             collapseOnSelection = false,
                         ) {
@@ -253,21 +263,12 @@ fun MainPage(
                                 contentDescription = "Multiple selection",
                             )
                         }
-                        OverlayIconDropdownMenu(
-                            entries = optionItems,
-                            collapseOnSelection = false,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Tune,
-                                contentDescription = "Tune",
-                            )
-                        }
-                        OverlayIconDropdownMenu(
+                        WindowIconDropdownMenu(
                             entries = menuItems,
                             collapseOnSelection = true,
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.More,
+                                imageVector = MiuixIcons.MoreCircle,
                                 contentDescription = "More",
                             )
                         }

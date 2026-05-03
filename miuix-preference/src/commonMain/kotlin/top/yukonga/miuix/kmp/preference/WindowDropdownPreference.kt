@@ -82,7 +82,7 @@ fun WindowDropdownPreference(
                     selected = index == selectedIndex,
                     onClick = { onSelectedIndexChange?.invoke(index) },
                 )
-            }
+            },
         )
     }
     WindowDropdownPreference(
@@ -308,4 +308,3 @@ fun WindowDropdownPreference(
         enabled = actualEnabled,
     )
 }
-

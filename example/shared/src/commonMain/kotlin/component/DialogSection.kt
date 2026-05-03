@@ -39,7 +39,7 @@ fun LazyListScope.dialogSection() {
                 .padding(bottom = 12.dp),
         ) {
             ArrowPreference(
-                title = "OverlayDialog",
+                title = "Dialog (O)",
                 summary = "Click to show an OverlayDialog",
                 onClick = {
                     showSuperDialog = true
@@ -48,7 +48,7 @@ fun LazyListScope.dialogSection() {
                 holdDownState = superDialogHoldDown,
             )
             ArrowPreference(
-                title = "WindowDialog",
+                title = "Dialog (W)",
                 summary = "Click to show a WindowDialog",
                 onClick = {
                     showWindowDialog = true
@@ -79,7 +79,7 @@ private fun SuperDialogDemo(
 ) {
     OverlayDialog(
         show = show,
-        title = "OverlayDialog",
+        title = "Dialog (O)",
         summary = "A dialog component inside MiuixPopupHost.",
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
@@ -112,7 +112,7 @@ private fun WindowDialogDemo(
 ) {
     WindowDialog(
         show = show,
-        title = "WindowDialog",
+        title = "Dialog (W)",
         summary = "A window-level dialog, no MiuixPopupHost required.",
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

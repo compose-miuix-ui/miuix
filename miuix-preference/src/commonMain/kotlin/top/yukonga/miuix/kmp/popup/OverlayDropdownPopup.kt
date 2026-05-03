@@ -210,7 +210,8 @@ fun OverlayDropdownDialog(
                         entries.forEachIndexed { entryIdx, entry ->
                             items(
                                 entry.items.size,
-                                key = { itemIdx -> "$entryIdx-$itemIdx" }) { itemIdx ->
+                                key = { itemIdx -> "$entryIdx-$itemIdx" },
+                            ) { itemIdx ->
                                 val item = entry.items[itemIdx]
                                 DropdownImpl(
                                     item = item,
@@ -230,7 +231,7 @@ fun OverlayDropdownDialog(
                                     HorizontalDivider(
                                         modifier = Modifier.padding(
                                             horizontal = 28.dp,
-                                            vertical = 6.dp
+                                            vertical = 6.dp,
                                         ),
                                         thickness = 1.dp,
                                     )

@@ -19,19 +19,18 @@ import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.IconButtonDefaults
-import top.yukonga.miuix.kmp.popup.OverlayDropdownPopup
+import top.yukonga.miuix.kmp.popup.WindowDropdownPopup
 
 /**
- * An [IconButton] wrapper that opens an [OverlayDropdownPopup] for a single [DropdownEntry].
+ * An [IconButton] wrapper that opens a [WindowDropdownPopup] for a single [DropdownEntry].
  */
 @Composable
-fun OverlayIconDropdownMenu(
+fun WindowIconDropdownMenu(
     entry: DropdownEntry,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     maxHeight: Dp? = null,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
@@ -41,13 +40,12 @@ fun OverlayIconDropdownMenu(
     content: @Composable () -> Unit,
 ) {
     val entries = remember(entry) { listOf(entry) }
-    OverlayIconDropdownMenu(
+    WindowIconDropdownMenu(
         entries = entries,
         modifier = modifier,
         enabled = enabled,
         maxHeight = maxHeight,
         dropdownColors = dropdownColors,
-        renderInRootScaffold = renderInRootScaffold,
         collapseOnSelection = collapseOnSelection,
         onExpandedChange = onExpandedChange,
         backgroundColor = backgroundColor,
@@ -59,16 +57,15 @@ fun OverlayIconDropdownMenu(
 }
 
 /**
- * An [IconButton] wrapper that opens an [OverlayDropdownPopup] for one or more [DropdownEntry] groups.
+ * An [IconButton] wrapper that opens a [WindowDropdownPopup] for one or more [DropdownEntry] groups.
  */
 @Composable
-fun OverlayIconDropdownMenu(
+fun WindowIconDropdownMenu(
     entries: List<DropdownEntry>,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     maxHeight: Dp? = null,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
@@ -117,14 +114,13 @@ fun OverlayIconDropdownMenu(
             content = content,
         )
         if (nonEmptyEntries.isNotEmpty()) {
-            OverlayDropdownPopup(
+            WindowDropdownPopup(
                 entries = nonEmptyEntries,
                 show = isDropdownExpanded.value,
                 onDismiss = { setExpanded(false) },
                 onDismissFinished = { isHoldDown.value = false },
                 maxHeight = maxHeight,
                 dropdownColors = dropdownColors,
-                renderInRootScaffold = renderInRootScaffold,
                 collapseOnSelection = collapseOnSelection,
             )
         }
