@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import component.blend.ColorBlendToken
-import component.effect.BgEffectBackground
 import misc.VersionInfo
 import navigation3.Route
 import org.jetbrains.compose.resources.painterResource
@@ -67,6 +66,8 @@ import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.effect.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.DeviceType
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -80,6 +81,7 @@ import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
+import utils.shouldShowSplitPane
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 @Composable
@@ -188,6 +190,7 @@ private fun AboutContent(
     val isInDark = isInDarkTheme()
     val dynamicBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
     val isFullScreenBackground = remember { mutableStateOf(true) }
+    val deviceType = if (shouldShowSplitPane()) DeviceType.PAD else DeviceType.PHONE
 
     val cardBlend = if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light
     val logoBlend = remember(isInDark) {
@@ -215,6 +218,9 @@ private fun AboutContent(
 
     BgEffectBackground(
         dynamicBackground = dynamicBackground.value,
+        deviceType = deviceType,
+        isDarkTheme = isInDark,
+        surface = MiuixTheme.colorScheme.surface,
         isOs3Effect = isOs3Effect,
         isFullSize = isFullScreenBackground.value,
         modifier = Modifier.fillMaxSize(),
