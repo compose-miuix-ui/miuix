@@ -44,3 +44,7 @@ docs/public/compose
 docs/public/icons
 **/generated/baselineProfiles/**
 example/ios/iosApp/Generated.xcconfig
+/build-plugins/bin/
+/build-plugins/bin/**
+/docs/iconGen/bin/
+/docs/iconGen/bin/**
