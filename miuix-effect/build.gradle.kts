@@ -43,7 +43,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.miuixBlur)
+            api(projects.miuixBlur)
             implementation(libs.jetbrains.compose.foundation)
         }
 

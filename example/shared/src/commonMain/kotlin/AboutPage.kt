@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
-import component.blend.ColorBlendToken
 import misc.VersionInfo
 import navigation3.Route
 import org.jetbrains.compose.resources.painterResource
@@ -68,6 +67,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.effect.BgEffectBackground
 import top.yukonga.miuix.kmp.effect.DeviceType
+import top.yukonga.miuix.kmp.effect.blend.ColorBlendToken
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
