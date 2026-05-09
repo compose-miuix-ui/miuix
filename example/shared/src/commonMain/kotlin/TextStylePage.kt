@@ -22,19 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.pageContentPadding
@@ -200,7 +199,6 @@ fun TextStylePage(
                         }
                     }
                 }
-                item { Spacer(modifier = Modifier.height(12.dp)) }
             }
             VerticalScrollBar(
                 adapter = rememberScrollBarAdapter(lazyListState),
@@ -222,35 +220,35 @@ private fun TextStyleItem(entry: TextStyleEntry) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
+            LazyText(
                 text = entry.name,
                 style = MiuixTheme.textStyles.footnote1,
-                color = colorScheme.onSurface,
+                color = MiuixTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
-            Text(
+            LazyText(
                 text = entry.description,
                 style = MiuixTheme.textStyles.footnote2,
-                color = colorScheme.onSurfaceVariantSummary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
+        LazyText(
             text = SAMPLE_TEXT_CN,
             style = entry.style,
-            color = colorScheme.onSurface,
+            color = MiuixTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(2.dp))
-        Text(
+        LazyText(
             text = SAMPLE_TEXT_EN,
             style = entry.style,
-            color = colorScheme.onSurface,
+            color = MiuixTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(2.dp))
-        Text(
+        LazyText(
             text = SAMPLE_TEXT_NUM,
             style = entry.style,
-            color = colorScheme.onSurfaceVariantSummary,
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         )
     }
 }
