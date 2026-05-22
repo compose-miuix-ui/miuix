@@ -9,12 +9,10 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,10 +47,7 @@ import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.DropdownColors
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
-import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.DropdownItem
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.ListPopupLayoutInfo
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
@@ -339,6 +334,13 @@ internal fun CascadingListPopupLayout(
 
 private const val SLOT_PRIMARY = "primary"
 private const val SLOT_SECONDARY = "secondary"
+private const val SLOT_SECONDARY_PROBE = "secondary_probe"
+
+// Hoisted so each measure pass reuses the same instances.
+private val ProbeArrowRotation: () -> Float = { 0f }
+private val ProbeExpandFraction: () -> Float = { 1f }
+private val ProbeOnHeaderClick: () -> Unit = {}
+private val ProbeOnLeafSelected: (DropdownItem) -> Unit = {}
 
 @Suppress("LongParameterList")
 @Composable
@@ -451,12 +453,17 @@ private fun CascadingMorphSubLayout(
 
         val secondaryLayout: SecondaryLayout? =
             if (activeExpanded != null && anchorRect != null) {
-                val measured = subcompose(SLOT_SECONDARY + "_probe") {
+                val measured = subcompose(SLOT_SECONDARY_PROBE) {
                     Box(propagateMinConstraints = true) {
-                        SecondaryProbe(
+                        CascadingSecondaryColumn(
                             triggerItem = activeExpanded,
-                            children = activeExpanded.children.orEmpty(),
                             dropdownColors = dropdownColors,
+                            expandFraction = ProbeExpandFraction,
+                            arrowRotation = ProbeArrowRotation,
+                            anchorHeightPx = 0,
+                            anchorPaddingTopPx = 0,
+                            onHeaderClick = ProbeOnHeaderClick,
+                            onLeafSelected = ProbeOnLeafSelected,
                         )
                     }
                 }.firstOrNull()?.measure(probeConstraints)
@@ -545,48 +552,6 @@ private fun unionOf(a: IntRect, b: IntRect): IntRect = IntRect(
     right = maxOf(a.right, b.right),
     bottom = maxOf(a.bottom, b.bottom),
 )
-
-/** Measurement-only stand-in for [CascadingSecondaryContent] used to derive the union rect. */
-@Composable
-private fun SecondaryProbe(
-    triggerItem: DropdownItem,
-    children: List<DropdownItem>,
-    dropdownColors: DropdownColors,
-) {
-    Box {
-        ListPopupColumn {
-            MorphHeaderRow(
-                triggerItem = triggerItem,
-                arrowRotation = { 0f },
-                expandFraction = { 1f },
-                anchorHeightPx = 0,
-                anchorPaddingTopPx = 0,
-                dropdownColors = dropdownColors,
-                onClick = {},
-            )
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                thickness = 1.dp,
-            )
-            children.forEachIndexed { index, child ->
-                key(child) {
-                    Box(propagateMinConstraints = true) {
-                        DropdownImpl(
-                            item = child,
-                            optionSize = children.size,
-                            isSelected = false,
-                            index = index,
-                            dropdownColors = dropdownColors,
-                            enabled = child.enabled,
-                            hasSubmenu = false,
-                            onSelectedIndexChange = {},
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 internal fun computeSecondaryRect(
     anchor: IntRect,
