@@ -116,7 +116,7 @@ fun TopAppBar(
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val largeTitleHeight = remember { mutableIntStateOf(0) }
+    val largeTitleHeight = rememberSaveable { mutableIntStateOf(0) }
     val expandedHeightPx by remember {
         derivedStateOf {
             largeTitleHeight.intValue.toFloat().coerceAtLeast(0f)
@@ -674,8 +674,8 @@ private fun TopAppBarLayout(
     // Small title animation is triggered once when the threshold is crossed
     // then runs independently to completion
     val smallTitleVisible = extOffset >= 1f
-    val smallTitleAlpha = remember { Animatable(0f) }
-    val smallTitleTranslationY = remember { Animatable(20f) }
+    val smallTitleAlpha = remember { Animatable(if (smallTitleVisible) 1f else 0f) }
+    val smallTitleTranslationY = remember { Animatable(if (smallTitleVisible) 0f else 20f) }
 
     LaunchedEffect(smallTitleVisible) {
         if (smallTitleVisible) {
