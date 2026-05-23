@@ -23,7 +23,7 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -128,7 +128,7 @@ fun BlurredBar(
                 backdrop = backdrop,
                 shape = RectangleShape,
                 blurRadius = 25f,
-                colors = BlurColors(
+                colors = BlurDefaults.blurColors(
                     blendColors = listOf(
                         BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
                     ),

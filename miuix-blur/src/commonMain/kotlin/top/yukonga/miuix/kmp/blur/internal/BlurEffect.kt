@@ -48,7 +48,7 @@ internal fun createBlurEffect(
 
     var effect: RenderEffect? = null
 
-    // Horizontal pass — shader specialized to exact tap count.
+    // H / V use distinct cache keys so each pass holds its own uniform state.
     if (radiusX > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
         if (n > 0) {
@@ -60,7 +60,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val hShader = scope.obtainRuntimeShader(
-                "LMGauss$n",
+                "LMGauss${n}_H",
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
@@ -71,7 +71,6 @@ internal fun createBlurEffect(
         }
     }
 
-    // Vertical pass — shader specialized to exact tap count
     if (radiusY > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceY, rawScratch, paramOffsets, paramWeights)
         if (n > 0) {
@@ -83,7 +82,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val vShader = scope.obtainRuntimeShader(
-                "LMGauss$n",
+                "LMGauss${n}_V",
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)

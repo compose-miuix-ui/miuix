@@ -33,20 +33,36 @@ internal const val MAX_BLEND_LAYERS = 8
  * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX] for isotropic blur.
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
-    // Pre-compute downscale factor to set padding before creating the effect.
     val sigmaMax = maxOf(radiusX, radiusY) * BLUR_RADIUS_TO_SIGMA
     val sf = computeDownScaleParams(sigmaMax).downScale
 
-    // Padding covers the blur kernel's maximum sampling reach in original
-    // pixel space. Keeps recording dimensions stable across radius changes
-    // within the same downscale level.
+    // Padding covers the kernel reach in source pixels so recording size stays
+    // stable across radius changes within the same downscale level.
     val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
     if (kernelPadding > padding) {
         padding = kernelPadding
     }
 
-    val paddedSize = Size(size.width + padding * 2f, size.height + padding * 2f)
-    val result = createBlurEffect(radiusX, radiusY, paddedSize, impl) ?: return
+    val paddedW = size.width + padding * 2f
+    val paddedH = size.height + padding * 2f
+
+    val scope = impl
+    val result = if (scope.cachedBlurResult != null &&
+        scope.cachedBlurRadiusX == radiusX &&
+        scope.cachedBlurRadiusY == radiusY &&
+        scope.cachedBlurSizeW == paddedW &&
+        scope.cachedBlurSizeH == paddedH
+    ) {
+        scope.cachedBlurResult
+    } else {
+        createBlurEffect(radiusX, radiusY, Size(paddedW, paddedH), scope).also {
+            scope.cachedBlurRadiusX = radiusX
+            scope.cachedBlurRadiusY = radiusY
+            scope.cachedBlurSizeW = paddedW
+            scope.cachedBlurSizeH = paddedH
+            scope.cachedBlurResult = it
+        }
+    } ?: return
 
     downscaleFactor = result.downscaleFactor
     renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect

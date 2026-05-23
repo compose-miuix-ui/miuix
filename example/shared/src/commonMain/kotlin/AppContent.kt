@@ -100,7 +100,7 @@ import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -462,7 +462,7 @@ private fun NavigationBar(
                                 backdrop = backdrop,
                                 shape = RectangleShape,
                                 blurRadius = 25f,
-                                colors = BlurColors(
+                                colors = BlurDefaults.blurColors(
                                     blendColors = listOf(
                                         BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
                                     ),
@@ -519,7 +519,7 @@ private fun NavigationBar(
                                 backdrop = backdrop,
                                 shape = floatingBarShape,
                                 blurRadius = 25f,
-                                colors = BlurColors(
+                                colors = BlurDefaults.blurColors(
                                     blendColors = listOf(
                                         BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
                                     ),

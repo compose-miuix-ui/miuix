@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
@@ -65,32 +66,29 @@ fun Modifier.drawBackdrop(
     onDrawFront: (DrawScope.() -> Unit)? = null,
     contentBlendMode: BlendMode = BlendMode.SrcOver,
     enabled: Boolean = true,
-): Modifier {
-    val shapeProvider = ShapeProvider(shape)
-    return this
-        .then(
-            if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier,
-        )
-        .then(
-            DrawBackdropElement(
-                backdrop = backdrop,
-                shapeProvider = shapeProvider,
-                effects = effects,
-                highlight = highlight,
-                layerBlock = layerBlock,
-                onDrawBehind = onDrawBehind,
-                onDrawBackdrop = onDrawBackdrop,
-                onDrawSurface = onDrawSurface,
-                onDrawFront = onDrawFront,
-                contentBlendMode = contentBlendMode,
-                enabled = enabled,
-            ),
-        )
-}
+): Modifier = this
+    .then(
+        if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier,
+    )
+    .then(
+        DrawBackdropElement(
+            backdrop = backdrop,
+            shape = shape,
+            effects = effects,
+            highlight = highlight,
+            layerBlock = layerBlock,
+            onDrawBehind = onDrawBehind,
+            onDrawBackdrop = onDrawBackdrop,
+            onDrawSurface = onDrawSurface,
+            onDrawFront = onDrawFront,
+            contentBlendMode = contentBlendMode,
+            enabled = enabled,
+        ),
+    )
 
 private class DrawBackdropElement(
     val backdrop: Backdrop,
-    val shapeProvider: ShapeProvider,
+    val shape: () -> Shape,
     val effects: BackdropEffectScope.() -> Unit,
     val highlight: (BackdropEffectScope.() -> Highlight?)?,
     val layerBlock: (GraphicsLayerScope.() -> Unit)?,
@@ -104,7 +102,7 @@ private class DrawBackdropElement(
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
         backdrop = backdrop,
-        shapeProvider = shapeProvider,
+        shape = shape,
         effects = effects,
         highlight = highlight,
         layerBlock = layerBlock,
@@ -119,7 +117,7 @@ private class DrawBackdropElement(
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
         node.backdrop = backdrop
-        node.shapeProvider = shapeProvider
+        node.updateShape(shape)
         node.effects = effects
         node.highlight = highlight
         node.layerBlock = layerBlock
@@ -148,7 +146,7 @@ private class DrawBackdropElement(
         if (this === other) return true
         if (other !is DrawBackdropElement) return false
         if (backdrop != other.backdrop) return false
-        if (shapeProvider != other.shapeProvider) return false
+        if (shape != other.shape) return false
         if (effects != other.effects) return false
         if (highlight != other.highlight) return false
         if (layerBlock != other.layerBlock) return false
@@ -163,7 +161,7 @@ private class DrawBackdropElement(
 
     override fun hashCode(): Int {
         var result = backdrop.hashCode()
-        result = 31 * result + shapeProvider.hashCode()
+        result = 31 * result + shape.hashCode()
         result = 31 * result + effects.hashCode()
         result = 31 * result + (highlight?.hashCode() ?: 0)
         result = 31 * result + (layerBlock?.hashCode() ?: 0)
@@ -179,7 +177,7 @@ private class DrawBackdropElement(
 
 private class DrawBackdropNode(
     var backdrop: Backdrop,
-    var shapeProvider: ShapeProvider,
+    val shape: () -> Shape,
     var effects: BackdropEffectScope.() -> Unit,
     var highlight: (BackdropEffectScope.() -> Highlight?)?,
     var layerBlock: (GraphicsLayerScope.() -> Unit)?,
@@ -196,6 +194,12 @@ private class DrawBackdropNode(
     ObserverModifierNode,
     CompositionLocalConsumerModifierNode {
 
+    private val shapeProvider: ShapeProvider = ShapeProvider(shape)
+
+    fun updateShape(shape: () -> Shape) {
+        shapeProvider.shapeBlock = shape
+    }
+
     private val effectScope = object : BackdropEffectScopeImpl() {
         override val shape: Shape get() = shapeProvider.innerShape
     }
@@ -203,9 +207,6 @@ private class DrawBackdropNode(
     private var graphicsLayer: GraphicsLayer? = null
     private val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
     private var noiseLayer: GraphicsLayer? = null
-
-    // Reused per-frame scratch — applyDownsampleStep runs every draw.
-    private val maxCoordBuffer = FloatArray(2)
 
     private fun obtainCascadeLayer(index: Int): GraphicsLayer {
         val ctx = requireGraphicsContext()
@@ -229,23 +230,24 @@ private class DrawBackdropNode(
     private val recordBackdropBlock: (DrawScope.() -> Unit) = {
         val currentPadding = padding
         val scaleFactor = cascadeFirstStepScale
-        if (currentPadding != 0f) {
-            val scaledPadding = if (scaleFactor > 1) (currentPadding / scaleFactor).toInt().toFloat() else currentPadding
-            drawContext.canvas.translate(scaledPadding, scaledPadding)
+        val scaledPadding = if (currentPadding == 0f) {
+            0f
+        } else if (scaleFactor > 1) {
+            (currentPadding / scaleFactor).toInt().toFloat()
+        } else {
+            currentPadding
         }
-        onDrawBackdrop {
-            with(backdrop) {
-                drawBackdrop(
-                    density = effectScope,
-                    coordinates = layoutCoordinates,
-                    layerBlock = layerBlock,
-                    downscaleFactor = scaleFactor,
-                )
+        translate(scaledPadding, scaledPadding) {
+            onDrawBackdrop {
+                with(backdrop) {
+                    drawBackdrop(
+                        density = effectScope,
+                        coordinates = layoutCoordinates,
+                        layerBlock = layerBlock,
+                        downscaleFactor = scaleFactor,
+                    )
+                }
             }
-        }
-        if (currentPadding != 0f) {
-            val scaledPadding = if (scaleFactor > 1) (currentPadding / scaleFactor).toInt().toFloat() else currentPadding
-            drawContext.canvas.translate(-scaledPadding, -scaledPadding)
         }
     }
 
@@ -271,7 +273,6 @@ private class DrawBackdropNode(
                     }
                 drawLayer(layer)
             } else if (scaleFactor <= 2) {
-                // Single 2x step — no cascade needed
                 cascadeFirstStepScale = 2
                 val w = (fullWidth / 2).coerceAtLeast(1)
                 val h = (fullHeight / 2).coerceAtLeast(1)
@@ -458,9 +459,8 @@ private class DrawBackdropNode(
         ensureGraphicsLayer()
         effectScope.apply(effects)
 
-        // When not downscaled, noise can go directly in the RenderEffect chain
-        // at full resolution. When downscaled, noise is deferred to a separate
-        // full-resolution layer in drawBackdropLayer.
+        // Full-res path: chain noise into the RenderEffect. Downscaled path defers it to
+        // drawBackdropLayer so each screen pixel still gets independent dithering.
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1) {
             effectScope.runtimeShaderEffect(
@@ -490,9 +490,8 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Applies a single cascade downsample step: sets [shaderSrc] as a render effect on
-     * [source] then records [dest] at ([destW], [destH]) by drawing [source] with [scale].
-     * Clears the render effect from [source] when done so it does not leak to the next pass.
+     * Sets [shaderSrc] on [source], records [dest] at ([destW], [destH]) by drawing [source]
+     * with [scale], then clears [source]'s render effect so it does not leak to the next pass.
      */
     private fun DrawScope.applyDownsampleStep(
         source: GraphicsLayer,
@@ -505,11 +504,9 @@ private class DrawBackdropNode(
         shaderKey: String,
         shaderSrc: String,
     ) {
-        maxCoordBuffer[0] = sourceW - 0.5f
-        maxCoordBuffer[1] = sourceH - 0.5f
         source.renderEffect = runtimeShaderEffect(
             runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
-                setFloatUniform("maxCoord", maxCoordBuffer)
+                setFloatUniform("maxCoord", sourceW - 0.5f, sourceH - 0.5f)
             },
             uniformShaderName = "child",
         )
@@ -520,10 +517,8 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Draws the downscaled [layer] upscaled to full resolution.
-     * When noise dithering is active, the upscaled content is recorded into a
-     * full-resolution [noiseLayer] and noise is applied per-pixel, avoiding the
-     * coarse block artifacts that occur when noise is applied at downscaled resolution.
+     * Upscales [layer] to full resolution. When noise dithering is active the upscaled content
+     * is staged in [noiseLayer] first so noise lands per screen pixel instead of per scaled block.
      */
     private fun DrawScope.drawUpscaledLayer(
         layer: GraphicsLayer,
@@ -537,7 +532,6 @@ private class DrawBackdropNode(
     ) {
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f) {
-            // Record the upscaled blur into a full-resolution layer for per-pixel noise
             layer.topLeft = IntOffset.Zero
             val noiseL = noiseLayer
                 ?: requireGraphicsContext().createGraphicsLayer().also { noiseLayer = it }
@@ -553,9 +547,7 @@ private class DrawBackdropNode(
                 } else {
                     IntOffset.Zero
                 }
-            drawContext.canvas.translate(-residualX, -residualY)
-            drawLayer(noiseL)
-            drawContext.canvas.translate(residualX, residualY)
+            translate(-residualX, -residualY) { drawLayer(noiseL) }
             noiseL.renderEffect = null
         } else {
             layer.topLeft =
@@ -564,9 +556,9 @@ private class DrawBackdropNode(
                 } else {
                     IntOffset.Zero
                 }
-            drawContext.canvas.translate(-residualX, -residualY)
-            scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
-            drawContext.canvas.translate(residualX, residualY)
+            translate(-residualX, -residualY) {
+                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+            }
         }
     }
 

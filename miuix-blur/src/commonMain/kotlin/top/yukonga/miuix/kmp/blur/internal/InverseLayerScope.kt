@@ -96,7 +96,6 @@ internal class InverseLayerScope : GraphicsLayerScope {
         blendMode = BlendMode.SrcOver
         colorFilter = null
         compositingStrategy = CompositingStrategy.Auto
-        matrix = null
     }
 
     private fun DrawTransform.inverseTransformAtTopLeft(

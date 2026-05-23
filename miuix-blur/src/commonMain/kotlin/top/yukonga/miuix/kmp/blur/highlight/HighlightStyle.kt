@@ -260,8 +260,7 @@ internal fun applyLightUniforms(
     }
 }
 
-// Writes [TL, TR, BL, BR] order directly into the float4 cornerRadii uniform, avoiding
-// a per-frame FloatArray(4) allocation.
+// Pack [TL, TR, BL, BR] into a vec4 uniform without a per-frame FloatArray allocation.
 internal fun DrawScope.setCornerRadiiUniform(shader: RuntimeShader, shape: Shape) {
     val sizePx = size
     val maxRadius = sizePx.minDimension / 2f

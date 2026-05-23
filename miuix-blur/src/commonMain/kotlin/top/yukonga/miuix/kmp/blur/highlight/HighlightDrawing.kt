@@ -11,13 +11,8 @@ import androidx.compose.ui.util.fastCoerceAtMost
 import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
 
 /**
- * Paints [highlight] over the current draw region, shaped by [shape].
- *
- * Skips drawing when the highlight would not be visible (`width <= 0`, `alpha <= 0`,
- * empty bounds, or the platform cannot produce the shader).
- *
- * Used by `Modifier.drawBackdrop`'s `highlight` parameter to layer an edge highlight
- * on top of the content.
+ * Paints [highlight] over the current draw region, shaped by [shape]. Skips when the highlight
+ * would be invisible (zero width / alpha, empty bounds, or no shader on this platform).
  */
 internal fun ContentDrawScope.drawHighlight(
     highlight: Highlight,

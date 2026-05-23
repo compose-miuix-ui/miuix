@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import top.yukonga.miuix.kmp.blur.internal.BlurResult
 import top.yukonga.miuix.kmp.blur.internal.COLOR_CONTROLS_SHADER
 import top.yukonga.miuix.kmp.blur.internal.MAX_BLUR_TAPS
 import top.yukonga.miuix.kmp.blur.internal.chain
@@ -119,14 +120,12 @@ internal abstract class BackdropEffectScopeImpl :
 
     var runtimeShaderCache: RuntimeShaderCache = RuntimeShaderCacheImpl()
 
-    // Scratch buffers for createBlurEffect — reused across observe-driven updateEffects()
-    // invocations. X and Y axes are computed sequentially so they share the same buffers.
+    // Scratch reused across updateEffects(); X / Y axes are sequential and share buffers.
     internal val blurRawWeights: DoubleArray = DoubleArray(14)
     internal val blurParamOffsets: FloatArray = FloatArray(MAX_BLUR_TAPS)
     internal val blurParamWeights: FloatArray = FloatArray(MAX_BLUR_TAPS)
 
-    // Lazy per-tapCount uniform buffers for setFloatUniform — uniform arrays require
-    // exact length matching the shader declaration. Indexed [0..MAX_BLUR_TAPS]; slot 0 unused.
+    // Per-tapCount uniform buffers — uniform array length must match the shader declaration.
     private val shaderOffsetsByTaps: Array<FloatArray?> = arrayOfNulls(MAX_BLUR_TAPS + 1)
     private val shaderWeightsByTaps: Array<FloatArray?> = arrayOfNulls(MAX_BLUR_TAPS + 1)
 
@@ -138,6 +137,13 @@ internal abstract class BackdropEffectScopeImpl :
 
     internal val blendModesBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS)
     internal val blendColorsBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS * 4)
+
+    // chain() allocates a native RenderEffect — cache last result keyed on inputs.
+    internal var cachedBlurRadiusX: Float = Float.NaN
+    internal var cachedBlurRadiusY: Float = Float.NaN
+    internal var cachedBlurSizeW: Float = Float.NaN
+    internal var cachedBlurSizeH: Float = Float.NaN
+    internal var cachedBlurResult: BlurResult? = null
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
 
@@ -179,13 +185,14 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1
         noiseCoefficient = 0f
+        cachedBlurRadiusX = Float.NaN
+        cachedBlurRadiusY = Float.NaN
+        cachedBlurSizeW = Float.NaN
+        cachedBlurSizeH = Float.NaN
+        cachedBlurResult = null
     }
 }
 
-/**
- * Internal downcast helper. [BackdropEffectScope] is a sealed interface whose only
- * implementation is [BackdropEffectScopeImpl] (enforced at compile time), so this cast
- * cannot fail at runtime.
- */
+/** [BackdropEffectScope] is sealed with only [BackdropEffectScopeImpl], so this cast is safe. */
 internal val BackdropEffectScope.impl: BackdropEffectScopeImpl
     get() = this as BackdropEffectScopeImpl

@@ -62,7 +62,6 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
-import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -268,7 +267,7 @@ private fun AboutContent(
                                     shape = RoundedCornerShape(16.dp),
                                     blurRadius = 150f,
                                     noiseCoefficient = noiseCoefficient,
-                                    colors = BlurColors(
+                                    colors = BlurDefaults.blurColors(
                                         blendColors = logoBlend,
                                     ),
                                     contentBlendMode = ComposeBlendMode.DstIn,
@@ -344,7 +343,7 @@ private fun AboutContent(
                                             shape = RoundedCornerShape(16.dp),
                                             blurRadius = blurRadius,
                                             noiseCoefficient = noiseCoefficient,
-                                            colors = BlurColors(
+                                            colors = BlurDefaults.blurColors(
                                                 blendColors = cardBlend,
                                                 brightness = brightness,
                                                 contrast = contrast,
@@ -395,7 +394,7 @@ private fun AboutContent(
                                             shape = RoundedCornerShape(16.dp),
                                             blurRadius = blurRadius,
                                             noiseCoefficient = noiseCoefficient,
-                                            colors = BlurColors(
+                                            colors = BlurDefaults.blurColors(
                                                 blendColors = cardBlend,
                                                 brightness = brightness,
                                                 contrast = contrast,

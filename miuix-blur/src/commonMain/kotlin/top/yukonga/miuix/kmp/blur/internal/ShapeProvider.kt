@@ -11,10 +11,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
 /**
- * Caches [Shape] outlines to avoid recomputation each frame.
+ * Caches [Shape] outlines. [shapeBlock] is mutable so a single provider survives modifier
+ * updates; the outline cache is keyed on the resolved [Shape] instance.
  */
 @Stable
-internal class ShapeProvider(val shapeBlock: () -> Shape) {
+internal class ShapeProvider(var shapeBlock: () -> Shape) {
 
     private var cachedShape: Shape? = null
     private var cachedOutline: Outline? = null

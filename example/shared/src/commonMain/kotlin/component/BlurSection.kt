@@ -42,7 +42,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
-import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -145,7 +144,7 @@ private fun BlurDemo() {
                             blurRadiusX = blurRadiusX,
                             blurRadiusY = blurRadiusY,
                             noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
+                            colors = BlurDefaults.blurColors(
                                 blendColors = currentBlend.second,
                                 brightness = brightness,
                                 contrast = contrast,
@@ -327,7 +326,7 @@ private fun ForegroundBlurDemo() {
                             blurRadiusX = blurRadiusX,
                             blurRadiusY = blurRadiusY,
                             noiseCoefficient = noiseCoefficient,
-                            colors = BlurColors(
+                            colors = BlurDefaults.blurColors(
                                 blendColors = currentBlend.second,
                                 brightness = brightness,
                                 contrast = contrast,

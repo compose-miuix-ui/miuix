@@ -12,6 +12,9 @@ import kotlin.jvm.JvmInline
 /**
  * Color configuration applied after blur processing.
  *
+ * Compose treats [List] as unstable, so the `@Immutable` annotation alone does not stabilize
+ * callers — prefer the remembered [BlurDefaults.blurColors] factory over direct construction.
+ *
  * @param blendColors Colors blended over the blurred backdrop, drawn in order.
  * @param brightness Brightness adjustment in range [-1, 1]. 0 means no change.
  * @param contrast Contrast multiplier. 1 means no change.

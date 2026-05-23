@@ -31,11 +31,8 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * Use [Modifier.layerBackdrop][layerBackdrop] on the content container to capture its
  * rendered output, then pass this [LayerBackdrop] to blur modifiers.
  *
- * The returned [LayerBackdrop] instance is keyed only on [graphicsLayer]; [onDraw] is
- * tracked via [rememberUpdatedState] and re-read on every record. This keeps the
- * instance stable across recompositions even when [onDraw] is a fresh lambda each
- * frame, so [LayerBackdropElement][layerBackdrop]'s `onGloballyPositioned` does not
- * thrash and `layerCoordinates` stays populated for backdrop sampling.
+ * The instance is keyed only on [graphicsLayer]; [onDraw] is read via [rememberUpdatedState]
+ * so a fresh lambda each frame does not rebuild the backdrop and reset its layer coordinates.
  *
  * @param graphicsLayer The graphics layer to record content into.
  * @param onDraw Custom draw logic for the layer content.
