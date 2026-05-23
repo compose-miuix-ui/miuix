@@ -121,6 +121,7 @@ compose.resources {
 }
 
 val generateVersionInfo by tasks.registering(GenerateVersionInfoTask::class) {
+    description = "GenerateVersionInfoTask"
     versionName.set(BuildConfig.APPLICATION_VERSION_NAME)
     versionCode.set(getGitVersionCode())
     outputFile.set(generatedSrcDir.map { it.file("kotlin/misc/VersionInfo.kt") })
