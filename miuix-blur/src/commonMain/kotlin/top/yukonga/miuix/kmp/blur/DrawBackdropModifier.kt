@@ -454,7 +454,7 @@ private class DrawBackdropNode(
     }
 
     private fun updateEffects() {
-        if (!enabled || !isRenderEffectSupported()) return
+        if (!enabled) return
         ensureGraphicsLayer()
         effectScope.apply(effects)
 
@@ -462,7 +462,7 @@ private class DrawBackdropNode(
         // at full resolution. When downscaled, noise is deferred to a separate
         // full-resolution layer in drawBackdropLayer.
         val noiseCoeff = effectScope.noiseCoefficient
-        if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1 && isRuntimeShaderSupported()) {
+        if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1) {
             effectScope.runtimeShaderEffect(
                 key = "NoiseDither",
                 shaderString = NOISE_DITHER_SHADER,
@@ -505,16 +505,14 @@ private class DrawBackdropNode(
         shaderKey: String,
         shaderSrc: String,
     ) {
-        if (isRuntimeShaderSupported()) {
-            maxCoordBuffer[0] = sourceW - 0.5f
-            maxCoordBuffer[1] = sourceH - 0.5f
-            source.renderEffect = runtimeShaderEffect(
-                runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
-                    setFloatUniform("maxCoord", maxCoordBuffer)
-                },
-                uniformShaderName = "child",
-            )
-        }
+        maxCoordBuffer[0] = sourceW - 0.5f
+        maxCoordBuffer[1] = sourceH - 0.5f
+        source.renderEffect = runtimeShaderEffect(
+            runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
+                setFloatUniform("maxCoord", maxCoordBuffer)
+            },
+            uniformShaderName = "child",
+        )
         recordLayer(dest, size = IntSize(destW, destH)) {
             scale(scale, scale, Offset.Zero) { drawLayer(source) }
         }
@@ -538,7 +536,7 @@ private class DrawBackdropNode(
         fullHeight: Int,
     ) {
         val noiseCoeff = effectScope.noiseCoefficient
-        if (noiseCoeff > 0f && isRuntimeShaderSupported()) {
+        if (noiseCoeff > 0f) {
             // Record the upscaled blur into a full-resolution layer for per-pixel noise
             layer.topLeft = IntOffset.Zero
             val noiseL = noiseLayer

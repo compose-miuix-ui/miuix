@@ -3,7 +3,11 @@
 `miuix-blur` is a standalone blur effect library for Compose Multiplatform. It provides backdrop blur, color blending, and texture effects via Modifier extensions. The library supports Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
 
 ::: warning
-On Android, blur effects require API 31 (Android 12) or higher. Custom blend modes via RuntimeShader require API 33 (Android 13) or higher. On unsupported API levels, blur modifiers become no-ops.
+On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. All
+effects (blur, blend, noise, highlight) rely on `RuntimeShader`, which is only
+available from API 33. Apps with a lower `minSdk` that still want to include
+this library should gate blur-related code paths with [the capability checks
+described below](#runtime-capability-checks).
 :::
 
 ## Setup
@@ -30,21 +34,38 @@ dependencies {
 
 ## Platform Support
 
-| Platform | RenderEffect (Blur) | RuntimeShader (Custom Blend Modes) |
-| --- | --- | --- |
-| Android | API 31+ | API 33+ |
-| Desktop (JVM) | Supported | Supported |
-| iOS / macOS | Supported | Supported |
-| WasmJs / Js | Supported | Supported |
+| Platform      | Minimum Requirement |
+| ------------- | ------------------- |
+| Android       | API 33 (Android 13) |
+| Desktop (JVM) | Supported           |
+| iOS / macOS   | Supported           |
+| WasmJs / Js   | Supported           |
 
-You can check platform capabilities at runtime:
+Blur is implemented as a separable Gaussian `RuntimeShader` wrapped in a
+`RenderEffect`. On Android, `RuntimeShader` was introduced in API 33, so that
+is the hard floor for the entire library — including blend, noise, and
+highlight effects.
+
+### Runtime capability checks
+
+If your app has a lower `minSdk` than `miuix-blur` and you want to keep
+shipping a single APK, gate blur usage with the capability checks below.
+On Android they map to `Build.VERSION.SDK_INT` comparisons; on Skiko-based
+targets (Desktop, iOS, macOS, Web) they always return `true`.
 
 ```kotlin
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 
-val canBlur = isRenderEffectSupported()
-val canUseCustomBlendModes = isRuntimeShaderSupported()
+// True on API 32+ (and all non-Android targets). Useful when you only need
+// the backdrop scaffold (e.g. a chained ColorFilter via `colorFilter(...)`).
+val backdropScaffoldSupported = isRenderEffectSupported()
+
+// True on API 33+ (and all non-Android targets). Gate any code path that
+// applies `blur(...)`, `blendColors(...)`, `noiseDither(...)`,
+// `Modifier.textureBlur(...)`, the highlight styles, or any `RuntimeShader`
+// you build yourself.
+val blurAndBlendSupported = isRuntimeShaderSupported()
 ```
 
 ## Basic Usage

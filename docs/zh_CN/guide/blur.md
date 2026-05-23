@@ -3,7 +3,10 @@
 `miuix-blur` 是一个独立的 Compose Multiplatform 模糊效果库。它通过 Modifier 扩展提供背景模糊、颜色混合和纹理效果。支持 Android、Desktop (JVM)、iOS、macOS 和 Web (WasmJs/Js) 平台。
 
 ::: warning 注意
-在 Android 上，模糊效果需要 API 31 (Android 12) 或更高版本。通过 RuntimeShader 实现的自定义混合模式需要 API 33 (Android 13) 或更高版本。在不支持的 API 级别上，模糊 Modifier 将作为空操作。
+Android 上 `miuix-blur` 要求 `minSdk` 33（Android 13）或更高。模糊、混合、
+噪点、高光等所有效果均依赖 `RuntimeShader`，该 API 自 33 起才提供。若你的
+应用 `minSdk` 低于 33 但仍想引入该库，请用 [下方介绍的能力检查](#运行时能力检查)
+门控所有 blur 相关代码路径。
 :::
 
 ## 配置
@@ -30,21 +33,34 @@ dependencies {
 
 ## 平台支持
 
-| 平台 | RenderEffect（模糊） | RuntimeShader（自定义混合模式） |
-| --- | --- | --- |
-| Android | API 31+ | API 33+ |
-| Desktop (JVM) | 支持 | 支持 |
-| iOS / macOS | 支持 | 支持 |
-| WasmJs / Js | 支持 | 支持 |
+| 平台          | 最低要求            |
+| ------------- | ------------------- |
+| Android       | API 33（Android 13）|
+| Desktop (JVM) | 支持                |
+| iOS / macOS   | 支持                |
+| WasmJs / Js   | 支持                |
 
-可在运行时检查平台能力：
+模糊由一对可分离高斯 `RuntimeShader` 再 wrap 进 `RenderEffect` 实现。Android 上
+`RuntimeShader` 自 API 33 起才提供，所以这是整个库（含混合、噪点、高光）的硬下限。
+
+### 运行时能力检查
+
+如果你的应用 `minSdk` 低于 `miuix-blur` 但仍想保持单 APK 发布，可以用下面的
+能力检查门控 blur 调用。Android 上它们对应 `Build.VERSION.SDK_INT` 判断；
+Skiko 系（Desktop / iOS / macOS / Web）始终返回 `true`。
 
 ```kotlin
 import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 
-val canBlur = isRenderEffectSupported()
-val canUseCustomBlendModes = isRuntimeShaderSupported()
+// API 32+（以及所有非 Android 目标）为 true。仅需要背景记录支架时（例如
+// 通过 `colorFilter(...)` 链一个 ColorFilter）适用。
+val backdropScaffoldSupported = isRenderEffectSupported()
+
+// API 33+（以及所有非 Android 目标）为 true。任何调用 `blur(...)`、
+// `blendColors(...)`、`noiseDither(...)`、`Modifier.textureBlur(...)`、
+// 高光样式、或自行构造 `RuntimeShader` 的路径都应被它门控。
+val blurAndBlendSupported = isRuntimeShaderSupported()
 ```
 
 ## 基本用法

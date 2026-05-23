@@ -34,7 +34,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-core/`           | Core utilities and MiuixIcons base; depended on by `miuix-ui` and `miuix-icons` |
 | `miuix-ui/`             | Main UI library — basic components, theme, colors, animations, overlay/window/layout |
 | `miuix-preference/`     | Preference components (SwitchPreference, CheckboxPreference, etc.)                  |
-| `miuix-blur/`           | Blur/backdrop effects (Android minSdk=31)                                           |
+| `miuix-blur/`           | Blur/backdrop effects (Android minSdk=33)                                           |
 | `miuix-icons/`          | Extended icon resources                                                             |
 | `miuix-navigation3-ui/` | Navigation 3 UI implementation (independent, no miuix dependency)                   |
 | `example/`              | Demo app — showcases and tests all components                                       |

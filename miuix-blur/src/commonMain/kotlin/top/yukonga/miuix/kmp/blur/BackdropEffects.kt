@@ -33,8 +33,6 @@ internal const val MAX_BLEND_LAYERS = 8
  * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX] for isotropic blur.
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
-    if (!isRuntimeShaderSupported()) return
-
     // Pre-compute downscale factor to set padding before creating the effect.
     val sigmaMax = maxOf(radiusX, radiusY) * BLUR_RADIUS_TO_SIGMA
     val sf = computeDownScaleParams(sigmaMax).downScale
@@ -72,7 +70,6 @@ fun BackdropEffectScope.noiseDither(coefficient: Float) {
  */
 fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
-    if (!isRuntimeShaderSupported()) return
 
     val layerList = colors.blendColors
     val layerCount = minOf(layerList.size, MAX_BLEND_LAYERS)

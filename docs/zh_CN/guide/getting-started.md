@@ -64,7 +64,7 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // 可选：添加 miuix-icons 以获取更多图标
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
-    // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 31）
+    // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 33）
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
     implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
@@ -80,6 +80,13 @@ implementation("top.yukonga.miuix.kmp:miuix-ui-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-js:<version>")
+// 可选：添加 miuix-preference
+implementation("top.yukonga.miuix.kmp:miuix-preference-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-js:<version>")
 // 可选：添加 miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")

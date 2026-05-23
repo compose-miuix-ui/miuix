@@ -2,7 +2,7 @@
 
 `Icon` is a fundamental icon component in Miuix used to display various vector icons, bitmap icons, or custom drawn content in the interface. It provides multiple ways to render icons to accommodate different icon resource types.
 
-To follow night mode or theme changes, you need to actively use the `tint` property of the `Icon` component to set the icon color, commonly using `MiuixTheme.colorScheme.onBackground`.
+By default, `tint` resolves to `LocalContentColor.current`, so the icon follows the content color provided by parent components such as `Button` or `Surface`. Pass an explicit `Color` (for example `MiuixTheme.colorScheme.onBackground`) when you need to override that, or `Color.Unspecified` to disable tinting and keep the source colors.
 
 <div style="position: relative; height: 120px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=icon" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -77,7 +77,7 @@ Icon(
 Icon(
     imageVector = MiuixIcons.Favorites,
     contentDescription = "Favorites",
-    tint = Color.Unspecified // Default
+    tint = Color.Unspecified // Disable tinting and keep the source colors
 )
 ```
 
@@ -85,40 +85,41 @@ Icon(
 
 ### Icon Properties (ImageVector Version)
 
-| Property Name      | Type        | Description                    | Default Value              | Required |
-| ------------------ | ----------- | ------------------------------ | -------------------------- | -------- |
-| imageVector        | ImageVector | Vector icon to draw            | -                          | Yes      |
-| contentDescription | String?     | Accessibility description text | -                          | No       |
-| modifier           | Modifier    | Modifier applied to the icon   | Modifier                   | No       |
-| tint               | Color       | Color tint applied to the icon | IconDefaults.DefaultTint() | No       |
+| Property Name      | Type        | Description                                                                              | Default Value              | Required |
+| ------------------ | ----------- | ---------------------------------------------------------------------------------------- | -------------------------- | -------- |
+| imageVector        | ImageVector | Vector icon to draw                                                                      | -                          | Yes      |
+| contentDescription | String?     | Accessibility description text                                                           | -                          | Yes      |
+| modifier           | Modifier    | Modifier applied to the icon                                                             | Modifier                   | No       |
+| tint               | Color       | Color tint applied to the icon. If `Color.Unspecified` is provided, no tint is applied   | LocalContentColor.current  | No       |
 
 ### Icon Properties (ImageBitmap Version)
 
-| Property Name      | Type        | Description                    | Default Value              | Required |
-| ------------------ | ----------- | ------------------------------ | -------------------------- | -------- |
-| bitmap             | ImageBitmap | Bitmap icon to draw            | -                          | Yes      |
-| contentDescription | String?     | Accessibility description text | -                          | No       |
-| modifier           | Modifier    | Modifier applied to the icon   | Modifier                   | No       |
-| tint               | Color       | Color tint applied to the icon | IconDefaults.DefaultTint() | No       |
+| Property Name      | Type        | Description                                                                              | Default Value              | Required |
+| ------------------ | ----------- | ---------------------------------------------------------------------------------------- | -------------------------- | -------- |
+| bitmap             | ImageBitmap | Bitmap icon to draw                                                                      | -                          | Yes      |
+| contentDescription | String?     | Accessibility description text                                                           | -                          | Yes      |
+| modifier           | Modifier    | Modifier applied to the icon                                                             | Modifier                   | No       |
+| tint               | Color       | Color tint applied to the icon. If `Color.Unspecified` is provided, no tint is applied   | LocalContentColor.current  | No       |
 
 ### Icon Properties (Painter Version)
 
-| Property Name      | Type     | Description                    | Default Value              | Required |
-| ------------------ | -------- | ------------------------------ | -------------------------- | -------- |
-| painter            | Painter  | Painter to use                 | -                          | Yes      |
-| contentDescription | String?  | Accessibility description text | -                          | No       |
-| modifier           | Modifier | Modifier applied to the icon   | Modifier                   | No       |
-| tint               | Color    | Color tint applied to the icon | IconDefaults.DefaultTint() | No       |
+| Property Name      | Type     | Description                                                                              | Default Value              | Required |
+| ------------------ | -------- | ---------------------------------------------------------------------------------------- | -------------------------- | -------- |
+| painter            | Painter  | Painter to use                                                                           | -                          | Yes      |
+| contentDescription | String?  | Accessibility description text                                                           | -                          | Yes      |
+| modifier           | Modifier | Modifier applied to the icon                                                             | Modifier                   | No       |
+| tint               | Color    | Color tint applied to the icon. If `Color.Unspecified` is provided, no tint is applied   | LocalContentColor.current  | No       |
 
-### IconDefaults Object
+### Icon Properties (Painter + ColorProducer Version)
 
-The IconDefaults object provides default configurations for the Icon component.
+This overload defers the tint color read to the draw phase via a [`ColorProducer`](https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/ColorProducer), which is useful when the tint color changes frequently and you want to avoid recomposition.
 
-#### Methods
-
-| Method Name | Return Type | Description                                    |
-| ----------- | ----------- | ---------------------------------------------- |
-| DefaultTint | Color       | Returns default tint color (Color.Unspecified) |
+| Property Name      | Type            | Description                                                                | Default Value | Required |
+| ------------------ | --------------- | -------------------------------------------------------------------------- | ------------- | -------- |
+| painter            | Painter         | Painter to use                                                             | -             | Yes      |
+| tint               | ColorProducer?  | Tint producer; if `null`, no tint is applied                               | -             | Yes      |
+| contentDescription | String?         | Accessibility description text                                             | -             | Yes      |
+| modifier           | Modifier        | Modifier applied to the icon                                               | Modifier      | No       |
 
 ## Advanced Usage
 

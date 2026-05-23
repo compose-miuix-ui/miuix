@@ -2,7 +2,7 @@
 
 `Icon` 是 Miuix 中的基础图标组件，用于在界面中展示各种矢量图标、位图图标或自定义绘制内容。它提供了多种绘制图标的方式，适应不同的图标资源类型。
 
-如果要跟随夜间模式或主题变化，需主动使用 `Icon` 组件的 `tint` 属性来设置图标的颜色，常用颜色为 `MiuixTheme.colorScheme.onBackground`。
+`tint` 的默认值是 `LocalContentColor.current`，因此图标会跟随父级组件（如 `Button`、`Surface`）提供的内容颜色。若需要覆盖该颜色，传入显式的 `Color`（例如 `MiuixTheme.colorScheme.onBackground`）；若想保留资源本身的颜色而不做着色，传入 `Color.Unspecified`。
 
 <div style="position: relative; height: 120px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=icon" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -77,7 +77,7 @@ Icon(
 Icon(
     imageVector = MiuixIcons.Favorites,
     contentDescription = "Favorites",
-    tint = Color.Unspecified // 默认情况
+    tint = Color.Unspecified // 关闭着色，保留图标自身颜色
 )
 ```
 
@@ -85,40 +85,41 @@ Icon(
 
 ### Icon 属性（ImageVector 版本）
 
-| 属性名             | 类型        | 说明                 | 默认值                     | 是否必须 |
-| ------------------ | ----------- | -------------------- | -------------------------- | -------- |
-| imageVector        | ImageVector | 要绘制的矢量图标     | -                          | 是       |
-| contentDescription | String?     | 图标的无障碍描述文本 | -                          | 否       |
-| modifier           | Modifier    | 应用于图标的修饰符   | Modifier                   | 否       |
-| tint               | Color       | 应用于图标的着色颜色 | IconDefaults.DefaultTint() | 否       |
+| 属性名             | 类型        | 说明                                                            | 默认值                    | 是否必须 |
+| ------------------ | ----------- | --------------------------------------------------------------- | ------------------------- | -------- |
+| imageVector        | ImageVector | 要绘制的矢量图标                                                | -                         | 是       |
+| contentDescription | String?     | 图标的无障碍描述文本                                            | -                         | 是       |
+| modifier           | Modifier    | 应用于图标的修饰符                                              | Modifier                  | 否       |
+| tint               | Color       | 应用于图标的着色颜色。传入 `Color.Unspecified` 时不进行着色     | LocalContentColor.current | 否       |
 
 ### Icon 属性（ImageBitmap 版本）
 
-| 属性名             | 类型        | 说明                 | 默认值                     | 是否必须 |
-| ------------------ | ----------- | -------------------- | -------------------------- | -------- |
-| bitmap             | ImageBitmap | 要绘制的位图图标     | -                          | 是       |
-| contentDescription | String?     | 图标的无障碍描述文本 | -                          | 否       |
-| modifier           | Modifier    | 应用于图标的修饰符   | Modifier                   | 否       |
-| tint               | Color       | 应用于图标的着色颜色 | IconDefaults.DefaultTint() | 否       |
+| 属性名             | 类型        | 说明                                                            | 默认值                    | 是否必须 |
+| ------------------ | ----------- | --------------------------------------------------------------- | ------------------------- | -------- |
+| bitmap             | ImageBitmap | 要绘制的位图图标                                                | -                         | 是       |
+| contentDescription | String?     | 图标的无障碍描述文本                                            | -                         | 是       |
+| modifier           | Modifier    | 应用于图标的修饰符                                              | Modifier                  | 否       |
+| tint               | Color       | 应用于图标的着色颜色。传入 `Color.Unspecified` 时不进行着色     | LocalContentColor.current | 否       |
 
 ### Icon 属性（Painter 版本）
 
-| 属性名             | 类型     | 说明                 | 默认值                     | 是否必须 |
-| ------------------ | -------- | -------------------- | -------------------------- | -------- |
-| painter            | Painter  | 要使用的绘制器       | -                          | 是       |
-| contentDescription | String?  | 图标的无障碍描述文本 | -                          | 否       |
-| modifier           | Modifier | 应用于图标的修饰符   | Modifier                   | 否       |
-| tint               | Color    | 应用于图标的着色颜色 | IconDefaults.DefaultTint() | 否       |
+| 属性名             | 类型     | 说明                                                            | 默认值                    | 是否必须 |
+| ------------------ | -------- | --------------------------------------------------------------- | ------------------------- | -------- |
+| painter            | Painter  | 要使用的绘制器                                                  | -                         | 是       |
+| contentDescription | String?  | 图标的无障碍描述文本                                            | -                         | 是       |
+| modifier           | Modifier | 应用于图标的修饰符                                              | Modifier                  | 否       |
+| tint               | Color    | 应用于图标的着色颜色。传入 `Color.Unspecified` 时不进行着色     | LocalContentColor.current | 否       |
 
-### IconDefaults 对象
+### Icon 属性（Painter + ColorProducer 版本）
 
-IconDefaults 对象提供了 Icon 组件的默认配置。
+此重载通过 [`ColorProducer`](https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/ColorProducer) 将 tint 颜色的读取延迟到绘制阶段，适合 tint 颜色频繁变化、希望避免触发重组的场景。
 
-#### 方法
-
-| 方法名      | 返回类型 | 说明                                        |
-| ----------- | -------- | ------------------------------------------- |
-| DefaultTint | Color    | 返回图标的默认着色颜色（Color.Unspecified） |
+| 属性名             | 类型            | 说明                                            | 默认值   | 是否必须 |
+| ------------------ | --------------- | ----------------------------------------------- | -------- | -------- |
+| painter            | Painter         | 要使用的绘制器                                  | -        | 是       |
+| tint               | ColorProducer?  | 提供 tint 颜色的生产器；为 `null` 时不进行着色  | -        | 是       |
+| contentDescription | String?         | 图标的无障碍描述文本                            | -        | 是       |
+| modifier           | Modifier        | 应用于图标的修饰符                              | Modifier | 否       |
 
 ## 进阶用法
 

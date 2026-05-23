@@ -70,14 +70,15 @@ ColorPicker(
 
 ## 单独使用滑块组件
 
-ColorPicker 提供了四种不同的滑块组件，可以单独使用：
+HSV 颜色空间下提供了四种可独立使用的滑块组件。其他颜色空间也有各自的滑块系列，
+参见 [其他颜色空间的滑块](#其他颜色空间的滑块)。
 
-### HueSlider - 色相滑块
+### HsvHueSlider - 色相滑块
 
 ```kotlin
 var hue by remember { mutableStateOf(0f) }
 
-HueSlider(
+HsvHueSlider(
     currentHue = hue,
     onHueChanged = { newHue ->
         hue = newHue * 360f
@@ -85,12 +86,12 @@ HueSlider(
 )
 ```
 
-### SaturationSlider - 饱和度滑块
+### HsvSaturationSlider - 饱和度滑块
 
 ```kotlin
 var saturation by remember { mutableStateOf(0.5f) }
 
-SaturationSlider(
+HsvSaturationSlider(
     currentHue = 180f, // 当前色相
     currentSaturation = saturation,
     onSaturationChanged = { newSaturation ->
@@ -99,12 +100,12 @@ SaturationSlider(
 )
 ```
 
-### ValueSlider - 明度滑块
+### HsvValueSlider - 明度滑块
 
 ```kotlin
 var value by remember { mutableStateOf(0.5f) }
 
-ValueSlider(
+HsvValueSlider(
     currentHue = 180f, // 当前色相
     currentSaturation = 0.5f, // 当前饱和度
     currentValue = value,
@@ -114,12 +115,12 @@ ValueSlider(
 )
 ```
 
-### AlphaSlider - 透明度滑块
+### HsvAlphaSlider - 透明度滑块
 
 ```kotlin
 var alpha by remember { mutableStateOf(1f) }
 
-AlphaSlider(
+HsvAlphaSlider(
     currentHue = 180f, // 当前色相
     currentSaturation = 0.5f, // 当前饱和度
     currentValue = 0.5f, // 当前明度
@@ -129,6 +130,19 @@ AlphaSlider(
     }
 )
 ```
+
+### 其他颜色空间的滑块
+
+除了上述 HSV 系列滑块外，ColorPicker 支持的每个颜色空间都有对应的独立滑块：
+
+| 颜色空间 | 滑块 |
+|---------|------|
+| OkHSV   | `OkHsvHueSlider`、`OkHsvSaturationSlider`、`OkHsvValueSlider`、`OkHsvAlphaSlider` |
+| OkLCH   | `OkLchLightnessSlider`、`OkLchChromaSlider`、`OkLchHueSlider`、`OkLchAlphaSlider` |
+| OkLab   | `OkLabLightnessSlider`、`OkLabAChannelSlider`、`OkLabBChannelSlider`、`OkLabAlphaSlider` |
+
+这些滑块的参数结构与对应的 HSV 滑块一致（当前值 + `on*Changed` 回调，外加可选的
+`hapticEffect`），具体每个滑块的参数请参考源码 KDoc。
 
 ## 进阶用法
 
