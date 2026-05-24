@@ -30,7 +30,15 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 /**
- * A [Icon] component that draws [imageVector] using [tint], with a default value.
+ * A [Icon] component with Miuix style.
+ *
+ * Draws [imageVector] using [tint], with a default value of [LocalContentColor]. If [imageVector]
+ * has no intrinsic size, this component falls back to the recommended default size. Icon is an
+ * opinionated component designed to be used with single-color icons so that they can be tinted
+ * correctly for the component they are placed in. For multicolored icons and icons that should not
+ * be tinted, use [Color.Unspecified] for [tint]. For generic images that should not be tinted, and
+ * do not follow the recommended icon size, use [androidx.compose.foundation.Image] instead. For a
+ * clickable icon, see [IconButton].
  *
  * @param imageVector [ImageVector] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
@@ -57,7 +65,15 @@ fun Icon(
 }
 
 /**
- * A [Icon] component that draws [bitmap] using [tint], with a default value.
+ * A [Icon] component with Miuix style.
+ *
+ * Draws [bitmap] using [tint], with a default value of [LocalContentColor]. If [bitmap] has no
+ * intrinsic size, this component falls back to the recommended default size. Icon is an
+ * opinionated component designed to be used with single-color icons so that they can be tinted
+ * correctly for the component they are placed in. For multicolored icons and icons that should not
+ * be tinted, use [Color.Unspecified] for [tint]. For generic images that should not be tinted, and
+ * do not follow the recommended icon size, use [androidx.compose.foundation.Image] instead. For a
+ * clickable icon, see [IconButton].
  *
  * @param bitmap [ImageBitmap] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
@@ -85,7 +101,15 @@ fun Icon(
 }
 
 /**
- * A [Icon] component that draws [painter] using [tint], with a default value.
+ * A [Icon] component with Miuix style.
+ *
+ * Draws [painter] using [tint], with a default value of [LocalContentColor]. If [painter] has no
+ * intrinsic size, this component falls back to the recommended default size. Icon is an
+ * opinionated component designed to be used with single-color icons so that they can be tinted
+ * correctly for the component they are placed in. For multicolored icons and icons that should not
+ * be tinted, use [Color.Unspecified] for [tint]. For generic images that should not be tinted, and
+ * do not follow the recommended icon size, use [androidx.compose.foundation.Image] instead. For a
+ * clickable icon, see [IconButton].
  *
  * @param painter [Painter] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
@@ -124,7 +148,16 @@ fun Icon(
 }
 
 /**
- * A [Icon] component that draws [painter] using [tint], with a default value.
+ * A [Icon] component with Miuix style.
+ *
+ * Draws [painter] using a [tint] produced by a [ColorProducer]. The producer is read at draw time,
+ * so a tint that changes frequently (animations, scroll-driven values) does not recompose this
+ * Icon. If [painter] has no intrinsic size, this component falls back to the recommended default
+ * size. Icon is an opinionated component designed to be used with single-color icons so that they
+ * can be tinted correctly for the component they are placed in. For multicolored icons and icons
+ * that should not be tinted, pass `null` for [tint]. For generic images that should not be tinted,
+ * and do not follow the recommended icon size, use [androidx.compose.foundation.Image] instead.
+ * For a clickable icon, see [IconButton].
  *
  * @param painter [Painter] to draw inside this icon
  * @param tint tint to be applied to [painter]. If null, then no tint is applied.

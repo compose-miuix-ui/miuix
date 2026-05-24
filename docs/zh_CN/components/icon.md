@@ -4,6 +4,8 @@
 
 `tint` 的默认值是 `LocalContentColor.current`，因此图标会跟随父级组件（如 `Button`、`Surface`）提供的内容颜色。若需要覆盖该颜色，传入显式的 `Color`（例如 `MiuixTheme.colorScheme.onBackground`）；若想保留资源本身的颜色而不做着色，传入 `Color.Unspecified`。
 
+`Icon` 是为**单色图标**设计的组件，会根据所处场景对图标着色。如果要原样渲染多色图片，或图片不应遵循推荐图标尺寸，请使用 `androidx.compose.foundation.Image`。需要点击交互的图标，请使用 `IconButton`。
+
 <div style="position: relative; height: 120px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=icon" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -50,16 +52,16 @@ Icon(
 
 ### 自定义绘制图标（Custom Painter）
 
-```kotlin
-val customPainter = remember { /* 自定义 Painter */ }
+任意 `Painter` 实现都可以使用，最常见的场景是 Compose Resources 的 `painterResource`：
 
+```kotlin
 Icon(
-    painter = customPainter,
+    painter = painterResource(Res.drawable.ic_custom),
     contentDescription = "自定义图标"
 )
 ```
 
-## 组件状态
+## 着色
 
 ### 自定义颜色
 
@@ -167,12 +169,32 @@ Icon(
 
 ### 动态变化图标
 
+需要点击交互时，用 `IconButton` 包裹 `Icon`，以获得 Miuix 风格的触摸反馈：
+
 ```kotlin
 var isSelected by remember { mutableStateOf(false) }
 
+IconButton(onClick = { isSelected = !isSelected }) {
+    Icon(
+        imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+        contentDescription = if (isSelected) "喜欢" else "不喜欢",
+    )
+}
+```
+
+### 高频变化的 tint
+
+当 tint 每帧都在变化（动画、手势驱动、选中态过渡等），使用 `ColorProducer` 重载——回调会在绘制阶段直接读取，`Icon` 自身可以跳过重组：
+
+```kotlin
+var isSelected by remember { mutableStateOf(false) }
+val tint by animateColorAsState(
+    if (isSelected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onBackground,
+)
+
 Icon(
-    imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
-    contentDescription = if (isSelected) "喜欢" else "不喜欢",
-    modifier = Modifier.clickable { isSelected = !isSelected }
+    painter = rememberVectorPainter(MiuixIcons.Favorites),
+    tint = { tint },
+    contentDescription = "Favorites",
 )
 ```

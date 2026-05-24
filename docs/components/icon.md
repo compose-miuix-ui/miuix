@@ -4,6 +4,8 @@
 
 By default, `tint` resolves to `LocalContentColor.current`, so the icon follows the content color provided by parent components such as `Button` or `Surface`. Pass an explicit `Color` (for example `MiuixTheme.colorScheme.onBackground`) when you need to override that, or `Color.Unspecified` to disable tinting and keep the source colors.
 
+`Icon` is an opinionated component designed for **single-color** icons that should be tinted to match their surroundings. If you need to render a multicolored image untouched, or an image that should not follow the recommended icon size, use `androidx.compose.foundation.Image` instead. For a clickable icon, wrap it with `IconButton`.
+
 <div style="position: relative; height: 120px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=icon" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -50,16 +52,16 @@ Icon(
 
 ### Custom Painter
 
-```kotlin
-val customPainter = remember { /* Custom Painter */ }
+Any `Painter` implementation works. The most common case is `painterResource` from Compose Resources:
 
+```kotlin
 Icon(
-    painter = customPainter,
+    painter = painterResource(Res.drawable.ic_custom),
     contentDescription = "Custom Icon"
 )
 ```
 
-## Component States
+## Tinting
 
 ### Custom Color
 
@@ -167,12 +169,32 @@ Icon(
 
 ### Dynamic Icon
 
+Wrap the `Icon` in an `IconButton` to make it clickable while keeping the Miuix touch feedback:
+
 ```kotlin
 var isSelected by remember { mutableStateOf(false) }
 
+IconButton(onClick = { isSelected = !isSelected }) {
+    Icon(
+        imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+        contentDescription = "Favorites",
+    )
+}
+```
+
+### Frequently Changing Tint
+
+For tint colors that change every frame (animations, gesture-driven values, selection transitions), use the `ColorProducer` overload — the producer is read at draw time so the `Icon` itself is not recomposed:
+
+```kotlin
+var isSelected by remember { mutableStateOf(false) }
+val tint by animateColorAsState(
+    if (isSelected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onBackground,
+)
+
 Icon(
-    imageVector = if (isSelected) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+    painter = rememberVectorPainter(MiuixIcons.Favorites),
+    tint = { tint },
     contentDescription = "Favorites",
-    modifier = Modifier.clickable { isSelected = !isSelected }
 )
 ```
