@@ -171,6 +171,31 @@ Text(
 )
 ```
 
+### 高频变化的文本颜色
+
+`Text(String, ...)` 与 `Text(AnnotatedString, ...)` 各自还提供一个以 `ColorProducer` 替换 `Color` 的重载：
+
+```kotlin
+fun Text(text: String, color: ColorProducer, modifier: Modifier = Modifier, ...)
+fun Text(text: AnnotatedString, color: ColorProducer, modifier: Modifier = Modifier, ...)
+```
+
+其余参数均与上方表格一致。回调会在绘制阶段直接读取最新值，因此当文本颜色每帧都在变化（动画、滚动联动、手势驱动等）时，`Text` 自身可以跳过重组：
+
+```kotlin
+val scrollState = rememberScrollState()
+Text(
+    text = "随滚动渐变的文本",
+    color = {
+        lerp(
+            MiuixTheme.colorScheme.onSurface,
+            MiuixTheme.colorScheme.primary,
+            (scrollState.value / 500f).coerceIn(0f, 1f),
+        )
+    },
+)
+```
+
 ### 可点击链接
 
 通过 `AnnotatedString` 和 `LinkAnnotation` 创建可点击链接：
