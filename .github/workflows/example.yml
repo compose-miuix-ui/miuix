@@ -5,8 +5,8 @@ on:
     branches: [main]
     paths-ignore:
       - "README.md"
+      - "CLAUDE.md"
       - "docs/**"
-      - "example/ios/iosApp/Info.plist"
 
 jobs:
   build:
