@@ -96,11 +96,9 @@ TextField(
 | onValueChange         | (String) -> Unit or (TextFieldValue) -> Unit | Callback when text changes          | -                                                | Yes      |
 | modifier              | Modifier                                     | Modifier applied to the input field | Modifier                                         | No       |
 | insideMargin          | DpSize                                       | Internal padding of input field     | TextFieldDefaults.InsideMargin                    | No       |
-| backgroundColor       | Color                                        | Background color                    | MiuixTheme.colorScheme.secondaryContainer        | No       |
+| colors                | TextFieldColors                              | Colors used by the field            | TextFieldDefaults.textFieldColors()              | No       |
 | cornerRadius          | Dp                                           | Corner radius                       | TextFieldDefaults.CornerRadius                    | No       |
 | label                 | String                                       | Label text                          | ""                                               | No       |
-| labelColor            | Color                                        | Label text color                    | MiuixTheme.colorScheme.onSecondaryContainer      | No       |
-| borderColor           | Color                                        | Border color when focused           | MiuixTheme.colorScheme.primary                   | No       |
 | useLabelAsPlaceholder | Boolean                                      | Use label as placeholder            | false                                            | No       |
 | enabled               | Boolean                                      | Whether input field is enabled      | true                                             | No       |
 | readOnly              | Boolean                                      | Whether input field is read-only    | false                                            | No       |
@@ -115,7 +113,7 @@ TextField(
 | visualTransformation  | VisualTransformation                         | Visual transformation               | VisualTransformation.None                        | No       |
 | onTextLayout          | (TextLayoutResult) -> Unit                   | Text layout callback                | {}                                               | No       |
 | interactionSource     | MutableInteractionSource?                    | Interaction source                  | null                                             | No       |
-| cursorBrush           | Brush                                        | Cursor brush                        | SolidColor(MiuixTheme.colorScheme.primary)       | No       |
+| cursorBrush           | Brush                                        | Cursor brush                        | SolidColor(colors.borderColor)                   | No       |
 
 ### TextField (state-based) Properties
 
@@ -124,11 +122,9 @@ TextField(
 | state                 | TextFieldState                                 | State object holding text and selection            | -                                          | Yes      |
 | modifier              | Modifier                                       | Modifier applied to the input field                | Modifier                                   | No       |
 | insideMargin          | DpSize                                         | Internal padding of input field                    | TextFieldDefaults.InsideMargin              | No       |
-| backgroundColor       | Color                                          | Background color                                   | MiuixTheme.colorScheme.secondaryContainer  | No       |
+| colors                | TextFieldColors                                | Colors used by the field                           | TextFieldDefaults.textFieldColors()        | No       |
 | cornerRadius          | Dp                                             | Corner radius                                      | TextFieldDefaults.CornerRadius              | No       |
 | label                 | String                                         | Label text                                         | ""                                         | No       |
-| labelColor            | Color                                          | Label text color                                   | MiuixTheme.colorScheme.onSecondaryContainer | No       |
-| borderColor           | Color                                          | Border color when focused                          | MiuixTheme.colorScheme.primary             | No       |
 | useLabelAsPlaceholder | Boolean                                        | Use label as placeholder                           | false                                      | No       |
 | enabled               | Boolean                                        | Whether input field is enabled                     | true                                       | No       |
 | readOnly              | Boolean                                        | Whether input field is read-only                   | false                                      | No       |
@@ -141,7 +137,7 @@ TextField(
 | trailingIcon          | @Composable (() -> Unit)?                      | Trailing icon                                      | null                                       | No       |
 | onTextLayout          | Density.(getResult: () -> TextLayoutResult?) -> Unit | Text layout callback with density receiver    | null                                       | No       |
 | interactionSource     | MutableInteractionSource?                      | Interaction source                                 | null                                       | No       |
-| cursorBrush           | Brush                                          | Cursor brush                                       | SolidColor(borderColor)                    | No       |
+| cursorBrush           | Brush                                          | Cursor brush                                       | SolidColor(colors.borderColor)             | No       |
 | outputTransformation  | OutputTransformation?                          | Output transformation                              | null                                       | No       |
 | scrollState           | ScrollState                                    | Scroll state                                       | rememberScrollState()                       | No       |
 
@@ -155,6 +151,16 @@ The TextFieldDefaults object provides default values for TextField components.
 | ------------- | ------ | ---------------------------- | ---------------------- |
 | CornerRadius  | Dp     | Corner radius of the field   | 16.dp                  |
 | InsideMargin  | DpSize | Internal padding of the field| DpSize(16.dp, 16.dp)  |
+
+#### `textFieldColors()` factory
+
+Builds a [TextFieldColors] instance. Override any subset; unspecified params fall back to the Miuix theme defaults.
+
+| Parameter        | Type  | Default                                          |
+| ---------------- | ----- | ------------------------------------------------ |
+| backgroundColor  | Color | MiuixTheme.colorScheme.secondaryContainer        |
+| labelColor       | Color | MiuixTheme.colorScheme.onSecondaryContainer      |
+| borderColor      | Color | MiuixTheme.colorScheme.primary                   |
 
 ## Advanced Usage
 
@@ -209,7 +215,7 @@ TextField(
 ```kotlin
 var email by remember { mutableStateOf("") }
 var isError by remember { mutableStateOf(false) }
-var errorColor = Color.Red.copy(0.3f)
+val errorColor = Color.Red.copy(0.3f)
 val emailPattern = remember { Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+") }
 
 Column {
@@ -220,14 +226,16 @@ Column {
             isError = email.isNotEmpty() && !emailPattern.matches(email)
         },
         label = "Email",
-        labelColor = if (isError) errorColor else MiuixTheme.colorScheme.onSecondaryContainer,
+        colors = TextFieldDefaults.textFieldColors(
+            labelColor = if (isError) errorColor else MiuixTheme.colorScheme.onSecondaryContainer,
+        ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
     )
     if (isError) {
         Text(
             text = "Please enter a valid email address",
             color = errorColor,
-                style = MiuixTheme.textStyles.body2,
+            style = MiuixTheme.textStyles.body2,
             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
         )
     }
@@ -244,7 +252,9 @@ TextField(
     onValueChange = { text = it },
     label = "Custom Input Field",
     cornerRadius = 8.dp,
-    backgroundColor = MiuixTheme.colorScheme.primary.copy(alpha = 0.1f),
+    colors = TextFieldDefaults.textFieldColors(
+        backgroundColor = MiuixTheme.colorScheme.primary.copy(alpha = 0.1f),
+    ),
     textStyle = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,

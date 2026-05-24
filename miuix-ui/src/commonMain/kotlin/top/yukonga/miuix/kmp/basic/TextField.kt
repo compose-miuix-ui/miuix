@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -62,11 +63,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param state The [TextFieldState] to be shown in the text field.
  * @param modifier The modifier to be applied to the [TextField].
  * @param insideMargin The margin inside the [TextField].
- * @param backgroundColor The background color of the [TextField].
+ * @param colors The [TextFieldColors] applied to the [TextField]. Use
+ *   [TextFieldDefaults.textFieldColors] to customize.
  * @param cornerRadius The corner radius of the [TextField].
  * @param label The label to be displayed when the [TextField] is empty.
- * @param labelColor The color of the label.
- * @param borderColor The color of the border when the [TextField] is focused.
  * @param useLabelAsPlaceholder Whether to use the label as a placeholder.
  * @param enabled Whether the [TextField] is enabled.
  * @param readOnly Whether the [TextField] is read-only.
@@ -88,11 +88,9 @@ fun TextField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     insideMargin: DpSize = TextFieldDefaults.InsideMargin,
-    backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
     cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
-    labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
-    borderColor: Color = MiuixTheme.colorScheme.primary,
     useLabelAsPlaceholder: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -105,16 +103,13 @@ fun TextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     onTextLayout: (Density.(getResult: () -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(borderColor),
+    cursorBrush: Brush = SolidColor(colors.borderColor),
     outputTransformation: OutputTransformation? = null,
     scrollState: ScrollState = rememberScrollState(),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
-    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState by remember(label, useLabelAsPlaceholder) {
         derivedStateOf {
             when {
@@ -123,29 +118,6 @@ fun TextField(
                 state.text.isNotEmpty() -> LabelAnimState.Floating
                 else -> LabelAnimState.Normal
             }
-        }
-    }
-    val labelAnim = animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> -insideMargin.height / 2
-            LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
-            LabelAnimState.Hidden -> 0.dp
-        },
-    )
-    val labelFontSize by animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
-            else -> TextFieldDefaults.LabelFontSizeNormal
-        },
-    )
-    val hasLeadingIcon = leadingIcon != null
-    val hasTrailingIcon = trailingIcon != null
-    val paddingModifier = remember(hasLeadingIcon, hasTrailingIcon, insideMargin) {
-        when {
-            !hasLeadingIcon && !hasTrailingIcon -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-            !hasLeadingIcon -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-            !hasTrailingIcon -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-            else -> Modifier.padding(vertical = insideMargin.height)
         }
     }
 
@@ -173,20 +145,15 @@ fun TextField(
         outputTransformation = outputTransformation,
         scrollState = scrollState,
         decorator = TextFieldDecorator { innerTextField ->
-            TextFieldDecorationBox(
+            TextFieldChrome(
                 label = label,
-                labelFontSize = labelFontSize,
-                labelColor = labelColor,
                 labelState = labelState,
-                backgroundColor = backgroundColor,
-                borderWidth = { borderWidthState.value },
-                borderColor = { borderColorState.value },
-                borderShape = borderShape,
-                paddingModifier = paddingModifier,
+                colors = colors,
+                cornerRadius = cornerRadius,
+                insideMargin = insideMargin,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
-                labelAnim = { labelAnim.value },
-                insideMargin = insideMargin,
+                isFocused = isFocused,
                 innerTextField = innerTextField,
             )
         },
@@ -201,11 +168,10 @@ fun TextField(
  *   [TextFieldValue]. An updated [TextFieldValue] comes as a parameter of the callback.
  * @param modifier The modifier to be applied to the [TextField].
  * @param insideMargin The margin inside the [TextField].
- * @param backgroundColor The background color of the [TextField].
+ * @param colors The [TextFieldColors] applied to the [TextField]. Use
+ *   [TextFieldDefaults.textFieldColors] to customize.
  * @param cornerRadius The corner radius of the [TextField].
  * @param label The label to be displayed when the [TextField] is empty.
- * @param labelColor The color of the label.
- * @param borderColor The color of the border when the [TextField] is focused.
  * @param useLabelAsPlaceholder Whether to use the label as a placeholder.
  * @param enabled Whether the [TextField] is enabled.
  * @param readOnly Whether the [TextField] is read-only.
@@ -229,11 +195,9 @@ fun TextField(
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     insideMargin: DpSize = TextFieldDefaults.InsideMargin,
-    backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
     cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
-    labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
-    borderColor: Color = MiuixTheme.colorScheme.primary,
     useLabelAsPlaceholder: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -248,43 +212,17 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary),
+    cursorBrush: Brush = SolidColor(colors.borderColor),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
-    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState = remember(value.text, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
             useLabelAsPlaceholder && value.text.isNotEmpty() -> LabelAnimState.Placeholder
             value.text.isNotEmpty() -> LabelAnimState.Floating
             else -> LabelAnimState.Normal
-        }
-    }
-    val labelAnim = animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> -insideMargin.height / 2
-            LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
-            LabelAnimState.Hidden -> 0.dp
-        },
-    )
-    val labelFontSize by animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
-            else -> TextFieldDefaults.LabelFontSizeNormal
-        },
-    )
-    val hasLeadingIcon = leadingIcon != null
-    val hasTrailingIcon = trailingIcon != null
-    val paddingModifier = remember(hasLeadingIcon, hasTrailingIcon, insideMargin) {
-        when {
-            !hasLeadingIcon && !hasTrailingIcon -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-            !hasLeadingIcon -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-            !hasTrailingIcon -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-            else -> Modifier.padding(vertical = insideMargin.height)
         }
     }
 
@@ -314,20 +252,15 @@ fun TextField(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->
-            TextFieldDecorationBox(
+            TextFieldChrome(
                 label = label,
-                labelFontSize = labelFontSize,
-                labelColor = labelColor,
                 labelState = labelState,
-                backgroundColor = backgroundColor,
-                borderWidth = { borderWidthState.value },
-                borderColor = { borderColorState.value },
-                borderShape = borderShape,
-                paddingModifier = paddingModifier,
+                colors = colors,
+                cornerRadius = cornerRadius,
+                insideMargin = insideMargin,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
-                labelAnim = { labelAnim.value },
-                insideMargin = insideMargin,
+                isFocused = isFocused,
                 innerTextField = innerTextField,
             )
         },
@@ -341,11 +274,10 @@ fun TextField(
  * @param onValueChange The callback to be called when the value changes.
  * @param modifier The modifier to be applied to the [TextField].
  * @param insideMargin The margin inside the [TextField].
- * @param backgroundColor The background color of the [TextField].
+ * @param colors The [TextFieldColors] applied to the [TextField]. Use
+ *   [TextFieldDefaults.textFieldColors] to customize.
  * @param cornerRadius The corner radius of the [TextField].
  * @param label The label to be displayed when the [TextField] is empty.
- * @param labelColor The color of the label.
- * @param borderColor The color of the border when the [TextField] is focused.
  * @param useLabelAsPlaceholder Whether to use the label as a placeholder.
  * @param enabled Whether the [TextField] is enabled.
  * @param readOnly Whether the [TextField] is read-only.
@@ -369,11 +301,9 @@ fun TextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     insideMargin: DpSize = TextFieldDefaults.InsideMargin,
-    backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
     cornerRadius: Dp = TextFieldDefaults.CornerRadius,
     label: String = "",
-    labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
-    borderColor: Color = MiuixTheme.colorScheme.primary,
     useLabelAsPlaceholder: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -388,43 +318,17 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(MiuixTheme.colorScheme.primary),
+    cursorBrush: Brush = SolidColor(colors.borderColor),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
-    val borderColorState = animateColorAsState(if (isFocused) borderColor else backgroundColor)
-    val borderShape = RoundedCornerShape(cornerRadius)
     val labelState = remember(value, label, useLabelAsPlaceholder) {
         when {
             label.isEmpty() -> LabelAnimState.Hidden
             useLabelAsPlaceholder && value.isNotEmpty() -> LabelAnimState.Placeholder
             value.isNotEmpty() -> LabelAnimState.Floating
             else -> LabelAnimState.Normal
-        }
-    }
-    val labelAnim = animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> -insideMargin.height / 2
-            LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
-            LabelAnimState.Hidden -> 0.dp
-        },
-    )
-    val labelFontSize by animateDpAsState(
-        when (labelState) {
-            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
-            else -> TextFieldDefaults.LabelFontSizeNormal
-        },
-    )
-    val hasLeadingIcon = leadingIcon != null
-    val hasTrailingIcon = trailingIcon != null
-    val paddingModifier = remember(hasLeadingIcon, hasTrailingIcon, insideMargin) {
-        when {
-            !hasLeadingIcon && !hasTrailingIcon -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
-            !hasLeadingIcon -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
-            !hasTrailingIcon -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
-            else -> Modifier.padding(vertical = insideMargin.height)
         }
     }
 
@@ -454,20 +358,15 @@ fun TextField(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         decorationBox = @Composable { innerTextField ->
-            TextFieldDecorationBox(
+            TextFieldChrome(
                 label = label,
-                labelFontSize = labelFontSize,
-                labelColor = labelColor,
                 labelState = labelState,
-                backgroundColor = backgroundColor,
-                borderWidth = { borderWidthState.value },
-                borderColor = { borderColorState.value },
-                borderShape = borderShape,
-                paddingModifier = paddingModifier,
+                colors = colors,
+                cornerRadius = cornerRadius,
+                insideMargin = insideMargin,
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
-                labelAnim = { labelAnim.value },
-                insideMargin = insideMargin,
+                isFocused = isFocused,
                 innerTextField = innerTextField,
             )
         },
@@ -492,6 +391,102 @@ object TextFieldDefaults {
 
     /** The label font size when the label is in its normal position. */
     internal val LabelFontSizeNormal = 17.dp
+
+    /**
+     * Default colors used by the [TextField].
+     *
+     * @param backgroundColor The background color of the [TextField].
+     * @param labelColor The color of the floating / inline label.
+     * @param borderColor The color of the border when the [TextField] is focused.
+     */
+    @Composable
+    fun textFieldColors(
+        backgroundColor: Color = MiuixTheme.colorScheme.secondaryContainer,
+        labelColor: Color = MiuixTheme.colorScheme.onSecondaryContainer,
+        borderColor: Color = MiuixTheme.colorScheme.primary,
+    ): TextFieldColors = remember(backgroundColor, labelColor, borderColor) {
+        TextFieldColors(
+            backgroundColor = backgroundColor,
+            labelColor = labelColor,
+            borderColor = borderColor,
+        )
+    }
+}
+
+/**
+ * Colors used by a [TextField] in different parts of the component.
+ *
+ * @param backgroundColor The background color of the [TextField].
+ * @param labelColor The color of the floating / inline label.
+ * @param borderColor The color of the border when the [TextField] is focused.
+ */
+@Immutable
+data class TextFieldColors(
+    val backgroundColor: Color,
+    val labelColor: Color,
+    val borderColor: Color,
+)
+
+/**
+ * Builds the shared chrome (background, animated border, floating label, leading/trailing icons,
+ * padding) around the inner text field. Centralizes derived state + animations so the three
+ * [TextField] overloads only differ in the [BasicTextField] call.
+ */
+@Composable
+private fun TextFieldChrome(
+    label: String,
+    labelState: LabelAnimState,
+    colors: TextFieldColors,
+    cornerRadius: Dp,
+    insideMargin: DpSize,
+    leadingIcon: @Composable (() -> Unit)?,
+    trailingIcon: @Composable (() -> Unit)?,
+    isFocused: Boolean,
+    innerTextField: @Composable () -> Unit,
+) {
+    val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
+    val borderColorState = animateColorAsState(if (isFocused) colors.borderColor else colors.backgroundColor)
+    val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    val labelAnim = animateDpAsState(
+        when (labelState) {
+            LabelAnimState.Floating -> -insideMargin.height / 2
+            LabelAnimState.Placeholder, LabelAnimState.Normal -> 0.dp
+            LabelAnimState.Hidden -> 0.dp
+        },
+    )
+    val labelFontSize by animateDpAsState(
+        when (labelState) {
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
+            else -> TextFieldDefaults.LabelFontSizeNormal
+        },
+    )
+    val hasLeadingIcon = leadingIcon != null
+    val hasTrailingIcon = trailingIcon != null
+    val paddingModifier = remember(hasLeadingIcon, hasTrailingIcon, insideMargin) {
+        when {
+            !hasLeadingIcon && !hasTrailingIcon -> Modifier.padding(insideMargin.width, vertical = insideMargin.height)
+            !hasLeadingIcon -> Modifier.padding(start = insideMargin.width).padding(vertical = insideMargin.height)
+            !hasTrailingIcon -> Modifier.padding(end = insideMargin.width).padding(vertical = insideMargin.height)
+            else -> Modifier.padding(vertical = insideMargin.height)
+        }
+    }
+
+    TextFieldDecorationBox(
+        label = label,
+        labelFontSize = labelFontSize,
+        labelColor = colors.labelColor,
+        labelState = labelState,
+        backgroundColor = colors.backgroundColor,
+        borderWidth = { borderWidthState.value },
+        borderColor = { borderColorState.value },
+        borderShape = borderShape,
+        paddingModifier = paddingModifier,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        labelAnim = { labelAnim.value },
+        insideMargin = insideMargin,
+        innerTextField = innerTextField,
+    )
 }
 
 /**

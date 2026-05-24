@@ -96,11 +96,9 @@ TextField(
 | onValueChange         | (String) -> Unit 或 (TextFieldValue) -> Unit | 文本变化时的回调函数   | -                                                    | 是       |
 | modifier              | Modifier                                     | 应用于输入框的修饰符   | Modifier                                             | 否       |
 | insideMargin          | DpSize                                       | 输入框内部边距         | TextFieldDefaults.InsideMargin                        | 否       |
-| backgroundColor       | Color                                        | 输入框背景颜色         | MiuixTheme.colorScheme.secondaryContainer            | 否       |
+| colors                | TextFieldColors                              | 输入框使用的颜色       | TextFieldDefaults.textFieldColors()                  | 否       |
 | cornerRadius          | Dp                                           | 输入框圆角半径         | TextFieldDefaults.CornerRadius                        | 否       |
 | label                 | String                                       | 输入框标签文本         | ""                                                   | 否       |
-| labelColor            | Color                                        | 标签文本颜色           | MiuixTheme.colorScheme.onSecondaryContainer          | 否       |
-| borderColor           | Color                                        | 输入框聚焦时的边框颜色 | MiuixTheme.colorScheme.primary                       | 否       |
 | useLabelAsPlaceholder | Boolean                                      | 是否使用标签作为占位符 | false                                                | 否       |
 | enabled               | Boolean                                      | 输入框是否可用         | true                                                 | 否       |
 | readOnly              | Boolean                                      | 输入框是否只读         | false                                                | 否       |
@@ -115,7 +113,7 @@ TextField(
 | visualTransformation  | VisualTransformation                         | 视觉转换器             | VisualTransformation.None                            | 否       |
 | onTextLayout          | (TextLayoutResult) -> Unit                   | 文本布局变化回调       | {}                                                   | 否       |
 | interactionSource     | MutableInteractionSource?                    | 交互源                 | null                                                 | 否       |
-| cursorBrush           | Brush                                        | 光标画刷               | SolidColor(MiuixTheme.colorScheme.primary)           | 否       |
+| cursorBrush           | Brush                                        | 光标画刷               | SolidColor(colors.borderColor)                       | 否       |
 
 ### TextField（state-based）属性
 
@@ -124,11 +122,9 @@ TextField(
 | state                 | TextFieldState                                      | 保存文本与选择的状态对象       | -                                             | 是       |
 | modifier              | Modifier                                            | 应用于输入框的修饰符           | Modifier                                      | 否       |
 | insideMargin          | DpSize                                              | 输入框内部边距                 | TextFieldDefaults.InsideMargin                | 否       |
-| backgroundColor       | Color                                               | 输入框背景颜色                 | MiuixTheme.colorScheme.secondaryContainer     | 否       |
+| colors                | TextFieldColors                                     | 输入框使用的颜色               | TextFieldDefaults.textFieldColors()           | 否       |
 | cornerRadius          | Dp                                                  | 输入框圆角半径                 | TextFieldDefaults.CornerRadius                | 否       |
 | label                 | String                                              | 输入框标签文本                 | ""                                            | 否       |
-| labelColor            | Color                                               | 标签文本颜色                   | MiuixTheme.colorScheme.onSecondaryContainer   | 否       |
-| borderColor           | Color                                               | 聚焦时的边框颜色               | MiuixTheme.colorScheme.primary                | 否       |
 | useLabelAsPlaceholder | Boolean                                             | 是否使用标签作为占位符         | false                                         | 否       |
 | enabled               | Boolean                                             | 输入框是否可用                 | true                                          | 否       |
 | readOnly              | Boolean                                             | 输入框是否只读                 | false                                         | 否       |
@@ -141,7 +137,7 @@ TextField(
 | trailingIcon          | @Composable (() -> Unit)?                           | 后置图标                       | null                                          | 否       |
 | onTextLayout          | Density.(getResult: () -> TextLayoutResult?) -> Unit | 文本布局回调（带 Density 接收） | null                                          | 否       |
 | interactionSource     | MutableInteractionSource?                           | 交互源                         | null                                          | 否       |
-| cursorBrush           | Brush                                               | 光标画刷                       | SolidColor(borderColor)                       | 否       |
+| cursorBrush           | Brush                                               | 光标画刷                       | SolidColor(colors.borderColor)                | 否       |
 | outputTransformation  | OutputTransformation?                               | 输出变换器                     | null                                          | 否       |
 | scrollState           | ScrollState                                         | 滚动状态                       | rememberScrollState()                         | 否       |
 
@@ -155,6 +151,16 @@ TextFieldDefaults 对象提供了 TextField 组件的默认值。
 | ------------ | ------ | -------------- | --------------------- |
 | CornerRadius | Dp     | 输入框圆角半径 | 16.dp                 |
 | InsideMargin | DpSize | 输入框内部边距 | DpSize(16.dp, 16.dp) |
+
+#### `textFieldColors()` 工厂
+
+构造 [TextFieldColors] 实例。按需覆盖任意子集，未指定的参数回退到 Miuix 主题默认值。
+
+| 参数             | 类型  | 默认值                                            |
+| ---------------- | ----- | ------------------------------------------------- |
+| backgroundColor  | Color | MiuixTheme.colorScheme.secondaryContainer         |
+| labelColor       | Color | MiuixTheme.colorScheme.onSecondaryContainer       |
+| borderColor      | Color | MiuixTheme.colorScheme.primary                    |
 
 ## 进阶用法
 
@@ -209,7 +215,7 @@ TextField(
 ```kotlin
 var email by remember { mutableStateOf("") }
 var isError by remember { mutableStateOf(false) }
-var errorColor = Color.Red.copy(0.3f)
+val errorColor = Color.Red.copy(0.3f)
 val emailPattern = remember { Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+") }
 
 Column {
@@ -220,14 +226,16 @@ Column {
             isError = email.isNotEmpty() && !emailPattern.matches(email)
         },
         label = "电子邮箱",
-        labelColor = if (isError) errorColor else MiuixTheme.colorScheme.onSecondaryContainer,
+        colors = TextFieldDefaults.textFieldColors(
+            labelColor = if (isError) errorColor else MiuixTheme.colorScheme.onSecondaryContainer,
+        ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
     )
     if (isError) {
         Text(
             text = "请输入有效的邮箱地址",
             color = errorColor,
-                style = MiuixTheme.textStyles.body2,
+            style = MiuixTheme.textStyles.body2,
             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
         )
     }
@@ -244,7 +252,9 @@ TextField(
     onValueChange = { text = it },
     label = "自定义输入框",
     cornerRadius = 8.dp,
-    backgroundColor = MiuixTheme.colorScheme.primary.copy(alpha = 0.1f),
+    colors = TextFieldDefaults.textFieldColors(
+        backgroundColor = MiuixTheme.colorScheme.primary.copy(alpha = 0.1f),
+    ),
     textStyle = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
