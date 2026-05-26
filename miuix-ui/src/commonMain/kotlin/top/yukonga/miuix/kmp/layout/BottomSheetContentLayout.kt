@@ -80,6 +80,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.coroutines.cancellation.CancellationException
@@ -572,9 +573,6 @@ private fun BottomSheetColumn(
 ) {
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
-    val topCornerShape = remember(cornerRadius) {
-        RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius)
-    }
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -605,8 +603,13 @@ private fun BottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .clip(topCornerShape)
-                .background(backgroundColor)
+                .squircleSurface(
+                    color = backgroundColor,
+                    topStart = cornerRadius,
+                    topEnd = cornerRadius,
+                    bottomEnd = 0.dp,
+                    bottomStart = 0.dp,
+                )
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
         ) {

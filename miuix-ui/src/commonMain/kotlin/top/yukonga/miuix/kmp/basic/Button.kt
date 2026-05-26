@@ -5,15 +5,17 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +26,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.squircle.squircleSurface
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -55,28 +59,35 @@ fun Button(
     indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val shape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val rowModifier = remember(minWidth, minHeight, insideMargin) {
         Modifier
             .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
             .padding(insideMargin)
     }
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.semantics { role = Role.Button },
-        shape = shape,
-        color = if (enabled) colors.color else colors.disabledColor,
-        contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
-        interactionSource = interactionSource,
-        indication = indication,
-    ) {
-        Row(
-            modifier = rowModifier,
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            content = content,
-        )
+    val containerColor = if (enabled) colors.color else colors.disabledColor
+    val contentColor = if (enabled) colors.contentColor else colors.disabledContentColor
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
+        Box(
+            modifier = modifier
+                .semantics { role = Role.Button }
+                .squircleSurface(color = containerColor, cornerRadius = cornerRadius)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    enabled = enabled,
+                    onClick = onClick,
+                ),
+            propagateMinConstraints = true,
+        ) {
+            Row(
+                modifier = rowModifier,
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                content = content,
+            )
+        }
     }
 }
 

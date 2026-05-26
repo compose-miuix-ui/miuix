@@ -3,24 +3,22 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.interfaces.HoldDownObserver
+import top.yukonga.miuix.kmp.squircle.squircleSurface
 
 /**
  * A [IconButton] component with Miuix style.
@@ -50,7 +48,6 @@ fun IconButton(
     minWidth: Dp = IconButtonDefaults.MinWidth,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
     val interactionSource = remember { MutableInteractionSource() }
 
     HoldDownObserver(holdDownState, interactionSource)
@@ -71,8 +68,7 @@ fun IconButton(
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
-            .clip(shape)
-            .background(backgroundColor)
+            .squircleSurface(color = backgroundColor, cornerRadius = cornerRadius)
             .then(clickableModifier),
         contentAlignment = Alignment.Center,
     ) {

@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -21,13 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.interfaces.HoldDownObserver
+import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -168,8 +166,6 @@ private fun BasicCard(
     cornerRadius: Dp = CardDefaults.CornerRadius,
     content: @Composable () -> Unit,
 ) {
-    val clipShape = RoundedCornerShape(cornerRadius)
-
     CompositionLocalProvider(
         LocalContentColor provides colors.contentColor,
     ) {
@@ -178,8 +174,7 @@ private fun BasicCard(
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 }
-                .clip(clipShape)
-                .background(color = colors.color),
+                .squircleSurface(color = colors.color, cornerRadius = cornerRadius),
             propagateMinConstraints = true,
         ) {
             content()

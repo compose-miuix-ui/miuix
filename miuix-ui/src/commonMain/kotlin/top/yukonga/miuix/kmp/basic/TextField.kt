@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,11 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.inset
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -54,6 +51,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.squircle.addSquircleRect
+import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -446,7 +445,6 @@ private fun TextFieldChrome(
 ) {
     val borderWidthState = animateDpAsState(if (isFocused) TextFieldDefaults.BorderWidth else 0.dp)
     val borderColorState = animateColorAsState(if (isFocused) colors.borderColor else colors.backgroundColor)
-    val borderShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val labelAnim = animateDpAsState(
         when (labelState) {
             LabelAnimState.Floating -> -insideMargin.height / 2
@@ -479,7 +477,7 @@ private fun TextFieldChrome(
         backgroundColor = colors.backgroundColor,
         borderWidth = { borderWidthState.value },
         borderColor = { borderColorState.value },
-        borderShape = borderShape,
+        cornerRadius = cornerRadius,
         paddingModifier = paddingModifier,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
@@ -501,7 +499,7 @@ private fun TextFieldDecorationBox(
     backgroundColor: Color,
     borderWidth: () -> Dp,
     borderColor: () -> Color,
-    borderShape: Shape,
+    cornerRadius: Dp,
     paddingModifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -509,9 +507,10 @@ private fun TextFieldDecorationBox(
     insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     innerTextField: @Composable () -> Unit,
 ) {
+    val borderPath = remember { Path() }
     Box(
         modifier = Modifier
-            .background(backgroundColor, borderShape)
+            .squircleBackground(color = backgroundColor, cornerRadius = cornerRadius)
             .drawWithContent {
                 drawContent()
                 val bw = borderWidth()
@@ -519,10 +518,18 @@ private fun TextFieldDecorationBox(
                     val strokePx = bw.toPx()
                     if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
                     val halfStroke = strokePx / 2f
-                    inset(halfStroke) {
-                        val outline = borderShape.createOutline(size, layoutDirection, Density(density, fontScale))
-                        drawOutline(
-                            outline = outline,
+                    val innerW = size.width - strokePx
+                    val innerH = size.height - strokePx
+                    val innerR = (cornerRadius.toPx() - halfStroke).coerceAtLeast(0f)
+                    borderPath.rewind()
+                    borderPath.addSquircleRect(
+                        width = innerW,
+                        height = innerH,
+                        cornerRadius = innerR,
+                    )
+                    translate(halfStroke, halfStroke) {
+                        drawPath(
+                            path = borderPath,
                             color = borderColor(),
                             style = Stroke(width = strokePx),
                         )

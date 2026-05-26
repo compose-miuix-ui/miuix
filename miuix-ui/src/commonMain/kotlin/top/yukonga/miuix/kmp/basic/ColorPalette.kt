@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -45,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
+import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -115,7 +113,6 @@ fun ColorPalette(
     }
 
     val onColorChangedState = rememberUpdatedState(onColorChanged)
-    val capsuleShape = CircleShape
 
     Column(
         modifier = modifier,
@@ -127,8 +124,10 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .clip(capsuleShape)
-                    .background(lastEmittedColor ?: color),
+                    .squircleBackground(
+                        color = lastEmittedColor ?: color,
+                        cornerRadius = 13.dp,
+                    ),
             )
         }
 
@@ -192,7 +191,6 @@ private fun PaletteCanvas(
 ) {
     val onSelectState = rememberUpdatedState(onSelect)
     val totalColumns = hueColumns + if (includeGrayColumn) 1 else 0
-    val shape = RoundedCornerShape(cornerRadius)
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 
@@ -200,7 +198,7 @@ private fun PaletteCanvas(
 
     Box(
         modifier = Modifier
-            .clip(shape)
+            .squircleClip(cornerRadius)
             .onGloballyPositioned { sizePx = it.size }
             .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {

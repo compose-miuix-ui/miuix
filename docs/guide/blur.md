@@ -54,8 +54,8 @@ On Android they map to `Build.VERSION.SDK_INT` comparisons; on Skiko-based
 targets (Desktop, iOS, macOS, Web) they always return `true`.
 
 ```kotlin
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 
 // True on API 32+ (and all non-Android targets). Useful when you only need
 // the backdrop scaffold (e.g. a chained ColorFilter via `colorFilter(...)`).

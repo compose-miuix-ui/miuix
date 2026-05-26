@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
@@ -85,16 +84,14 @@ internal fun CascadingPrimaryContent(
                 this.transformOrigin = transformOrigin
             }
             .graphicsLayer {
-                // Recedes toward the spawn anchor while a secondary is on screen.
                 val s = primaryScale()
                 scaleX = s
                 scaleY = s
                 this.transformOrigin = transformOrigin
             }
-            .popupClipReveal(enterFraction, popupLayoutPosition, shape)
+            .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius)
             .dropShadow(shape = shape, shadow = CascadeShadow)
-            .clip(shape)
-            .background(surfaceColor),
+            .background(color = surfaceColor),
     ) {
         Box {
             ListPopupColumn {
@@ -228,7 +225,6 @@ internal fun CascadingSecondaryContent(
     surfaceColor: Color,
 ) {
     val cornerPx = with(LocalDensity.current) { CascadingPopupCornerRadius.toPx() }
-    val revealShape = remember { RoundedCornerShape(CascadingPopupCornerRadius) }
     val anchorTopLeft = anchorLocalInUnion.topLeft
     val secondaryTopLeft = secondaryLocalInUnion.topLeft
     val secondaryWidth = secondaryLocalInUnion.width
@@ -242,7 +238,7 @@ internal fun CascadingSecondaryContent(
                 alpha = enterAlpha()
                 this.transformOrigin = transformOrigin
             }
-            .popupClipReveal(enterFraction, popupLayoutPosition, revealShape)
+            .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius)
             .drawWithCache {
                 val innerPath = Path()
                 onDrawWithContent {

@@ -41,6 +41,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
@@ -105,13 +106,19 @@ internal fun CascadingListPopupLayout(
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
+    // Defer enter until both are measured — otherwise transformOrigin and offset jump on frame 1.
+    var primarySize by remember { mutableStateOf(IntSize.Zero) }
+    var hostPositionInWindow by remember { mutableStateOf(IntOffset.Zero) }
+    var hostMeasured by remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
+            snapshotFlow { primarySize to hostMeasured }
+                .first { (size, ready) -> size != IntSize.Zero && ready }
             launch { enterFraction.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
             launch { enterAlpha.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
-            launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
         } else {
             if (!internalVisible.value) return@LaunchedEffect
             expandedItem = null
@@ -178,7 +185,6 @@ internal fun CascadingListPopupLayout(
     )
     if (parentBounds == IntRect.Zero) return
 
-    var primarySize by remember { mutableStateOf(IntSize.Zero) }
     val layoutInfo = rememberListPopupLayoutInfo(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
@@ -187,8 +193,6 @@ internal fun CascadingListPopupLayout(
     )
 
     val anchorBoundsByItem = remember { mutableStateMapOf<DropdownItem, IntRect>() }
-
-    var hostPositionInWindow by remember { mutableStateOf(IntOffset.Zero) }
 
     popupHost(internalVisible.value) {
         val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
@@ -273,6 +277,7 @@ internal fun CascadingListPopupLayout(
                         .onGloballyPositioned { coords ->
                             val pos = coords.positionInWindow()
                             hostPositionInWindow = IntOffset(pos.x.toInt(), pos.y.toInt())
+                            hostMeasured = true
                         }
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = {

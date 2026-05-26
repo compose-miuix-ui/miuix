@@ -34,6 +34,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ListPopupContent
@@ -87,15 +88,21 @@ internal fun ListPopupLayout(
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
     val internalVisible = remember { mutableStateOf(false) }
+    // Defer enter until both are measured — otherwise transformOrigin and offset jump on frame 1.
+    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
+    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
+    var hostMeasured by remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
-            launch { fractionProgress.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
-            launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
             if (enableWindowDim) {
                 launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
             }
+            snapshotFlow { popupContentSize to hostMeasured }
+                .first { (size, ready) -> size != IntSize.Zero && ready }
+            launch { fractionProgress.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
+            launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
         } else {
             if (!internalVisible.value) return@LaunchedEffect
             launch { fractionProgress.animateTo(0f, ListPopupDefaults.FractionAnimationSpec) }
@@ -134,15 +141,12 @@ internal fun ListPopupLayout(
 
     if (parentBounds == IntRect.Zero) return
 
-    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
     val layoutInfo = rememberListPopupLayoutInfo(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = popupContentSize,
     )
-
-    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
 
     val requestDismiss: () -> Unit = remember {
         { currentOnDismiss?.invoke() }
@@ -202,6 +206,7 @@ internal fun ListPopupLayout(
                     .fillMaxSize()
                     .onGloballyPositioned { coordinates ->
                         hostPositionInWindow = coordinates.positionInWindow()
+                        hostMeasured = true
                     }
                     .pointerInput(Unit) {
                         detectTapGestures(

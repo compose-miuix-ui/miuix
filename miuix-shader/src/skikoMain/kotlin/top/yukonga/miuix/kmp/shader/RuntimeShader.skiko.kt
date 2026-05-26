@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package top.yukonga.miuix.kmp.blur
+package top.yukonga.miuix.kmp.shader
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
@@ -9,16 +9,32 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.asComposeShader
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.graphics.skiaShader
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.SynchronizedObject
+import kotlinx.coroutines.internal.synchronized
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
 
-actual fun RuntimeShader(shaderString: String): RuntimeShader = SkikoRuntimeShader(RuntimeShaderBuilder(RuntimeEffect.makeForShader(shaderString)))
+actual fun isRuntimeShaderSupported(): Boolean = true
+
+actual fun RuntimeShader(shaderString: String): RuntimeShader = SkikoRuntimeShader(RuntimeShaderBuilder(obtainRuntimeEffect(shaderString)))
+
+// RuntimeEffect is immutable; cache to avoid recompiling SkSL per brush.
+@OptIn(InternalCoroutinesApi::class)
+private val effectCacheLock = SynchronizedObject()
+private val effectCache = mutableMapOf<String, RuntimeEffect>()
+
+@OptIn(InternalCoroutinesApi::class)
+private fun obtainRuntimeEffect(shaderString: String): RuntimeEffect = synchronized(effectCacheLock) {
+    effectCache.getOrPut(shaderString) { RuntimeEffect.makeForShader(shaderString) }
+}
 
 actual fun RuntimeShader.asComposeShader(): Shader = asSkikoRuntimeShader().makeShader().asComposeShader()
 
-actual fun RuntimeShader.asBrush(): ShaderBrush = ShaderBrush(this.asComposeShader())
+actual fun RuntimeShader.asBrush(): ShaderBrush = ShaderBrush(asComposeShader())
 
-internal fun RuntimeShader.asSkikoRuntimeShader(): RuntimeShaderBuilder = (this as SkikoRuntimeShader).shader
+/** Returns the underlying Skia [RuntimeShaderBuilder] for interop with native shader APIs. */
+fun RuntimeShader.asSkikoRuntimeShader(): RuntimeShaderBuilder = (this as SkikoRuntimeShader).shader
 
 private class SkikoRuntimeShader(val shader: RuntimeShaderBuilder) : RuntimeShader {
 

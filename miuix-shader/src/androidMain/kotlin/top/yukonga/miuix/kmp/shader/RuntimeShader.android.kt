@@ -1,22 +1,34 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package top.yukonga.miuix.kmp.blur
+package top.yukonga.miuix.kmp.shader
 
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
 import org.intellij.lang.annotations.Language
 
+@SuppressLint("ObsoleteSdkInt")
+@ChecksSdkIntAtLeast(Build.VERSION_CODES.TIRAMISU)
+actual fun isRuntimeShaderSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader = AndroidRuntimeShader(android.graphics.RuntimeShader(shaderString))
 
 actual fun RuntimeShader.asComposeShader(): Shader = asAndroidRuntimeShader()
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun RuntimeShader.asBrush(): ShaderBrush = (this as AndroidRuntimeShader).brush
 
-internal fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader = (this as AndroidRuntimeShader).shader
+/** Returns the underlying [android.graphics.RuntimeShader] for interop with native render-effect APIs. */
+fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader = (this as AndroidRuntimeShader).shader
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private class AndroidRuntimeShader(val shader: android.graphics.RuntimeShader) : RuntimeShader {
 
     val brush: ShaderBrush = ShaderBrush(shader)

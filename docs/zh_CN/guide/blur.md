@@ -50,8 +50,8 @@ dependencies {
 Skiko 系（Desktop / iOS / macOS / Web）始终返回 `true`。
 
 ```kotlin
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 
 // API 32+（以及所有非 Android 目标）为 true。仅需要背景记录支架时（例如
 // 通过 `colorFilter(...)` 链一个 ColorFilter）适用。

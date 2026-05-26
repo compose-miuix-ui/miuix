@@ -55,6 +55,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.miuixShader)
             implementation(libs.jetbrains.compose.foundation)
         }
     }

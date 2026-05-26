@@ -7,8 +7,8 @@ import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.skiaImageFilter
 import org.jetbrains.skia.ImageFilter
-import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asSkikoRuntimeShader
+import top.yukonga.miuix.kmp.shader.RuntimeShader
+import top.yukonga.miuix.kmp.shader.asSkikoRuntimeShader
 
 internal actual fun RenderEffect?.chain(other: RenderEffect): RenderEffect = if (this != null) {
     ImageFilter.makeCompose(
