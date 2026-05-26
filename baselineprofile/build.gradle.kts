@@ -6,6 +6,7 @@ import com.android.build.api.dsl.ManagedVirtualDevice
 plugins {
     alias(libs.plugins.androidTest)
     alias(libs.plugins.baselineprofile)
+    id("module.spotless")
 }
 
 android {

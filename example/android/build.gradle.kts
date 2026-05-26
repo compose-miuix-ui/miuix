@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.composeCompiler)
+    id("module.kotlin-jvm-toolchain")
+    id("module.spotless")
 }
 
 dependencies {

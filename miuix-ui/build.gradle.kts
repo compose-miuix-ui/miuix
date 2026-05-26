@@ -10,7 +10,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
+    id("module.kotlin-jvm-toolchain")
     id("module.publication")
+    id("module.spotless")
+}
+
+miuixPublication {
+    description.set("A UI library for Compose Multiplatform")
 }
 
 kotlin {
@@ -43,6 +49,8 @@ kotlin {
         browser()
     }
 
+    applyMiuixSourceSetHierarchy()
+
     sourceSets {
         commonMain.dependencies {
             api(projects.miuixCore)
@@ -52,50 +60,6 @@ kotlin {
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
-        }
-
-        val skikoMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val darwinMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        val iosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        iosArm64Main {
-            dependsOn(iosMain)
-        }
-
-        iosSimulatorArm64Main {
-            dependsOn(iosMain)
-        }
-
-        val macosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        macosArm64Main {
-            dependsOn(macosMain)
-        }
-
-        named("desktopMain") {
-            dependsOn(skikoMain)
-        }
-
-        val webMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
-            dependsOn(webMain)
         }
     }
 }

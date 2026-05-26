@@ -10,9 +10,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
+    id("module.kotlin-jvm-toolchain")
+    id("module.spotless")
 }
 
 val generatedSrcDir: Provider<Directory> = layout.buildDirectory.dir("generated/miuix-example")
+
+group = BuildConfig.LIBRARY_ID
 
 kotlin {
     android {
@@ -53,6 +57,8 @@ kotlin {
         browser()
     }
 
+    applyMiuixSourceSetHierarchy()
+
     sourceSets {
         commonMain {
             kotlin.srcDir(generatedSrcDir.map { it.dir("kotlin") })
@@ -68,50 +74,6 @@ kotlin {
                 implementation(libs.jetbrains.androidx.navigationevent)
                 implementation(libs.kotlinx.serialization.core)
             }
-        }
-
-        val skikoMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val darwinMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        val iosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        iosArm64Main {
-            dependsOn(iosMain)
-        }
-
-        iosSimulatorArm64Main {
-            dependsOn(iosMain)
-        }
-
-        val macosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        macosArm64Main {
-            dependsOn(macosMain)
-        }
-
-        named("desktopMain") {
-            dependsOn(skikoMain)
-        }
-
-        val webMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
-            dependsOn(webMain)
         }
     }
 }

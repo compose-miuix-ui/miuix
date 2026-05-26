@@ -292,7 +292,7 @@ private class DrawBackdropNode(
                     fullHeight,
                 )
             } else {
-                // Multi-step cascade, single-pass wider filter when possible:
+                // Multistep cascade, single-pass wider filter when possible:
                 //   sf =  4: backdrop ½ → 2x box → ¼                     (1 cascade layer)
                 //   sf =  8: backdrop ½ → 4x box → ⅛                     (1 cascade layer)
                 //   sf = 16: backdrop ½ → 4x box → ⅛ → 2x box → 1/16     (2 cascade layers)

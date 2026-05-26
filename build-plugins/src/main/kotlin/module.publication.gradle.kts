@@ -2,39 +2,47 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import java.io.FileInputStream
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URI
-import java.nio.file.Files
-import java.util.Base64
 import java.util.Properties
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 plugins {
     `maven-publish`
     signing
 }
 
+val versionSuffix = when {
+    project.hasProperty("release") -> ""
+    project.hasProperty("alpha") -> {
+        val v = project.property("alpha")?.toString()
+        if (v.isNullOrBlank()) "-alpha" else "-alpha$v"
+    }
+
+    project.hasProperty("beta") -> {
+        val v = project.property("beta")?.toString()
+        if (v.isNullOrBlank()) "-beta" else "-beta$v"
+    }
+
+    project.hasProperty("rc") -> {
+        val v = project.property("rc")?.toString()
+        if (v.isNullOrBlank()) "-rc" else "-rc$v"
+    }
+
+    else -> "-${getGitHashShort()}-SNAPSHOT"
+}
+
+group = BuildConfig.LIBRARY_ID
+version = "${BuildConfig.LIBRARY_VERSION}$versionSuffix"
+
+val publicationExt = extensions.create<MiuixPublicationExtension>("miuixPublication")
+
 val javadocJar by tasks.registering(Jar::class) {
+    description = "javadocJar"
     archiveClassifier.set("javadoc")
 }
 
-val githubUrl = "https://github.com"
-val githubPkgUrl = "https://maven.pkg.github.com"
-val owner = "compose-miuix-ui"
-val repository = "miuix"
-val projectUrl = "$githubUrl/$owner/$repository"
-val githubPackagesUrl = "$githubPkgUrl/$owner/$repository"
+val projectUrl = "https://github.com/compose-miuix-ui/miuix"
+val githubPackagesUrl = "https://maven.pkg.github.com/compose-miuix-ui/miuix"
 val sonatypePackageUrl = layout.buildDirectory.dir("publishing/mavenCentral")
 val localPackageUrl = layout.buildDirectory.dir("repository/local")
-
-val miuixUiDescription = "A UI library for Compose Multiplatform"
-val miuixBlurDescription = "Blur effect library for Miuix"
-val miuixCoreDescription = "Core utilities for Miuix"
-val miuixIconsDescription = "Extended icon library for Miuix"
-val miuixNavigation3UiDescription = "Navigation3 UI library for Miuix"
-val miuixPreferenceDescription = "Preference components for Miuix"
 
 val localPropertiesFile: File = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -43,7 +51,6 @@ if (localPropertiesFile.exists()) {
 }
 
 publishing {
-    // Configure the publication repository
     repositories {
         maven {
             name = "local"
@@ -62,23 +69,11 @@ publishing {
             }
         }
     }
-    // Configure all publications
     publications.withType<MavenPublication> {
-        // Stub javadoc.jar artifact
         artifact(javadocJar.get())
-        // Provide artifacts information required
         pom {
             name.set(project.name)
-            description.set(
-                when (project.name) {
-                    "miuix-blur" -> miuixBlurDescription
-                    "miuix-core" -> miuixCoreDescription
-                    "miuix-icons" -> miuixIconsDescription
-                    "miuix-navigation3-ui" -> miuixNavigation3UiDescription
-                    "miuix-preference" -> miuixPreferenceDescription
-                    else -> miuixUiDescription
-                }
-            )
+            description.set(publicationExt.description)
             url.set(projectUrl)
             licenses {
                 license {
@@ -98,95 +93,43 @@ publishing {
                 developer {
                     id.set("compose-miuix-ui")
                     name.set("compose-miuix-ui")
-                    url.set("$githubUrl/compose-miuix-ui")
+                    url.set("https://github.com/compose-miuix-ui")
                 }
             }
         }
     }
 }
 
-// Task to publish to Maven Central using Central Publisher API
-tasks.register("publishToMavenCentralUsingCentralApi") {
+tasks.register<CentralPublisherUploadTask>("publishToMavenCentralUsingCentralApi") {
+    description = "Upload the staged Maven Central bundle via the Central Publisher API"
     dependsOn("publishAllPublicationsToSonatypeRepository")
-    doLast {
-        val sourceDir = sonatypePackageUrl.get().asFile.toPath()
-        if (!Files.exists(sourceDir)) {
-            throw GradleException("Maven Central repository directory does not exist: $sourceDir")
-        }
-        val zipFileName = "${project.name}-${project.version}.zip"
-        val zipFile = layout.buildDirectory.file("publishing/$zipFileName").get().asFile.toPath()
-        Files.createDirectories(zipFile.parent)
-        ZipOutputStream(Files.newOutputStream(zipFile)).use { zos ->
-            Files.walk(sourceDir).use { paths ->
-                paths.filter { Files.isRegularFile(it) }.forEach { path ->
-                    val entryName = sourceDir.relativize(path).toString().replace('\\', '/')
-                    zos.putNextEntry(ZipEntry(entryName))
-                    Files.newInputStream(path).use { input ->
-                        input.copyTo(zos)
-                    }
-                    zos.closeEntry()
-                }
-            }
-        }
-        val zipSize = Files.size(zipFile)
-        println("Uploading archive to Maven Central: $zipFile (size=${zipSize} bytes)")
-        val centralTokenId = System.getenv("CENTRAL_TOKEN_ID") ?: localProperties.getProperty("CENTRAL_TOKEN_ID")
-        val centralTokenSecret = System.getenv("CENTRAL_TOKEN_SECRET") ?: localProperties.getProperty("CENTRAL_TOKEN_SECRET")
-        if (centralTokenId.isNullOrBlank() || centralTokenSecret.isNullOrBlank()) {
-            throw GradleException("Central publisher token is not configured")
-        }
-        val auth = Base64.getEncoder().encodeToString("$centralTokenId:$centralTokenSecret".toByteArray(Charsets.UTF_8))
-        val url = URI("https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC").toURL()
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.doOutput = true
-        val boundary = "------------------------" + System.currentTimeMillis().toString(16)
-        connection.setRequestProperty("Authorization", "Bearer $auth")
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
-        connection.setRequestProperty("Accept", "text/plain")
-        try {
-            zipFile.toFile().inputStream().use { input ->
-                connection.outputStream.use { output ->
-                    output.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
-                    output.write("Content-Disposition: form-data; name=\"bundle\"; filename=\"$zipFileName\"\r\n".toByteArray(Charsets.UTF_8))
-                    output.write("Content-Type: application/zip\r\n\r\n".toByteArray(Charsets.UTF_8))
-                    input.copyTo(output)
-                    output.write("\r\n--$boundary--\r\n".toByteArray(Charsets.UTF_8))
-                    output.flush()
-                }
-            }
-        } catch (e: IOException) {
-            val responseCodeDuringError = runCatching { connection.responseCode }.getOrElse { -1 }
-            val errorBody = runCatching {
-                (connection.errorStream ?: connection.inputStream)?.bufferedReader()?.use { it.readText() }
-            }.getOrNull()
-            val message = buildString {
-                append("Central publisher API upload failed during streaming: ").append(e.message)
-                append(" (HTTP ").append(responseCodeDuringError).append(")")
-                if (!errorBody.isNullOrBlank()) {
-                    append(": ").append(errorBody)
-                }
-            }
-            throw GradleException(message, e)
-        }
-        val responseCode = connection.responseCode
-        if (responseCode !in 200..299) {
-            val errorStream = connection.errorStream ?: connection.inputStream
-            val message = errorStream.bufferedReader().use { it.readText() }
-            throw GradleException("Central publisher API request failed: $responseCode $message")
-        }
+    sonatypeRepoDir.set(sonatypePackageUrl)
+    bundleFileName.set(provider { "${project.name}-${project.version}.zip" })
+    bundleFile.set(
+        layout.buildDirectory.file(
+            provider { "publishing/${project.name}-${project.version}.zip" },
+        ),
+    )
+    centralTokenId.set(
+        provider {
+            System.getenv("CENTRAL_TOKEN_ID") ?: localProperties.getProperty("CENTRAL_TOKEN_ID")
+        },
+    )
+    centralTokenSecret.set(
+        provider {
+            System.getenv("CENTRAL_TOKEN_SECRET") ?: localProperties.getProperty("CENTRAL_TOKEN_SECRET")
+        },
+    )
+}
+
+val signingKey = System.getenv("GPG_SIGNING_KEY") ?: localProperties.getProperty("GPG_SIGNING_KEY")
+val signingPassword = System.getenv("GPG_PASSPHRASE") ?: localProperties.getProperty("GPG_PASSPHRASE")
+if (!signingKey.isNullOrBlank()) {
+    signing {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications)
     }
-}
-
-// Signing artifacts. Signing.* extra properties values will be used
-signing {
-    val signingKey = System.getenv("GPG_SIGNING_KEY") ?: localProperties.getProperty("GPG_SIGNING_KEY")
-    val signingPassword = System.getenv("GPG_PASSPHRASE") ?: localProperties.getProperty("GPG_PASSPHRASE")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications)
-}
-
-// Ensure all publish tasks depend on corresponding sign tasks
-tasks.withType<PublishToMavenRepository>().configureEach {
-    dependsOn(tasks.withType<Sign>())
+    tasks.withType<PublishToMavenRepository>().configureEach {
+        dependsOn(tasks.withType<Sign>())
+    }
 }

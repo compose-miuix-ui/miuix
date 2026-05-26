@@ -3,6 +3,8 @@
 
 plugins {
     kotlin("jvm")
+    id("module.kotlin-jvm-toolchain")
+    id("module.spotless")
 }
 
 dependencies {

@@ -110,7 +110,7 @@ abstract class ConvertBaselineProfileTask : DefaultTask() {
             val hasMethodFlags = 'H' in flags || 'S' in flags || 'P' in flags
 
             if (!hasMethodFlags) {
-                // Bare class reference: only pre-load class, don't pre-compile methods
+                // Bare class reference: only preload class, don't pre-compile methods
                 "L${className};"
             } else {
                 // Build aggregated flag string in HSPL order
