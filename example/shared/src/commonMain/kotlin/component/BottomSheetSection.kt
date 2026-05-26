@@ -26,7 +26,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -35,6 +34,7 @@ import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
@@ -176,7 +176,8 @@ private fun SuperBottomSheetDemo(
             }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }
-                Slider(
+                SliderPreference(
+                    title = "Slider",
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
                     modifier = Modifier.padding(bottom = 12.dp),
@@ -294,7 +295,8 @@ private fun WindowBottomSheetDemo(
             }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }
-                Slider(
+                SliderPreference(
+                    title = "Slider",
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
                     modifier = Modifier.padding(bottom = 12.dp),
