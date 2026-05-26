@@ -33,6 +33,7 @@ internal const val MAX_BLEND_LAYERS = 8
  * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX] for isotropic blur.
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
+    if (!isRuntimeShaderSupported()) return
     val sigmaMax = maxOf(radiusX, radiusY) * BLUR_RADIUS_TO_SIGMA
     val sf = computeDownScaleParams(sigmaMax).downScale
 

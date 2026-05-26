@@ -98,6 +98,7 @@ fun BackdropEffectScope.runtimeShaderEffect(
     uniformShaderName: String,
     block: RuntimeShader.() -> Unit,
 ) {
+    if (!isRuntimeShaderSupported()) return
     val effect = createRuntimeShaderEffect(
         runtimeShader = obtainRuntimeShader(key, shaderString).apply(block),
         uniformShaderName = uniformShaderName,

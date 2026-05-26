@@ -21,6 +21,7 @@ import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
 import top.yukonga.miuix.kmp.blur.asComposeShader
 import top.yukonga.miuix.kmp.blur.internal.BLOOM_STROKE_SHADER_DUAL
 import top.yukonga.miuix.kmp.blur.internal.BLOOM_STROKE_SHADER_SINGLE
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import kotlin.math.floor
 import kotlin.math.sqrt
 
@@ -118,6 +119,7 @@ data class BloomStroke(
         highlightAlpha: Float,
         runtimeShaderCache: RuntimeShaderCache,
     ): Shader? {
+        if (!isRuntimeShaderSupported()) return null
         val sizePx = size
         val shaderKey = if (dualPeak) "BloomStrokeDual" else "BloomStrokeSingle"
         val shaderSource = if (dualPeak) BLOOM_STROKE_SHADER_DUAL else BLOOM_STROKE_SHADER_SINGLE
