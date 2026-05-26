@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -265,14 +264,14 @@ fun AppContent(
 
     AnimatedVisibility(
         visible = appState.showFPSMonitor,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn(),
+        exit = fadeOut(),
     ) {
         FPSMonitor(
             modifier = Modifier
+                .fillMaxSize()
                 .statusBarsPadding()
-                .captionBarPadding()
-                .fillMaxWidth(),
+                .captionBarPadding(),
         )
     }
 }

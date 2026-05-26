@@ -7,7 +7,6 @@ plugins {
     id("com.diffplug.spotless")
 }
 
-val ktlintVersion = "1.8.0"
 val composeKtlintRules = "io.nlopez.compose.rules:ktlint:0.5.9"
 val copyrightFile = rootProject.file("spotless/copyright.txt")
 val copyrightDelimiter = "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$"
@@ -18,7 +17,7 @@ spotless {
     kotlin {
         target("src/**/*.kt")
         targetExclude("**/build/**/*.kt", "**/icon/**/*.kt", "**/navigation3/ListUtils.kt", "**/navigation3/scene/*.kt", "**/navigation3/ui/*.kt")
-        ktlint(ktlintVersion)
+        ktlint()
             .customRuleSets(listOf(composeKtlintRules))
             .editorConfigOverride(
                 mapOf(
@@ -36,7 +35,7 @@ spotless {
     kotlinGradle {
         target("*.kts")
         targetExclude("**/build/**/*.kts")
-        ktlint(ktlintVersion)
+        ktlint()
         licenseHeaderFile(copyrightFile, copyrightDelimiter)
     }
 }
