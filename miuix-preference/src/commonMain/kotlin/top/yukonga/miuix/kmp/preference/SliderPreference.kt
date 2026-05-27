@@ -132,7 +132,7 @@ fun SliderPreference(
                         Text(
                             text = valueText,
                             fontSize = MiuixTheme.textStyles.body2.fontSize,
-                            color = if (enabled) summaryColor.color else summaryColor.disabledColor,
+                            color = if (enabled) MiuixTheme.colorScheme.onSurfaceVariantActions else MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                         )
                     }
                     endActions?.invoke(this)
@@ -260,7 +260,7 @@ fun RangeSliderPreference(
                         Text(
                             text = valueText,
                             fontSize = MiuixTheme.textStyles.body2.fontSize,
-                            color = if (enabled) summaryColor.color else summaryColor.disabledColor,
+                            color = if (enabled) MiuixTheme.colorScheme.onSurfaceVariantActions else MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                         )
                     }
                     endActions?.invoke(this)
