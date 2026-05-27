@@ -108,9 +108,10 @@ fun NavTestPage(
         val contentPadding = pageContentPadding(
             innerPadding,
             padding,
-            isWideScreen,
+            true,
             extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+            extraBottom = 12.dp,
         )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
@@ -137,8 +138,7 @@ fun NavTestPage(
                 item(key = "nav_layout") {
                     Card(
                         modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp),
+                            .padding(horizontal = 12.dp),
                     ) {
                         ArrowPreference(
                             title = "Long Long Long Long Long Title",

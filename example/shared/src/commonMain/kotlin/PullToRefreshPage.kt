@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.coroutines.delay
@@ -98,23 +99,24 @@ fun PullToRefreshPage(
             }
         },
     ) { innerPadding ->
+        val contentPadding = pageContentPadding(
+            innerPadding,
+            padding,
+            true,
+            extraTop = 12.dp,
+            extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+            extraBottom = 12.dp,
+        )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             PullToRefresh(
                 isRefreshing = isRefreshing,
                 onRefresh = { isRefreshing = true },
                 pullToRefreshState = pullToRefreshState,
                 topAppBarScrollBehavior = if (appState.showTopAppBar) topAppBarScrollBehavior else null,
-                contentPadding = PaddingValues(
-                    top = innerPadding.calculateTopPadding() + 12.dp,
-                    bottom = if (isWideScreen) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                    } else {
-                        0.dp
-                    },
-                ),
+                contentPadding = contentPadding,
             ) {
                 val lazyListState = rememberLazyListState()
-                val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen, extraTop = 12.dp)
                 Box {
                     LazyColumn(
                         state = lazyListState,
@@ -164,7 +166,6 @@ fun PullToRefreshPage(
                                 }
                             }
                         }
-                        item { Spacer(modifier = Modifier.height(12.dp)) }
                     }
                     VerticalScrollBar(
                         adapter = rememberScrollBarAdapter(lazyListState),

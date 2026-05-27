@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
@@ -50,14 +51,17 @@ fun pageContentPadding(
     extraTop: Dp = 0.dp,
     extraStart: Dp = 0.dp,
     extraEnd: Dp = 0.dp,
+    extraBottom: Dp = 0.dp,
 ): PaddingValues {
     val topPadding = innerPadding.calculateTopPadding() + extraTop
-    val bottomPadding = if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + outerPadding.calculateBottomPadding()
+    val bottomPadding = outerPadding.calculateBottomPadding() + extraBottom + if (isWideScreen) {
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues()
+            .calculateBottomPadding()
     } else {
-        outerPadding.calculateBottomPadding()
+        0.dp
     }
-    return remember(topPadding, bottomPadding, extraStart, extraEnd) {
+
+    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom) {
         PaddingValues(
             top = topPadding,
             start = extraStart,
