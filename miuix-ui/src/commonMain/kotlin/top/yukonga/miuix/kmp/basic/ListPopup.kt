@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -49,7 +50,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.squircle.addSquircleRect
-import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.min
@@ -459,7 +459,7 @@ fun rememberListPopupLayoutInfo(
 
                 else -> false
             }
-            PopupLayoutPosition(showBelow = false, showAbove = false, isRightAligned = isRightAligned)
+            PopupLayoutPosition(showBelow = true, showAbove = false, isRightAligned = isRightAligned)
         } else {
             val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
             val anchorCenterY = parentBounds.top + parentBounds.height / 2
@@ -558,15 +558,11 @@ fun ListPopupContent(
                 scaleY = scale
                 alpha = alphaProgress()
                 transformOrigin = localTransformOrigin
-            },
+            }
+            .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius)
+            .background(color = backgroundColor),
     ) {
-        Box(
-            modifier = Modifier
-                .squircleSurface(color = backgroundColor, cornerRadius = cornerRadius)
-                .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius),
-        ) {
-            content()
-        }
+        content()
     }
 }
 
