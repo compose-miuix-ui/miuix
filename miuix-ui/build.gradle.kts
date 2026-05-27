@@ -72,6 +72,7 @@ baselineProfile {
 }
 
 val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::class) {
+    description = "convertBaselineProfile"
     inputFile.set(
         layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt"),
     )

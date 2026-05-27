@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.squircle
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,14 +23,11 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.SynchronizedObject
-import kotlinx.coroutines.internal.synchronized
 import top.yukonga.miuix.kmp.shader.RuntimeShader
 import top.yukonga.miuix.kmp.shader.asComposeShader
 import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
-import kotlin.math.sqrt
 
 /**
  * Squircle solid background — fill-only, descendants are NOT clipped.
@@ -40,16 +38,13 @@ import kotlin.math.sqrt
  * @param extension corner-tile size as a multiple of [cornerRadius]; 1.0
  *   matches a circular arc, 1.1 is the default continuous-corner look.
  *   Clamped to [1.0, 2.0].
- * @param control cubic Bézier handle ratio; 0.55228 reproduces a quarter
- *   circle, 0.63 is the default. Clamped to [0.3, 0.9].
  */
 @Composable
 fun Modifier.squircleBackground(
     color: Color,
     cornerRadius: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
-): Modifier = squircleBackground(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension, control)
+): Modifier = squircleBackground(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
 /** Per-corner variant of [squircleBackground]. Ordering matches [RoundedCornerShape]. */
 @Composable
@@ -60,9 +55,8 @@ fun Modifier.squircleBackground(
     bottomEnd: Dp,
     bottomStart: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
 ): Modifier {
-    val brush = rememberSquircleBrush(color, topStart, topEnd, bottomEnd, bottomStart, extension, control)
+    val brush = rememberSquircleBrush(color, topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this.background(
             color = color,
             shape = RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart),
@@ -81,8 +75,7 @@ fun Modifier.squircleBackground(
 fun Modifier.squircleClip(
     cornerRadius: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
-): Modifier = squircleClip(cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension, control)
+): Modifier = squircleClip(cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
 /** Per-corner variant of [squircleClip]. */
 @Composable
@@ -92,9 +85,8 @@ fun Modifier.squircleClip(
     bottomEnd: Dp,
     bottomStart: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
 ): Modifier {
-    val brush = rememberSquircleBrush(Color.White, topStart, topEnd, bottomEnd, bottomStart, extension, control)
+    val brush = rememberSquircleBrush(Color.White, topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this.clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
     return this
         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -113,8 +105,7 @@ fun Modifier.squircleSurface(
     color: Color,
     cornerRadius: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
-): Modifier = squircleSurface(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension, control)
+): Modifier = squircleSurface(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
 /** Per-corner variant of [squircleSurface]. */
 @Composable
@@ -125,11 +116,75 @@ fun Modifier.squircleSurface(
     bottomEnd: Dp,
     bottomStart: Dp,
     extension: Float = SquircleDefaults.Extension,
-    control: Float = SquircleDefaults.Control,
 ): Modifier {
-    val brush = rememberSquircleBrush(Color.White, topStart, topEnd, bottomEnd, bottomStart, extension, control)
+    val brush = rememberSquircleBrush(Color.White, topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this
             .clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
+            .background(color)
+    return this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawRect(color)
+            drawContent()
+            drawRect(brush = brush, blendMode = BlendMode.DstIn)
+        }
+}
+
+/**
+ * Absolute-positioning variant of [squircleBackground]. Corner parameters are physical
+ * (clockwise from top-left) and are NOT flipped by `LocalLayoutDirection` — mirrors
+ * `AbsoluteRoundedCornerShape`. Reach for this when corners are anchored to physical sides
+ * regardless of layout direction (e.g. transition reveals tied to a swipe edge).
+ */
+@Composable
+fun Modifier.absoluteSquircleBackground(
+    color: Color,
+    topLeft: Dp,
+    topRight: Dp,
+    bottomRight: Dp,
+    bottomLeft: Dp,
+    extension: Float = SquircleDefaults.Extension,
+): Modifier {
+    val brush = rememberSquircleBrush(color, topLeft, topRight, bottomRight, bottomLeft, extension)
+        ?: return this.background(
+            color = color,
+            shape = AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft),
+        )
+    return this.background(brush = brush, shape = RectangleShape)
+}
+
+/** Absolute-positioning variant of [squircleClip]. See [absoluteSquircleBackground] for semantics. */
+@Composable
+fun Modifier.absoluteSquircleClip(
+    topLeft: Dp,
+    topRight: Dp,
+    bottomRight: Dp,
+    bottomLeft: Dp,
+    extension: Float = SquircleDefaults.Extension,
+): Modifier {
+    val brush = rememberSquircleBrush(Color.White, topLeft, topRight, bottomRight, bottomLeft, extension)
+        ?: return this.clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))
+    return this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            drawRect(brush = brush, blendMode = BlendMode.DstIn)
+        }
+}
+
+/** Absolute-positioning variant of [squircleSurface]. See [absoluteSquircleBackground] for semantics. */
+@Composable
+fun Modifier.absoluteSquircleSurface(
+    color: Color,
+    topLeft: Dp,
+    topRight: Dp,
+    bottomRight: Dp,
+    bottomLeft: Dp,
+    extension: Float = SquircleDefaults.Extension,
+): Modifier {
+    val brush = rememberSquircleBrush(Color.White, topLeft, topRight, bottomRight, bottomLeft, extension)
+        ?: return this
+            .clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))
             .background(color)
     return this
         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -148,12 +203,10 @@ private fun rememberSquircleBrush(
     bottomEnd: Dp,
     bottomStart: Dp,
     extension: Float,
-    control: Float,
 ): SquircleShaderBrush? {
-    if (!isRuntimeShaderSupported()) return null
+    if (!LocalSquircleEnabled.current || !isRuntimeShaderSupported()) return null
     val density = LocalDensity.current
     val extClamped = extension.coerceIn(SquircleDefaults.ExtensionMin, SquircleDefaults.ExtensionMax)
-    val ctrlClamped = control.coerceIn(SquircleDefaults.ControlMin, SquircleDefaults.ControlMax)
     val tiles = remember(topStart, topEnd, bottomEnd, bottomStart, extClamped, density) {
         with(density) {
             floatArrayOf(
@@ -164,17 +217,14 @@ private fun rememberSquircleBrush(
             )
         }
     }
-    val ctrlKey = (ctrlClamped * CONTROL_KEY_PRECISION).toInt()
-    val sdfShader = remember(ctrlKey) { getOrCreateSdfShader(ctrlClamped, ctrlKey) }
-    return remember(color, tiles, sdfShader) {
-        SquircleShaderBrush(color, tiles, sdfShader)
+    return remember(color, tiles) {
+        SquircleShaderBrush(color, tiles)
     }
 }
 
 private class SquircleShaderBrush(
     private val color: Color,
     private val cornerTilesPx: FloatArray,
-    private val sdfShader: Shader,
 ) : ShaderBrush() {
     private val runtimeShader = RuntimeShader(SQUIRCLE_SHADER)
     private val effectiveSizes = FloatArray(4)
@@ -189,7 +239,7 @@ private class SquircleShaderBrush(
             val tile = cornerTilesPx[i]
             val effective = tile.coerceIn(0f, halfMin)
             effectiveSizes[i] = effective
-            halfRanges[i] = SDF_HALF_RANGE * effective
+            halfRanges[i] = BakedSquircleSdf.HALF_RANGE * effective
             weights[i] = if (range <= 0f) 1f else ((tile - threshold) / range).coerceIn(0f, 1f)
         }
         runtimeShader.setColorUniform("color", color)
@@ -197,94 +247,23 @@ private class SquircleShaderBrush(
         runtimeShader.setFloatUniform("cornerSizes", effectiveSizes)
         runtimeShader.setFloatUniform("halfRangesPx", halfRanges)
         runtimeShader.setFloatUniform("blendWeights", weights)
-        runtimeShader.setFloatUniform("bitmapSize", SDF_BITMAP_SIZE.toFloat())
-        runtimeShader.setInputShader("cornerSdf", sdfShader)
+        runtimeShader.setFloatUniform("bitmapSize", BakedSquircleSdf.SIZE.toFloat())
+        runtimeShader.setInputShader("cornerSdf", bakedSdfShader)
         return runtimeShader.asComposeShader()
     }
 }
 
-private const val SDF_BITMAP_SIZE = 256
-private const val SDF_HALF_RANGE = 0.125f
-private const val BEZIER_SAMPLES = 64
-private const val BLEND_THRESHOLD_RATIO = 0.7853982f // π/4 — squircle→circle blend starts here
-private const val CONTROL_KEY_PRECISION = 100f
+// π/4 — squircle → circle blend threshold. Above this ratio of cornerSize / halfMin the SDF result
+// is mixed with a pure circle SDF so capsule / pill / circle silhouettes degrade cleanly.
+private const val BLEND_THRESHOLD_RATIO = 0.7853982f
 
-@OptIn(InternalCoroutinesApi::class)
-private val sdfCacheLock = SynchronizedObject()
-private val sdfShaderCache = mutableMapOf<Int, Shader>()
-
-@OptIn(InternalCoroutinesApi::class)
-private fun getOrCreateSdfShader(control: Float, key: Int): Shader = synchronized(sdfCacheLock) {
-    sdfShaderCache.getOrPut(key) {
-        ImageShader(
-            makeAlphaImageBitmap(SDF_BITMAP_SIZE, generateSdfBytes(SDF_BITMAP_SIZE, control)),
-            TileMode.Clamp,
-            TileMode.Clamp,
-        )
-    }
-}
-
-private fun generateSdfBytes(size: Int, control: Float): ByteArray {
-    val handle = 1f - control
-
-    val bx = FloatArray(BEZIER_SAMPLES + 1)
-    val by = FloatArray(BEZIER_SAMPLES + 1)
-    for (i in 0..BEZIER_SAMPLES) {
-        val t = i.toFloat() / BEZIER_SAMPLES
-        val omt = 1f - t
-        bx[i] = 3f * omt * t * t * handle + t * t * t
-        by[i] = omt * omt * omt + 3f * omt * omt * t * handle
-    }
-
-    val bytes = ByteArray(size * size)
-    val invSize = 1f / size
-    val invRange2 = 1f / (2f * SDF_HALF_RANGE)
-
-    for (py in 0 until size) {
-        val y = (py + 0.5f) * invSize
-        for (px in 0 until size) {
-            val x = (px + 0.5f) * invSize
-
-            var minSqDist = Float.MAX_VALUE
-            var closestIdx = 0
-            for (i in 0 until BEZIER_SAMPLES) {
-                val ax = bx[i]
-                val ay = by[i]
-                val sx = bx[i + 1] - ax
-                val sy = by[i + 1] - ay
-                val len2 = sx * sx + sy * sy
-                if (len2 < 1e-12f) continue
-                var u = ((x - ax) * sx + (y - ay) * sy) / len2
-                if (u < 0f) {
-                    u = 0f
-                } else if (u > 1f) {
-                    u = 1f
-                }
-                val qx = ax + u * sx
-                val qy = ay + u * sy
-                val ddx = x - qx
-                val ddy = y - qy
-                val sqDist = ddx * ddx + ddy * ddy
-                if (sqDist < minSqDist) {
-                    minSqDist = sqDist
-                    closestIdx = i
-                }
-            }
-            val dist = sqrt(minSqDist)
-
-            // Sign: tangent × point-to-curve cross product. Fill region is on the left of the bezier motion.
-            val tx = bx[closestIdx + 1] - bx[closestIdx]
-            val ty = by[closestIdx + 1] - by[closestIdx]
-            val pdx = x - bx[closestIdx]
-            val pdy = y - by[closestIdx]
-            val cross = tx * pdy - ty * pdx
-            val signedDist = if (cross > 0f) -dist else dist
-
-            val alpha = (0.5f - signedDist * invRange2).coerceIn(0f, 1f)
-            bytes[py * size + px] = (alpha * 255f + 0.5f).toInt().toByte()
-        }
-    }
-    return bytes
+// Decoded once per process — wraps the baked SDF bytes into a Skia ImageShader.
+private val bakedSdfShader: Shader by lazy {
+    ImageShader(
+        makeAlphaImageBitmap(BakedSquircleSdf.SIZE, BakedSquircleSdf.bytes),
+        TileMode.Clamp,
+        TileMode.Clamp,
+    )
 }
 
 private const val SQUIRCLE_SHADER = """

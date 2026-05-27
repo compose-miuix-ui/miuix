@@ -36,7 +36,7 @@ Before committing, run `./gradlew spotlessCheck`; only run `./gradlew spotlessAp
 | `miuix-preference/`     | Preference / menu / popup components                          |
 | `miuix-blur/`           | Blur effects (Android minSdk=33)                              |
 | `miuix-icons/`          | Extended icon resources                                       |
-| `miuix-navigation3-ui/` | Navigation 3 UI (independent of miuix)                        |
+| `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip) |
 | `example/`              | Demo app                                                      |
 | `baselineprofile/`      | Android baseline profile generation                           |
 | `docs/`                 | VitePress documentation site                                  |

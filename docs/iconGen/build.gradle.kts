@@ -28,7 +28,7 @@ val darkColor = providers.gradleProperty("iconDarkColor").getOrElse("#FFFFFF")
 val preserve = providers.gradleProperty("iconPreserveColors").map { it.equals("true", true) }.getOrElse(false)
 
 tasks.register<JavaExec>("generateIcons") {
-    group = "iconGen"
+    group = "docIconGenerate"
     description = "Generate SVGs from Compose ImageVector definitions"
     dependsOn(tasks.named("classes"))
     classpath = mainClasspath

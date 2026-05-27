@@ -31,13 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -51,8 +47,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.squircle.addSquircleRect
 import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -487,9 +483,6 @@ private fun TextFieldChrome(
     )
 }
 
-/**
- * A Miuix style decoration box for the [TextField] component.
- */
 @Composable
 private fun TextFieldDecorationBox(
     label: String,
@@ -507,35 +500,14 @@ private fun TextFieldDecorationBox(
     insideMargin: DpSize = TextFieldDefaults.InsideMargin,
     innerTextField: @Composable () -> Unit,
 ) {
-    val borderPath = remember { Path() }
     Box(
         modifier = Modifier
             .squircleBackground(color = backgroundColor, cornerRadius = cornerRadius)
-            .drawWithContent {
-                drawContent()
-                val bw = borderWidth()
-                if (bw > 0.dp) {
-                    val strokePx = bw.toPx()
-                    if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
-                    val halfStroke = strokePx / 2f
-                    val innerW = size.width - strokePx
-                    val innerH = size.height - strokePx
-                    val innerR = (cornerRadius.toPx() - halfStroke).coerceAtLeast(0f)
-                    borderPath.rewind()
-                    borderPath.addSquircleRect(
-                        width = innerW,
-                        height = innerH,
-                        cornerRadius = innerR,
-                    )
-                    translate(halfStroke, halfStroke) {
-                        drawPath(
-                            path = borderPath,
-                            color = borderColor(),
-                            style = Stroke(width = strokePx),
-                        )
-                    }
-                }
-            },
+            .squircleBorder(
+                width = borderWidth,
+                color = borderColor,
+                cornerRadius = cornerRadius,
+            ),
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(

@@ -10,11 +10,11 @@
 "连续曲率圆角"观感。视觉差异在中到大半径时最明显。
 :::
 
-::: warning 注意
+::: warning 平台下限
 基于 shader 的 modifier（`squircleBackground`、`squircleSurface`、
-`squircleClip`）在 Android 上需要 API 33+。在更低 API 上**会自动回退**到
-等价的 `RoundedCornerShape` 实现 —— 不会崩溃，也无需手动门控。基于 path
-的 API（`squircleBorder`、`Path.addSquircleRect`）则没有平台下限。
+`squircleClip`、`squircleBorder`）需要 Android API 33+。更低 API 上会自动
+回退到等价的 `RoundedCornerShape` 实现 —— 不会崩溃，无需手动门控。运行时
+开关见下方[全局开关](#全局开关)。
 :::
 
 ## 配置
@@ -48,24 +48,9 @@ dependencies {
 | iOS / macOS   | 支持                                | 支持             |
 | WasmJs / Js   | 支持                                | 支持             |
 
-`squircleBackground`、`squircleSurface`、`squircleClip` 由一个 SDF 驱动的
-`RuntimeShader` 实现，Android 上需要 API 33。运行时着色器不可用时，每个
-modifier 会静默降级为 `Modifier.background(color, RoundedCornerShape(...))`
-或 `Modifier.clip(RoundedCornerShape(...))`，调用方无需自行判断。
-
-`squircleBorder` 和 `Path.addSquircleRect` 由三次贝塞尔段拼接而成，在所有
-平台上均可使用。
-
-### 运行时能力检查
-
-如果你需要知道是否走的是 shader 路径（例如根据它来决定其他视觉选择），
-复用 `miuix-shader` 暴露的能力标志即可：
-
-```kotlin
-import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
-
-val realSquircle = isRuntimeShaderSupported()
-```
+回退是自动的，调用方无需分支。`Path.addSquircleRect` 在所有平台都能跑，但
+提供了显式的 `squircleEnabled` 参数 —— 跟 modifier 混用时透传它即可保持
+视觉一致。
 
 ## 基本用法
 
@@ -84,10 +69,6 @@ Box(
         ),
 )
 ```
-
-默认的 `extension = 1.1f` 和 `control = 0.63f` 给出标准的连续曲率观感。
-若想近似同半径的 `RoundedCornerShape`，可传 `extension = 1f` 和
-`control = 0.55228f`。
 
 ## 变体
 
@@ -126,16 +107,16 @@ Modifier.squircleClip(cornerRadius = 16.dp)
 ```
 
 ::: warning 离屏成本
-`squircleSurface` 和 `squircleClip` 各自会开一个离屏 GPU layer ——
-与 `Modifier.clip(...)` 加内容绘制成本结构相同。size 和参数稳定时 shader
-输出会被缓存；能传常量就传常量，避免让 `cornerRadius` 受持续动画状态驱动。
+`squircleSurface` 和 `squircleClip` 各自会开一个离屏 GPU layer。size 和参数
+稳定时 shader 输出会被缓存；能传常量就传常量，避免让 `cornerRadius` 受持续
+动画状态驱动。
 :::
 
 ### squircleBorder — 仅描边
 
 围绕布局绘制 squircle 轮廓的描边，自动内缩半个描边宽度，使其与同半径
-的 `squircleBackground` / `squircleSurface` 视觉对齐。基于 path 实现，
-不需要 `RuntimeShader`。
+的 `squircleBackground` / `squircleSurface` 视觉对齐。基于 path 实现（不需要
+shader），比 shader 变体更便宜。
 
 ```kotlin
 import top.yukonga.miuix.kmp.squircle.squircleBorder
@@ -166,25 +147,22 @@ Modifier.squircleSurface(
 
 ## 调整曲线参数
 
-两个标量决定圆角观感，均被自动钳位到安全范围：
+`extension` 决定连续曲率区从顶点延伸出去的距离。`1.0` 等同标准圆弧；
+默认 `1.1` 给出标准的 squircle 观感。
 
 | 参数        | 默认值 | 范围         | 作用                                                                |
 | ----------- | :----: | ------------ | ------------------------------------------------------------------- |
 | `extension` | `1.1`  | `[1, 2]`     | 角部区域大小相对 `cornerRadius` 的倍数；`1.0` 即标准圆弧。           |
-| `control`   | `0.63` | `[0.3, 0.9]` | 三次贝塞尔控制柄比例；`0.55228` 等价于四分之一圆。                  |
 
 ```kotlin
-// 更接近 iOS 观感：角部区域稍大、曲线更"鼓"
 Modifier.squircleBackground(
     color = MiuixTheme.colorScheme.primaryVariant,
     cornerRadius = 24.dp,
     extension = 1.2f,
-    control = 0.7f,
 )
 ```
 
-如果你在自己的 API 表面里需要引用默认值，可直接用 `SquircleDefaults.Extension`
-/ `SquircleDefaults.Control` —— 两者都对外公开。
+引用默认值用 `SquircleDefaults.Extension`。
 
 ## Path API
 
@@ -205,8 +183,49 @@ val path = Path().apply {
 }
 ```
 
-path 由 8 段三次贝塞尔曲线构成，可在所有平台运行。静态填充/裁剪请优先使用
-modifier API —— 它们走 shader 加速并缓存 SDF。
+静态填充 / 裁剪场景请优先用 shader-backed modifier —— 它们每进程只算一次
+距离场并缓存。
+
+## 全局开关
+
+`LocalSquircleEnabled`（默认 `true`）门控本模块全部 shader-backed squircle
+modifier。置为 `false` 时所有 modifier 在运行时切换到 `RoundedCornerShape`
+回退，适合用户偏好或 A/B 对比：
+
+```kotlin
+import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
+
+CompositionLocalProvider(LocalSquircleEnabled provides userPrefersRoundedRects) {
+    AppContent()
+}
+```
+
+`isSquircleEnabled()` 把 `LocalSquircleEnabled.current` 与运行时 shader 能力
+检查合并为单次读取。当你在同一组件里混用 shader-backed modifier 与
+`addSquircleRect` 时，在 @Composable 处读它一次，捕获布尔后透传给 path 构造器：
+
+```kotlin
+@Composable
+fun OutlinedSurface(cornerRadius: Dp) {
+    val squircleEnabled = isSquircleEnabled()
+    val path = remember { Path() }
+    Box(
+        Modifier
+            .squircleBackground(MiuixTheme.colorScheme.surface, cornerRadius)
+            .drawWithContent {
+                drawContent()
+                path.rewind()
+                path.addSquircleRect(
+                    width = size.width,
+                    height = size.height,
+                    cornerRadius = cornerRadius.toPx(),
+                    squircleEnabled = squircleEnabled,
+                )
+                drawPath(path, MiuixTheme.colorScheme.outline, style = Stroke(1.dp.toPx()))
+            },
+    )
+}
+```
 
 ## 属性
 
@@ -221,7 +240,6 @@ modifier API —— 它们走 shader 加速并缓存 SDF。
 | `bottomEnd`    | `Dp`    | 每角半径（按角重载）                              | -                                   |
 | `bottomStart`  | `Dp`    | 每角半径（按角重载）                              | -                                   |
 | `extension`    | `Float` | 角部区域倍数，钳位到 `[1, 2]`                     | `SquircleDefaults.Extension` = 1.1  |
-| `control`      | `Float` | 贝塞尔控制柄比例，钳位到 `[0.3, 0.9]`             | `SquircleDefaults.Control` = 0.63   |
 
 ### squircleBorder
 
@@ -231,25 +249,21 @@ modifier API —— 它们走 shader 加速并缓存 SDF。
 | `color`        | `Color` | 描边颜色          | -                               |
 | `cornerRadius` | `Dp`    | 统一圆角半径      | -                               |
 | `extension`    | `Float` | 角部区域倍数      | `SquircleDefaults.Extension`    |
-| `control`      | `Float` | 贝塞尔控制柄比例  | `SquircleDefaults.Control`      |
 
 ### Path.addSquircleRect
 
-| 参数           | 类型    | 说明              | 默认值                          |
-| -------------- | ------- | ----------------- | ------------------------------- |
-| `width`        | `Float` | path 宽度（像素） | -                               |
-| `height`       | `Float` | path 高度（像素） | -                               |
-| `cornerRadius` | `Float` | 圆角半径（像素）  | -                               |
-| `extension`    | `Float` | 角部区域倍数      | `SquircleDefaults.Extension`    |
-| `control`      | `Float` | 贝塞尔控制柄比例  | `SquircleDefaults.Control`      |
+| 参数              | 类型      | 说明                                                 | 默认值                          |
+| ----------------- | --------- | ---------------------------------------------------- | ------------------------------- |
+| `width`           | `Float`   | path 宽度（像素）                                    | -                               |
+| `height`          | `Float`   | path 高度（像素）                                    | -                               |
+| `cornerRadius`    | `Float`   | 圆角半径（像素）                                     | -                               |
+| `extension`       | `Float`   | 角部区域倍数                                         | `SquircleDefaults.Extension`    |
+| `squircleEnabled` | `Boolean` | 为 `false` 时改为追加同尺寸的圆角矩形                 | `true`                          |
 
 ### SquircleDefaults
 
 | 常量           | 类型    | 说明                       |  值    |
 | -------------- | ------- | -------------------------- | -----: |
 | `Extension`    | `Float` | 默认角部区域倍数           | `1.1`  |
-| `Control`      | `Float` | 默认贝塞尔控制柄比例       | `0.63` |
 | `ExtensionMin` | `Float` | `Extension` 下限           | `1.0`  |
 | `ExtensionMax` | `Float` | `Extension` 上限           | `2.0`  |
-| `ControlMin`   | `Float` | `Control` 下限             | `0.3`  |
-| `ControlMax`   | `Float` | `Control` 上限             | `0.9`  |

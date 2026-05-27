@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.drop
+import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
 import ui.AppTheme
 import ui.keyColorFor
 
@@ -44,6 +45,7 @@ fun App(
         CompositionLocalProvider(
             LocalAppState provides appState,
             LocalUpdateAppState provides updateAppState,
+            LocalSquircleEnabled provides appState.enableSquircle,
         ) {
             AppContent(padding = padding)
         }

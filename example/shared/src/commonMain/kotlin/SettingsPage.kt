@@ -126,6 +126,13 @@ private fun SettingsContent(
                     )
                     AnimatedVisibility(visible = isRuntimeShaderSupported()) {
                         SwitchPreference(
+                            title = "Enable Squircle Shapes",
+                            checked = appState.enableSquircle,
+                            onCheckedChange = { updateAppState { state -> state.copy(enableSquircle = it) } },
+                        )
+                    }
+                    AnimatedVisibility(visible = isRuntimeShaderSupported()) {
+                        SwitchPreference(
                             title = "Enable Blur Effect",
                             checked = appState.enableBlur,
                             onCheckedChange = { updateAppState { state -> state.copy(enableBlur = it) } },

@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.squircle.addSquircleRect
+import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.min
@@ -559,7 +560,7 @@ fun ListPopupContent(
                 alpha = alphaProgress()
                 transformOrigin = localTransformOrigin
             }
-            .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius)
+            .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius, isSquircleEnabled())
             .background(color = backgroundColor),
     ) {
         content()
@@ -571,12 +572,15 @@ fun ListPopupContent(
  * spawn direction encoded by [popupLayoutPosition] as [fractionProgress] moves 0 → 1: from the top
  * when shown below the anchor, from the bottom when shown above, and outwards from the center
  * otherwise. The band itself is shaped as a squircle (via [addSquircleRect]) so the four corners
- * stay aligned with the surrounding [squircleSurface] / [squircleClip] during reveal.
+ * stay aligned with the surrounding [squircleSurface] / [squircleClip] during reveal — when
+ * [squircleEnabled] is `false`, [addSquircleRect] falls back to a plain rounded rectangle to
+ * match the squircle modifiers' fallback rendering.
  */
 internal fun Modifier.popupClipReveal(
     fractionProgress: () -> Float,
     popupLayoutPosition: PopupLayoutPosition,
     cornerRadius: Dp,
+    squircleEnabled: Boolean,
 ): Modifier = drawWithCache {
     val path = Path()
     val showBelow = popupLayoutPosition.showBelow
@@ -601,6 +605,7 @@ internal fun Modifier.popupClipReveal(
             width = size.width,
             height = visibleHeight,
             cornerRadius = cornerRadius.toPx(),
+            squircleEnabled = squircleEnabled,
         )
         if (clipStart == 0f) {
             clipPath(path) {
