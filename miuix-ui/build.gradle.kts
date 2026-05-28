@@ -107,6 +107,20 @@ val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::clas
                 "miuix-navigation3-ui/src/androidMain/baselineProfiles/baseline-prof.txt",
             ).asFile.absolutePath,
     )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/shader/",
+        rootProject.layout.projectDirectory
+            .file(
+                "miuix-shader/src/androidMain/baselineProfiles/baseline-prof.txt",
+            ).asFile.absolutePath,
+    )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/squircle/",
+        rootProject.layout.projectDirectory
+            .file(
+                "miuix-squircle/src/androidMain/baselineProfiles/baseline-prof.txt",
+            ).asFile.absolutePath,
+    )
 }
 
 tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
