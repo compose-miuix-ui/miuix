@@ -34,10 +34,8 @@ import component.effect.BgEffectBackground
 import component.highlight.HighlightConfig
 import component.highlight.rememberContainerHighlight
 import org.jetbrains.compose.resources.painterResource
-import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
@@ -48,6 +46,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test_bg
@@ -185,66 +184,46 @@ private fun BlurDemo() {
 
             HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
 
-            BasicComponent(
+            SliderPreference(
                 title = "Blur Radius",
-                endActions = { ValueText("${blurRadiusX.toInt()}") },
-                bottomAction = {
-                    Slider(
-                        value = blurRadiusX / 200f,
-                        onValueChange = {
-                            blurRadiusX = it * 200f
-                            blurRadiusY = it * 200f
-                        },
-                    )
+                valueText = "${blurRadiusX.toInt()}",
+                value = blurRadiusX / 200f,
+                onValueChange = {
+                    blurRadiusX = it * 200f
+                    blurRadiusY = it * 200f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
-                bottomAction = {
-                    Slider(
-                        value = noiseCoefficient / 0.1f,
-                        onValueChange = { noiseCoefficient = it * 0.1f },
-                    )
-                },
+                valueText = "${(noiseCoefficient * 10000).toInt() / 10000f}",
+                value = noiseCoefficient / 0.1f,
+                onValueChange = { noiseCoefficient = it * 0.1f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Brightness",
-                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = (brightness + 1f) / 2f,
-                        onValueChange = { brightness = it * 2f - 1f },
-                    )
-                },
+                valueText = "${(brightness * 100).toInt() / 100f}",
+                value = (brightness + 1f) / 2f,
+                onValueChange = { brightness = it * 2f - 1f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Contrast",
-                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = contrast / 3f,
-                        onValueChange = { contrast = it * 3f },
-                    )
-                },
+                valueText = "${(contrast * 100).toInt() / 100f}",
+                value = contrast / 3f,
+                onValueChange = { contrast = it * 3f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Saturation",
-                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = saturation / 3f,
-                        onValueChange = { saturation = it * 3f },
-                    )
-                },
+                valueText = "${(saturation * 100).toInt() / 100f}",
+                value = saturation / 3f,
+                onValueChange = { saturation = it * 3f },
             )
         }
     }
@@ -360,79 +339,49 @@ private fun ForegroundBlurDemo() {
 
             HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
 
-            BasicComponent(
+            SliderPreference(
                 title = "Blur Radius",
-                endActions = { ValueText("${blurRadiusX.toInt()}") },
-                bottomAction = {
-                    Slider(
-                        value = blurRadiusX / 200f,
-                        onValueChange = {
-                            blurRadiusX = it * 200f
-                            blurRadiusY = it * 200f
-                        },
-                    )
+                valueText = "${blurRadiusX.toInt()}",
+                value = blurRadiusX / 200f,
+                onValueChange = {
+                    blurRadiusX = it * 200f
+                    blurRadiusY = it * 200f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Noise",
-                endActions = { ValueText("${(noiseCoefficient * 10000).toInt() / 10000f}") },
-                bottomAction = {
-                    Slider(
-                        value = noiseCoefficient / 0.1f,
-                        onValueChange = { noiseCoefficient = it * 0.1f },
-                    )
-                },
+                valueText = "${(noiseCoefficient * 10000).toInt() / 10000f}",
+                value = noiseCoefficient / 0.1f,
+                onValueChange = { noiseCoefficient = it * 0.1f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Brightness",
-                endActions = { ValueText("${(brightness * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = (brightness + 1f) / 2f,
-                        onValueChange = { brightness = it * 2f - 1f },
-                    )
-                },
+                valueText = "${(brightness * 100).toInt() / 100f}",
+                value = (brightness + 1f) / 2f,
+                onValueChange = { brightness = it * 2f - 1f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Contrast",
-                endActions = { ValueText("${(contrast * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = contrast / 3f,
-                        onValueChange = { contrast = it * 3f },
-                    )
-                },
+                valueText = "${(contrast * 100).toInt() / 100f}",
+                value = contrast / 3f,
+                onValueChange = { contrast = it * 3f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
-            BasicComponent(
+            SliderPreference(
                 title = "Saturation",
-                endActions = { ValueText("${(saturation * 100).toInt() / 100f}") },
-                bottomAction = {
-                    Slider(
-                        value = saturation / 3f,
-                        onValueChange = { saturation = it * 3f },
-                    )
-                },
+                valueText = "${(saturation * 100).toInt() / 100f}",
+                value = saturation / 3f,
+                onValueChange = { saturation = it * 3f },
             )
         }
     }
-}
-
-@Suppress("FunctionName")
-@Composable
-private fun ValueText(text: String) {
-    Text(
-        text = text,
-        fontSize = MiuixTheme.textStyles.body2.fontSize,
-        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-    )
 }
 
 @Composable

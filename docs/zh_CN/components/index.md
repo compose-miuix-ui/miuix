@@ -52,6 +52,8 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Over
 | [SwitchPreference](../components/switchpreference)             | 基于 BasicComponent 的开关组件                                                     | 设置项开关、功能启用   |
 | [CheckboxPreference](../components/checkboxpreference)         | 基于 BasicComponent 的复选框组件                                                   | 多项选择、条款同意     |
 | [RadioButtonPreference](../components/radiobuttonpreference)   | 基于 BasicComponent 的单选组件                                                     | 单项选择、选项切换     |
+| [SliderPreference](../components/sliderpreference)             | 基于 BasicComponent 的滑块组件                                                     | 数值调节、音量/亮度    |
+| [RangeSliderPreference](../components/rangesliderpreference)   | 基于 BasicComponent 的范围滑块组件                                                 | 范围选择、价格筛选     |
 | [OverlayListPopup](../components/overlaylistpopup)             | 基于 BasicComponent 的列表弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |
 | [OverlayCascadingListPopup](../components/overlaycascadinglistpopup) | 二级级联列表弹窗组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用）               | 子菜单、分组动作面板   |
 | [OverlayDropdownPreference](../components/overlaydropdownpreference) | 基于 BasicComponent 的下拉选择器组件（使用 MiuixPopupUtils，需在 `Scaffold` 中使用） | 选项选择、功能列表     |

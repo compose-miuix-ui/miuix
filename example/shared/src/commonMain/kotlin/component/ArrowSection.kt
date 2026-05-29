@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -31,6 +30,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.arrowSection() {
@@ -67,26 +67,16 @@ fun LazyListScope.arrowSection() {
                 },
                 onClick = {},
             )
-            ArrowPreference(
-                title = "Arrow + Slider + Dialog (O)",
-                endActions = {
-                    Text(
-                        text = "${(volume * 100).toInt()}%",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                    )
-                },
+            SliderPreference(
+                title = "Volume",
+                valueText = "${(volume * 100).toInt()}%",
+                value = volume,
+                onValueChange = { volume = it },
                 onClick = {
                     showVolumeDialog.value = true
                     volumeDialogHoldDown.value = true
                 },
                 holdDownState = volumeDialogHoldDown.value,
-                bottomAction = {
-                    Slider(
-                        value = volume,
-                        onValueChange = { volume = it },
-                    )
-                },
             )
             ArrowPreference(
                 title = "Disabled Arrow",
