@@ -3,15 +3,4 @@
 
 package top.yukonga.miuix.kmp.utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.window.DialogProperties
-
 actual fun platform(): Platform = Platform.Js
-
-@Composable
-actual fun platformDialogProperties(): DialogProperties = DialogProperties(
-    dismissOnBackPress = false,
-    usePlatformDefaultWidth = false,
-    scrimColor = Color.Transparent,
-)
