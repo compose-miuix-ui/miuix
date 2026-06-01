@@ -64,8 +64,8 @@ import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.effect.BgEffectBackground
-import top.yukonga.miuix.kmp.effect.DeviceType
+import top.yukonga.miuix.kmp.effect.bg.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.bg.DeviceType
 import top.yukonga.miuix.kmp.effect.blend.ColorBlendToken
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet

@@ -26,7 +26,8 @@ kotlin {
 
 | Package | Contents |
 | --- | --- |
-| `top.yukonga.miuix.kmp.effect` | Background gradient effect (`BgEffectBackground`, `DeviceType`) |
+| `top.yukonga.miuix.kmp.effect` | Backward-compatible re-exports (deprecated — use `effect.bg` instead) |
+| `top.yukonga.miuix.kmp.effect.bg` | Background gradient effect (`BgEffectBackground`, `DeviceType`) and internal shader/painter state |
 | `top.yukonga.miuix.kmp.effect.liquid` | Liquid glass effects (refraction lens, vibrancy, inner shadow, combined backdrop) |
 | `top.yukonga.miuix.kmp.effect.animation` | Animation utilities (damped drag, interactive highlight) |
 | `top.yukonga.miuix.kmp.effect.highlight` | Highlight configuration and sensor-driven container highlights |
@@ -39,8 +40,8 @@ kotlin {
 `BgEffectBackground` renders an animated gradient background using GPU-accelerated runtime shaders. See the existing [Blur Effects](blur.md) documentation for backdrop blur integration.
 
 ```kotlin
-import top.yukonga.miuix.kmp.effect.BgEffectBackground
-import top.yukonga.miuix.kmp.effect.DeviceType
+import top.yukonga.miuix.kmp.effect.bg.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.bg.DeviceType
 
 BgEffectBackground(
     dynamicBackground = true,

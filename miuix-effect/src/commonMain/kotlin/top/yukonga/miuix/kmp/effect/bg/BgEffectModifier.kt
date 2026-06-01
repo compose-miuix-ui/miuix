@@ -15,7 +15,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.effect.DeviceType
 import top.yukonga.miuix.kmp.effect.bg.BgEffectNode.Companion.MIN_FRAME_DELTA_NANOS
 import kotlin.math.floor
 
@@ -23,8 +22,7 @@ import kotlin.math.floor
  * Applies a GPU-accelerated animated background gradient effect to this [Modifier].
  *
  * This is the low-level modifier API for the background effect. Most callers should
- * use [top.yukonga.miuix.kmp.effect.BgEffectBackground] instead, which provides a
- * higher-level composable wrapper.
+ * use [BgEffectBackground] instead, which provides a higher-level composable wrapper.
  *
  * The effect renders a multi-point gradient with Perlin noise perturbation over a
  * solid [surface] color. The gradient animates continuously when [playing] is `true`,

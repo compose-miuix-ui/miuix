@@ -3,8 +3,6 @@
 
 package top.yukonga.miuix.kmp.effect.bg
 
-import top.yukonga.miuix.kmp.effect.DeviceType
-
 /**
  * Configuration presets for the background gradient effect.
  *

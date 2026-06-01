@@ -41,8 +41,8 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.effect.BgEffectBackground
-import top.yukonga.miuix.kmp.effect.DeviceType
+import top.yukonga.miuix.kmp.effect.bg.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.bg.DeviceType
 import top.yukonga.miuix.kmp.effect.blend.ColorBlendToken
 import top.yukonga.miuix.kmp.effect.highlight.HighlightConfig
 import top.yukonga.miuix.kmp.effect.highlight.rememberContainerHighlight

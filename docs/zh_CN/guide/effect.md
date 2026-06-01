@@ -26,7 +26,8 @@ kotlin {
 
 | 包 | 内容 |
 | --- | --- |
-| `top.yukonga.miuix.kmp.effect` | 背景渐变效果（`BgEffectBackground`、`DeviceType`） |
+| `top.yukonga.miuix.kmp.effect` | 向后兼容的重导出（已弃用 — 请使用 `effect.bg`） |
+| `top.yukonga.miuix.kmp.effect.bg` | 背景渐变效果（`BgEffectBackground`、`DeviceType`）及内部着色器/画笔状态 |
 | `top.yukonga.miuix.kmp.effect.liquid` | 液态玻璃效果（折射透镜、通透感、内阴影、组合背景） |
 | `top.yukonga.miuix.kmp.effect.animation` | 动画工具（阻尼拖拽、交互高光） |
 | `top.yukonga.miuix.kmp.effect.highlight` | 高光配置与传感器驱动的容器高光 |
@@ -39,8 +40,8 @@ kotlin {
 `BgEffectBackground` 使用 GPU 加速的运行时着色器渲染动画渐变背景。有关背景模糊集成，请参阅已有的[模糊效果](blur.md)文档。
 
 ```kotlin
-import top.yukonga.miuix.kmp.effect.BgEffectBackground
-import top.yukonga.miuix.kmp.effect.DeviceType
+import top.yukonga.miuix.kmp.effect.bg.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.bg.DeviceType
 
 BgEffectBackground(
     dynamicBackground = true,
