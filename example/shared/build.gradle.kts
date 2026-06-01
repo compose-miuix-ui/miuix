@@ -68,6 +68,7 @@ kotlin {
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.miuixBlur)
                 implementation(projects.miuixSquircle)
+                implementation(projects.miuixEffect)
                 implementation(projects.miuixIcons)
                 implementation(projects.miuixNavigation3Ui)
                 implementation(libs.androidx.navigation3.runtime)

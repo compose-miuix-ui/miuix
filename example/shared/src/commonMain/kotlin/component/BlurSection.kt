@@ -29,10 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import component.blend.ColorBlendToken
-import component.effect.BgEffectBackground
-import component.highlight.HighlightConfig
-import component.highlight.rememberContainerHighlight
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -45,6 +41,11 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.effect.bg.BgEffectBackground
+import top.yukonga.miuix.kmp.effect.bg.DeviceType
+import top.yukonga.miuix.kmp.effect.blend.ColorBlendToken
+import top.yukonga.miuix.kmp.effect.highlight.HighlightConfig
+import top.yukonga.miuix.kmp.effect.highlight.rememberContainerHighlight
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
@@ -283,6 +284,9 @@ private fun ForegroundBlurDemo() {
         ) {
             BgEffectBackground(
                 dynamicBackground = dynamicBackground.value,
+                deviceType = DeviceType.PHONE,
+                isDarkTheme = isInDark,
+                surface = MiuixTheme.colorScheme.surface,
                 isFullSize = true,
                 isOs3Effect = isOs3Effect,
                 modifier = Modifier

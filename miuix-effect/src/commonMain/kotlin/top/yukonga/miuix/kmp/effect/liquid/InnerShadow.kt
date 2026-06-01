@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package component.liquid
+package top.yukonga.miuix.kmp.effect.liquid
 
 // Adapted from Kyant0/AndroidLiquidGlass — https://github.com/Kyant0/AndroidLiquidGlass (Apache 2.0).
 
@@ -31,6 +31,35 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
+/**
+ * Configuration for an inner shadow effect rendered inside a clipped shape.
+ *
+ * An inner shadow simulates a light source casting shadow inward from the edges
+ * of a shape. It uses offscreen compositing with a blur render effect to produce
+ * a soft, physically-plausible shadow that respects the shape's outline.
+ *
+ * The shadow is rendered by:
+ * 1. Drawing the shape filled with [color] into an offscreen graphics layer.
+ * 2. Overlaying a "shadow mask" using [BlendMode.Clear] offset by [offset], which
+ *    erases the interior and leaves only the edge fringe.
+ * 3. Applying a [BlurEffect] with the given [radius] to soften the fringe.
+ * 4. Compositing the result inside the original shape clip.
+ *
+ * @property radius Blur radius for the shadow softness. Larger values produce a wider,
+ *   more diffused shadow. `0.dp` renders a crisp, unblurred shadow edge.
+ *   Default: `24.dp`.
+ * @property offset Directional offset of the shadow from the shape's edge, in [DpOffset].
+ *   Positive `y` values cast the shadow downward (simulating a top-down light).
+ *   Default: `DpOffset(0.dp, radius)` — directly below, scaled to the blur radius.
+ * @property color Fill color of the shadow. Alpha controls the shadow's base opacity
+ *   before the [alpha] multiplier is applied.
+ *   Default: `Color.Black.copy(alpha = 0.15f)`.
+ * @property alpha Overall opacity multiplier for the entire shadow layer, in range `[0, 1]`.
+ *   `0f` makes the shadow fully transparent; `1f` is fully opaque.
+ *   Default: `1f`.
+ * @property blendMode Compositing mode used when drawing the shadow layer over the content.
+ *   Default: [DrawScope.DefaultBlendMode] (platform default, typically SrcOver).
+ */
 @Immutable
 data class InnerShadow(
     val radius: Dp = 24.dp,
@@ -40,16 +69,57 @@ data class InnerShadow(
     val blendMode: BlendMode = DrawScope.DefaultBlendMode,
 ) {
     companion object {
+        /** A default [InnerShadow] instance with standard parameters. */
         @Stable
         val Default: InnerShadow = InnerShadow()
     }
 }
 
+/**
+ * Applies an inner shadow effect to this [Modifier], rendered inside the given [shape].
+ *
+ * The inner shadow is drawn **after** the content (`drawContent()`), overlaying the
+ * shadow within the shape's clipped region. The [shadow] lambda is called on every
+ * draw frame, allowing reactive shadow parameters (e.g., animating [InnerShadow.alpha]
+ * with press progress).
+ *
+ * ### Usage
+ *
+ * ```kotlin
+ * Box(
+ *     modifier = Modifier
+ *         .size(200.dp, 100.dp)
+ *         .innerShadow(shape = RoundedCornerShape(16.dp)) {
+ *             InnerShadow(
+ *                 radius = 12.dp,
+ *                 color = Color.Black.copy(alpha = 0.2f),
+ *                 alpha = pressProgress,
+ *             )
+ *         }
+ * )
+ * ```
+ *
+ * ### Performance Notes
+ *
+ * - The blur render effect is cached and only re-created when [InnerShadow.radius] changes.
+ * - A [GraphicsLayer] is allocated on attach and released on detach to prevent leaks.
+ * - When [shadow] returns `null`, the effect is skipped entirely (zero cost).
+ *
+ * @param shape The [Shape] defining the clipping region for the shadow. Must match the
+ *   component's visual shape for correct edge alignment.
+ * @param shadow A lambda returning the current [InnerShadow] configuration, or `null`
+ *   to skip rendering. Called once per draw frame.
+ */
 fun Modifier.innerShadow(
     shape: Shape,
     shadow: () -> InnerShadow?,
 ): Modifier = this then InnerShadowElement(shape, shadow)
 
+/**
+ * [ModifierNodeElement] that creates and manages [InnerShadowNode] instances.
+ *
+ * Uses structural equality on [shape] and [shadow] to detect parameter changes.
+ */
 private class InnerShadowElement(
     val shape: Shape,
     val shadow: () -> InnerShadow?,
@@ -84,6 +154,25 @@ private class InnerShadowElement(
     }
 }
 
+/**
+ * [DrawModifierNode] that renders the inner shadow effect using offscreen compositing.
+ *
+ * ### Rendering Pipeline
+ *
+ * 1. `drawContent()` — renders the component's own content first.
+ * 2. Creates an outline from the current [shape] and builds a clip [Path].
+ * 3. Records into an offscreen [GraphicsLayer]:
+ *    - Clips to the shape outline.
+ *    - Draws the outline filled with [InnerShadow.color].
+ *    - Translates by the shadow offset and draws the outline again with
+ *      [ShadowMaskPaint] ([BlendMode.Clear]), erasing the offset region.
+ * 4. Applies a [BlurEffect] to the layer (cached by radius).
+ * 5. Draws the composited layer clipped to the original shape.
+ *
+ * ### Lifecycle
+ * - [onAttach] allocates the offscreen [GraphicsLayer] with [CompositingStrategy.Offscreen].
+ * - [onDetach] releases the layer back to the graphics context.
+ */
 private class InnerShadowNode(
     var shape: Shape,
     var shadow: () -> InnerShadow?,
@@ -157,6 +246,7 @@ private class InnerShadowNode(
     }
 }
 
+/** Paint configured with [BlendMode.Clear] to erase regions when drawing the shadow mask. */
 private val ShadowMaskPaint: Paint = Paint().apply {
     blendMode = BlendMode.Clear
 }

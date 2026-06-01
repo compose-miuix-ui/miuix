@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package component.liquid
+package top.yukonga.miuix.kmp.effect.liquid
 
 // Adapted from Kyant0/AndroidLiquidGlass — https://github.com/Kyant0/AndroidLiquidGlass (Apache 2.0).
 
@@ -13,12 +13,57 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 
 /**
- * Rounded-rect refraction lens with optional chromatic dispersion.
+ * Applies a rounded-rectangle refraction lens effect to the backdrop content.
  *
- * @param chromaticAberration Strength of the rim chromatic dispersion. `0` disables the
- *  effect (cheaper non-dispersion shader is used). Typical values: `0.1` for subtle,
- *  `0.2` for Apple-pill-like, `0.3+` for pronounced rainbow halo. The dispersion offset
- *  scales with the refraction depth so it concentrates at the rim band's outer edge.
+ * This effect simulates light refracting through a glass-like rounded rectangle,
+ * displacing the backdrop content inward from the edges to create a "lens" or
+ * "liquid glass" visual. The refraction follows the signed distance field (SDF)
+ * of the rounded rectangle, producing physically-motivated distortion that is
+ * strongest at the corners and edges.
+ *
+ * ### Chromatic Aberration
+ *
+ * When [chromaticAberration] is greater than zero, a separate dispersion shader is
+ * used that splits the refraction into 7 spectral bands (red, orange, yellow, green,
+ * cyan, blue, purple), each offset proportionally to produce a rainbow halo at the
+ * rim. The dispersion intensity scales with the refraction depth, concentrating the
+ * chromatic effect at the outer edge of the refraction band.
+ *
+ * ### Platform Requirements
+ *
+ * This effect requires runtime shader support ([isRuntimeShaderSupported]). On
+ * unsupported platforms, the call is a no-op.
+ *
+ * ### Usage
+ *
+ * ```kotlin
+ * Modifier.drawBackdrop(
+ *     backdrop = backdrop,
+ *     shape = { RoundedCornerShape(24.dp) },
+ *     effects = {
+ *         lens(
+ *             refractionHeight = 24.dp.toPx(),
+ *             refractionAmount = 24.dp.toPx(),
+ *             chromaticAberration = 0.2f,
+ *         )
+ *     },
+ * )
+ * ```
+ *
+ * @param refractionHeight Height (in pixels) of the refraction band measured inward
+ *   from the shape edge. Content within this band is displaced. Must be positive.
+ * @param refractionAmount Maximum displacement amount (in pixels) applied at the edge.
+ *   Higher values produce stronger distortion. Must be positive.
+ * @param depthEffect When `true`, adds a radial component to the refraction gradient
+ *   that pulls content toward the center, simulating convex lens depth.
+ *   Default: `false`.
+ * @param chromaticAberration Strength of the chromatic dispersion at the rim.
+ *   - `0f` disables dispersion entirely (uses the cheaper non-dispersion shader).
+ *   - `0.1f` produces subtle rainbow fringing.
+ *   - `0.2f` approximates Apple-style pill refraction.
+ *   - `0.3f+` produces pronounced rainbow halos.
+ *
+ *   Default: `0f` (disabled).
  */
 fun BackdropEffectScope.lens(
     refractionHeight: Float,
@@ -69,6 +114,15 @@ fun BackdropEffectScope.lens(
     }
 }
 
+/**
+ * Extracts the four corner radii from the current [BackdropEffectScope.shape] as a [FloatArray].
+ *
+ * Returns `[topLeft, topRight, bottomRight, bottomLeft]` in pixel units, clamped to
+ * half the minimum dimension. Returns `null` if the shape is not a [CornerBasedShape].
+ *
+ * Corner order respects [BackdropEffectScope.layoutDirection]: in RTL layouts,
+ * start/end corners are swapped.
+ */
 private fun BackdropEffectScope.roundedRectCornerRadii(): FloatArray? {
     val cornerShape = shape as? CornerBasedShape ?: return null
     val sizePx = size
@@ -86,6 +140,7 @@ private fun BackdropEffectScope.roundedRectCornerRadii(): FloatArray? {
     )
 }
 
+/** Shared SDF utilities for rounded-rectangle distance and gradient computation. */
 private const val ROUNDED_RECT_SDF = """
 float radiusAt(float2 coord, float4 radii) {
     if (coord.x >= 0.0) {
@@ -115,6 +170,13 @@ float2 gradSdRoundedRect(float2 coord, float2 halfSize, float radius) {
 }
 """
 
+/**
+ * SkSL shader for rounded-rectangle refraction without chromatic dispersion.
+ *
+ * Displaces backdrop content inward from the shape edges using a circle-map
+ * function applied to the SDF distance. The refraction direction follows the
+ * SDF gradient, with optional depth-effect radial bias.
+ */
 private const val ROUNDED_RECT_REFRACTION_SHADER = """
 uniform shader content;
 
@@ -151,6 +213,13 @@ half4 main(float2 coord) {
 }
 """
 
+/**
+ * SkSL shader for rounded-rectangle refraction with 7-band chromatic dispersion.
+ *
+ * Extends the base refraction shader by sampling the content texture at 7 spectral
+ * band offsets (red, orange, yellow, green, cyan, blue, purple), each displaced
+ * proportionally to the refraction depth and [chromaticAberration] strength.
+ */
 private const val ROUNDED_RECT_REFRACTION_WITH_DISPERSION_SHADER = """
 uniform shader content;
 

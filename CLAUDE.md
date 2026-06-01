@@ -35,6 +35,7 @@ Before committing, run `./gradlew spotlessCheck`; only run `./gradlew spotlessAp
 | `miuix-ui/`             | Main UI library                                               |
 | `miuix-preference/`     | Preference / menu / popup components                          |
 | `miuix-blur/`           | Blur effects (Android minSdk=33)                              |
+| `miuix-effect/`         | Visual effects (background gradient, liquid glass, animation) |
 | `miuix-icons/`          | Extended icon resources                                       |
 | `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip) |
 | `example/`              | Demo app                                                      |
@@ -67,6 +68,16 @@ Before committing, run `./gradlew spotlessCheck`; only run `./gradlew spotlessAp
 | `preference/` | Preference components (SwitchPreference, CheckboxPreference, …) |
 | `menu/`       | Dropdown menus (Overlay/Window variants, cascading)             |
 | `popup/`      | Dropdown popup primitives shared by menus                       |
+
+`miuix-effect/src/commonMain/kotlin/top/yukonga/miuix/kmp/effect/`:
+
+| Subdir        | Contents                                                        |
+| :------------ | :-------------------------------------------------------------- |
+| `bg/`         | Background gradient effect (`BgEffectBackground`, `DeviceType`, shader, painter, config) |
+| `liquid/`     | Liquid glass effects (refraction lens, vibrancy, inner shadow, combined backdrop) |
+| `animation/`  | Animation utilities (damped drag, interactive highlight)        |
+| `highlight/`  | Highlight configuration and sensor-driven container highlights  |
+| `blend/`      | Predefined color blend token lists                              |
 
 ### Platform Source Sets
 

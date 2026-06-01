@@ -64,8 +64,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import component.animation.DampedDragAnimation
-import component.animation.InteractiveHighlight
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -82,6 +80,14 @@ import top.yukonga.miuix.kmp.blur.highlight.LightSource
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.sensor.rememberDeviceTilt
+import top.yukonga.miuix.kmp.effect.animation.DampedDragAnimation
+import top.yukonga.miuix.kmp.effect.animation.InteractiveHighlight
+import top.yukonga.miuix.kmp.effect.liquid.CombinedBackdrop
+import top.yukonga.miuix.kmp.effect.liquid.InnerShadow
+import top.yukonga.miuix.kmp.effect.liquid.innerShadow
+import top.yukonga.miuix.kmp.effect.liquid.lens
+import top.yukonga.miuix.kmp.effect.liquid.rememberCombinedBackdrop
+import top.yukonga.miuix.kmp.effect.liquid.vibrancy
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform

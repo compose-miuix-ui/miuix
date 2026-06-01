@@ -45,6 +45,7 @@ include(":miuix-preference")
 include(":miuix-shader")
 include(":miuix-blur")
 include(":miuix-squircle")
+include(":miuix-effect")
 include(":miuix-icons")
 include(":miuix-navigation3-ui")
 

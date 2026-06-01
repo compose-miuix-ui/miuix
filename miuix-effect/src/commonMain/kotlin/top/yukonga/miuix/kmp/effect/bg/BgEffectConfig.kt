@@ -1,10 +1,45 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package component.effect
+package top.yukonga.miuix.kmp.effect.bg
 
+/**
+ * Configuration presets for the background gradient effect.
+ *
+ * Each [Config] defines the visual parameters for a specific combination of
+ * [DeviceType] (phone vs. pad) and theme (light vs. dark), for either the
+ * OS2 or OS3 effect variant. The configuration controls:
+ *
+ * - **Control points**: Four 3D points (x, y, radius) that define gradient anchors.
+ * - **Color palettes**: Three RGBA color arrays ([colors1], [colors2], [colors3]) that
+ *   cycle through animated interpolation, enabling smooth multi-palette transitions.
+ * - **Animation timing**: [colorInterpPeriod] controls the half-cycle duration of color
+ *   transitions; [pointOffset] controls the oscillation amplitude of control points.
+ * - **Post-processing**: [lightOffset] and [saturateOffset] modulate brightness and
+ *   saturation based on Perlin noise, producing the organic "breathing" effect.
+ *
+ * Configurations are selected via [BgEffectConfig.get] and are treated as immutable
+ * singletons to enable reference-equality caching in the rendering pipeline.
+ */
 internal object BgEffectConfig {
 
+    /**
+     * A set of visual parameters for the background gradient effect.
+     *
+     * @property points Control-point positions as a flat `FloatArray` of 12 values
+     *   (4 points × 3 components: x, y, radius). Coordinates are in UV space [0, 1].
+     * @property colors1 First RGBA color palette (16 floats = 4 colors × 4 components).
+     * @property colors2 Second RGBA color palette for interpolation.
+     * @property colors3 Third RGBA color palette for interpolation.
+     * @property colorInterpPeriod Half-cycle duration (in seconds) for color palette
+     *   transitions. A value of `5.0` means each palette-to-palette blend takes ~10s.
+     * @property lightOffset Noise-driven brightness shift. Positive values brighten;
+     *   negative values darken. Range: typically [-0.1, 0.1].
+     * @property saturateOffset Noise-driven saturation reduction strength.
+     *   `0.0` = no desaturation; `0.2` = moderate noise-driven desaturation.
+     * @property pointOffset Oscillation amplitude for animated control-point positions.
+     *   Higher values produce more movement. Range: typically [0.1, 0.4].
+     */
     internal class Config(
         val points: FloatArray,
         val colors1: FloatArray,
@@ -16,7 +51,7 @@ internal object BgEffectConfig {
         val pointOffset: Float,
     )
 
-    // OS2 Data
+    // ── OS2 Presets ────────────────────────────────────────────────────────
 
     private val OS2_PHONE_LIGHT_COLORS = floatArrayOf(
         0.57f, 0.76f, 0.98f, 1.0f, 0.98f, 0.85f, 0.68f, 1.0f, 0.98f, 0.75f, 0.93f, 1.0f, 0.73f, 0.70f, 0.98f, 1.0f,
@@ -74,7 +109,7 @@ internal object BgEffectConfig {
         pointOffset = 0.1f,
     )
 
-    // OS3 Data
+    // ── OS3 Presets ────────────────────────────────────────────────────────
 
     private val OS3_PHONE_LIGHT = Config(
         points = floatArrayOf(0.8f, 0.2f, 1.0f, 0.8f, 0.9f, 1.0f, 0.2f, 0.9f, 1.0f, 0.2f, 0.2f, 1.0f),
@@ -120,6 +155,15 @@ internal object BgEffectConfig {
         pointOffset = 0.2f,
     )
 
+    /**
+     * Returns the appropriate [Config] for the given device type, theme, and OS version.
+     *
+     * @param deviceType The form factor (phone or tablet).
+     * @param isDark Whether the system is in dark theme.
+     * @param isOs3 `true` for HyperOS 3 effect variant, `false` for HyperOS 2.
+     * @return A singleton [Config] instance. Callers may use reference equality (`===`)
+     *   to detect configuration changes.
+     */
     internal fun get(
         deviceType: DeviceType,
         isDark: Boolean,

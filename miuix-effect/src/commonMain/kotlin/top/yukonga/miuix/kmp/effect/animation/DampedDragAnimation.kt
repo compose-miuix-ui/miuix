@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package component.animation
+package top.yukonga.miuix.kmp.effect.animation
 
 // Adapted from Kyant0/AndroidLiquidGlass — https://github.com/Kyant0/AndroidLiquidGlass (Apache 2.0).
 
@@ -34,7 +34,72 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.time.TimeSource
 
-internal class DampedDragAnimation(
+/**
+ * A damped drag animation controller providing animated value tracking, press/release
+ * scale transitions, and velocity-aware spring physics.
+ *
+ * This class manages a multi-property animation system designed for interactive
+ * draggable UI elements (e.g., tab indicators, slider thumbs). It coordinates:
+ *
+ * - **Value animation**: Tracks the primary drag position within a [valueRange],
+ *   using critically-damped spring physics for smooth, momentum-based movement.
+ * - **Press progress**: An animated `[0, 1]` value indicating press state, useful
+ *   for driving visual feedback (e.g., highlight intensity, shadow depth).
+ * - **Scale animation**: Separate X/Y scale values that animate to [pressedScale]
+ *   on press and back to [initialScale] on release, with independent spring specs
+ *   for a tactile "squeeze" feel.
+ * - **Velocity tracking**: Continuously updated velocity normalized to the value
+ *   range span, enabling velocity-dependent visual effects (e.g., squash-and-stretch).
+ *
+ * ### Lifecycle
+ *
+ * 1. Create an instance with callbacks for drag events.
+ * 2. Apply [modifier] to the draggable component for gesture handling.
+ * 3. Read [value], [pressProgress], [scaleX], [scaleY], and [velocity] to drive
+ *    visual transforms in `graphicsLayer {}` or `drawWithContent {}`.
+ * 4. Call [animateToValue] to programmatically snap to a target (e.g., on tab selection).
+ *
+ * ### Usage
+ *
+ * ```kotlin
+ * val dampedDrag = remember(animationScope) {
+ *     DampedDragAnimation(
+ *         animationScope = animationScope,
+ *         initialValue = 0f,
+ *         valueRange = 0f..3f,
+ *         visibilityThreshold = 0.001f,
+ *         initialScale = 1f,
+ *         pressedScale = 1.4f,
+ *         onDragStopped = {
+ *             animateToValue(targetValue.roundToInt().toFloat())
+ *         },
+ *         onDrag = { _, dragAmount -> updateValue(targetValue + dragAmount.x) },
+ *     )
+ * }
+ *
+ * Box(
+ *     modifier = Modifier
+ *         .then(dampedDrag.modifier)
+ *         .graphicsLayer {
+ *             scaleX = dampedDrag.scaleX
+ *             scaleY = dampedDrag.scaleY
+ *         }
+ * )
+ * ```
+ *
+ * @param animationScope Coroutine scope for all animation coroutines.
+ * @param initialValue Starting value for the position animation.
+ * @param valueRange Allowed range for the position value.
+ * @param visibilityThreshold Minimum change considered visible (affects spring stiffness).
+ * @param initialScale Scale factor when not pressed.
+ * @param pressedScale Scale factor when fully pressed.
+ * @param canDrag Predicate determining whether a drag starting at the given offset
+ *   should be accepted. Return `false` to reject drags outside the interactive area.
+ * @param onDragStarted Called when a drag gesture begins.
+ * @param onDragStopped Called when a drag gesture ends or is cancelled.
+ * @param onDrag Called on each drag event with the component size and drag delta.
+ */
+class DampedDragAnimation(
     private val animationScope: CoroutineScope,
     val initialValue: Float,
     val valueRange: ClosedRange<Float>,
@@ -70,13 +135,30 @@ internal class DampedDragAnimation(
 
     private fun nowMillis(): Long = startMark.elapsedNow().inWholeMilliseconds
 
+    /** Current animated position value within [valueRange]. */
     val value: Float get() = valueAnimation.value
+
+    /** Target value the position animation is converging toward. */
     val targetValue: Float get() = valueAnimation.targetValue
+
+    /** Current press progress in range `[0, 1]`. `1f` = fully pressed. */
     val pressProgress: Float get() = pressProgressAnimation.value
+
+    /** Current horizontal scale factor. Animates toward [pressedScale] on press. */
     val scaleX: Float get() = scaleXAnimation.value
+
+    /** Current vertical scale factor. Animates toward [pressedScale] on press. */
     val scaleY: Float get() = scaleYAnimation.value
+
+    /** Current velocity, normalized to the [valueRange] span. */
     val velocity: Float get() = velocityAnimation.value
 
+    /**
+     * A [Modifier] that captures drag gestures and drives all animations.
+     *
+     * Must be applied to the interactive component. Handles pointer down (press),
+     * drag (value update), and pointer up (release) events.
+     */
     val modifier: Modifier = Modifier.pointerInput(Unit) {
         inspectDragGestures(
             onDragStart = { down ->
@@ -100,6 +182,10 @@ internal class DampedDragAnimation(
         }
     }
 
+    /**
+     * Initiates the press animation, transitioning scale and press progress to their
+     * pressed states. Cancels any in-progress release animation.
+     */
     fun press() {
         releaseJob?.cancel()
         pressJob?.cancel()
@@ -111,6 +197,10 @@ internal class DampedDragAnimation(
         }
     }
 
+    /**
+     * Initiates the release animation, waiting for the value to settle before
+     * transitioning scale and press progress back to their resting states.
+     */
     fun release() {
         releaseJob?.cancel()
         releaseJob = animationScope.launch {
@@ -127,6 +217,10 @@ internal class DampedDragAnimation(
         }
     }
 
+    /**
+     * Animates the position value toward [value], coereced to [valueRange].
+     * Uses spring physics with velocity tracking for momentum-based movement.
+     */
     fun updateValue(value: Float) {
         val targetValue = value.coerceIn(valueRange)
         animationScope.launch {
@@ -134,6 +228,12 @@ internal class DampedDragAnimation(
         }
     }
 
+    /**
+     * Programmatically animates to the given [value] (e.g., on tab selection).
+     *
+     * Presses, animates the position, optionally damps residual velocity, then
+     * releases. Uses [MutatorMutex] to cancel conflicting drag gestures.
+     */
     fun animateToValue(value: Float) {
         animationScope.launch {
             mutatorMutex.mutate {
@@ -158,7 +258,23 @@ internal class DampedDragAnimation(
     }
 }
 
-internal suspend fun PointerInputScope.inspectDragGestures(
+/**
+ * Custom drag gesture detector that provides drag start, drag, drag end, and drag
+ * cancel callbacks with proper multi-pointer handling.
+ *
+ * This differs from the standard `detectDragGestures` in that it:
+ * - Calls `onDragStart` with the initial down event (not a separate `onPress`).
+ * - Passes the initial down event to `onDrag` with `Offset.Zero` for immediate
+ *   visual feedback on pointer-down.
+ * - Supports pointer ID remapping when the original pointer goes up and another
+ *   pointer is already down.
+ *
+ * @param onDragStart Called with the first pointer-down event.
+ * @param onDragEnd Called when the active pointer goes up.
+ * @param onDragCancel Called when the gesture is cancelled (e.g., pointer consumed).
+ * @param onDrag Called on each drag event with the pointer change and drag delta.
+ */
+suspend fun PointerInputScope.inspectDragGestures(
     onDragStart: (down: PointerInputChange) -> Unit = {},
     onDragEnd: (change: PointerInputChange) -> Unit = {},
     onDragCancel: () -> Unit = {},
