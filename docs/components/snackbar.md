@@ -89,15 +89,17 @@ These helpers allow you to manually dismiss the newest or oldest visible Snackba
 fun SnackbarHost(
     state: SnackbarHostState,
     modifier: Modifier = Modifier,
+    canSwipeToDismiss: Boolean = true,
     content: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 )
 ```
 
-| Parameter Name | Type                               | Description                            | Default Value        | Required |
-| -------------- | ---------------------------------- | -------------------------------------- | -------------------- | -------- |
-| state          | SnackbarHostState                  | State that holds the Snackbar queue    | -                    | Yes      |
-| modifier       | Modifier                           | Modifier applied to the host container | Modifier             | No       |
-| content        | @Composable (SnackbarData) -> Unit | Custom content for each Snackbar item  | `{ Snackbar(it) }` | No       |
+| Parameter Name    | Type                               | Description                                | Default Value        | Required |
+| ----------------- | ---------------------------------- | ------------------------------------------ | -------------------- | -------- |
+| state             | SnackbarHostState                  | State that holds the Snackbar queue        | -                    | Yes      |
+| modifier          | Modifier                           | Modifier applied to the host container     | Modifier             | No       |
+| canSwipeToDismiss | Boolean                            | Whether Snackbars can be dismissed by swipe | true                | No       |
+| content           | @Composable (SnackbarData) -> Unit | Custom content for each Snackbar item      | `{ Snackbar(it) }` | No       |
 
 In most cases you can keep the default `content` which uses the built‑in `Snackbar` composable.
 

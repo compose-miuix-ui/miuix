@@ -3,18 +3,17 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
-import androidx.compose.ui.graphics.asSkiaColorFilter
+import androidx.compose.ui.graphics.skiaImageFilter
 import org.jetbrains.skia.ImageFilter
-import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asSkikoRuntimeShader
+import top.yukonga.miuix.kmp.shader.RuntimeShader
+import top.yukonga.miuix.kmp.shader.asSkikoRuntimeShader
 
 internal actual fun RenderEffect?.chain(other: RenderEffect): RenderEffect = if (this != null) {
     ImageFilter.makeCompose(
-        other.asSkiaImageFilter(),
-        this.asSkiaImageFilter(),
+        other.skiaImageFilter,
+        this.skiaImageFilter,
     ).asComposeRenderEffect()
 } else {
     other
@@ -26,14 +25,5 @@ internal actual fun runtimeShaderEffect(
 ): RenderEffect = ImageFilter.makeRuntimeShader(
     runtimeShader.asSkikoRuntimeShader(),
     uniformShaderName,
-    null,
-).asComposeRenderEffect()
-
-internal actual fun colorFilterEffect(
-    renderEffect: RenderEffect?,
-    colorFilter: ColorFilter,
-): RenderEffect = ImageFilter.makeColorFilter(
-    colorFilter.asSkiaColorFilter(),
-    renderEffect?.asSkiaImageFilter(),
     null,
 ).asComposeRenderEffect()

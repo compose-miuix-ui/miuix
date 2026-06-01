@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,14 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -46,45 +44,35 @@ fun FloatingToolbar(
     showDivider: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val density = LocalDensity.current
-    val shape = RoundedCornerShape(cornerRadius)
+    val shape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
     val dividerColor = MiuixTheme.colorScheme.dividerLine
 
-    val layerOrClipModifier = remember(shadowElevation, shape, density) {
-        when {
-            shadowElevation > 0.dp -> {
-                Modifier.dropShadow(
-                    shape = shape,
-                    shadow = Shadow(
-                        radius = 10.dp,
-                        color = Color.Black,
-                        alpha = 0.1f,
-                    ),
-                ).clip(shape)
-            }
-
-            else -> Modifier
-        }
+    val dividerMod = if (showDivider) {
+        Modifier
+            .squircleBackground(color = dividerColor, cornerRadius = cornerRadius)
+            .padding(0.75.dp)
+    } else {
+        Modifier
     }
-    val dividerModifier = remember(showDivider, shape, dividerColor) {
-        if (showDivider) {
-            Modifier
-                .background(
-                    color = dividerColor,
-                    shape = shape,
-                )
-                .padding(0.75.dp)
-        } else {
-            Modifier
-        }
+    val shadowMod = if (shadowElevation > 0.dp) {
+        Modifier.dropShadow(
+            shape = shape,
+            shadow = Shadow(
+                radius = 10.dp,
+                color = Color.Black,
+                alpha = 0.1f,
+            ),
+        )
+    } else {
+        Modifier
     }
 
     Box(
         modifier = modifier
             .padding(outSidePadding)
-            .then(dividerModifier)
-            .then(layerOrClipModifier)
-            .background(color = color, shape = shape)
+            .then(dividerMod)
+            .then(shadowMod)
+            .squircleBackground(color = color, cornerRadius = cornerRadius)
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
             },

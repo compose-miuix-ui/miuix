@@ -10,9 +10,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
+    id("module.kotlin-jvm-toolchain")
+    id("module.spotless")
 }
 
 val generatedSrcDir: Provider<Directory> = layout.buildDirectory.dir("generated/miuix-example")
+
+group = BuildConfig.LIBRARY_ID
 
 kotlin {
     android {
@@ -53,6 +57,8 @@ kotlin {
         browser()
     }
 
+    applyMiuixSourceSetHierarchy()
+
     sourceSets {
         commonMain {
             kotlin.srcDir(generatedSrcDir.map { it.dir("kotlin") })
@@ -61,6 +67,7 @@ kotlin {
                 api(projects.miuixPreference)
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.miuixBlur)
+                implementation(projects.miuixSquircle)
                 implementation(projects.miuixEffect)
                 implementation(projects.miuixIcons)
                 implementation(projects.miuixNavigation3Ui)
@@ -70,50 +77,6 @@ kotlin {
                 implementation(libs.kotlinx.serialization.core)
             }
         }
-
-        val skikoMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val darwinMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        val iosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        iosArm64Main {
-            dependsOn(iosMain)
-        }
-
-        iosSimulatorArm64Main {
-            dependsOn(iosMain)
-        }
-
-        val macosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        macosArm64Main {
-            dependsOn(macosMain)
-        }
-
-        named("desktopMain") {
-            dependsOn(skikoMain)
-        }
-
-        val webMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
-            dependsOn(webMain)
-        }
     }
 }
 
@@ -122,6 +85,7 @@ compose.resources {
 }
 
 val generateVersionInfo by tasks.registering(GenerateVersionInfoTask::class) {
+    description = "GenerateVersionInfoTask"
     versionName.set(BuildConfig.APPLICATION_VERSION_NAME)
     versionCode.set(getGitVersionCode())
     outputFile.set(generatedSrcDir.map { it.file("kotlin/misc/VersionInfo.kt") })

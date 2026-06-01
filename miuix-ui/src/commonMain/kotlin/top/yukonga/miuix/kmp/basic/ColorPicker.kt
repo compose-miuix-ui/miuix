@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.color.api.toHsv
@@ -1218,7 +1219,7 @@ private fun ColorSlider(
     ) {
         SliderIndicator(
             modifier = Modifier.align(Alignment.CenterStart),
-            value = value,
+            valueProvider = { value },
             sliderWidth = maxWidth,
             sliderSizePx = sliderHeightPx,
             indicatorSize = indicatorSizeDp,
@@ -1228,23 +1229,21 @@ private fun ColorSlider(
 
 @Composable
 private fun SliderIndicator(
-    value: Float,
+    valueProvider: () -> Float,
     sliderWidth: Dp,
     sliderSizePx: Float,
     indicatorSize: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val density = LocalDensity.current
-    val indicatorOffsetXDp = with(density) {
-        val sliderWidthPx = sliderWidth.toPx()
-        val effectiveWidthPx = sliderWidthPx - sliderSizePx
-        val indicatorPositionPx = (value * effectiveWidthPx) + (sliderSizePx / 2)
-        indicatorPositionPx.toDp() - (indicatorSize / 2)
-    }
-
     Box(
         modifier = modifier
-            .offset(x = indicatorOffsetXDp)
+            .offset {
+                val sliderWidthPx = sliderWidth.toPx()
+                val effectiveWidthPx = sliderWidthPx - sliderSizePx
+                val indicatorPositionPx = (valueProvider() * effectiveWidthPx) + (sliderSizePx / 2)
+                val indicatorOffsetXDp = indicatorPositionPx.toDp() - (indicatorSize / 2)
+                IntOffset(indicatorOffsetXDp.roundToPx(), 0)
+            }
             .size(indicatorSize)
             .drawWithCache {
                 val strokeWidth = 6.dp.toPx()

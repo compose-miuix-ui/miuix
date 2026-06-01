@@ -43,7 +43,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -68,7 +68,7 @@ fun NavTestPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val blurSupported = isRenderEffectSupported()
+    val blurSupported = isRuntimeShaderSupported()
     val surfaceColor = MiuixTheme.colorScheme.surface
     val backdrop = if (blurSupported) {
         rememberLayerBackdrop {
@@ -108,9 +108,10 @@ fun NavTestPage(
         val contentPadding = pageContentPadding(
             innerPadding,
             padding,
-            isWideScreen,
+            true,
             extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+            extraBottom = 12.dp,
         )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
@@ -137,8 +138,7 @@ fun NavTestPage(
                 item(key = "nav_layout") {
                     Card(
                         modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp),
+                            .padding(horizontal = 12.dp),
                     ) {
                         ArrowPreference(
                             title = "Long Long Long Long Long Title",

@@ -3,18 +3,19 @@
 
 package top.yukonga.miuix.kmp.blur
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
-import top.yukonga.miuix.kmp.blur.internal.MI_BLEND_MODE_SHADER
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeDownScaleParams
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
-private const val MAX_BLEND_LAYERS = 8
+internal const val MAX_BLEND_LAYERS = 8
 
 /**
  * Chains a separable Blur into the scope's [BackdropEffectScope.renderEffect],
@@ -33,21 +34,36 @@ private const val MAX_BLEND_LAYERS = 8
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     if (!isRuntimeShaderSupported()) return
-
-    // Pre-compute downscale factor to set padding before creating the effect.
     val sigmaMax = maxOf(radiusX, radiusY) * BLUR_RADIUS_TO_SIGMA
     val sf = computeDownScaleParams(sigmaMax).downScale
 
-    // Padding covers the blur kernel's maximum sampling reach in original
-    // pixel space. Keeps recording dimensions stable across radius changes
-    // within the same downscale level.
+    // Padding covers the kernel reach in source pixels so recording size stays
+    // stable across radius changes within the same downscale level.
     val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
     if (kernelPadding > padding) {
         padding = kernelPadding
     }
 
-    val paddedSize = Size(size.width + padding * 2f, size.height + padding * 2f)
-    val result = createBlurEffect(radiusX, radiusY, paddedSize, this) ?: return
+    val paddedW = size.width + padding * 2f
+    val paddedH = size.height + padding * 2f
+
+    val scope = impl
+    val result = if (scope.cachedBlurResult != null &&
+        scope.cachedBlurRadiusX == radiusX &&
+        scope.cachedBlurRadiusY == radiusY &&
+        scope.cachedBlurSizeW == paddedW &&
+        scope.cachedBlurSizeH == paddedH
+    ) {
+        scope.cachedBlurResult
+    } else {
+        createBlurEffect(radiusX, radiusY, Size(paddedW, paddedH), scope).also {
+            scope.cachedBlurRadiusX = radiusX
+            scope.cachedBlurRadiusY = radiusY
+            scope.cachedBlurSizeW = paddedW
+            scope.cachedBlurSizeH = paddedH
+            scope.cachedBlurResult = it
+        }
+    } ?: return
 
     downscaleFactor = result.downscaleFactor
     renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect
@@ -71,51 +87,53 @@ fun BackdropEffectScope.noiseDither(coefficient: Float) {
  */
 fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
-    if (!isRuntimeShaderSupported()) return
 
-    val layers = colors.blendColors.take(MAX_BLEND_LAYERS)
+    val layerList = colors.blendColors
+    val layerCount = minOf(layerList.size, MAX_BLEND_LAYERS)
+    val scope = impl
+    val modes = scope.blendModesBuffer
+    val colorData = scope.blendColorsBuffer
+
+    val needsExtended = (0 until layerCount).any { layerList[it].mode.value >= 100 }
+    val shaderKey = if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd"
+    val shaderSource = if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD
 
     runtimeShaderEffect(
-        key = "MiBlendModes",
-        shaderString = MI_BLEND_MODE_SHADER,
+        key = shaderKey,
+        shaderString = shaderSource,
         uniformShaderName = "child",
     ) {
-        setFloatUniform("layerCount", layers.size.toFloat())
+        setFloatUniform("layerCount", layerCount.toFloat())
 
-        // Pack blend modes as float array (Skiko lacks IntArray uniform support)
-        val modes = FloatArray(MAX_BLEND_LAYERS)
-        for (i in layers.indices) {
-            modes[i] = layers[i].mode.value.toFloat()
-        }
-        setFloatUniform("blendModes", modes)
-
-        // Pack colors as flat float array with premultiplied alpha
-        // (array-indexed setColorUniform is not supported on Android/Skiko)
-        val colorData = FloatArray(MAX_BLEND_LAYERS * 4)
-        for (i in layers.indices) {
-            val c = layers[i].color.convert(ColorSpaces.Srgb)
+        // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
+        // Zero unused trailing slots to avoid stale state from a previous invocation.
+        for (i in 0 until layerCount) {
+            val entry = layerList[i]
+            modes[i] = entry.mode.value.toFloat()
+            val c = entry.color.convert(ColorSpaces.Srgb)
             val a = c.alpha
             colorData[i * 4] = c.red * a
             colorData[i * 4 + 1] = c.green * a
             colorData[i * 4 + 2] = c.blue * a
             colorData[i * 4 + 3] = a
         }
+        for (i in layerCount until MAX_BLEND_LAYERS) {
+            modes[i] = 0f
+            colorData[i * 4] = 0f
+            colorData[i * 4 + 1] = 0f
+            colorData[i * 4 + 2] = 0f
+            colorData[i * 4 + 3] = 0f
+        }
+        setFloatUniform("blendModes", modes)
         setFloatUniform("layerColors", colorData)
-        setFloatUniform("uSaturation", colors.saturation)
-        setFloatUniform("uBrightness", colors.brightness)
-        setFloatUniform("uLuminanceAmount", 0f)
-        setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
+        // Standard family doesn't declare these uniforms; setting them would error.
+        if (needsExtended) {
+            setFloatUniform("uSaturation", colors.saturation)
+            setFloatUniform("uBrightness", colors.brightness)
+            setFloatUniform("uLuminanceAmount", 0f)
+            setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
+        }
     }
-}
-
-/**
- * Convenience: chains a single blend color layer with the given [mode].
- *
- * Each call adds an independent shader pass; for batch-blending many layers
- * (≥ 3) prefer a single [blendColors] call with a packed [BlurColors] instead.
- */
-fun BackdropEffectScope.blendColor(color: Color, mode: BlurBlendMode = BlurBlendMode.SrcOver) {
-    blendColors(BlurColors(blendColors = listOf(BlendColorEntry(color, mode))))
 }
 
 /**

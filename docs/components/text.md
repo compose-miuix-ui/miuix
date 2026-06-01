@@ -171,6 +171,31 @@ Text(
 )
 ```
 
+### Frequently Changing Color
+
+Both `Text(String, ...)` and `Text(AnnotatedString, ...)` have a companion overload that takes a `ColorProducer` instead of a `Color`:
+
+```kotlin
+fun Text(text: String, color: ColorProducer, modifier: Modifier = Modifier, ...)
+fun Text(text: AnnotatedString, color: ColorProducer, modifier: Modifier = Modifier, ...)
+```
+
+All other parameters are identical to the tables above. The producer is read directly during draw, so when the text color changes on every frame (animations, scroll listeners, gesture-driven values), the `Text` itself is not recomposed:
+
+```kotlin
+val scrollState = rememberScrollState()
+Text(
+    text = "Scroll-tinted text",
+    color = {
+        lerp(
+            MiuixTheme.colorScheme.onSurface,
+            MiuixTheme.colorScheme.primary,
+            (scrollState.value / 500f).coerceIn(0f, 1f),
+        )
+    },
+)
+```
+
 ### Clickable Links
 
 Use `AnnotatedString` with `LinkAnnotation` to create clickable links:

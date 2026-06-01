@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -57,7 +56,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  *   switching across recompositions will allocate a new internal source and lose pending interactions.
  */
 @Composable
-@NonRestartableComposable
 fun BasicComponent(
     modifier: Modifier = Modifier,
     title: String? = null,

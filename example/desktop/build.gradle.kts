@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
+    id("module.kotlin-jvm-toolchain")
+    id("module.spotless")
 }
 
 kotlin {
@@ -25,9 +27,6 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "Main_desktopKt"
-        buildTypes.release.proguard {
-            configurationFiles.from("proguard-rules-desktop.pro")
-        }
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = BuildConfig.APPLICATION_NAME

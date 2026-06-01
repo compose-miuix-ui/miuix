@@ -6,23 +6,21 @@ package top.yukonga.miuix.kmp.blur.internal
 /** Builds a separable Blur shader with [tapCount] symmetric tap pairs (1..7). */
 internal fun buildBlurShader(tapCount: Int): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
-    val offsetSize = tapCount * 2
     return """
     uniform shader child;
-    uniform float in_blurOffset[$offsetSize];
+    uniform float2 in_blurOffset[$tapCount];
     uniform float in_blurWeight[$tapCount];
-    uniform float2 in_texSize;
+    uniform float2 in_maxCoord;
 
     half4 main(float2 xy) {
         half4 color = half4(0);
-        float2 maxCoord = in_texSize - 0.5;
         for (int i = 0; i < $tapCount; i++) {
-            float2 offset = float2(in_blurOffset[i], in_blurOffset[i + $tapCount]);
-            float2 c1 = clamp(xy + offset, float2(0.5), maxCoord);
-            float2 c2 = clamp(xy - offset, float2(0.5), maxCoord);
+            float2 offset = in_blurOffset[i];
+            float2 c1 = clamp(xy + offset, float2(0.5), in_maxCoord);
+            float2 c2 = clamp(xy - offset, float2(0.5), in_maxCoord);
             color += (child.eval(c1) + child.eval(c2)) * half(in_blurWeight[i]);
         }
-        if (color.a > 0.001) {
+        if (color.a > 0.0039) {
             return half4(color.rgb / color.a, 1.0);
         }
         return color;
@@ -32,6 +30,11 @@ internal fun buildBlurShader(tapCount: Int): String {
 
 /** Maximum number of tap pairs for the Blur shader. */
 internal const val MAX_BLUR_TAPS = 7
+
+/** Pre-built per-tap-count shader sources; index 0 is unused. */
+internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
+    if (i == 0) "" else buildBlurShader(i)
+}
 
 /**
  * Brightness / contrast / saturation adjustment.
@@ -78,75 +81,53 @@ internal const val COLOR_CONTROLS_SHADER = """
     }
 """
 
-/**
- * Noise dithering shader — 3-channel pseudo-random anti-banding.
- */
+/** Noise dithering shader — 3-channel pseudo-random anti-banding. */
 internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
     uniform float noise_coeff;
 
-    float random1(float2 st) {
-        return fract(sin(dot(st.xy, float2(6.9898, 78.233))) * 43734.5453);
-    }
-    float random2(float2 st) {
-        return fract(sin(dot(st.xy, float2(7.9898, 78.233))) * 43745.5453);
-    }
-    float random3(float2 st) {
-        return fract(sin(dot(st.xy, float2(8.9898, 78.233))) * 43767.5453);
-    }
-
     half4 main(float2 xy) {
-        float noise1 = (random1(xy) - 0.5) * noise_coeff;
-        float noise2 = (random2(xy) - 0.5) * noise_coeff;
-        float noise3 = (random3(xy) - 0.5) * noise_coeff;
+        float3 d = float3(
+            dot(xy, float2(6.9898, 78.233)),
+            dot(xy, float2(7.9898, 78.233)),
+            dot(xy, float2(8.9898, 78.233))
+        );
+        float3 n = (fract(sin(d) * float3(43734.5453, 43745.5453, 43767.5453)) - 0.5) * noise_coeff;
         half4 color = child.eval(xy);
-        color.rg += half2(noise1);
-        color.rb += half2(noise2);
-        color.gb += half2(noise3);
+        color.rg += half2(n.x);
+        color.rb += half2(n.y);
+        color.gb += half2(n.z);
         return color;
     }
 """
 
-/** 2× downsample with a 4-point box filter (uniforms: `child`, `imageWH[2]`). */
+/** 2× downsample — 4-tap ±0.25 dual-filter, 9-tap tent footprint. */
 internal const val DOWNSAMPLE_2X_SHADER = """
     uniform shader child;
-    uniform float imageWH[2];
+    uniform float2 maxCoord;
     half4 main(float2 xy) {
-        float2 center = float2(xy.x - 0.5, xy.y - 0.5);
-        center = clamp(center, float2(0), float2(imageWH[0] - 1, imageWH[1] - 1));
-        float4 color = float4(child.eval(center + float2(0.25, 0.25)));
-        color += float4(child.eval(center + float2(0.25, 0.75)));
-        color += float4(child.eval(center + float2(0.75, 0.25)));
-        color += float4(child.eval(center + float2(0.75, 0.75)));
-        return half4(color * 0.25);
+        float2 minCoord = float2(0.5);
+        half4 color = half4(0);
+        color += child.eval(clamp(xy + float2(-0.25, -0.25), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 0.25, -0.25), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2(-0.25,  0.25), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 0.25,  0.25), minCoord, maxCoord));
+        return color * 0.25;
     }
 """
 
-/** 4× downsample with a 16-tap 4×4 grid box filter (uniforms: `child`, `imageWH[2]`). */
+/** 4× downsample — 4-tap ±0.75 dual-filter, 16-tap tent footprint. */
 internal const val DOWNSAMPLE_4X_SHADER = """
     uniform shader child;
-    uniform float imageWH[2];
+    uniform float2 maxCoord;
     half4 main(float2 xy) {
-        float2 center = float2(xy.x - 0.5, xy.y - 0.5);
-        center = clamp(center, float2(0), float2(imageWH[0] - 1, imageWH[1] - 1));
-        float4 color = float4(0);
-        color += float4(child.eval(center + float2(0.125, 0.125)));
-        color += float4(child.eval(center + float2(0.125, 0.375)));
-        color += float4(child.eval(center + float2(0.125, 0.625)));
-        color += float4(child.eval(center + float2(0.125, 0.875)));
-        color += float4(child.eval(center + float2(0.375, 0.125)));
-        color += float4(child.eval(center + float2(0.375, 0.375)));
-        color += float4(child.eval(center + float2(0.375, 0.625)));
-        color += float4(child.eval(center + float2(0.375, 0.875)));
-        color += float4(child.eval(center + float2(0.625, 0.125)));
-        color += float4(child.eval(center + float2(0.625, 0.375)));
-        color += float4(child.eval(center + float2(0.625, 0.625)));
-        color += float4(child.eval(center + float2(0.625, 0.875)));
-        color += float4(child.eval(center + float2(0.875, 0.125)));
-        color += float4(child.eval(center + float2(0.875, 0.375)));
-        color += float4(child.eval(center + float2(0.875, 0.625)));
-        color += float4(child.eval(center + float2(0.875, 0.875)));
-        return half4(color * (1.0/16.0));
+        float2 minCoord = float2(0.5);
+        half4 color = half4(0);
+        color += child.eval(clamp(xy + float2(-0.75, -0.75), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 0.75, -0.75), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2(-0.75,  0.75), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 0.75,  0.75), minCoord, maxCoord));
+        return color * 0.25;
     }
 """
 
@@ -155,20 +136,23 @@ internal const val DOWNSAMPLE_4X_SHADER = """
  * then a 3D hemispheric normal is built along the rounded edge so that the directional
  * lights paint the inner halo.
  *
- * Two shading modes, selected per call by the `useDualPeak` uniform:
+ * Two specializations selected at build time by [dualPeak]:
  *
- *  - `useDualPeak = 0` (default): each light's hemisphere is derived from its own
- *    projected XY direction (`normalize(lightDir.xy)`); a positive cosine factor between
- *    the rim normal and that hemisphere axis gates the light's contribution. Lights
- *    pointing purely along Z fall back to the upper / lower split `(0, ∓1, 0)` for
- *    backwards compatibility with overhead-only configurations. Single peak per light.
+ *  - `dualPeak = false`: each light's hemisphere is derived from its own projected XY
+ *    direction (`normalize(lightDir.xy)`); a positive cosine factor between the rim
+ *    normal and that hemisphere axis gates the light's contribution. Lights pointing
+ *    purely along Z fall back to the upper / lower split `(0, ∓1, 0)` for backwards
+ *    compatibility with overhead-only configurations. Single peak per light.
  *
- *  - `useDualPeak = 1`: each light contributes via `dot(N.xy, L.xy)²` (xy-only dot²),
+ *  - `dualPeak = true`: each light contributes via `dot(N.xy, L.xy)²` (xy-only dot²),
  *    so a single light produces two rim peaks 180° apart (where `n.xy` aligns and
  *    anti-aligns with `L.xy`) and naturally drops to zero perpendicular to `L.xy` and
  *    on the interior surface (where `n.xy → 0`). Matches the specular rim model used
  *    by Apple-style Liquid Glass demos; pair with a zero-intensity second light to get
  *    the canonical "two opposing peaks rotating with the light direction".
+ *
+ * Selecting the path at build time lets the driver compile out the unused branch and
+ * removes the `useDualPeak > 0.5` per-fragment comparison.
  *
  * Light directions are pre-normalized on the CPU side: `dir = normalize((srcX-0.5,
  * srcY-0.7, srcZ))`, where `(0.5, 0.7, 0)` is the reference origin.
@@ -177,11 +161,40 @@ internal const val DOWNSAMPLE_4X_SHADER = """
  * contributions, `result.a = outMask`, all multiplied by the rounded-rect outer mask.
  * Compose `BlendMode.Plus` then adds these contributions onto the surface below.
  */
-internal const val BLOOM_STROKE_SHADER = """
-uniform float2 size;
+internal fun buildBloomStrokeShader(dualPeak: Boolean): String {
+    val axisUniforms = if (dualPeak) {
+        ""
+    } else {
+        """
+uniform float2 axis1;
+uniform float2 axis2;
+"""
+    }
+    val lightBlock = if (dualPeak) {
+        """
+    float l1 = dot(n.xy, lightDir1.xy);
+    rgb += half(l1 * l1 * lightIntensity1) * lightColor1.rgb;
+    float l2 = dot(n.xy, lightDir2.xy);
+    rgb += half(l2 * l2 * lightIntensity2) * lightColor2.rgb;
+"""
+    } else {
+        """
+    float falloff1 = max(dot(float3(axis1, 0.0), n), 0.0);
+    float light1 = clamp(dot(n, lightDir1) * falloff1, 0.0, 1.0);
+    rgb += half(light1 * light1 * lightIntensity1) * lightColor1.rgb;
+
+    float falloff2 = max(dot(float3(axis2, 0.0), n), 0.0);
+    float light2 = clamp(dot(n, lightDir2) * falloff2, 0.0, 1.0);
+    rgb += half(light2 * light2 * lightIntensity2) * lightColor2.rgb;
+"""
+    }
+    return """
+uniform float2 halfView;
+uniform float2 halfViewFloor;
 uniform float4 cornerRadii;
 uniform float strokeWidth;
 uniform float innerBlurRadius;
+uniform float innerBlurRadiusSq;
 uniform float highlightAlpha;
 
 layout(color) uniform half4 strokeColor;
@@ -194,25 +207,24 @@ uniform float lightIntensity1;
 uniform float3 lightDir2;
 layout(color) uniform half4 lightColor2;
 uniform float lightIntensity2;
-
-uniform float useDualPeak;
-
-float pickRadius(float2 fragCoord, float2 halfView, float4 radii) {
+$axisUniforms
+float pickRadius(float2 fragCoord, float4 radii) {
     float2 up = fragCoord.y < halfView.y ? radii.xy : radii.zw;
     return fragCoord.x < halfView.x ? up.x : up.y;
 }
 
+// caller passes non-negative pos (already abs-folded), so skip the redundant abs.
 float roundedBoxSDF(float2 pos, float2 halfSize, float radius) {
     radius = min(radius, min(halfSize.x, halfSize.y));
-    float2 d = abs(pos) - halfSize + radius;
+    float2 d = pos - halfSize + radius;
     return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - radius;
 }
 
-float3 getNormal(float2 fragCoord, float2 halfView, float sdf, float R, float innerR) {
-    float2 xy = fragCoord - floor(halfView);
+float3 getNormal(float2 fragCoord, float sdf, float R) {
+    float2 xy = fragCoord - halfViewFloor;
     float2 xy_a = abs(xy);
-    float t = smoothstep(-innerR, 0.0, sdf);
-    float z = sqrt(max(innerR * innerR - t * t, 0.0));
+    float t = smoothstep(-innerBlurRadius, 0.0, sdf);
+    float z = sqrt(max(innerBlurRadiusSq - t * t, 0.0));
     float3 coord = float3(xy_a, -z);
 
     float2 corner = halfView - R;
@@ -220,7 +232,7 @@ float3 getNormal(float2 fragCoord, float2 halfView, float sdf, float R, float in
     corner.y = min(corner.y, xy_a.y);
 
     float2 dir = normalize(coord.xy - corner.xy);
-    corner += dir * (R - innerR);
+    corner += dir * (R - innerBlurRadius);
 
     if (any(lessThan(xy_a, corner))) {
         return float3(0.0, 0.0, -1.0);
@@ -233,10 +245,9 @@ float3 getNormal(float2 fragCoord, float2 halfView, float sdf, float R, float in
 }
 
 half4 main(float2 fragCoord) {
-    float2 halfView = size * 0.5;
     float2 xy = abs(fragCoord - halfView);
 
-    float originRadius = pickRadius(fragCoord, halfView, cornerRadii);
+    float originRadius = pickRadius(fragCoord, cornerRadii);
     float R = max(originRadius, innerBlurRadius);
 
     if (all(lessThan(xy, halfView - R))) {
@@ -251,58 +262,53 @@ half4 main(float2 fragCoord) {
     //       = strokeColor.rgb * strokeColor.a * sa^2
     half3 rgb = strokeColor.rgb * half(strokeAlphaMul * strokeAlpha * strokeAlpha);
 
-    float3 n = getNormal(fragCoord, halfView, sdf, R, innerBlurRadius);
-
-    if (useDualPeak > 0.5) {
-        // 2D dot² model: only the xy components of the rim normal and light direction
-        // contribute, so a single light yields two rim peaks 180° apart (where n.xy
-        // aligns / anti-aligns with L.xy) and naturally drops to zero perpendicular to
-        // L.xy and on the interior surface (where n.xy → 0). Pair with a zero-intensity
-        // secondary to mirror the Apple-style single-rim specular sweep.
-        float l1 = dot(n.xy, lightDir1.xy);
-        rgb += half(l1 * l1 * lightIntensity1) * lightColor1.rgb;
-        float l2 = dot(n.xy, lightDir2.xy);
-        rgb += half(l2 * l2 * lightIntensity2) * lightColor2.rgb;
-    } else {
-        // Hemisphere axis follows each light's own xy direction so the rim peak rotates
-        // with the light. When the light is purely along Z (xy magnitude < 1e-3) we fall
-        // back to the canonical upper / lower split for backwards compatibility.
-        float xyLen1 = length(lightDir1.xy);
-        float2 axis1 = xyLen1 > 1e-3 ? lightDir1.xy / xyLen1 : float2(0.0, -1.0);
-        float falloff1 = max(dot(float3(axis1, 0.0), n), 0.0);
-        float light1 = clamp(dot(n, lightDir1) * falloff1, 0.0, 1.0);
-        rgb += half(light1 * light1 * lightIntensity1) * lightColor1.rgb;
-
-        float xyLen2 = length(lightDir2.xy);
-        float2 axis2 = xyLen2 > 1e-3 ? lightDir2.xy / xyLen2 : float2(0.0, 1.0);
-        float falloff2 = max(dot(float3(axis2, 0.0), n), 0.0);
-        float light2 = clamp(dot(n, lightDir2) * falloff2, 0.0, 1.0);
-        rgb += half(light2 * light2 * lightIntensity2) * lightColor2.rgb;
-    }
-
+    float3 n = getNormal(fragCoord, sdf, R);
+$lightBlock
     return half4(rgb * half(highlightAlpha), 1.0) * outMask;
 }
 """
+}
+
+internal val BLOOM_STROKE_SHADER_SINGLE: String = buildBloomStrokeShader(dualPeak = false)
+internal val BLOOM_STROKE_SHADER_DUAL: String = buildBloomStrokeShader(dualPeak = true)
 
 /**
- * Multi-layer blend mode dispatch. Standard Porter-Duff / separable / non-separable modes
- * (0-31) plus extended modes (100-121, 200-203) covering Lab operations, linear light,
- * alpha-aware plus darker/lighter, and brightness/saturation/luminance curves.
+ * Builds the multi-layer blend mode shader, optionally including the extended-mode helpers.
+ *
+ * - `includeExtended = false` (all layers have `mode <= 28`): emits only the Porter-Duff /
+ *   separable / non-separable HSL functions + `doBlend` dispatch + a flat `main` loop. The
+ *   Lab color-space helpers, `pow()`-heavy conversions and the `getBlendModeColor` dispatch
+ *   are omitted entirely, shrinking the program and freeing the register budget the driver
+ *   would otherwise reserve for the longest path.
+ * - `includeExtended = true` (any layer has `mode > 28`): emits the full set, identical to
+ *   the prior monolithic shader.
+ *
+ * The standard family is the common case — keeping it lean lifts move-GPU occupancy on
+ * Adreno / Mali where Lab path register pressure otherwise capped warp parallelism.
  */
-internal const val MI_BLEND_MODE_SHADER = """
+internal fun buildBlendModeShader(includeExtended: Boolean): String = buildString {
+    append(BLEND_MODE_SHADER_HEADER)
+    if (includeExtended) {
+        append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
+        append(BLEND_MODE_SHADER_MAIN_EXTENDED)
+    } else {
+        append(BLEND_MODE_SHADER_MAIN_STANDARD)
+    }
+}
+
+internal val BLEND_MODE_SHADER_STANDARD: String = buildBlendModeShader(includeExtended = false)
+internal val BLEND_MODE_SHADER_EXTENDED: String = buildBlendModeShader(includeExtended = true)
+
+/** Uniforms, standard mode helpers (0-28), and `doBlend` dispatch — shared by both families. */
+private const val BLEND_MODE_SHADER_HEADER = """
     uniform shader child;
 
     uniform float layerCount;
     uniform float blendModes[8];
     uniform vec4 layerColors[8]; // premultiplied sRGB, set as flat float[32]
 
-    uniform float uSaturation;
-    uniform float uBrightness;
-    uniform float uLuminanceAmount;
-    uniform vec4 uLuminanceValues;
-
     // ================================================================
-    // Standard blend modes (0-31) — premultiplied alpha
+    // Standard blend modes (0-28) — premultiplied alpha
     // ================================================================
 
     const half kMinNormalHalf = 0.00006103515625;
@@ -476,7 +482,7 @@ internal const val MI_BLEND_MODE_SHADER = """
     half4 mi_blend_color(half4 src, half4 dst) { return mi_blend_hslc(half2(0), src, dst); }
     half4 mi_blend_luminosity(half4 src, half4 dst) { return mi_blend_hslc(half2(1, 0), src, dst); }
 
-    // Standard mode dispatch (0-31)
+    // Standard mode dispatch (0-28)
     half4 doBlend(int mode, half4 blendColor, half4 background) {
         if (mode == 0)  { background = mi_blend_clear(blendColor, background); }
         else if (mode == 1)  { background = mi_blend_src(blendColor, background); }
@@ -492,7 +498,7 @@ internal const val MI_BLEND_MODE_SHADER = """
         else if (mode == 11) { background = mi_blend_xor(blendColor, background); }
         else if (mode == 12) { background = mi_blend_plus(blendColor, background); }
         else if (mode == 13) { background = mi_blend_modulate(blendColor, background); }
-        else if (mode == 14 || mode == 29) { background = mi_blend_screen(blendColor, background); }
+        else if (mode == 14) { background = mi_blend_screen(blendColor, background); }
         else if (mode == 15) { background = mi_blend_overlay(blendColor, background); }
         else if (mode == 16) { background = mi_blend_darken(blendColor, background); }
         else if (mode == 17) { background = mi_blend_lighten(blendColor, background); }
@@ -502,13 +508,22 @@ internal const val MI_BLEND_MODE_SHADER = """
         else if (mode == 21) { background = mi_blend_soft_light(blendColor, background); }
         else if (mode == 22) { background = mi_blend_difference(blendColor, background); }
         else if (mode == 23) { background = mi_blend_exclusion(blendColor, background); }
-        else if (mode == 24 || mode == 30) { background = mi_blend_multiply(blendColor, background); }
+        else if (mode == 24) { background = mi_blend_multiply(blendColor, background); }
         else if (mode == 25) { background = mi_blend_hue(blendColor, background); }
         else if (mode == 26) { background = mi_blend_saturation(blendColor, background); }
         else if (mode == 27) { background = mi_blend_color(blendColor, background); }
-        else if (mode == 28 || mode == 31) { background = mi_blend_luminosity(blendColor, background); }
+        else if (mode == 28) { background = mi_blend_luminosity(blendColor, background); }
         return background;
     }
+
+"""
+
+/** Lab / linear light / plus / adjustments + `getBlendModeColor` dispatch for modes > 28. */
+private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
+    uniform float uSaturation;
+    uniform float uBrightness;
+    uniform float uLuminanceAmount;
+    uniform vec4 uLuminanceValues;
 
     // ================================================================
     // Extended blend modes (100+)
@@ -716,8 +731,8 @@ internal const val MI_BLEND_MODE_SHADER = """
     // ================================================================
 
     half4 getBlendModeColor(half4 bg, half4 ch, int mode, half4 bc) {
-        // Standard modes (0-31): premultiplied alpha, direct result
-        if (mode <= 31) return doBlend(mode, bc, bg);
+        // Standard modes (0-28): premultiplied alpha, direct result
+        if (mode <= 28) return doBlend(mode, bc, bg);
         // Custom modes (100+): unpremultiplied inputs, alpha handled internally
         if (mode == 100) return blendLinearLight(bc, bg);
         if (mode == 101) { half g = greyscale(ch.rgb); return mix(ch, blendLinearLight(half4(bc.rgb, g), bg), bc.a); }
@@ -736,9 +751,26 @@ internal const val MI_BLEND_MODE_SHADER = """
         if (mode == 203) { half4 adj = luminance_curve(bg, uLuminanceValues, uLuminanceAmount); return half4(mix(bg.rgb, adj.rgb, bc.a), bg.a); }
         return blendSrcOver(bc, bg);
     }
+"""
 
-    // ======== Main ========
+/** Flat `main` — standard family only, no unpremul/premul roundtrip. */
+private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
+    half4 main(float2 fragCoord) {
+        half4 currentColor = child.eval(fragCoord);
+        int count = int(layerCount);
 
+        for (int i = 0; i < 8; i++) {
+            if (i >= count) break;
+            half4 layerColor = layerColors[i];
+            int mode = int(blendModes[i]);
+            currentColor = doBlend(mode, layerColor, currentColor);
+        }
+        return currentColor;
+    }
+"""
+
+/** Branching `main` — extended family with unpremul/premul roundtrip for custom modes. */
+private const val BLEND_MODE_SHADER_MAIN_EXTENDED = """
     half4 main(float2 fragCoord) {
         float4 currentColor = float4(child.eval(fragCoord));
         int count = int(layerCount);
@@ -748,7 +780,7 @@ internal const val MI_BLEND_MODE_SHADER = """
             half4 layerColor = layerColors[i];
             int mode = int(blendModes[i]);
             // Standard modes produce premultiplied result directly
-            if (mode <= 31) {
+            if (mode <= 28) {
                 currentColor = float4(doBlend(mode, layerColor, half4(currentColor)));
             } else {
                 // Unpremultiply for custom modes (they expect straight alpha)

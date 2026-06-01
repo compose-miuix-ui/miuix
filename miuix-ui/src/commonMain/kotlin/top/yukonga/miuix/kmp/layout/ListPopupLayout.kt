@@ -87,6 +87,8 @@ internal fun ListPopupLayout(
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
     val internalVisible = remember { mutableStateOf(false) }
+    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
+    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(show) {
         if (show) {
@@ -134,15 +136,12 @@ internal fun ListPopupLayout(
 
     if (parentBounds == IntRect.Zero) return
 
-    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
     val layoutInfo = rememberListPopupLayoutInfo(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = popupContentSize,
     )
-
-    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
 
     val requestDismiss: () -> Unit = remember {
         { currentOnDismiss?.invoke() }

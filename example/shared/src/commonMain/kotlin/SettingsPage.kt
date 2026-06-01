@@ -24,10 +24,11 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -41,7 +42,6 @@ import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
-import kotlin.random.Random
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
 private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
@@ -124,7 +124,14 @@ private fun SettingsContent(
                         checked = appState.showFPSMonitor,
                         onCheckedChange = { updateAppState { state -> state.copy(showFPSMonitor = it) } },
                     )
-                    AnimatedVisibility(visible = isRenderEffectSupported()) {
+                    AnimatedVisibility(visible = isRuntimeShaderSupported()) {
+                        SwitchPreference(
+                            title = "Enable Squircle Shapes",
+                            checked = appState.enableSquircle,
+                            onCheckedChange = { updateAppState { state -> state.copy(enableSquircle = it) } },
+                        )
+                    }
+                    AnimatedVisibility(visible = isRuntimeShaderSupported()) {
                         SwitchPreference(
                             title = "Enable Blur Effect",
                             checked = appState.enableBlur,
@@ -263,6 +270,7 @@ private fun SettingsContent(
                 }
             }
             item(key = "settingsTransition") {
+                SmallTitle("Navigation3")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                 ) {
@@ -293,6 +301,7 @@ private fun SettingsContent(
                 }
             }
             item(key = "settingsAbout") {
+                SmallTitle("Other")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp),
                 ) {

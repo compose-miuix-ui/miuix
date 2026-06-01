@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +67,7 @@ import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
+import kotlin.time.Duration.Companion.milliseconds
 
 private val IconListTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private val IconListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
@@ -77,6 +79,9 @@ fun IconsPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val dynamicTopPadding by remember(topAppBarScrollBehavior) {
+        derivedStateOf { 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction) }
+    }
 
     // Search state
     var searchStatus by remember { mutableStateOf(SearchStatus(label = "Search icons")) }
@@ -160,7 +165,7 @@ fun IconsPage(
                                     },
                                 ),
                         ) {
-                            SearchBarFake(searchStatus.label)
+                            SearchBarFake(searchStatus.label, dynamicTopPadding)
                         }
                     }
                 }
@@ -196,7 +201,7 @@ fun IconsPage(
                                     current = SearchStatus.Status.COLLAPSING,
                                 )
                                 coroutineScope.launch {
-                                    delay(350L)
+                                    delay(350.milliseconds)
                                     // item 0 = header, icon rows start at item 1
                                     lazyListState.animateScrollToItem(index + 1)
                                 }

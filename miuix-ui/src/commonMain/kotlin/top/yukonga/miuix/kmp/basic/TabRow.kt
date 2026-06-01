@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,9 +36,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -51,6 +48,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -149,8 +149,7 @@ fun TabRow(
                     .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
                     .width(config.tabWidth)
                     .fillMaxHeight()
-                    .clip(config.shape)
-                    .background(colors.backgroundColor(true)),
+                    .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
             )
             LazyRow(
                 state = config.listState,
@@ -165,7 +164,7 @@ fun TabRow(
                         text = tabText,
                         isSelected = selectedTabIndex == index,
                         onClick = { currentOnTabSelected.invoke(index) },
-                        shape = config.shape,
+                        cornerRadius = config.cornerRadius,
                         width = config.tabWidth,
                         color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
@@ -215,7 +214,7 @@ fun TabRowWithContour(
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
-    val outerShape = RoundedCornerShape(cornerRadius + contourPadding)
+    val outerCornerRadius = cornerRadius + contourPadding
 
     BoxWithConstraints(
         modifier = Modifier
@@ -272,8 +271,7 @@ fun TabRowWithContour(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(outerShape)
-                .background(color = colors.backgroundColor(false))
+                .squircleSurface(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
                 .padding(contourPadding),
         ) {
             Box(
@@ -281,8 +279,7 @@ fun TabRowWithContour(
                     .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
                     .width(config.tabWidth)
                     .fillMaxHeight()
-                    .clip(config.shape)
-                    .background(colors.backgroundColor(true)),
+                    .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
             )
             LazyRow(
                 state = config.listState,
@@ -297,7 +294,7 @@ fun TabRowWithContour(
                         text = tabText,
                         isSelected = selectedTabIndex == index,
                         onClick = { currentOnTabSelected.invoke(index) },
-                        shape = config.shape,
+                        cornerRadius = config.cornerRadius,
                         width = config.tabWidth,
                         color = colors.contentColor(selectedTabIndex == index),
                         contentAlignment = contentAlignment,
@@ -315,49 +312,7 @@ private fun TabItem(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    shape: Shape,
-    width: Dp,
-    color: Color = Color.Unspecified,
-    contentAlignment: Alignment = Alignment.Center,
-    interactionSource: MutableInteractionSource? = null,
-    indication: Indication? = null,
-) {
-    Surface(
-        shape = shape,
-        onClick = onClick,
-        color = Color.Transparent,
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(width)
-            .semantics {
-                role = Role.Tab
-                selected = isSelected
-            },
-        interactionSource = interactionSource,
-        indication = indication,
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-            contentAlignment = contentAlignment,
-        ) {
-            Text(
-                text = text,
-                color = color,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                fontSize = MiuixTheme.textStyles.body1.fontSize,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TabItemWithContour(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    shape: Shape,
+    cornerRadius: Dp,
     width: Dp,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
@@ -368,7 +323,47 @@ private fun TabItemWithContour(
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
-            .clip(shape)
+            .squircleClip(cornerRadius)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = indication,
+                onClick = onClick,
+            )
+            .semantics {
+                role = Role.Tab
+                selected = isSelected
+            }
+            .padding(horizontal = 12.dp),
+        contentAlignment = contentAlignment,
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = MiuixTheme.textStyles.body1.fontSize,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun TabItemWithContour(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    cornerRadius: Dp,
+    width: Dp,
+    color: Color = Color.Unspecified,
+    contentAlignment: Alignment = Alignment.Center,
+    interactionSource: MutableInteractionSource? = null,
+    indication: Indication? = null,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(width)
+            .squircleClip(cornerRadius)
             .clickable(
                 interactionSource = interactionSource,
                 indication = indication,
@@ -396,7 +391,7 @@ private fun TabItemWithContour(
  */
 private data class TabRowConfig(
     val tabWidth: Dp,
-    val shape: Shape,
+    val cornerRadius: Dp,
     val listState: androidx.compose.foundation.lazy.LazyListState,
 )
 
@@ -418,9 +413,7 @@ private fun rememberTabRowConfig(
     val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
         calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
     }
-    val shape = RoundedCornerShape(cornerRadius)
-
-    return TabRowConfig(tabWidth, shape, resolvedListState)
+    return TabRowConfig(tabWidth, cornerRadius, resolvedListState)
 }
 
 private fun calculateTabWidth(

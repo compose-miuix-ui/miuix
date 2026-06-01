@@ -31,14 +31,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -117,20 +114,6 @@ fun TopAppBar(
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val largeTitleHeight = remember { mutableIntStateOf(0) }
-    val expandedHeightPx by remember {
-        derivedStateOf {
-            largeTitleHeight.intValue.toFloat().coerceAtLeast(0f)
-        }
-    }
-
-    SideEffect {
-        // Sets the app bar's height offset to collapse the entire bar's height when content is scrolled.
-        if (scrollBehavior?.state?.heightOffsetLimit != -expandedHeightPx) {
-            scrollBehavior?.state?.heightOffsetLimit = -expandedHeightPx
-        }
-    }
-
     // Wrap the given actions in a Row.
     val actionsRow =
         @Composable {
@@ -149,6 +132,7 @@ fun TopAppBar(
         title = title,
         color = color,
         titleColor = titleColor,
+        largeTitle = largeTitle,
         largeTitleColor = largeTitleColor,
         subtitle = subtitle,
         subtitleColor = subtitleColor,
@@ -157,11 +141,8 @@ fun TopAppBar(
         titlePadding = titlePadding,
         navigationIconPadding = navigationIconPadding,
         actionIconPadding = actionIconPadding,
-        scrolledOffset = { scrollBehavior?.state?.heightOffset ?: 0f },
-        expandedHeightPx = expandedHeightPx,
-        largeTitleHeight = largeTitleHeight,
+        scrollBehavior = scrollBehavior,
         modifier = modifier,
-        largeTitle = largeTitle,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         bottomContent = bottomContent,
     )
@@ -188,7 +169,6 @@ fun TopAppBar(
  * @param bottomContent The [Composable] content displayed below the title bar area.
  */
 @Composable
-@NonRestartableComposable
 fun SmallTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
@@ -206,9 +186,11 @@ fun SmallTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     SideEffect {
-        // Sets the height offset limit of the SmallTopAppBar to 0f
-        // To ensure that the content can still scroll normally even when scrollBehavior is passed.
-        scrollBehavior?.state?.heightOffsetLimit = 0f
+        // Pin the bar: clamp scroll range to 0 so nested content still scrolls even when this bar
+        // shares a ScrollBehavior with a collapsible one. Guard against redundant writes.
+        scrollBehavior?.state?.let { state ->
+            if (state.heightOffsetLimit != 0f) state.heightOffsetLimit = 0f
+        }
     }
 
     // Wrap the given actions in a Row.
@@ -601,11 +583,6 @@ private suspend fun settleAppBar(
     return Velocity(0f, velocity - remainingVelocity)
 }
 
-/** A functional interface for providing an app-bar scroll offset. */
-private fun interface ScrolledOffset {
-    fun offset(): Float
-}
-
 /**
  * The base [Layout] for [TopAppBar]. This function lays out a [TopAppBar] navigation icon
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
@@ -622,9 +599,9 @@ private fun interface ScrolledOffset {
  * @param titlePadding the horizontal padding of the [TopAppBar]'s title & large title.
  * @param navigationIconPadding the start padding of the navigation icon.
  * @param actionIconPadding the end padding of the action icons.
- * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
- * @param largeTitleHeight a mutable state that holds the height of the large title content (including subtitle).
- * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
+ * @param scrollBehavior the [ScrollBehavior] that drives the collapse/expand state. The layout
+ *   reads its `heightOffset` and `collapsedFraction` directly inside layout/draw-phase lambdas,
+ *   and writes the matching `heightOffsetLimit` from the large title's measured height.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
@@ -643,41 +620,40 @@ private fun TopAppBarLayout(
     titlePadding: Dp,
     navigationIconPadding: Dp,
     actionIconPadding: Dp,
-    scrolledOffset: ScrolledOffset,
-    expandedHeightPx: Float,
-    largeTitleHeight: MutableState<Int>,
+    scrollBehavior: ScrollBehavior?,
     modifier: Modifier = Modifier,
     largeTitle: String = title,
     defaultWindowInsetsPadding: Boolean = true,
     bottomContent: @Composable () -> Unit = {},
 ) {
-    // Subtract the scrolledOffset from the maxHeight
-    val heightOffset by remember(scrolledOffset) {
-        derivedStateOf {
-            val offset = scrolledOffset.offset()
-            if (offset.isNaN()) 0 else offset.roundToInt()
+    // Producer lambdas — reads stay in layout/draw phases so scroll never recomposes this subtree.
+    val scrolledOffset = remember(scrollBehavior) {
+        { scrollBehavior?.state?.heightOffset ?: 0f }
+    }
+    val largeTitleAlpha = remember(scrollBehavior) {
+        {
+            val frac = scrollBehavior?.state?.collapsedFraction ?: 0f
+            1f - (frac * 3f).coerceIn(0f, 1f)
+        }
+    }
+    val updateHeightOffsetLimit = remember(scrollBehavior) {
+        { height: Int ->
+            scrollBehavior?.state?.let { state ->
+                val limit = -height.toFloat()
+                if (state.heightOffsetLimit != limit) state.heightOffsetLimit = limit
+            }
+            Unit
         }
     }
 
-    // Small Title Animation
-    val extOffset by remember(heightOffset) {
+    // Boolean derivedStateOf invalidates only on flip → the spring fires once per crossing, not per frame.
+    val smallTitleVisible by remember(scrollBehavior) {
         derivedStateOf {
-            abs(heightOffset) / expandedHeightPx * 3
+            (scrollBehavior?.state?.collapsedFraction ?: 0f) * 3f >= 1f
         }
     }
-
-    // Large Title Alpha Animation
-    val largeTitleAlpha by remember(heightOffset, expandedHeightPx) {
-        derivedStateOf {
-            1f - (abs(heightOffset) / expandedHeightPx * 3).coerceIn(0f, 1f)
-        }
-    }
-
-    // Small title animation is triggered once when the threshold is crossed
-    // then runs independently to completion
-    val smallTitleVisible = extOffset >= 1f
-    val smallTitleAlpha = remember { Animatable(0f) }
-    val smallTitleTranslationY = remember { Animatable(20f) }
+    val smallTitleAlpha = remember { Animatable(if (smallTitleVisible) 1f else 0f) }
+    val smallTitleTranslationY = remember { Animatable(if (smallTitleVisible) 0f else 20f) }
 
     LaunchedEffect(smallTitleVisible) {
         if (smallTitleVisible) {
@@ -691,7 +667,6 @@ private fun TopAppBarLayout(
         }
     }
 
-    // Title color transition animation
     val animatedTitleColor by animateColorAsState(
         targetValue = titleColor,
         animationSpec = tween(durationMillis = 50),
@@ -744,12 +719,15 @@ private fun TopAppBarLayout(
                     .layoutId("largeTitle")
                     .padding(top = TopAppBarDefaults.CollapsedHeight)
                     .padding(horizontal = titlePadding)
-                    .graphicsLayer { alpha = largeTitleAlpha },
+                    .graphicsLayer { alpha = largeTitleAlpha() },
             ) {
                 Column(
                     modifier = Modifier
-                        .offset { IntOffset(0, heightOffset) }
-                        .onSizeChanged { largeTitleHeight.value = it.height },
+                        .offset {
+                            val v = scrolledOffset()
+                            IntOffset(0, if (v.isNaN()) 0 else v.roundToInt())
+                        }
+                        .onSizeChanged { updateHeightOffsetLimit(it.height) },
                 ) {
                     Text(
                         text = largeTitle,
@@ -767,7 +745,6 @@ private fun TopAppBarLayout(
                 }
             }
             if (subtitle.isNotEmpty()) {
-                // Small subtitle: appears with small title when collapsed
                 Box(
                     Modifier
                         .layoutId("smallSubtitle")
@@ -788,7 +765,7 @@ private fun TopAppBarLayout(
             }
         },
         modifier = modifier
-            .then(Modifier.background(color))
+            .background(color)
             .then(
                 if (defaultWindowInsetsPadding) {
                     Modifier
@@ -814,12 +791,24 @@ private fun TopAppBarLayout(
                 .fastFirst { it.layoutId == "actionIcons" }
                 .measure(constraints.copy(minWidth = 0, minHeight = 0))
 
-        val maxTitleWidth = constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width
+        val maxTitleWidth =
+            if (constraints.maxWidth == Constraints.Infinity) {
+                constraints.maxWidth
+            } else {
+                (constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width)
+                    .coerceAtLeast(0)
+            }
+        val titleMaxWidth =
+            if (maxTitleWidth == Constraints.Infinity) {
+                maxTitleWidth
+            } else {
+                (maxTitleWidth * TitleWidthFraction).roundToInt()
+            }
 
         val titlePlaceable =
             measurables
                 .fastFirst { it.layoutId == "title" }
-                .measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
+                .measure(constraints.copy(minWidth = 0, maxWidth = titleMaxWidth, minHeight = 0))
 
         val largeTitlePlaceable =
             measurables
@@ -835,7 +824,7 @@ private fun TopAppBarLayout(
         val smallSubtitlePlaceable =
             measurables
                 .firstOrNull { it.layoutId == "smallSubtitle" }
-                ?.measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
+                ?.measure(constraints.copy(minWidth = 0, maxWidth = titleMaxWidth, minHeight = 0))
 
         val bottomContentPlaceable =
             measurables
@@ -843,21 +832,23 @@ private fun TopAppBarLayout(
                 .measure(constraints.copy(minWidth = 0, minHeight = 0))
 
         val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
-        val expandedHeight = maxOf(
-            collapsedHeight,
-            largeTitlePlaceable.height,
-        )
-
-        val barHeight = lerp(
-            start = collapsedHeight,
-            stop = expandedHeight,
-            fraction = if (expandedHeightPx > 0f) {
-                val offset = scrolledOffset.offset()
-                if (offset.isNaN()) 1f else (1f - (abs(offset) / expandedHeightPx).coerceIn(0f, 1f))
+        // largeTitle Box has top padding = collapsedHeight, so subtract it back for the pure expansion.
+        val expansion = (largeTitlePlaceable.height - collapsedHeight).coerceAtLeast(0)
+        val barHeight = if (expansion > 0) {
+            val offset = scrolledOffset()
+            val collapseFraction = if (offset.isNaN()) {
+                0f
             } else {
-                1f
-            },
-        ).toFloat().roundToInt()
+                (abs(offset) / expansion.toFloat()).coerceIn(0f, 1f)
+            }
+            lerp(
+                start = collapsedHeight,
+                stop = collapsedHeight + expansion,
+                fraction = 1f - collapseFraction,
+            )
+        } else {
+            collapsedHeight
+        }
 
         val verticalCenter = collapsedHeight / 2
         val smallSubtitleHeight = smallSubtitlePlaceable?.height ?: 0
@@ -902,16 +893,10 @@ private fun TopAppBarLayout(
             )
 
             // Large title (includes large subtitle in a Column)
-            largeTitlePlaceable.placeRelative(
-                x = 0,
-                y = 0,
-            )
+            largeTitlePlaceable.placeRelative(x = 0, y = 0)
 
             // Bottom content (pinned, below bar and subtitle)
-            bottomContentPlaceable.placeRelative(
-                x = 0,
-                y = contentTop,
-            )
+            bottomContentPlaceable.placeRelative(x = 0, y = contentTop)
         }
     }
 }
@@ -951,13 +936,6 @@ private fun SmallTopAppBarLayout(
     defaultWindowInsetsPadding: Boolean = true,
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val titleModifier = remember(titlePadding) {
-        Modifier
-            .layoutId("title")
-            .padding(horizontal = titlePadding)
-    }
-
-    // Title color transition animation
     val animatedTitleColor by animateColorAsState(
         targetValue = titleColor,
         animationSpec = tween(durationMillis = 50),
@@ -976,7 +954,11 @@ private fun SmallTopAppBarLayout(
             ) {
                 navigationIcon()
             }
-            Box(titleModifier) {
+            Box(
+                Modifier
+                    .layoutId("title")
+                    .padding(horizontal = titlePadding),
+            ) {
                 Text(
                     text = title,
                     color = animatedTitleColor,
@@ -1008,7 +990,7 @@ private fun SmallTopAppBarLayout(
             }
         },
         modifier = modifier
-            .then(Modifier.background(color))
+            .background(color)
             .then(
                 if (defaultWindowInsetsPadding) {
                     Modifier
@@ -1034,17 +1016,29 @@ private fun SmallTopAppBarLayout(
                 .fastFirst { it.layoutId == "actionIcons" }
                 .measure(constraints.copy(minWidth = 0, minHeight = 0))
 
-        val maxTitleWidth = constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width
+        val maxTitleWidth =
+            if (constraints.maxWidth == Constraints.Infinity) {
+                constraints.maxWidth
+            } else {
+                (constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width)
+                    .coerceAtLeast(0)
+            }
+        val titleMaxWidth =
+            if (maxTitleWidth == Constraints.Infinity) {
+                maxTitleWidth
+            } else {
+                (maxTitleWidth * TitleWidthFraction).roundToInt()
+            }
 
         val titlePlaceable =
             measurables
                 .fastFirst { it.layoutId == "title" }
-                .measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
+                .measure(constraints.copy(minWidth = 0, maxWidth = titleMaxWidth, minHeight = 0))
 
         val subtitlePlaceable =
             measurables
                 .firstOrNull { it.layoutId == "subtitle" }
-                ?.measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
+                ?.measure(constraints.copy(minWidth = 0, maxWidth = titleMaxWidth, minHeight = 0))
 
         val bottomContentPlaceable =
             measurables
@@ -1091,10 +1085,10 @@ private fun SmallTopAppBarLayout(
             )
 
             // Bottom content (below subtitle)
-            bottomContentPlaceable.placeRelative(
-                x = 0,
-                y = contentTop,
-            )
+            bottomContentPlaceable.placeRelative(x = 0, y = contentTop)
         }
     }
 }
+
+// Slack so the centred title isn't butted against nav/actions.
+private val TitleWidthFraction = 0.9

@@ -10,7 +10,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
+    id("module.kotlin-jvm-toolchain")
     id("module.publication")
+    id("module.spotless")
+}
+
+miuixPublication {
+    description.set("A UI library for Compose Multiplatform")
 }
 
 kotlin {
@@ -43,59 +49,18 @@ kotlin {
         browser()
     }
 
+    applyMiuixSourceSetHierarchy()
+
     sourceSets {
         commonMain.dependencies {
             api(projects.miuixCore)
+            api(projects.miuixSquircle)
             api(libs.jetbrains.compose.foundation)
 
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
-        }
-
-        val skikoMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val darwinMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        val iosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        iosArm64Main {
-            dependsOn(iosMain)
-        }
-
-        iosSimulatorArm64Main {
-            dependsOn(iosMain)
-        }
-
-        val macosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        macosArm64Main {
-            dependsOn(macosMain)
-        }
-
-        named("desktopMain") {
-            dependsOn(skikoMain)
-        }
-
-        val webMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
-            dependsOn(webMain)
         }
     }
 }
@@ -107,6 +72,7 @@ baselineProfile {
 }
 
 val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::class) {
+    description = "convertBaselineProfile"
     inputFile.set(
         layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt"),
     )
@@ -139,6 +105,20 @@ val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::clas
         rootProject.layout.projectDirectory
             .file(
                 "miuix-navigation3-ui/src/androidMain/baselineProfiles/baseline-prof.txt",
+            ).asFile.absolutePath,
+    )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/shader/",
+        rootProject.layout.projectDirectory
+            .file(
+                "miuix-shader/src/androidMain/baselineProfiles/baseline-prof.txt",
+            ).asFile.absolutePath,
+    )
+    additionalOutputs.put(
+        "top/yukonga/miuix/kmp/squircle/",
+        rootProject.layout.projectDirectory
+            .file(
+                "miuix-squircle/src/androidMain/baselineProfiles/baseline-prof.txt",
             ).asFile.absolutePath,
     )
 }

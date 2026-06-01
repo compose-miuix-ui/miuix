@@ -20,12 +20,3 @@ internal expect fun runtimeShaderEffect(
     runtimeShader: RuntimeShader,
     uniformShaderName: String,
 ): RenderEffect
-
-/**
- * Creates a [RenderEffect] that applies a [ColorFilter], optionally chaining
- * onto an existing [renderEffect].
- */
-internal expect fun colorFilterEffect(
-    renderEffect: RenderEffect? = null,
-    colorFilter: ColorFilter,
-): RenderEffect

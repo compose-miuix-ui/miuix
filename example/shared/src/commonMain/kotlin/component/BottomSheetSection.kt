@@ -15,18 +15,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -122,97 +121,26 @@ private fun SuperBottomSheetDemo(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         startAction = {
-            IconButton(
-                onClick = onDismissRequest,
-            ) {
-                Icon(
-                    imageVector = MiuixIcons.Close,
-                    contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground,
-                )
-            }
+            BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = onDismissRequest)
         },
         endAction = {
-            IconButton(
-                onClick = onDismissRequest,
-            ) {
-                Icon(
-                    imageVector = MiuixIcons.Ok,
-                    contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground,
-                )
-            }
+            BottomSheetActionButton(MiuixIcons.Ok, "Confirm", onClick = onDismissRequest)
         },
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-                .scrollEndHaptic()
-                .overScrollVertical(),
+        BottomSheetContent(
+            allowDismiss = allowDismiss,
+            onAllowDismissChange = { allowDismiss = it },
+            enableNestedScroll = enableNestedScroll,
+            onEnableNestedScrollChange = { enableNestedScroll = it },
+            switchChecked = switchChecked,
+            onSwitchCheckedChange = onSwitchCheckedChange,
         ) {
-            item {
-                SmallTitle(
-                    text = "Behavior Settings",
-                    insideMargin = PaddingValues(16.dp, 8.dp),
-                )
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
-                    ),
-                ) {
-                    SwitchPreference(
-                        title = "Allow Dismiss",
-                        summary = "Drag or Back to dismiss",
-                        checked = allowDismiss,
-                        onCheckedChange = { allowDismiss = it },
-                    )
-                    SwitchPreference(
-                        title = "Enable NestedScroll",
-                        summary = "Scroll content vs Drag sheet",
-                        checked = enableNestedScroll,
-                        onCheckedChange = { enableNestedScroll = it },
-                    )
-                }
-            }
-            item {
-                var sliderValue by remember { mutableFloatStateOf(0.5f) }
-                Slider(
-                    value = sliderValue,
-                    onValueChange = { sliderValue = it },
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                var textFieldValue by remember { mutableStateOf("") }
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it },
-                    label = "TextField",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
-                    ),
-                ) {
-                    OverlayDropdownPreference(
-                        title = "DropdownPref (O)",
-                        items = BottomSheetDropdownOptions,
-                        selectedIndex = dropdownSelectedIndex,
-                        onSelectedIndexChange = onDropdownSelectedIndexChange,
-                    )
-                    SwitchPreference(
-                        title = "SwitchPref",
-                        checked = switchChecked,
-                        onCheckedChange = onSwitchCheckedChange,
-                    )
-                }
-                Spacer(
-                    Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
-                    ),
-                )
-            }
+            OverlayDropdownPreference(
+                title = "DropdownPref (O)",
+                items = BottomSheetDropdownOptions,
+                selectedIndex = dropdownSelectedIndex,
+                onSelectedIndexChange = onDropdownSelectedIndexChange,
+            )
         }
     }
 }
@@ -239,98 +167,119 @@ private fun WindowBottomSheetDemo(
         onDismissFinished = onDismissFinished,
         startAction = {
             val dismissState = LocalDismissState.current
-            IconButton(
-                onClick = { dismissState?.invoke() },
-            ) {
-                Icon(
-                    imageVector = MiuixIcons.Close,
-                    contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground,
-                )
-            }
+            BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = { dismissState?.invoke() })
         },
         endAction = {
             val dismissState = LocalDismissState.current
-            IconButton(
-                onClick = { dismissState?.invoke() },
-            ) {
-                Icon(
-                    imageVector = MiuixIcons.Ok,
-                    contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground,
-                )
-            }
+            BottomSheetActionButton(MiuixIcons.Ok, "Confirm", onClick = { dismissState?.invoke() })
         },
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-                .scrollEndHaptic()
-                .overScrollVertical(),
+        BottomSheetContent(
+            allowDismiss = allowDismiss,
+            onAllowDismissChange = { allowDismiss = it },
+            enableNestedScroll = enableNestedScroll,
+            onEnableNestedScrollChange = { enableNestedScroll = it },
+            switchChecked = switchChecked,
+            onSwitchCheckedChange = onSwitchCheckedChange,
         ) {
-            item {
-                SmallTitle(
-                    text = "Behavior Settings",
-                    insideMargin = PaddingValues(16.dp, 8.dp),
+            WindowDropdownPreference(
+                title = "DropdownPref (W)",
+                items = BottomSheetDropdownOptions,
+                selectedIndex = dropdownSelectedIndex,
+                onSelectedIndexChange = onDropdownSelectedIndexChange,
+            )
+        }
+    }
+}
+
+/**
+ * Shared content of both BottomSheet demos. The only part that differs between the Overlay and
+ * Window variants is the dropdown preference, supplied through the [dropdown] slot.
+ */
+@Composable
+private fun BottomSheetContent(
+    allowDismiss: Boolean,
+    onAllowDismissChange: (Boolean) -> Unit,
+    enableNestedScroll: Boolean,
+    onEnableNestedScrollChange: (Boolean) -> Unit,
+    switchChecked: Boolean,
+    onSwitchCheckedChange: (Boolean) -> Unit,
+    dropdown: @Composable () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth()
+            .scrollEndHaptic()
+            .overScrollVertical(),
+    ) {
+        item {
+            SmallTitle(
+                text = "Behavior Settings",
+                insideMargin = PaddingValues(16.dp, 8.dp),
+            )
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.secondaryContainer,
+                ),
+            ) {
+                SwitchPreference(
+                    title = "Allow Dismiss",
+                    summary = "Drag or Back to dismiss",
+                    checked = allowDismiss,
+                    onCheckedChange = onAllowDismissChange,
                 )
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
-                    ),
-                ) {
-                    SwitchPreference(
-                        title = "Allow Dismiss",
-                        summary = "Drag or Back to dismiss",
-                        checked = allowDismiss,
-                        onCheckedChange = { allowDismiss = it },
-                    )
-                    SwitchPreference(
-                        title = "Enable NestedScroll",
-                        summary = "Scroll content vs Drag sheet",
-                        checked = enableNestedScroll,
-                        onCheckedChange = { enableNestedScroll = it },
-                    )
-                }
-            }
-            item {
-                var sliderValue by remember { mutableFloatStateOf(0.5f) }
-                Slider(
-                    value = sliderValue,
-                    onValueChange = { sliderValue = it },
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                var textFieldValue by remember { mutableStateOf("") }
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it },
-                    label = "TextField",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
-                    ),
-                ) {
-                    WindowDropdownPreference(
-                        title = "DropdownPref (W)",
-                        items = BottomSheetDropdownOptions,
-                        selectedIndex = dropdownSelectedIndex,
-                        onSelectedIndexChange = onDropdownSelectedIndexChange,
-                    )
-                    SwitchPreference(
-                        title = "SwitchPref",
-                        checked = switchChecked,
-                        onCheckedChange = onSwitchCheckedChange,
-                    )
-                }
-                Spacer(
-                    Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
-                    ),
+                SwitchPreference(
+                    title = "Enable NestedScroll",
+                    summary = "Scroll content vs Drag sheet",
+                    checked = enableNestedScroll,
+                    onCheckedChange = onEnableNestedScrollChange,
                 )
             }
         }
+        item {
+            var textFieldValue by remember { mutableStateOf("") }
+            TextField(
+                value = textFieldValue,
+                onValueChange = { textFieldValue = it },
+                label = "TextField",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.secondaryContainer,
+                ),
+            ) {
+                dropdown()
+                SwitchPreference(
+                    title = "SwitchPref",
+                    checked = switchChecked,
+                    onCheckedChange = onSwitchCheckedChange,
+                )
+            }
+            Spacer(
+                Modifier.padding(
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun BottomSheetActionButton(
+    imageVector: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = MiuixTheme.colorScheme.onBackground,
+        )
     }
 }

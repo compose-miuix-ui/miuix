@@ -8,7 +8,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -21,7 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -39,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -118,7 +116,6 @@ fun Slider(
     var layoutHeight by remember { mutableIntStateOf(0) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(height)
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
@@ -254,7 +251,6 @@ fun Slider(
         contentAlignment = Alignment.CenterStart,
     ) {
         SliderTrack(
-            shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
             thumbColor = colors.thumbColor(enabled),
@@ -322,7 +318,6 @@ fun VerticalSlider(
     var isHoveringThumb by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(width)
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -457,7 +452,6 @@ fun VerticalSlider(
         contentAlignment = Alignment.BottomCenter,
     ) {
         SliderTrack(
-            shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
             thumbColor = colors.thumbColor(enabled),
@@ -531,7 +525,6 @@ fun RangeSlider(
     val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(height)
     var lastDraggedIsStart by remember { mutableStateOf(true) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
@@ -801,7 +794,6 @@ fun RangeSlider(
         contentAlignment = Alignment.CenterStart,
     ) {
         RangeSliderTrack(
-            shape = shape,
             backgroundColor = colors.backgroundColor(enabled),
             foregroundColor = colors.foregroundColor(enabled),
             thumbColor = colors.thumbColor(enabled),
@@ -826,7 +818,6 @@ fun RangeSlider(
  */
 @Composable
 private fun SliderTrack(
-    shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
     thumbColor: Color,
@@ -850,9 +841,9 @@ private fun SliderTrack(
 
     Canvas(
         modifier = modifier
-            .clip(shape)
-            .background(backgroundColor)
+            .clip(CircleShape)
             .drawBehind {
+                drawRect(backgroundColor)
                 drawRect(Color.Black, alpha = backgroundAlpha)
             },
     ) {
@@ -939,7 +930,6 @@ private fun SliderTrack(
  */
 @Composable
 private fun RangeSliderTrack(
-    shape: Shape,
     backgroundColor: Color,
     foregroundColor: Color,
     thumbColor: Color,
@@ -964,9 +954,9 @@ private fun RangeSliderTrack(
 
     Canvas(
         modifier = modifier
-            .clip(shape)
-            .background(backgroundColor)
+            .clip(CircleShape)
             .drawBehind {
+                drawRect(backgroundColor)
                 drawRect(Color.Black, alpha = backgroundAlpha)
             },
     ) {
@@ -1249,27 +1239,6 @@ internal class RangeSliderHapticState {
 }
 
 private fun stepsToTickFractions(steps: Int): FloatArray = if (steps == 0) floatArrayOf() else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
-
-private fun snapValueToTick(
-    current: Float,
-    tickFractions: FloatArray,
-    minPx: Float,
-    maxPx: Float,
-): Float {
-    if (tickFractions.isEmpty()) return current
-    var bestFraction = tickFractions[0]
-    var bestDist = abs(lerp(minPx, maxPx, bestFraction) - current)
-    for (i in 1 until tickFractions.size) {
-        val f = tickFractions[i]
-        val px = lerp(minPx, maxPx, f)
-        val dist = abs(px - current)
-        if (dist < bestDist) {
-            bestDist = dist
-            bestFraction = f
-        }
-    }
-    return lerp(minPx, maxPx, bestFraction)
-}
 
 private fun resolveValueFromFraction(
     fraction: Float,

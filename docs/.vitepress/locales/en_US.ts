@@ -37,6 +37,7 @@ export default defineConfig({
                         { text: "Utility Functions", link: "/guide/utils" },
                         { text: "Navigation3 Support", link: "/guide/navigation3" },
                         { text: "Blur Effects", link: "/guide/blur" },
+                        { text: "Squircle Shapes", link: "/guide/squircle" },
                         { text: "Effect Library", link: "/guide/effect" },
                         { text: "Platform Support", link: "/guide/multiplatform" },
                         { text: "Best Practices", link: "/guide/best-practices" },

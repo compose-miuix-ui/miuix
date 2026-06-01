@@ -14,13 +14,17 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val tilt = remember { mutableStateOf(DeviceTilt.Zero) }
 
-    DisposableEffect(context, smoothing) {
+    DisposableEffect(context, lifecycleOwner, smoothing) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         val sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
             ?: sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
@@ -35,6 +39,7 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
         var smoothGravityX = 0f
         var smoothGravityY = 0f
         var initialized = false
+        var registered = false
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -66,8 +71,37 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
 
             override fun onAccuracyChanged(s: Sensor?, a: Int) = Unit
         }
-        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME)
-        onDispose { sensorManager.unregisterListener(listener) }
+
+        fun register() {
+            if (!registered) {
+                sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME)
+                registered = true
+            }
+        }
+
+        fun unregister() {
+            if (registered) {
+                sensorManager.unregisterListener(listener)
+                registered = false
+                initialized = false
+            }
+        }
+
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> register()
+                Lifecycle.Event.ON_STOP -> unregister()
+                else -> Unit
+            }
+        }
+
+        val lifecycle = lifecycleOwner.lifecycle
+        lifecycle.addObserver(lifecycleObserver)
+
+        onDispose {
+            lifecycle.removeObserver(lifecycleObserver)
+            unregister()
+        }
     }
 
     return tilt

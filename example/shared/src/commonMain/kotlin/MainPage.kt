@@ -38,6 +38,7 @@ import component.colorPickerSection
 import component.dialogSection
 import component.dropdownSection
 import component.numberPickerSection
+import component.otherPageSection
 import component.progressIndicatorSection
 import component.radioButtonSection
 import component.sliderSection
@@ -45,7 +46,6 @@ import component.snackbarSection
 import component.spinnerSection
 import component.switchSection
 import component.tabRowSection
-import component.testPageSection
 import component.textFieldSection
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.DropdownEntry
@@ -359,7 +359,7 @@ fun MainPage(
                     colorPickerSection()
                     cardSection()
                     blurSection()
-                    testPageSection()
+                    otherPageSection()
                     item { Spacer(modifier = Modifier.height(12.dp)) }
                 }
             }

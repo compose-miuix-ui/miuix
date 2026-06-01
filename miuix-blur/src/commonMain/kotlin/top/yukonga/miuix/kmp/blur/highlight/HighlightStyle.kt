@@ -19,8 +19,10 @@ import androidx.compose.ui.util.fastCoerceAtMost
 import top.yukonga.miuix.kmp.blur.RuntimeShader
 import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
 import top.yukonga.miuix.kmp.blur.asComposeShader
-import top.yukonga.miuix.kmp.blur.internal.BLOOM_STROKE_SHADER
+import top.yukonga.miuix.kmp.blur.internal.BLOOM_STROKE_SHADER_DUAL
+import top.yukonga.miuix.kmp.blur.internal.BLOOM_STROKE_SHADER_SINGLE
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import kotlin.math.floor
 import kotlin.math.sqrt
 
 /** Reference origin (in normalized UV) used to convert a [LightPosition] into a 3D direction. */
@@ -119,17 +121,23 @@ data class BloomStroke(
     ): Shader? {
         if (!isRuntimeShaderSupported()) return null
         val sizePx = size
-        val shader = runtimeShaderCache.obtainRuntimeShader("BloomStroke", BLOOM_STROKE_SHADER)
-        shader.setFloatUniform("size", sizePx.width, sizePx.height)
-        shader.setFloatUniform("cornerRadii", getCornerRadii(shape))
+        val shaderKey = if (dualPeak) "BloomStrokeDual" else "BloomStrokeSingle"
+        val shaderSource = if (dualPeak) BLOOM_STROKE_SHADER_DUAL else BLOOM_STROKE_SHADER_SINGLE
+        val shader = runtimeShaderCache.obtainRuntimeShader(shaderKey, shaderSource)
+        val halfW = sizePx.width * 0.5f
+        val halfH = sizePx.height * 0.5f
+        shader.setFloatUniform("halfView", halfW, halfH)
+        shader.setFloatUniform("halfViewFloor", floor(halfW), floor(halfH))
+        setCornerRadiiUniform(shader, shape)
         shader.setFloatUniform("strokeWidth", strokeWidthPx)
-        shader.setFloatUniform("innerBlurRadius", innerBlurRadius.toPx())
+        val innerR = innerBlurRadius.toPx()
+        shader.setFloatUniform("innerBlurRadius", innerR)
+        shader.setFloatUniform("innerBlurRadiusSq", innerR * innerR)
         shader.setFloatUniform("highlightAlpha", highlightAlpha)
         shader.setColorUniform("strokeColor", color.copy(alpha = 1f))
         shader.setFloatUniform("strokeAlphaMul", color.alpha)
-        applyLightUniforms(shader, "1", primaryLight)
-        applyLightUniforms(shader, "2", secondaryLight)
-        shader.setFloatUniform("useDualPeak", if (dualPeak) 1f else 0f)
+        applyLightUniforms(shader, "1", primaryLight, includeAxis = !dualPeak)
+        applyLightUniforms(shader, "2", secondaryLight, includeAxis = !dualPeak)
         return shader.asComposeShader()
     }
 
@@ -231,20 +239,38 @@ internal fun applyLightUniforms(
     shader: RuntimeShader,
     suffix: String,
     light: LightSource,
+    includeAxis: Boolean = true,
 ) {
     val dx = light.position.x - LIGHT_REF_X
     val dy = light.position.y - LIGHT_REF_Y
     val dz = light.position.z
     val len = sqrt(dx * dx + dy * dy + dz * dz).coerceAtLeast(1e-6f)
-    shader.setFloatUniform("lightDir$suffix", dx / len, dy / len, dz / len)
+    val nx = dx / len
+    val ny = dy / len
+    shader.setFloatUniform("lightDir$suffix", nx, ny, dz / len)
     shader.setColorUniform("lightColor$suffix", light.color.copy(alpha = 1f))
     shader.setFloatUniform("lightIntensity$suffix", light.color.alpha * light.intensity)
+    if (includeAxis) {
+        val xyLen = sqrt(nx * nx + ny * ny)
+        if (xyLen > 1e-3f) {
+            shader.setFloatUniform("axis$suffix", nx / xyLen, ny / xyLen)
+        } else {
+            // light points purely along Z; fall back to canonical upper / lower split
+            val fallbackY = if (suffix == "1") -1f else 1f
+            shader.setFloatUniform("axis$suffix", 0f, fallbackY)
+        }
+    }
 }
 
-internal fun DrawScope.getCornerRadii(shape: Shape): FloatArray {
+// Pack [TL, TR, BL, BR] into a vec4 uniform without a per-frame FloatArray allocation.
+internal fun DrawScope.setCornerRadiiUniform(shader: RuntimeShader, shape: Shape) {
     val sizePx = size
     val maxRadius = sizePx.minDimension / 2f
-    val cornerShape = shape as? CornerBasedShape ?: return FloatArray(4) { maxRadius }
+    val cornerShape = shape as? CornerBasedShape
+    if (cornerShape == null) {
+        shader.setFloatUniform("cornerRadii", maxRadius, maxRadius, maxRadius, maxRadius)
+        return
+    }
     val isLtr = layoutDirection == LayoutDirection.Ltr
     val topLeft =
         if (isLtr) cornerShape.topStart.toPx(sizePx, this) else cornerShape.topEnd.toPx(sizePx, this)
@@ -254,8 +280,8 @@ internal fun DrawScope.getCornerRadii(shape: Shape): FloatArray {
         if (isLtr) cornerShape.bottomEnd.toPx(sizePx, this) else cornerShape.bottomStart.toPx(sizePx, this)
     val bottomLeft =
         if (isLtr) cornerShape.bottomStart.toPx(sizePx, this) else cornerShape.bottomEnd.toPx(sizePx, this)
-    // Returned in [TL, TR, BL, BR] order, matching the shader's cornerRadii layout.
-    return floatArrayOf(
+    shader.setFloatUniform(
+        "cornerRadii",
         topLeft.fastCoerceAtMost(maxRadius),
         topRight.fastCoerceAtMost(maxRadius),
         bottomLeft.fastCoerceAtMost(maxRadius),

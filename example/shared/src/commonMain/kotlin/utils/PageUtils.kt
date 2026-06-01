@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
@@ -23,9 +24,9 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -50,14 +51,17 @@ fun pageContentPadding(
     extraTop: Dp = 0.dp,
     extraStart: Dp = 0.dp,
     extraEnd: Dp = 0.dp,
+    extraBottom: Dp = 0.dp,
 ): PaddingValues {
     val topPadding = innerPadding.calculateTopPadding() + extraTop
-    val bottomPadding = if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + outerPadding.calculateBottomPadding()
+    val bottomPadding = outerPadding.calculateBottomPadding() + extraBottom + if (isWideScreen) {
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues()
+            .calculateBottomPadding()
     } else {
-        outerPadding.calculateBottomPadding()
+        0.dp
     }
-    return remember(topPadding, bottomPadding, extraStart, extraEnd) {
+
+    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom) {
         PaddingValues(
             top = topPadding,
             start = extraStart,
@@ -108,7 +112,7 @@ fun AdaptiveTopAppBar(
 @Composable
 fun rememberBlurBackdrop(): LayerBackdrop? {
     val appState = LocalAppState.current
-    if (!appState.enableBlur || !isRenderEffectSupported()) return null
+    if (!appState.enableBlur || !isRuntimeShaderSupported()) return null
     val surfaceColor = MiuixTheme.colorScheme.surface
     return rememberLayerBackdrop {
         drawRect(surfaceColor)
@@ -128,7 +132,7 @@ fun BlurredBar(
                 backdrop = backdrop,
                 shape = RectangleShape,
                 blurRadius = 25f,
-                colors = BlurColors(
+                colors = BlurDefaults.blurColors(
                     blendColors = listOf(
                         BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
                     ),

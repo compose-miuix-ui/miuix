@@ -2,6 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
 plugins {
-    id("root.build-plugin")
-    id("root.library-publish")
+    id("module.spotless")
 }

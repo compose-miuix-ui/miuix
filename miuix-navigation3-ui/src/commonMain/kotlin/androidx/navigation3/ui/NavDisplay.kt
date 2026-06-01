@@ -39,7 +39,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -57,7 +56,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -94,6 +92,7 @@ import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventTransitionState.Idle
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationEventState
+import top.yukonga.miuix.kmp.squircle.absoluteSquircleClip
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -713,7 +712,7 @@ fun <T : Any> NavDisplay(
                 if (shouldFlipDirection) {
                     flippedPredictivePopTransitionSpec()
                 } else {
-                    transitionScene.predictivePopSpec<T>()?.invoke(this, swipeEdge)
+                    transitionScene.predictivePopSpec()?.invoke(this, swipeEdge)
                         ?: predictivePopTransitionSpec(swipeEdge)
                 }
             }
@@ -781,14 +780,21 @@ fun <T : Any> NavDisplay(
 
             val roundedModifier = if (transitionEffects.enableCornerClip && isTopScene) {
                 val corner = if (!isInMultiWindowMode()) getRoundedCorner() else 0.dp
-                val shape = remember(corner, shouldFlipDirection) {
-                    if (shouldFlipDirection) {
-                        AbsoluteRoundedCornerShape(topRight = corner, bottomRight = corner)
-                    } else {
-                        AbsoluteRoundedCornerShape(topLeft = corner, bottomLeft = corner)
-                    }
+                if (shouldFlipDirection) {
+                    Modifier.absoluteSquircleClip(
+                        topLeft = 0.dp,
+                        topRight = corner,
+                        bottomRight = corner,
+                        bottomLeft = 0.dp,
+                    )
+                } else {
+                    Modifier.absoluteSquircleClip(
+                        topLeft = corner,
+                        topRight = 0.dp,
+                        bottomRight = 0.dp,
+                        bottomLeft = corner,
+                    )
                 }
-                Modifier.clip(shape)
             } else {
                 Modifier
             }

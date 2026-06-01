@@ -25,42 +25,48 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Run macOS demo      | `./gradlew :example:macos:runDebugExecutableMacosArm64` |
 | Run iOS demo        | Open `example/ios/iosApp.xcodeproj` in Xcode and run    |
 
-**ALWAYS run `./gradlew spotlessApply` before committing.** CI will reject formatting violations.
+Before committing, run `./gradlew spotlessCheck`; only run `./gradlew spotlessApply` if the check reports violations. CI will reject formatting violations.
 
 ## Repository Structure
 
-| Directory                | Purpose                                                        |
-| :----------------------- | :------------------------------------------------------------- |
-| `miuix-core/`           | Core utilities and MiuixIcons base; depended on by `miuix-ui` and `miuix-icons` |
-| `miuix-ui/`             | Main UI library — basic components, theme, colors, animations, overlay/window/layout |
-| `miuix-preference/`     | Preference components (SwitchPreference, CheckboxPreference, etc.)                  |
-| `miuix-blur/`           | Blur/backdrop effects (Android minSdk=31)                                           |
-| `miuix-icons/`          | Extended icon resources                                                             |
-| `miuix-navigation3-ui/` | Navigation 3 UI implementation (independent, no miuix dependency)                   |
-| `example/`              | Demo app — showcases and tests all components                                       |
-| `baselineprofile/`      | Android baseline profile generation                                                 |
-| `docs/`                 | VitePress documentation site                                                        |
-| `build-plugins/`        | Custom Gradle plugins for build logic reuse                                         |
-| `gradle/`               | Version catalog (`libs.versions.toml`) and wrapper                                  |
+| Directory               | Purpose                                                       |
+| :---------------------- | :------------------------------------------------------------ |
+| `miuix-core/`           | Utilities + MiuixIcons base (depended on by `ui` and `icons`) |
+| `miuix-ui/`             | Main UI library                                               |
+| `miuix-preference/`     | Preference / menu / popup components                          |
+| `miuix-blur/`           | Blur effects (Android minSdk=33)                              |
+| `miuix-icons/`          | Extended icon resources                                       |
+| `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip) |
+| `example/`              | Demo app                                                      |
+| `baselineprofile/`      | Android baseline profile generation                           |
+| `docs/`                 | VitePress documentation site                                  |
+| `build-plugins/`        | Custom Gradle plugins                                         |
+| `gradle/`               | Version catalog + wrapper                                     |
 
 ### Component Source Layout
 
-```
-miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/
-├── basic/       # Fundamental components (Button, Switch, TextField, Surface, etc.)
-├── overlay/     # Scaffold-hosted overlay components (OverlayDialog, OverlayBottomSheet, etc.)
-├── window/      # Platform window components (WindowDialog, WindowBottomSheet, etc.)
-├── layout/      # Shared layout components (DialogContentLayout, BottomSheetContentLayout, etc.)
-├── theme/       # MiuixTheme, Colors, TextStyles, ThemeController, DynamicColors, etc.
-├── color/       # Color utilities, Material Color
-├── anim/        # Animation utilities
-├── utils/       # General utilities
-├── icon/        # Built-in basic icons (ArrowRight, Check, Search, etc.)
-└── interfaces/
+`miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/`:
 
-miuix-preference/src/commonMain/kotlin/top/yukonga/miuix/kmp/
-└── preference/  # Preference components (SwitchPreference, CheckboxPreference, ArrowPreference, etc.)
-```
+| Subdir        | Contents                                                        |
+| :------------ | :-------------------------------------------------------------- |
+| `basic/`      | Fundamental components (Button, Switch, TextField, Surface, …)  |
+| `overlay/`    | Scaffold-hosted overlays (OverlayDialog, OverlayBottomSheet, …) |
+| `window/`     | Platform window components (WindowDialog, WindowBottomSheet, …) |
+| `layout/`     | Shared layout primitives                                        |
+| `theme/`      | MiuixTheme, Colors, TextStyles, ThemeController, DynamicColors  |
+| `color/`      | Color utilities, Material Color                                 |
+| `anim/`       | Animation utilities                                             |
+| `utils/`      | General utilities                                               |
+| `icon/`       | Built-in basic icons (ArrowRight, Check, Search, …)             |
+| `interfaces/` | Shared interfaces                                               |
+
+`miuix-preference/src/commonMain/kotlin/top/yukonga/miuix/kmp/`:
+
+| Subdir        | Contents                                                        |
+| :------------ | :-------------------------------------------------------------- |
+| `preference/` | Preference components (SwitchPreference, CheckboxPreference, …) |
+| `menu/`       | Dropdown menus (Overlay/Window variants, cascading)             |
+| `popup/`      | Dropdown popup primitives shared by menus                       |
 
 ### Platform Source Sets
 
@@ -81,7 +87,7 @@ commonMain
 
 ## Code Style
 
-- **Formatter**: Spotless + ktlint 1.8.0 with Compose rules (`io.nlopez.compose.rules:ktlint:0.5.6`)
+- **Formatter**: Spotless + ktlint with Compose rules (`io.nlopez.compose.rules:ktlint`). Exact versions live in `build-plugins/src/main/kotlin/module.spotless.gradle.kts`
 - **License header** (required on all `.kt` and `.kts` files):
 
   ```
@@ -90,7 +96,8 @@ commonMain
   ```
 
   Spotless auto-fills `$YEAR` with the current year. Do not manually change years in existing file headers.
-- **Spotless exclusions**: Icon files (`**/icon/**/*.kt`) and navigation3 files (`**/navigation3/**/*.kt`) are excluded from formatting.
+
+- **Spotless exclusions**: Icon files (`**/icon/**/*.kt`) and a subset of navigation3 sources (`**/navigation3/ListUtils.kt`, `**/navigation3/scene/*.kt`, `**/navigation3/ui/*.kt`) are excluded from formatting.
 - Line endings: platform-native
 - Composable function names may use PascalCase (ktlint rule disabled for `@Composable`)
 
@@ -164,7 +171,7 @@ data class ButtonColors(
 
 ### Key Patterns
 
-- **`rememberUpdatedState`** for values whose latest reading must be visible to a long-lived closure without re-running an effect or rebuilding a Modifier: use inside `LaunchedEffect`/`DisposableEffect` so the effect body sees the newest callback without being keyed on it, and inside `remember { }`-cached lambdas (e.g., the `onClick` you pass to `Modifier.clickable` after wrapping it in `remember`) so the cached body still calls the up-to-date callback. Note: this prevents *stale captures*, it does not stabilize the outer lambda's identity — a `Modifier.clickable { current() }` literal is still a fresh object on each composition. Do NOT use it when forwarding a callback directly to a child composable (e.g., `Button(onClick = onClick)`) — Compose's skip mechanism handles lambda stability there
+- **`rememberUpdatedState`** for values whose latest reading must be visible to a long-lived closure without re-running an effect or rebuilding a Modifier: use inside `LaunchedEffect`/`DisposableEffect` so the effect body sees the newest callback without being keyed on it, and inside `remember { }`-cached lambdas (e.g., the `onClick` you pass to `Modifier.clickable` after wrapping it in `remember`) so the cached body still calls the up-to-date callback. Note: this prevents _stale captures_, it does not stabilize the outer lambda's identity — a `Modifier.clickable { current() }` literal is still a fresh object on each composition. Do NOT use it when forwarding a callback directly to a child composable (e.g., `Button(onClick = onClick)`) — Compose's skip mechanism handles lambda stability there
 - **`remember` with keys** for derived values: `val alpha = remember(enabled) { if (enabled) 1f else 0.38f }`
 - **`@NonRestartableComposable`** on thin wrapper composables that fully delegate to other composables and read no state themselves; avoid on composables with multiple internal state reads (they benefit from smart recomposition)
 - **`@Immutable`** on color/style data classes
@@ -195,8 +202,6 @@ data class ButtonColors(
 4. Register the demo in the example app
 5. Verify on at least Android and Desktop
 
-Use `/create-component` to scaffold a new component.
-
 ### Modifying a Component
 
 When changing a component's API, defaults, or behavior, check and update all related artifacts:
@@ -219,4 +224,4 @@ Format: `<scope>: <summary>`
 - Keep subject line ≤ 72 characters, sentence case, no trailing period
 - Reference PRs/issues as `(#1234)` at end
 - Check recent `git log --oneline` to stay consistent with current conventions
-- **Run `./gradlew spotlessApply` before every commit**
+- **Run `./gradlew spotlessCheck` before every commit; only run `./gradlew spotlessApply` if violations are reported**

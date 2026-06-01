@@ -284,6 +284,7 @@ fun SearchBar(
 @Composable
 fun SearchBarFake(
     label: String,
+    searchBarTopPadding: Dp = 12.dp,
 ) {
     InputField(
         query = "",
@@ -302,7 +303,7 @@ fun SearchBarFake(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp),
+            .padding(top = searchBarTopPadding, bottom = 6.dp),
         onSearch = { },
         enabled = false,
         expanded = false,

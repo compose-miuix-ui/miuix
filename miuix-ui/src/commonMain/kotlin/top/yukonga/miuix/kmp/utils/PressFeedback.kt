@@ -10,7 +10,7 @@ import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.pointer.PointerEvent
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
 
-@Immutable
+@Stable
 data class SinkFeedback(
     val sinkAmount: Float = 0.94f,
     val animationSpec: AnimationSpec<Float> = spring(0.8f, 600f),
@@ -80,7 +80,7 @@ data class SinkFeedback(
     }
 }
 
-@Immutable
+@Stable
 data class TiltFeedback(
     val tiltAmount: Float = 8f,
     val animationSpec: AnimationSpec<Float> = spring(0.6f, 400f),

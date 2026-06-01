@@ -12,6 +12,9 @@ import kotlin.jvm.JvmInline
 /**
  * Color configuration applied after blur processing.
  *
+ * Compose treats [List] as unstable, so the `@Immutable` annotation alone does not stabilize
+ * callers — prefer the remembered [BlurDefaults.blurColors] factory over direct construction.
+ *
  * @param blendColors Colors blended over the blurred backdrop, drawn in order.
  * @param brightness Brightness adjustment in range [-1, 1]. 0 means no change.
  * @param contrast Contrast multiplier. 1 means no change.
@@ -120,7 +123,7 @@ value class BlurBlendMode(val value: Int) {
         /** Plus lighter with alpha-aware compositing. */
         val PlusLighter = BlurBlendMode(121)
 
-        /** Alpha blend with child modulation. */
+        /** Alpha blend with mask-channel modulation; the mask resolves to backdrop.r. */
         val AlphaBlend = BlurBlendMode(200)
 
         /** Saturation adjustment. Requires [BlurColors.saturation]. */

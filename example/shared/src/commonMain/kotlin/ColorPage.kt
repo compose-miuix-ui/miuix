@@ -3,20 +3,17 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -31,12 +28,13 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
@@ -49,7 +47,7 @@ import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
 private val CamelCaseRegex = Regex("([A-Z])")
-private val ColorBlockShape = RoundedCornerShape(12.dp)
+private val ColorBlockCornerRadius = 12.dp
 
 @Immutable
 private data class ColorBlockData(
@@ -266,24 +264,19 @@ fun ColorsPreview(colors: Colors) {
 
 @Composable
 private fun ColorBlock(displayName: String, surfaceColor: Color, textColor: Color, modifier: Modifier = Modifier) {
-    Surface(
-        color = surfaceColor,
-        shape = ColorBlockShape,
-        border = BorderStroke(1.dp, textColor),
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp),
+            .height(100.dp)
+            .squircleBackground(surfaceColor, ColorBlockCornerRadius)
+            .squircleBorder(1.dp, textColor, ColorBlockCornerRadius),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = displayName,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(12.dp),
-            )
-        }
+        Text(
+            text = displayName,
+            color = textColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(12.dp),
+        )
     }
 }

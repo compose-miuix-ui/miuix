@@ -5,6 +5,7 @@ package component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,12 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.RangeSlider
-import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalSlider
+import top.yukonga.miuix.kmp.preference.RangeSliderPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
 
 fun LazyListScope.sliderSection() {
     item(key = "slider") {
@@ -37,91 +38,55 @@ fun LazyListScope.sliderSection() {
                 .padding(bottom = 12.dp),
         ) {
             var sliderValue by remember { mutableFloatStateOf(0.3f) }
-            Text(
-                text = "Normal: ${(sliderValue * 100).toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp),
-            )
-            Slider(
+            SliderPreference(
                 value = sliderValue,
                 onValueChange = { sliderValue = it },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                title = "Normal",
+                valueText = "${(sliderValue * 100).toInt()}%",
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var stepsValue by remember { mutableFloatStateOf(100f) }
-            Text(
-                text = "Steps: ${stepsValue.toInt()}/200",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            Slider(
+            SliderPreference(
                 value = stepsValue,
                 onValueChange = { stepsValue = it },
+                title = "Steps",
+                valueText = "${stepsValue.toInt()}/200",
                 valueRange = 0f..200f,
                 steps = 199,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var stepsWithKeyPointsValue by remember { mutableFloatStateOf(5f) }
-            Text(
-                text = "Steps with Key Points: ${stepsWithKeyPointsValue.toInt()}/8",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            Slider(
+            SliderPreference(
                 value = stepsWithKeyPointsValue,
                 onValueChange = { stepsWithKeyPointsValue = it },
+                title = "Steps with Key Points",
+                valueText = "${stepsWithKeyPointsValue.toInt()}/8",
                 valueRange = 0f..8f,
                 steps = 7,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 showKeyPoints = true,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var customKeyPointsValue by remember { mutableFloatStateOf(25f) }
-            Text(
-                text = "Custom Key Points: ${customKeyPointsValue.toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            Slider(
+            SliderPreference(
                 value = customKeyPointsValue,
                 onValueChange = { customKeyPointsValue = it },
+                title = "Custom Key Points",
+                valueText = "${customKeyPointsValue.toInt()}%",
                 valueRange = 0f..100f,
                 showKeyPoints = true,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             val disabledValue by remember { mutableFloatStateOf(0.7f) }
-            Text(
-                text = "Disabled: ${(disabledValue * 100).toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            Slider(
+            SliderPreference(
                 value = disabledValue,
                 onValueChange = {},
+                title = "Disabled",
+                valueText = "${(disabledValue * 100).toInt()}%",
                 enabled = false,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
             )
         }
 
@@ -133,73 +98,44 @@ fun LazyListScope.sliderSection() {
                 .padding(bottom = 12.dp),
         ) {
             var rangeValue by remember { mutableStateOf(0.2f..0.8f) }
-            Text(
-                text = "Range: ${(rangeValue.start * 100).toInt()}% - ${(rangeValue.endInclusive * 100).toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 12.dp, bottom = 4.dp),
-            )
-            RangeSlider(
+            RangeSliderPreference(
                 value = rangeValue,
                 onValueChange = { rangeValue = it },
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                title = "Range",
+                valueText = "${(rangeValue.start * 100).toInt()}% - ${(rangeValue.endInclusive * 100).toInt()}%",
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var rangeStepsValue by remember { mutableStateOf(2f..8f) }
-            Text(
-                text = "Range with Key Points: ${rangeStepsValue.start.toInt()} - ${rangeStepsValue.endInclusive.toInt()}",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            RangeSlider(
+            RangeSliderPreference(
                 value = rangeStepsValue,
                 onValueChange = { rangeStepsValue = it },
+                title = "Range with Key Points",
+                valueText = "${rangeStepsValue.start.toInt()} - ${rangeStepsValue.endInclusive.toInt()}",
                 valueRange = 0f..8f,
                 steps = 7,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 showKeyPoints = true,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var customRangeValue by remember { mutableStateOf(20f..80f) }
-            Text(
-                text = "Custom Range Points: ${customRangeValue.start.toInt()}% - ${customRangeValue.endInclusive.toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            RangeSlider(
+            RangeSliderPreference(
                 value = customRangeValue,
                 onValueChange = { customRangeValue = it },
+                title = "Custom Range Points",
+                valueText = "${customRangeValue.start.toInt()}% - ${customRangeValue.endInclusive.toInt()}%",
                 valueRange = 0f..100f,
                 showKeyPoints = true,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 keyPoints = listOf(0f, 20f, 40f, 60f, 80f, 100f),
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var disabledRangeValue by remember { mutableStateOf(0.3f..0.7f) }
-            Text(
-                text = "Disabled: ${(disabledRangeValue.start * 100).toInt()}% - ${(disabledRangeValue.endInclusive * 100).toInt()}%",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-            )
-            RangeSlider(
+            RangeSliderPreference(
                 value = disabledRangeValue,
                 onValueChange = {},
+                title = "Disabled",
+                valueText = "${(disabledRangeValue.start * 100).toInt()}% - ${(disabledRangeValue.endInclusive * 100).toInt()}%",
                 enabled = false,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
             )
         }
 

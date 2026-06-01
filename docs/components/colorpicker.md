@@ -72,14 +72,15 @@ ColorPicker(
 
 ## Individual Slider Components
 
-ColorPicker provides four different slider components that can be used independently:
+The HSV color space exposes four sliders that can be used independently. Other
+color spaces have their own slider families — see [Other Color Space Sliders](#other-color-space-sliders).
 
-### HueSlider
+### HsvHueSlider
 
 ```kotlin
 var hue by remember { mutableStateOf(0f) }
 
-HueSlider(
+HsvHueSlider(
     currentHue = hue,
     onHueChanged = { newHue ->
         hue = newHue * 360f
@@ -87,12 +88,12 @@ HueSlider(
 )
 ```
 
-### SaturationSlider
+### HsvSaturationSlider
 
 ```kotlin
 var saturation by remember { mutableStateOf(0.5f) }
 
-SaturationSlider(
+HsvSaturationSlider(
     currentHue = 180f, // Current hue
     currentSaturation = saturation,
     onSaturationChanged = { newSaturation ->
@@ -101,12 +102,12 @@ SaturationSlider(
 )
 ```
 
-### ValueSlider
+### HsvValueSlider
 
 ```kotlin
 var value by remember { mutableStateOf(0.5f) }
 
-ValueSlider(
+HsvValueSlider(
     currentHue = 180f, // Current hue
     currentSaturation = 0.5f, // Current saturation
     currentValue = value,
@@ -116,12 +117,12 @@ ValueSlider(
 )
 ```
 
-### AlphaSlider
+### HsvAlphaSlider
 
 ```kotlin
 var alpha by remember { mutableStateOf(1f) }
 
-AlphaSlider(
+HsvAlphaSlider(
     currentHue = 180f, // Current hue
     currentSaturation = 0.5f, // Current saturation
     currentValue = 0.5f, // Current value
@@ -131,6 +132,21 @@ AlphaSlider(
     }
 )
 ```
+
+### Other Color Space Sliders
+
+In addition to the HSV-family sliders above, each color space `ColorPicker`
+supports has its own set of standalone sliders:
+
+| Color space | Sliders |
+|-------------|---------|
+| OkHSV       | `OkHsvHueSlider`, `OkHsvSaturationSlider`, `OkHsvValueSlider`, `OkHsvAlphaSlider` |
+| OkLCH       | `OkLchLightnessSlider`, `OkLchChromaSlider`, `OkLchHueSlider`, `OkLchAlphaSlider` |
+| OkLab       | `OkLabLightnessSlider`, `OkLabAChannelSlider`, `OkLabBChannelSlider`, `OkLabAlphaSlider` |
+
+The parameter shapes mirror their HSV counterparts (current value(s) and an
+`on*Changed` callback, plus an optional `hapticEffect`); refer to the source
+KDoc for the exact parameter list of each.
 
 ## Advanced Usage
 

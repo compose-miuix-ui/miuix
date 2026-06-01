@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.platform
@@ -327,9 +328,9 @@ fun FloatingNavigationBar(
                 .then(
                     if (showDivider) {
                         Modifier
-                            .background(
+                            .squircleBackground(
                                 color = MiuixTheme.colorScheme.dividerLine,
-                                shape = shape,
+                                cornerRadius = cornerRadius,
                             )
                             .padding(0.75.dp)
                     } else {
@@ -350,7 +351,7 @@ fun FloatingNavigationBar(
                         Modifier
                     },
                 )
-                .background(color = color, shape = shape)
+                .squircleBackground(color = color, cornerRadius = cornerRadius)
                 .then(modifier)
                 .padding(horizontal = FloatingNavigationBarDefaults.HorizontalPadding)
                 .align(horizontalAlignment)

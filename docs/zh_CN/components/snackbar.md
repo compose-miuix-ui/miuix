@@ -89,15 +89,17 @@ suspend fun SnackbarHostState.oldestSnackbarData(): SnackbarData?
 fun SnackbarHost(
     state: SnackbarHostState,
     modifier: Modifier = Modifier,
+    canSwipeToDismiss: Boolean = true,
     content: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 )
 ```
 
-| 参数名   | 类型                               | 说明                                       | 默认值             | 是否必须 |
-| -------- | ---------------------------------- | ------------------------------------------ | ------------------ | -------- |
-| state    | SnackbarHostState                  | 管理 Snackbar 队列的状态                   | -                  | 是       |
-| modifier | Modifier                           | 应用于宿主容器的修饰符                     | Modifier           | 否       |
-| content  | @Composable (SnackbarData) -> Unit | 自定义每一条 Snackbar 的内容               | `{ Snackbar(it) }` | 否       |
+| 参数名            | 类型                               | 说明                              | 默认值             | 是否必须 |
+| ----------------- | ---------------------------------- | --------------------------------- | ------------------ | -------- |
+| state             | SnackbarHostState                  | 管理 Snackbar 队列的状态          | -                  | 是       |
+| modifier          | Modifier                           | 应用于宿主容器的修饰符            | Modifier           | 否       |
+| canSwipeToDismiss | Boolean                            | 是否允许通过滑动手势关闭 Snackbar | true               | 否       |
+| content           | @Composable (SnackbarData) -> Unit | 自定义每一条 Snackbar 的内容      | `{ Snackbar(it) }` | 否       |
 
 大多数情况下，可以直接使用默认的 `content`，即内置的 `Snackbar` 视觉样式。
 

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -25,10 +24,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.translate
@@ -53,6 +49,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.anim.SinOutEasing
+import top.yukonga.miuix.kmp.squircle.addSquircleRect
+import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.min
@@ -462,7 +460,7 @@ fun rememberListPopupLayoutInfo(
 
                 else -> false
             }
-            PopupLayoutPosition(showBelow = false, showAbove = false, isRightAligned = isRightAligned)
+            PopupLayoutPosition(showBelow = true, showAbove = false, isRightAligned = isRightAligned)
         } else {
             val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
             val anchorCenterY = parentBounds.top + parentBounds.height / 2
@@ -545,7 +543,7 @@ fun ListPopupContent(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val shape = remember { RoundedCornerShape(16.dp) }
+    val cornerRadius = 16.dp
     val backgroundColor = MiuixTheme.colorScheme.surfaceContainer
 
     Box(
@@ -561,19 +559,11 @@ fun ListPopupContent(
                 scaleY = scale
                 alpha = alphaProgress()
                 transformOrigin = localTransformOrigin
-            },
+            }
+            .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius, isSquircleEnabled())
+            .background(color = backgroundColor),
     ) {
-        Box(
-            modifier = Modifier
-                .graphicsLayer {
-                    this.shape = shape
-                    clip = true
-                }
-                .popupClipReveal(fractionProgress, popupLayoutPosition, shape)
-                .background(backgroundColor, shape),
-        ) {
-            content()
-        }
+        content()
     }
 }
 
@@ -581,46 +571,47 @@ fun ListPopupContent(
  * Directional clip-reveal used during popup enter/exit. The visible band grows along the popup's
  * spawn direction encoded by [popupLayoutPosition] as [fractionProgress] moves 0 → 1: from the top
  * when shown below the anchor, from the bottom when shown above, and outwards from the center
- * otherwise. The band is shaped by [shape] so the rounded corners stay aligned during reveal.
+ * otherwise. The band itself is shaped as a squircle (via [addSquircleRect]) so the four corners
+ * stay aligned with the surrounding [squircleSurface] / [squircleClip] during reveal — when
+ * [squircleEnabled] is `false`, [addSquircleRect] falls back to a plain rounded rectangle to
+ * match the squircle modifiers' fallback rendering.
  */
 internal fun Modifier.popupClipReveal(
     fractionProgress: () -> Float,
     popupLayoutPosition: PopupLayoutPosition,
-    shape: Shape,
+    cornerRadius: Dp,
+    squircleEnabled: Boolean,
 ): Modifier = drawWithCache {
     val path = Path()
+    val showBelow = popupLayoutPosition.showBelow
+    val showAbove = popupLayoutPosition.showAbove
     onDrawWithContent {
-        val progress = fractionProgress()
+        // Clamp — source spring overshoots; an oversized reveal path would cut downstream content.
+        val progress = fractionProgress().coerceIn(0f, 1f)
+        if (progress <= 0f) return@onDrawWithContent
+
         val height = size.height
-        val showBelow = popupLayoutPosition.showBelow
-        val showAbove = popupLayoutPosition.showAbove
+        val visibleHeight = height * progress
+        if (visibleHeight <= 0f) return@onDrawWithContent
 
-        val clipTop = if (showAbove) height * (1f - progress) else 0f
-        val clipBottom = when {
-            showBelow -> height * progress
-            showAbove -> height
-            else -> height * (0.5f + 0.5f * progress)
+        val clipStart = when {
+            showBelow -> 0f
+            showAbove -> height * (1f - progress)
+            else -> height * (0.5f - 0.5f * progress)
         }
-        val clipStart =
-            if (!showBelow && !showAbove) {
-                height * (0.5f - 0.5f * progress)
-            } else {
-                clipTop
-            }
-        val visibleHeight = clipBottom - clipStart
 
-        if (visibleHeight > 0f) {
-            val outline = shape.createOutline(
-                Size(size.width, visibleHeight),
-                layoutDirection,
-                this,
-            )
-            path.rewind()
-            when (outline) {
-                is Outline.Rectangle -> path.addRect(outline.rect)
-                is Outline.Rounded -> path.addRoundRect(outline.roundRect)
-                is Outline.Generic -> path.addPath(outline.path)
+        path.rewind()
+        path.addSquircleRect(
+            width = size.width,
+            height = visibleHeight,
+            cornerRadius = cornerRadius.toPx(),
+            squircleEnabled = squircleEnabled,
+        )
+        if (clipStart == 0f) {
+            clipPath(path) {
+                this@onDrawWithContent.drawContent()
             }
+        } else {
             translate(top = clipStart) {
                 clipPath(path) {
                     translate(top = -clipStart) {

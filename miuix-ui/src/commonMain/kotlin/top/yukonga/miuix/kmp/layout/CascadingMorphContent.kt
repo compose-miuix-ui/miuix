@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,6 +42,7 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupLayoutPosition
 import top.yukonga.miuix.kmp.basic.popupClipReveal
+import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 
 private var deeperChildrenWarned = false
 
@@ -85,16 +85,14 @@ internal fun CascadingPrimaryContent(
                 this.transformOrigin = transformOrigin
             }
             .graphicsLayer {
-                // Recedes toward the spawn anchor while a secondary is on screen.
                 val s = primaryScale()
                 scaleX = s
                 scaleY = s
                 this.transformOrigin = transformOrigin
             }
-            .popupClipReveal(enterFraction, popupLayoutPosition, shape)
+            .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius, isSquircleEnabled())
             .dropShadow(shape = shape, shadow = CascadeShadow)
-            .clip(shape)
-            .background(surfaceColor),
+            .background(color = surfaceColor),
     ) {
         Box {
             ListPopupColumn {
@@ -227,9 +225,7 @@ internal fun CascadingSecondaryContent(
     dropdownColors: DropdownColors,
     surfaceColor: Color,
 ) {
-    val children = triggerItem.children.orEmpty()
     val cornerPx = with(LocalDensity.current) { CascadingPopupCornerRadius.toPx() }
-    val revealShape = remember { RoundedCornerShape(CascadingPopupCornerRadius) }
     val anchorTopLeft = anchorLocalInUnion.topLeft
     val secondaryTopLeft = secondaryLocalInUnion.topLeft
     val secondaryWidth = secondaryLocalInUnion.width
@@ -243,7 +239,7 @@ internal fun CascadingSecondaryContent(
                 alpha = enterAlpha()
                 this.transformOrigin = transformOrigin
             }
-            .popupClipReveal(enterFraction, popupLayoutPosition, revealShape)
+            .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius, isSquircleEnabled())
             .drawWithCache {
                 val innerPath = Path()
                 onDrawWithContent {
@@ -335,39 +331,69 @@ internal fun CascadingSecondaryContent(
                 },
             propagateMinConstraints = true,
         ) {
-            ListPopupColumn {
-                MorphHeaderRow(
-                    triggerItem = triggerItem,
-                    arrowRotation = arrowRotation,
-                    expandFraction = expandFraction,
-                    anchorHeightPx = anchorLocalInUnion.height,
-                    anchorPaddingTopPx = anchorPaddingTopPx,
-                    dropdownColors = dropdownColors,
-                    onClick = onCollapseSecondary,
-                )
-                HorizontalDivider(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 4.dp),
-                    thickness = 1.5.dp,
-                )
-                children.forEachIndexed { index, child ->
-                    key(child) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            propagateMinConstraints = true,
-                        ) {
-                            DropdownImpl(
-                                item = child,
-                                optionSize = children.size,
-                                isSelected = child.selected,
-                                index = index,
-                                dropdownColors = dropdownColors,
-                                enabled = child.enabled,
-                                hasSubmenu = false,
-                                onSelectedIndexChange = { onLeafSelected(child) },
-                            )
-                        }
-                    }
+            CascadingSecondaryColumn(
+                triggerItem = triggerItem,
+                dropdownColors = dropdownColors,
+                expandFraction = expandFraction,
+                arrowRotation = arrowRotation,
+                anchorHeightPx = anchorLocalInUnion.height,
+                anchorPaddingTopPx = anchorPaddingTopPx,
+                onHeaderClick = onCollapseSecondary,
+                onLeafSelected = onLeafSelected,
+            )
+        }
+    }
+}
+
+/** Shared header + divider + children body for the secondary popup. Used by both the real
+ *  animated layout and the measurement probe so their sizes can't diverge. */
+@Composable
+internal fun CascadingSecondaryColumn(
+    triggerItem: DropdownItem,
+    dropdownColors: DropdownColors,
+    expandFraction: () -> Float,
+    arrowRotation: () -> Float,
+    anchorHeightPx: Int,
+    anchorPaddingTopPx: Int,
+    onHeaderClick: () -> Unit,
+    onLeafSelected: (DropdownItem) -> Unit,
+) {
+    val children = triggerItem.children.orEmpty()
+    ListPopupColumn {
+        MorphHeaderRow(
+            triggerItem = triggerItem,
+            arrowRotation = arrowRotation,
+            expandFraction = expandFraction,
+            anchorHeightPx = anchorHeightPx,
+            anchorPaddingTopPx = anchorPaddingTopPx,
+            dropdownColors = dropdownColors,
+            onClick = onHeaderClick,
+        )
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(horizontal = 20.dp, vertical = 4.dp),
+            thickness = 1.5.dp,
+        )
+        val lastChildIdx = children.lastIndex
+        children.forEachIndexed { index, child ->
+            key(child) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    propagateMinConstraints = true,
+                ) {
+                    DropdownImpl(
+                        item = child,
+                        optionSize = children.size,
+                        isSelected = child.selected,
+                        index = index,
+                        dropdownColors = dropdownColors,
+                        enabled = child.enabled,
+                        hasSubmenu = false,
+                        // Header owns popup-global "first"; only the trailing child owns "last".
+                        isFirst = false,
+                        isLast = index == lastChildIdx,
+                        onSelectedIndexChange = { onLeafSelected(child) },
+                    )
                 }
             }
         }

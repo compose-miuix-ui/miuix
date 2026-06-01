@@ -26,7 +26,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
@@ -41,7 +41,7 @@ fun MultiScaffoldTestPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val blurSupported = isRenderEffectSupported()
+    val blurSupported = isRuntimeShaderSupported()
     val surfaceColor = MiuixTheme.colorScheme.surface
     val backdrop = if (blurSupported) {
         rememberLayerBackdrop {

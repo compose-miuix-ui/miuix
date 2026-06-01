@@ -7,18 +7,19 @@ plugins {
     id("com.diffplug.spotless")
 }
 
+val composeKtlintRules = "io.nlopez.compose.rules:ktlint:0.5.9"
+val copyrightFile = rootProject.file("spotless/copyright.txt")
+val copyrightDelimiter = "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$"
+
 spotless {
     lineEndings = LineEnding.PLATFORM_NATIVE
 
     kotlin {
         target("src/**/*.kt")
         targetExclude("**/build/**/*.kt", "**/icon/**/*.kt", "**/navigation3/ListUtils.kt", "**/navigation3/scene/*.kt", "**/navigation3/ui/*.kt")
-        ktlint("1.8.0")
-            .customRuleSets(
-                listOf(
-                    "io.nlopez.compose.rules:ktlint:0.5.8",
-                ),
-            ).editorConfigOverride(
+        ktlint()
+            .customRuleSets(listOf(composeKtlintRules))
+            .editorConfigOverride(
                 mapOf(
                     "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
                     "ktlint_compose_modifier-missing-check" to "disabled",
@@ -28,13 +29,13 @@ spotless {
                     "ktlint_compose_modifier-naming" to "disabled",
                 ),
             )
-        licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$")
+        licenseHeaderFile(copyrightFile, copyrightDelimiter)
     }
 
     kotlinGradle {
         target("*.kts")
         targetExclude("**/build/**/*.kts")
-        ktlint("1.8.0")
-        licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$")
+        ktlint()
+        licenseHeaderFile(copyrightFile, copyrightDelimiter)
     }
 }

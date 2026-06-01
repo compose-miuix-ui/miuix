@@ -8,7 +8,13 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
+    id("module.kotlin-jvm-toolchain")
     id("module.publication")
+    id("module.spotless")
+}
+
+miuixPublication {
+    description.set("Preference components for Miuix")
 }
 
 kotlin {
@@ -41,54 +47,12 @@ kotlin {
         browser()
     }
 
+    applyMiuixSourceSetHierarchy()
+
     sourceSets {
         commonMain.dependencies {
             api(projects.miuixUi)
             api(libs.jetbrains.compose.foundation)
-        }
-
-        val skikoMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val darwinMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        val iosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        iosArm64Main {
-            dependsOn(iosMain)
-        }
-
-        iosSimulatorArm64Main {
-            dependsOn(iosMain)
-        }
-
-        val macosMain by creating {
-            dependsOn(darwinMain)
-        }
-
-        macosArm64Main {
-            dependsOn(macosMain)
-        }
-
-        named("desktopMain") {
-            dependsOn(skikoMain)
-        }
-
-        val webMain by creating {
-            dependsOn(skikoMain)
-        }
-
-        wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
-            dependsOn(webMain)
         }
     }
 }
