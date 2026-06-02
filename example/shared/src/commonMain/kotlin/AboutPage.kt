@@ -107,23 +107,27 @@ fun AboutPage(
     }
 
     val backdrop = rememberBlurBackdrop()
-    val blurActive = backdrop != null && scrollProgress == 1f
-    val barColor = if (blurActive) {
-        Color.Transparent
-    } else {
-        if (scrollProgress == 1f) MiuixTheme.colorScheme.surface else Color.Transparent
-    }
+    // Defer the frame-rate scroll read out of composition: these booleans only flip at the
+    // single 1f threshold, so derivedStateOf recomposes the bar on flip rather than every frame.
+    val collapsed by remember { derivedStateOf { scrollProgress == 1f } }
+    val blurActive by remember(backdrop) { derivedStateOf { backdrop != null && scrollProgress == 1f } }
 
     Scaffold(
         topBar = {
+            val barColor = if (blurActive) {
+                Color.Transparent
+            } else {
+                if (collapsed) MiuixTheme.colorScheme.surface else Color.Transparent
+            }
+            val titleColor = MiuixTheme.colorScheme.onSurface.copy(
+                alpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f),
+            )
             BlurredBar(backdrop, blurActive) {
                 SmallTopAppBar(
                     title = "About",
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
-                    titleColor = MiuixTheme.colorScheme.onSurface.copy(
-                        alpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f),
-                    ),
+                    titleColor = titleColor,
                     defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         BackNavigationIcon(
@@ -142,7 +146,7 @@ fun AboutPage(
                 ),
                 topAppBarScrollBehavior = topAppBarScrollBehavior,
                 lazyListState = lazyListState,
-                scrollProgress = scrollProgress,
+                scrollProgressProvider = { scrollProgress },
             )
         }
     }
@@ -153,7 +157,7 @@ private fun AboutContent(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
     lazyListState: LazyListState,
-    scrollProgress: Float,
+    scrollProgressProvider: () -> Float,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
@@ -208,17 +212,13 @@ private fun AboutContent(
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(300.dp) }
 
-    val versionCodeProgress = ((scrollProgress - 0.05f) / 0.15f).coerceIn(0f, 1f)
-    val projectNameProgress = ((scrollProgress - 0.20f) / 0.15f).coerceIn(0f, 1f)
-    val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
-
     BgEffectBackground(
         dynamicBackground = dynamicBackground.value,
         isOs3Effect = isOs3Effect,
         isFullSize = isFullScreenBackground.value,
         modifier = Modifier.fillMaxSize(),
         bgModifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier,
-        alpha = { 1f - scrollProgress },
+        alpha = { 1f - scrollProgressProvider() },
     ) {
         Column(
             modifier = Modifier
@@ -238,6 +238,7 @@ private fun AboutContent(
                 modifier = Modifier
                     .size(88.dp)
                     .graphicsLayer {
+                        val iconProgress = ((scrollProgressProvider() - 0.35f) / 0.15f).coerceIn(0f, 1f)
                         clip = true
                         shape = RoundedCornerShape(24.dp)
                         alpha = 1 - iconProgress
@@ -255,6 +256,7 @@ private fun AboutContent(
             Text(
                 modifier = Modifier.padding(top = 12.dp, bottom = 5.dp)
                     .graphicsLayer {
+                        val projectNameProgress = ((scrollProgressProvider() - 0.20f) / 0.15f).coerceIn(0f, 1f)
                         alpha = 1 - projectNameProgress
                         scaleX = 1 - (projectNameProgress * 0.05f)
                         scaleY = 1 - (projectNameProgress * 0.05f)
@@ -284,6 +286,7 @@ private fun AboutContent(
             Text(
                 modifier = Modifier.fillMaxWidth()
                     .graphicsLayer {
+                        val versionCodeProgress = ((scrollProgressProvider() - 0.05f) / 0.15f).coerceIn(0f, 1f)
                         alpha = 1 - versionCodeProgress
                         scaleX = 1 - (versionCodeProgress * 0.05f)
                         scaleY = 1 - (versionCodeProgress * 0.05f)
