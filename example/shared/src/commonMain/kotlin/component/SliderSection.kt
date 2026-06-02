@@ -80,7 +80,7 @@ fun LazyListScope.sliderSection() {
                 keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
-            val disabledValue by remember { mutableFloatStateOf(0.7f) }
+            val disabledValue = 0.7f
             SliderPreference(
                 value = disabledValue,
                 onValueChange = {},
@@ -233,7 +233,7 @@ fun LazyListScope.sliderSection() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                val disabledVerticalValue by remember { mutableFloatStateOf(0.7f) }
+                val disabledVerticalValue = 0.7f
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
