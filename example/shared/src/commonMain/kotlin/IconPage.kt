@@ -79,15 +79,18 @@ fun IconsPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
-    val dynamicTopPadding by remember(topAppBarScrollBehavior) {
-        derivedStateOf { 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction) }
+    val density = LocalDensity.current
+    // Quantize the collapse-driven padding to whole pixels to avoid sub-pixel jitter while collapsing.
+    val dynamicTopPadding by remember(topAppBarScrollBehavior, density) {
+        derivedStateOf {
+            with(density) { (12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction)).roundToPx().toDp() }
+        }
     }
 
     // Search state
     var searchStatus by remember { mutableStateOf(SearchStatus(label = "Search icons")) }
     val updateSearchStatus: (SearchStatus) -> Unit = { searchStatus = it }
     var searchOffsetY by remember { mutableStateOf(0.dp) }
-    val density = LocalDensity.current
 
     // Icon data
     val allIcons = remember { MiuixIcons.All }
