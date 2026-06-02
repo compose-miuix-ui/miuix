@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import kotlinx.coroutines.CancellationException
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -70,6 +71,8 @@ fun LicensePage(
             val jsonString = Res.readBytes("files/aboutlibraries.json").decodeToString()
             val libs = SimpleJsonParser(jsonString).parseLibs()
             value = libs.libraries
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             e.printStackTrace()
         }
