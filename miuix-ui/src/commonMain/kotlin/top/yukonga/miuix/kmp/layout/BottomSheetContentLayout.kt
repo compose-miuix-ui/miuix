@@ -509,28 +509,32 @@ internal fun BottomSheetContent(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+                try {
+                    if (!enableNestedScroll || isSettling.value) return Velocity.Zero
 
-                // Take over fling if the sheet is offset.
-                if (dragOffsetY.value > 0) {
-                    performSettle(available.y)
+                    // Take over fling if the sheet is offset.
+                    if (dragOffsetY.value > 0) {
+                        performSettle(available.y)
+                        return available
+                    }
+                    return Velocity.Zero
+                } finally {
                     resetNestedScrollGesture()
-                    return available
                 }
-                resetNestedScrollGesture()
-                return Velocity.Zero
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+                try {
+                    if (!enableNestedScroll || isSettling.value) return Velocity.Zero
 
-                if (dragOffsetY.value > 0) {
-                    performSettle(available.y)
+                    if (dragOffsetY.value > 0) {
+                        performSettle(available.y)
+                        return available
+                    }
+                    return super.onPostFling(consumed, available)
+                } finally {
                     resetNestedScrollGesture()
-                    return available
                 }
-                resetNestedScrollGesture()
-                return super.onPostFling(consumed, available)
             }
         }
     }
