@@ -1,6 +1,6 @@
 [versions]
 agp = "9.2.1"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kotlinx-serialization = "1.11.0"
 
 about-libraries = "14.2.1"
