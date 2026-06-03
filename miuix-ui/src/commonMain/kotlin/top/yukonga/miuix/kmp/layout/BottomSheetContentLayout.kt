@@ -84,6 +84,7 @@ import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.abs
 
 /**
  * Internal shared layout logic for [OverlayBottomSheet] and [WindowBottomSheet].
@@ -440,11 +441,19 @@ internal fun BottomSheetContent(
         }
     }
 
+    val isNestedScrollGestureStarted = remember { mutableStateOf(false) }
+    val canDragSheetFromNestedScroll = remember { mutableStateOf(false) }
+
+    fun resetNestedScrollGesture() {
+        isNestedScrollGestureStarted.value = false
+        canDragSheetFromNestedScroll.value = false
+    }
+
     // Nested scroll logic
     val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (!enableNestedScroll) return Offset.Zero
+                if (!enableNestedScroll || source != NestedScrollSource.UserInput) return Offset.Zero
 
                 // Allow interruption whenever settling
                 if (isSettling.value) {
@@ -467,10 +476,15 @@ internal fun BottomSheetContent(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                if (!enableNestedScroll) return Offset.Zero
+                if (!enableNestedScroll || source != NestedScrollSource.UserInput) return Offset.Zero
 
                 val delta = available.y
-                if (delta > 0) {
+                if (!isNestedScrollGestureStarted.value) {
+                    isNestedScrollGestureStarted.value = true
+                    canDragSheetFromNestedScroll.value = delta > 0 && abs(consumed.y) < 0.5f
+                }
+
+                if (delta > 0 && canDragSheetFromNestedScroll.value) {
                     if (!allowDismiss) return Offset.Zero
 
                     if (isSettling.value) {
@@ -495,24 +509,32 @@ internal fun BottomSheetContent(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+                try {
+                    if (!enableNestedScroll || isSettling.value) return Velocity.Zero
 
-                // Take over fling if the sheet is offset
-                if (dragOffsetY.value > 0) {
-                    performSettle(available.y)
-                    return available
+                    // Take over fling if the sheet is offset.
+                    if (dragOffsetY.value > 0) {
+                        performSettle(available.y)
+                        return available
+                    }
+                    return Velocity.Zero
+                } finally {
+                    resetNestedScrollGesture()
                 }
-                return Velocity.Zero
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                if (!enableNestedScroll || isSettling.value) return Velocity.Zero
+                try {
+                    if (!enableNestedScroll || isSettling.value) return Velocity.Zero
 
-                if (dragOffsetY.value > 0) {
-                    performSettle(available.y)
-                    return available
+                    if (dragOffsetY.value > 0) {
+                        performSettle(available.y)
+                        return available
+                    }
+                    return super.onPostFling(consumed, available)
+                } finally {
+                    resetNestedScrollGesture()
                 }
-                return super.onPostFling(consumed, available)
             }
         }
     }
