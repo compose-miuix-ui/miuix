@@ -13,7 +13,7 @@ plugins {
 }
 
 kotlin {
-    js(IR) {
+    js {
         outputModuleName = "demo"
         browser {
             commonWebpackConfig {
