@@ -12,7 +12,7 @@ plugins {
 }
 
 kotlin {
-    js(IR) {
+    js {
         outputModuleName = "composeApp"
         browser {
             commonWebpackConfig {
