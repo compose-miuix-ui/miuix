@@ -8,7 +8,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -154,7 +156,10 @@ fun TabRow(
             LazyRow(
                 state = config.listState,
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
+                    // collectionInfo (the leftmost semantics in the chain wins the property).
+                    .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
@@ -162,6 +167,7 @@ fun TabRow(
                 itemsIndexed(tabs) { index, tabText ->
                     TabItem(
                         text = tabText,
+                        index = index,
                         isSelected = selectedTabIndex == index,
                         onClick = { currentOnTabSelected.invoke(index) },
                         cornerRadius = config.cornerRadius,
@@ -284,7 +290,10 @@ fun TabRowWithContour(
             LazyRow(
                 state = config.listState,
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
+                    // collectionInfo (the leftmost semantics in the chain wins the property).
+                    .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
@@ -292,6 +301,7 @@ fun TabRowWithContour(
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
                         text = tabText,
+                        index = index,
                         isSelected = selectedTabIndex == index,
                         onClick = { currentOnTabSelected.invoke(index) },
                         cornerRadius = config.cornerRadius,
@@ -310,6 +320,7 @@ fun TabRowWithContour(
 @Composable
 private fun TabItem(
     text: String,
+    index: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
@@ -324,14 +335,20 @@ private fun TabItem(
             .fillMaxHeight()
             .width(width)
             .squircleClip(cornerRadius)
-            .clickable(
+            .selectable(
+                selected = isSelected,
+                onClick = onClick,
+                role = Role.Tab,
                 interactionSource = interactionSource,
                 indication = indication,
-                onClick = onClick,
             )
             .semantics {
-                role = Role.Tab
-                selected = isSelected
+                collectionItemInfo = CollectionItemInfo(
+                    rowIndex = 0,
+                    rowSpan = 1,
+                    columnIndex = index,
+                    columnSpan = 1,
+                )
             }
             .padding(horizontal = 12.dp),
         contentAlignment = contentAlignment,
@@ -350,6 +367,7 @@ private fun TabItem(
 @Composable
 private fun TabItemWithContour(
     text: String,
+    index: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
@@ -364,14 +382,20 @@ private fun TabItemWithContour(
             .fillMaxHeight()
             .width(width)
             .squircleClip(cornerRadius)
-            .clickable(
+            .selectable(
+                selected = isSelected,
+                onClick = onClick,
+                role = Role.Tab,
                 interactionSource = interactionSource,
                 indication = indication,
-                onClick = onClick,
             )
             .semantics {
-                role = Role.Tab
-                selected = isSelected
+                collectionItemInfo = CollectionItemInfo(
+                    rowIndex = 0,
+                    rowSpan = 1,
+                    columnIndex = index,
+                    columnSpan = 1,
+                )
             },
         contentAlignment = contentAlignment,
     ) {
@@ -392,7 +416,7 @@ private fun TabItemWithContour(
 private data class TabRowConfig(
     val tabWidth: Dp,
     val cornerRadius: Dp,
-    val listState: androidx.compose.foundation.lazy.LazyListState,
+    val listState: LazyListState,
 )
 
 /**

@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -96,7 +97,9 @@ fun NavigationBar(
             HorizontalDivider()
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectableGroup(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -185,7 +188,8 @@ fun RowScope.NavigationBarItem(
                 Image(
                     modifier = Modifier.padding(top = NavigationBarDefaults.IconTopPadding).size(NavigationBarDefaults.IconSize),
                     imageVector = icon,
-                    contentDescription = label,
+                    // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                    contentDescription = null,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Text(
@@ -222,7 +226,8 @@ fun RowScope.NavigationBarItem(
                         }
                         .size(NavigationBarDefaults.IconSize),
                     imageVector = icon,
-                    contentDescription = label,
+                    // Decorative: the label (always present in the tree) names the item; avoids double-read.
+                    contentDescription = null,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Text(
@@ -307,6 +312,7 @@ fun FloatingNavigationBar(
     ) {
         Row(
             modifier = Modifier
+                .selectableGroup()
                 .padding(bottom = bottomPaddingValue)
                 .defaultMinSize(minHeight = 52.dp)
                 .then(

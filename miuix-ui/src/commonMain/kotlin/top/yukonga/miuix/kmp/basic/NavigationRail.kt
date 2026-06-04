@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -89,6 +90,7 @@ fun NavigationRail(
                 .width(minWidth)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
+                .selectableGroup()
                 .padding(vertical = NavigationRailDefaults.VerticalPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
@@ -165,7 +167,8 @@ fun NavigationRailItem(
                 Image(
                     modifier = Modifier.size(NavigationRailDefaults.IconSize),
                     imageVector = icon,
-                    contentDescription = label,
+                    // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                    contentDescription = null,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
@@ -182,7 +185,8 @@ fun NavigationRailItem(
                 Image(
                     modifier = Modifier.size(NavigationRailDefaults.IconSize),
                     imageVector = icon,
-                    contentDescription = label,
+                    // The label only exists in the tree when selected; name the icon otherwise to avoid double-read.
+                    contentDescription = if (selected) null else label,
                     colorFilter = ColorFilter.tint(tint),
                 )
                 if (selected) {

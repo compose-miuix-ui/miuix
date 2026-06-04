@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -58,6 +59,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
@@ -304,6 +307,7 @@ internal fun IosLiquidGlassNavigationBar(
                         role = Role.Tab,
                         onClick = { currentIndex = index },
                     )
+                    .semantics { selected = index == currentIndex }
                     .weight(1f)
                     .fillMaxHeight()
                     .graphicsLayer {
@@ -317,7 +321,8 @@ internal fun IosLiquidGlassNavigationBar(
                 Icon(
                     modifier = Modifier.size(22.dp),
                     imageVector = item.icon,
-                    contentDescription = item.label,
+                    // Decorative: the adjacent label names the item; avoids TalkBack double-read.
+                    contentDescription = null,
                 )
                 Text(
                     text = item.label,
@@ -340,6 +345,7 @@ internal fun IosLiquidGlassNavigationBar(
             CompositionLocalProvider(LocalContentColor provides tabContentColor) {
                 Row(
                     modifier = Modifier
+                        .selectableGroup()
                         .onSizeChanged { coords ->
                             totalWidthPx = coords.width.toFloat()
                             val contentWidthPx = totalWidthPx - with(density) { 8.dp.toPx() }
