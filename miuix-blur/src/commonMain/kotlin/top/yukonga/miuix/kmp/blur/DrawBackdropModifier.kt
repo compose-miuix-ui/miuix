@@ -208,17 +208,47 @@ private class DrawBackdropNode(
         override val shape: Shape get() = shapeProvider.innerShape
     }
 
-    private var graphicsLayer: GraphicsLayer? = null
-    private val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
-    private var noiseLayer: GraphicsLayer? = null
+    /** Layers + level parameters for rendering one downscale level (primary = lo, secondary = hi). */
+    private inner class LevelTarget {
+        var mainLayer: GraphicsLayer? = null
+        val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
+        var noiseLayer: GraphicsLayer? = null
+        var downscaleFactor: Int = 1
+        var padding: Float by mutableFloatStateOf(0f)
 
-    private fun obtainCascadeLayer(index: Int): GraphicsLayer {
-        val ctx = requireGraphicsContext()
-        while (cascadeLayers.size <= index) {
-            cascadeLayers.add(ctx.createGraphicsLayer())
+        /** First step downscale for cascade (backdrop draw uses this, not the total factor). */
+        var cascadeFirstStepScale: Int = 1
+
+        fun ensureMain(): GraphicsLayer = mainLayer ?: requireGraphicsContext().createGraphicsLayer().also { mainLayer = it }
+
+        fun obtainCascade(index: Int): GraphicsLayer {
+            val ctx = requireGraphicsContext()
+            while (cascadeLayers.size <= index) {
+                cascadeLayers.add(ctx.createGraphicsLayer())
+            }
+            return cascadeLayers[index]
         }
-        return cascadeLayers[index]
+
+        fun release() {
+            val ctx = requireGraphicsContext()
+            mainLayer?.let { ctx.releaseGraphicsLayer(it) }
+            mainLayer = null
+            for (cascade in cascadeLayers) ctx.releaseGraphicsLayer(cascade)
+            cascadeLayers.clear()
+            noiseLayer?.let { ctx.releaseGraphicsLayer(it) }
+            noiseLayer = null
+        }
     }
+
+    private val primary = LevelTarget()
+    private val secondary = LevelTarget()
+    private var crossfadeResultLayer: GraphicsLayer? = null
+
+    /** True when the radius sits in a transition band and [primary] (lo) + [secondary] (hi) cross-fade. */
+    private var blending: Boolean by mutableStateOf(false)
+
+    /** Smoothstep weight of the higher (secondary) level while [blending]. */
+    private var blendFactor: Float by mutableFloatStateOf(0f)
 
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
@@ -228,12 +258,9 @@ private class DrawBackdropNode(
 
     private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
 
-    private var padding by mutableFloatStateOf(0f)
-    private var downscaleFactor: Int = 1
-
-    private val recordBackdropBlock: (DrawScope.() -> Unit) = {
-        val currentPadding = padding
-        val scaleFactor = cascadeFirstStepScale
+    private fun DrawScope.recordBackdrop(target: LevelTarget) {
+        val currentPadding = target.padding
+        val scaleFactor = target.cascadeFirstStepScale
         val scaledPadding = if (currentPadding == 0f) {
             0f
         } else if (scaleFactor > 1) {
@@ -255,129 +282,127 @@ private class DrawBackdropNode(
         }
     }
 
-    /** First step downscale for cascade (backdrop draw uses this, not the total factor). */
-    private var cascadeFirstStepScale: Int = 1
+    /** Renders [target]'s blurred backdrop (record → cascade downsample → upscale) into this DrawScope. */
+    private fun DrawScope.renderBlurInto(target: LevelTarget) {
+        val layer = target.mainLayer ?: return
+        val currentPadding = target.padding
+        val scaleFactor = target.downscaleFactor
+        val fullWidth = (size.width + currentPadding * 2).toInt()
+        val fullHeight = (size.height + currentPadding * 2).toInt()
 
-    private val drawBackdropLayer: DrawScope.() -> Unit = {
-        val layer = graphicsLayer
-        if (layer != null) {
-            val currentPadding = padding
-            val scaleFactor = downscaleFactor
-            val fullWidth = (size.width + currentPadding * 2).toInt()
-            val fullHeight = (size.height + currentPadding * 2).toInt()
+        if (scaleFactor <= 1) {
+            target.cascadeFirstStepScale = 1
+            recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
+            layer.topLeft =
+                if (currentPadding != 0f) {
+                    IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
+                } else {
+                    IntOffset.Zero
+                }
+            drawLayer(layer)
+        } else if (scaleFactor <= 2) {
+            target.cascadeFirstStepScale = 2
+            val w = (fullWidth / 2).coerceAtLeast(1)
+            val h = (fullHeight / 2).coerceAtLeast(1)
+            recordLayer(layer, size = IntSize(w, h)) { recordBackdrop(target) }
+            drawUpscaledLayer(
+                target,
+                layer,
+                scaleFactor.toFloat(),
+                currentPadding,
+                scaleFactor,
+                backdrop.offsetResidualX,
+                backdrop.offsetResidualY,
+                fullWidth,
+                fullHeight,
+            )
+        } else {
+            // Multistep cascade, single-pass wider filter when possible:
+            //   sf =  4: backdrop ½ → 2x box → ¼                     (1 cascade layer)
+            //   sf =  8: backdrop ½ → 4x box → ⅛                     (1 cascade layer)
+            //   sf = 16: backdrop ½ → 4x box → ⅛ → 2x box → 1/16     (2 cascade layers)
+            target.cascadeFirstStepScale = 2
+            val firstW = (fullWidth / 2).coerceAtLeast(1)
+            val firstH = (fullHeight / 2).coerceAtLeast(1)
 
-            if (scaleFactor <= 1) {
-                cascadeFirstStepScale = 1
-                recordLayer(layer, size = IntSize(fullWidth, fullHeight), block = recordBackdropBlock)
-                layer.topLeft =
-                    if (currentPadding != 0f) {
-                        IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
-                    } else {
-                        IntOffset.Zero
-                    }
-                drawLayer(layer)
-            } else if (scaleFactor <= 2) {
-                cascadeFirstStepScale = 2
-                val w = (fullWidth / 2).coerceAtLeast(1)
-                val h = (fullHeight / 2).coerceAtLeast(1)
-                recordLayer(layer, size = IntSize(w, h), block = recordBackdropBlock)
-                drawUpscaledLayer(
-                    layer,
-                    scaleFactor.toFloat(),
-                    currentPadding,
-                    scaleFactor,
-                    backdrop.offsetResidualX,
-                    backdrop.offsetResidualY,
-                    fullWidth,
-                    fullHeight,
-                )
-            } else {
-                // Multistep cascade, single-pass wider filter when possible:
-                //   sf =  4: backdrop ½ → 2x box → ¼                     (1 cascade layer)
-                //   sf =  8: backdrop ½ → 4x box → ⅛                     (1 cascade layer)
-                //   sf = 16: backdrop ½ → 4x box → ⅛ → 2x box → 1/16     (2 cascade layers)
-                cascadeFirstStepScale = 2
-                val firstW = (fullWidth / 2).coerceAtLeast(1)
-                val firstH = (fullHeight / 2).coerceAtLeast(1)
+            // Step 0: record backdrop at ½ size (GPU bilinear, no shader).
+            val firstCascade = target.obtainCascade(0)
+            recordLayer(firstCascade, size = IntSize(firstW, firstH)) { recordBackdrop(target) }
 
-                // Step 0: record backdrop at ½ size (GPU bilinear, no shader).
-                val firstCascade = obtainCascadeLayer(0)
-                recordLayer(firstCascade, size = IntSize(firstW, firstH), block = recordBackdropBlock)
-
-                when (scaleFactor) {
-                    4 -> {
-                        // Single 2× box step: ½ → ¼
-                        applyDownsampleStep(
-                            source = firstCascade,
-                            sourceW = firstW,
-                            sourceH = firstH,
-                            dest = layer,
-                            destW = (firstW / 2).coerceAtLeast(1),
-                            destH = (firstH / 2).coerceAtLeast(1),
-                            scale = 0.5f,
-                            shaderKey = "Downsample2x",
-                            shaderSrc = DOWNSAMPLE_2X_SHADER,
-                        )
-                    }
-
-                    8 -> {
-                        // Single 4× box step: ½ → ⅛
-                        applyDownsampleStep(
-                            source = firstCascade,
-                            sourceW = firstW,
-                            sourceH = firstH,
-                            dest = layer,
-                            destW = (firstW / 4).coerceAtLeast(1),
-                            destH = (firstH / 4).coerceAtLeast(1),
-                            scale = 0.25f,
-                            shaderKey = "Downsample4x",
-                            shaderSrc = DOWNSAMPLE_4X_SHADER,
-                        )
-                    }
-
-                    16 -> {
-                        // 4× then 2× cascade: ½ → ⅛ → 1/16
-                        val midW = (firstW / 4).coerceAtLeast(1)
-                        val midH = (firstH / 4).coerceAtLeast(1)
-                        val midCascade = obtainCascadeLayer(1)
-                        applyDownsampleStep(
-                            source = firstCascade,
-                            sourceW = firstW,
-                            sourceH = firstH,
-                            dest = midCascade,
-                            destW = midW,
-                            destH = midH,
-                            scale = 0.25f,
-                            shaderKey = "Downsample4x",
-                            shaderSrc = DOWNSAMPLE_4X_SHADER,
-                        )
-                        applyDownsampleStep(
-                            source = midCascade,
-                            sourceW = midW,
-                            sourceH = midH,
-                            dest = layer,
-                            destW = (midW / 2).coerceAtLeast(1),
-                            destH = (midH / 2).coerceAtLeast(1),
-                            scale = 0.5f,
-                            shaderKey = "Downsample2x",
-                            shaderSrc = DOWNSAMPLE_2X_SHADER,
-                        )
-                    }
-
-                    else -> error("Unsupported scaleFactor: $scaleFactor (must be 1/2/4/8/16)")
+            when (scaleFactor) {
+                4 -> {
+                    // Single 2× box step: ½ → ¼
+                    applyDownsampleStep(
+                        source = firstCascade,
+                        sourceW = firstW,
+                        sourceH = firstH,
+                        dest = layer,
+                        destW = (firstW / 2).coerceAtLeast(1),
+                        destH = (firstH / 2).coerceAtLeast(1),
+                        scale = 0.5f,
+                        shaderKey = "Downsample2x",
+                        shaderSrc = DOWNSAMPLE_2X_SHADER,
+                    )
                 }
 
-                drawUpscaledLayer(
-                    layer,
-                    scaleFactor.toFloat(),
-                    currentPadding,
-                    scaleFactor,
-                    backdrop.offsetResidualX,
-                    backdrop.offsetResidualY,
-                    fullWidth,
-                    fullHeight,
-                )
+                8 -> {
+                    // Single 4× box step: ½ → ⅛
+                    applyDownsampleStep(
+                        source = firstCascade,
+                        sourceW = firstW,
+                        sourceH = firstH,
+                        dest = layer,
+                        destW = (firstW / 4).coerceAtLeast(1),
+                        destH = (firstH / 4).coerceAtLeast(1),
+                        scale = 0.25f,
+                        shaderKey = "Downsample4x",
+                        shaderSrc = DOWNSAMPLE_4X_SHADER,
+                    )
+                }
+
+                16 -> {
+                    // 4× then 2× cascade: ½ → ⅛ → 1/16
+                    val midW = (firstW / 4).coerceAtLeast(1)
+                    val midH = (firstH / 4).coerceAtLeast(1)
+                    val midCascade = target.obtainCascade(1)
+                    applyDownsampleStep(
+                        source = firstCascade,
+                        sourceW = firstW,
+                        sourceH = firstH,
+                        dest = midCascade,
+                        destW = midW,
+                        destH = midH,
+                        scale = 0.25f,
+                        shaderKey = "Downsample4x",
+                        shaderSrc = DOWNSAMPLE_4X_SHADER,
+                    )
+                    applyDownsampleStep(
+                        source = midCascade,
+                        sourceW = midW,
+                        sourceH = midH,
+                        dest = layer,
+                        destW = (midW / 2).coerceAtLeast(1),
+                        destH = (midH / 2).coerceAtLeast(1),
+                        scale = 0.5f,
+                        shaderKey = "Downsample2x",
+                        shaderSrc = DOWNSAMPLE_2X_SHADER,
+                    )
+                }
+
+                else -> error("Unsupported scaleFactor: $scaleFactor (must be 1/2/4/8/16)")
             }
+
+            drawUpscaledLayer(
+                target,
+                layer,
+                scaleFactor.toFloat(),
+                currentPadding,
+                scaleFactor,
+                backdrop.offsetResidualX,
+                backdrop.offsetResidualY,
+                fullWidth,
+                fullHeight,
+            )
         }
     }
 
@@ -407,7 +432,20 @@ private class DrawBackdropNode(
             updateEffects()
         }
         onDrawBehind?.invoke(this)
-        drawBackdropLayer()
+        renderBlurInto(primary)
+        if (blending) {
+            // Cross-fade band: composite the higher level on top of the lower one with alpha = blendFactor.
+            val result = crossfadeResultLayer
+                ?: requireGraphicsContext().createGraphicsLayer().also { crossfadeResultLayer = it }
+            recordLayer(
+                result,
+                size = IntSize(size.width.toInt().coerceAtLeast(1), size.height.toInt().coerceAtLeast(1)),
+            ) {
+                renderBlurInto(secondary)
+            }
+            result.alpha = blendFactor
+            drawLayer(result)
+        }
         onDrawSurface?.invoke(this)
 
         if (contentBlendMode == BlendMode.SrcOver) {
@@ -460,11 +498,45 @@ private class DrawBackdropNode(
 
     private fun updateEffects() {
         if (!enabled) return
-        ensureGraphicsLayer()
-        effectScope.apply(effects)
+        primary.ensureMain()
 
-        // Full-res path: chain noise into the RenderEffect. Downscaled path defers it to
-        // drawBackdropLayer so each screen pixel still gets independent dithering.
+        // Pass 1 (auto): build the lower bracket level into [primary]; blur() also stashes the
+        // cross-fade bracket (computeDownScaleBlend) on the scope for us to read below.
+        effectScope.forcedDownscaleExp = -1
+        effectScope.apply(effects)
+        chainFullResNoiseIfNeeded()
+        primary.mainLayer?.renderEffect = effectScope.renderEffect
+        primary.padding = effectScope.padding
+        primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
+
+        val expLo = effectScope.blurBlendExpLo
+        val expHi = effectScope.blurBlendExpHi
+        val factor = effectScope.blurBlendFactor
+
+        if (expLo == expHi || factor <= 0.001f) {
+            blending = false
+            return
+        }
+
+        // Pass 2: build the higher bracket level into [secondary]; draw() cross-fades the two.
+        secondary.ensureMain()
+        effectScope.forcedDownscaleExp = expHi
+        effectScope.apply(effects)
+        chainFullResNoiseIfNeeded()
+        secondary.mainLayer?.renderEffect = effectScope.renderEffect
+        secondary.padding = effectScope.padding
+        secondary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
+        effectScope.forcedDownscaleExp = -1
+
+        blendFactor = factor
+        blending = true
+    }
+
+    /**
+     * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
+     * [drawUpscaledLayer] so each screen pixel still gets independent dithering.
+     */
+    private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1) {
             effectScope.runtimeShaderEffect(
@@ -475,20 +547,12 @@ private class DrawBackdropNode(
                 setFloatUniform("noise_coeff", noiseCoeff)
             }
         }
-
-        graphicsLayer?.renderEffect = effectScope.renderEffect
-        padding = effectScope.padding
-        downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
-    }
-
-    private fun ensureGraphicsLayer(): GraphicsLayer = graphicsLayer ?: requireGraphicsContext().createGraphicsLayer().also {
-        graphicsLayer = it
     }
 
     override fun onAttach() {
         effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
         if (enabled) {
-            ensureGraphicsLayer()
+            primary.ensureMain()
             observeEffects()
         }
     }
@@ -522,9 +586,11 @@ private class DrawBackdropNode(
 
     /**
      * Upscales [layer] to full resolution. When noise dithering is active the upscaled content
-     * is staged in [noiseLayer] first so noise lands per screen pixel instead of per scaled block.
+     * is staged in [target]'s noise layer first so noise lands per screen pixel instead of per
+     * scaled block.
      */
     private fun DrawScope.drawUpscaledLayer(
+        target: LevelTarget,
         layer: GraphicsLayer,
         scaleUp: Float,
         currentPadding: Float,
@@ -537,8 +603,8 @@ private class DrawBackdropNode(
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
-            val noiseL = noiseLayer
-                ?: requireGraphicsContext().createGraphicsLayer().also { noiseLayer = it }
+            val noiseL = target.noiseLayer
+                ?: requireGraphicsContext().createGraphicsLayer().also { target.noiseLayer = it }
             recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
             }
@@ -567,19 +633,11 @@ private class DrawBackdropNode(
     }
 
     fun releaseGraphicsLayers() {
-        val ctx = requireGraphicsContext()
-        graphicsLayer?.let {
-            ctx.releaseGraphicsLayer(it)
-        }
-        graphicsLayer = null
-        for (cascade in cascadeLayers) {
-            ctx.releaseGraphicsLayer(cascade)
-        }
-        cascadeLayers.clear()
-        noiseLayer?.let {
-            ctx.releaseGraphicsLayer(it)
-        }
-        noiseLayer = null
+        primary.release()
+        secondary.release()
+        crossfadeResultLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
+        crossfadeResultLayer = null
+        blending = false
         effectScope.reset()
     }
 

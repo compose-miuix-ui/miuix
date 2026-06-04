@@ -10,8 +10,9 @@ import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
+import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
-import top.yukonga.miuix.kmp.blur.internal.computeDownScaleParams
+import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
@@ -34,8 +35,22 @@ internal const val MAX_BLEND_LAYERS = 8
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     if (!isRuntimeShaderSupported()) return
-    val sigmaMax = maxOf(radiusX, radiusY) * BLUR_RADIUS_TO_SIGMA
-    val sf = computeDownScaleParams(sigmaMax).downScale
+    val scope = impl
+    val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
+
+    // Pick the downscale exponent: forced for the cross-fade lo/hi passes, otherwise the adaptive
+    // choice — which also records the transition-band bracket for the node to read and cross-fade.
+    val exp = if (scope.forcedDownscaleExp >= 0) {
+        scope.forcedDownscaleExp
+    } else {
+        val bracket = computeDownScaleBlend(maxOf(sigmaX, sigmaY))
+        scope.blurBlendExpLo = bracket.expLo
+        scope.blurBlendExpHi = bracket.expHi
+        scope.blurBlendFactor = bracket.blend
+        bracket.expLo
+    }
+    val sf = 1 shl exp
 
     // Padding covers the kernel reach in source pixels so recording size stays
     // stable across radius changes within the same downscale level.
@@ -47,26 +62,35 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     val paddedW = size.width + padding * 2f
     val paddedH = size.height + padding * 2f
 
-    val scope = impl
-    val result = if (scope.cachedBlurResult != null &&
+    val effect = if (scope.cachedBlurResult != null &&
         scope.cachedBlurRadiusX == radiusX &&
         scope.cachedBlurRadiusY == radiusY &&
         scope.cachedBlurSizeW == paddedW &&
-        scope.cachedBlurSizeH == paddedH
+        scope.cachedBlurSizeH == paddedH &&
+        scope.cachedBlurExp == exp
     ) {
         scope.cachedBlurResult
     } else {
-        createBlurEffect(radiusX, radiusY, Size(paddedW, paddedH), scope).also {
+        createBlurEffect(
+            radiusX,
+            radiusY,
+            sf,
+            adjustedVarianceForExp(sigmaX * sigmaX, exp),
+            adjustedVarianceForExp(sigmaY * sigmaY, exp),
+            Size(paddedW, paddedH),
+            scope,
+        ).also {
             scope.cachedBlurRadiusX = radiusX
             scope.cachedBlurRadiusY = radiusY
             scope.cachedBlurSizeW = paddedW
             scope.cachedBlurSizeH = paddedH
+            scope.cachedBlurExp = exp
             scope.cachedBlurResult = it
         }
     } ?: return
 
-    downscaleFactor = result.downscaleFactor
-    renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect
+    downscaleFactor = sf
+    renderEffect = renderEffect?.chain(effect) ?: effect
 }
 
 /**

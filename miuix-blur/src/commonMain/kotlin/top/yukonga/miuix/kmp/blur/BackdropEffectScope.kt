@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import top.yukonga.miuix.kmp.blur.internal.BlurResult
 import top.yukonga.miuix.kmp.blur.internal.COLOR_CONTROLS_SHADER
 import top.yukonga.miuix.kmp.blur.internal.MAX_BLUR_TAPS
 import top.yukonga.miuix.kmp.blur.internal.chain
@@ -139,12 +138,25 @@ internal abstract class BackdropEffectScopeImpl :
     internal val blendModesBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS)
     internal val blendColorsBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS * 4)
 
-    // chain() allocates a native RenderEffect — cache last result keyed on inputs.
+    // chain() allocates a native RenderEffect — cache last result keyed on inputs (incl. level).
     internal var cachedBlurRadiusX: Float = Float.NaN
     internal var cachedBlurRadiusY: Float = Float.NaN
     internal var cachedBlurSizeW: Float = Float.NaN
     internal var cachedBlurSizeH: Float = Float.NaN
-    internal var cachedBlurResult: BlurResult? = null
+    internal var cachedBlurExp: Int = -1
+    internal var cachedBlurResult: RenderEffect? = null
+
+    /**
+     * When >= 0, [blur] builds at this exact downscale exponent instead of the adaptive choice.
+     * The node sets it for the cross-fade lo/hi passes; -1 means auto. Internal — not exposed on
+     * the public [BackdropEffectScope] interface.
+     */
+    internal var forcedDownscaleExp: Int = -1
+
+    // Cross-fade bracket discovered by the auto [blur] pass (see computeDownScaleBlend).
+    internal var blurBlendExpLo: Int = 0
+    internal var blurBlendExpHi: Int = 0
+    internal var blurBlendFactor: Float = 0f
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
 
@@ -190,7 +202,12 @@ internal abstract class BackdropEffectScopeImpl :
         cachedBlurRadiusY = Float.NaN
         cachedBlurSizeW = Float.NaN
         cachedBlurSizeH = Float.NaN
+        cachedBlurExp = -1
         cachedBlurResult = null
+        forcedDownscaleExp = -1
+        blurBlendExpLo = 0
+        blurBlendExpHi = 0
+        blurBlendFactor = 0f
     }
 }
 

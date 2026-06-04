@@ -80,9 +80,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 
@@ -105,7 +107,7 @@ import kotlin.math.abs
  * @param enableWindowDim Whether to dim the window behind the bottom sheet.
  * @param onDismissRequest The callback when the user tries to dismiss the bottom sheet.
  * @param onDismissFinished Invoked when the hide animation completes; not invoked if the hide
- *   is cancelled mid-flight (e.g., by [show] toggling back to true).
+ *   is canceled mid-flight (e.g., by [show] toggling back to true).
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
