@@ -16,6 +16,20 @@ internal const val BLUR_KERNEL_REACH = 14
 
 private const val WEIGHT_THRESHOLD = 0.002
 
+/** Highest downscale exponent (downScale = 1 shl exp); covers 1/2/4/8/16. */
+private const val MAX_DOWNSCALE_EXP = 4
+
+/**
+ * Pre-built Gaussian shader-cache keys, indexed `[tapCount][exp]` (exp = log2(downScale)), so
+ * the per-frame rebuild path in [createBlurEffect] avoids allocating a key string per axis.
+ */
+private val BLUR_H_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
+    Array(MAX_DOWNSCALE_EXP + 1) { exp -> "LMGauss${n}_H_d${1 shl exp}" }
+}
+private val BLUR_V_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
+    Array(MAX_DOWNSCALE_EXP + 1) { exp -> "LMGauss${n}_V_d${1 shl exp}" }
+}
+
 /**
  * Builds the separable Blur [RenderEffect] (H then V) for an EXPLICIT [downScale] level using the
  * per-axis variances already compensated for that level's box prefilter (see [adjustedVarianceForExp]).
@@ -42,6 +56,9 @@ internal fun createBlurEffect(
     val paramOffsets = scope.blurParamOffsets
     val paramWeights = scope.blurParamWeights
 
+    // exp = log2(downScale); downScale is always a power of two in 1..16.
+    val exp = downScale.countTrailingZeroBits()
+
     var effect: RenderEffect? = null
 
     // H / V use distinct cache keys so each pass holds its own uniform state; the _d$downScale
@@ -57,7 +74,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val hShader = scope.obtainRuntimeShader(
-                "LMGauss${n}_H_d$downScale",
+                BLUR_H_KEYS[n][exp],
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
@@ -79,7 +96,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val vShader = scope.obtainRuntimeShader(
-                "LMGauss${n}_V_d$downScale",
+                BLUR_V_KEYS[n][exp],
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)

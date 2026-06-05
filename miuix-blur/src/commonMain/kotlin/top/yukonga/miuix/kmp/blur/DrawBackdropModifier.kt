@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -219,6 +220,16 @@ private class DrawBackdropNode(
         /** First step downscale for cascade (backdrop draw uses this, not the total factor). */
         var cascadeFirstStepScale: Int = 1
 
+        // Draw-path RenderEffects cached for reuse while the source size / noise coefficient hold.
+        // A RenderEffect snapshots its shader's uniforms at creation, so reusing the instance is
+        // safe and avoids a native allocation per frame. Two slots cover the deepest cascade (sf=16).
+        val dsKeys = arrayOf("", "")
+        val dsW = intArrayOf(-1, -1)
+        val dsH = intArrayOf(-1, -1)
+        val dsEffects = arrayOfNulls<RenderEffect>(2)
+        var noiseEffect: RenderEffect? = null
+        var noiseEffectCoeff: Float = Float.NaN
+
         fun ensureMain(): GraphicsLayer = mainLayer ?: requireGraphicsContext().createGraphicsLayer().also { mainLayer = it }
 
         fun obtainCascade(index: Int): GraphicsLayer {
@@ -229,6 +240,31 @@ private class DrawBackdropNode(
             return cascadeLayers[index]
         }
 
+        /**
+         * Returns the cached downsample [RenderEffect] for [slot] when its [key]/[w]/[h] are
+         * unchanged, otherwise builds it via [build] (setting the shader uniforms) and caches it.
+         */
+        inline fun downsampleEffect(slot: Int, key: String, w: Int, h: Int, build: () -> RenderEffect): RenderEffect {
+            val cached = dsEffects[slot]
+            if (cached != null && dsKeys[slot] == key && dsW[slot] == w && dsH[slot] == h) return cached
+            return build().also {
+                dsEffects[slot] = it
+                dsKeys[slot] = key
+                dsW[slot] = w
+                dsH[slot] = h
+            }
+        }
+
+        /** Returns the cached noise [RenderEffect] for [coeff], building via [build] on a miss. */
+        inline fun noiseRenderEffect(coeff: Float, build: () -> RenderEffect): RenderEffect {
+            val cached = noiseEffect
+            if (cached != null && noiseEffectCoeff == coeff) return cached
+            return build().also {
+                noiseEffect = it
+                noiseEffectCoeff = coeff
+            }
+        }
+
         fun release() {
             val ctx = requireGraphicsContext()
             mainLayer?.let { ctx.releaseGraphicsLayer(it) }
@@ -237,6 +273,12 @@ private class DrawBackdropNode(
             cascadeLayers.clear()
             noiseLayer?.let { ctx.releaseGraphicsLayer(it) }
             noiseLayer = null
+            dsEffects.fill(null)
+            dsKeys.fill("")
+            dsW.fill(-1)
+            dsH.fill(-1)
+            noiseEffect = null
+            noiseEffectCoeff = Float.NaN
         }
     }
 
@@ -333,6 +375,8 @@ private class DrawBackdropNode(
                 4 -> {
                     // Single 2× box step: ½ → ¼
                     applyDownsampleStep(
+                        target = target,
+                        slot = 0,
                         source = firstCascade,
                         sourceW = firstW,
                         sourceH = firstH,
@@ -348,6 +392,8 @@ private class DrawBackdropNode(
                 8 -> {
                     // Single 4× box step: ½ → ⅛
                     applyDownsampleStep(
+                        target = target,
+                        slot = 0,
                         source = firstCascade,
                         sourceW = firstW,
                         sourceH = firstH,
@@ -366,6 +412,8 @@ private class DrawBackdropNode(
                     val midH = (firstH / 4).coerceAtLeast(1)
                     val midCascade = target.obtainCascade(1)
                     applyDownsampleStep(
+                        target = target,
+                        slot = 0,
                         source = firstCascade,
                         sourceW = firstW,
                         sourceH = firstH,
@@ -377,6 +425,8 @@ private class DrawBackdropNode(
                         shaderSrc = DOWNSAMPLE_4X_SHADER,
                     )
                     applyDownsampleStep(
+                        target = target,
+                        slot = 1,
                         source = midCascade,
                         sourceW = midW,
                         sourceH = midH,
@@ -558,10 +608,13 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Sets [shaderSrc] on [source], records [dest] at ([destW], [destH]) by drawing [source]
-     * with [scale], then clears [source]'s render effect so it does not leak to the next pass.
+     * Sets the downsample effect (cached per [target]/[slot]) on [source], records [dest] at
+     * ([destW], [destH]) by drawing [source] with [scale], then clears [source]'s render effect
+     * so it does not leak to the next pass.
      */
     private fun DrawScope.applyDownsampleStep(
+        target: LevelTarget,
+        slot: Int,
         source: GraphicsLayer,
         sourceW: Int,
         sourceH: Int,
@@ -572,12 +625,14 @@ private class DrawBackdropNode(
         shaderKey: String,
         shaderSrc: String,
     ) {
-        source.renderEffect = runtimeShaderEffect(
-            runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
-                setFloatUniform("maxCoord", sourceW - 0.5f, sourceH - 0.5f)
-            },
-            uniformShaderName = "child",
-        )
+        source.renderEffect = target.downsampleEffect(slot, shaderKey, sourceW, sourceH) {
+            runtimeShaderEffect(
+                runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
+                    setFloatUniform("maxCoord", sourceW - 0.5f, sourceH - 0.5f)
+                },
+                uniformShaderName = "child",
+            )
+        }
         recordLayer(dest, size = IntSize(destW, destH)) {
             scale(scale, scale, Offset.Zero) { drawLayer(source) }
         }
@@ -608,9 +663,11 @@ private class DrawBackdropNode(
             recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
             }
-            val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
-            noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
-            noiseL.renderEffect = runtimeShaderEffect(noiseShader, "child")
+            noiseL.renderEffect = target.noiseRenderEffect(noiseCoeff) {
+                val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
+                noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
+                runtimeShaderEffect(noiseShader, "child")
+            }
             noiseL.topLeft =
                 if (currentPadding != 0f) {
                     IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
