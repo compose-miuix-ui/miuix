@@ -18,9 +18,7 @@ HSPLtop/yukonga/miuix/kmp/blur/RuntimeShaderCacheKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/RuntimeShaderKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/TextureEffectKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/internal/BlurEffectKt**->**(**)**
-HSPLtop/yukonga/miuix/kmp/blur/internal/BlurResult;->**(**)**
-HSPLtop/yukonga/miuix/kmp/blur/internal/DownScaleParams;->**(**)**
-HSPLtop/yukonga/miuix/kmp/blur/internal/LayerRecorderKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/blur/internal/DownScaleBlend;->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/internal/RenderEffectCompat_androidKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/internal/ShadersKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/blur/internal/ShapeProvider;->**(**)**

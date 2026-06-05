@@ -154,6 +154,25 @@ Modifier.squircleSurface(
 Mix and match to produce asymmetric shapes (a "card stuck to the top of the
 screen", an inset chip with one squared edge, and so on).
 
+## Absolute Corners (layout-direction-agnostic)
+
+`absoluteSquircleBackground`, `absoluteSquircleClip`, and `absoluteSquircleSurface`
+mirror the per-corner overloads but take physical corners (`topLeft`, `topRight`,
+`bottomRight`, `bottomLeft`, clockwise from top-left) that are **not** flipped by
+`LocalLayoutDirection` — the same relationship `AbsoluteRoundedCornerShape` has to
+`RoundedCornerShape`. Reach for these when corners must anchor to physical sides
+regardless of RTL/LTR (e.g. a transition reveal tied to a swipe edge).
+
+```kotlin
+Modifier.absoluteSquircleSurface(
+    color = MiuixTheme.colorScheme.surface,
+    topLeft = 24.dp,
+    topRight = 24.dp,
+    bottomRight = 0.dp,
+    bottomLeft = 0.dp,
+)
+```
+
 ## Customizing the Curve
 
 `extension` controls how far the continuous-curvature zone extends from the

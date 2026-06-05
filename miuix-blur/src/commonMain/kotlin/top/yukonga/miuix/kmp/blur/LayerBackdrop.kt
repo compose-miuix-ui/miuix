@@ -51,6 +51,8 @@ fun rememberLayerBackdrop(
 /**
  * A [Backdrop] that draws from a captured [GraphicsLayer].
  * The layer content is captured via [Modifier.layerBackdrop][layerBackdrop].
+ *
+ * @property graphicsLayer The [GraphicsLayer] holding the captured content drawn as the backdrop.
  */
 @Stable
 class LayerBackdrop internal constructor(

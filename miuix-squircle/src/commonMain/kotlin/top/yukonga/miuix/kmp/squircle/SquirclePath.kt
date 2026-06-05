@@ -37,6 +37,14 @@ internal const val SQUIRCLE_CONTROL = 0.643f
  * Pass `squircleEnabled = false` (typically forwarded from [isSquircleEnabled]) to append a
  * plain rounded rectangle of the same dimensions instead — useful when the surrounding visuals
  * use the shader-backed modifiers' fallback path.
+ *
+ * @param width The width of the rectangle in pixels; nothing is appended when not positive.
+ * @param height The height of the rectangle in pixels; nothing is appended when not positive.
+ * @param cornerRadius The corner radius in pixels, clamped to half the smaller side.
+ * @param extension The corner-tile size as a multiple of [cornerRadius], clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ * @param squircleEnabled When `false`, appends a plain rounded rectangle instead of the squircle
+ *   silhouette; typically forwarded from [isSquircleEnabled].
  */
 fun Path.addSquircleRect(
     width: Float,

@@ -33,6 +33,8 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-preference` | Preference components (SwitchPreference, CheckboxPreference, etc.), depends on `miuix-ui` |
 | `miuix-icons` | Extended icon library, can be used independently or together with `miuix-ui` (automatically includes `miuix-core`) |
 | `miuix-blur` | Blur effect library, can be used independently |
+| `miuix-squircle` | Squircle (smooth rounded corner) shapes, can be used independently (transitively included by `miuix-ui`) |
+| `miuix-shader` | Low-level runtime shader / render effect abstraction, transitively included by `miuix-blur` / `miuix-squircle` |
 | `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
 
 - For Compose Multiplatform projects:
@@ -48,6 +50,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // Optional: Add miuix-blur for blur effects
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
+            // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
+            implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // Optional: Add miuix-navigation3-ui for Navigation3 support
             implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
         }
@@ -66,6 +70,8 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 33)
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
+    // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
+    implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
     // Optional: Add miuix-navigation3-ui for Navigation3 support
     implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
 }
@@ -108,6 +114,13 @@ implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
+// Optional: Add miuix-squircle
+implementation("top.yukonga.miuix.kmp:miuix-squircle-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-js:<version>")
 ```
 
 ## Basic Usage

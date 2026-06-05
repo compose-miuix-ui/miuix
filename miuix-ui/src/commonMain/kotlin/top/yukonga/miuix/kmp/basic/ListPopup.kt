@@ -196,11 +196,22 @@ interface PopupPositionProvider {
 }
 
 object ListPopupDefaults {
+    /** Default animation spec driving the scale/clip-reveal fraction progress of the popup. */
     val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+
+    /** Default animation spec driving the popup content alpha while entering. */
     val AlphaEnterAnimationSpec = tween<Float>(durationMillis = 200)
+
+    /** Default animation spec driving the popup content alpha while exiting. */
     val AlphaExitAnimationSpec = tween<Float>(durationMillis = 150)
+
+    /** Default animation spec driving the background dim while entering. */
     val DimEnterAnimationSpec = tween<Float>(durationMillis = 300, easing = SinOutEasing)
+
+    /** Default animation spec driving the background dim while exiting. */
     val DimExitAnimationSpec = tween<Float>(durationMillis = 150, easing = SinOutEasing)
+
+    /** Default animation spec used to settle the popup back to its resting state after a gesture. */
     val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
 
     /**
@@ -215,6 +226,13 @@ object ListPopupDefaults {
      */
     val MinPopupHeight = 50.dp
 
+    /**
+     * Creates a [PopupPositionProvider] that anchors the popup directly below (or above when there
+     * is no room) the anchor, used by dropdown-style list popups.
+     *
+     * @param verticalMargin The extra vertical margin between the popup and the anchor.
+     * @param horizontalMargin The extra horizontal margin applied to the popup.
+     */
     fun dropdownPositionProvider(
         verticalMargin: Dp = 8.dp,
         horizontalMargin: Dp = 0.dp,
@@ -259,8 +277,10 @@ object ListPopupDefaults {
         override fun getMargins(): PaddingValues = margins
     }
 
+    /** Default dropdown [PopupPositionProvider] created by [dropdownPositionProvider]. */
     val DropdownPositionProvider: PopupPositionProvider = dropdownPositionProvider()
 
+    /** A [PopupPositionProvider] that anchors the popup to a corner of the anchor for context menus. */
     val ContextMenuPositionProvider = object : PopupPositionProvider {
         override fun calculatePosition(
             anchorBounds: IntRect,
@@ -334,6 +354,14 @@ internal fun safeTransformOrigin(x: Float, y: Float): TransformOrigin {
     return TransformOrigin(safeX, safeY)
 }
 
+/**
+ * Describes how the popup is placed relative to its anchor, used to drive the directional reveal
+ * and transform origin.
+ *
+ * @property showBelow Whether the popup is shown below the anchor.
+ * @property showAbove Whether the popup is shown above the anchor.
+ * @property isRightAligned Whether the popup is aligned to the right edge of the anchor.
+ */
 @Immutable
 data class PopupLayoutPosition(
     val showBelow: Boolean,
@@ -341,6 +369,15 @@ data class PopupLayoutPosition(
     val isRightAligned: Boolean,
 )
 
+/**
+ * The resolved layout information for a list popup, produced by [rememberListPopupLayoutInfo].
+ *
+ * @property windowBounds Bounds of the safe area of the window the popup is placed within.
+ * @property popupMargin The (extra) margins applied around the popup content.
+ * @property effectiveTransformOrigin The transform origin in window coordinates used to scale the popup from its anchor corner.
+ * @property localTransformOrigin The transform origin local to the popup content used by its [graphicsLayer] scaling.
+ * @property popupLayoutPosition The resolved [PopupLayoutPosition] describing how the popup is placed relative to its anchor.
+ */
 @Immutable
 data class ListPopupLayoutInfo(
     val windowBounds: IntRect,
@@ -350,6 +387,14 @@ data class ListPopupLayoutInfo(
     val popupLayoutPosition: PopupLayoutPosition,
 )
 
+/**
+ * Computes and remembers the [ListPopupLayoutInfo] for a list popup from its anchor and content size.
+ *
+ * @param alignment The [PopupPositionProvider.Align] of the popup relative to the window.
+ * @param popupPositionProvider The [PopupPositionProvider] that computes the popup offset and margins.
+ * @param parentBounds The bounds of the anchor (parent) component in window coordinates.
+ * @param popupContentSize The measured size of the popup content; [IntSize.Zero] before it is measured.
+ */
 @Composable
 fun rememberListPopupLayoutInfo(
     alignment: PopupPositionProvider.Align,
@@ -532,6 +577,19 @@ fun rememberListPopupLayoutInfo(
     )
 }
 
+/**
+ * The scaling, fading and clip-revealing container that hosts a list popup's content.
+ *
+ * @param popupContentSize The last reported size of the content, compared against the latest
+ *   measurement to avoid redundant [onPopupContentSizeChange] callbacks.
+ * @param onPopupContentSizeChange Called when the measured content size changes.
+ * @param fractionProgress Provides the current scale/clip-reveal fraction (0 → 1) of the popup.
+ * @param alphaProgress Provides the current alpha (0 → 1) of the popup content.
+ * @param popupLayoutPosition The [PopupLayoutPosition] describing the popup's spawn direction.
+ * @param localTransformOrigin The transform origin local to the content used while scaling.
+ * @param modifier The modifier to be applied to the popup container.
+ * @param content The content of the popup.
+ */
 @Composable
 fun ListPopupContent(
     popupContentSize: IntSize,

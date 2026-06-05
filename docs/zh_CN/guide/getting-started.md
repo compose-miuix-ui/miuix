@@ -33,6 +33,8 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-preference` | Preference 组件（SwitchPreference、CheckboxPreference 等），依赖 `miuix-ui` |
 | `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix-ui` 同时使用（自动包含 `miuix-core`） |
 | `miuix-blur` | 模糊效果库，可独立使用 |
+| `miuix-squircle` | 平滑圆角形状，可独立使用（已由 `miuix-ui` 传递包含） |
+| `miuix-shader` | 底层运行时着色器 / 渲染效果抽象，已由 `miuix-blur` / `miuix-squircle` 传递包含 |
 | `miuix-navigation3-ui` | Navigation3 UI 库，可独立使用 |
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
@@ -48,6 +50,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // 可选：添加 miuix-blur 以获取模糊效果
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
+            // 可选：添加 miuix-squircle 以获取平滑圆角形状
+            implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
             implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
         }
@@ -66,6 +70,8 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 33）
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
+    // 可选：添加 miuix-squircle 以获取平滑圆角形状
+    implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
     // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
     implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
 }
@@ -108,6 +114,13 @@ implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
+// 可选：添加 miuix-squircle
+implementation("top.yukonga.miuix.kmp:miuix-squircle-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-js:<version>")
 ```
 
 ## 基本用法

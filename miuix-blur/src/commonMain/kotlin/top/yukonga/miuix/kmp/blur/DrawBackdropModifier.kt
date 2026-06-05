@@ -55,6 +55,26 @@ private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { 
 
 /**
  * Applies a backdrop effect to this composable.
+ *
+ * @param backdrop The [Backdrop] providing the background content to capture and blur.
+ * @param shape The shape provider for the blur region clipping; re-read on each draw so an
+ *   animated shape stays current.
+ * @param effects The effect pipeline applied to the captured backdrop, configured against a
+ *   [BackdropEffectScope] (e.g. [blur], [blendColors], [colorControls]).
+ * @param highlight Optional edge highlight resolved against the [BackdropEffectScope] and painted
+ *   on top of the content; returning `null` skips drawing.
+ * @param layerBlock Optional graphics layer transformation applied to this composable and used to
+ *   inverse-transform the recorded backdrop so it stays aligned.
+ * @param onDrawBehind Optional draw callback invoked before the blurred backdrop, behind it.
+ * @param onDrawBackdrop Wraps the backdrop drawing call, letting callers transform or intercept the
+ *   recorded content; defaults to invoking it directly.
+ * @param onDrawSurface Optional draw callback invoked after the blurred backdrop and before the
+ *   composable's own content.
+ * @param onDrawFront Optional draw callback invoked last, on top of the content and highlight.
+ * @param contentBlendMode The [BlendMode] used to composite the composable's content over the blur.
+ *   [BlendMode.DstIn] masks the blur by the content alpha (foreground blur).
+ * @param enabled Whether the backdrop effect is active. When false, content draws normally without
+ *   blur. Also gated by [isRuntimeShaderSupported].
  */
 fun Modifier.drawBackdrop(
     backdrop: Backdrop,

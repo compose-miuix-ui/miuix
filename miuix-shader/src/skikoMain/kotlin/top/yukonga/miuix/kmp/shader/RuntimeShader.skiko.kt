@@ -17,6 +17,11 @@ import org.jetbrains.skia.RuntimeShaderBuilder
 
 actual fun isRuntimeShaderSupported(): Boolean = true
 
+/**
+ * Creates a platform-specific [RuntimeShader] from an AGSL/SkSL shader string.
+ *
+ * @param shaderString The SkSL shader source to compile.
+ */
 actual fun RuntimeShader(shaderString: String): RuntimeShader = SkikoRuntimeShader(RuntimeShaderBuilder(obtainRuntimeEffect(shaderString)))
 
 // RuntimeEffect is immutable; cache to avoid recompiling SkSL per brush.

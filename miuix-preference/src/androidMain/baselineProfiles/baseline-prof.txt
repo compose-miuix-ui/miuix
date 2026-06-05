@@ -8,6 +8,7 @@ HSPLtop/yukonga/miuix/kmp/preference/OverlayDropdownPreferenceKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/OverlaySpinnerPreferenceKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/RadioButtonLocation;->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/RadioButtonPreferenceKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/preference/SliderPreferenceKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/SwitchPreferenceKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/WindowDropdownPreferenceKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/preference/WindowSpinnerPreferenceKt**->**(**)**

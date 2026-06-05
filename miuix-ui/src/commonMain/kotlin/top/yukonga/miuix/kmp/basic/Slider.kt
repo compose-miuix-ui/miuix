@@ -288,6 +288,8 @@ fun Slider(
  * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
  * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
  *   Values should be within [valueRange].
+ * @param magnetThreshold The magnetic snap threshold as a fraction (0.0 to 1.0). When the slider value is within this
+ *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
  */
 @Composable
 fun VerticalSlider(

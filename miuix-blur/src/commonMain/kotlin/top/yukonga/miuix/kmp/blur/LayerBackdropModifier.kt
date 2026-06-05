@@ -16,6 +16,8 @@ import top.yukonga.miuix.kmp.blur.internal.recordLayer
 /**
  * Captures the content of this composable into the given [LayerBackdrop]'s graphics layer.
  * Place this modifier on the container whose content should appear as the blurred background.
+ *
+ * @param backdrop The [LayerBackdrop] whose graphics layer records this composable's content.
  */
 fun Modifier.layerBackdrop(backdrop: LayerBackdrop): Modifier = this then LayerBackdropElement(backdrop)
 

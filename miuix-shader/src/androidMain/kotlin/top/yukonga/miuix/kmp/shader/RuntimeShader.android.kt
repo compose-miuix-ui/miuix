@@ -17,6 +17,11 @@ import org.intellij.lang.annotations.Language
 @ChecksSdkIntAtLeast(Build.VERSION_CODES.TIRAMISU)
 actual fun isRuntimeShaderSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+/**
+ * Creates a platform-specific [RuntimeShader] from an AGSL/SkSL shader string.
+ *
+ * @param shaderString The AGSL shader source to compile.
+ */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader = AndroidRuntimeShader(android.graphics.RuntimeShader(shaderString))
 

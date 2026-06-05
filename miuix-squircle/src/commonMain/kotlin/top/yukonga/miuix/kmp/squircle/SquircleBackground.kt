@@ -35,9 +35,10 @@ import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
  * Falls back to `Modifier.background(color, RoundedCornerShape(cornerRadius))`
  * when runtime shaders are unavailable (Android < API 33).
  *
- * @param extension corner-tile size as a multiple of [cornerRadius]; 1.0
- *   matches a circular arc, 1.1 is the default continuous-corner look.
- *   Clamped to [1.0, 2.0].
+ * @param color The fill [Color] of the squircle background.
+ * @param cornerRadius The radius applied uniformly to all four corners.
+ * @param extension The corner-tile size as a multiple of [cornerRadius]: 1.0 matches a circular
+ *   arc, 1.1 is the default continuous-corner look. Clamped to [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.squircleBackground(
@@ -46,7 +47,17 @@ fun Modifier.squircleBackground(
     extension: Float = SquircleDefaults.Extension,
 ): Modifier = squircleBackground(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
-/** Per-corner variant of [squircleBackground]. Ordering matches [RoundedCornerShape]. */
+/**
+ * Per-corner variant of [squircleBackground]. Ordering matches [RoundedCornerShape].
+ *
+ * @param color The fill [Color] of the squircle background.
+ * @param topStart The corner radius of the top-start corner (flipped by `LocalLayoutDirection`).
+ * @param topEnd The corner radius of the top-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomEnd The corner radius of the bottom-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomStart The corner radius of the bottom-start corner (flipped by `LocalLayoutDirection`).
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ */
 @Composable
 fun Modifier.squircleBackground(
     color: Color,
@@ -70,6 +81,10 @@ fun Modifier.squircleBackground(
  *
  * Falls back to `Modifier.clip(RoundedCornerShape(cornerRadius))` when
  * runtime shaders are unavailable.
+ *
+ * @param cornerRadius The radius applied uniformly to all four corners.
+ * @param extension The corner-tile size as a multiple of [cornerRadius], clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.squircleClip(
@@ -77,7 +92,16 @@ fun Modifier.squircleClip(
     extension: Float = SquircleDefaults.Extension,
 ): Modifier = squircleClip(cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
-/** Per-corner variant of [squircleClip]. */
+/**
+ * Per-corner variant of [squircleClip].
+ *
+ * @param topStart The corner radius of the top-start corner (flipped by `LocalLayoutDirection`).
+ * @param topEnd The corner radius of the top-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomEnd The corner radius of the bottom-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomStart The corner radius of the bottom-start corner (flipped by `LocalLayoutDirection`).
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ */
 @Composable
 fun Modifier.squircleClip(
     topStart: Dp,
@@ -99,6 +123,11 @@ fun Modifier.squircleClip(
 /**
  * Fill + clip in a single offscreen layer — drop-in replacement for
  * `.clip(RoundedCornerShape(r)).background(color)` with a squircle outline.
+ *
+ * @param color The fill [Color] drawn behind the clipped content.
+ * @param cornerRadius The radius applied uniformly to all four corners.
+ * @param extension The corner-tile size as a multiple of [cornerRadius], clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.squircleSurface(
@@ -107,7 +136,17 @@ fun Modifier.squircleSurface(
     extension: Float = SquircleDefaults.Extension,
 ): Modifier = squircleSurface(color, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension)
 
-/** Per-corner variant of [squircleSurface]. */
+/**
+ * Per-corner variant of [squircleSurface].
+ *
+ * @param color The fill [Color] drawn behind the clipped content.
+ * @param topStart The corner radius of the top-start corner (flipped by `LocalLayoutDirection`).
+ * @param topEnd The corner radius of the top-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomEnd The corner radius of the bottom-end corner (flipped by `LocalLayoutDirection`).
+ * @param bottomStart The corner radius of the bottom-start corner (flipped by `LocalLayoutDirection`).
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ */
 @Composable
 fun Modifier.squircleSurface(
     color: Color,
@@ -135,6 +174,14 @@ fun Modifier.squircleSurface(
  * (clockwise from top-left) and are NOT flipped by `LocalLayoutDirection` — mirrors
  * `AbsoluteRoundedCornerShape`. Reach for this when corners are anchored to physical sides
  * regardless of layout direction (e.g. transition reveals tied to a swipe edge).
+ *
+ * @param color The fill [Color] of the squircle background.
+ * @param topLeft The physical top-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param topRight The physical top-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomRight The physical bottom-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomLeft The physical bottom-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.absoluteSquircleBackground(
@@ -153,7 +200,16 @@ fun Modifier.absoluteSquircleBackground(
     return this.background(brush = brush, shape = RectangleShape)
 }
 
-/** Absolute-positioning variant of [squircleClip]. See [absoluteSquircleBackground] for semantics. */
+/**
+ * Absolute-positioning variant of [squircleClip]. See [absoluteSquircleBackground] for semantics.
+ *
+ * @param topLeft The physical top-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param topRight The physical top-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomRight The physical bottom-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomLeft The physical bottom-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ */
 @Composable
 fun Modifier.absoluteSquircleClip(
     topLeft: Dp,
@@ -172,7 +228,17 @@ fun Modifier.absoluteSquircleClip(
         }
 }
 
-/** Absolute-positioning variant of [squircleSurface]. See [absoluteSquircleBackground] for semantics. */
+/**
+ * Absolute-positioning variant of [squircleSurface]. See [absoluteSquircleBackground] for semantics.
+ *
+ * @param color The fill [Color] drawn behind the clipped content.
+ * @param topLeft The physical top-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param topRight The physical top-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomRight The physical bottom-right corner radius, never flipped by `LocalLayoutDirection`.
+ * @param bottomLeft The physical bottom-left corner radius, never flipped by `LocalLayoutDirection`.
+ * @param extension The corner-tile size as a multiple of each corner radius, clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
+ */
 @Composable
 fun Modifier.absoluteSquircleSurface(
     color: Color,

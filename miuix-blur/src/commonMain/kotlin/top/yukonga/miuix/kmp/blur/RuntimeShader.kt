@@ -14,7 +14,11 @@ import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported as coreIsRuntimeSha
 /** Back-compat re-export. New code should use `top.yukonga.miuix.kmp.shader.RuntimeShader`. */
 typealias RuntimeShader = top.yukonga.miuix.kmp.shader.RuntimeShader
 
-/** Back-compat re-export. */
+/**
+ * Back-compat re-export.
+ *
+ * @param shaderString The AGSL/SkSL shader source code to compile into the [RuntimeShader].
+ */
 fun RuntimeShader(shaderString: String): RuntimeShader = top.yukonga.miuix.kmp.shader.RuntimeShader(shaderString)
 
 /** Back-compat re-export. */

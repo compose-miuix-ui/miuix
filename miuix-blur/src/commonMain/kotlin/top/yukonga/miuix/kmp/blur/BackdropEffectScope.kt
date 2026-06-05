@@ -49,6 +49,10 @@ sealed interface BackdropEffectScope :
  *
  * Brightness is applied in linear (gamma 2.2) space via a runtime shader to avoid
  * the hue shift a linear `ColorMatrix` offset would introduce.
+ *
+ * @param brightness Brightness adjustment applied in linear space. 0 (default) leaves brightness unchanged.
+ * @param contrast Contrast multiplier. 1 (default) leaves contrast unchanged.
+ * @param saturation Saturation multiplier. 1 (default) leaves saturation unchanged.
  */
 fun BackdropEffectScope.colorControls(
     brightness: Float = 0f,
@@ -86,6 +90,8 @@ fun BackdropEffectScope.colorControls(
 
 /**
  * Chains an arbitrary [RenderEffect] onto the backdrop effect pipeline.
+ *
+ * @param effect The [RenderEffect] to chain onto [BackdropEffectScope.renderEffect].
  */
 fun BackdropEffectScope.effect(effect: RenderEffect) {
     renderEffect = renderEffect.chain(effect)

@@ -15,6 +15,9 @@ sealed interface RuntimeShaderCache {
 
     /**
      * Returns a cached [RuntimeShader] for the given [key], compiling from [string] if not yet cached.
+     *
+     * @param key The cache key identifying the compiled [RuntimeShader].
+     * @param string The AGSL/SkSL shader source compiled on a cache miss.
      */
     fun obtainRuntimeShader(key: String, string: String): RuntimeShader
 }

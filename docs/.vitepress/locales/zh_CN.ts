@@ -104,6 +104,8 @@ export default defineConfig({
                         { text: "SwitchPreference", link: "/zh_CN/components/switchpreference" },
                         { text: "CheckboxPreference", link: "/zh_CN/components/checkboxpreference" },
                         { text: "RadioButtonPreference", link: "/zh_CN/components/radiobuttonpreference" },
+                        { text: "SliderPreference", link: "/zh_CN/components/sliderpreference" },
+                        { text: "RangeSliderPreference", link: "/zh_CN/components/rangesliderpreference" },
                         { text: "OverlayListPopup", link: "/zh_CN/components/overlaylistpopup" },
                         { text: "OverlayCascadingListPopup", link: "/zh_CN/components/overlaycascadinglistpopup" },
                         { text: "OverlayDropdownPreference", link: "/zh_CN/components/overlaydropdownpreference" },

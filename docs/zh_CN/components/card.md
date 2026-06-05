@@ -31,9 +31,9 @@ Card {
 | 属性名            | 类型                               | 说明                     | 默认值                       | 是否必须 | 适用范围 |
 | ----------------- | ---------------------------------- | ------------------------ | ---------------------------- | -------- | -------- |
 | modifier          | Modifier                           | 应用于卡片的修饰符       | Modifier                     | 否       | 所有     |
-| colors            | CardColors                         | 卡片颜色配置             | CardDefaults.defaultColors() | 否       | 所有     |
 | cornerRadius      | Dp                                 | 卡片圆角半径             | CardDefaults.CornerRadius    | 否       | 所有     |
 | insideMargin      | PaddingValues                      | 卡片内部边距             | CardDefaults.InsideMargin    | 否       | 所有     |
+| colors            | CardColors                         | 卡片颜色配置             | CardDefaults.defaultColors() | 否       | 所有     |
 | pressFeedbackType | PressFeedbackType                  | 按压反馈类型             | PressFeedbackType.None       | 否       | 交互式   |
 | showIndication    | Boolean                            | 显示点击指示效果         | false                        | 否       | 交互式   |
 | holdDownState     | Boolean                            | 卡片是否处于按下状态     | false                        | 否       | 交互式   |

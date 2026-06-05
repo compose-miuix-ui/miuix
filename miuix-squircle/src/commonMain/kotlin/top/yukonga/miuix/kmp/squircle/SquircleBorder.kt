@@ -19,6 +19,12 @@ import androidx.compose.ui.unit.Dp
  * same-radius [squircleBackground] / [squircleSurface]. Path-based; no shader required, rebuilt
  * only when size changes. Falls back to `Modifier.border(...)` with `RoundedCornerShape` whenever
  * [isSquircleEnabled] is `false`, keeping borders aligned with the fill APIs' fallback.
+ *
+ * @param width The stroke width of the border.
+ * @param color The stroke [Color] of the border.
+ * @param cornerRadius The radius applied uniformly to all four corners.
+ * @param extension The corner-tile size as a multiple of [cornerRadius], clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.squircleBorder(
@@ -63,6 +69,12 @@ fun Modifier.squircleBorder(
  * scope, so animating either via `animateDpAsState` / `animateColorAsState` updates the stroke
  * without recomposing this composable or its subtree. Falls back to a stroked rounded-rect path
  * (rather than [Modifier.border]) when [isSquircleEnabled] is `false`.
+ *
+ * @param width Lambda returning the stroke width, read inside the draw scope each frame.
+ * @param color Lambda returning the stroke [Color], read inside the draw scope each frame.
+ * @param cornerRadius The radius applied uniformly to all four corners.
+ * @param extension The corner-tile size as a multiple of [cornerRadius], clamped to
+ *   [SquircleDefaults.ExtensionMin]..[SquircleDefaults.ExtensionMax].
  */
 @Composable
 fun Modifier.squircleBorder(

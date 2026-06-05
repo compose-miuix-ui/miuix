@@ -5,3 +5,4 @@ HSPLtop/yukonga/miuix/kmp/squircle/SquircleBorderKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/squircle/SquircleDefaults;->**(**)**
 HSPLtop/yukonga/miuix/kmp/squircle/SquircleShaderBrush;->**(**)**
 HSPLtop/yukonga/miuix/kmp/squircle/internal/BakedSquircleSdf;->**(**)**
+PLtop/yukonga/miuix/kmp/squircle/SquirclePathKt**->**(**)**

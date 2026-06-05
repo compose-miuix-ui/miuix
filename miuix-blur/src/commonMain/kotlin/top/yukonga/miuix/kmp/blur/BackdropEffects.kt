@@ -99,6 +99,9 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
  * Registers a noise dither pass with the given [coefficient]. Non-positive values are ignored.
  * Noise is applied at full resolution after upscaling so each screen pixel gets independent
  * dithering, which prevents banding visible at low blur radii.
+ *
+ * @param coefficient The noise dithering strength stored in [BackdropEffectScope.noiseCoefficient].
+ *   Values at or below 0 are ignored.
  */
 fun BackdropEffectScope.noiseDither(coefficient: Float) {
     if (coefficient <= 0f) return
@@ -110,6 +113,9 @@ fun BackdropEffectScope.noiseDither(coefficient: Float) {
  * [MAX_BLEND_LAYERS] entries are honored. Brightness and saturation in [colors] are
  * folded into the blend shader's uniforms (separate from any [colorControls] you may
  * have already chained).
+ *
+ * @param colors The [BlurColors] whose blend layers and brightness/saturation drive the shader.
+ *   An empty blend-layer list is a no-op.
  */
 fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return

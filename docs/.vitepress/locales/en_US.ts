@@ -95,6 +95,8 @@ export default defineConfig({
                         { text: "SwitchPreference", link: "/components/switchpreference" },
                         { text: "CheckboxPreference", link: "/components/checkboxpreference" },
                         { text: "RadioButtonPreference", link: "/components/radiobuttonpreference" },
+                        { text: "SliderPreference", link: "/components/sliderpreference" },
+                        { text: "RangeSliderPreference", link: "/components/rangesliderpreference" },
                         { text: "OverlayListPopup", link: "/components/overlaylistpopup" },
                         { text: "OverlayCascadingListPopup", link: "/components/overlaycascadinglistpopup" },
                         { text: "OverlayDropdownPreference", link: "/components/overlaydropdownpreference" },

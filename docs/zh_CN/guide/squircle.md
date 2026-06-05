@@ -145,6 +145,24 @@ Modifier.squircleSurface(
 
 混搭即可得到非对称形状（"贴在顶部的卡片"、"一侧切直的内嵌徽章"等）。
 
+## 绝对圆角（与布局方向无关）
+
+`absoluteSquircleBackground`、`absoluteSquircleClip`、`absoluteSquircleSurface`
+与每角独立半径的重载相同，但接受物理方位的角参数（`topLeft`、`topRight`、
+`bottomRight`、`bottomLeft`，从左上顺时针），且**不会**随 `LocalLayoutDirection`
+翻转——与 `AbsoluteRoundedCornerShape` 之于 `RoundedCornerShape` 的关系一致。
+当圆角需要固定在物理方位、不随 RTL/LTR 改变时使用（例如绑定到滑动边缘的过渡揭示）。
+
+```kotlin
+Modifier.absoluteSquircleSurface(
+    color = MiuixTheme.colorScheme.surface,
+    topLeft = 24.dp,
+    topRight = 24.dp,
+    bottomRight = 0.dp,
+    bottomLeft = 0.dp,
+)
+```
+
 ## 调整曲线参数
 
 `extension` 决定连续曲率区从顶点延伸出去的距离。`1.0` 等同标准圆弧；

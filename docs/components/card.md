@@ -30,9 +30,9 @@ Card {
 | Property Name     | Type                               | Description                               | Default Value                | Required | Applies To  |
 | ----------------- | ---------------------------------- | ----------------------------------------- | ---------------------------- | -------- | ----------- |
 | modifier          | Modifier                           | Modifier applied to the card              | Modifier                     | No       | All         |
-| colors            | CardColors                         | Card color configuration                  | CardDefaults.defaultColors() | No       | All         |
 | cornerRadius      | Dp                                 | Card corner radius                        | CardDefaults.CornerRadius    | No       | All         |
 | insideMargin      | PaddingValues                      | Card inner padding                        | CardDefaults.InsideMargin    | No       | All         |
+| colors            | CardColors                         | Card color configuration                  | CardDefaults.defaultColors() | No       | All         |
 | pressFeedbackType | PressFeedbackType                  | Feedback type when pressed                | PressFeedbackType.None       | No       | Interactive |
 | showIndication    | Boolean                            | Show indication on interaction            | false                        | No       | Interactive |
 | holdDownState     | Boolean                            | Whether the card is in the pressed state  | false                        | No       | Interactive |

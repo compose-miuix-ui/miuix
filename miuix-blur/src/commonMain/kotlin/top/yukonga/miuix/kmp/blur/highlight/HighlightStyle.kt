@@ -46,8 +46,10 @@ interface HighlightStyle {
      * Returns a runtime [Shader] that paints each pixel of the highlight bounds. Return
      * `null` to fall back to a flat [color] stroke.
      *
+     * @param shape The rounded shape whose corner radii bound the highlight stroke.
      * @param strokeWidthPx Stroke band width in pixels (already coerced).
      * @param highlightAlpha Overall opacity from [Highlight.alpha], folded into the shader uniforms.
+     * @param runtimeShaderCache Cache used to obtain and reuse the compiled [RuntimeShader].
      */
     fun DrawScope.createShader(
         shape: Shape,
@@ -72,6 +74,10 @@ interface HighlightStyle {
  *   `(0.5, 0.7)` is the reference origin (so a light placed there contributes nothing).
  * - [z] is signed depth in the same units. Negative `z` places the light behind the
  *   surface plane and illuminates the inward-facing edge.
+ *
+ * @property x Horizontal UV position in `[0, 1]` relative to the highlight bounds.
+ * @property y Vertical UV position in `[0, 1]` relative to the highlight bounds.
+ * @property z Signed depth; negative places the light behind the surface plane.
  */
 @Immutable
 data class LightPosition(
@@ -80,7 +86,13 @@ data class LightPosition(
     val z: Float,
 )
 
-/** A directional light contributing to a [BloomStroke]. */
+/**
+ * A directional light contributing to a [BloomStroke].
+ *
+ * @property position The 3D position used to derive the light direction (see [LightPosition]).
+ * @property color Light color; its alpha is folded into the contribution weight.
+ * @property intensity Overall scale on the light's contribution.
+ */
 @Immutable
 data class LightSource(
     val position: LightPosition,
@@ -92,7 +104,12 @@ data class LightSource(
  * Edge bloom stroke shading model for [HighlightStyle]: rounded-rect SDF + 3D hemispheric
  * rim normal lit by directional lights, with a flat stroke on top.
  *
+ * @property color Flat stroke tint; its alpha scales the stroke contribution and is used as the
+ *  fallback color on platforms without runtime shader support.
+ * @property blendMode Blend mode used to composite the highlight layer over the content.
  * @property innerBlurRadius Inward halo depth in dp.
+ * @property primaryLight The main directional light shaping the rim.
+ * @property secondaryLight The secondary directional light shaping the rim.
  * @property dualPeak `false` (default) = each light makes one rim peak. `true` = each
  *  light makes two 180°-opposed peaks via `dot(N.xy, L.xy)²`; pair with a zero-intensity
  *  [secondaryLight] for an Apple-style specular sweep.

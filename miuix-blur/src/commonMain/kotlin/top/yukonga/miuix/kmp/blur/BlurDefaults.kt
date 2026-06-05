@@ -49,6 +49,8 @@ data class BlendColorEntry(
  *
  * Wraps standard SkBlendMode values (0-31) plus extended modes (100-121, 200-203)
  * implementing Lab color space operations, linear light blending, and more.
+ *
+ * @property value The raw blend mode identifier; standard SkBlendMode ordinals (0-31) or extended custom codes.
  */
 @JvmInline
 value class BlurBlendMode(val value: Int) {
@@ -155,6 +157,11 @@ object BlurDefaults {
 
     /**
      * Creates a [BlurColors] instance with the given parameters.
+     *
+     * @param blendColors Colors blended over the blurred backdrop, drawn in order.
+     * @param brightness Brightness adjustment in range [-1, 1]. 0 means no change.
+     * @param contrast Contrast multiplier. 1 means no change.
+     * @param saturation Saturation multiplier. 1 means no change.
      */
     @Composable
     fun blurColors(
