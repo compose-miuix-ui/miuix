@@ -10,6 +10,7 @@ import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
@@ -209,6 +210,9 @@ private class DrawBackdropNode(
         override val shape: Shape get() = shapeProvider.innerShape
     }
 
+    /** The node's graphics context; the (necessarily `inner`) [LevelTarget] reaches it through here. */
+    private val graphicsContext get() = requireGraphicsContext()
+
     /** Layers + level parameters for rendering one downscale level (primary = lo, secondary = hi). */
     private inner class LevelTarget {
         var mainLayer: GraphicsLayer? = null
@@ -230,10 +234,10 @@ private class DrawBackdropNode(
         var noiseEffect: RenderEffect? = null
         var noiseEffectCoeff: Float = Float.NaN
 
-        fun ensureMain(): GraphicsLayer = mainLayer ?: requireGraphicsContext().createGraphicsLayer().also { mainLayer = it }
+        fun ensureMain(): GraphicsLayer = mainLayer ?: graphicsContext.createGraphicsLayer().also { mainLayer = it }
 
         fun obtainCascade(index: Int): GraphicsLayer {
-            val ctx = requireGraphicsContext()
+            val ctx = graphicsContext
             while (cascadeLayers.size <= index) {
                 cascadeLayers.add(ctx.createGraphicsLayer())
             }
@@ -266,7 +270,7 @@ private class DrawBackdropNode(
         }
 
         fun release() {
-            val ctx = requireGraphicsContext()
+            val ctx = graphicsContext
             mainLayer?.let { ctx.releaseGraphicsLayer(it) }
             mainLayer = null
             for (cascade in cascadeLayers) ctx.releaseGraphicsLayer(cascade)
@@ -473,6 +477,10 @@ private class DrawBackdropNode(
     private val contentPaint = Paint()
     private val highlightPaint = Paint()
 
+    // Reused saveLayer bounds for the non-SrcOver content path (DstIn / foreground blur): Rect is a
+    // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
+    private var contentBoundsRect: Rect? = null
+
     override fun ContentDrawScope.draw() {
         if (!enabled) {
             drawContent()
@@ -486,7 +494,7 @@ private class DrawBackdropNode(
         if (blending) {
             // Cross-fade band: composite the higher level on top of the lower one with alpha = blendFactor.
             val result = crossfadeResultLayer
-                ?: requireGraphicsContext().createGraphicsLayer().also { crossfadeResultLayer = it }
+                ?: graphicsContext.createGraphicsLayer().also { crossfadeResultLayer = it }
             recordLayer(
                 result,
                 size = IntSize(size.width.toInt().coerceAtLeast(1), size.height.toInt().coerceAtLeast(1)),
@@ -501,11 +509,11 @@ private class DrawBackdropNode(
         if (contentBlendMode == BlendMode.SrcOver) {
             drawContent()
         } else {
+            val w = size.width
+            val h = size.height
+            val bounds = contentBoundsRect?.takeIf { it.right == w && it.bottom == h } ?: Rect(0f, 0f, w, h).also { contentBoundsRect = it }
             contentPaint.blendMode = contentBlendMode
-            drawContext.canvas.saveLayer(
-                androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
-                contentPaint,
-            )
+            drawContext.canvas.saveLayer(bounds, contentPaint)
             drawContent()
             drawContext.canvas.restore()
         }
@@ -514,7 +522,9 @@ private class DrawBackdropNode(
             drawHighlight(
                 highlight = resolved,
                 shape = effectScope.shape,
-                runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache),
+                // onAttach cached this from LocalRuntimeShaderCache (a staticCompositionLocalOf, so
+                // its identity is stable) — read the field instead of a per-frame currentValueOf.
+                runtimeShaderCache = effectScope.runtimeShaderCache,
                 paint = highlightPaint,
             )
         }
@@ -659,7 +669,7 @@ private class DrawBackdropNode(
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
             val noiseL = target.noiseLayer
-                ?: requireGraphicsContext().createGraphicsLayer().also { target.noiseLayer = it }
+                ?: graphicsContext.createGraphicsLayer().also { target.noiseLayer = it }
             recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
             }
@@ -692,7 +702,7 @@ private class DrawBackdropNode(
     fun releaseGraphicsLayers() {
         primary.release()
         secondary.release()
-        crossfadeResultLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
+        crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
         crossfadeResultLayer = null
         blending = false
         effectScope.reset()

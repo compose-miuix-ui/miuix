@@ -11,8 +11,11 @@ import kotlin.math.exp
 /** Conversion factor from blur radius in pixels to Blur sigma. */
 internal const val BLUR_RADIUS_TO_SIGMA = 0.45f
 
-/** Max kernel reach in downsampled pixels — outermost pair reaches ~offset 12.5, rounded up. */
-internal const val BLUR_KERNEL_REACH = 14
+/**
+ * Max kernel reach in downsampled pixels: the outermost merged tap pair tops out just below offset
+ * 12.5, where bilinear sampling reaches texel 13 — so 13 exactly covers the kernel, no darkening.
+ */
+internal const val BLUR_KERNEL_REACH = 13
 
 private const val WEIGHT_THRESHOLD = 0.002
 
@@ -111,8 +114,6 @@ internal fun createBlurEffect(
     return effect
 }
 
-internal data class DownScaleParams(val adjustedVariance: Float, val downScale: Int)
-
 /**
  * Implied box-prefilter variance (full-resolution px²) absorbed by the downsample at each level;
  * index = log2(downScale). The separable Gaussian only supplies the remaining variance:
@@ -137,23 +138,13 @@ internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float {
 }
 
 /**
- * Picks an adaptive [DownScaleParams.downScale] (1/2/4/8/16) from σ² and returns the variance
- * compensated for the box-filter pre-filtering applied during downsampling.
- */
-internal fun computeDownScaleParams(sigma: Float): DownScaleParams {
-    val sigmaSquared = sigma * sigma
-    val exp = downScaleExpFor(sigmaSquared)
-    return DownScaleParams(adjustedVarianceForExp(sigmaSquared, exp), 1 shl exp)
-}
-
-/**
  * Bracket of two adjacent downscale levels to cross-fade between, plus a smoothstep [blend]
  * weight of the higher level. Outside any transition band [expLo] == [expHi] and [blend] is 0.
  */
 internal data class DownScaleBlend(val expLo: Int, val expHi: Int, val blend: Float)
 
 /** Sigma at each downscale boundary (= √ of the σ² thresholds in [downScaleExpFor]). */
-private val BOUNDARY_SIGMA = floatArrayOf(3.5496479f, 9.5f, 20f, 44.10215f)
+private val BOUNDARY_SIGMA = floatArrayOf(3.5496478f, 9.5f, 20f, 44.10215f)
 
 /** Half-width of each cross-fade transition band, as a fraction of the boundary radius/sigma. */
 private const val BLEND_BAND_FRACTION = 0.12f
@@ -235,12 +226,10 @@ internal fun computeBlurParamsInto(
     // 5. Center weight = residual ensuring sum(weights) = 0.5
     //    (each weight is counted twice due to symmetric sampling, so 2×0.5 = 1.0)
     var pairWeightSum = 0f
-    @Suppress("EmptyRange")
     for (j in 1 until tapCount) pairWeightSum += outWeights[j]
     outWeights[0] = (0.5f - pairWeightSum).coerceAtLeast(0f)
 
     // 6. Validity check: zero out weights outside (0, 1)
-    @Suppress("EmptyRange")
     for (j in 0 until tapCount) {
         if (outWeights[j] <= 0f || outWeights[j] >= 1f) {
             outWeights[j] = 0f

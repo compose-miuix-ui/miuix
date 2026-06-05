@@ -56,16 +56,32 @@ fun BackdropEffectScope.colorControls(
     saturation: Float = 1f,
 ) {
     if (brightness == 0f && contrast == 1f && saturation == 1f) return
+    if (!isRuntimeShaderSupported()) return
+    val scope = impl
 
-    runtimeShaderEffect(
-        key = "ColorControls",
-        shaderString = COLOR_CONTROLS_SHADER,
-        uniformShaderName = "child",
+    // Reuse the cached effect while the three values are unchanged.
+    val cached = scope.cachedColorResult
+    val effect = if (cached != null &&
+        scope.cachedColorBrightness == brightness &&
+        scope.cachedColorContrast == contrast &&
+        scope.cachedColorSaturation == saturation
     ) {
-        setFloatUniform("in_brightness", brightness)
-        setFloatUniform("in_contrast", contrast)
-        setFloatUniform("in_saturation", saturation)
+        cached
+    } else {
+        val shader = obtainRuntimeShader("ColorControls", COLOR_CONTROLS_SHADER).apply {
+            setFloatUniform("in_brightness", brightness)
+            setFloatUniform("in_contrast", contrast)
+            setFloatUniform("in_saturation", saturation)
+        }
+        createRuntimeShaderEffect(shader, "child").also {
+            scope.cachedColorBrightness = brightness
+            scope.cachedColorContrast = contrast
+            scope.cachedColorSaturation = saturation
+            scope.cachedColorResult = it
+        }
     }
+
+    renderEffect = renderEffect.chain(effect)
 }
 
 /**
@@ -146,6 +162,16 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedBlurExp: Int = -1
     internal var cachedBlurResult: RenderEffect? = null
 
+    // blendColors()/colorControls() build RenderEffects that don't depend on the animating radius,
+    // so cache them: a fixed tint/adjustment rebuilds once, not per frame. Reuse is safe because a
+    // RenderEffect snapshots its shader's uniforms at creation (see LevelTarget.dsEffects).
+    internal var cachedBlendColors: BlurColors? = null
+    internal var cachedBlendResult: RenderEffect? = null
+    internal var cachedColorBrightness: Float = Float.NaN
+    internal var cachedColorContrast: Float = Float.NaN
+    internal var cachedColorSaturation: Float = Float.NaN
+    internal var cachedColorResult: RenderEffect? = null
+
     /**
      * When >= 0, [blur] builds at this exact downscale exponent instead of the adaptive choice.
      * The node sets it for the cross-fade lo/hi passes; -1 means auto. Internal — not exposed on
@@ -204,6 +230,12 @@ internal abstract class BackdropEffectScopeImpl :
         cachedBlurSizeH = Float.NaN
         cachedBlurExp = -1
         cachedBlurResult = null
+        cachedBlendColors = null
+        cachedBlendResult = null
+        cachedColorBrightness = Float.NaN
+        cachedColorContrast = Float.NaN
+        cachedColorSaturation = Float.NaN
+        cachedColorResult = null
         forcedDownscaleExp = -1
         blurBlendExpLo = 0
         blurBlendExpHi = 0
