@@ -36,8 +36,8 @@ private val BLUR_V_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
 /**
  * Builds the separable Blur [RenderEffect] (H then V) for an EXPLICIT [downScale] level using the
  * per-axis variances already compensated for that level's box prefilter (see [adjustedVarianceForExp]).
- * The shader cache keys carry [downScale] so two adjacent levels rendered in the same frame (the
- * cross-fade lo/hi passes) never share a Gaussian shader instance and corrupt each other's kernel.
+ * The shader cache keys carry [downScale] so the H/V passes and the cross-fade lo/hi levels each
+ * build from a separate shader instance and never alias each other's uniform arrays.
  */
 internal fun createBlurEffect(
     radiusX: Float,
@@ -64,8 +64,8 @@ internal fun createBlurEffect(
 
     var effect: RenderEffect? = null
 
-    // H / V use distinct cache keys so each pass holds its own uniform state; the _d$downScale
-    // suffix additionally isolates the cross-fade lo/hi levels from one another.
+    // H / V use distinct cache keys so each pass builds from its own shader instance; the
+    // _d$downScale suffix additionally isolates the cross-fade lo/hi levels from one another.
     if (radiusX > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
         if (n > 0) {
