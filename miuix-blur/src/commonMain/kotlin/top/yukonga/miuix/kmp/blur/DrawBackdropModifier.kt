@@ -225,8 +225,9 @@ private class DrawBackdropNode(
         var cascadeFirstStepScale: Int = 1
 
         // Draw-path RenderEffects cached for reuse while the source size / noise coefficient hold.
-        // A RenderEffect snapshots its shader's uniforms at creation, so reusing the instance is
-        // safe and avoids a native allocation per frame. Two slots cover the deepest cascade (sf=16).
+        // A RenderEffect captures its shader's uniforms when created, so a built instance is
+        // unaffected by later re-sets of the tree-shared RuntimeShader — reuse is safe and saves a
+        // native allocation per frame. Two slots cover the deepest cascade (sf=16).
         val dsKeys = arrayOf("", "")
         val dsW = intArrayOf(-1, -1)
         val dsH = intArrayOf(-1, -1)

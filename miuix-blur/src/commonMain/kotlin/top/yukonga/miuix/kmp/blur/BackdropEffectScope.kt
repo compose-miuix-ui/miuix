@@ -163,8 +163,9 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedBlurResult: RenderEffect? = null
 
     // blendColors()/colorControls() build RenderEffects that don't depend on the animating radius,
-    // so cache them: a fixed tint/adjustment rebuilds once, not per frame. Reuse is safe because a
-    // RenderEffect snapshots its shader's uniforms at creation (see LevelTarget.dsEffects).
+    // so cache them: a fixed tint/adjustment rebuilds once, not per frame. A RenderEffect captures
+    // its shader's uniforms when created, so a built effect is unaffected by later re-sets of the
+    // tree-shared RuntimeShader — reuse across frames and both cross-fade passes is safe.
     internal var cachedBlendColors: BlurColors? = null
     internal var cachedBlendResult: RenderEffect? = null
     internal var cachedColorBrightness: Float = Float.NaN
