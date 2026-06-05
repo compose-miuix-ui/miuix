@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
@@ -14,6 +15,7 @@ import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
 internal const val MAX_BLEND_LAYERS = 8
@@ -111,10 +113,29 @@ fun BackdropEffectScope.noiseDither(coefficient: Float) {
  */
 fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
+    if (!isRuntimeShaderSupported()) return
+    val scope = impl
 
+    // Reuse the cached blend effect on an unchanged config — a hit skips the color conversions,
+    // uniform uploads and effect creation, leaving only the chain. Keyed on the BlurColors value,
+    // so callers that rebuild it (or its list) each frame still hit.
+    val cached = scope.cachedBlendResult
+    val effect = if (cached != null && scope.cachedBlendColors == colors) {
+        cached
+    } else {
+        buildBlendColorsEffect(scope, colors).also {
+            scope.cachedBlendColors = colors
+            scope.cachedBlendResult = it
+        }
+    }
+
+    renderEffect = renderEffect.chain(effect)
+}
+
+/** Builds the blend-layer [RenderEffect] for [colors] (no chaining); see [blendColors] for caching. */
+private fun buildBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
     val layerList = colors.blendColors
     val layerCount = minOf(layerList.size, MAX_BLEND_LAYERS)
-    val scope = impl
     val modes = scope.blendModesBuffer
     val colorData = scope.blendColorsBuffer
 
@@ -122,11 +143,7 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
     val shaderKey = if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd"
     val shaderSource = if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD
 
-    runtimeShaderEffect(
-        key = shaderKey,
-        shaderString = shaderSource,
-        uniformShaderName = "child",
-    ) {
+    val shader = scope.obtainRuntimeShader(shaderKey, shaderSource).apply {
         setFloatUniform("layerCount", layerCount.toFloat())
 
         // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
@@ -158,6 +175,7 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
             setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
         }
     }
+    return createRuntimeShaderEffect(shader, "child")
 }
 
 /**
