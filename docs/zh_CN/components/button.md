@@ -103,6 +103,7 @@ Button(
 | minHeight         | Dp                        | 按钮最小高度         | ButtonDefaults.MinHeight          | 否       |
 | colors            | TextButtonColors          | 文本按钮颜色配置     | ButtonDefaults.textButtonColors() | 否       |
 | insideMargin      | PaddingValues             | 按钮内部边距         | ButtonDefaults.InsideMargin       | 否       |
+| textStyle         | TextStyle?                | 按钮文本的文本样式   | null（MiuixTheme.textStyles.button）| 否     |
 | interactionSource | MutableInteractionSource? | 按钮的交互源         | null                              | 否       |
 | indication        | Indication?               | 点击交互的反馈效果   | LocalIndication.current           | 否       |
 

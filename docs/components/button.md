@@ -103,6 +103,7 @@ Button(
 | minHeight         | Dp                        | Minimum height of the button      | ButtonDefaults.MinHeight          | No       |
 | colors            | TextButtonColors          | Text button color configuration   | ButtonDefaults.textButtonColors() | No       |
 | insideMargin      | PaddingValues             | Internal padding of the button    | ButtonDefaults.InsideMargin       | No       |
+| textStyle         | TextStyle?                | Text style of the button text     | null (MiuixTheme.textStyles.button)| No      |
 | interactionSource | MutableInteractionSource? | Interaction source for the button | null                              | No       |
 | indication        | Indication?               | Indication for click interactions | LocalIndication.current           | No       |
 

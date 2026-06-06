@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.squircle.squircleSurface
@@ -117,6 +118,7 @@ fun TextButton(
     minHeight: Dp = ButtonDefaults.MinHeight,
     colors: TextButtonColors = ButtonDefaults.textButtonColors(),
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
+    textStyle: TextStyle? = null,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = LocalIndication.current,
 ) {
@@ -142,7 +144,7 @@ fun TextButton(
     ) {
         Text(
             text = text,
-            style = MiuixTheme.textStyles.button,
+            style = textStyle ?: MiuixTheme.textStyles.button,
         )
     }
 }
