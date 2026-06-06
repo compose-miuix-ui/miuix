@@ -136,6 +136,7 @@ data class SnackbarColors(
     val contentColor: Color,
     val actionContentColor: Color,
     val dismissActionContentColor: Color,
+    val actionContainerColor: Color,
 )
 ```
 
@@ -143,21 +144,29 @@ You can create a color configuration via `SnackbarDefaults.snackbarColors`:
 
 ```kotlin
 val colors = SnackbarDefaults.snackbarColors(
-    containerColor = MiuixTheme.colorScheme.surfaceContainerHighest,
-    contentColor = MiuixTheme.colorScheme.onSurfaceContainer,
-    actionContentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-    dismissActionContentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest,
+    containerColor = MiuixTheme.colorScheme.onSecondaryVariant,
+    contentColor = MiuixTheme.colorScheme.secondaryVariant,
+    actionContentColor = MiuixTheme.colorScheme.onPrimary,
+    dismissActionContentColor = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+    actionContainerColor = MiuixTheme.colorScheme.primary,
 )
 ```
 
+By default the Snackbar uses an inverse surface tone (a dark bar in light theme, a light bar in dark theme) so it stands out over the content behind it.
+
+The action label is rendered as a filled pill; `actionContainerColor` is its background and `actionContentColor` its text color, so override them together to keep enough contrast.
+
 #### Constants
 
-`SnackbarDefaults` also exposes the default corner radius and inside margin used by `Snackbar`:
+`SnackbarDefaults` also exposes the default dimensions and paddings used by `Snackbar`:
 
-| Constant Name | Type          | Description                                | Default Value                                          |
-| ------------- | ------------- | ------------------------------------------ | ------------------------------------------------------ |
-| CornerRadius  | Dp            | Default corner radius of the Snackbar      | 12.dp                                                  |
-| InsideMargin  | PaddingValues | Default inner padding of the Snackbar      | PaddingValues(horizontal = 12.dp, vertical = 8.dp)     |
+| Constant Name      | Type          | Description                                   | Default Value                                         |
+| ------------------ | ------------- | --------------------------------------------- | ----------------------------------------------------- |
+| CornerRadius       | Dp            | Default corner radius of the Snackbar         | 16.dp                                                 |
+| InsideMargin       | PaddingValues | Default inner padding of the Snackbar content | PaddingValues(all = 12.dp)                            |
+| OuterPadding       | PaddingValues | Default outer padding around the Snackbar     | PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp) |
+| ActionCornerRadius | Dp            | Default corner radius of the action pill      | 50.dp                                                 |
+| ActionInsideMargin | PaddingValues | Default inner padding of the action pill      | PaddingValues(horizontal = 12.dp, vertical = 0.dp)    |
 
 ## SnackbarDuration and SnackbarResult
 

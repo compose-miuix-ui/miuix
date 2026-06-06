@@ -29,9 +29,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -42,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -51,13 +50,15 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
@@ -65,9 +66,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
+import top.yukonga.miuix.kmp.icon.basic.Close
+import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Possible durations of the [Snackbar].
@@ -295,7 +299,7 @@ fun SnackbarHost(
                         entry.data.visuals.actionLabel != null,
                         accessibilityManager,
                     )
-                    delay(duration)
+                    delay(duration.milliseconds)
 
                     if (anchoredDraggableState.currentValue != SnackbarSwipeToDismissValue.Settled) return@LaunchedEffect
                     entry.data.dismiss()
@@ -369,72 +373,82 @@ fun Snackbar(
     colors: SnackbarColors = SnackbarDefaults.snackbarColors(),
     insideMargin: PaddingValues = SnackbarDefaults.InsideMargin,
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
     val visuals = data.visuals
     val scope = rememberCoroutineScope()
 
-    Surface(
-        modifier = modifier
-            .semantics { liveRegion = LiveRegionMode.Polite }
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-            .dropShadow(
-                shape = shape,
-                shadow = Shadow(
-                    radius = 1.dp,
-                    spread = 0.6.dp,
-                    color = MiuixTheme.colorScheme.dividerLine,
-                    offset = DpOffset(x = 0.dp, y = 1.dp),
-                ),
-            )
-            .pointerInput(Unit) {
-                detectTapGestures { /* Consume click */ }
-            },
-        shape = shape,
-        color = colors.containerColor,
-        contentColor = colors.contentColor,
+    CompositionLocalProvider(
+        LocalContentColor provides colors.contentColor,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .defaultMinSize(minHeight = 44.dp)
-                .padding(insideMargin),
-        ) {
-            Text(
-                text = visuals.message,
-                color = colors.contentColor,
-                style = MiuixTheme.textStyles.body2,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-
-            if (!visuals.actionLabel.isNullOrEmpty()) {
-                val onAction by rememberUpdatedState(data::performAction)
-                TextButton(
-                    text = visuals.actionLabel,
-                    onClick = { scope.launch { onAction() } },
-                    colors = ButtonDefaults.textButtonColors(
-                        color = Color.Transparent,
-                        disabledColor = Color.Transparent,
-                        textColor = colors.actionContentColor,
-                        disabledTextColor = colors.actionContentColor,
+        Box(
+            modifier = modifier
+                .semantics(mergeDescendants = false) {
+                    isTraversalGroup = true
+                    liveRegion = LiveRegionMode.Polite
+                }
+                .padding(SnackbarDefaults.OuterPadding)
+                .dropShadow(
+                    shape = RoundedCornerShape(cornerRadius),
+                    shadow = Shadow(
+                        radius = 10.dp,
+                        color = Color.Black,
+                        alpha = 0.1f,
                     ),
-                    insideMargin = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                 )
-            }
+                .squircleBackground(color = colors.containerColor, cornerRadius = cornerRadius)
+                .pointerInput(Unit) {
+                    detectTapGestures { /* Consume click */ }
+                },
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(insideMargin),
+            ) {
+                Text(
+                    text = visuals.message,
+                    color = colors.contentColor,
+                    style = MiuixTheme.textStyles.body2,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
 
-            if (visuals.withDismissAction) {
-                val onDismiss by rememberUpdatedState(data::dismiss)
-                Icon(
-                    imageVector = MiuixIcons.Basic.SearchCleanup,
-                    contentDescription = "Dismiss",
-                    tint = colors.dismissActionContentColor,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .clickable { scope.launch { onDismiss() } },
-                )
+                if (!visuals.actionLabel.isNullOrEmpty()) {
+                    val onAction by rememberUpdatedState(data::performAction)
+                    TextButton(
+                        text = visuals.actionLabel,
+                        onClick = { scope.launch { onAction() } },
+                        modifier = Modifier.padding(start = 12.dp),
+                        cornerRadius = SnackbarDefaults.ActionCornerRadius,
+                        minWidth = 26.dp,
+                        minHeight = 26.dp,
+                        colors = ButtonDefaults.textButtonColorsPrimary(
+                            color = colors.actionContainerColor,
+                            textColor = colors.actionContentColor,
+                        ),
+                        insideMargin = SnackbarDefaults.ActionInsideMargin,
+                        textStyle = TextStyle(fontSize = 15.sp),
+                    )
+                }
+
+                if (visuals.withDismissAction) {
+                    val onDismiss by rememberUpdatedState(data::dismiss)
+                    Icon(
+                        imageVector = MiuixIcons.Basic.Close,
+                        contentDescription = "Dismiss",
+                        tint = colors.dismissActionContentColor,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(20.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = null,
+                            ) {
+                                scope.launch { onDismiss() }
+                            },
+                    )
+                }
             }
         }
     }
@@ -445,8 +459,10 @@ fun Snackbar(
  *
  * @param containerColor container color of the Snackbar
  * @param contentColor content color of the Snackbar
- * @param actionContentColor action content color of the Snackbar
- * @param dismissActionContentColor dismiss action content color of the Snackbar
+ * @param actionContentColor content color of the action label pill of the Snackbar
+ * @param dismissActionContentColor content color of the dismiss action of the Snackbar
+ * @param actionContainerColor container color of the action label pill of the Snackbar; pair it
+ *   with [actionContentColor] so the label keeps enough contrast against the pill
  */
 @Immutable
 data class SnackbarColors(
@@ -454,6 +470,7 @@ data class SnackbarColors(
     val contentColor: Color,
     val actionContentColor: Color,
     val dismissActionContentColor: Color,
+    val actionContainerColor: Color,
 )
 
 /**
@@ -461,23 +478,40 @@ data class SnackbarColors(
  */
 object SnackbarDefaults {
     /** The default corner radius. */
-    val CornerRadius = 12.dp
+    val CornerRadius = 16.dp
 
     /** The default inside margin. */
-    val InsideMargin = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    val InsideMargin = PaddingValues(all = 12.dp)
+
+    /** The default outer padding around the Snackbar. */
+    val OuterPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp)
+
+    /** The default corner radius of the action label pill. */
+    val ActionCornerRadius = 50.dp
+
+    /** The default inside margin of the action label pill. */
+    val ActionInsideMargin = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
 
     @Composable
     fun snackbarColors(
-        containerColor: Color = MiuixTheme.colorScheme.surfaceContainerHighest,
-        contentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
-        actionContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-        dismissActionContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-    ): SnackbarColors = remember(containerColor, contentColor, actionContentColor, dismissActionContentColor) {
+        containerColor: Color = MiuixTheme.colorScheme.onSecondaryVariant,
+        contentColor: Color = MiuixTheme.colorScheme.secondaryVariant,
+        actionContentColor: Color = MiuixTheme.colorScheme.onPrimary,
+        dismissActionContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+        actionContainerColor: Color = MiuixTheme.colorScheme.primary,
+    ): SnackbarColors = remember(
+        containerColor,
+        contentColor,
+        actionContentColor,
+        dismissActionContentColor,
+        actionContainerColor,
+    ) {
         SnackbarColors(
             containerColor = containerColor,
             contentColor = contentColor,
             actionContentColor = actionContentColor,
             dismissActionContentColor = dismissActionContentColor,
+            actionContainerColor = actionContainerColor,
         )
     }
 }

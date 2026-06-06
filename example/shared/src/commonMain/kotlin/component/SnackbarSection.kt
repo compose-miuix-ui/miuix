@@ -71,7 +71,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                         text = "Short (4s)",
                         onClick = {
                             scope.launch {
-                                snackbarHostState.showSnackbar("This is a short message")
+                                snackbarHostState.showSnackbar("This message stays for 4 seconds.")
                             }
                         },
                         modifier = Modifier.weight(1f),
@@ -81,7 +81,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                         onClick = {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "This is a long message to display more text content",
+                                    message = "This is a longer message that stays for 10 seconds.",
                                     duration = SnackbarDuration.Long,
                                 )
                             }
@@ -98,7 +98,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                         onClick = {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "This message will last for 2 seconds",
+                                    message = "This message uses a custom 2-second duration.",
                                     duration = SnackbarDuration.Custom(2000L),
                                 )
                             }
@@ -112,7 +112,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                             scope.launch {
                                 text = "Action: Alive"
                                 val result = snackbarHostState.showSnackbar(
-                                    message = "This message has an action",
+                                    message = "This message has an action button.",
                                     actionLabel = "Undo",
                                     duration = SnackbarDuration.Short,
                                 )
@@ -135,7 +135,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                         onClick = {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "This message can be removed via the close button",
+                                    message = "Tap the close button to dismiss this message.",
                                     withDismissAction = true,
                                     duration = SnackbarDuration.Long,
                                 )
@@ -148,9 +148,28 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                         onClick = {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Indefinite message, dismiss manually",
+                                    message = "This message stays until you dismiss it manually.",
                                     withDismissAction = true,
                                     duration = SnackbarDuration.Indefinite,
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        text = "Action + Close",
+                        onClick = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "This message has both an action and a close button.",
+                                    actionLabel = "Undo",
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Long,
                                 )
                             }
                         },

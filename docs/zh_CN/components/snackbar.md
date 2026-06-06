@@ -136,6 +136,7 @@ data class SnackbarColors(
     val contentColor: Color,
     val actionContentColor: Color,
     val dismissActionContentColor: Color,
+    val actionContainerColor: Color,
 )
 ```
 
@@ -143,21 +144,29 @@ data class SnackbarColors(
 
 ```kotlin
 val colors = SnackbarDefaults.snackbarColors(
-    containerColor = MiuixTheme.colorScheme.surfaceContainerHighest,
-    contentColor = MiuixTheme.colorScheme.onSurfaceContainer,
-    actionContentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-    dismissActionContentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest,
+    containerColor = MiuixTheme.colorScheme.onSecondaryVariant,
+    contentColor = MiuixTheme.colorScheme.secondaryVariant,
+    actionContentColor = MiuixTheme.colorScheme.onPrimary,
+    dismissActionContentColor = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+    actionContainerColor = MiuixTheme.colorScheme.primary,
 )
 ```
 
+默认情况下 Snackbar 采用反色表面（浅色主题下为深色条，深色主题下为浅色条），以便在内容之上更醒目。
+
+操作标签会渲染为一个填充的胶囊按钮：`actionContainerColor` 是其背景色，`actionContentColor` 是其文字色，自定义时请同时调整以保证对比度。
+
 #### 常量
 
-`SnackbarDefaults` 同时提供 `Snackbar` 使用的默认圆角与内边距：
+`SnackbarDefaults` 同时提供 `Snackbar` 使用的默认尺寸与内外边距：
 
-| 常量名       | 类型          | 说明                      | 默认值                                              |
-| ------------ | ------------- | ------------------------- | --------------------------------------------------- |
-| CornerRadius | Dp            | Snackbar 的默认圆角半径   | 12.dp                                               |
-| InsideMargin | PaddingValues | Snackbar 内容的默认内边距 | PaddingValues(horizontal = 12.dp, vertical = 8.dp)  |
+| 常量名             | 类型          | 说明                       | 默认值                                                |
+| ------------------ | ------------- | -------------------------- | ----------------------------------------------------- |
+| CornerRadius       | Dp            | Snackbar 的默认圆角半径    | 16.dp                                                 |
+| InsideMargin       | PaddingValues | Snackbar 内容的默认内边距  | PaddingValues(all = 12.dp)                            |
+| OuterPadding       | PaddingValues | Snackbar 的默认外边距      | PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp) |
+| ActionCornerRadius | Dp            | 操作胶囊按钮的默认圆角半径 | 50.dp                                                 |
+| ActionInsideMargin | PaddingValues | 操作胶囊按钮的默认内边距   | PaddingValues(horizontal = 12.dp, vertical = 0.dp)    |
 
 ## SnackbarDuration 与 SnackbarResult
 
