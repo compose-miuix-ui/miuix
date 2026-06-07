@@ -35,6 +35,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [NumberPicker](../components/numberpicker)                 | Vertical scroll picker for number selection | Time picker, quantity selection       |
 | [ProgressIndicator](../components/progressindicator)       | Displays operation progress status         | Loading, progress display             |
 | [Snackbar](../components/snackbar)                         | Temporary message bar for brief feedback   | Operation result, status notification |
+| [Tooltip](../components/tooltip)                           | Brief label shown on hover or long press   | Icon button labels, element hints     |
 | [Icon](../components/icon)                                 | Icon display component                     | Icon buttons, status indicators       |
 | [FloatingActionButton](../components/floatingactionbutton) | Floating action button                     | Primary actions, quick functions      |
 | [FloatingToolbar](../components/floatingtoolbar)           | Floating toolbar                           | Quick actions, information display    |

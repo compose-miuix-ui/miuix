@@ -86,6 +86,7 @@ export default defineConfig({
                         { text: "NumberPicker", link: "/zh_CN/components/numberpicker" },
                         { text: "ProgressIndicator", link: "/zh_CN/components/progressindicator", },
                         { text: "Snackbar", link: "/zh_CN/components/snackbar" },
+                        { text: "Tooltip", link: "/zh_CN/components/tooltip" },
                         { text: "Icon", link: "/zh_CN/components/icon" },
                         { text: "FloatingActionButton", link: "/zh_CN/components/floatingactionbutton", },
                         { text: "FloatingToolbar", link: "/zh_CN/components/floatingtoolbar", },

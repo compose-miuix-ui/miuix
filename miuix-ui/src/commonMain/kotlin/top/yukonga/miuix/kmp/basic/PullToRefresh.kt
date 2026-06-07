@@ -382,7 +382,7 @@ class PullToRefreshState(
         val animatedValue = Animatable(0f)
         animatedValue.animateTo(
             targetValue = 1f,
-            animationSpec = tween<Float>(durationMillis = 200, easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)),
+            animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)),
         ) {
             refreshCompleteAnimProgressState.floatValue = this.value
         }
@@ -739,7 +739,7 @@ private fun animateRotation(): State<Float> {
     return infiniteTransition.animateFloat(
         initialValue = initialRotation,
         targetValue = initialRotation + 360f,
-        animationSpec = infiniteRepeatable<Float>(
+        animationSpec = infiniteRepeatable(
             animation = tween(800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),

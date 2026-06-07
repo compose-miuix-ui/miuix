@@ -47,6 +47,7 @@ import component.spinnerSection
 import component.switchSection
 import component.tabRowSection
 import component.textFieldSection
+import component.tooltipSection
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -58,6 +59,7 @@ import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -251,32 +253,38 @@ fun MainPage(
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     actions = {
-                        OverlayIconCascadingDropdownMenu(
-                            entries = cascadingEntries,
-                            collapseOnSelection = true,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Tune,
-                                contentDescription = "Tune",
-                            )
+                        TooltipBox(text = "Options") {
+                            OverlayIconCascadingDropdownMenu(
+                                entries = cascadingEntries,
+                                collapseOnSelection = true,
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.Tune,
+                                    contentDescription = "Tune",
+                                )
+                            }
                         }
-                        OverlayIconDropdownMenu(
-                            entries = optionItems,
-                            collapseOnSelection = false,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Sort,
-                                contentDescription = "Sort",
-                            )
+                        TooltipBox(text = "Sort") {
+                            OverlayIconDropdownMenu(
+                                entries = optionItems,
+                                collapseOnSelection = false,
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.Sort,
+                                    contentDescription = "Sort",
+                                )
+                            }
                         }
-                        OverlayIconDropdownMenu(
-                            entries = multiSelectItems,
-                            collapseOnSelection = false,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.SelectAll,
-                                contentDescription = "SelectAll",
-                            )
+                        TooltipBox(text = "Select all") {
+                            OverlayIconDropdownMenu(
+                                entries = multiSelectItems,
+                                collapseOnSelection = false,
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.SelectAll,
+                                    contentDescription = "SelectAll",
+                                )
+                            }
                         }
                     },
                 )
@@ -355,6 +363,7 @@ fun MainPage(
                     textFieldSection()
                     sliderSection()
                     tabRowSection()
+                    tooltipSection()
                     numberPickerSection()
                     colorPickerSection()
                     cardSection()

@@ -77,6 +77,7 @@ export default defineConfig({
                         { text: "NumberPicker", link: "/components/numberpicker" },
                         { text: "ProgressIndicator", link: "/components/progressindicator", },
                         { text: "Snackbar", link: "/components/snackbar" },
+                        { text: "Tooltip", link: "/components/tooltip" },
                         { text: "Icon", link: "/components/icon" },
                         { text: "FloatingActionButton", link: "/components/floatingactionbutton", },
                         { text: "FloatingToolbar", link: "/components/floatingtoolbar" },
