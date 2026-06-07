@@ -101,6 +101,7 @@ Scaffold(
 | label    | String      | 文本标签         | -      | 是       |
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
+| badge    | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
 
 ### FloatingNavigationBar 属性
 
@@ -126,6 +127,7 @@ Scaffold(
 | label    | String      | 文本标签         | -      | 是       |
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
+| badge    | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
 
 ### NavigationBarDefaults 对象
 
@@ -137,7 +139,6 @@ NavigationBarDefaults 对象提供了 NavigationBar 和 NavigationBarItem 组件
 | ---------------------- | -------- | -------------------------- | ------ |
 | ItemHeight             | Dp       | 项目高度                   | 64.dp  |
 | IconSize               | Dp       | 图标尺寸                   | 26.dp  |
-| TextFontSize           | TextUnit | 字号（TextOnly 模式）      | 14.sp  |
 | LabelFontSize          | TextUnit | 标签字号                   | 12.sp  |
 | IconTopPadding         | Dp       | 图标顶部内边距             | 8.dp   |
 | BottomPadding          | Dp       | 标签底部内边距             | 8.dp   |
@@ -169,7 +170,6 @@ FloatingNavigationBarDefaults 对象提供了 FloatingNavigationBar 和 Floating
 | --------------------- | ---------------------- |
 | IconAndText           | 显示图标和文本         |
 | IconOnly              | 仅显示图标             |
-| TextOnly              | 仅显示文本             |
 | IconWithSelectedLabel | 始终显示图标，仅选中时显示文本 |
 
 ## 进阶用法

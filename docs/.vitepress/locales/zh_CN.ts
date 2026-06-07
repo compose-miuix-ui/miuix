@@ -87,6 +87,7 @@ export default defineConfig({
                         { text: "ProgressIndicator", link: "/zh_CN/components/progressindicator", },
                         { text: "Snackbar", link: "/zh_CN/components/snackbar" },
                         { text: "Tooltip", link: "/zh_CN/components/tooltip" },
+                        { text: "Badge", link: "/zh_CN/components/badge" },
                         { text: "Icon", link: "/zh_CN/components/icon" },
                         { text: "FloatingActionButton", link: "/zh_CN/components/floatingactionbutton", },
                         { text: "FloatingToolbar", link: "/zh_CN/components/floatingtoolbar", },

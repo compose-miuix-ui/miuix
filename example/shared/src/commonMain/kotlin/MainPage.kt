@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.arrowSection
+import component.badgeSection
 import component.basicComponentSection
 import component.blurSection
 import component.bottomSheetSection
@@ -364,6 +365,7 @@ fun MainPage(
                     sliderSection()
                     tabRowSection()
                     tooltipSection()
+                    badgeSection()
                     numberPickerSection()
                     colorPickerSection()
                     cardSection()

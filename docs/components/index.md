@@ -36,6 +36,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [ProgressIndicator](../components/progressindicator)       | Displays operation progress status         | Loading, progress display             |
 | [Snackbar](../components/snackbar)                         | Temporary message bar for brief feedback   | Operation result, status notification |
 | [Tooltip](../components/tooltip)                           | Brief label shown on hover or long press   | Icon button labels, element hints     |
+| [Badge](../components/badge)                               | Small status overlay on an anchor          | Unread counts, status dots            |
 | [Icon](../components/icon)                                 | Icon display component                     | Icon buttons, status indicators       |
 | [FloatingActionButton](../components/floatingactionbutton) | Floating action button                     | Primary actions, quick functions      |
 | [FloatingToolbar](../components/floatingtoolbar)           | Floating toolbar                           | Quick actions, information display    |

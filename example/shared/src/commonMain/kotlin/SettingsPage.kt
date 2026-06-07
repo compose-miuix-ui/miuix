@@ -43,8 +43,8 @@ import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
-private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
-private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
+private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
+private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
 private val FloatingNavigationBarStyleOptions = listOf("Default", "iOS-like")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
@@ -124,6 +124,36 @@ private fun SettingsContent(
                         checked = appState.showFPSMonitor,
                         onCheckedChange = { updateAppState { state -> state.copy(showFPSMonitor = it) } },
                     )
+                    OverlayDropdownPreference(
+                        title = "Color Mode",
+                        items = ColorModeOptions,
+                        selectedIndex = appState.colorMode,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
+                    )
+                    AnimatedVisibility(visible = appState.colorMode in 3..5) {
+                        OverlayDropdownPreference(
+                            title = "Key Color",
+                            items = KeyColorOptions,
+                            selectedIndex = appState.seedIndex,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
+                        )
+                    }
+                    AnimatedVisibility(visible = appState.colorMode in 3..5 && appState.seedIndex > 0) {
+                        Column {
+                            OverlayDropdownPreference(
+                                title = "Palette Style",
+                                items = PaletteStyleOptions,
+                                selectedIndex = appState.paletteStyle,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
+                            )
+                            OverlayDropdownPreference(
+                                title = "Color Spec",
+                                items = ColorSpecOptions,
+                                selectedIndex = appState.colorSpec,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
+                            )
+                        }
+                    }
                     AnimatedVisibility(visible = isRuntimeShaderSupported()) {
                         SwitchPreference(
                             title = "Enable Squircle Shapes",
@@ -139,6 +169,16 @@ private fun SettingsContent(
                         )
                     }
                     SwitchPreference(
+                        title = "Enable Scroll End Haptic",
+                        checked = appState.enableScrollEndHaptic,
+                        onCheckedChange = { updateAppState { state -> state.copy(enableScrollEndHaptic = it) } },
+                    )
+                    SwitchPreference(
+                        title = "Enable Page User Scroll",
+                        checked = appState.enablePageUserScroll,
+                        onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
+                    )
+                    SwitchPreference(
                         title = "Show TopAppBar",
                         checked = appState.showTopAppBar,
                         onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
@@ -148,6 +188,13 @@ private fun SettingsContent(
                         checked = appState.showNavigationBar,
                         onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
                     )
+                    AnimatedVisibility(visible = appState.showNavigationBar) {
+                        SwitchPreference(
+                            title = "Show Navigation Badge",
+                            checked = appState.showNavigationBarBadge,
+                            onCheckedChange = { updateAppState { state -> state.copy(showNavigationBarBadge = it) } },
+                        )
+                    }
                     AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
                         OverlayDropdownPreference(
                             title = "NavigationBar Mode",
@@ -226,46 +273,6 @@ private fun SettingsContent(
                             selectedIndex = appState.floatingActionButtonPosition,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
                         )
-                    }
-                    SwitchPreference(
-                        title = "Enable Scroll End Haptic",
-                        checked = appState.enableScrollEndHaptic,
-                        onCheckedChange = { updateAppState { state -> state.copy(enableScrollEndHaptic = it) } },
-                    )
-                    SwitchPreference(
-                        title = "Enable Page User Scroll",
-                        checked = appState.enablePageUserScroll,
-                        onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
-                    )
-                    OverlayDropdownPreference(
-                        title = "Color Mode",
-                        items = ColorModeOptions,
-                        selectedIndex = appState.colorMode,
-                        onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
-                    )
-                    AnimatedVisibility(visible = appState.colorMode in 3..5) {
-                        OverlayDropdownPreference(
-                            title = "Key Color",
-                            items = KeyColorOptions,
-                            selectedIndex = appState.seedIndex,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
-                        )
-                    }
-                    AnimatedVisibility(visible = appState.colorMode in 3..5 && appState.seedIndex > 0) {
-                        Column {
-                            OverlayDropdownPreference(
-                                title = "Palette Style",
-                                items = PaletteStyleOptions,
-                                selectedIndex = appState.paletteStyle,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
-                            )
-                            OverlayDropdownPreference(
-                                title = "Color Spec",
-                                items = ColorSpecOptions,
-                                selectedIndex = appState.colorSpec,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
-                            )
-                        }
                     }
                 }
             }

@@ -72,6 +72,7 @@ import component.animation.InteractiveHighlight
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Text
@@ -170,6 +171,7 @@ internal fun IosLiquidGlassNavigationBar(
     backdrop: LayerBackdrop?,
     isBlurActive: Boolean,
     modifier: Modifier = Modifier,
+    badge: (Int) -> (@Composable () -> Unit)? = { null },
 ) {
     val isDark = isInDarkTheme()
     val pillShape = remember { CircleShape }
@@ -318,12 +320,14 @@ internal fun IosLiquidGlassNavigationBar(
                 verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
                 horizontalAlignment = CenterHorizontally,
             ) {
-                Icon(
-                    modifier = Modifier.size(22.dp),
-                    imageVector = item.icon,
-                    // Decorative: the adjacent label names the item; avoids TalkBack double-read.
-                    contentDescription = null,
-                )
+                BadgedBox(badge = { badge(index)?.invoke() }) {
+                    Icon(
+                        modifier = Modifier.size(22.dp),
+                        imageVector = item.icon,
+                        // Decorative: the adjacent label names the item; avoids TalkBack double-read.
+                        contentDescription = null,
+                    )
+                }
                 Text(
                     text = item.label,
                     fontSize = 11.sp,

@@ -139,6 +139,7 @@ fun NavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [NavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
 fun RowScope.NavigationBarItem(
@@ -148,6 +149,7 @@ fun RowScope.NavigationBarItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val itemHeight = NavigationBarDefaults.ItemHeight
     val interactionSource = remember { MutableInteractionSource() }
@@ -179,19 +181,25 @@ fun RowScope.NavigationBarItem(
                 role = Role.Tab,
                 interactionSource = interactionSource,
                 indication = null,
-            ),
+            )
+            .then(if (badge != null) Modifier.badgeBounds() else Modifier),
         horizontalAlignment = CenterHorizontally,
         verticalArrangement = if (mode == NavigationBarDisplayMode.IconAndText || mode == NavigationBarDisplayMode.IconWithSelectedLabel) Arrangement.Top else Arrangement.Center,
     ) {
         when (mode) {
             NavigationBarDisplayMode.IconAndText -> {
-                Image(
-                    modifier = Modifier.padding(top = NavigationBarDefaults.IconTopPadding).size(NavigationBarDefaults.IconSize),
-                    imageVector = icon,
-                    // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                NavigationItemIcon(
+                    badge = badge,
+                    modifier = Modifier.padding(top = NavigationBarDefaults.IconTopPadding),
+                ) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationBarDefaults.IconSize),
+                        imageVector = icon,
+                        // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
                 Text(
                     modifier = Modifier.padding(bottom = NavigationBarDefaults.BottomPadding),
                     text = label,
@@ -215,21 +223,24 @@ fun RowScope.NavigationBarItem(
                     label = "textAlpha",
                 )
 
-                Image(
-                    modifier = Modifier
-                        .layout { measurable, constraints ->
-                            val topPaddingPx = iconTopPadding.roundToPx()
-                            val placeable = measurable.measure(constraints.offset(vertical = -topPaddingPx))
-                            layout(placeable.width, placeable.height + topPaddingPx) {
-                                placeable.placeRelative(0, topPaddingPx)
-                            }
+                NavigationItemIcon(
+                    badge = badge,
+                    modifier = Modifier.layout { measurable, constraints ->
+                        val topPaddingPx = iconTopPadding.roundToPx()
+                        val placeable = measurable.measure(constraints.offset(vertical = -topPaddingPx))
+                        layout(placeable.width, placeable.height + topPaddingPx) {
+                            placeable.placeRelative(0, topPaddingPx)
                         }
-                        .size(NavigationBarDefaults.IconSize),
-                    imageVector = icon,
-                    // Decorative: the label (always present in the tree) names the item; avoids double-read.
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                    },
+                ) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationBarDefaults.IconSize),
+                        imageVector = icon,
+                        // Decorative: the label (always present in the tree) names the item; avoids double-read.
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
                 Text(
                     modifier = Modifier
                         .padding(bottom = NavigationBarDefaults.BottomPadding)
@@ -242,25 +253,15 @@ fun RowScope.NavigationBarItem(
                 )
             }
 
-            NavigationBarDisplayMode.TextOnly -> {
-                Text(
-                    modifier = Modifier
-                        .padding(vertical = NavigationBarDefaults.BottomPadding),
-                    text = label,
-                    color = tint,
-                    textAlign = TextAlign.Center,
-                    fontSize = NavigationBarDefaults.TextFontSize,
-                    fontWeight = fontWeight,
-                )
-            }
-
             else -> {
-                Image(
-                    modifier = Modifier.size(NavigationBarDefaults.IconSize),
-                    imageVector = icon,
-                    contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationBarDefaults.IconSize),
+                        imageVector = icon,
+                        contentDescription = label,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
             }
         }
     }
@@ -381,6 +382,7 @@ fun FloatingNavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [FloatingNavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
 fun FloatingNavigationBarItem(
@@ -390,6 +392,7 @@ fun FloatingNavigationBarItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -416,21 +419,42 @@ fun FloatingNavigationBarItem(
                 role = Role.Tab,
                 interactionSource = interactionSource,
                 indication = null,
-            ),
+            )
+            .then(if (badge != null) Modifier.badgeBounds() else Modifier),
         horizontalAlignment = CenterHorizontally,
     ) {
-        Image(
-            modifier = Modifier
-                .padding(
-                    vertical = FloatingNavigationBarDefaults.IconPadding,
-                    horizontal = FloatingNavigationBarDefaults.IconPadding,
-                )
-                .size(FloatingNavigationBarDefaults.IconSize),
-            imageVector = icon,
-            contentDescription = label,
-            colorFilter = ColorFilter.tint(tint),
-        )
+        NavigationItemIcon(
+            badge = badge,
+            modifier = Modifier.padding(
+                vertical = FloatingNavigationBarDefaults.IconPadding,
+                horizontal = FloatingNavigationBarDefaults.IconPadding,
+            ),
+        ) { iconModifier ->
+            Image(
+                modifier = iconModifier.size(FloatingNavigationBarDefaults.IconSize),
+                imageVector = icon,
+                contentDescription = label,
+                colorFilter = ColorFilter.tint(tint),
+            )
+        }
     }
+}
+
+/**
+ * Hosts the navigation item icon ([content]) in a [BadgedBox] so [badge] (when non-null) anchors to
+ * the icon's top-end corner. [modifier] positions the icon (and its badge) within the item and is
+ * applied to the anchor, so the badge tracks the icon rather than any positioning padding; [badge]
+ * draws nothing when null. The item's ancestor applies [badgeBounds] so a present badge is clamped
+ * within the item bounds. Hosting in a [BadgedBox] from a single call site keeps the icon slot from
+ * being reused across branches (which would discard its state when the badge appears or disappears).
+ */
+@Composable
+internal fun NavigationItemIcon(
+    badge: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+    content: @Composable (Modifier) -> Unit,
+) {
+    BadgedBox(modifier = modifier, badge = { badge?.invoke() }) { content(Modifier) }
 }
 
 /** Contains default values used by [NavigationBar] and [NavigationBarItem]. */
@@ -440,9 +464,6 @@ object NavigationBarDefaults {
 
     /** The default icon size. */
     val IconSize = 26.dp
-
-    /** The default text font size. */
-    val TextFontSize = 14.sp
 
     /** The default label font size. */
     val LabelFontSize = 12.sp
@@ -504,9 +525,6 @@ enum class NavigationBarDisplayMode {
 
     /** Show icon only. */
     IconOnly,
-
-    /** Show text only. */
-    TextOnly,
 
     /** Show icon always, show text only when selected. */
     IconWithSelectedLabel,

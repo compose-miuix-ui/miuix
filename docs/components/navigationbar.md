@@ -101,6 +101,7 @@ Scaffold(
 | label         | String        | Label of the item                | -             | Yes      |
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
+| badge         | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
 
 ### FloatingNavigationBar Properties
 
@@ -126,6 +127,7 @@ Scaffold(
 | label         | String        | Label of the item                | -             | Yes      |
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
+| badge         | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
 
 ### NavigationBarDefaults Object
 
@@ -137,7 +139,6 @@ The NavigationBarDefaults object provides default values for NavigationBar and N
 | ---------------------- | -------- | -------------------------------------------- | ------------- |
 | ItemHeight             | Dp       | Item height                                  | 64.dp         |
 | IconSize               | Dp       | Icon size                                    | 26.dp         |
-| TextFontSize           | TextUnit | Text font size (TextOnly mode)               | 14.sp         |
 | LabelFontSize          | TextUnit | Label font size                              | 12.sp         |
 | IconTopPadding         | Dp       | Top padding for the icon                     | 8.dp          |
 | BottomPadding          | Dp       | Bottom padding for the label                 | 8.dp          |
@@ -169,7 +170,6 @@ The FloatingNavigationBarDefaults object provides default values for FloatingNav
 | --------------------- | -------------------------------------------- |
 | IconAndText           | Show both icon and text                      |
 | IconOnly              | Show icon only                               |
-| TextOnly              | Show text only                               |
 | IconWithSelectedLabel | Show icon always, show text only when selected|
 
 ## Advanced Usage

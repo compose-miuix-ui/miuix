@@ -69,6 +69,7 @@ Row {
 | label    | String      | 该项的标签文本   | -      | 是       |
 | modifier | Modifier    | 应用于 NavigationRailItem 的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用该项     | true     | 否       |
+| badge    | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
 
 ### NavigationRailDefaults 对象
 
@@ -85,8 +86,6 @@ NavigationRailDefaults 对象提供了 NavigationRail 和 NavigationRailItem 组
 | IconTextSpacing        | Dp       | 图标与文字间距               | 4.dp   |
 | ItemVerticalPadding    | Dp       | 每个项目的垂直内边距         | 12.dp  |
 | LabelFontSize          | TextUnit | 标签字号                     | 12.sp  |
-| TextOnlyFontSize       | TextUnit | TextOnly 模式字号            | 14.sp  |
-| TextOnlyVerticalPadding| Dp       | TextOnly 模式垂直内边距      | 4.dp   |
 | SelectedPressedAlpha   | Float    | 选中项按压时的透明度         | 0.5f   |
 | UnselectedPressedAlpha | Float    | 未选中项按压时的透明度       | 0.6f   |
 | UnselectedAlpha        | Float    | 未选中项的透明度             | 0.4f   |
@@ -97,5 +96,4 @@ NavigationRailDefaults 对象提供了 NavigationRail 和 NavigationRailItem 组
 | --------------------- | --------------------------------------- |
 | IconAndText           | 同时显示图标和文本。                    |
 | IconOnly              | 仅显示图标。                            |
-| TextOnly              | 仅显示文本。                            |
 | IconWithSelectedLabel | 始终显示图标，仅在选中时显示文本。      |

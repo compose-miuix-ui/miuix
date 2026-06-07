@@ -119,6 +119,7 @@ fun NavigationRail(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [NavigationRailItem].
  * @param enabled Whether the item is enabled.
+ * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
 fun NavigationRailItem(
@@ -128,6 +129,7 @@ fun NavigationRailItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -159,19 +161,22 @@ fun NavigationRailItem(
                 indication = null,
             )
             .padding(vertical = NavigationRailDefaults.ItemVerticalPadding)
-            .animateContentSize(),
+            .animateContentSize()
+            .then(if (badge != null) Modifier.badgeBounds() else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         when (mode) {
             NavigationRailDisplayMode.IconAndText -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
-                    imageVector = icon,
-                    // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
+                        imageVector = icon,
+                        // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
                 Text(
                     text = label,
@@ -183,13 +188,15 @@ fun NavigationRailItem(
             }
 
             NavigationRailDisplayMode.IconWithSelectedLabel -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
-                    imageVector = icon,
-                    // The label only exists in the tree when selected; name the icon otherwise to avoid double-read.
-                    contentDescription = if (selected) null else label,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
+                        imageVector = icon,
+                        // The label only exists in the tree when selected; name the icon otherwise to avoid double-read.
+                        contentDescription = if (selected) null else label,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
                 if (selected) {
                     Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
                     Text(
@@ -202,24 +209,15 @@ fun NavigationRailItem(
                 }
             }
 
-            NavigationRailDisplayMode.TextOnly -> {
-                Text(
-                    modifier = Modifier.padding(vertical = NavigationRailDefaults.TextOnlyVerticalPadding),
-                    text = label,
-                    color = tint,
-                    textAlign = TextAlign.Center,
-                    fontSize = NavigationRailDefaults.TextOnlyFontSize,
-                    fontWeight = fontWeight,
-                )
-            }
-
             else -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
-                    imageVector = icon,
-                    contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
-                )
+                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                    Image(
+                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
+                        imageVector = icon,
+                        contentDescription = label,
+                        colorFilter = ColorFilter.tint(tint),
+                    )
+                }
             }
         }
     }
@@ -248,12 +246,6 @@ object NavigationRailDefaults {
     /** The default label font size. */
     val LabelFontSize = 12.sp
 
-    /** The font size in [NavigationRailDisplayMode.TextOnly] mode. */
-    val TextOnlyFontSize = 14.sp
-
-    /** The vertical padding in [NavigationRailDisplayMode.TextOnly] mode. */
-    val TextOnlyVerticalPadding = 4.dp
-
     /** The alpha value for the selected item when pressed. */
     val SelectedPressedAlpha = 0.5f
 
@@ -276,9 +268,6 @@ enum class NavigationRailDisplayMode {
 
     /** Show icon only. */
     IconOnly,
-
-    /** Show text only. */
-    TextOnly,
 
     /** Show icon always, show text only when selected. */
     IconWithSelectedLabel,

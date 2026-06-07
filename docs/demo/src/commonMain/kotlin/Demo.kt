@@ -63,6 +63,7 @@ private val availableComponents = listOf(
     AvailableComponent("ProgressIndicator", "progressIndicator") { ProgressIndicatorDemo() },
     AvailableComponent("Snackbar", "snackbar") { SnackbarDemo() },
     AvailableComponent("Tooltip", "tooltip") { TooltipDemo() },
+    AvailableComponent("Badge", "badge") { BadgeDemo() },
     AvailableComponent("Icon", "icon") { IconDemo() },
     AvailableComponent("FloatingActionButton", "floatingActionButton") { FloatingActionButtonDemo() },
     AvailableComponent("FloatingToolbar", "floatingToolbar") { FloatingToolbarDemo() },

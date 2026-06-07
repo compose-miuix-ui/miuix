@@ -78,6 +78,7 @@ export default defineConfig({
                         { text: "ProgressIndicator", link: "/components/progressindicator", },
                         { text: "Snackbar", link: "/components/snackbar" },
                         { text: "Tooltip", link: "/components/tooltip" },
+                        { text: "Badge", link: "/components/badge" },
                         { text: "Icon", link: "/components/icon" },
                         { text: "FloatingActionButton", link: "/components/floatingactionbutton", },
                         { text: "FloatingToolbar", link: "/components/floatingtoolbar" },

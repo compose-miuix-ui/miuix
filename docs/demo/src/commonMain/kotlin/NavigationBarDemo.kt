@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
@@ -71,6 +72,11 @@ fun NavigationBarDemo() {
                                         onClick = { selectedIndex1 = index },
                                         icon = item.icon,
                                         label = item.label,
+                                        badge = when (index) {
+                                            1 -> ({ Badge { Text("8") } })
+                                            2 -> ({ Badge() })
+                                            else -> null
+                                        },
                                     )
                                 }
                             }
@@ -101,6 +107,11 @@ fun NavigationBarDemo() {
                                         onClick = { selectedIndex2 = index },
                                         icon = item.icon,
                                         label = item.label,
+                                        badge = when (index) {
+                                            1 -> ({ Badge { Text("8") } })
+                                            2 -> ({ Badge() })
+                                            else -> null
+                                        },
                                     )
                                 }
                             }

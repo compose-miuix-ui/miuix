@@ -69,6 +69,7 @@ Row {
 | label         | String      | Label of the item                | -             | Yes      |
 | modifier      | Modifier    | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean     | Whether the item is enabled      | true          | No       |
+| badge         | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
 
 ### NavigationRailDefaults Object
 
@@ -85,8 +86,6 @@ The NavigationRailDefaults object provides default values for NavigationRail and
 | IconTextSpacing        | Dp       | Spacing between icon and text              | 4.dp          |
 | ItemVerticalPadding    | Dp       | Vertical padding for each item             | 12.dp         |
 | LabelFontSize          | TextUnit | Label font size                            | 12.sp         |
-| TextOnlyFontSize       | TextUnit | Font size in TextOnly mode                 | 14.sp         |
-| TextOnlyVerticalPadding| Dp       | Vertical padding in TextOnly mode          | 4.dp          |
 | SelectedPressedAlpha   | Float    | Alpha for selected pressed item            | 0.5f          |
 | UnselectedPressedAlpha | Float    | Alpha for unselected pressed item          | 0.6f          |
 | UnselectedAlpha        | Float    | Alpha for unselected item                  | 0.4f          |
@@ -97,5 +96,4 @@ The NavigationRailDefaults object provides default values for NavigationRail and
 | --------------------- | ------------------------------------------------- |
 | IconAndText           | Display both icon and text.                       |
 | IconOnly              | Display only icon.                                |
-| TextOnly              | Display only text.                                |
 | IconWithSelectedLabel | Display icon always, and text only when selected. |
