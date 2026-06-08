@@ -23,7 +23,6 @@ import top.yukonga.miuix.kmp.icon.extended.Email
 import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.icon.extended.Messages
 import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.badgeSection() {
     item(key = "badge") {
@@ -37,10 +36,6 @@ fun LazyListScope.badgeSection() {
                 modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    text = "A badge overlays dynamic information, such as an unread count, on an anchor.",
-                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                )
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,

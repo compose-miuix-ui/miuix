@@ -9,12 +9,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.BasicTooltipDefaults
-import androidx.compose.foundation.BasicTooltipState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.MutatorMutex
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,11 +25,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +43,11 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -47,6 +55,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
@@ -57,8 +67,13 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import top.yukonga.miuix.kmp.squircle.squircleBackground
@@ -239,7 +254,6 @@ fun rememberTooltipState(
  * @param enableUserInput whether hover / long press on the anchor shows the tooltip.
  * @param content the anchor content.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TooltipBox(
     positionProvider: PopupPositionProvider,
@@ -253,17 +267,8 @@ fun TooltipBox(
     var anchorBounds by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val positioning = (positionProvider as? TooltipPopupPositionProvider)?.positioning ?: TooltipAnchorPosition.Below
     val scope = remember(positioning) { TooltipScopeImpl(positioning) { anchorBounds } }
-    val basicState = remember(state) {
-        object : BasicTooltipState {
-            override val isVisible: Boolean get() = state.isVisible
-            override val isPersistent: Boolean get() = state.isPersistent
-            override suspend fun show(mutatePriority: MutatePriority) = state.show(mutatePriority)
-            override fun dismiss() = state.dismiss()
-            override fun onDispose() = state.onDispose()
-        }
-    }
 
-    BasicTooltipBox(
+    TooltipBoxImpl(
         positionProvider = positionProvider,
         tooltip = {
             AnimatedVisibility(
@@ -276,12 +281,145 @@ fun TooltipBox(
                 scope.tooltip()
             }
         },
-        state = basicState,
+        state = state,
         modifier = modifier.onGloballyPositioned { anchorBounds = it },
         focusable = focusable,
         enableUserInput = enableUserInput,
         content = content,
     )
+}
+
+private const val TOOLTIP_LONG_PRESS_LABEL = "Show tooltip"
+private const val TOOLTIP_PANE_TITLE = "Tooltip"
+
+/**
+ * Miuix's tooltip primitive. Forked from the experimental foundation `BasicTooltipBox` so the mouse
+ * hover gesture keeps a persistent tooltip open: when the cursor leaves the anchor the tooltip is
+ * dismissed only if it is not persistent. This lets the cursor travel onto a persistent [RichTooltip]
+ * to reach its action, matching the Material 3 tooltip behavior.
+ */
+@Composable
+private fun TooltipBoxImpl(
+    positionProvider: PopupPositionProvider,
+    tooltip: @Composable () -> Unit,
+    state: TooltipState,
+    modifier: Modifier = Modifier,
+    focusable: Boolean = false,
+    enableUserInput: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    Box(
+        modifier = modifier
+            .tooltipGestures(enableUserInput, state)
+            .tooltipAnchorSemantics(enableUserInput, state, scope),
+    ) {
+        if (state.isVisible) {
+            TooltipPopup(
+                positionProvider = positionProvider,
+                state = state,
+                focusable = focusable,
+                content = tooltip,
+            )
+        }
+        content()
+    }
+
+    DisposableEffect(state) { onDispose { state.onDispose() } }
+}
+
+@Composable
+private fun TooltipPopup(
+    positionProvider: PopupPositionProvider,
+    state: TooltipState,
+    focusable: Boolean,
+    content: @Composable () -> Unit,
+) {
+    Popup(
+        popupPositionProvider = positionProvider,
+        onDismissRequest = { if (state.isVisible) state.dismiss() },
+        properties = PopupProperties(focusable = focusable),
+    ) {
+        Box(
+            modifier = Modifier.semantics {
+                liveRegion = LiveRegionMode.Assertive
+                paneTitle = TOOLTIP_PANE_TITLE
+            },
+        ) {
+            content()
+        }
+    }
+}
+
+/**
+ * Shows the tooltip on long press (touch / stylus) and on mouse hover. The mouse
+ * [PointerEventType.Exit] branch dismisses only non-persistent tooltips, so a persistent tooltip
+ * stays open while the cursor moves from the anchor onto the tooltip to reach its action.
+ */
+private fun Modifier.tooltipGestures(enabled: Boolean, state: TooltipState): Modifier = if (enabled) {
+    this
+        .pointerInput(state) {
+            coroutineScope {
+                awaitEachGesture {
+                    val pass = PointerEventPass.Initial
+                    val inputType = awaitFirstDown(pass = pass).type
+                    if (inputType == PointerType.Touch || inputType == PointerType.Stylus) {
+                        try {
+                            withTimeout(viewConfiguration.longPressTimeoutMillis) {
+                                waitForUpOrCancellation(pass = pass)
+                            }
+                        } catch (_: PointerEventTimeoutCancellationException) {
+                            // Long press detected: show the tooltip and consume the following up
+                            // event so the anchor's own click handling does not also fire.
+                            launch { state.show(MutatePriority.UserInput) }
+                            val changes = awaitPointerEvent(pass = pass).changes
+                            for (i in changes.indices) {
+                                changes[i].consume()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .pointerInput(state) {
+            coroutineScope {
+                awaitPointerEventScope {
+                    val pass = PointerEventPass.Main
+                    while (true) {
+                        val event = awaitPointerEvent(pass)
+                        if (event.changes[0].type == PointerType.Mouse) {
+                            when (event.type) {
+                                PointerEventType.Enter ->
+                                    launch { state.show(MutatePriority.UserInput) }
+
+                                PointerEventType.Exit ->
+                                    if (!state.isPersistent) state.dismiss()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+} else {
+    this
+}
+
+private fun Modifier.tooltipAnchorSemantics(
+    enabled: Boolean,
+    state: TooltipState,
+    scope: CoroutineScope,
+): Modifier = if (enabled) {
+    this.semantics(mergeDescendants = true) {
+        onLongClick(
+            label = TOOLTIP_LONG_PRESS_LABEL,
+            action = {
+                scope.launch { state.show() }
+                true
+            },
+        )
+    }
+} else {
+    this
 }
 
 /**
