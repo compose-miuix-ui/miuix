@@ -4,7 +4,10 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -169,7 +172,11 @@ private class TooltipStateImpl(
         MutableTransitionState(initialIsVisible)
 
     override val isVisible: Boolean
-        get() = transition.currentState || transition.targetState
+        // Keep the popup composed while shown or still animating. Gating on currentState would
+        // hard-cut the exit when a dismiss interrupts an unfinished enter, since currentState only
+        // flips to true once the enter has settled; !isIdle keeps it through the reversal so the
+        // exit can animate out.
+        get() = transition.targetState || !transition.isIdle
 
     /** continuation used to clean up */
     private var job: (CancellableContinuation<Unit>)? = null
@@ -238,6 +245,14 @@ fun rememberTooltipState(
 }
 
 /**
+ * Spring driving the tooltip's exit scale. A spring (not a tween) honors the inbound velocity left
+ * by the enter spring when a dismiss interrupts an unsettled enter, so the reversal stays smooth; a
+ * tween would discard that velocity and produce a stall-and-reverse hitch.
+ */
+private val TooltipExitScaleSpec: FiniteAnimationSpec<Float> =
+    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.0001f)
+
+/**
  * A tooltip box that anchors a [tooltip] (a [PlainTooltip] or [RichTooltip]) to its [content].
  *
  * The tooltip is shown on hover (desktop / web) or long press (touch), or programmatically via
@@ -276,7 +291,7 @@ fun TooltipBox(
                 enter = fadeIn(ListPopupDefaults.AlphaEnterAnimationSpec) +
                     scaleIn(initialScale = 0.9f, animationSpec = ListPopupDefaults.FractionAnimationSpec),
                 exit = fadeOut(ListPopupDefaults.AlphaExitAnimationSpec) +
-                    scaleOut(targetScale = 0.9f, animationSpec = ListPopupDefaults.AlphaExitAnimationSpec),
+                    scaleOut(targetScale = 0.9f, animationSpec = TooltipExitScaleSpec),
             ) {
                 scope.tooltip()
             }
