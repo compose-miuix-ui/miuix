@@ -58,9 +58,9 @@ import androidx.compose.ui.zIndex
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import lazyfont.LazyInputField
+import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
@@ -74,9 +74,10 @@ fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
     offsetY: Dp,
     defaultResult: @Composable () -> Unit,
-    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit) -> Unit = { searchStatus, onStatusChange ->
-        SearchBar(searchStatus, onStatusChange)
+    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp) -> Unit = { searchStatus, onStatusChange, padding ->
+        SearchBar(searchStatus, onStatusChange, padding)
     },
+    searchBarTopPadding: Dp = 12.dp,
     result: LazyListScope.() -> Unit,
 ) {
     val searchStatus = this
@@ -147,7 +148,7 @@ fun SearchStatus.SearchPager(
                         .weight(1f)
                         .background(MiuixTheme.colorScheme.surface),
                 ) {
-                    expandBar(searchStatus, onSearchStatusChange)
+                    expandBar(searchStatus, onSearchStatusChange, searchBarTopPadding)
                 }
             }
             AnimatedVisibility(
@@ -155,12 +156,12 @@ fun SearchStatus.SearchPager(
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
             ) {
-                Text(
+                LazyText(
                     text = "Cancel",
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(end = 16.dp, bottom = 6.dp)
+                        .padding(start = 4.dp, end = 16.dp, top = searchBarTopPadding, bottom = 6.dp)
                         .clickable(
                             interactionSource = null,
                             enabled = searchStatus.isExpand(),
@@ -214,6 +215,7 @@ fun SearchStatus.SearchPager(
 fun SearchBar(
     searchStatus: SearchStatus,
     onSearchStatusChange: (SearchStatus) -> Unit,
+    searchBarTopPadding: Dp = 12.dp,
 ) {
     val focusRequester = remember { FocusRequester() }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -223,7 +225,7 @@ fun SearchBar(
         { onSearchStatusChangeUpdated.value(searchStatusUpdated.value.copy(searchText = "")) }
     }
 
-    InputField(
+    LazyInputField(
         query = searchStatus.searchText,
         onQueryChange = { onSearchStatusChange(searchStatus.copy(searchText = it)) },
         label = searchStatus.label,
@@ -261,7 +263,7 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .padding(bottom = 6.dp)
+            .padding(top = searchBarTopPadding, bottom = 6.dp)
             .focusRequester(focusRequester),
         onSearch = {},
         expanded = searchStatus.shouldExpand(),
@@ -286,7 +288,7 @@ fun SearchBarFake(
     label: String,
     searchBarTopPadding: Dp = 12.dp,
 ) {
-    InputField(
+    LazyInputField(
         query = "",
         onQueryChange = { },
         label = label,

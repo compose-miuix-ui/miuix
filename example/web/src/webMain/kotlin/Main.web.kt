@@ -19,7 +19,7 @@ import lazyfont.loadLazyWebFontFamily
 import lazyfont.queryParam
 
 private const val DEFAULT_CSS_URL =
-    "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify,Latin&display=swap"
+    "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {

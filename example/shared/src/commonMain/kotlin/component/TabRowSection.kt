@@ -18,11 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.TabRowWithContour
-import top.yukonga.miuix.kmp.basic.Text
 
 fun LazyListScope.tabRowSection() {
     item(key = "tabRow") {
@@ -70,7 +70,7 @@ fun LazyListScope.tabRowSection() {
                 userScrollEnabled = true,
                 key = { it },
                 pageContent = { page ->
-                    Text(
+                    LazyText(
                         text = "Content of ${tabTexts1[page]}",
                         modifier = Modifier
                             .fillMaxWidth(),

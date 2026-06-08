@@ -19,13 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import lazyfont.LazyText
+import lazyfont.LazyTextField
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
@@ -59,7 +59,7 @@ fun LazyListScope.arrowSection() {
                     }
                 },
                 endActions = {
-                    Text(
+                    LazyText(
                         text = "End",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -81,7 +81,7 @@ fun LazyListScope.arrowSection() {
             ArrowPreference(
                 title = "Disabled Arrow",
                 endActions = {
-                    Text(
+                    LazyText(
                         text = "End",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
@@ -117,7 +117,7 @@ private fun SliderDialog(
         onDismissFinished = onDismissFinished,
         content = {
             var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
-            TextField(
+            LazyTextField(
                 modifier = Modifier.padding(bottom = 16.dp),
                 value = text,
                 maxLines = 1,

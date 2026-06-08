@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.basicComponentSection() {
@@ -27,18 +27,18 @@ fun LazyListScope.basicComponentSection() {
                 title = "Title",
                 summary = "Summary",
                 startAction = {
-                    Text(
+                    LazyText(
                         text = "Start",
                     )
                 },
                 endActions = {
-                    Text(
+                    LazyText(
                         text = "End1",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(
+                    LazyText(
                         text = "End2",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -50,19 +50,19 @@ fun LazyListScope.basicComponentSection() {
                 title = "Title",
                 summary = "Summary",
                 startAction = {
-                    Text(
+                    LazyText(
                         text = "Start",
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
                 endActions = {
-                    Text(
+                    LazyText(
                         text = "End1",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(
+                    LazyText(
                         text = "End2",
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,

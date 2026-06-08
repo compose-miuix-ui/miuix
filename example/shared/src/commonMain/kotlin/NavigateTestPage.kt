@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import lazyfont.LazyText
 import navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
@@ -40,7 +41,6 @@ import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
@@ -144,12 +144,12 @@ fun NavTestPage(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             startAction = {
-                                Text(text = "Start")
+                                LazyText(text = "Start")
                             },
                             endActions = {
-                                Text(text = "End1", textAlign = TextAlign.End)
+                                LazyText(text = "End1", textAlign = TextAlign.End)
                                 Spacer(Modifier.width(8.dp))
-                                Text(text = "End2", textAlign = TextAlign.End)
+                                LazyText(text = "End2", textAlign = TextAlign.End)
                             },
                             enabled = true,
                         )
@@ -157,12 +157,12 @@ fun NavTestPage(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             startAction = {
-                                Text(text = "Start")
+                                LazyText(text = "Start")
                             },
                             endActions = {
-                                Text(text = "End1", textAlign = TextAlign.End)
+                                LazyText(text = "End1", textAlign = TextAlign.End)
                                 Spacer(Modifier.width(8.dp))
-                                Text(text = "End2", textAlign = TextAlign.End)
+                                LazyText(text = "End2", textAlign = TextAlign.End)
                             },
                             enabled = true,
                         )
@@ -170,10 +170,10 @@ fun NavTestPage(
                             title = "Title",
                             summary = "Summary",
                             startAction = {
-                                Text(text = "Start")
+                                LazyText(text = "Start")
                             },
                             endActions = {
-                                Text(
+                                LazyText(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
@@ -184,10 +184,10 @@ fun NavTestPage(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             startAction = {
-                                Text(text = "Start")
+                                LazyText(text = "Start")
                             },
                             endActions = {
-                                Text(
+                                LazyText(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
@@ -198,7 +198,7 @@ fun NavTestPage(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             endActions = {
-                                Text(
+                                LazyText(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
@@ -209,7 +209,7 @@ fun NavTestPage(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             endActions = {
-                                Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
+                                LazyText(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
                             enabled = true,
                         )
@@ -217,7 +217,7 @@ fun NavTestPage(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             endActions = {
-                                Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
+                                LazyText(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
                             enabled = true,
                         )

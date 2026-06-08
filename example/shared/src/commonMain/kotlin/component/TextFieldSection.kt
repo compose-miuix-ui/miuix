@@ -17,8 +17,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import lazyfont.LazyTextField
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextField
 
 fun LazyListScope.textFieldSection() {
     item(key = "textField") {
@@ -30,7 +30,7 @@ fun LazyListScope.textFieldSection() {
         var text4 by remember { mutableStateOf("") }
 
         SmallTitle(text = "TextField")
-        TextField(
+        LazyTextField(
             value = text1,
             onValueChange = { text1 = it },
             modifier = Modifier
@@ -39,7 +39,7 @@ fun LazyListScope.textFieldSection() {
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
-        TextField(
+        LazyTextField(
             value = text2,
             onValueChange = { text2 = it },
             label = "With title",
@@ -49,7 +49,7 @@ fun LazyListScope.textFieldSection() {
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
-        TextField(
+        LazyTextField(
             state = text3,
             label = "State-based",
             modifier = Modifier
@@ -58,7 +58,7 @@ fun LazyListScope.textFieldSection() {
             onKeyboardAction = { focusManager.clearFocus() },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
-        TextField(
+        LazyTextField(
             value = text4,
             onValueChange = { text4 = it },
             label = "Placeholder & SingleLine",
