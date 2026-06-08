@@ -17,26 +17,122 @@
  /* For KernelSU WebUI */
 @import url('https://mui.kernelsu.org/internal/insets.css');
 
+:root {
+    color-scheme: light dark;
+    --loading-bg: #ffffff;
+    --loading-fg: #303030;
+    --loading-sub: #8c93b0;
+    --loading-track: rgba(0, 0, 0, 0.08);
+    --loading-accent: #3482ff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --loading-bg: #242424;
+        --loading-fg: #e6e6e6;
+        --loading-sub: #8c93b0;
+        --loading-track: rgba(255, 255, 255, 0.14);
+        --loading-accent: #277af7;
+    }
+}
+
 html, body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background-color: var(--loading-bg);
 }
 
 #loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    font-weight: bold;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--loading-bg);
+    color: var(--loading-fg);
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-#loading::after {
+#loading.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#loading-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+}
+
+#loading-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#loading-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+#loading-bar {
+    width: 180px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--loading-track);
+    overflow: hidden;
+}
+
+#loading-bar-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 2px;
+    background-color: var(--loading-accent);
+}
+
+#loading-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--loading-sub);
+    min-height: 18px;
+}
+
+#loading-label::after {
     content: '.';
     animation: ellipsis 1.5s infinite;
+}
+
+#loading.indeterminate #loading-percent {
+    display: none;
+}
+
+#loading.indeterminate #loading-bar-fill {
+    width: 40%;
+    animation: indeterminate 1.1s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+    0% {
+        transform: translateX(-120%);
+    }
+
+    100% {
+        transform: translateX(260%);
+    }
 }
 
 @keyframes ellipsis {
@@ -54,6 +150,13 @@ html, body {
 
     100% {
         content: '.';
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #loading-label::after,
+    #loading.indeterminate #loading-bar-fill {
+        animation: none;
     }
 }
 

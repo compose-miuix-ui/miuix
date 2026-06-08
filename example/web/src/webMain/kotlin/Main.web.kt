@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.ComposeViewport
@@ -23,13 +24,17 @@ private const val DEFAULT_CSS_URL =
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    platformHideLoading()
     val cssUrl = queryParam("cssUrl").ifBlank { DEFAULT_CSS_URL }
     ComposeViewport(viewportContainerId = "composeApp") {
         var insetTopPx by remember { mutableDoubleStateOf(0.0) }
         var insetBottomPx by remember { mutableDoubleStateOf(0.0) }
         var insetStartPx by remember { mutableDoubleStateOf(0.0) }
         var insetEndPx by remember { mutableDoubleStateOf(0.0) }
+
+        LaunchedEffect(Unit) {
+            withFrameNanos {}
+            platformHideLoading()
+        }
 
         LaunchedEffect(Unit) {
             insetTopPx = platformGetCssVar("--safe-area-inset-top")

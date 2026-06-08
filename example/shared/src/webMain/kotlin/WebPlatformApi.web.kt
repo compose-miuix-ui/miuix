@@ -7,8 +7,12 @@ import kotlin.js.ExperimentalWasmJsInterop
 @JsFun(
     """
         function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('composeApp').style.display = 'block';
+            if (window.__miuixLoading) {
+                window.__miuixLoading.finish();
+            } else {
+                const el = document.getElementById('loading');
+                if (el) el.style.display = 'none';
+            }
         }
     """,
 )
