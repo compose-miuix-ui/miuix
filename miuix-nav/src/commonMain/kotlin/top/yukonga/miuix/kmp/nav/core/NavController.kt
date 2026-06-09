@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.nav.core
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 /**
@@ -25,13 +27,12 @@ public class NavController(public val backStack: SnapshotStateList<NavKey>) {
      *
      * @return `true` if an entry was popped, `false` if only the root remained.
      */
-    public fun pop(): Boolean =
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
-            true
-        } else {
-            false
-        }
+    public fun pop(): Boolean = if (backStack.size > 1) {
+        backStack.removeAt(backStack.lastIndex)
+        true
+    } else {
+        false
+    }
 
     /** Replaces the top entry with [key], or adds it if the stack is empty. */
     public fun replace(key: NavKey) {
@@ -50,4 +51,20 @@ public class NavController(public val backStack: SnapshotStateList<NavKey>) {
             backStack.removeAt(backStack.lastIndex)
         }
     }
+}
+
+/**
+ * Remembers a [NavController] wrapping a [rememberNavBackStack] seeded with [elements].
+ *
+ * ```kotlin
+ * val nav = rememberNavController(Route.Home)
+ * ```
+ *
+ * The result channel (navigateForResult/setResult/observeResult) is deferred past v1 core
+ * (design spec §12) and is not part of this factory.
+ */
+@Composable
+public fun rememberNavController(vararg elements: NavKey): NavController {
+    val backStack = rememberNavBackStack(*elements)
+    return remember(backStack) { NavController(backStack) }
 }

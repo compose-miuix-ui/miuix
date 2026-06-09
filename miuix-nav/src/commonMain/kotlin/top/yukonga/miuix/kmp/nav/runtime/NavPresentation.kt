@@ -39,5 +39,4 @@ internal fun roleFor(relativeDepth: Float, isRemoving: Boolean): NavRole = when 
  * `d > opaqueDepth` are culled (fully occluded by an upper opaque layer). Modal-style
  * transitions raise [opaqueDepth] above 1 to keep the lower layer visible.
  */
-internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean =
-    relativeDepth > -1f && relativeDepth <= opaqueDepth
+internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean = relativeDepth > -1f && relativeDepth <= opaqueDepth

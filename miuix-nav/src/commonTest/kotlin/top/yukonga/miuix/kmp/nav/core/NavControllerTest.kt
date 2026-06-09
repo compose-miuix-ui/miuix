@@ -12,8 +12,7 @@ import kotlin.test.assertTrue
 
 private data class K(val name: String) : NavKey
 
-private fun stackOf(vararg keys: NavKey): SnapshotStateList<NavKey> =
-    mutableStateListOf<NavKey>().apply { addAll(keys) }
+private fun stackOf(vararg keys: NavKey): SnapshotStateList<NavKey> = mutableStateListOf<NavKey>().apply { addAll(keys) }
 
 class NavControllerTest {
     @Test

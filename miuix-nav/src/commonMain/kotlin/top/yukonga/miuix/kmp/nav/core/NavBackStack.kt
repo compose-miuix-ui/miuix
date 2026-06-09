@@ -31,8 +31,7 @@ public typealias NavBackStack = SnapshotStateList<NavKey>
 /**
  * Non-composable constructor for a [NavBackStack], primarily for tests and off-composition setup.
  */
-public fun navBackStackOf(vararg elements: NavKey): NavBackStack =
-    elements.toList().toMutableStateList()
+public fun navBackStackOf(vararg elements: NavKey): NavBackStack = elements.toList().toMutableStateList()
 
 /** Json instance for key serialization. */
 internal val NavBackStackJson: Json = Json { ignoreUnknownKeys = true }
@@ -105,7 +104,6 @@ internal val NavBackStackSaver: Saver<NavBackStack, List<String>> = Saver(
  * ```
  */
 @Composable
-public fun rememberNavBackStack(vararg elements: NavKey): NavBackStack =
-    rememberSaveable(saver = NavBackStackSaver) {
-        elements.toList().toMutableStateList()
-    }
+public fun rememberNavBackStack(vararg elements: NavKey): NavBackStack = rememberSaveable(saver = NavBackStackSaver) {
+    elements.toList().toMutableStateList()
+}
