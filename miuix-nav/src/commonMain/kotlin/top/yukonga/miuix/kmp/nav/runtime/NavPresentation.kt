@@ -20,8 +20,8 @@ internal fun relativeDepth(animatedTop: Float, entryIndex: Int): Float = animate
  * Maps a [relativeDepth] to a [NavRole] (design spec §4.1 / §6.1).
  *
  * - `|d| ≤ TOP_EPSILON` -> [NavRole.Top] (steady-state top, jitter-tolerant);
- * - `d > 0` -> [NavRole.Covered] (below the top, possibly culled by [isVisibleAt]);
- * - `-1 < d < 0` -> [NavRole.Outgoing] when [isRemoving], else [NavRole.Incoming].
+ * - `d > TOP_EPSILON` -> [NavRole.Covered] (below the top, possibly culled by [isVisibleAt]);
+ * - `d < -TOP_EPSILON` -> [NavRole.Outgoing] when [isRemoving], else [NavRole.Incoming].
  *
  * Boundary ownership: the transition between layers `i` and `i-1` is governed by the upper
  * entry `i`; this classification feeds NavDisplay's choice of the governing transition (§4.3).
@@ -38,5 +38,9 @@ internal fun roleFor(relativeDepth: Float, isRemoving: Boolean): NavRole = when 
  * Entries with `d <= -1` are unloaded (fully past the leading edge); entries with
  * `d > opaqueDepth` are culled (fully occluded by an upper opaque layer). Modal-style
  * transitions raise [opaqueDepth] above 1 to keep the lower layer visible.
+ *
+ * Note: visibility is the authority for whether an entry renders. An entry at exactly `d == -1`
+ * is culled here even though [roleFor] would still classify it as [NavRole.Incoming]/
+ * [NavRole.Outgoing]; its role is simply never acted upon once it is invisible.
  */
 internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean = relativeDepth > -1f && relativeDepth <= opaqueDepth

@@ -9,13 +9,15 @@ package top.yukonga.miuix.kmp.nav.runtime
  * Algorithm (design spec §8):
  * - `common` = [commonPrefixLength] of [old] and [new];
  * - `removed` = old.size - common, `added` = new.size - common;
- * - classify:
+ * - classify (the first matching arm wins, so pure add/remove are decided before the mixed arm):
  *   - identical lists -> [NavChange.None];
- *   - added > 0 && removed == 0 -> [NavChange.Push] (added == 1) else [NavChange.MultiPush];
+ *   - added > 0 && removed == 0 -> [NavChange.Push] (added == 1) else [NavChange.MultiPush]
+ *     (regardless of `common`, so pushing onto an empty stack is still a [NavChange.Push]);
  *   - removed > 0 && added == 0 -> [NavChange.Pop] (removed == 1) else [NavChange.MultiPop];
- *   - added > 0 && removed > 0 -> [NavChange.Replace] only when it is a single top swap
- *     (common == new.size - 1 && removed == 1 && added == 1), otherwise [NavChange.ReplaceAll];
- *   - common == 0 with any change falls into the mixed branch -> [NavChange.ReplaceAll].
+ *   - added > 0 && removed > 0 -> [NavChange.Replace] only when it is a one-for-one top swap
+ *     (common == new.size - 1 && removed == 1 && added == 1); this also covers swapping a lone
+ *     root such as `["a"] -> ["b"]` (common == 0 == new.size - 1). Every other mixed add+remove
+ *     (including a no-shared-prefix multi-entry replacement) -> [NavChange.ReplaceAll].
  *
  * The reconciler caller additionally marks removed entries as exiting and drives
  * `animatedTop` target = `new.lastIndex`; that side of the work lives in the rendering layer.

@@ -8,7 +8,7 @@ package top.yukonga.miuix.kmp.nav.core
  *
  * A [NavKey] is a pure tag carrying no behavior. User route hierarchies implement it and should
  * annotate the hierarchy with `@Serializable` (kotlinx.serialization) so the back stack can be
- * persisted across configuration changes and process death by [NavBackStackSaver].
+ * persisted across configuration changes and process death via [rememberNavBackStack].
  *
  * ```kotlin
  * @Serializable

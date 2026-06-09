@@ -67,6 +67,7 @@ internal fun <T : NavKey> navBackStackSaver(elementsSerializer: KSerializer<List
  */
 @Composable
 public inline fun <reified T : NavKey> rememberNavBackStack(vararg elements: T): NavBackStack {
+    // T is fixed by the reified call site, so the serializer never changes -> keyless remember.
     val saver = remember { navBackStackSaver(serializer<List<T>>()) }
     return rememberSaveable(saver = saver) {
         val seed: List<NavKey> = elements.toList()

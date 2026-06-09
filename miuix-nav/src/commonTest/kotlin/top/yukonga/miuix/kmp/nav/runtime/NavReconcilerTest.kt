@@ -126,4 +126,11 @@ class NavReconcilerTest {
         // common == 0, removed == 2, added == 1.
         assertEquals(NavChange.ReplaceAll, navReconcile(listOf("a", "b"), listOf("z")))
     }
+
+    @Test
+    fun reconcile_singleRootSwap_isReplace() {
+        // common == 0 == new.size - 1, removed == 1, added == 1 -> a one-for-one swap of the lone
+        // root is classified as Replace (in-place top swap with no layer below), not ReplaceAll.
+        assertEquals(NavChange.Replace, navReconcile(listOf("a"), listOf("b")))
+    }
 }
