@@ -58,25 +58,14 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.NavDisplayTransitionEffects
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import androidx.savedstate.serialization.SavedStateConfiguration
 import component.liquid.IosLiquidGlassNavigationBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import lazyfont.LazyText
 import navigation3.Navigator
 import navigation3.Route
@@ -116,6 +105,10 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.nav.core.NavDisplay
+import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
+import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.BlurredBar
@@ -162,30 +155,11 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    val serializersModule = remember {
-        SerializersModule {
-            polymorphic(NavKey::class) {
-                subclass(Route.Main::class)
-                subclass(Route.PullToRefresh::class)
-                subclass(Route.About::class)
-                subclass(Route.License::class)
-                subclass(Route.Navigation::class)
-                subclass(Route.MultiScaffold::class)
-                subclass(Route.MiuixNav::class)
-            }
-        }
-    }
-
-    val savedStateConfig = remember(serializersModule) {
-        SavedStateConfiguration {
-            this.serializersModule = serializersModule
-        }
-    }
-
-    val backStack = rememberNavBackStack(
-        configuration = savedStateConfig,
-        Route.Main,
-    )
+    // miuix-nav back stack. The explicit <Route> supertype is required: a bare
+    // rememberNavBackStack(Route.Main) would infer T = the Route.Main singleton type and fail to
+    // encode the whole sealed hierarchy for save/restore. miuix-nav is reflection-free, so no
+    // SerializersModule / SavedStateConfiguration is needed for the @Serializable sealed Route.
+    val backStack = rememberNavBackStack<Route>(Route.Main)
     val navigator = remember { Navigator(backStack) }
 
     val navigationItems = remember {
@@ -207,65 +181,54 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
     ) {
-        val entryProvider = remember(backStack) {
-            entryProvider<NavKey> {
-                entry<Route.Main> {
-                    Home(
-                        padding = padding,
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                    )
-                }
-                entry<Route.PullToRefresh> {
-                    PullToRefreshPage(padding = padding)
-                }
-                entry<Route.About> {
-                    AboutPage(padding = padding)
-                }
-                entry<Route.License> {
-                    LicensePage(padding = padding)
-                }
-                entry<Route.Navigation> { route ->
-                    val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
-                    NavTestPage(
-                        index = index,
-                        padding = padding,
-                    )
-                }
-                entry<Route.MultiScaffold> {
-                    MultiScaffoldTestPage(padding = padding)
-                }
-                entry<Route.MiuixNav> {
-                    MiuixNavDemoPage(padding = padding)
-                }
-            }
-        }
-
-        val entries = rememberDecoratedNavEntries(
-            backStack = backStack,
-            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
-            entryProvider = entryProvider,
-        )
-
-        val transitionEffects = remember(
+        val effects = remember(
             appState.enableCornerClip,
             appState.enableDim,
             appState.blockInputDuringTransition,
-            appState.popDirectionFollowsSwipeEdge,
         ) {
-            NavDisplayTransitionEffects(
+            NavDisplayEffects(
                 enableCornerClip = appState.enableCornerClip,
                 dimAmount = if (appState.enableDim) 0.5f else 0f,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
-                popDirectionFollowsSwipeEdge = appState.popDirectionFollowsSwipeEdge,
             )
         }
 
         NavDisplay(
-            entries = entries,
+            backStack = backStack,
             onBack = { navigator.pop() },
-            transitionEffects = transitionEffects,
-        )
+            transition = NavTransitions.MiuixDefault,
+            effects = effects,
+        ) {
+            entry<Route.Main> {
+                Home(
+                    padding = padding,
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
+            }
+            entry<Route.PullToRefresh> {
+                PullToRefreshPage(padding = padding)
+            }
+            entry<Route.About> {
+                AboutPage(padding = padding)
+            }
+            entry<Route.License> {
+                LicensePage(padding = padding)
+            }
+            entry<Route.Navigation> { route ->
+                val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
+                NavTestPage(
+                    index = index,
+                    padding = padding,
+                )
+            }
+            entry<Route.MultiScaffold> {
+                MultiScaffoldTestPage(padding = padding)
+            }
+            entry<Route.MiuixNav> {
+                MiuixNavDemoPage(padding = padding)
+            }
+        }
     }
 
     AnimatedVisibility(

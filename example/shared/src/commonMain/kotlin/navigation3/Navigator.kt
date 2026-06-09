@@ -3,20 +3,16 @@
 
 package navigation3
 
-import androidx.navigation3.runtime.NavKey
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import top.yukonga.miuix.kmp.nav.core.NavBackStack
+import top.yukonga.miuix.kmp.nav.core.NavKey
 
 /**
- * Simple navigation helper that owns a back stack and result channels.
- * Supports push/replace/pop/popUntil and result APIs: navigateForResult/setResult/observeResult/clearResult.
+ * Simple navigation helper that owns a miuix-nav back stack.
+ * Supports push/replace/pop/popUntil over the shared [NavBackStack].
  */
 class Navigator(
-    val backStack: MutableList<NavKey>,
+    val backStack: NavBackStack,
 ) {
-    private val resultBus = mutableMapOf<String, MutableSharedFlow<Any>>()
-
     /**
      * Push a key onto the back stack.
      */
@@ -53,39 +49,7 @@ class Navigator(
         }
     }
 
-    /**
-     * Navigate expecting a result. Caller should subscribe via observeResult(requestKey).
-     */
-    fun navigateForResult(route: Route, requestKey: String) {
-        ensureChannel(requestKey)
-        push(route)
-    }
-
-    /**
-     * Set a result for the given request and then pop.
-     */
-    fun <T : Any> setResult(requestKey: String, value: T) {
-        ensureChannel(requestKey).tryEmit(value)
-        pop()
-    }
-
-    /**
-     * Observe results for a given request key as a SharedFlow.
-     */
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Any> observeResult(requestKey: String): SharedFlow<T> = ensureChannel(requestKey) as SharedFlow<T>
-
-    /**
-     * Clear the last emitted result for the request key.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearResult(requestKey: String) {
-        ensureChannel(requestKey).resetReplayCache()
-    }
-
     fun current() = backStack.lastOrNull()
 
     fun backStackSize() = backStack.size
-
-    private fun ensureChannel(key: String): MutableSharedFlow<Any> = resultBus.getOrPut(key) { MutableSharedFlow(replay = 1, extraBufferCapacity = 0) }
 }

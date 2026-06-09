@@ -32,7 +32,6 @@ data class AppState(
     val enableCornerClip: Boolean = true,
     val enableDim: Boolean = true,
     val blockInputDuringTransition: Boolean = true,
-    val popDirectionFollowsSwipeEdge: Boolean = false,
     // Squircle
     val enableSquircle: Boolean = true,
     // Blur

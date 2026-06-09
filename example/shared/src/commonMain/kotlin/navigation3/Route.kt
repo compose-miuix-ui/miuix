@@ -3,8 +3,8 @@
 
 package navigation3
 
-import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
+import top.yukonga.miuix.kmp.nav.core.NavKey
 
 /**
  * Type-safe navigation keys for Navigation3.

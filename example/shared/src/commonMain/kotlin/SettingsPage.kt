@@ -277,7 +277,7 @@ private fun SettingsContent(
                 }
             }
             item(key = "settingsTransition") {
-                SmallTitle("Navigation3")
+                SmallTitle("Navigation")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                 ) {
@@ -298,12 +298,6 @@ private fun SettingsContent(
                         summary = "Block touch input on the non-target scene",
                         checked = appState.blockInputDuringTransition,
                         onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
-                    )
-                    SwitchPreference(
-                        title = "Pop Follows Swipe Edge",
-                        summary = "Pop animation direction follows the finger swipe edge",
-                        checked = appState.popDirectionFollowsSwipeEdge,
-                        onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
                     )
                 }
             }
