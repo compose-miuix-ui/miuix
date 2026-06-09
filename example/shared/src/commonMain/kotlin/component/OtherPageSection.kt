@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import navigation3.Route
+import navigation.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -38,11 +38,6 @@ fun LazyListScope.otherPageSection() {
                 title = "MultiScaffold Test",
                 summary = "Navigate to a MultiScaffold Page",
                 onClick = { navigator.push(Route.MultiScaffold) },
-            )
-            ArrowPreference(
-                title = "miuix-nav Demo",
-                summary = "Self-contained continuous-depth navigation showcase",
-                onClick = { navigator.push(Route.MiuixNav) },
             )
         }
     }

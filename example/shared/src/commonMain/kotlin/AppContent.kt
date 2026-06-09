@@ -67,8 +67,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import lazyfont.LazyText
-import navigation3.Navigator
-import navigation3.Route
+import navigation.Navigator
+import navigation.Route
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -229,9 +229,6 @@ fun AppContent(
             }
             entry<Route.MultiScaffold> {
                 MultiScaffoldTestPage(padding = padding)
-            }
-            entry<Route.MiuixNav> {
-                MiuixNavDemoPage(padding = padding)
             }
         }
     }
