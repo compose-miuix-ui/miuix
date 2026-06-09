@@ -3,6 +3,16 @@
 
 package top.yukonga.miuix.kmp.nav.runtime
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import top.yukonga.miuix.kmp.nav.core.NavEntry
 import top.yukonga.miuix.kmp.nav.transition.NavRole
 
 /** Epsilon around zero within which an entry is treated as the steady-state top. */
@@ -44,3 +54,77 @@ internal fun roleFor(relativeDepth: Float, isRemoving: Boolean): NavRole = when 
  * [NavRole.Outgoing]; its role is simply never acted upon once it is invisible.
  */
 internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean = relativeDepth > -1f && relativeDepth <= opaqueDepth
+
+/**
+ * Core driver of the whole navigation stack (spec §4.1 / §7.1).
+ *
+ * Holds the single driving float [animatedTop] and the live presentation set ([presented] = the
+ * current back-stack entries UNION the entries still leaving). Merges what earlier drafts split into
+ * a separate "presentation store": there is exactly one owner of both the float and the set.
+ *
+ * @param initialTopIndex the initial value of [animatedTop] (the top index of the initial back stack).
+ */
+@Stable
+internal class NavPresentation(initialTopIndex: Float) {
+    /**
+     * The single driving float for the whole stack (spec §4.1 / §7.1 dual-mode driver).
+     *
+     * `snapToFinger` during a gesture (1:1, no interpolator); `settleTo` on settle/normal (the shared
+     * spring). The renderer reads it lazily inside `graphicsLayer { }` blocks for zero-recomposition
+     * per-frame visuals; both extensions live in `runtime/NavDriver.kt` (Phase 3, see §0.3).
+     */
+    val animatedTop: Animatable<Float, AnimationVector1D> = Animatable(initialTopIndex)
+
+    // Presentation set = current back-stack entries UNION entries still leaving (relative depth > -1).
+    private val _presented = mutableStateListOf<NavEntry<*>>()
+
+    /** Entries currently presented, ordered bottom (root) to top; includes leaving entries. */
+    val presented: List<NavEntry<*>> get() = _presented
+
+    /** Last classified stack mutation; surfaced to the transition scope via `change`. */
+    var change: NavChange by mutableStateOf(NavChange.None)
+        private set
+
+    /**
+     * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation
+     * set, preserving leaving entries (flagged via [NavEntry.presentation]'s `isRemoving`) until they
+     * are unloaded at relative depth <= -1. [change] is the classification computed by `navReconcile`
+     * (Phase 2). Surviving instances are reused so `movableContentOf` identity is preserved.
+     */
+    fun reconcile(currentEntries: List<NavEntry<*>>, change: NavChange) {
+        this.change = change
+        val currentKeys = currentEntries.mapTo(HashSet(currentEntries.size)) { it.contentKey }
+        // Entries that fell off the back stack become "leaving" but stay rendered.
+        _presented.forEach { e ->
+            if (e.contentKey !in currentKeys) {
+                e.presentation = e.presentation.copy(isRemoving = true)
+            }
+        }
+        // Insert newly added current entries (keep existing instances for movableContent identity).
+        val presentedKeys = _presented.mapTo(HashSet(_presented.size)) { it.contentKey }
+        currentEntries.forEach { e ->
+            if (e.contentKey !in presentedKeys) {
+                e.presentation = e.presentation.copy(isRemoving = false)
+                _presented.add(e)
+            } else {
+                // Reuse existing instance; clear any stale leaving flag (re-push of same key).
+                val existing = _presented.first { it.contentKey == e.contentKey }
+                existing.presentation = existing.presentation.copy(isRemoving = false)
+            }
+        }
+    }
+
+    /** Removes a fully-left entry (relative depth <= -1). Caller releases its per-entry state scopes. */
+    fun unload(entry: NavEntry<*>) {
+        _presented.remove(entry)
+    }
+}
+
+/**
+ * Remembers a [NavPresentation] across recompositions, seeded with [initialTopIndex].
+ *
+ * The presentation owns the single driving float and outlives individual recompositions, so it is
+ * created once via [remember] and never rebuilt.
+ */
+@Composable
+internal fun rememberNavPresentation(initialTopIndex: Int): NavPresentation = remember { NavPresentation(initialTopIndex.toFloat()) }
