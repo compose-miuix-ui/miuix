@@ -91,6 +91,33 @@ NavDisplay(backStack, transition = NavTransitions.Cupertino) {
 }
 ```
 
+## Swipe-to-dismiss direction
+
+The interactive swipe that pops the top entry follows the **same motion as the transition**: a horizontal slide is dismissed by swiping right, a bottom-up modal by swiping down. Each transition declares this via `dismissDirection: NavSwipeDirection`:
+
+| Direction | Gesture | Used by |
+| :-- | :-- | :-- |
+| `LeftToRight` (default) | Horizontal swipe right | `Cupertino`, `MiuixDefault`, `AndroidCrossActivity`, `Scale`, `Fade`, `SharedAxisX` |
+| `TopToBottom` | Vertical swipe down | `Modal` |
+| `RightToLeft` / `BottomToTop` | Horizontal left / vertical up | — (available for custom transitions) |
+| `None` | Disabled (pop via back button / system back only) | `None` |
+
+The swipe uses the orientation-locked drag detectors, so it claims only its own axis and lets the page's cross-axis scrolling and taps through untouched. Override it per route with `entry(swipeDismiss = ...)` — including `NavSwipeDirection.None` to disable the gesture on a route (e.g. a confirmation page that must be left via a button):
+
+```kotlin
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+
+NavDisplay(backStack) {
+    entry<Route.Home> { HomeScreen() }
+    // Bottom sheet: inherits TopToBottom from NavTransitions.Modal.
+    entry<Route.Sheet>(transition = NavTransitions.Modal) { SheetScreen() }
+    // Force a route to be button-only, regardless of its transition.
+    entry<Route.Confirm>(swipeDismiss = NavSwipeDirection.None) { ConfirmScreen() }
+}
+```
+
+A custom transition passes its natural direction to the factory: `navGraphicsTransition(dismissDirection = NavSwipeDirection.TopToBottom) { ... }`.
+
 ## Custom transitions
 
 Build any transition by reading the raw float depth and writing a `graphicsLayer`. The block runs inside a deferred-read layer, so reading `relativeDepth` does not recompose:
@@ -126,7 +153,9 @@ NavDisplay(
 
 ## Gesture back
 
-Predictive / edge-swipe back is built in and shares the same `animatedTop` and `NavTransition` as a normal pop — there is no separate predictive animation to maintain. When a gesture is in progress the finger drives `animatedTop` 1:1 (`snapTo`, no interpolator); on release a velocity-first / position-fallback decision commits or cancels, handing the lift velocity to the convergence spring so motion stays continuous.
+Back is built in and shares the same `animatedTop` and `NavTransition` as a normal pop — there is no separate predictive animation to maintain. When a gesture is in progress the finger drives `animatedTop` 1:1 (`snapTo`, no interpolator); on release a velocity-first / position-fallback decision commits or cancels, handing the lift velocity to the convergence spring so motion stays continuous.
+
+Two sources feed it: the **in-content swipe** (an all-platform Compose gesture, direction-aware per [Swipe-to-dismiss direction](#swipe-to-dismiss-direction) above) and the **platform back** (system predictive back / ESC / a custom trigger). Both stream into the same driver.
 
 The **input source** and its **semantics differ per platform** — the runtime normalizes them into the same back stream, but the gesture feel is not identical everywhere:
 

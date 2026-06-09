@@ -29,6 +29,7 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
@@ -146,7 +147,7 @@ fun MiuixNavDemoPage(
                             onClose = { backStack.removeAt(backStack.lastIndex) },
                         )
                     }
-                    entry<DemoRoute.Custom>(transition = CustomDepthTransition) {
+                    entry<DemoRoute.Custom>(transition = CustomDepthTransition, swipeDismiss = NavSwipeDirection.None) {
                         DemoCustomContent(
                             padding = padding,
                             onClose = { backStack.removeAt(backStack.lastIndex) },
@@ -211,7 +212,7 @@ private fun DemoHomeContent(
             )
             ArrowPreference(
                 title = "Open Custom transition",
-                summary = "navGraphicsTransition reading relativeDepth directly",
+                summary = "navGraphicsTransition + swipeDismiss = None (swipe-to-dismiss disabled)",
                 onClick = onOpenCustom,
             )
         }
@@ -219,8 +220,8 @@ private fun DemoHomeContent(
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             BasicComponent(
                 title = "Try gesture back",
-                summary = "Android: system predictive back. Desktop: press ESC. " +
-                    "Both drive the same animatedTop and NavTransition as normal pop.",
+                summary = "Swipe a Detail page left-to-right to pop it; swipe the Modal top-to-bottom " +
+                    "to dismiss. System predictive back / Desktop ESC drive the same animatedTop.",
             )
         }
     }
@@ -278,7 +279,7 @@ private fun DemoModalContent(
             Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                 ArrowPreference(
                     title = "Close modal",
-                    summary = "Slides back down; the page below stayed visible the whole time",
+                    summary = "Swipe top-to-bottom to dismiss, or tap here; the page below stays put",
                     onClick = onClose,
                 )
             }
@@ -296,7 +297,7 @@ private fun DemoCustomContent(
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             ArrowPreference(
                 title = "Close",
-                summary = "Entered via navGraphicsTransition (depth-driven scale + slide)",
+                summary = "Swipe-to-dismiss is disabled here (swipeDismiss = None); use this button",
                 onClick = onClose,
             )
         }

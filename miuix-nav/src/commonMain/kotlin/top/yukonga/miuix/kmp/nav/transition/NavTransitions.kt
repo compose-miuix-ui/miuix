@@ -160,7 +160,7 @@ object NavTransitions {
      * [opaqueDepth] is raised to 2f to stop the host from culling it. Translation is linear so a
      * downward dismiss gesture follows the finger 1:1.
      */
-    val Modal: NavTransition = navGraphicsTransition(opaqueDepth = 2f) { scope ->
+    val Modal: NavTransition = navGraphicsTransition(opaqueDepth = 2f, dismissDirection = NavSwipeDirection.TopToBottom) { scope ->
         val d = scope.relativeDepth
         if (d <= 0f) {
             val height = scope.layoutSize.height.toFloat()
@@ -173,8 +173,9 @@ object NavTransitions {
      * Instant transition: no visual change, the top entry simply swaps in/out. Lower layers are
      * fully occluded (opaqueDepth = 1f) so only the top + one covered layer are kept.
      */
-    val None: NavTransition = navGraphicsTransition(opaqueDepth = 1f) {
-        // Intentionally empty: identity transform, instant swap.
+    val None: NavTransition = navGraphicsTransition(opaqueDepth = 1f, dismissDirection = NavSwipeDirection.None) {
+        // Intentionally empty: identity transform, instant swap. No motion means no swipe to follow,
+        // so the interactive dismiss gesture is disabled; pop via the back button / system back.
     }
 
     /** Peak leading-edge corner radius applied mid-slide by [MiuixDefault]. */

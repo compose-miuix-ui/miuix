@@ -37,7 +37,7 @@ import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
-import top.yukonga.miuix.kmp.nav.gesture.navEdgeSwipe
+import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismiss
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
@@ -52,6 +52,7 @@ import top.yukonga.miuix.kmp.nav.state.navMaxLifecycleFor
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryLifecycleOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import kotlin.reflect.KClass
@@ -64,6 +65,16 @@ import kotlin.reflect.KClass
  */
 @PublishedApi
 internal const val NAV_TRANSITION_METADATA_KEY: String = "top.yukonga.miuix.kmp.nav.transition"
+
+/**
+ * Metadata key under which a per-route [NavSwipeDirection] override is stored on a built [NavEntry].
+ *
+ * A `null`/absent value means the entry inherits the dismiss direction of its governing
+ * [NavTransition.dismissDirection]; an explicit value (including [NavSwipeDirection.None] to disable
+ * the gesture) wins.
+ */
+@PublishedApi
+internal const val NAV_SWIPE_DISMISS_METADATA_KEY: String = "top.yukonga.miuix.kmp.nav.swipeDismiss"
 
 /**
  * DSL receiver of the [NavDisplay] content lambda.
@@ -81,20 +92,25 @@ class NavEntryBuilder {
      *   itself is used (data classes / data objects give stable equality out of the box).
      * @param transition per-route transition override; `null` inherits [NavDisplay]'s global
      *   transition (see design §6.4). Stored in the entry's metadata.
-     * @param metadata extra per-entry metadata, merged with the transition override.
+     * @param swipeDismiss per-route interactive swipe-to-dismiss direction; `null` inherits the
+     *   governing transition's [NavTransition.dismissDirection]. Pass [NavSwipeDirection.None] to
+     *   disable the gesture on this route, or another direction to override it.
+     * @param metadata extra per-entry metadata, merged with the transition / swipe-dismiss overrides.
      * @param content the composable rendering a key of type [T].
      */
     inline fun <reified T : NavKey> entry(
         contentKey: Any? = null,
         transition: NavTransition? = null,
+        swipeDismiss: NavSwipeDirection? = null,
         metadata: Map<String, Any> = emptyMap(),
         noinline content: @Composable (T) -> Unit,
     ) {
         register(T::class) { key ->
             @Suppress("UNCHECKED_CAST")
             val typed = key as T
-            val mergedMetadata =
-                if (transition != null) metadata + (NAV_TRANSITION_METADATA_KEY to transition) else metadata
+            var mergedMetadata = metadata
+            if (transition != null) mergedMetadata = mergedMetadata + (NAV_TRANSITION_METADATA_KEY to transition)
+            if (swipeDismiss != null) mergedMetadata = mergedMetadata + (NAV_SWIPE_DISMISS_METADATA_KEY to swipeDismiss)
             NavEntry(
                 key = typed,
                 contentKey = contentKey ?: typed,
@@ -151,6 +167,9 @@ private fun NavPresentation.animateTopTo(target: Float) {
 
 /** Reads the per-route [NavTransition] override from an entry's metadata, or null to inherit. */
 private fun NavEntry<*>.transitionOrNull(): NavTransition? = metadata[NAV_TRANSITION_METADATA_KEY] as? NavTransition
+
+/** Reads the per-route [NavSwipeDirection] override from an entry's metadata, or null to inherit. */
+private fun NavEntry<*>.swipeDismissOrNull(): NavSwipeDirection? = metadata[NAV_SWIPE_DISMISS_METADATA_KEY] as? NavSwipeDirection
 
 /**
  * Private rendering core shared by all [NavDisplay] overloads.
@@ -322,6 +341,11 @@ private fun NavDisplayLayout(
                     val upperEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
                     val upperTransition = upperEntry?.transitionOrNull() ?: transition
 
+                    // Interactive dismiss direction for this (top) entry: a per-route override wins,
+                    // else the entry's own transition declares the natural direction (e.g. a Modal
+                    // dismisses downward, a horizontal slide rightward). NavSwipeDirection.None disables it.
+                    val dismissDirection = entry.swipeDismissOrNull() ?: ownTransition.dismissDirection
+
                     NavEntryHost(
                         entry = entry,
                         entryIndex = entryIndex,
@@ -334,9 +358,10 @@ private fun NavDisplayLayout(
                         layoutSize = layoutSize,
                         layoutDirection = layoutDirection,
                         density = density,
-                        hostModifier = Modifier.navEdgeSwipe(
+                        hostModifier = Modifier.navSwipeDismiss(
                             // Only the current top entry (and never the root) is interactively swipeable.
                             enabled = entryIndex == topIndex && topIndex > 0,
+                            direction = dismissDirection,
                             animatedTop = presentation.animatedTop,
                             topIndex = topIndex,
                             onCommit = currentOnBack.value,

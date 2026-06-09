@@ -91,6 +91,33 @@ NavDisplay(backStack, transition = NavTransitions.Cupertino) {
 }
 ```
 
+## 滑动关闭方向
+
+关闭顶层 entry 的交互式滑动手势，与转场**运动方向一致**：水平滑动类转场用右滑关闭，底部上滑的 Modal 用下滑关闭。每个转场通过 `dismissDirection: NavSwipeDirection` 声明：
+
+| 方向 | 手势 | 使用者 |
+| :-- | :-- | :-- |
+| `LeftToRight`（默认） | 水平右滑 | `Cupertino`、`MiuixDefault`、`AndroidCrossActivity`、`Scale`、`Fade`、`SharedAxisX` |
+| `TopToBottom` | 垂直下滑 | `Modal` |
+| `RightToLeft` / `BottomToTop` | 水平左滑 / 垂直上滑 | —（供自定义转场使用） |
+| `None` | 禁用（仅经返回按钮 / 系统返回 pop） | `None` |
+
+该手势使用按轴锁定的拖拽检测器，只认自身轴向，放行页面在另一轴上的滚动与点击。可用 `entry(swipeDismiss = ...)` 按路由覆盖——包括用 `NavSwipeDirection.None` 在某路由上禁用手势（例如必须经按钮离开的确认页）：
+
+```kotlin
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+
+NavDisplay(backStack) {
+    entry<Route.Home> { HomeScreen() }
+    // 底部表单：从 NavTransitions.Modal 继承 TopToBottom。
+    entry<Route.Sheet>(transition = NavTransitions.Modal) { SheetScreen() }
+    // 强制某路由仅按钮关闭，无论其转场如何。
+    entry<Route.Confirm>(swipeDismiss = NavSwipeDirection.None) { ConfirmScreen() }
+}
+```
+
+自定义转场可把自然方向传给工厂：`navGraphicsTransition(dismissDirection = NavSwipeDirection.TopToBottom) { ... }`。
+
 ## 自定义转场
 
 读取原始 float 深度，自由写 `graphicsLayer`。该 block 在延迟读取的图层内执行，读 `relativeDepth` 不触发重组：
@@ -126,7 +153,9 @@ NavDisplay(
 
 ## 手势返回
 
-预测返回 / 边缘侧滑已内置，且与普通 pop **共用同一个 `animatedTop` 与同一套 `NavTransition`**——无需为预测返回单独维护一套动画。手势进行中，手指以 1:1 驱动 `animatedTop`（`snapTo`，不过插值器）；松手时按「速度优先、位置兜底」判定 commit 或 cancel，并把松手瞬时速度作为初速度交接给收敛弹簧，保证运动连续。
+返回已内置，且与普通 pop **共用同一个 `animatedTop` 与同一套 `NavTransition`**——无需为预测返回单独维护一套动画。手势进行中，手指以 1:1 驱动 `animatedTop`（`snapTo`，不过插值器）；松手时按「速度优先、位置兜底」判定 commit 或 cancel，并把松手瞬时速度作为初速度交接给收敛弹簧，保证运动连续。
+
+两个来源汇入它：**页面内滑动**（全平台的 Compose 手势，按上文[滑动关闭方向](#滑动关闭方向)区分方向）与**平台返回**（系统预测返回 / ESC / 自定义触发）。二者流入同一驱动。
 
 各平台的**输入来源与语义不同**——运行时把它们归一到同一条返回流，但跟手观感并非处处一致：
 
