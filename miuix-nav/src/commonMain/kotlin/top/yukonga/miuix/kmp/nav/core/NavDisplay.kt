@@ -17,6 +17,8 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +34,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
+import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
+import top.yukonga.miuix.kmp.nav.gesture.navEdgeSwipe
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
@@ -177,10 +183,36 @@ private fun NavDisplayLayout(
     val presentation = rememberNavPresentation(backStack.lastIndex)
     val stateHolder = rememberNavSaveableStateHolder()
 
-    // [onBack] is a real, forwarded callback held by this layout. Phase 8 Task 8.9 adds the gesture
-    // consumers here — PredictiveBackHandler(enabled = backStack.size > 1) and Modifier.navEdgeSwipe —
-    // both driving the same presentation.animatedTop and invoking onBack on commit (see §0.5). Until
-    // then it is the plain system-back pass-through supplied by the overloads.
+    val topIndex = backStack.lastIndex
+    val backScope = rememberCoroutineScope()
+    val currentOnBack = rememberUpdatedState(onBack)
+
+    // Wire the platform predictive back gesture to the single driver. Enabled only when there is
+    // something to pop (size > 1). During the gesture each NavBackEvent snaps animatedTop 1:1
+    // (Task 8.5); on commit the shared spring settles to topIndex - 1 and onBack() pops; on cancel
+    // the spring settles back to topIndex (Phase 3 single spring, §0.3). Modifier.navEdgeSwipe on the
+    // top (non-root) entry drives the same animatedTop for the interactive iOS-style edge swipe.
+    PredictiveBackHandler(
+        enabled = backStack.size > 1,
+        onProgress = { events ->
+            drivePredictiveBack(
+                events = events,
+                animatedTop = presentation.animatedTop,
+                topIndex = topIndex,
+            )
+        },
+        onCommit = {
+            backScope.launch {
+                presentation.animatedTop.settleTo(target = (topIndex - 1).toFloat())
+            }
+            currentOnBack.value()
+        },
+        onCancel = {
+            backScope.launch {
+                presentation.animatedTop.settleTo(target = topIndex.toFloat())
+            }
+        },
+    )
 
     // Build entries for the current back stack and reconcile. The build runs only when the back-stack
     // key list changes; entry instances for surviving keys are reused by the presentation. The
@@ -258,6 +290,14 @@ private fun NavDisplayLayout(
                     layoutDirection = layoutDirection,
                     density = density,
                     onUnload = { presentation.unload(entry) },
+                    hostModifier = Modifier.navEdgeSwipe(
+                        // Only the current top entry (and never the root) is interactively swipeable.
+                        enabled = entryIndex == topIndex && topIndex > 0,
+                        animatedTop = presentation.animatedTop,
+                        topIndex = topIndex,
+                        onCommit = currentOnBack.value,
+                        onCancel = {},
+                    ),
                 )
             }
         }
@@ -299,6 +339,7 @@ private fun NavEntryHost(
     layoutDirection: LayoutDirection,
     density: Density,
     onUnload: () -> Unit,
+    hostModifier: Modifier = Modifier,
 ) {
     // opaqueDepth of the upper transition decides culling of this (covered) layer; for the top
     // entry its own transition's opaqueDepth applies. Use the larger so Modal-style transitions
@@ -369,7 +410,7 @@ private fun NavEntryHost(
         Modifier
     }
 
-    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier)) {
+    Box(modifier = hostModifier.then(entryModifier).then(clipModifier).then(blockInputModifier)) {
         ProvideNavEntryViewModelStore(vmOwner) {
             ProvideNavEntryLifecycle(lifecycleOwner) {
                 stateHolder.EntryStateContent(entry.contentKey) {
