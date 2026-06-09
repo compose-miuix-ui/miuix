@@ -4,6 +4,36 @@
 package top.yukonga.miuix.kmp.nav.runtime
 
 /**
+ * Pure classifier of a back-stack change over `contentKey` lists.
+ *
+ * Algorithm (design spec §8):
+ * - `common` = [commonPrefixLength] of [old] and [new];
+ * - `removed` = old.size - common, `added` = new.size - common;
+ * - classify:
+ *   - identical lists -> [NavChange.None];
+ *   - added > 0 && removed == 0 -> [NavChange.Push] (added == 1) else [NavChange.MultiPush];
+ *   - removed > 0 && added == 0 -> [NavChange.Pop] (removed == 1) else [NavChange.MultiPop];
+ *   - added > 0 && removed > 0 -> [NavChange.Replace] only when it is a single top swap
+ *     (common == new.size - 1 && removed == 1 && added == 1), otherwise [NavChange.ReplaceAll];
+ *   - common == 0 with any change falls into the mixed branch -> [NavChange.ReplaceAll].
+ *
+ * The reconciler caller additionally marks removed entries as exiting and drives
+ * `animatedTop` target = `new.lastIndex`; that side of the work lives in the rendering layer.
+ */
+internal fun navReconcile(old: List<Any>, new: List<Any>): NavChange {
+    val common = commonPrefixLength(old, new)
+    val removed = old.size - common
+    val added = new.size - common
+    return when {
+        removed == 0 && added == 0 -> NavChange.None
+        removed == 0 -> if (added == 1) NavChange.Push else NavChange.MultiPush(added)
+        added == 0 -> if (removed == 1) NavChange.Pop else NavChange.MultiPop(removed)
+        common == new.size - 1 && removed == 1 && added == 1 -> NavChange.Replace
+        else -> NavChange.ReplaceAll
+    }
+}
+
+/**
  * Length of the longest common prefix of [old] and [new] compared by element equality.
  *
  * Both lists are `contentKey` lists; equality (not identity) decides a match so that value-stable
