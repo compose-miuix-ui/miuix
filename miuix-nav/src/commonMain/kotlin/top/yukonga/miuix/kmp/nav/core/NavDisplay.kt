@@ -224,16 +224,50 @@ private fun NavDisplayLayout(
     // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
     // by UI, so it must not be snapshot state (no cross-phase back-write).
     val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
-    val indexByContentKey = remember(currentKeyList) {
+    // Persistent contentKey -> back-stack index. Current entries get their fresh index on each
+    // reconcile; a leaving (popped/replaced) entry KEEPS its last index here so it can still render
+    // its exit animation, and is pruned only when it has finished leaving (see the unload effect
+    // below). Plain (non-snapshot) map: it is mutated in lockstep with presentation.presented (a
+    // snapshot list) inside the reconcile block, and the visible-window derivedStateOf re-evaluates
+    // off that snapshot list rather than off this map.
+    val indexByContentKey = remember { mutableMapOf<Any, Int>() }
+    remember(currentKeyList) {
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
         previousContentKeys[0] = newContentKeys
-        currentEntries.withIndex().associate { (index, e) -> e.contentKey to index }
+        currentEntries.forEachIndexed { index, e -> indexByContentKey[e.contentKey] = index }
+    }
+
+    // Unload entries that have finished leaving — either they slid fully off the front edge
+    // (relativeDepth <= -1, the pop case) or a current entry now occupies their index (the replace
+    // case, where the driver never moves past them). Such entries are no longer (or never were) in the
+    // visible window, so no NavEntryHost runs to self-unload; prune them here at the layout level: drop
+    // the saved state and remove from the presentation set + index map. Each entry's per-entry
+    // ViewModelStore is cleared automatically by its host's RememberObserver.onForgotten when the host
+    // leaves composition.
+    val finishedLeaving by remember(presentation, indexByContentKey) {
+        derivedStateOf {
+            val top = presentation.animatedTop.value
+            val currentSize = backStack.size
+            presentation.presented.filter { e ->
+                e.presentation.isRemoving &&
+                    (indexByContentKey[e.contentKey]?.let { index -> top - index <= -1f || index < currentSize } ?: true)
+            }
+        }
+    }
+    if (finishedLeaving.isNotEmpty()) {
+        SideEffect {
+            finishedLeaving.fastForEach { e ->
+                stateHolder.removeState(e.contentKey)
+                indexByContentKey.remove(e.contentKey)
+                presentation.unload(e)
+            }
+        }
     }
 
     // Drive the single shared float towards the new top index via the shared spring. The renderer only
-    // sets the target; the gesture layer (Phase 8 Task 8.9) may snapToFinger it instead.
+    // sets the target; the interactive gesture layer may snapToFinger it instead.
     presentation.animateTopTo(backStack.lastIndex.toFloat())
 
     var layoutSize by remember { mutableStateOf(IntSize.Zero) }
@@ -289,7 +323,6 @@ private fun NavDisplayLayout(
                     layoutSize = layoutSize,
                     layoutDirection = layoutDirection,
                     density = density,
-                    onUnload = { presentation.unload(entry) },
                     hostModifier = Modifier.navEdgeSwipe(
                         // Only the current top entry (and never the root) is interactively swipeable.
                         enabled = entryIndex == topIndex && topIndex > 0,
@@ -313,7 +346,6 @@ private val NavCornerClipRadius = 16.dp
  * The driving float is read **only** inside deferred `graphicsLayer { }` blocks (here and inside the
  * transition's own `transformEntry`), so per-frame changes never recompose this host. The host:
  * - computes the coarse `relativeDepth = animatedTop - entryIndex` (composition-time, integer bucket);
- * - unloads itself when it has fully left the front edge (d <= -1 && isRemoving);
  * - selects the governing transition (own when d <= 0, upper when 0 < d) per §4.3 and applies its
  *   `transformEntry` with a [LiveNavTransitionScope] (per-frame deferred read);
  * - layers the orthogonal [effects] via [NavDisplayEffects]'s per-depth helpers
@@ -338,7 +370,6 @@ private fun NavEntryHost(
     layoutSize: IntSize,
     layoutDirection: LayoutDirection,
     density: Density,
-    onUnload: () -> Unit,
     hostModifier: Modifier = Modifier,
 ) {
     // opaqueDepth of the upper transition decides culling of this (covered) layer; for the top
@@ -361,17 +392,6 @@ private fun NavEntryHost(
     val vmOwner = rememberNavEntryViewModelStoreOwner()
     val maxLifecycle = navMaxLifecycleFor(entry.presentation, coarseDepth)
     val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
-
-    // Unload exiting entries once they have left the front edge (d <= -1): release this entry's
-    // saveable state + view-model store, then drop it from the presentation set.
-    if (coarseDepth <= -1f && entry.presentation.isRemoving) {
-        SideEffect {
-            stateHolder.removeState(entry.contentKey)
-            vmOwner.dispose()
-            onUnload()
-        }
-        return
-    }
 
     // Choose the governing transition at the coarse (integer-bucket) depth: own transition while at
     // or entering the top (d <= 0), the upper neighbour's transition while covered (0 < d). The

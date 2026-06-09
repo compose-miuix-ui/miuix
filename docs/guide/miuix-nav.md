@@ -47,6 +47,10 @@ fun App() {
 
 `rememberNavBackStack` returns a `NavBackStack` (a `SnapshotStateList<NavKey>`). Operate it directly (`add` / `removeLastOrNull`) or wrap it in `NavController` for `push` / `pop` / `replace` / `popUntil`.
 
+::: warning
+`rememberNavBackStack` is `inline fun <reified T : NavKey>`. When you seed it with a single concrete key, pass the route **supertype** as the explicit type argument — `rememberNavBackStack<Route>(Route.Home)` — so the whole sealed hierarchy is serializable. Writing `rememberNavBackStack(Route.Home)` infers `T = Route.Home`, and pushing other subtypes (e.g. `Route.Detail`) will later fail to serialize for save/restore.
+:::
+
 ## Continuous push and pop
 
 Because the stack is driven by one float, pushing or popping several entries at once animates as a single continuous sweep instead of collapsing into one top-level cross-fade:

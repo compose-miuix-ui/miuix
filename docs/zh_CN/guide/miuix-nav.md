@@ -47,6 +47,10 @@ fun App() {
 
 `rememberNavBackStack` 返回 `NavBackStack`（即 `SnapshotStateList<NavKey>`）。可直接操作它（`add` / `removeLastOrNull`），也可用 `NavController` 包装以使用 `push` / `pop` / `replace` / `popUntil`。
 
+::: warning
+`rememberNavBackStack` 是 `inline fun <reified T : NavKey>`。当你用单个具体 key 作种子时，请把路由**超类型**作为显式类型参数传入——`rememberNavBackStack<Route>(Route.Home)`——以保证整个密封层级可序列化。写成 `rememberNavBackStack(Route.Home)` 会把 `T` 推断为 `Route.Home`，之后 push 其它子类型（如 `Route.Detail`）在保存/恢复时会序列化失败。
+:::
+
 ## 连续出入栈
 
 由于整栈由单个 float 驱动，一次性 push 或 pop 多个 entry 会作为一段连续的运动播放，而不会塌缩成单次顶层交叉淡入：
