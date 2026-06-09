@@ -300,38 +300,43 @@ private fun NavDisplayLayout(
 
         visibleEntries.fastForEach { entry ->
             key(entry.contentKey) {
-                val entryIndex = indexByContentKey[entry.contentKey] ?: return@key
+                // Local non-null guard, NOT a non-local `return@key`. A non-local return out of an
+                // inline @Composable lambda makes the Kotlin compiler emit a synthetic
+                // `$$$$$NON_LOCAL_RETURN$$$$$."<anonymous>"()` marker; the Compose Hot Reload javaagent
+                // then materialises that into a method literally named "<anonymous>", which the JVM
+                // rejects at class load (ClassFormatError). Entries reaching here always have an index
+                // (they survived the visibleEntries filter over the same map), so the body always runs.
+                indexByContentKey[entry.contentKey]?.let { entryIndex ->
+                    // Boundary ownership (§4.3): the entry's own transition governs while it is at the
+                    // top (d <= 0); the upper neighbour's transition governs the covered treatment
+                    // (0 < d <= 1). NavEntryHost picks per relativeDepth inside the deferred
+                    // graphicsLayer so the choice costs no recomposition.
+                    val ownTransition = entry.transitionOrNull() ?: transition
+                    val upperKey = backStack.getOrNull(entryIndex + 1)
+                    val upperTransition = upperKey?.let { entryProvider(it).transitionOrNull() } ?: transition
 
-                // Boundary ownership (§4.3): the entry's own transition governs while it is at the
-                // top (d <= 0); the upper neighbour's transition governs the covered treatment
-                // (0 < d <= 1). Both are resolved here from the precomputed index map; NavEntryHost
-                // picks per relativeDepth inside the deferred graphicsLayer so the choice costs no
-                // recomposition.
-                val ownTransition = entry.transitionOrNull() ?: transition
-                val upperKey = backStack.getOrNull(entryIndex + 1)
-                val upperTransition = upperKey?.let { entryProvider(it).transitionOrNull() } ?: transition
-
-                NavEntryHost(
-                    entry = entry,
-                    entryIndex = entryIndex,
-                    presentation = presentation,
-                    stateHolder = stateHolder,
-                    ownTransition = ownTransition,
-                    upperTransition = upperTransition,
-                    change = presentation.change,
-                    effects = effects,
-                    layoutSize = layoutSize,
-                    layoutDirection = layoutDirection,
-                    density = density,
-                    hostModifier = Modifier.navEdgeSwipe(
-                        // Only the current top entry (and never the root) is interactively swipeable.
-                        enabled = entryIndex == topIndex && topIndex > 0,
-                        animatedTop = presentation.animatedTop,
-                        topIndex = topIndex,
-                        onCommit = currentOnBack.value,
-                        onCancel = {},
-                    ),
-                )
+                    NavEntryHost(
+                        entry = entry,
+                        entryIndex = entryIndex,
+                        presentation = presentation,
+                        stateHolder = stateHolder,
+                        ownTransition = ownTransition,
+                        upperTransition = upperTransition,
+                        change = presentation.change,
+                        effects = effects,
+                        layoutSize = layoutSize,
+                        layoutDirection = layoutDirection,
+                        density = density,
+                        hostModifier = Modifier.navEdgeSwipe(
+                            // Only the current top entry (and never the root) is interactively swipeable.
+                            enabled = entryIndex == topIndex && topIndex > 0,
+                            animatedTop = presentation.animatedTop,
+                            topIndex = topIndex,
+                            onCommit = currentOnBack.value,
+                            onCancel = {},
+                        ),
+                    )
+                }
             }
         }
     }
