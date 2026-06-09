@@ -39,6 +39,11 @@ fun LazyListScope.otherPageSection() {
                 summary = "Navigate to a MultiScaffold Page",
                 onClick = { navigator.push(Route.MultiScaffold) },
             )
+            ArrowPreference(
+                title = "miuix-nav Demo",
+                summary = "Self-contained continuous-depth navigation showcase",
+                onClick = { navigator.push(Route.MiuixNav) },
+            )
         }
     }
 }

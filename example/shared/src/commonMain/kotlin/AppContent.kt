@@ -171,6 +171,7 @@ fun AppContent(
                 subclass(Route.License::class)
                 subclass(Route.Navigation::class)
                 subclass(Route.MultiScaffold::class)
+                subclass(Route.MiuixNav::class)
             }
         }
     }
@@ -233,6 +234,9 @@ fun AppContent(
                 }
                 entry<Route.MultiScaffold> {
                     MultiScaffoldTestPage(padding = padding)
+                }
+                entry<Route.MiuixNav> {
+                    MiuixNavDemoPage(padding = padding)
                 }
             }
         }

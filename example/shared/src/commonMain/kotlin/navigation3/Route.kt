@@ -29,4 +29,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object MultiScaffold : Route
+
+    @Serializable
+    data object MiuixNav : Route
 }
