@@ -56,15 +56,18 @@ public class NavController(public val backStack: SnapshotStateList<NavKey>) {
 /**
  * Remembers a [NavController] wrapping a [rememberNavBackStack] seeded with [elements].
  *
+ * The key type [T] is captured reflection-free for cross-platform persistence; when seeding with a
+ * single concrete key pass the route supertype, e.g. `rememberNavController<Route>(Route.Home)`.
+ *
  * ```kotlin
- * val nav = rememberNavController(Route.Home)
+ * val nav = rememberNavController<Route>(Route.Home)
  * ```
  *
  * The result channel (navigateForResult/setResult/observeResult) is deferred past v1 core
  * (design spec §12) and is not part of this factory.
  */
 @Composable
-public fun rememberNavController(vararg elements: NavKey): NavController {
+public inline fun <reified T : NavKey> rememberNavController(vararg elements: T): NavController {
     val backStack = rememberNavBackStack(*elements)
     return remember(backStack) { NavController(backStack) }
 }

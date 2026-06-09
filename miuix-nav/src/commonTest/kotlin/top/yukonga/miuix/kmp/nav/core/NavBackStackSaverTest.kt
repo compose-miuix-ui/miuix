@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.nav.core
 
 import androidx.compose.runtime.saveable.SaverScope
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.serializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,22 +24,21 @@ class NavBackStackSaverTest {
     @Test
     fun saver_roundTripsPolymorphicKeys() {
         val original: NavBackStack = navBackStackOf(Route.Home, Route.Detail("42"))
-
-        // Drive the Saver's save/restore lambdas directly without a SaverScope-backed holder.
-        val saved = with(NavBackStackSaver) { TestSaverScope.save(original) }
+        val saver = navBackStackSaver(serializer<List<Route>>())
+        val saved = with(saver) { TestSaverScope.save(original) }
         checkNotNull(saved) { "Saver.save returned null" }
-        val restored = NavBackStackSaver.restore(saved)
+        val restored = saver.restore(saved)
         checkNotNull(restored) { "Saver.restore returned null" }
-
         assertEquals(original.toList(), restored.toList())
     }
 
     @Test
     fun saver_roundTripsEmptyStack() {
         val original: NavBackStack = navBackStackOf()
-        val saved = with(NavBackStackSaver) { TestSaverScope.save(original) }
+        val saver = navBackStackSaver(serializer<List<Route>>())
+        val saved = with(saver) { TestSaverScope.save(original) }
         checkNotNull(saved)
-        val restored = NavBackStackSaver.restore(saved)
+        val restored = saver.restore(saved)
         checkNotNull(restored)
         assertEquals(emptyList(), restored.toList())
     }
