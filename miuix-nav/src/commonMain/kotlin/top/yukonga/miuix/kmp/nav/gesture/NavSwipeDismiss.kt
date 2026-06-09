@@ -5,57 +5,65 @@ package top.yukonga.miuix.kmp.nav.gesture
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import kotlin.math.abs
 
 /**
  * Interactive swipe-to-dismiss that drives `animatedTop` directly, finger-following, along the axis
  * and direction the current transition declares ([NavSwipeDirection]).
  *
- * Attach to the top (non-root) entry. The gesture follows the same motion as the transition: a
- * horizontal slide ([NavSwipeDirection.LeftToRight] / [NavSwipeDirection.RightToLeft]) is dismissed
- * by a horizontal swipe via [detectHorizontalDragGestures]; a bottom-up modal
- * ([NavSwipeDirection.TopToBottom] / [NavSwipeDirection.BottomToTop]) by a vertical swipe via
- * [detectVerticalDragGestures]. Using the orientation-locked detectors means the swipe claims only
- * its own axis and lets the page's cross-axis scrolling and taps through untouched.
+ * Attach to the top (non-root) entry. A single unified pointer handler replaces the orientation-locked
+ * `detectHorizontalDragGestures` / `detectVerticalDragGestures` detectors, which only owned one axis
+ * and yielded the pointer to any other consumer — the source of two defects: an in-progress dismiss
+ * cancelled the instant the finger drifted onto the cross axis (a nested scroll claimed the pointer),
+ * and in-page taps/scrolls fired while the gesture was driving the transition. The unified handler
+ * instead works in two phases:
+ *
+ * 1. **Engagement** — movement is watched on [PointerEventPass.Initial] (parent-first), so the moment
+ *    travel **in the dismiss direction** crosses the [androidx.compose.ui.platform.ViewConfiguration]
+ *    touch slop **and** dominates the cross axis, the pointer is claimed (consumed) before any nested
+ *    scrollable can take it. A drag that is clearly cross-axis dominant is left untouched, so the
+ *    page's own scrolling and taps still work when there is no dismiss intent. Travel opposite the
+ *    dismiss direction never engages (there is nothing to drag the entry "forward" toward).
+ * 2. **Follow** — once claimed, **every** pointer change is consumed on **both** axes, so neither a
+ *    nested scroll nor any in-page handler can act on the finger that is driving the dismiss, and a
+ *    cross-axis wiggle can no longer steal or cancel the gesture. The dismiss ends **only** on finger
+ *    lift; there is no cross-axis cancel path.
+ *
  * [NavSwipeDirection.None] disables the gesture entirely (pop via back button / system back).
  *
- * While dragging, `animatedTop` is driven via Phase 3's [snapToFinger] to `topIndex - progress`,
- * where `progress` is the finger travel **in the dismiss direction** over the layout extent on that
- * axis (clamped `0f..1f`) — linear, 1:1 with the finger (§7.1, no interpolation on this axis).
- * Travel opposite the dismiss direction yields `0` progress (it never drags the entry "forward").
+ * While following, `animatedTop` is driven via Phase 3's [snapToFinger] to `topIndex - progress`,
+ * where `progress` is the finger travel **in the dismiss direction since the claim point** over the
+ * layout extent on that axis (clamped `0f..1f`) — linear, 1:1 with the finger (§7.1, no interpolation
+ * on this axis).
+ *
  * On release the decision is delegated to Phase 3's [navBackCommitDecision] (**velocity-first,
  * position-fallback**, §7.2), using the shared thresholds [NavDriverSpec.COMMIT_VELOCITY_THRESHOLD] /
- * [NavDriverSpec.COMMIT_POSITION_THRESHOLD].
+ * [NavDriverSpec.COMMIT_POSITION_THRESHOLD]. Release velocity is sampled with a [VelocityTracker]
+ * (instantaneous, not a per-event delta proxy) and expressed in **progress-units per second** (axis
+ * pixels/sec ÷ layout extent, signed toward the dismiss direction). That value feeds
+ * [navBackCommitDecision] directly. For the convergence spring it is negated to the depth axis
+ * (`animatedTop = topIndex - progress`, so depth velocity = -progress velocity) and handed to the
+ * single shared spring via [settleTo]'s `initialVelocity`, making the snap -> spring handoff
+ * velocity-continuous (§0.3 single spring).
  *
- * Release velocity is sampled with a [VelocityTracker] (instantaneous, not a per-event delta proxy)
- * and expressed in **progress-units per second** (axis pixels/sec ÷ layout extent, signed toward the
- * dismiss direction). That value feeds [navBackCommitDecision] directly. For the convergence spring it
- * is negated to the depth axis (`animatedTop = topIndex - progress`, so depth velocity = -progress
- * velocity) and handed to the single shared spring via [settleTo]'s `initialVelocity`, making the snap
- * -> spring handoff velocity-continuous (§0.3 single spring).
- *
- * On commit [onCommit] is invoked **synchronously**, decoupled from the settle (see the `onDragEnd`
- * body for why gating the pop behind the settle is unsafe in a per-entry coroutine scope).
+ * On commit [onCommit] is invoked **synchronously**, decoupled from the settle (see the release body
+ * for why gating the pop behind the settle is unsafe in a per-entry coroutine scope).
  *
  * @param enabled Whether the swipe is active. Disable on the root entry (nothing to pop).
  * @param direction The dismiss axis + direction; [NavSwipeDirection.None] disables the gesture.
@@ -66,7 +74,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
  * @param onCancel Invoked once after the cancel spring settles back to [topIndex].
  */
 // composed { } is required here: the swipe needs composition-scoped state (coroutine scope,
-// remembered layout size). A Modifier.Node rewrite is a deferred optimization, so suppress the
+// up-to-date callbacks). A Modifier.Node rewrite is a deferred optimization, so suppress the
 // no-composed lint locally rather than disabling the performance rule project-wide.
 @Suppress("ktlint:compose:modifier-composed-check")
 fun Modifier.navSwipeDismiss(
@@ -83,8 +91,6 @@ fun Modifier.navSwipeDismiss(
     val currentOnCommit = rememberUpdatedState(onCommit)
     val currentOnCancel = rememberUpdatedState(onCancel)
 
-    var layoutSize by remember { mutableStateOf(IntSize.Zero) }
-
     val isHorizontal = direction == NavSwipeDirection.LeftToRight || direction == NavSwipeDirection.RightToLeft
     // Sign mapping a raw axis delta onto "progress toward dismiss": +1 when the dismiss direction is the
     // axis-positive one (right / down), -1 when it is axis-negative (left / up).
@@ -94,91 +100,110 @@ fun Modifier.navSwipeDismiss(
         NavSwipeDirection.None -> 0f // unreachable (guarded above)
     }
 
-    this
-        .onSizeChanged { layoutSize = it }
-        .pointerInput(enabled, direction, topIndex, layoutSize) {
+    this.pointerInput(enabled, direction, topIndex) {
+        awaitEachGesture {
             // Layout extent along the gesture axis, used to normalise finger travel into 0f..1f progress.
-            val extent = (if (isHorizontal) layoutSize.width else layoutSize.height).toFloat().coerceAtLeast(1f)
-            // Accumulated drag along the gesture axis (raw signed pixels).
-            var drag = 0f
-            // Tracks pointer position over time for an accurate instantaneous release velocity.
-            val velocityTracker = VelocityTracker()
+            // Read per-gesture from the live pointer scope so a resize between gestures is picked up.
+            val extent = (if (isHorizontal) size.width else size.height).toFloat().coerceAtLeast(1f)
+            val slop = viewConfiguration.touchSlop
 
-            val onStart = {
-                drag = 0f
-                velocityTracker.resetTracking()
-            }
-            val onDrag = { change: PointerInputChange, amount: Float ->
-                change.consume()
-                drag += amount
+            val down = awaitFirstDown(requireUnconsumed = false)
+            // Tracks pointer position over time for an accurate instantaneous release velocity. Sampled
+            // from the down so the velocity window is populated even before the gesture engages.
+            val velocityTracker = VelocityTracker()
+            velocityTracker.addPosition(down.uptimeMillis, down.position)
+
+            // --- Engagement phase: decide whether this is our dismiss swipe, watching Initial pass. ---
+            var preClaimDrag = 0f // accumulated travel on the gesture axis (raw signed pixels)
+            var crossTravel = 0f // accumulated travel on the cross axis (raw signed pixels)
+            var claimed = false
+            while (!claimed) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
-                scope.launch {
-                    animatedTop.snapToFinger(topIndex = topIndex, progress = (dismissSign * drag / extent).coerceIn(0f, 1f))
+                if (!change.pressed) return@awaitEachGesture // lifted before engaging: a tap / short press
+                val delta = change.positionChange()
+                preClaimDrag += if (isHorizontal) delta.x else delta.y
+                crossTravel += if (isHorizontal) delta.y else delta.x
+                val toward = dismissSign * preClaimDrag // > 0 means moving toward the dismiss direction
+                if (toward > slop && toward >= abs(crossTravel)) {
+                    // Dismiss-direction travel crossed slop and dominates: claim before nested scroll can.
+                    claimed = true
+                    change.consume()
+                } else if (abs(crossTravel) > slop && abs(crossTravel) > abs(toward)) {
+                    // Clearly a cross-axis gesture (e.g. the page's vertical scroll): never our swipe.
+                    return@awaitEachGesture
                 }
             }
-            val onEnd = {
+
+            // --- Follow phase: we own the pointer. Consume every change on both axes (so neither a nested
+            // scroll nor any in-page handler sees the finger, and no cross-axis movement can cancel). The
+            // dismiss follows the finger 1:1 from the claim point and ends only on lift. ---
+            var drag = 0f
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                velocityTracker.addPosition(change.uptimeMillis, change.position)
+                if (!change.pressed) {
+                    change.consume()
+                    break
+                }
+                val delta = change.positionChange()
+                drag += if (isHorizontal) delta.x else delta.y
+                change.consume()
                 val progress = (dismissSign * drag / extent).coerceIn(0f, 1f)
-                // Instantaneous release velocity along the axis, in pixels/sec, projected onto the
-                // dismiss direction and normalised to progress-units/sec (positive points toward pop).
-                val velocity = velocityTracker.calculateVelocity()
-                val axisVelocity = if (isHorizontal) velocity.x else velocity.y
-                val progressVelocity = dismissSign * axisVelocity / extent
-                val committing = navBackCommitDecision(progress = progress, velocity = progressVelocity)
-                // Depth axis is the inverse of the progress axis, so negate for the spring handoff.
-                val depthVelocity = -progressVelocity
-                if (committing) {
-                    // Commit the back-stack change SYNCHRONOUSLY, never gated behind the settle. `scope`
-                    // is this entry's composition scope; the commit settle drives `animatedTop` to
-                    // `topIndex - 1`, at which point this (top) entry reaches relativeDepth -1, leaves the
-                    // visible window, and its host leaves composition -- cancelling `scope`. If the pop
-                    // were sequenced AFTER `settleTo` inside that scope, the cancellation could drop the
-                    // pop entirely: the back stack would stay unchanged while the renderer's shared spring
-                    // pulls `animatedTop` back to the un-popped top, so the page "springs back" and feels
-                    // stuck. Popping first lets the renderer own the final convergence; the settle below
-                    // only seeds the spring with the release velocity.
-                    currentOnCommit.value()
-                    scope.launch {
-                        animatedTop.settleTo(
-                            target = (topIndex - 1).toFloat(),
-                            spec = NavDriverSpec.Default,
-                            initialVelocity = depthVelocity,
-                        )
-                    }
-                } else {
-                    // Cancel keeps the entry in place (never marked removing), so its scope survives the
-                    // settle and onCancel can safely run after it.
-                    scope.launch {
-                        animatedTop.settleTo(
-                            target = topIndex.toFloat(),
-                            spec = NavDriverSpec.Default,
-                            initialVelocity = depthVelocity,
-                        )
-                        currentOnCancel.value()
-                    }
-                }
+                scope.launch { animatedTop.snapToFinger(topIndex = topIndex, progress = progress) }
             }
-            val onCancelDrag = {
+
+            // --- Release: velocity-first / position-fallback, velocity-continuous spring handoff. ---
+            val progress = (dismissSign * drag / extent).coerceIn(0f, 1f)
+            // Instantaneous release velocity along the axis, in pixels/sec, projected onto the dismiss
+            // direction and normalised to progress-units/sec (positive points toward pop).
+            val velocity = velocityTracker.calculateVelocity()
+            val axisVelocity = if (isHorizontal) velocity.x else velocity.y
+            val progressVelocity = dismissSign * axisVelocity / extent
+            // Depth axis is the inverse of the progress axis, so negate for the spring handoff.
+            val depthVelocity = -progressVelocity
+            if (navBackCommitDecision(progress = progress, velocity = progressVelocity)) {
+                // Commit the back-stack change SYNCHRONOUSLY, never gated behind the settle. `scope` is
+                // this entry's composition scope; the commit settle drives `animatedTop` to `topIndex - 1`,
+                // at which point this (top) entry reaches relativeDepth -1, leaves the visible window, and
+                // its host leaves composition -- cancelling `scope`. If the pop were sequenced AFTER
+                // `settleTo` inside that scope, the cancellation could drop the pop entirely: the back stack
+                // would stay unchanged while the renderer's shared spring pulls `animatedTop` back to the
+                // un-popped top, so the page "springs back" and feels stuck. Popping first lets the renderer
+                // own the final convergence; the settle below only seeds the spring with the release velocity.
+                currentOnCommit.value()
                 scope.launch {
-                    animatedTop.settleTo(target = topIndex.toFloat(), spec = NavDriverSpec.Default)
+                    animatedTop.settleTo(
+                        target = (topIndex - 1).toFloat(),
+                        spec = NavDriverSpec.Default,
+                        initialVelocity = depthVelocity,
+                    )
+                }
+            } else {
+                // Cancel keeps the entry in place (never marked removing), so its scope survives the settle
+                // and onCancel can safely run after it.
+                //
+                // Clamp the seeded velocity to <= 0. The depth axis runs from `topIndex - 1` (fully
+                // dismissed) up to `topIndex` (rest), and at release `animatedTop` is always <= topIndex.
+                // A release that flicks AWAY from the dismiss direction (e.g. a back-swipe yanked back the
+                // other way) produces a POSITIVE depth velocity, which would carry the shared spring PAST
+                // the rest position to `animatedTop > topIndex`. That momentarily drops THIS top entry into
+                // the covered regime (relativeDepth > 0), so its transition applies the covered parallax and
+                // the page flashes a few frames in the wrong direction. A cancel has nothing above the top
+                // to reveal, so that upward momentum is purely spurious: drop it and let the spring ease back
+                // to rest from the current position. Legitimate "return" motion (negative depth velocity) is
+                // kept, preserving the snap -> spring velocity continuity.
+                scope.launch {
+                    animatedTop.settleTo(
+                        target = topIndex.toFloat(),
+                        spec = NavDriverSpec.Default,
+                        initialVelocity = depthVelocity.coerceAtMost(0f),
+                    )
                     currentOnCancel.value()
                 }
-                Unit
-            }
-
-            if (isHorizontal) {
-                detectHorizontalDragGestures(
-                    onDragStart = { onStart() },
-                    onHorizontalDrag = { change, dragAmount -> onDrag(change, dragAmount) },
-                    onDragEnd = { onEnd() },
-                    onDragCancel = { onCancelDrag() },
-                )
-            } else {
-                detectVerticalDragGestures(
-                    onDragStart = { onStart() },
-                    onVerticalDrag = { change, dragAmount -> onDrag(change, dragAmount) },
-                    onDragEnd = { onEnd() },
-                    onDragCancel = { onCancelDrag() },
-                )
             }
         }
+    }
 }
