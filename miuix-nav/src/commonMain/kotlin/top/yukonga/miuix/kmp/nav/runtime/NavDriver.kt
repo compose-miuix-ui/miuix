@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.nav.runtime
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.runtime.Immutable
 
@@ -101,4 +103,48 @@ internal fun navBackCommitDecision(
     velocity >= velocityThreshold -> true
     velocity <= -velocityThreshold -> false
     else -> progress >= positionThreshold
+}
+
+/**
+ * Drives [this] `animatedTop` to follow a gesture finger 1:1, with no spring or
+ * easing on the path (spec §7.1, "snap mode"). Each gesture event calls this with
+ * the latest [progress]; the value lands exactly on `topIndex - progress`, so a
+ * later [settleTo] can hand off from precisely where the finger left it.
+ *
+ * @param topIndex index of the current top entry (`backStack.lastIndex`).
+ * @param progress raw gesture progress; clamped to `0f..1f` by [fingerTarget].
+ */
+internal suspend fun Animatable<Float, AnimationVector1D>.snapToFinger(
+    topIndex: Int,
+    progress: Float,
+) {
+    snapTo(fingerTarget(topIndex, progress))
+}
+
+/**
+ * Converges [this] `animatedTop` to [target] through the single shared spring
+ * ([NavDriverSpec.spring], spec §7.1 "settle mode" / §9 "single shared spring").
+ * Used for normal push/pop and for gesture release (commit -> `topIndex - 1`,
+ * cancel -> `topIndex`).
+ *
+ * By default [initialVelocity] is [this] Animatable's own current [velocity], so the
+ * value AND its first derivative stay continuous across the snap->spring boundary,
+ * eliminating the visual jolt a fresh-from-zero spring would cause. Callers that
+ * track a separate finger velocity (e.g. an edge swipe whose drag delta differs
+ * from the Animatable's internal velocity) may pass it explicitly.
+ *
+ * @param target destination value on the depth axis (an entry index, possibly fractional during interruption).
+ * @param spec spring + threshold parameters; defaults to [NavDriverSpec.Default].
+ * @param initialVelocity velocity (depth-units per second) to seed the spring with; defaults to the current [velocity].
+ */
+internal suspend fun Animatable<Float, AnimationVector1D>.settleTo(
+    target: Float,
+    spec: NavDriverSpec = NavDriverSpec.Default,
+    initialVelocity: Float = velocity,
+) {
+    animateTo(
+        targetValue = target,
+        animationSpec = spec.spring(),
+        initialVelocity = initialVelocity,
+    )
 }
