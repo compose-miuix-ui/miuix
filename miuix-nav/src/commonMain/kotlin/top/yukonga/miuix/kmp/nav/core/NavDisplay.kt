@@ -211,18 +211,23 @@ private fun NavDisplayLayout(
     Box(
         modifier = modifier.onSizeChanged { layoutSize = it },
     ) {
-        // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The
-        // governing opaqueDepth is the global transition's (per-route overrides only deepen, never
-        // shrink, the kept window; the renderer keeps a layer alive while ANY transition would). This
-        // derivedStateOf reads the coarse (composition-time) animatedTop value so only crossing an
+        // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The window
+        // depth is the MAX opaqueDepth across the global transition and every presented entry's
+        // per-route override — the renderer keeps a layer alive while ANY transition in play would, so
+        // a Modal override (opaqueDepth 2f) keeps the layer below it visible even under a shallower
+        // global transition. Over-keeping a hidden layer is cheap; under-keeping would blank it out.
+        // This derivedStateOf reads the coarse (composition-time) animatedTop value so only crossing an
         // integer boundary re-evaluates the window; per-frame floats are read lazily in graphicsLayer.
         val visibleEntries by remember(presentation, transition, indexByContentKey) {
             derivedStateOf {
                 val top = presentation.animatedTop.value
+                val windowDepth = presentation.presented.fold(transition.opaqueDepth) { acc, entry ->
+                    maxOf(acc, (entry.transitionOrNull() ?: transition).opaqueDepth)
+                }
                 presentation.presented.filter { entry ->
                     val index = indexByContentKey[entry.contentKey] ?: return@filter false
                     val d = relativeDepth(top, index)
-                    isVisibleAt(d, transition.opaqueDepth)
+                    isVisibleAt(d, windowDepth)
                 }
             }
         }
