@@ -312,8 +312,15 @@ private fun NavDisplayLayout(
                     // (0 < d <= 1). NavEntryHost picks per relativeDepth inside the deferred
                     // graphicsLayer so the choice costs no recomposition.
                     val ownTransition = entry.transitionOrNull() ?: transition
-                    val upperKey = backStack.getOrNull(entryIndex + 1)
-                    val upperTransition = upperKey?.let { entryProvider(it).transitionOrNull() } ?: transition
+                    // Resolve the upper neighbour from the PRESENTED set (which still holds a
+                    // popped-but-animating-out entry), NOT the live back stack. A leaving entry keeps its
+                    // last index in indexByContentKey, so index + 1 still points at it until it unloads.
+                    // Using backStack here would, the instant an upper entry with a per-route transition
+                    // (e.g. a bottom-up Modal) is popped, revert this covered layer to the global transition
+                    // mid-dismiss — for a Modal over the horizontal-slide default that wrongly parallaxes the
+                    // layer below sideways while the modal is still sliding down (§4.3 boundary ownership).
+                    val upperEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
+                    val upperTransition = upperEntry?.transitionOrNull() ?: transition
 
                     NavEntryHost(
                         entry = entry,
