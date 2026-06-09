@@ -136,9 +136,9 @@ fun NavTestPage(
                         Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                             BasicComponent(
                                 title = "Swipe to go back",
-                                summary = "Swipe this page left-to-right to pop it. Stack several pages with " +
-                                    "continuous push above, then drag back through them; the gesture drives the " +
-                                    "same animatedTop spring.",
+                                summary = "Turn on \"Enable Swipe Back\" in Settings, then swipe a pushed page to " +
+                                    "pop it. Stack several pages with continuous push above and drag back through " +
+                                    "them; the gesture drives the same animatedTop spring.",
                             )
                         }
                     }

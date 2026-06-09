@@ -109,6 +109,7 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
@@ -198,36 +199,45 @@ fun AppContent(
             )
         }
 
+        // Swipe-to-dismiss is opt-in in miuix-nav and off by default; the example gates it behind a
+        // setting. Directions are physical (not mirrored), so pick per layout direction: rightward
+        // back-swipe under LTR, leftward under RTL.
+        val swipeBackDirection = when {
+            !appState.enableSwipeBack -> NavSwipeDirection.None
+            LocalLayoutDirection.current == LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
+            else -> NavSwipeDirection.LeftToRight
+        }
+
         NavDisplay(
             backStack = backStack,
             onBack = { navigator.pop() },
             transition = NavTransitions.MiuixDefault,
             effects = effects,
         ) {
-            entry<Route.Main> {
+            entry<Route.Main>(swipeDismiss = swipeBackDirection) {
                 Home(
                     padding = padding,
                     navigationItems = navigationItems,
                     mainPagerState = mainPagerState,
                 )
             }
-            entry<Route.PullToRefresh> {
+            entry<Route.PullToRefresh>(swipeDismiss = swipeBackDirection) {
                 PullToRefreshPage(padding = padding)
             }
-            entry<Route.About> {
+            entry<Route.About>(swipeDismiss = swipeBackDirection) {
                 AboutPage(padding = padding)
             }
-            entry<Route.License> {
+            entry<Route.License>(swipeDismiss = swipeBackDirection) {
                 LicensePage(padding = padding)
             }
-            entry<Route.Navigation> { route ->
+            entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
                 val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
                 NavTestPage(
                     index = index,
                     padding = padding,
                 )
             }
-            entry<Route.MultiScaffold> {
+            entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
                 MultiScaffoldTestPage(padding = padding)
             }
         }

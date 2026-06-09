@@ -299,6 +299,12 @@ private fun SettingsContent(
                         checked = appState.blockInputDuringTransition,
                         onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
                     )
+                    SwitchPreference(
+                        title = "Enable Swipe Back",
+                        summary = "Swipe a pushed page to pop it; direction follows layout",
+                        checked = appState.enableSwipeBack,
+                        onCheckedChange = { updateAppState { state -> state.copy(enableSwipeBack = it) } },
+                    )
                 }
             }
             item(key = "settingsAbout") {
