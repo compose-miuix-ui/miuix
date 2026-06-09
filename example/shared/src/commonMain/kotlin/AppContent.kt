@@ -108,6 +108,7 @@ import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
@@ -181,13 +182,17 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
     ) {
+        // Follow the device screen corner so the slide-in clip matches the platform (0 on Desktop/Web).
+        val navCornerRadius = rememberNavSystemCornerRadius()
         val effects = remember(
             appState.enableCornerClip,
+            navCornerRadius,
             appState.enableDim,
             appState.blockInputDuringTransition,
         ) {
             NavDisplayEffects(
                 enableCornerClip = appState.enableCornerClip,
+                cornerClipRadius = navCornerRadius,
                 dimAmount = if (appState.enableDim) 0.5f else 0f,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
             )

@@ -5,6 +5,8 @@ package top.yukonga.miuix.kmp.nav.core
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
  * Orthogonal visual effects applied by [NavDisplay] on top of the active
@@ -14,8 +16,11 @@ import androidx.compose.runtime.Stable
  * transition. This type holds no lambda fields and is therefore [Immutable]; the per-depth helpers
  * are pure functions of the switches and the depth.
  *
- * @property enableCornerClip whether to clip the entering top entry with rounded corners while it
- *   slides in over the layer below.
+ * @property enableCornerClip whether to clip the entering top entry with rounded corners on its
+ *   leading edge while it slides in over the layer below.
+ * @property cornerClipRadius the leading-edge corner radius used when [enableCornerClip] is on.
+ *   Defaults to 0.dp (no rounding); pass [rememberNavSystemCornerRadius] to follow the device screen
+ *   corner (matching the platform), which still yields no rounding where the platform reports 0.
  * @property dimAmount maximum dim alpha applied to the covered layer during a transition. Set to 0f
  *   to disable dimming.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
@@ -24,6 +29,7 @@ import androidx.compose.runtime.Stable
 @Immutable
 data class NavDisplayEffects(
     val enableCornerClip: Boolean = true,
+    val cornerClipRadius: Dp = 0.dp,
     val dimAmount: Float = 0.5f,
     val blockInputDuringTransition: Boolean = true,
 ) {

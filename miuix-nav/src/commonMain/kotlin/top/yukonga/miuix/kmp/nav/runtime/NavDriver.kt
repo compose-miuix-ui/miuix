@@ -56,8 +56,13 @@ internal data class NavDriverSpec(
         /** Slightly under critical damping for a brisk, barely-overshooting settle. */
         const val DAMPING_RATIO: Float = 0.9f
 
-        /** Medium-low stiffness: snappy yet not jittery on the depth scale (units = entries). */
-        const val STIFFNESS: Float = 600f
+        /**
+         * Low stiffness on the depth scale (units = entries). With [DAMPING_RATIO] and the tight
+         * [VISIBILITY_THRESHOLD], a full one-step push/pop settles in roughly half a second
+         * (`t ≈ -ln(threshold) / (damping·√stiffness)`), matching the established miuix navigation
+         * feel (a ~500ms transition) rather than a snappier default.
+         */
+        const val STIFFNESS: Float = 180f
 
         /**
          * `animatedTop` is measured in entry-index units, so it converges visually once

@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.nav.core
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -21,7 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -55,6 +53,7 @@ import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
+import top.yukonga.miuix.kmp.squircle.absoluteSquircleClip
 import kotlin.reflect.KClass
 
 /**
@@ -374,9 +373,6 @@ private fun NavDisplayLayout(
     }
 }
 
-/** Default rounded-corner radius used by [NavDisplayEffects.enableCornerClip]. */
-private val NavCornerClipRadius = 16.dp
-
 /**
  * Renders one presented entry as a pure function of [NavPresentation.animatedTop].
  *
@@ -449,7 +445,17 @@ private fun NavEntryHost(
     }
 
     val clipModifier = if (effects.shouldClipCornersAt(coarseDepth)) {
-        Modifier.clip(RoundedCornerShape(NavCornerClipRadius))
+        // Squircle-clip only the leading edge — the corners that meet the screen edge as the entering
+        // page slides in — matching the reference navigation. absoluteSquircleClip uses physical
+        // corners (never flipped by layout direction), so pick the leading side per layout direction:
+        // left for LTR, right for RTL. The radius comes from the effects, so callers can follow the
+        // platform screen corner (e.g. rememberNavSystemCornerRadius).
+        val r = effects.cornerClipRadius
+        if (layoutDirection == LayoutDirection.Ltr) {
+            Modifier.absoluteSquircleClip(topLeft = r, topRight = 0.dp, bottomRight = 0.dp, bottomLeft = r)
+        } else {
+            Modifier.absoluteSquircleClip(topLeft = 0.dp, topRight = r, bottomRight = r, bottomLeft = 0.dp)
+        }
     } else {
         Modifier
     }

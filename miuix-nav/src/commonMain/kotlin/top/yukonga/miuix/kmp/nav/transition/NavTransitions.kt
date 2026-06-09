@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.nav.transition
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
@@ -57,29 +56,24 @@ object NavTransitions {
     }
 
     /**
-     * Reproduces the current miuix navigation feel: horizontal slide (same geometry as
-     * [Cupertino]) with a leading-edge rounded-corner clip on the top page while it enters or
-     * leaves, plus a parallax on the covered page. The dark scrim is provided by the orthogonal
-     * NavDisplayEffects layer.
+     * Reproduces the established miuix navigation feel: a full-width horizontal slide (same geometry
+     * as [Cupertino]) with a quarter-width parallax and light alpha falloff on the covered page.
      *
-     * The corner clip uses a plain [RoundedCornerShape] (this module does not depend on the
-     * squircle module); the radius follows a bell curve — 0 at rest (d = 0), peaking at
-     * [TransitionCornerRadius] mid-slide, back to 0 fully off-screen.
+     * The leading-edge corner clip and the dark scrim are NOT baked into this transition — they are
+     * the orthogonal [NavDisplayEffects] layer (`enableCornerClip` + `cornerClipRadius`, `dimAmount`),
+     * mirroring the reference implementation where the clip is an effect applied to the entering top.
+     * Keeping it out here lets the clip radius follow the platform screen corner instead of a fixed
+     * value, and avoids double-clipping when both a transition and the effect are in play.
      */
     val MiuixDefault: NavTransition = navGraphicsTransition(opaqueDepth = 1f) { scope ->
         val width = scope.layoutSize.width.toFloat()
         val d = scope.relativeDepth
         val rtl = scope.layoutDirection == LayoutDirection.Rtl
         if (d <= 0f) {
-            val p = (-d).coerceIn(0f, 1f) // 0 at top, 1 fully off the trailing edge
-            translationX = (if (rtl) -1f else 1f) * p * width
-            // Leading-edge corner clip, strongest mid-slide (bell curve), zero at both ends.
-            val bell = 1f - (2f * p - 1f) * (2f * p - 1f)
-            val radius = TransitionCornerRadius * bell // Dp * Float = Dp
-            clip = radius > 0.5.dp
-            // Round only the leading edge (start side, auto-mirrored for RTL).
-            shape = RoundedCornerShape(topStart = radius, topEnd = 0.dp, bottomEnd = 0.dp, bottomStart = radius)
+            // Entering/leaving the top: full-width slide from the trailing edge. Mirrored for RTL.
+            translationX = (if (rtl) -1f else 1f) * (-d).coerceIn(0f, 1f) * width
         } else {
+            // Covered: parallax a quarter width toward the leading edge with a light alpha falloff.
             translationX = (if (rtl) 1f else -1f) * coverProgress(d) * width * 0.25f
             alpha = 1f - 0.1f * coverProgress(d)
         }
@@ -177,9 +171,6 @@ object NavTransitions {
         // Intentionally empty: identity transform, instant swap. No motion means no swipe to follow,
         // so the interactive dismiss gesture is disabled; pop via the back button / system back.
     }
-
-    /** Peak leading-edge corner radius applied mid-slide by [MiuixDefault]. */
-    private val TransitionCornerRadius = 16.dp
 
     /** Fixed horizontal offset used by [SharedAxisX]. */
     private val SharedAxisOffset = 30.dp
