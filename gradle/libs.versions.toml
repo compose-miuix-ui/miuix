@@ -2,6 +2,7 @@
 agp = "9.2.1"
 kotlin = "2.4.0"
 kotlinx-serialization = "1.11.0"
+kotlinx-collections-immutable = "0.4.0"
 
 about-libraries = "14.2.1"
 androidx-activity = "1.13.0"
@@ -28,6 +29,8 @@ android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "about-libraries" }
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -39,6 +42,7 @@ jetbrains-compose-components-resources = { module = "org.jetbrains.compose.compo
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
+jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "jetbrains-lifecycle" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor-utilities" }
 
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
