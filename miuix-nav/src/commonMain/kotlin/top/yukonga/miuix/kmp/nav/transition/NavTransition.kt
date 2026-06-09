@@ -59,6 +59,5 @@ fun navGraphicsTransition(
 ): NavTransition = object : NavTransition {
     override val opaqueDepth: Float = opaqueDepth
 
-    override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier =
-        this.graphicsLayer { block(scope) }
+    override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier = this.graphicsLayer { block(scope) }
 }
