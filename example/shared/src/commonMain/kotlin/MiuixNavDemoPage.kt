@@ -1,12 +1,20 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
@@ -135,7 +143,6 @@ fun MiuixNavDemoPage(
                     }
                     entry<DemoRoute.Modal>(transition = NavTransitions.Modal) {
                         DemoModalContent(
-                            padding = padding,
                             onClose = { backStack.removeAt(backStack.lastIndex) },
                         )
                     }
@@ -151,6 +158,28 @@ fun MiuixNavDemoPage(
     }
 }
 
+/**
+ * Opaque, full-size page shell for a navigation entry.
+ *
+ * Each entry MUST paint an opaque background that fills the host, otherwise a covered page shows
+ * through during/after the transition (the parallaxed lower layer would bleed in from the side). An
+ * opaque page is what makes the navigation read as real full-page switching.
+ */
+@Composable
+private fun DemoPage(
+    padding: PaddingValues,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(padding),
+        content = content,
+    )
+}
+
 @Composable
 private fun DemoHomeContent(
     padding: PaddingValues,
@@ -159,7 +188,7 @@ private fun DemoHomeContent(
     onOpenModal: () -> Unit,
     onOpenCustom: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    DemoPage(padding = padding) {
         SmallTitle(text = "Continuous depth")
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             ArrowPreference(
@@ -204,8 +233,15 @@ private fun DemoDetailContent(
     onPushNext: () -> Unit,
     onPopToHome: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    DemoPage(padding = padding) {
         SmallTitle(text = "Detail #$index")
+        Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+            BasicComponent(
+                title = "Full page #$index",
+                summary = "This opaque page fully covers the one below it at rest; the lower page is " +
+                    "only revealed (parallaxed) mid-transition and during a back gesture.",
+            )
+        }
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             ArrowPreference(
                 title = "Push next Detail",
@@ -223,17 +259,29 @@ private fun DemoDetailContent(
 
 @Composable
 private fun DemoModalContent(
-    padding: PaddingValues,
     onClose: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-        SmallTitle(text = "Modal")
-        Card(modifier = Modifier.padding(horizontal = 12.dp)) {
-            ArrowPreference(
-                title = "Close modal",
-                summary = "Slide back down; lower layer stayed visible",
-                onClick = onClose,
-            )
+    // Transparent fill on purpose: NavTransitions.Modal keeps the lower page rendered (opaqueDepth =
+    // 2f), so the Home page stays visible above this bottom sheet. Only the sheet itself is opaque.
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(
+                    color = MiuixTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                )
+                .padding(bottom = 24.dp),
+        ) {
+            SmallTitle(text = "Modal")
+            Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+                ArrowPreference(
+                    title = "Close modal",
+                    summary = "Slides back down; the page below stayed visible the whole time",
+                    onClick = onClose,
+                )
+            }
         }
     }
 }
@@ -243,7 +291,7 @@ private fun DemoCustomContent(
     padding: PaddingValues,
     onClose: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    DemoPage(padding = padding) {
         SmallTitle(text = "Custom transition")
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             ArrowPreference(
