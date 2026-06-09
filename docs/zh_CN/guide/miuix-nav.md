@@ -29,7 +29,7 @@ sealed interface Route : NavKey {
 
 @Composable
 fun App() {
-    val backStack = rememberNavBackStack(Route.Home)
+    val backStack = rememberNavBackStack<Route>(Route.Home)
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -96,7 +96,7 @@ import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
 
 val myTransition = navGraphicsTransition { scope ->
     val d = scope.relativeDepth          // animatedTop - index
-    translationX = -d * scope.layoutSize.width
+    translationX = -d * scope.layoutSize.width.toFloat()
     scaleX = 1f - 0.1f * d.coerceIn(0f, 1f)
     scaleY = scaleX
     cameraDistance = 16f * scope.density.density
