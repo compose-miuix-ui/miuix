@@ -93,30 +93,34 @@ NavDisplay(backStack, transition = NavTransitions.Cupertino) {
 
 ## Swipe-to-dismiss direction
 
-The interactive swipe that pops the top entry follows the **same motion as the transition**: a horizontal slide is dismissed by swiping right, a bottom-up modal by swiping down. Each transition declares this via `dismissDirection: NavSwipeDirection`:
+The interactive swipe that pops the top entry runs along the **same axis as the transition**: a horizontal slide is dismissed by a horizontal swipe, a bottom-up modal by a downward swipe. It is **opt-in** — `dismissDirection` defaults to `None` and **none of the built-in presets enable it**. Turn it on per route with `entry(swipeDismiss = ...)`, or author a transition that declares a direction.
 
-| Direction | Gesture | Used by |
-| :-- | :-- | :-- |
-| `LeftToRight` (default) | Horizontal swipe right | `Cupertino`, `MiuixDefault`, `AndroidCrossActivity`, `Scale`, `Fade`, `SharedAxisX` |
-| `TopToBottom` | Vertical swipe down | `Modal` |
-| `RightToLeft` / `BottomToTop` | Horizontal left / vertical up | — (available for custom transitions) |
-| `None` | Disabled (pop via back button / system back only) | `None` |
+`NavSwipeDirection` values are **physical screen directions** (which way the finger moves) and are *not* mirrored for layout direction, so pick the right one per LTR / RTL:
 
-The swipe uses the orientation-locked drag detectors, so it claims only its own axis and lets the page's cross-axis scrolling and taps through untouched. Override it per route with `entry(swipeDismiss = ...)` — including `NavSwipeDirection.None` to disable the gesture on a route (e.g. a confirmation page that must be left via a button):
+| Direction | Finger motion |
+| :-- | :-- |
+| `LeftToRight` | Rightward — the back swipe under **LTR** |
+| `RightToLeft` | Leftward — the back swipe under **RTL** |
+| `TopToBottom` | Downward — dismiss for a bottom-up modal |
+| `BottomToTop` | Upward |
+| `None` (default) | Disabled — pop via back button / system back only |
+
+Once a swipe engages it owns the pointer for the rest of the gesture (consuming both axes), so a cross-axis wiggle cannot steal it or cancel mid-swipe, and in-page taps / scrolls are suppressed until the finger lifts. Set or override it per route — including `NavSwipeDirection.None` to keep a route button-only:
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 
 NavDisplay(backStack) {
-    entry<Route.Home> { HomeScreen() }
-    // Bottom sheet: inherits TopToBottom from NavTransitions.Modal.
-    entry<Route.Sheet>(transition = NavTransitions.Modal) { SheetScreen() }
-    // Force a route to be button-only, regardless of its transition.
-    entry<Route.Confirm>(swipeDismiss = NavSwipeDirection.None) { ConfirmScreen() }
+    // Enable an LTR back swipe on this route (off by default).
+    entry<Route.Home>(swipeDismiss = NavSwipeDirection.LeftToRight) { HomeScreen() }
+    // Bottom sheet: swipe down to dismiss.
+    entry<Route.Sheet>(transition = NavTransitions.Modal, swipeDismiss = NavSwipeDirection.TopToBottom) { SheetScreen() }
+    // Left untouched (default None): button-only.
+    entry<Route.Confirm> { ConfirmScreen() }
 }
 ```
 
-A custom transition passes its natural direction to the factory: `navGraphicsTransition(dismissDirection = NavSwipeDirection.TopToBottom) { ... }`.
+A custom transition can still declare a natural direction so routes inherit it: `navGraphicsTransition(dismissDirection = NavSwipeDirection.LeftToRight) { ... }`.
 
 ## Custom transitions
 

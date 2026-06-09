@@ -93,30 +93,34 @@ NavDisplay(backStack, transition = NavTransitions.Cupertino) {
 
 ## 滑动关闭方向
 
-关闭顶层 entry 的交互式滑动手势，与转场**运动方向一致**：水平滑动类转场用右滑关闭，底部上滑的 Modal 用下滑关闭。每个转场通过 `dismissDirection: NavSwipeDirection` 声明：
+关闭顶层 entry 的交互式滑动手势，与转场**沿同一轴向**：水平滑动类转场用水平滑动关闭，底部上滑的 Modal 用下滑关闭。它是**按需开启**的——`dismissDirection` 默认为 `None`，且**所有内置预设默认都不开启**。请按路由用 `entry(swipeDismiss = ...)` 开启，或自定义转场时声明方向。
 
-| 方向 | 手势 | 使用者 |
-| :-- | :-- | :-- |
-| `LeftToRight`（默认） | 水平右滑 | `Cupertino`、`MiuixDefault`、`AndroidCrossActivity`、`Scale`、`Fade`、`SharedAxisX` |
-| `TopToBottom` | 垂直下滑 | `Modal` |
-| `RightToLeft` / `BottomToTop` | 水平左滑 / 垂直上滑 | —（供自定义转场使用） |
-| `None` | 禁用（仅经返回按钮 / 系统返回 pop） | `None` |
+`NavSwipeDirection` 的取值是**物理屏幕方向**（手指往哪个方向移动），**不随布局方向镜像**，因此请按 LTR / RTL 选对方向：
 
-该手势使用按轴锁定的拖拽检测器，只认自身轴向，放行页面在另一轴上的滚动与点击。可用 `entry(swipeDismiss = ...)` 按路由覆盖——包括用 `NavSwipeDirection.None` 在某路由上禁用手势（例如必须经按钮离开的确认页）：
+| 方向 | 手指移动 |
+| :-- | :-- |
+| `LeftToRight` | 向右 —— LTR 下的返回滑动 |
+| `RightToLeft` | 向左 —— RTL 下的返回滑动 |
+| `TopToBottom` | 向下 —— 底部上滑 Modal 的关闭 |
+| `BottomToTop` | 向上 |
+| `None`（默认） | 禁用 —— 仅经返回按钮 / 系统返回 pop |
+
+一旦手势认领成功，它会在本次手势余下过程中独占指针（消费两个轴向），因此跨轴的轻微滑动既不会抢走它、也不会中途取消；在手指抬起前，页面内的点击 / 滚动都被屏蔽。可按路由设置或覆盖——包括用 `NavSwipeDirection.None` 让某路由仅按钮关闭：
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 
 NavDisplay(backStack) {
-    entry<Route.Home> { HomeScreen() }
-    // 底部表单：从 NavTransitions.Modal 继承 TopToBottom。
-    entry<Route.Sheet>(transition = NavTransitions.Modal) { SheetScreen() }
-    // 强制某路由仅按钮关闭，无论其转场如何。
-    entry<Route.Confirm>(swipeDismiss = NavSwipeDirection.None) { ConfirmScreen() }
+    // 在该路由上开启 LTR 返回滑动（默认关闭）。
+    entry<Route.Home>(swipeDismiss = NavSwipeDirection.LeftToRight) { HomeScreen() }
+    // 底部表单：下滑关闭。
+    entry<Route.Sheet>(transition = NavTransitions.Modal, swipeDismiss = NavSwipeDirection.TopToBottom) { SheetScreen() }
+    // 不设置（默认 None）：仅按钮关闭。
+    entry<Route.Confirm> { ConfirmScreen() }
 }
 ```
 
-自定义转场可把自然方向传给工厂：`navGraphicsTransition(dismissDirection = NavSwipeDirection.TopToBottom) { ... }`。
+自定义转场仍可声明自然方向，供路由继承：`navGraphicsTransition(dismissDirection = NavSwipeDirection.LeftToRight) { ... }`。
 
 ## 自定义转场
 
