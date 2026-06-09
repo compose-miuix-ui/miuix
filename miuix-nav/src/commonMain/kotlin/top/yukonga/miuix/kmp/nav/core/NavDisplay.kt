@@ -3,8 +3,51 @@
 
 package top.yukonga.miuix.kmp.nav.core
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import top.yukonga.miuix.kmp.nav.runtime.NavChange
+import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
+import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
+import top.yukonga.miuix.kmp.nav.runtime.navReconcile
+import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
+import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
+import top.yukonga.miuix.kmp.nav.runtime.settleTo
+import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
+import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
+import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryViewModelStore
+import top.yukonga.miuix.kmp.nav.state.navMaxLifecycleFor
+import top.yukonga.miuix.kmp.nav.state.rememberNavEntryLifecycleOwner
+import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
+import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import kotlin.reflect.KClass
 
 /**
@@ -83,3 +126,362 @@ class NavEntryBuilder {
  * prebuilt lookup of this exact shape.
  */
 internal fun entryProvider(builder: NavEntryBuilder.() -> Unit): (NavKey) -> NavEntry<*> = NavEntryBuilder().apply(builder).build()
+
+/**
+ * Drives [NavPresentation.animatedTop] towards [target] with the single shared convergence spring,
+ * unless a gesture currently owns the float (in which case the gesture layer snaps it via
+ * `snapToFinger`). Implemented as a [LaunchedEffect] keyed on [target] that defers to the one shared
+ * spring entry point `settleTo` (Phase 3, §0.3) — the renderer never builds its own
+ * [androidx.compose.animation.core.AnimationSpec].
+ */
+@Composable
+private fun NavPresentation.animateTopTo(target: Float) {
+    LaunchedEffect(target) {
+        if (animatedTop.value != target) {
+            animatedTop.settleTo(target)
+        }
+    }
+}
+
+/** Reads the per-route [NavTransition] override from an entry's metadata, or null to inherit. */
+private fun NavEntry<*>.transitionOrNull(): NavTransition? = metadata[NAV_TRANSITION_METADATA_KEY] as? NavTransition
+
+/**
+ * Private rendering core shared by all [NavDisplay] overloads.
+ *
+ * Responsibilities:
+ * - build one [NavEntry] per current back-stack key via [entryProvider];
+ * - reconcile against the previous render set ([NavPresentation.reconcile]) to obtain the presentation
+ *   set (current ∪ exiting) and the [NavChange];
+ * - keep the single driving float [NavPresentation.animatedTop] converging to `lastIndex` via the
+ *   shared spring ([animateTopTo] → `settleTo`);
+ * - precompute a `contentKey -> index` map at reconcile time so depth math is an O(1) lookup at
+ *   render time (no O(n^2) rebuild of NavEntry instances per frame);
+ * - render only the visible window ([derivedStateOf] over `presented` + the governing opaqueDepth),
+ *   applying the governing transition (boundary ownership §4.3), the orthogonal [effects], and
+ *   per-entry state scopes; fully-exited entries are unloaded.
+ *
+ * Visual reads of [NavPresentation.animatedTop] happen inside deferred `graphicsLayer { }` blocks so
+ * the per-frame float change does not recompose this function. The saveable-state holder is created
+ * **once here** and passed down to each [NavEntryHost] (stable identity, see §0.4).
+ */
+@Composable
+private fun NavDisplayLayout(
+    backStack: NavBackStack,
+    entryProvider: (NavKey) -> NavEntry<*>,
+    onBack: () -> Unit,
+    transition: NavTransition,
+    effects: NavDisplayEffects,
+    modifier: Modifier = Modifier,
+) {
+    val presentation = rememberNavPresentation(backStack.lastIndex)
+    val stateHolder = rememberNavSaveableStateHolder()
+
+    // [onBack] is a real, forwarded callback held by this layout. Phase 8 Task 8.9 adds the gesture
+    // consumers here — PredictiveBackHandler(enabled = backStack.size > 1) and Modifier.navEdgeSwipe —
+    // both driving the same presentation.animatedTop and invoking onBack on commit (see §0.5). Until
+    // then it is the plain system-back pass-through supplied by the overloads.
+
+    // Build entries for the current back stack and reconcile. The build runs only when the back-stack
+    // key list changes; entry instances for surviving keys are reused by the presentation. The
+    // reconcile pass classifies the change against the PREVIOUS back-stack content keys (kept in a
+    // remembered holder, not the presented set — the latter still holds exiting keys) and precomputes a
+    // stable contentKey -> back-stack-index map so the render loop never rebuilds NavEntry instances to
+    // recover an index (no O(n^2)).
+    val currentKeyList = backStack.toList()
+    // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
+    // by UI, so it must not be snapshot state (no cross-phase back-write).
+    val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
+    val indexByContentKey = remember(currentKeyList) {
+        val currentEntries = currentKeyList.map { entryProvider(it) }
+        val newContentKeys = currentEntries.map { it.contentKey }
+        presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
+        previousContentKeys[0] = newContentKeys
+        currentEntries.withIndex().associate { (index, e) -> e.contentKey to index }
+    }
+
+    // Drive the single shared float towards the new top index via the shared spring. The renderer only
+    // sets the target; the gesture layer (Phase 8 Task 8.9) may snapToFinger it instead.
+    presentation.animateTopTo(backStack.lastIndex.toFloat())
+
+    var layoutSize by remember { mutableStateOf(IntSize.Zero) }
+    val layoutDirection = LocalLayoutDirection.current
+    val density = LocalDensity.current
+
+    Box(
+        modifier = modifier.onSizeChanged { layoutSize = it },
+    ) {
+        // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The
+        // governing opaqueDepth is the global transition's (per-route overrides only deepen, never
+        // shrink, the kept window; the renderer keeps a layer alive while ANY transition would). This
+        // derivedStateOf reads the coarse (composition-time) animatedTop value so only crossing an
+        // integer boundary re-evaluates the window; per-frame floats are read lazily in graphicsLayer.
+        val visibleEntries by remember(presentation, transition, indexByContentKey) {
+            derivedStateOf {
+                val top = presentation.animatedTop.value
+                presentation.presented.filter { entry ->
+                    val index = indexByContentKey[entry.contentKey] ?: return@filter false
+                    val d = relativeDepth(top, index)
+                    isVisibleAt(d, transition.opaqueDepth)
+                }
+            }
+        }
+
+        visibleEntries.fastForEach { entry ->
+            key(entry.contentKey) {
+                val entryIndex = indexByContentKey[entry.contentKey] ?: return@key
+
+                // Boundary ownership (§4.3): the entry's own transition governs while it is at the
+                // top (d <= 0); the upper neighbour's transition governs the covered treatment
+                // (0 < d <= 1). Both are resolved here from the precomputed index map; NavEntryHost
+                // picks per relativeDepth inside the deferred graphicsLayer so the choice costs no
+                // recomposition.
+                val ownTransition = entry.transitionOrNull() ?: transition
+                val upperKey = backStack.getOrNull(entryIndex + 1)
+                val upperTransition = upperKey?.let { entryProvider(it).transitionOrNull() } ?: transition
+
+                NavEntryHost(
+                    entry = entry,
+                    entryIndex = entryIndex,
+                    presentation = presentation,
+                    stateHolder = stateHolder,
+                    ownTransition = ownTransition,
+                    upperTransition = upperTransition,
+                    change = presentation.change,
+                    effects = effects,
+                    layoutSize = layoutSize,
+                    layoutDirection = layoutDirection,
+                    density = density,
+                    onUnload = { presentation.unload(entry) },
+                )
+            }
+        }
+    }
+}
+
+/** Default rounded-corner radius used by [NavDisplayEffects.enableCornerClip]. */
+private val NavCornerClipRadius = 16.dp
+
+/**
+ * Renders one presented entry as a pure function of [NavPresentation.animatedTop].
+ *
+ * The driving float is read **only** inside deferred `graphicsLayer { }` blocks (here and inside the
+ * transition's own `transformEntry`), so per-frame changes never recompose this host. The host:
+ * - computes the coarse `relativeDepth = animatedTop - entryIndex` (composition-time, integer bucket);
+ * - unloads itself when it has fully left the front edge (d <= -1 && isRemoving);
+ * - selects the governing transition (own when d <= 0, upper when 0 < d) per §4.3 and applies its
+ *   `transformEntry` with a [LiveNavTransitionScope] (per-frame deferred read);
+ * - layers the orthogonal [effects] via [NavDisplayEffects]'s per-depth helpers
+ *   (`shouldClipCornersAt` / `shouldBlockInputAt` / `dimAlphaAt`);
+ * - scopes the content with the shared [stateHolder]'s `EntryStateContent`, a per-entry lifecycle
+ *   owner, and a per-entry view-model store owner (Phase 5, real signatures);
+ * - keeps composition identity via the surrounding `key(contentKey)` + a cached `movableContentOf`.
+ *
+ * @param stateHolder the single saveable-state holder created once in [NavDisplayLayout] and shared
+ *   across all hosts (stable identity, §0.4).
+ */
+@Composable
+private fun NavEntryHost(
+    entry: NavEntry<*>,
+    entryIndex: Int,
+    presentation: NavPresentation,
+    stateHolder: NavSaveableStateHolder,
+    ownTransition: NavTransition,
+    upperTransition: NavTransition,
+    change: NavChange,
+    effects: NavDisplayEffects,
+    layoutSize: IntSize,
+    layoutDirection: LayoutDirection,
+    density: Density,
+    onUnload: () -> Unit,
+) {
+    // opaqueDepth of the upper transition decides culling of this (covered) layer; for the top
+    // entry its own transition's opaqueDepth applies. Use the larger so Modal-style transitions
+    // (opaqueDepth > 1) keep the lower layer alive.
+    val opaqueDepth = maxOf(ownTransition.opaqueDepth, upperTransition.opaqueDepth)
+
+    // Cache a single movableContentOf per host so the entry's content keeps its state if the host is
+    // moved within the call hierarchy across recompositions.
+    val movableContent = remember {
+        movableContentOf<@Composable () -> Unit> { inner -> inner() }
+    }
+
+    // Coarse (composition-time) relative depth; only the integer bucket matters here, unlike the
+    // per-frame float read inside graphicsLayer.
+    val coarseDepth = presentation.animatedTop.value - entryIndex
+
+    // Per-entry state scopes. The view-model store owner and lifecycle owner are remembered per host;
+    // the saveable holder is the shared one passed from NavDisplayLayout.
+    val vmOwner = rememberNavEntryViewModelStoreOwner()
+    val maxLifecycle = navMaxLifecycleFor(entry.presentation, coarseDepth)
+    val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
+
+    // Unload exiting entries once they have left the front edge (d <= -1): release this entry's
+    // saveable state + view-model store, then drop it from the presentation set.
+    if (coarseDepth <= -1f && entry.presentation.isRemoving) {
+        SideEffect {
+            stateHolder.removeState(entry.contentKey)
+            vmOwner.dispose()
+            onUnload()
+        }
+        return
+    }
+
+    // Choose the governing transition at the coarse (integer-bucket) depth: own transition while at
+    // or entering the top (d <= 0), the upper neighbour's transition while covered (0 < d). The
+    // per-frame visual is then a pure deferred read inside the transition's own graphicsLayer.
+    val activeTransition = if (coarseDepth <= 0f) ownTransition else upperTransition
+    val entryModifier = with(activeTransition) {
+        Modifier.transformEntry(
+            LiveNavTransitionScope(
+                presentation = presentation,
+                entryIndex = entryIndex,
+                isRemoving = entry.presentation.isRemoving,
+                change = change,
+                layoutSize = layoutSize,
+                layoutDirection = layoutDirection,
+                density = density,
+            ),
+        )
+    }
+
+    val clipModifier = if (effects.shouldClipCornersAt(coarseDepth)) {
+        Modifier.clip(RoundedCornerShape(NavCornerClipRadius))
+    } else {
+        Modifier
+    }
+
+    val blockInputModifier = if (effects.shouldBlockInputAt(coarseDepth)) {
+        Modifier.pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                    event.changes.fastForEach { it.consume() }
+                }
+            }
+        }
+    } else {
+        Modifier
+    }
+
+    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier)) {
+        ProvideNavEntryViewModelStore(vmOwner) {
+            ProvideNavEntryLifecycle(lifecycleOwner) {
+                stateHolder.EntryStateContent(entry.contentKey) {
+                    movableContent { entry.Content() }
+                }
+            }
+        }
+
+        // Dim scrim on the covered layer, alpha driven by a deferred relative-depth read via the
+        // effects helper.
+        if (effects.dimAmount > 0f && coarseDepth > 0f && coarseDepth <= opaqueDepth) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val d = presentation.animatedTop.value - entryIndex
+                        alpha = effects.dimAlphaAt(d)
+                    }
+                    .background(Color.Black),
+            )
+        }
+    }
+}
+
+/**
+ * Host composable that renders and animates a navigation back stack with continuous-depth float
+ * transitions.
+ *
+ * This is the primary overload: routes are registered via the [content] DSL ([NavEntryBuilder.entry]).
+ * The [transition] is the global default; individual routes may override it via `entry(transition = …)`.
+ *
+ * @param backStack the live back stack to render (a [androidx.compose.runtime.snapshots.SnapshotStateList] of [NavKey]).
+ * @param modifier modifier applied to the host container.
+ * @param onBack callback for a system/predictive back; defaults to popping the last entry.
+ * @param transition the global default [NavTransition]; per-route overrides win.
+ * @param effects orthogonal visual effects (corner clip / dim / input blocking).
+ * @param content the route-registration DSL block.
+ */
+@Composable
+fun NavDisplay(
+    backStack: NavBackStack,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = { backStack.removeLastOrNull() },
+    transition: NavTransition = NavTransitions.Cupertino,
+    effects: NavDisplayEffects = NavDisplayEffects(),
+    content: NavEntryBuilder.() -> Unit,
+) {
+    val provider = remember(content) { entryProvider(content) }
+    NavDisplay(
+        backStack = backStack,
+        entryProvider = provider,
+        modifier = modifier,
+        onBack = onBack,
+        transition = transition,
+        effects = effects,
+    )
+}
+
+/**
+ * Convenience overload driving the back stack through a [NavController].
+ *
+ * @param navController the controller whose [NavController.backStack] is rendered.
+ * @param modifier modifier applied to the host container.
+ * @param onBack callback for a system/predictive back; defaults to [NavController.pop].
+ * @param transition the global default [NavTransition]; per-route overrides win.
+ * @param effects orthogonal visual effects.
+ * @param content the route-registration DSL block.
+ */
+@Composable
+@NonRestartableComposable
+fun NavDisplay(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = { navController.pop() },
+    transition: NavTransition = NavTransitions.Cupertino,
+    effects: NavDisplayEffects = NavDisplayEffects(),
+    content: NavEntryBuilder.() -> Unit,
+) {
+    NavDisplay(
+        backStack = navController.backStack,
+        modifier = modifier,
+        onBack = onBack,
+        transition = transition,
+        effects = effects,
+        content = content,
+    )
+}
+
+/**
+ * Low-level overload taking a prebuilt [entryProvider] instead of the DSL lambda.
+ *
+ * Declared `internal` because its signature exposes the `internal` [NavEntry] type; the public DSL
+ * overloads above forward to it within the module.
+ *
+ * @param backStack the live back stack to render.
+ * @param entryProvider lookup that builds a [NavEntry] for each [NavKey].
+ * @param modifier modifier applied to the host container.
+ * @param onBack callback for a system/predictive back; defaults to popping the last entry.
+ * @param transition the global default [NavTransition]; per-route overrides win.
+ * @param effects orthogonal visual effects.
+ */
+@Composable
+internal fun NavDisplay(
+    backStack: NavBackStack,
+    entryProvider: (NavKey) -> NavEntry<*>,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = { backStack.removeLastOrNull() },
+    transition: NavTransition = NavTransitions.Cupertino,
+    effects: NavDisplayEffects = NavDisplayEffects(),
+) {
+    require(backStack.isNotEmpty()) { "NavDisplay back stack cannot be empty" }
+    NavDisplayLayout(
+        backStack = backStack,
+        entryProvider = entryProvider,
+        onBack = onBack,
+        transition = transition,
+        effects = effects,
+        modifier = modifier,
+    )
+}
