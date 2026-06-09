@@ -12,25 +12,29 @@ import androidx.compose.ui.graphics.graphicsLayer
  * Direction of the interactive swipe that dismisses (pops) the current top entry.
  *
  * The renderer maps the finger travel along the matching axis onto the shared `animatedTop` driver
- * 1:1, so the dismiss gesture follows the same motion as the transition: a horizontal slide is
- * dismissed by a horizontal swipe, a bottom-up modal by a downward swipe. Each [NavTransition]
- * declares the natural direction for its motion via [NavTransition.dismissDirection]; a route may
- * override it (including disabling the gesture with [None]) through the `entry { }` DSL.
+ * 1:1, so the dismiss gesture follows the same axis as the transition: a horizontal slide is
+ * dismissed by a horizontal swipe, a bottom-up modal by a downward swipe. The values are **physical
+ * screen directions** (which way the finger moves) and are NOT mirrored for layout direction — so
+ * the "back" swipe is [LeftToRight] under LTR but [RightToLeft] under RTL; pick accordingly.
+ *
+ * Swipe-to-dismiss is opt-in: a [NavTransition] may declare a direction via
+ * [NavTransition.dismissDirection] (none of the [NavTransitions] presets do by default), and a route
+ * may set or override it (including disabling with [None]) through the `entry(swipeDismiss = …)` DSL.
  */
 enum class NavSwipeDirection {
     /** No interactive swipe-to-dismiss; the entry is popped only via the back button / system back. */
     None,
 
-    /** Horizontal swipe toward the trailing edge (finger moves right). Standard back gesture. */
+    /** Horizontal swipe with the finger moving rightward (physical; the back swipe under LTR). */
     LeftToRight,
 
-    /** Horizontal swipe toward the leading edge (finger moves left). */
+    /** Horizontal swipe with the finger moving leftward (physical; the back swipe under RTL). */
     RightToLeft,
 
-    /** Vertical swipe downward (finger moves down). Natural dismiss for a bottom-up modal. */
+    /** Vertical swipe with the finger moving downward. Natural dismiss for a bottom-up modal. */
     TopToBottom,
 
-    /** Vertical swipe upward (finger moves up). */
+    /** Vertical swipe with the finger moving upward. */
     BottomToTop,
 }
 
@@ -66,13 +70,15 @@ fun interface NavTransition {
     val opaqueDepth: Float get() = 1f
 
     /**
-     * The natural direction of the interactive swipe that dismisses this entry, matching the
-     * transition's own motion. Defaults to [NavSwipeDirection.LeftToRight] (the standard back swipe for
-     * a horizontal slide). A bottom-up modal overrides this to [NavSwipeDirection.TopToBottom]; an
-     * instant transition disables the gesture with [NavSwipeDirection.None]. A route may further
-     * override it via the `entry { }` DSL.
+     * The direction of the interactive swipe that dismisses this entry. Defaults to
+     * [NavSwipeDirection.None]: the swipe-to-dismiss gesture is **opt-in**. Enable it either by
+     * authoring a transition that declares a direction matching its own motion (e.g. an LTR
+     * horizontal slide -> [NavSwipeDirection.LeftToRight] / RTL -> [NavSwipeDirection.RightToLeft], a
+     * bottom-up modal -> [NavSwipeDirection.TopToBottom]), or per route via the
+     * `entry(swipeDismiss = …)` DSL. None of the built-in [NavTransitions] presets enable it by
+     * default. Directions are physical (not mirrored for layout direction); see [NavSwipeDirection].
      */
-    val dismissDirection: NavSwipeDirection get() = NavSwipeDirection.LeftToRight
+    val dismissDirection: NavSwipeDirection get() = NavSwipeDirection.None
 }
 
 /**
@@ -86,12 +92,13 @@ fun interface NavTransition {
  * zero recomposition while they animate (spec section 6.2).
  *
  * @param opaqueDepth see [NavTransition.opaqueDepth]; defaults to `1f`.
- * @param dismissDirection see [NavTransition.dismissDirection]; defaults to [NavSwipeDirection.LeftToRight].
+ * @param dismissDirection see [NavTransition.dismissDirection]; defaults to [NavSwipeDirection.None]
+ *   (swipe-to-dismiss is opt-in).
  * @param block the per-frame graphics-layer transform.
  */
 fun navGraphicsTransition(
     opaqueDepth: Float = 1f,
-    dismissDirection: NavSwipeDirection = NavSwipeDirection.LeftToRight,
+    dismissDirection: NavSwipeDirection = NavSwipeDirection.None,
     block: GraphicsLayerScope.(NavTransitionScope) -> Unit,
 ): NavTransition = object : NavTransition {
     override val opaqueDepth: Float = opaqueDepth

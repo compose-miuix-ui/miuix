@@ -151,10 +151,11 @@ object NavTransitions {
     /**
      * Bottom-up modal: the entering page slides up from the bottom edge (d: -1 -> 0,
      * translationY: +height -> 0). The layer below is kept fully visible and untouched, so
-     * [opaqueDepth] is raised to 2f to stop the host from culling it. Translation is linear so a
-     * downward dismiss gesture follows the finger 1:1.
+     * [opaqueDepth] is raised to 2f to stop the host from culling it. Like every preset, swipe-to-
+     * dismiss is opt-in: pass `entry(swipeDismiss = NavSwipeDirection.TopToBottom)` to let a downward
+     * swipe dismiss it (the translation is linear, so the gesture follows the finger 1:1).
      */
-    val Modal: NavTransition = navGraphicsTransition(opaqueDepth = 2f, dismissDirection = NavSwipeDirection.TopToBottom) { scope ->
+    val Modal: NavTransition = navGraphicsTransition(opaqueDepth = 2f) { scope ->
         val d = scope.relativeDepth
         if (d <= 0f) {
             val height = scope.layoutSize.height.toFloat()
