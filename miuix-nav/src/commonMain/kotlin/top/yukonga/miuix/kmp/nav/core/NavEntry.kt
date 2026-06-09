@@ -26,6 +26,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavRole
  *   by the DSL). Empty by default.
  * @property content the composable that renders this entry, receiving the typed [key].
  */
+@PublishedApi
 internal class NavEntry<K : NavKey>(
     val key: K,
     val contentKey: Any,
