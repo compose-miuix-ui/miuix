@@ -3,7 +3,7 @@
 
 package top.yukonga.miuix.kmp.nav.gesture
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -20,8 +20,11 @@ import kotlinx.coroutines.flow.SharedFlow
  *
  * This is the skiko substitute for a system predictive-back dispatcher: there is no per-event
  * progress, only a fire-and-commit signal.
+ *
+ * Stable, not immutable: the identity is fixed but the backing hot flow's state changes on each
+ * [request] emission (those changes are observed via [events], not Compose snapshot state).
  */
-@Immutable
+@Stable
 class NavBackRequest {
     private val _events = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -47,16 +50,15 @@ val LocalNavBackRequest = staticCompositionLocalOf { NavBackRequest() }
  * On iOS/macOS without a hardware keyboard this is inert; continuous edge swipes are handled by
  * [Modifier.navEdgeSwipe] instead.
  */
-fun Modifier.navBackKeyModifier(enabled: Boolean, request: NavBackRequest): Modifier =
-    if (!enabled) {
-        this
-    } else {
-        this.onPreviewKeyEvent { event ->
-            if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
-                request.request()
-                true
-            } else {
-                false
-            }
+fun Modifier.navBackKeyModifier(enabled: Boolean, request: NavBackRequest): Modifier = if (!enabled) {
+    this
+} else {
+    this.onPreviewKeyEvent { event ->
+        if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
+            request.request()
+            true
+        } else {
+            false
         }
     }
+}

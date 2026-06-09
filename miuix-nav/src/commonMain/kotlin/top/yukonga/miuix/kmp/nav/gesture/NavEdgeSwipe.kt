@@ -48,6 +48,10 @@ import kotlin.math.abs
  * @param onCommit Invoked once after the commit spring settles (pop the back stack here).
  * @param onCancel Invoked once after the cancel spring settles.
  */
+// composed { } is required here: the swipe needs composition-scoped state (coroutine scope,
+// remembered layout size). A Modifier.Node rewrite is a deferred optimization, so suppress the
+// no-composed lint locally rather than disabling the performance rule project-wide.
+@Suppress("ktlint:compose:modifier-composed-check")
 fun Modifier.navEdgeSwipe(
     enabled: Boolean,
     animatedTop: Animatable<Float, AnimationVector1D>,
