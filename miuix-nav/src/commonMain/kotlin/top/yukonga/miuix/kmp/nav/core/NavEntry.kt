@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.nav.core
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -53,6 +54,7 @@ internal class NavEntry<K : NavKey>(
  * @property isRemoving true while the entry has been removed from the back stack but is still
  *   animating out (relative depth has not yet reached the unload threshold).
  */
+@Immutable
 internal data class NavPresentationState(
     val role: NavRole,
     val isRemoving: Boolean,
