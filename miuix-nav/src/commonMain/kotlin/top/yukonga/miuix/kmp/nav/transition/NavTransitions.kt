@@ -128,13 +128,15 @@ object NavTransitions {
             }
             if (scope.role == NavRole.Outgoing) {
                 // Committed (or programmatic) exit: fly a further CrossActivityDrift toward the
-                // physical right (the reference always exits rightward) and fade within the first
-                // 20% of the post-commit sweep. While the finger still drives, p == release
-                // progress and the post fraction stays 0 (the reference applies no alpha
-                // pre-commit).
+                // physical right (the reference always exits rightward) and fade out at the start
+                // of the post-commit sweep. While the finger still drives, p == release progress
+                // and the post fraction stays 0 (the reference applies no alpha pre-commit). The
+                // reference rate is 5x over the first 20% of its fixed 450ms (i.e. 90ms of wall
+                // time); our post fraction runs on the depth axis, which the settle covers faster
+                // early on, so 3.5x (~29% of the sweep) lands on the same wall-clock window.
                 val releaseP = if (gesture != null) (1f - gesture.progress).coerceAtLeast(0.01f) else 1f
                 val post = (1f - p / releaseP).coerceIn(0f, 1f)
-                alpha = (1f - post * 5f).coerceAtLeast(0f)
+                alpha = (1f - post * 3.5f).coerceAtLeast(0f)
                 tx += post * driftPx
             } else {
                 // Entering the top (push, or a cancelled back gesture): quick fade-in while the
