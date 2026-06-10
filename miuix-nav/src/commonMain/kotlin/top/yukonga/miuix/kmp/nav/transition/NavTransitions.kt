@@ -81,68 +81,86 @@ object NavTransitions {
     }
 
     /**
-     * Platform cross-activity feel (the AOSP task open/close animation). The top page behaves
-     * like the platform's shrinking card (d: -1 -> 0): it scales between [CROSS_ACTIVITY_MIN_SCALE]
-     * and 1 while drifting up to [CrossActivityDrift] **away from the gesture's originating
-     * edge** (toward the trailing edge for programmatic transitions), staying **fully opaque
-     * through the whole interactive range** — alpha falls only across the last
-     * [CROSS_ACTIVITY_FADE_WINDOW] of the exit, so a dragged page stays solid (like the platform
-     * card) and vanishes quickly once the commit settle carries it out. The covered page stays
-     * opaque and parallaxes a quarter width toward the leading edge (d: 0 -> 1), matching the
-     * platform's pop spec (`slideIn(-width/4)` for the revealed layer). No dim is baked in: the
-     * platform derives depth from scale and parallax alone, so pair this with
-     * `NavDisplayEffects(dimAmount = 0f)` for the authentic look.
+     * Platform cross-activity feel, transcribed from the reference `CrossActivityBackAnimation` /
+     * `DefaultCrossActivityBackAnimation` (AOSP WM Shell):
      *
-     * **Gesture-aware**: while a back gesture drives the transition ([NavTransitionScope.gesture]
-     * non-null), the card's transform origin tracks the finger — the vertical pivot follows
-     * `touchY` (so the card visibly rides up and down with the finger) and the horizontal pivot
-     * leans away from the originating edge, like the platform's predictive-back card. The
-     * context stays frozen through the release settle, so the pivot never snaps at lift. The
-     * remaining platform nuance (the revealed layer shrinking with the gesture and growing back
-     * after commit) is not a pure function of the depth sweep and is intentionally not reproduced.
+     * - **Pre-commit (finger down)**: the top card scales **centered** toward
+     *   [CROSS_ACTIVITY_MIN_SCALE] (0.9, the reference `MAX_SCALE`) with **no fade**; a LEFT-edge
+     *   gesture additionally offsets it so its right side hugs the screen edge minus
+     *   [CrossActivityEdgeMargin]; a RIGHT-edge gesture stays centered. The card rides vertically
+     *   with the finger (approximated by tracking `touchY` through the transform origin; the
+     *   reference shifts the rect by a damped touch delta of the same magnitude). The revealed
+     *   layer below sits [CrossActivityDrift] behind (physical left) and scales **in sync** with
+     *   the card.
+     * - **Post-commit (released)**: the card flies a further [CrossActivityDrift] out and fades
+     *   away within the **first 20%** of the remaining sweep (`alpha = 1 - 5·post`, the reference
+     *   curve); the revealed layer grows back to full size and slides to rest. The frozen
+     *   [NavTransitionScope.gesture] marks the release point, so while the finger still drives,
+     *   the post fraction is exactly 0 and the pre-commit mapping holds — the two phases connect
+     *   without a jump. A programmatic pop is all post-commit (release point = rest), giving the
+     *   classic back-button close; a push plays the reverse with a quick fade-in.
      *
-     * Corner clipping is the orthogonal effects layer's job: pair this preset with
-     * `NavDisplayEffects(cornerClipMode = NavCornerClipMode.All, cornerClipRadius = ...)` so the
-     * card rounds **all four** corners with the platform screen radius (smooth corners included),
-     * instead of the slide-style leading-edge clip.
+     * Directions are physical (not mirrored for RTL), like the reference. The scrim on the
+     * revealed layer is the orthogonal [NavDisplayEffects.dimAmount] (the reference dims it at
+     * 0.2 light / 0.8 dark, fading out across the post-commit sweep); corner clipping is the
+     * effects layer too — pair with `NavDisplayEffects(cornerClipMode = NavCornerClipMode.All,
+     * cornerClipRadius = rememberNavSystemCornerRadius())` to round all four corners with the
+     * screen radius, exactly like the reference's `setCornerRadius(windowCornerRadius)`.
      */
     val AndroidCrossActivity: NavTransition = navGraphicsTransition(opaqueDepth = 1f) { scope ->
         val d = scope.relativeDepth
+        val gesture = scope.gesture
+        val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
         if (d <= 0f) {
             val p = topProgress(d) // 0 off-edge, 1 at top
             scaleX = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * p
             scaleY = scaleX
-            val gesture = scope.gesture
-            // The card drifts AWAY from the edge the gesture originated from (a right-edge swipe
-            // carries it leftward); without a gesture (programmatic pop) it drifts toward the
-            // trailing edge. The drift must follow the edge, not the layout direction — otherwise
-            // it overpowers the much smaller pivot lean and the card visibly moves the wrong way.
-            val trailing = if (scope.layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            val driftSign = when (gesture?.swipeEdge) {
-                NavSwipeEdge.Left -> 1f
-                NavSwipeEdge.Right -> -1f
-                else -> trailing
+            // LEFT-edge gestures hug the card's right side against the screen edge minus the
+            // display-bounds margin; RIGHT-edge gestures scale centered (reference behavior).
+            var tx = 0f
+            if (gesture?.swipeEdge == NavSwipeEdge.Left) {
+                val hugMax = scope.layoutSize.width.toFloat() * (1f - CROSS_ACTIVITY_MIN_SCALE) / 2f -
+                    with(scope.density) { CrossActivityEdgeMargin.toPx() }
+                tx += (1f - p) * hugMax.coerceAtLeast(0f)
             }
-            translationX = driftSign * (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-            alpha = (p / CROSS_ACTIVITY_FADE_WINDOW).coerceIn(0f, 1f)
-            // Gesture-aware card: while a back gesture drives (or its frozen context settles), the
-            // card shrinks toward the finger — the pivot tracks the touch's vertical position, so
-            // moving the finger up/down visibly carries the card with it (the platform behavior).
-            // The horizontal pivot leans away from the originating edge.
+            if (scope.role == NavRole.Outgoing) {
+                // Committed (or programmatic) exit: fly out and fade within the first 20% of the
+                // post-commit sweep. While the finger still drives, p == release progress and the
+                // post fraction stays 0 (the reference applies no alpha pre-commit).
+                val releaseP = if (gesture != null) (1f - gesture.progress).coerceAtLeast(0.01f) else 1f
+                val post = (1f - p / releaseP).coerceIn(0f, 1f)
+                alpha = (1f - post * 5f).coerceAtLeast(0f)
+                tx += post * driftPx
+            } else {
+                // Entering the top (push, or a cancelled back gesture): quick fade-in while the
+                // card zooms up; opaque after the first 20% of travel.
+                alpha = (p / 0.2f).coerceIn(0f, 1f)
+            }
+            translationX = tx
+            // Vertical follow: centered horizontal pivot (reference scaleCentered), vertical pivot
+            // tracking the finger. Frozen through the release settle, so it never snaps at lift.
             if (gesture != null) {
                 val height = scope.layoutSize.height.toFloat()
                 val pivotY = if (height > 0f) (gesture.touchY / height).coerceIn(0.1f, 0.9f) else 0.5f
-                val pivotX = when (gesture.swipeEdge) {
-                    NavSwipeEdge.Left -> 0.8f
-                    NavSwipeEdge.Right -> 0.2f
-                    NavSwipeEdge.None -> 0.5f
-                }
-                transformOrigin = TransformOrigin(pivotX, pivotY)
+                transformOrigin = TransformOrigin(0.5f, pivotY)
             }
         } else {
-            // Covered: opaque, parallaxed a quarter width toward the leading edge. Mirrored for RTL.
-            val sign = if (scope.layoutDirection == LayoutDirection.Rtl) 1f else -1f
-            translationX = sign * coverProgress(d) * scope.layoutSize.width.toFloat() * 0.25f
+            val dc = coverProgress(d) // 0 at top, 1 covered
+            // Revealed layer: starts CrossActivityDrift behind (physical left) and slides to rest.
+            translationX = -dc * driftPx
+            if (gesture != null) {
+                // Scales in sync with the card while the finger drives; grows back to full size
+                // across the post-commit sweep (release point from the frozen gesture context).
+                val liveScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * dc
+                val releaseProgress = gesture.progress
+                val post = if (releaseProgress >= 1f) {
+                    1f
+                } else {
+                    (((1f - dc) - releaseProgress) / (1f - releaseProgress)).coerceIn(0f, 1f)
+                }
+                scaleX = liveScale + (1f - liveScale) * post
+                scaleY = scaleX
+            }
         }
     }
 
@@ -223,18 +241,20 @@ object NavTransitions {
     /** Fixed horizontal offset used by [SharedAxisX]. */
     private val SharedAxisOffset = 30.dp
 
-    /** Smallest scale the [AndroidCrossActivity] top card shrinks to (the platform gesture value). */
-    private const val CROSS_ACTIVITY_MIN_SCALE = 0.85f
+    /** Smallest scale of the [AndroidCrossActivity] card (the reference `MAX_SCALE = 0.9`). */
+    private const val CROSS_ACTIVITY_MIN_SCALE = 0.9f
 
-    /** Horizontal drift of the [AndroidCrossActivity] top card over its exit (platform commit offset). */
+    /**
+     * Behind-offset of the revealed layer and post-commit fly-out distance of the card (the
+     * reference `cross_activity_back_entering_start_offset = 96dp`).
+     */
     private val CrossActivityDrift = 96.dp
 
     /**
-     * Fraction of the [AndroidCrossActivity] exit over which the top card fades, measured from the
-     * off-edge end: the card is fully opaque for the first 60% of travel (the interactive range)
-     * and fades out across the final 40% once a commit carries it away.
+     * Margin kept between the hugging card edge and the screen edge for LEFT-edge gestures (the
+     * reference `cross_task_back_vertical_margin = 8dp`, reused as the display-bounds margin).
      */
-    private const val CROSS_ACTIVITY_FADE_WINDOW = 0.4f
+    private val CrossActivityEdgeMargin = 8.dp
 }
 
 /**
