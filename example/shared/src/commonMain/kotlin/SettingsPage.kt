@@ -52,6 +52,7 @@ private val FloatingToolbarPositionOptions =
 private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
+private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
@@ -281,6 +282,12 @@ private fun SettingsContent(
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                 ) {
+                    OverlayDropdownPreference(
+                        title = "Transition Style",
+                        items = NavTransitionStyleOptions,
+                        selectedIndex = appState.navTransitionStyle,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(navTransitionStyle = it) } },
+                    )
                     SwitchPreference(
                         title = "Enable Corner Clip",
                         summary = "Clip the top scene with rounded corners during transitions",

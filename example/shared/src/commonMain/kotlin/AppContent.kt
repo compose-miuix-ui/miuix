@@ -208,10 +208,17 @@ fun AppContent(
             else -> NavSwipeDirection.LeftToRight
         }
 
+        // Global transition style: the established default, or the platform cross-activity feel.
+        // Presets are singletons, so the expression itself is stable across recompositions.
+        val navTransition = when (appState.navTransitionStyle) {
+            1 -> NavTransitions.AndroidCrossActivity
+            else -> NavTransitions.MiuixDefault
+        }
+
         NavDisplay(
             backStack = backStack,
             onBack = { navigator.pop() },
-            transition = NavTransitions.MiuixDefault,
+            transition = navTransition,
             effects = effects,
         ) {
             entry<Route.Main>(swipeDismiss = swipeBackDirection) {
