@@ -111,10 +111,16 @@ internal class NavPresentation(initialTopIndex: Float) {
      * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation
      * set, preserving leaving entries (flagged via [NavEntry.presentation]'s `isRemoving`) until they
      * are unloaded at relative depth <= -1. [change] is the classification computed by `navReconcile`
-     * (Phase 2). Surviving instances are reused so `movableContentOf` identity is preserved.
+     * (Phase 2). Surviving instances are reused so `movableContentOf` identity is preserved, but they
+     * adopt the fresh registration payload ([NavEntry.adoptFrom]) so a rebuilt entry provider
+     * refreshes live entries instead of leaving them pinned to first-push captures.
+     *
+     * A [NavChange.None] classification (identical key lists — the reconcile re-ran because the
+     * provider changed, not the stack) keeps the previous [change]: an in-flight transition keeps
+     * reading the classification that started it.
      */
     fun reconcile(currentEntries: List<NavEntry<*>>, change: NavChange) {
-        this.change = change
+        if (change != NavChange.None) this.change = change
         val currentKeys = currentEntries.mapTo(HashSet(currentEntries.size)) { it.contentKey }
         // Entries that fell off the back stack become "leaving" but stay rendered.
         _presented.forEach { e ->
@@ -129,9 +135,11 @@ internal class NavPresentation(initialTopIndex: Float) {
                 e.presentation = e.presentation.copy(isRemoving = false)
                 _presented.add(e)
             } else {
-                // Reuse existing instance; clear any stale leaving flag (re-push of same key).
+                // Reuse existing instance; clear any stale leaving flag (re-push of same key) and
+                // adopt the freshly built registration payload (content / metadata).
                 val existing = _presented.first { it.contentKey == e.contentKey }
                 existing.presentation = existing.presentation.copy(isRemoving = false)
+                existing.adoptFrom(e)
             }
         }
     }

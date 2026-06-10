@@ -30,9 +30,46 @@ import top.yukonga.miuix.kmp.nav.transition.NavRole
 internal class NavEntry<K : NavKey>(
     val key: K,
     val contentKey: Any,
-    val metadata: Map<String, Any>,
-    val content: @Composable (K) -> Unit,
+    metadata: Map<String, Any>,
+    content: @Composable (K) -> Unit,
 ) {
+    /**
+     * Registration payload as built by the DSL. A holder class (rather than two snapshot fields)
+     * because a composable lambda cannot round-trip through a function-typed snapshot delegate —
+     * its runtime class implements the composable calling convention, not `FunctionN`, so the
+     * delegate's checkcast throws; a plain class field sidesteps the cast entirely.
+     */
+    private class Registration<K : NavKey>(
+        val metadata: Map<String, Any>,
+        val content: @Composable (K) -> Unit,
+    )
+
+    /**
+     * Snapshot-backed so [adoptFrom] can refresh a surviving instance in place when the entry
+     * provider is rebuilt (a DSL capture changed): instance identity must stay stable for
+     * `movableContentOf`, so the reconciler reuses the old instance and swaps the registration.
+     */
+    private var registration: Registration<K> by mutableStateOf(Registration(metadata, content))
+
+    /** Arbitrary per-entry data (per-route transition / swipe overrides live here). */
+    val metadata: Map<String, Any> get() = registration.metadata
+
+    /**
+     * Adopts the registration payload of a freshly built [other] entry with the same [contentKey],
+     * keeping this instance (and its composition identity) alive. Guarded by payload equality so
+     * the routine reconcile on every stack mutation — which rebuilds entries from an unchanged
+     * provider — never invalidates readers: the content lambda reference and the metadata values
+     * only change when the provider itself was rebuilt.
+     */
+    fun adoptFrom(other: NavEntry<*>) {
+        @Suppress("UNCHECKED_CAST")
+        val incoming = (other as NavEntry<K>).registration
+        val current = registration
+        if (current.content !== incoming.content || current.metadata != incoming.metadata) {
+            registration = incoming
+        }
+    }
+
     /**
      * Per-entry presentation snapshot maintained by the reconciler (role + removal flag). Read by
      * the renderer to pick the governing [top.yukonga.miuix.kmp.nav.transition.NavTransition].
@@ -44,7 +81,7 @@ internal class NavEntry<K : NavKey>(
     /** Renders this entry's content with its typed key. */
     @Composable
     fun Content() {
-        content(key)
+        registration.content(key)
     }
 }
 

@@ -297,7 +297,7 @@ private fun NavDisplayLayout(
     // snapshot list) inside the reconcile block, and the visible-window derivedStateOf re-evaluates
     // off that snapshot list rather than off this map.
     val indexByContentKey = remember { mutableMapOf<Any, Int>() }
-    remember(currentKeyList) {
+    remember(currentKeyList, entryProvider) {
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
@@ -341,8 +341,9 @@ private fun NavDisplayLayout(
 
     // Effective interactive dismiss direction of the CURRENT top entry: a per-route override wins,
     // else its governing transition declares the natural direction. Rebuilding one entry to read
-    // its metadata is O(1) and only happens when the stack or the global transition changes.
-    val topDismissDirection = remember(currentKeyList, transition) {
+    // its metadata is O(1) and only happens when the stack, the global transition, or the entry
+    // provider changes.
+    val topDismissDirection = remember(currentKeyList, transition, entryProvider) {
         val topEntry = entryProvider(currentKeyList.last())
         topEntry.swipeDismissOrNull() ?: (topEntry.transitionOrNull() ?: transition).dismissDirection
     }
