@@ -76,12 +76,23 @@ data class NavDisplayEffects(
     fun dimAlphaAt(relativeDepth: Float): Float = if (dimAmount <= 0f) 0f else relativeDepth.coerceIn(0f, 1f) * dimAmount
 
     /**
-     * Whether the entering top entry should be corner-clipped at relative depth [relativeDepth]. Only
-     * the entry strictly crossing the front edge (-1 < d < 0) is clipped, and only when
-     * [enableCornerClip]; a settled top (d == 0) or fully-exited entry (d == -1) is not clipped.
+     * Whether an entry should be corner-clipped at relative depth [relativeDepth], when
+     * [enableCornerClip]:
+     *
+     * - [NavCornerClipMode.Leading]: only the entry strictly crossing the front edge
+     *   (-1 < d < 0); a settled top (d == 0) or fully-exited entry (d == -1) is not clipped.
+     * - [NavCornerClipMode.All]: any layer at a fractional depth (-1 < d < 1, d != 0) — the
+     *   reference card animation rounds BOTH surfaces (the card and the revealed layer below)
+     *   for the whole animation, and the revealed layer is visibly scaled while covered.
      */
     @Stable
-    fun shouldClipCornersAt(relativeDepth: Float): Boolean = enableCornerClip && relativeDepth > -1f && relativeDepth < 0f
+    fun shouldClipCornersAt(relativeDepth: Float): Boolean {
+        if (!enableCornerClip) return false
+        return when (cornerClipMode) {
+            NavCornerClipMode.Leading -> relativeDepth > -1f && relativeDepth < 0f
+            NavCornerClipMode.All -> relativeDepth > -1f && relativeDepth < 1f && relativeDepth != 0f
+        }
+    }
 
     /**
      * Whether pointer input should be blocked for an entry at relative depth [relativeDepth]. Input is

@@ -197,6 +197,7 @@ fun Modifier.navSwipeDismiss(
                             progress = anchoredProgress(anchor = anchor, fingerProgress = fingerProgress).coerceAtLeast(0f),
                             swipeEdge = swipeEdge,
                             touchY = touchY,
+                            initialTouchY = down.position.y,
                         ),
                     )
                 }
