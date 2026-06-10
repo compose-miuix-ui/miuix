@@ -478,16 +478,23 @@ private fun NavEntryHost(
     }
 
     val clipModifier = if (effects.shouldClipCornersAt(coarseDepth)) {
-        // Squircle-clip only the leading edge — the corners that meet the screen edge as the entering
-        // page slides in — matching the reference navigation. absoluteSquircleClip uses physical
-        // corners (never flipped by layout direction), so pick the leading side per layout direction:
-        // left for LTR, right for RTL. The radius comes from the effects, so callers can follow the
-        // platform screen corner (e.g. rememberNavSystemCornerRadius).
+        // Squircle-clip the transitioning top entry. The radius comes from the effects, so callers
+        // can follow the platform screen corner (e.g. rememberNavSystemCornerRadius); the corner
+        // set follows the effects' clip mode. absoluteSquircleClip uses physical corners (never
+        // flipped by layout direction), so the leading side is picked per layout direction.
         val r = effects.cornerClipRadius
-        if (layoutDirection == LayoutDirection.Ltr) {
-            Modifier.absoluteSquircleClip(topLeft = r, topRight = 0.dp, bottomRight = 0.dp, bottomLeft = r)
-        } else {
-            Modifier.absoluteSquircleClip(topLeft = 0.dp, topRight = r, bottomRight = r, bottomLeft = 0.dp)
+        when (effects.cornerClipMode) {
+            // Card-style transitions scale the whole page: every corner meets visible background.
+            NavCornerClipMode.All -> Modifier.absoluteSquircleClip(topLeft = r, topRight = r, bottomRight = r, bottomLeft = r)
+
+            // Slide-style transitions: only the corners that meet the screen edge as the entering
+            // page slides in — left for LTR, right for RTL — matching the reference navigation.
+            NavCornerClipMode.Leading ->
+                if (layoutDirection == LayoutDirection.Ltr) {
+                    Modifier.absoluteSquircleClip(topLeft = r, topRight = 0.dp, bottomRight = 0.dp, bottomLeft = r)
+                } else {
+                    Modifier.absoluteSquircleClip(topLeft = 0.dp, topRight = r, bottomRight = r, bottomLeft = 0.dp)
+                }
         }
     } else {
         Modifier

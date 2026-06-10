@@ -9,18 +9,42 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
+ * Which corners of the transitioning top entry the corner-clip effect rounds.
+ *
+ * The clip is the effects layer's job (not the transition's) because it needs composable
+ * machinery the per-frame transition transform cannot host: the smooth (squircle) corner shape
+ * and a platform-provided radius ([rememberNavSystemCornerRadius]).
+ */
+enum class NavCornerClipMode {
+    /**
+     * Only the leading-edge corners (left under LTR, right under RTL) — the corners that meet
+     * the screen edge as a slide-style entering page moves in over the layer below.
+     */
+    Leading,
+
+    /**
+     * All four corners — for card-style transitions (e.g.
+     * [top.yukonga.miuix.kmp.nav.transition.NavTransitions.AndroidCrossActivity]) that scale the
+     * whole page, so every corner meets visible background.
+     */
+    All,
+}
+
+/**
  * Orthogonal visual effects applied by [NavDisplay] on top of the active
  * [top.yukonga.miuix.kmp.nav.transition.NavTransition].
  *
- * All three switches are computed against each entry's relative depth, independently of the chosen
+ * All switches are computed against each entry's relative depth, independently of the chosen
  * transition. This type holds no lambda fields and is therefore [Immutable]; the per-depth helpers
  * are pure functions of the switches and the depth.
  *
- * @property enableCornerClip whether to clip the entering top entry with rounded corners on its
- *   leading edge while it slides in over the layer below.
- * @property cornerClipRadius the leading-edge corner radius used when [enableCornerClip] is on.
- *   Defaults to 0.dp (no rounding); pass [rememberNavSystemCornerRadius] to follow the device screen
- *   corner (matching the platform), which still yields no rounding where the platform reports 0.
+ * @property enableCornerClip whether to clip the transitioning top entry with smooth rounded
+ *   corners (per [cornerClipMode]) while it animates over the layer below.
+ * @property cornerClipRadius the corner radius used when [enableCornerClip] is on. Defaults to
+ *   0.dp (no rounding); pass [rememberNavSystemCornerRadius] to follow the device screen corner
+ *   (matching the platform), which still yields no rounding where the platform reports 0.
+ * @property cornerClipMode which corners to round; [NavCornerClipMode.Leading] for slide-style
+ *   transitions, [NavCornerClipMode.All] for card-style ones.
  * @property dimAmount maximum dim alpha applied to the covered layer during a transition. Set to 0f
  *   to disable dimming.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
@@ -30,6 +54,7 @@ import androidx.compose.ui.unit.dp
 data class NavDisplayEffects(
     val enableCornerClip: Boolean = true,
     val cornerClipRadius: Dp = 0.dp,
+    val cornerClipMode: NavCornerClipMode = NavCornerClipMode.Leading,
     val dimAmount: Float = 0.5f,
     val blockInputDuringTransition: Boolean = true,
 ) {
