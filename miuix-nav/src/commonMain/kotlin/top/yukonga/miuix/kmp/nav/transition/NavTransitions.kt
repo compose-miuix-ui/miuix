@@ -139,9 +139,13 @@ object NavTransitions {
                 alpha = (1f - post * 3.5f).coerceAtLeast(0f)
                 tx += post * driftPx
             } else {
-                // Entering the top (push, or a cancelled back gesture): quick fade-in while the
-                // card zooms up; opaque after the first 20% of travel.
-                alpha = (p / 0.2f).coerceIn(0f, 1f)
+                // While a gesture drives (or settles a cancel), the card stays FULLY OPAQUE at any
+                // depth — the reference never touches alpha pre-commit. The quick fade-in applies
+                // only to a programmatic push. Without this guard a deep drag (system progress
+                // approaches 1 quickly) would run the fade-in formula backwards and turn the card
+                // translucent mid-drag, then flash back to opaque the instant a commit flips the
+                // role to Outgoing (post = 0 -> alpha 1).
+                alpha = if (gesture != null) 1f else (p / 0.2f).coerceIn(0f, 1f)
             }
             translationX = tx
             translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
