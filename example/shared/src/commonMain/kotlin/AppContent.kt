@@ -190,9 +190,12 @@ fun AppContent(
             navCornerRadius,
             appState.enableDim,
             appState.blockInputDuringTransition,
+            appState.navTransitionStyle,
         ) {
             NavDisplayEffects(
-                enableCornerClip = appState.enableCornerClip,
+                // The cross-activity style clips its own card on all four corners; the
+                // leading-edge clip effect would stack a second, asymmetric clip on top.
+                enableCornerClip = appState.enableCornerClip && appState.navTransitionStyle == 0,
                 cornerClipRadius = navCornerRadius,
                 dimAmount = if (appState.enableDim) 0.5f else 0f,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
@@ -209,9 +212,17 @@ fun AppContent(
         }
 
         // Global transition style: the established default, or the platform cross-activity feel.
-        // Presets are singletons, so the expression itself is stable across recompositions.
+        // The cross-activity card clips to the device screen corner where the platform reports
+        // one (Desktop/Web report 0, so fall back to the preset default there).
         val navTransition = when (appState.navTransitionStyle) {
-            1 -> NavTransitions.AndroidCrossActivity
+            1 -> remember(navCornerRadius) {
+                if (navCornerRadius > 0.dp) {
+                    NavTransitions.androidCrossActivity(cardCornerRadius = navCornerRadius)
+                } else {
+                    NavTransitions.AndroidCrossActivity
+                }
+            }
+
             else -> NavTransitions.MiuixDefault
         }
 
