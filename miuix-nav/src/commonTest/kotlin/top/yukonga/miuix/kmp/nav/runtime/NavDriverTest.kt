@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.nav.runtime
 
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -95,6 +96,32 @@ class NavDriverTest {
         // anchor == 0 degenerates to the legacy fingerTarget clamp (0..1).
         assertEquals(0f, anchoredProgress(anchor = 0f, fingerProgress = -0.5f))
         assertEquals(1f, anchoredProgress(anchor = 0f, fingerProgress = 1.5f))
+    }
+
+    // ---- noOvershootVelocityFloor ----
+
+    @Test
+    fun noOvershootFloor_zeroDistance_isZero() {
+        // Released exactly at the target: any toward-target velocity would overshoot.
+        assertEquals(0f, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 0f))
+    }
+
+    @Test
+    fun noOvershootFloor_isOmegaTimesDistance() {
+        // Exact no-overshoot bound for a critically damped spring: v0 >= -ω·x0, ω = √stiffness.
+        assertEquals(-sqrt(NavDriverSpec.STIFFNESS), NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 1f), absoluteTolerance = 1e-4f)
+    }
+
+    @Test
+    fun noOvershootFloor_scalesLinearlyWithDistance() {
+        val one = NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 1f)
+        assertEquals(2f * one, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 2f), absoluteTolerance = 1e-4f)
+    }
+
+    @Test
+    fun noOvershootFloor_negativeDistance_treatedAsZero() {
+        // Defensive: a value already past the target must not produce a positive floor.
+        assertEquals(0f, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = -0.5f))
     }
 
     // ---- navBackCommitDecision ----

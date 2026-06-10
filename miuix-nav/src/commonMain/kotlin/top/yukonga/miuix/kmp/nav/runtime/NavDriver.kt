@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.runtime.Immutable
+import kotlin.math.sqrt
 
 /**
  * Anchored gesture progress (grab-anchor model, spec 2026-06-10 §3.1 / invariant 6).
@@ -76,17 +77,39 @@ internal data class NavDriverSpec(
         visibilityThreshold = visibilityThreshold,
     )
 
+    /**
+     * The most negative (toward-target) velocity a commit settle may be seeded with without
+     * overshooting the target, given the [remainingDistance] still to travel (no-bounce
+     * requirement).
+     *
+     * For a critically damped spring `x(t) = e^(-ωt)·(x0 + (v0 + ω·x0)·t)`, the trajectory
+     * crosses zero iff `v0 < -ω·x0` — so flooring the seed at `-ω·distance` is the exact
+     * no-overshoot condition, not an approximation. Slower releases keep their full velocity
+     * (snap -> spring continuity intact); only the excess speed that could ONLY have become a
+     * visible bounce-back past the fully-popped position is dropped.
+     *
+     * @param remainingDistance distance from the current value down to the settle target, `>= 0`.
+     * @return the velocity floor (a value `<= 0`) to pass through `coerceAtLeast`.
+     */
+    fun noOvershootVelocityFloor(remainingDistance: Float): Float = if (remainingDistance <= 0f) 0f else -sqrt(stiffness) * remainingDistance
+
     companion object {
-        /** Slightly under critical damping for a brisk, barely-overshooting settle. */
-        const val DAMPING_RATIO: Float = 0.9f
+        /**
+         * Critically damped: navigation must never bounce. An underdamped settle (the earlier
+         * 0.9) oscillates past the target — invisible at ~0.15% when starting from rest, but a
+         * velocity-seeded commit (a flung back-swipe) overshoots visibly and springs back.
+         */
+        const val DAMPING_RATIO: Float = 1f
 
         /**
          * Low stiffness on the depth scale (units = entries). With [DAMPING_RATIO] and the tight
          * [VISIBILITY_THRESHOLD], a full one-step push/pop settles in roughly half a second
          * (`t ≈ -ln(threshold) / (damping·√stiffness)`), matching the established miuix navigation
-         * feel (a ~500ms transition) rather than a snappier default.
+         * feel (a ~500ms transition) rather than a snappier default. The value keeps the decay
+         * envelope of the original tuning (`1·√146 ≈ 0.9·√180`), so moving to critical damping
+         * did not change the perceived duration.
          */
-        const val STIFFNESS: Float = 180f
+        const val STIFFNESS: Float = 146f
 
         /**
          * `animatedTop` is measured in entry-index units, so it converges visually once

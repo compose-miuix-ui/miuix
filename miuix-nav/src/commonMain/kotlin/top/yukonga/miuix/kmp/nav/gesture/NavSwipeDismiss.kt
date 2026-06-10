@@ -200,10 +200,17 @@ fun Modifier.navSwipeDismiss(
                 // own the final convergence; the settle below only seeds the spring with the release velocity.
                 currentOnCommit.value()
                 scope.launch {
+                    // No-bounce commit: even a critically damped spring crosses its target once
+                    // when the seeded fling speed exceeds ω·distance, which reads as the entry
+                    // overshooting the fully-popped position and bouncing back. Floor the seed at
+                    // the exact no-overshoot bound (computed from the value the settle actually
+                    // starts at — all pending finger snaps are FIFO-ordered before this launch);
+                    // slower releases keep full snap -> spring velocity continuity.
+                    val floor = NavDriverSpec.Default.noOvershootVelocityFloor(animatedTop.value - (topIndex - 1f))
                     animatedTop.settleTo(
                         target = (topIndex - 1).toFloat(),
                         spec = NavDriverSpec.Default,
-                        initialVelocity = depthVelocity,
+                        initialVelocity = depthVelocity.coerceAtLeast(floor),
                     )
                 }
             } else {
@@ -219,7 +226,8 @@ fun Modifier.navSwipeDismiss(
                 // the page flashes a few frames in the wrong direction. A cancel has nothing above the top
                 // to reveal, so that upward momentum is purely spurious: drop it and let the spring ease back
                 // to rest from the current position. Legitimate "return" motion (negative depth velocity) is
-                // kept, preserving the snap -> spring velocity continuity.
+                // kept, preserving the snap -> spring velocity continuity; it points away from the cancel
+                // target, so it can never cross it (no bounce, no overshoot floor needed on this branch).
                 scope.launch {
                     animatedTop.settleTo(
                         target = topIndex.toFloat(),
