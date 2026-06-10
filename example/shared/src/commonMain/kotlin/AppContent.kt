@@ -187,7 +187,8 @@ fun AppContent(
         // Follow the device screen corner so the slide-in clip matches the platform (0 on Desktop/Web).
         val navCornerRadius = rememberNavSystemCornerRadius()
         val isCrossActivityStyle = appState.navTransitionStyle == 1
-        val backdropColor = MiuixTheme.colorScheme.background
+        val backdropColor = MiuixTheme.colorScheme.surface
+        val isDarkTheme = isInDarkTheme()
         val effects = remember(
             appState.enableCornerClip,
             navCornerRadius,
@@ -195,6 +196,7 @@ fun AppContent(
             appState.blockInputDuringTransition,
             isCrossActivityStyle,
             backdropColor,
+            isDarkTheme,
         ) {
             NavDisplayEffects(
                 enableCornerClip = appState.enableCornerClip,
@@ -204,7 +206,13 @@ fun AppContent(
                 // The cross-activity card scales the whole page (round all four corners); the
                 // slide style rounds only the leading edge.
                 cornerClipMode = if (isCrossActivityStyle) NavCornerClipMode.All else NavCornerClipMode.Leading,
-                dimAmount = if (appState.enableDim) 0.5f else 0f,
+                // The cross-activity style uses the platform scrim constants (0.2 light / 0.8
+                // dark); the slide style keeps the established 0.5.
+                dimAmount = when {
+                    !appState.enableDim -> 0f
+                    isCrossActivityStyle -> if (isDarkTheme) 0.8f else 0.2f
+                    else -> 0.5f
+                },
                 blockInputDuringTransition = appState.blockInputDuringTransition,
                 // Fill the area revealed around scaled-down layers with the page background, like
                 // the platform's back-animation background layer.
