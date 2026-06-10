@@ -85,9 +85,10 @@ object NavTransitions {
      * `DefaultCrossActivityBackAnimation` (AOSP WM Shell):
      *
      * - **Pre-commit (finger down)**: the top card scales **centered** toward
-     *   [CROSS_ACTIVITY_MIN_SCALE] (0.9, the reference `MAX_SCALE`) with **no fade**; a LEFT-edge
-     *   gesture additionally offsets it so its right side hugs the screen edge minus
-     *   [CrossActivityEdgeMargin]; a RIGHT-edge gesture stays centered. The card rides vertically
+     *   [CROSS_ACTIVITY_MIN_SCALE] (0.9, the reference `MAX_SCALE`) with **no fade**, and offsets
+     *   so it hugs the screen edge **opposite the gesture's originating edge** minus
+     *   [CrossActivityEdgeMargin] (the reference hugs only for LEFT-edge gestures; this preset
+     *   hugs both edges symmetrically). The card rides vertically
      *   with the finger (approximated by tracking `touchY` through the transform origin; the
      *   reference shifts the rect by a damped touch delta of the same magnitude). The revealed
      *   layer below sits [CrossActivityDrift] behind (physical left) and scales **in sync** with
@@ -115,22 +116,30 @@ object NavTransitions {
             val p = topProgress(d) // 0 off-edge, 1 at top
             scaleX = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * p
             scaleY = scaleX
-            // LEFT-edge gestures hug the card's right side against the screen edge minus the
-            // display-bounds margin; RIGHT-edge gestures scale centered (reference behavior).
+            // The card hugs the screen edge OPPOSITE the gesture's originating edge, minus the
+            // display-bounds margin (the reference hugs only for LEFT-edge gestures and scales
+            // centered for RIGHT-edge ones; this preset hugs symmetrically for both edges).
+            val hugSign = when (gesture?.swipeEdge) {
+                NavSwipeEdge.Left -> 1f
+                NavSwipeEdge.Right -> -1f
+                else -> 0f
+            }
             var tx = 0f
-            if (gesture?.swipeEdge == NavSwipeEdge.Left) {
+            if (hugSign != 0f) {
                 val hugMax = scope.layoutSize.width.toFloat() * (1f - CROSS_ACTIVITY_MIN_SCALE) / 2f -
                     with(scope.density) { CrossActivityEdgeMargin.toPx() }
-                tx += (1f - p) * hugMax.coerceAtLeast(0f)
+                tx += hugSign * (1f - p) * hugMax.coerceAtLeast(0f)
             }
             if (scope.role == NavRole.Outgoing) {
                 // Committed (or programmatic) exit: fly out and fade within the first 20% of the
                 // post-commit sweep. While the finger still drives, p == release progress and the
-                // post fraction stays 0 (the reference applies no alpha pre-commit).
+                // post fraction stays 0 (the reference applies no alpha pre-commit). The fly-out
+                // continues in the hug direction; a programmatic pop exits toward the right like
+                // the reference.
                 val releaseP = if (gesture != null) (1f - gesture.progress).coerceAtLeast(0.01f) else 1f
                 val post = (1f - p / releaseP).coerceIn(0f, 1f)
                 alpha = (1f - post * 5f).coerceAtLeast(0f)
-                tx += post * driftPx
+                tx += post * driftPx * (if (hugSign != 0f) hugSign else 1f)
             } else {
                 // Entering the top (push, or a cancelled back gesture): quick fade-in while the
                 // card zooms up; opaque after the first 20% of travel.
