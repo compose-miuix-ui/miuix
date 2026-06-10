@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.nav.core
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -49,6 +50,11 @@ enum class NavCornerClipMode {
  *   to disable dimming.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
  *   transition is in progress, so taps cannot reach a half-animated screen.
+ * @property backdropColor solid color drawn behind every entry layer. Card-style transitions scale
+ *   layers below full size, revealing the area behind the navigation host; the reference shell
+ *   animation fills it with a color layer in the entering page's background color, so the page
+ *   background reads as extending outward. Pass the theme background to reproduce that;
+ *   [Color.Unspecified] (default) draws no backdrop.
  */
 @Immutable
 data class NavDisplayEffects(
@@ -57,6 +63,7 @@ data class NavDisplayEffects(
     val cornerClipMode: NavCornerClipMode = NavCornerClipMode.Leading,
     val dimAmount: Float = 0.5f,
     val blockInputDuringTransition: Boolean = true,
+    val backdropColor: Color = Color.Unspecified,
 ) {
     /**
      * Dim alpha to apply to a covered layer at relative depth [relativeDepth]. The covered layer

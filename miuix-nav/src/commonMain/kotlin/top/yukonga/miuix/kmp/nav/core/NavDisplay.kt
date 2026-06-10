@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -343,6 +344,14 @@ private fun NavDisplayLayout(
                 onGesture = { presentation.gesture = it },
             ),
     ) {
+        // Backdrop behind every entry (reference shell behavior): a solid layer in the page
+        // background color, so the area revealed around a scaled-down entry reads as the page
+        // background extending outward instead of whatever sits behind the navigation host. At
+        // rest it is fully covered by the opaque top entry.
+        if (effects.backdropColor.isSpecified) {
+            Box(modifier = Modifier.fillMaxSize().background(effects.backdropColor))
+        }
+
         // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The window
         // depth is the MAX opaqueDepth across the global transition and every presented entry's
         // per-route override — the renderer keeps a layer alive while ANY transition in play would, so
