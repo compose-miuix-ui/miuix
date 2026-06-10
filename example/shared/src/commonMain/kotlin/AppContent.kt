@@ -105,6 +105,7 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
@@ -185,18 +186,22 @@ fun AppContent(
     ) {
         // Follow the device screen corner so the slide-in clip matches the platform (0 on Desktop/Web).
         val navCornerRadius = rememberNavSystemCornerRadius()
+        val isCrossActivityStyle = appState.navTransitionStyle == 1
         val effects = remember(
             appState.enableCornerClip,
             navCornerRadius,
             appState.enableDim,
             appState.blockInputDuringTransition,
-            appState.navTransitionStyle,
+            isCrossActivityStyle,
         ) {
             NavDisplayEffects(
-                // The cross-activity style clips its own card on all four corners; the
-                // leading-edge clip effect would stack a second, asymmetric clip on top.
-                enableCornerClip = appState.enableCornerClip && appState.navTransitionStyle == 0,
-                cornerClipRadius = navCornerRadius,
+                enableCornerClip = appState.enableCornerClip,
+                // The cross-activity card should stay rounded on Desktop/Web too, where the
+                // platform reports no screen corner.
+                cornerClipRadius = if (isCrossActivityStyle && navCornerRadius <= 0.dp) 32.dp else navCornerRadius,
+                // The cross-activity card scales the whole page (round all four corners); the
+                // slide style rounds only the leading edge.
+                cornerClipMode = if (isCrossActivityStyle) NavCornerClipMode.All else NavCornerClipMode.Leading,
                 dimAmount = if (appState.enableDim) 0.5f else 0f,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
             )
@@ -212,19 +217,8 @@ fun AppContent(
         }
 
         // Global transition style: the established default, or the platform cross-activity feel.
-        // The cross-activity card clips to the device screen corner where the platform reports
-        // one (Desktop/Web report 0, so fall back to the preset default there).
-        val navTransition = when (appState.navTransitionStyle) {
-            1 -> remember(navCornerRadius) {
-                if (navCornerRadius > 0.dp) {
-                    NavTransitions.androidCrossActivity(cardCornerRadius = navCornerRadius)
-                } else {
-                    NavTransitions.AndroidCrossActivity
-                }
-            }
-
-            else -> NavTransitions.MiuixDefault
-        }
+        // Presets are singletons, so the expression itself is stable across recompositions.
+        val navTransition = if (isCrossActivityStyle) NavTransitions.AndroidCrossActivity else NavTransitions.MiuixDefault
 
         NavDisplay(
             backStack = backStack,
