@@ -91,8 +91,9 @@ object NavTransitions {
      *   hugs both edges symmetrically). The card rides vertically
      *   with the finger (approximated by tracking `touchY` through the transform origin; the
      *   reference shifts the rect by a damped touch delta of the same magnitude). The revealed
-     *   layer below sits [CrossActivityDrift] behind (physical left) and scales **in sync** with
-     *   the card.
+     *   layer below stays **parked** [CrossActivityDrift] behind (physical left) for the whole
+     *   gesture — it scales **in sync** with the card around its own center, so it barely moves
+     *   until release.
      * - **Post-commit (released)**: the card flies a further [CrossActivityDrift] out and fades
      *   away within the **first 20%** of the remaining sweep (`alpha = 1 - 5·post`, the reference
      *   curve); the revealed layer grows back to full size and slides to rest. The frozen
@@ -155,18 +156,27 @@ object NavTransitions {
             }
         } else {
             val dc = coverProgress(d) // 0 at top, 1 covered
-            // Revealed layer: starts CrossActivityDrift behind (physical left) and slides to rest.
-            translationX = -dc * driftPx
-            if (gesture != null) {
-                // Scales in sync with the card while the finger drives; grows back to full size
-                // across the post-commit sweep (release point from the frozen gesture context).
-                val liveScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * dc
+            // Post-commit fraction: 0 while the finger drives (the reference keeps the revealed
+            // layer parked at its behind-offset during the whole gesture — it scales centered, so
+            // its position barely moves), growing only once the commit settle passes the release
+            // point. A programmatic transition is all post-commit.
+            val post = if (gesture != null) {
                 val releaseProgress = gesture.progress
-                val post = if (releaseProgress >= 1f) {
+                if (releaseProgress >= 1f) {
                     1f
                 } else {
                     (((1f - dc) - releaseProgress) / (1f - releaseProgress)).coerceIn(0f, 1f)
                 }
+            } else {
+                1f - dc
+            }
+            // Revealed layer: parked CrossActivityDrift behind (physical left) through the
+            // gesture; slides to rest only across the post-commit sweep.
+            translationX = -(1f - post) * driftPx
+            if (gesture != null) {
+                // Scales in sync with the card while the finger drives; grows back to full size
+                // across the post-commit sweep (release point from the frozen gesture context).
+                val liveScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * dc
                 scaleX = liveScale + (1f - liveScale) * post
                 scaleY = scaleX
             }
