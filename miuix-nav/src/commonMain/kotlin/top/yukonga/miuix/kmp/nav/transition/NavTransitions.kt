@@ -3,9 +3,11 @@
 
 package top.yukonga.miuix.kmp.nav.transition
 
-import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * Preset library of [NavTransition]s, all implemented as pure functions of the single float
@@ -85,15 +87,14 @@ object NavTransitions {
      * `DefaultCrossActivityBackAnimation` (AOSP WM Shell):
      *
      * - **Pre-commit (finger down)**: the top card scales **centered** toward
-     *   [CROSS_ACTIVITY_MIN_SCALE] (0.9, the reference `MAX_SCALE`) with **no fade**, and offsets
-     *   so it hugs the screen edge **opposite the gesture's originating edge** minus
-     *   [CrossActivityEdgeMargin] (the reference hugs only for LEFT-edge gestures; this preset
-     *   hugs both edges symmetrically). The card rides vertically
-     *   with the finger (approximated by tracking `touchY` through the transform origin; the
-     *   reference shifts the rect by a damped touch delta of the same magnitude). The revealed
-     *   layer below stays **parked** [CrossActivityDrift] behind (physical left) for the whole
-     *   gesture — it scales **in sync** with the card around its own center, so it barely moves
-     *   until release.
+     *   [CROSS_ACTIVITY_MIN_SCALE] (0.9, the reference `MAX_SCALE`) with **no fade**; a LEFT-edge
+     *   gesture additionally offsets it so its right side hugs the screen edge minus
+     *   [CrossActivityEdgeMargin], while a RIGHT-edge gesture stays centered (reference
+     *   behavior). Both layers ride vertically with the finger: a **damped delta from the
+     *   initial touch** (the reference `getYOffset`: decelerate-eased, capped at half the freed
+     *   vertical space minus the margin). The revealed layer below stays **parked**
+     *   [CrossActivityDrift] behind (physical left) for the whole gesture — it scales **in
+     *   sync** with the card around its own center, so it barely moves until release.
      * - **Post-commit (released)**: the card flies a further [CrossActivityDrift] out and fades
      *   away within the **first 20%** of the remaining sweep (`alpha = 1 - 5·post`, the reference
      *   curve); the revealed layer grows back to full size and slides to rest. The frozen
@@ -117,43 +118,31 @@ object NavTransitions {
             val p = topProgress(d) // 0 off-edge, 1 at top
             scaleX = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * p
             scaleY = scaleX
-            // The card hugs the screen edge OPPOSITE the gesture's originating edge, minus the
-            // display-bounds margin (the reference hugs only for LEFT-edge gestures and scales
-            // centered for RIGHT-edge ones; this preset hugs symmetrically for both edges).
-            val hugSign = when (gesture?.swipeEdge) {
-                NavSwipeEdge.Left -> 1f
-                NavSwipeEdge.Right -> -1f
-                else -> 0f
-            }
+            // A LEFT-edge gesture hugs the card's right side against the screen edge minus the
+            // display-bounds margin; a RIGHT-edge gesture scales centered (reference behavior).
             var tx = 0f
-            if (hugSign != 0f) {
+            if (gesture?.swipeEdge == NavSwipeEdge.Left) {
                 val hugMax = scope.layoutSize.width.toFloat() * (1f - CROSS_ACTIVITY_MIN_SCALE) / 2f -
                     with(scope.density) { CrossActivityEdgeMargin.toPx() }
-                tx += hugSign * (1f - p) * hugMax.coerceAtLeast(0f)
+                tx += (1f - p) * hugMax.coerceAtLeast(0f)
             }
             if (scope.role == NavRole.Outgoing) {
-                // Committed (or programmatic) exit: fly out and fade within the first 20% of the
-                // post-commit sweep. While the finger still drives, p == release progress and the
-                // post fraction stays 0 (the reference applies no alpha pre-commit). The fly-out
-                // continues in the hug direction; a programmatic pop exits toward the right like
-                // the reference.
+                // Committed (or programmatic) exit: fly a further CrossActivityDrift toward the
+                // physical right (the reference always exits rightward) and fade within the first
+                // 20% of the post-commit sweep. While the finger still drives, p == release
+                // progress and the post fraction stays 0 (the reference applies no alpha
+                // pre-commit).
                 val releaseP = if (gesture != null) (1f - gesture.progress).coerceAtLeast(0.01f) else 1f
                 val post = (1f - p / releaseP).coerceIn(0f, 1f)
                 alpha = (1f - post * 5f).coerceAtLeast(0f)
-                tx += post * driftPx * (if (hugSign != 0f) hugSign else 1f)
+                tx += post * driftPx
             } else {
                 // Entering the top (push, or a cancelled back gesture): quick fade-in while the
                 // card zooms up; opaque after the first 20% of travel.
                 alpha = (p / 0.2f).coerceIn(0f, 1f)
             }
             translationX = tx
-            // Vertical follow: centered horizontal pivot (reference scaleCentered), vertical pivot
-            // tracking the finger. Frozen through the release settle, so it never snaps at lift.
-            if (gesture != null) {
-                val height = scope.layoutSize.height.toFloat()
-                val pivotY = if (height > 0f) (gesture.touchY / height).coerceIn(0.1f, 0.9f) else 0.5f
-                transformOrigin = TransformOrigin(0.5f, pivotY)
-            }
+            translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
         } else {
             val dc = coverProgress(d) // 0 at top, 1 covered
             // Post-commit fraction: 0 while the finger drives (the reference keeps the revealed
@@ -180,7 +169,33 @@ object NavTransitions {
                 scaleX = liveScale + (1f - liveScale) * post
                 scaleY = scaleX
             }
+            // The revealed layer rides with the finger too (reference allowEnteringYShift); the
+            // shift collapses with its scale returning to full, so it lands at rest untranslated.
+            translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
         }
+    }
+
+    /**
+     * Vertical follow of the cross-activity layers (the reference `getYOffset`): a damped delta
+     * from the initial touch — decelerate-eased over half the layout height — capped at the
+     * vertical space freed by the current scale minus the display-bounds margin. The cap
+     * collapses as the layer returns to full size, so the shift settles back to zero without any
+     * extra bookkeeping.
+     */
+    private fun crossActivityYShift(
+        gesture: NavGesture?,
+        height: Float,
+        scale: Float,
+        density: Density,
+    ): Float {
+        if (gesture == null || height <= 0f) return 0f
+        val rawDelta = gesture.touchY - gesture.initialTouchY
+        val half = height / 2f
+        val ratio = min(half, abs(rawDelta)) / half
+        val damped = 1f - (1f - ratio) * (1f - ratio) // DecelerateInterpolator(1f)
+        val marginPx = with(density) { CrossActivityEdgeMargin.toPx() }
+        val maxShift = ((height - height * scale) / 2f - marginPx).coerceAtLeast(0f)
+        return maxShift * damped * (if (rawDelta < 0f) -1f else 1f)
     }
 
     /**
