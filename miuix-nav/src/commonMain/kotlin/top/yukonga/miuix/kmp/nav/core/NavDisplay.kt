@@ -440,14 +440,15 @@ private fun NavDisplayLayout(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .graphicsLayer {
-                                    // Reference scrim curve: constant at dimAmount while the
-                                    // finger drives (the depth below equals the release progress,
-                                    // so the fraction holds at 1), fading only across the
-                                    // post-commit sweep. A programmatic transition fades linearly
-                                    // with the depth below, as before.
+                                    // Two scrim curves (effects.holdDimDuringGesture): the
+                                    // card-style reference holds at dimAmount while the finger
+                                    // drives (the depth below equals the release progress, so the
+                                    // fraction stays 1) and fades only across the post-commit
+                                    // sweep; the slide style follows the depth linearly, so the
+                                    // dim lightens as the layer below is revealed.
                                     val below = (presentation.animatedTop.value - (entryIndex - 1)).coerceIn(0f, 1f)
                                     val g = presentation.gesture
-                                    val fraction = if (g != null) {
+                                    val fraction = if (g != null && effects.holdDimDuringGesture) {
                                         (below / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f)
                                     } else {
                                         below

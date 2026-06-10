@@ -213,6 +213,9 @@ fun AppContent(
                     isCrossActivityStyle -> if (isDarkTheme) 0.8f else 0.2f
                     else -> 0.5f
                 },
+                // The platform scrim holds steady while the finger drives; the slide style keeps
+                // the established depth-following dim.
+                holdDimDuringGesture = isCrossActivityStyle,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
                 // Fill the area revealed around scaled-down layers with the page background, like
                 // the platform's back-animation background layer.
