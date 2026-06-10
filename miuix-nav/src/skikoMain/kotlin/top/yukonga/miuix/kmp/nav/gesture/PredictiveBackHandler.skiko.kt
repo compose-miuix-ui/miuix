@@ -15,9 +15,9 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
  *
  * The skiko targets (iOS, macOS, Desktop, Web) lack a unified system predictive-back stream, so
  * this actual handles only *discrete* back triggers (Desktop ESC, Web programmatic back). Each
- * trigger emits a minimal synthetic two-point [NavBackEvent] flow (`progress` 0f -> 1f) and then
- * commits, satisfying the common contract that [onProgress] is always collected and exactly one of
- * [onCommit] / [onCancel] fires.
+ * trigger emits a minimal single-point [NavBackEvent] flow (`progress` 0f) and then commits; the
+ * commit settle animates the pop through the shared spring. This satisfies the common contract
+ * that [onProgress] is always collected and exactly one of [onCommit] / [onCancel] fires.
  *
  * Continuous, finger-following edge swipes on iOS are provided separately by
  * `Modifier.navSwipeDismiss`, which drives `animatedTop` directly; this actual deliberately does
@@ -47,10 +47,13 @@ actual fun PredictiveBackHandler(
 }
 
 /**
- * A minimal two-point synthetic back stream used when the platform offers no continuous progress
- * source (e.g. a Desktop ESC press). Emits `progress` 0f then 1f from [NavSwipeEdge.None].
+ * A minimal single-point synthetic back stream used when the platform offers no continuous
+ * progress source (e.g. a Desktop ESC press). Emits only `progress = 0f`: with the grab-anchor
+ * drive this is a no-op snap (it lands exactly on the current `animatedTop`, wherever an
+ * in-flight transition left it), and the subsequent commit settle animates the pop through the
+ * shared spring. Emitting a `1f` point here would hard-snap `animatedTop` to the fully-popped
+ * end and turn every discrete back trigger into an animation-free teleport.
  */
 private fun syntheticBackFlow(): Flow<NavBackEvent> = flow {
     emit(NavBackEvent(progress = 0f, swipeEdge = NavSwipeEdge.None, touchY = 0f))
-    emit(NavBackEvent(progress = 1f, swipeEdge = NavSwipeEdge.None, touchY = 0f))
 }
