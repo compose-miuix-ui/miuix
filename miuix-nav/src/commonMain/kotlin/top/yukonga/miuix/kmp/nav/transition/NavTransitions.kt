@@ -80,9 +80,19 @@ object NavTransitions {
     }
 
     /**
-     * AOSP cross-activity feel: the entering page scales up from 0.9 while fading in
-     * (d: -1 -> 0); the covered page scales down to 0.9 while fading out (d: 0 -> 1). No
-     * horizontal translation. Transform origin is the layer center (default).
+     * Platform cross-activity feel (the AOSP task open/close animation): the top page scales
+     * between 0.9 and 1 while fading (d: -1 -> 0), and the covered page stays **fully opaque**
+     * and parallaxes a quarter width toward the leading edge (d: 0 -> 1) — on pop the revealed
+     * page slides back in from -width/4 while the departing page scales down and fades out,
+     * matching the platform's programmatic pop spec (`slideIn(-width/4)` + `scaleOut(0.9)` +
+     * `fadeOut`). The covered page is never faded: the platform look derives its depth from
+     * scale and parallax alone, so pair this with `NavDisplayEffects(dimAmount = 0f)` for the
+     * authentic appearance.
+     *
+     * The platform's gesture composite (both layers shrinking toward the touch point, then the
+     * revealed layer growing back after commit) is not a pure function of the depth sweep, so
+     * this preset keeps the programmatic spec's geometry for both drive modes — linear in `d`,
+     * 1:1 with the finger.
      */
     val AndroidCrossActivity: NavTransition = navGraphicsTransition(opaqueDepth = 1f) { scope ->
         val d = scope.relativeDepth
@@ -92,10 +102,9 @@ object NavTransitions {
             scaleY = scaleX
             alpha = p
         } else {
-            val p = coverProgress(d) // 0 at top, 1 covered
-            scaleX = 1f - 0.1f * p
-            scaleY = scaleX
-            alpha = 1f - p
+            // Covered: opaque, parallaxed a quarter width toward the leading edge. Mirrored for RTL.
+            val sign = if (scope.layoutDirection == LayoutDirection.Rtl) 1f else -1f
+            translationX = sign * coverProgress(d) * scope.layoutSize.width.toFloat() * 0.25f
         }
     }
 
