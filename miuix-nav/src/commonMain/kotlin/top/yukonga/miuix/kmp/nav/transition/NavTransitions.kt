@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.nav.transition
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
@@ -83,10 +84,11 @@ object NavTransitions {
 
     /**
      * Platform cross-activity feel (the AOSP task open/close animation). The top page behaves
-     * like the platform's shrinking card (d: -1 -> 0): it scales between [CrossActivityMinScale]
-     * and 1 while drifting up to [CrossActivityDrift] toward the trailing edge, staying **fully
-     * opaque through the whole interactive range** — alpha falls only across the last
-     * [CrossActivityFadeWindow] of the exit, so a dragged page stays solid (like the platform
+     * like the platform's shrinking card (d: -1 -> 0): it scales between [CROSS_ACTIVITY_MIN_SCALE]
+     * and 1 while drifting up to [CrossActivityDrift] **away from the gesture's originating
+     * edge** (toward the trailing edge for programmatic transitions), staying **fully opaque
+     * through the whole interactive range** — alpha falls only across the last
+     * [CROSS_ACTIVITY_FADE_WINDOW] of the exit, so a dragged page stays solid (like the platform
      * card) and vanishes quickly once the commit settle carries it out. The covered page stays
      * opaque and parallaxes a quarter width toward the leading edge (d: 0 -> 1), matching the
      * platform's pop spec (`slideIn(-width/4)` for the revealed layer). No dim is baked in: the
@@ -102,39 +104,68 @@ object NavTransitions {
      * nuance (the revealed layer shrinking with the gesture and growing back after commit) is
      * not a pure function of the depth sweep and is intentionally not reproduced.
      */
-    val AndroidCrossActivity: NavTransition = navGraphicsTransition(opaqueDepth = 1f) { scope ->
-        val d = scope.relativeDepth
-        if (d <= 0f) {
-            val p = topProgress(d) // 0 off-edge, 1 at top
-            scaleX = CrossActivityMinScale + (1f - CrossActivityMinScale) * p
-            scaleY = scaleX
-            val trailing = if (scope.layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            translationX = trailing * (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-            alpha = (p / CrossActivityFadeWindow).coerceIn(0f, 1f)
-            // Gesture-aware card: while a back gesture drives (or its frozen context settles), the
-            // card shrinks toward the finger — the pivot tracks the touch's vertical position, so
-            // moving the finger up/down visibly carries the card with it (the platform behavior).
-            // The horizontal pivot leans away from the originating edge.
-            val gesture = scope.gesture
-            if (gesture != null) {
-                val height = scope.layoutSize.height.toFloat()
-                val pivotY = if (height > 0f) (gesture.touchY / height).coerceIn(0.1f, 0.9f) else 0.5f
-                val pivotX = when (gesture.swipeEdge) {
-                    NavSwipeEdge.Left -> 0.8f
-                    NavSwipeEdge.Right -> 0.2f
-                    NavSwipeEdge.None -> 0.5f
+    val AndroidCrossActivity: NavTransition = androidCrossActivity()
+
+    /**
+     * [AndroidCrossActivity] with a configurable card corner radius.
+     *
+     * The platform clips the shrinking card to the device screen corner; pass the value from
+     * `rememberNavSystemCornerRadius()` (with a sane fallback where the platform reports none) so
+     * the card corners match the display on every side. When this style is active, disable the
+     * orthogonal leading-edge clip effect (`NavDisplayEffects.enableCornerClip`) — the two clips
+     * stack asymmetrically otherwise.
+     *
+     * @param cardCornerRadius corner radius of the card while it is scaled below full size.
+     *   The default is inlined (not an object property): [AndroidCrossActivity] evaluates it
+     *   during object initialization, before later-declared properties would be assigned.
+     */
+    fun androidCrossActivity(cardCornerRadius: Dp = 32.dp): NavTransition {
+        // Allocated once per transition instance — graphics-layer blocks run per frame and must
+        // not allocate.
+        val cardShape = RoundedCornerShape(cardCornerRadius)
+        return navGraphicsTransition(opaqueDepth = 1f) { scope ->
+            val d = scope.relativeDepth
+            if (d <= 0f) {
+                val p = topProgress(d) // 0 off-edge, 1 at top
+                scaleX = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * p
+                scaleY = scaleX
+                val gesture = scope.gesture
+                // The card drifts AWAY from the edge the gesture originated from (a right-edge swipe
+                // carries it leftward); without a gesture (programmatic pop) it drifts toward the
+                // trailing edge. The drift must follow the edge, not the layout direction — otherwise
+                // it overpowers the much smaller pivot lean and the card visibly moves the wrong way.
+                val trailing = if (scope.layoutDirection == LayoutDirection.Rtl) -1f else 1f
+                val driftSign = when (gesture?.swipeEdge) {
+                    NavSwipeEdge.Left -> 1f
+                    NavSwipeEdge.Right -> -1f
+                    else -> trailing
                 }
-                transformOrigin = TransformOrigin(pivotX, pivotY)
+                translationX = driftSign * (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
+                alpha = (p / CROSS_ACTIVITY_FADE_WINDOW).coerceIn(0f, 1f)
+                // Gesture-aware card: while a back gesture drives (or its frozen context settles), the
+                // card shrinks toward the finger — the pivot tracks the touch's vertical position, so
+                // moving the finger up/down visibly carries the card with it (the platform behavior).
+                // The horizontal pivot leans away from the originating edge.
+                if (gesture != null) {
+                    val height = scope.layoutSize.height.toFloat()
+                    val pivotY = if (height > 0f) (gesture.touchY / height).coerceIn(0.1f, 0.9f) else 0.5f
+                    val pivotX = when (gesture.swipeEdge) {
+                        NavSwipeEdge.Left -> 0.8f
+                        NavSwipeEdge.Right -> 0.2f
+                        NavSwipeEdge.None -> 0.5f
+                    }
+                    transformOrigin = TransformOrigin(pivotX, pivotY)
+                }
+                // Rounded card corners whenever the page is scaled (gesture drag, exit, enter zoom).
+                if (scaleX < 1f) {
+                    shape = cardShape
+                    clip = true
+                }
+            } else {
+                // Covered: opaque, parallaxed a quarter width toward the leading edge. Mirrored for RTL.
+                val sign = if (scope.layoutDirection == LayoutDirection.Rtl) 1f else -1f
+                translationX = sign * coverProgress(d) * scope.layoutSize.width.toFloat() * 0.25f
             }
-            // Rounded card corners whenever the page is scaled (gesture drag, exit, enter zoom).
-            if (scaleX < 1f) {
-                shape = CrossActivityCardShape
-                clip = true
-            }
-        } else {
-            // Covered: opaque, parallaxed a quarter width toward the leading edge. Mirrored for RTL.
-            val sign = if (scope.layoutDirection == LayoutDirection.Rtl) 1f else -1f
-            translationX = sign * coverProgress(d) * scope.layoutSize.width.toFloat() * 0.25f
         }
     }
 
@@ -216,9 +247,9 @@ object NavTransitions {
     private val SharedAxisOffset = 30.dp
 
     /** Smallest scale the [AndroidCrossActivity] top card shrinks to (the platform gesture value). */
-    private const val CrossActivityMinScale = 0.85f
+    private const val CROSS_ACTIVITY_MIN_SCALE = 0.85f
 
-    /** Trailing-edge drift of the [AndroidCrossActivity] top card over its exit (platform commit offset). */
+    /** Horizontal drift of the [AndroidCrossActivity] top card over its exit (platform commit offset). */
     private val CrossActivityDrift = 96.dp
 
     /**
@@ -226,13 +257,7 @@ object NavTransitions {
      * off-edge end: the card is fully opaque for the first 60% of travel (the interactive range)
      * and fades out across the final 40% once a commit carries it away.
      */
-    private const val CrossActivityFadeWindow = 0.4f
-
-    /**
-     * Corner shape of the [AndroidCrossActivity] card while it is scaled below full size.
-     * Allocated once — graphics-layer blocks run per frame and must not allocate.
-     */
-    private val CrossActivityCardShape = RoundedCornerShape(32.dp)
+    private const val CROSS_ACTIVITY_FADE_WINDOW = 0.4f
 }
 
 /**
