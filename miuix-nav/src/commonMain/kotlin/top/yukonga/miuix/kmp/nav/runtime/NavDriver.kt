@@ -9,21 +9,45 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.runtime.Immutable
 
 /**
- * Pure mapping from a predictive-back / edge-swipe gesture progress to the
- * `animatedTop` target value, per spec §7.2.
+ * Anchored gesture progress (grab-anchor model, spec 2026-06-10 §3.1 / invariant 6).
  *
- * The mapping is strictly linear (1:1 with the finger): a fully completed
- * gesture (`progress == 1`) drives `animatedTop` exactly one step toward the
- * previous entry, i.e. `topIndex - 1`. This linearity is the whole point of the
- * single-driver model — no easing lives on the `finger -> animatedTop` axis, so
- * no inverse-transform is ever needed (contrast nav3's SeekableTransitionState,
- * which bakes easing into its fraction).
+ * A gesture may claim the stack while the shared spring is still mid-flight. [anchor] is the
+ * progress already travelled toward pop at the claim instant (`topIndex - animatedTop.value`,
+ * signed): positive when grabbed mid-push, negative when grabbed while a pop-settle is still
+ * reeling a leaving entry out above the new top. The total progress is strictly additive —
+ * `anchor + fingerProgress` — so the slope stays exactly 1 (1:1 with the finger, no easing on
+ * this axis) and the first frame (`fingerProgress == 0`) maps back to the sampled anchor: zero
+ * jump by construction.
+ *
+ * Clamp range:
+ * - upper bound `1f`: the fully-popped end; an `anchor > 0` grab saturates early (the page pins
+ *   at the end while the finger keeps travelling), matching the reference interactive-pop feel.
+ * - lower bound `min(anchor, 0f)`: with `anchor >= 0` a reverse drag can at most push the page
+ *   back to rest (never into the covered regime — the static analogue of the cancel velocity
+ *   clamp); with `anchor < 0` it can at most freeze the leaving entry at the grab point, never
+ *   re-revealing an already-popped page (the back stack no longer holds it).
+ *
+ * @param anchor progress toward pop at the claim instant, signed; `0f` for a rest-state grab.
+ * @param fingerProgress finger travel since the claim in progress units, unclamped.
+ * @return total progress on the pop axis, in `min(anchor, 0f)..1f`.
+ */
+internal fun anchoredProgress(anchor: Float, fingerProgress: Float): Float = (anchor + fingerProgress).coerceIn(anchor.coerceAtMost(0f), 1f)
+
+/**
+ * Pure mapping from a rest-state gesture progress to the `animatedTop` target value.
+ *
+ * The `anchor == 0` special case of the grab-anchor model: a gesture starting from a settled
+ * top (`animatedTop == topIndex`). A fully completed gesture (`progress == 1`) drives
+ * `animatedTop` exactly one step toward the previous entry, i.e. `topIndex - 1`. The mapping is
+ * strictly linear (1:1 with the finger): no easing lives on the `finger -> animatedTop` axis,
+ * so no inverse-transform is ever needed (contrast nav3's SeekableTransitionState, which bakes
+ * easing into its fraction).
  *
  * @param topIndex index of the current top entry in the back stack (`lastIndex`).
- * @param progress raw gesture progress; clamped to `0f..1f`.
+ * @param progress raw gesture progress; clamped to `0f..1f` by [anchoredProgress].
  * @return the `animatedTop` value the gesture should snap to.
  */
-internal fun fingerTarget(topIndex: Int, progress: Float): Float = topIndex - progress.coerceIn(0f, 1f)
+internal fun fingerTarget(topIndex: Int, progress: Float): Float = topIndex - anchoredProgress(anchor = 0f, fingerProgress = progress)
 
 /**
  * The single source of truth for the shared `animatedTop` spring (spec §9
@@ -111,19 +135,25 @@ internal fun navBackCommitDecision(
 }
 
 /**
- * Drives [this] `animatedTop` to follow a gesture finger 1:1, with no spring or
- * easing on the path (spec §7.1, "snap mode"). Each gesture event calls this with
- * the latest [progress]; the value lands exactly on `topIndex - progress`, so a
- * later [settleTo] can hand off from precisely where the finger left it.
+ * Drives [this] `animatedTop` to follow a gesture finger 1:1, with no spring or easing on the
+ * path (spec §7.1, "snap mode"). Each gesture event calls this with the latest [progress]; the
+ * value lands exactly on `topIndex - anchoredProgress(anchor, progress)`, so a later [settleTo]
+ * can hand off from precisely where the finger left it.
+ *
+ * [anchor] implements the grab-anchor model ([anchoredProgress]): callers that claim the stack
+ * while the shared spring is mid-flight pass the progress sampled at the claim instant, making
+ * the first snap a no-op (zero jump). Rest-state gestures pass the default `0f`.
  *
  * @param topIndex index of the current top entry (`backStack.lastIndex`).
- * @param progress raw gesture progress; clamped to `0f..1f` by [fingerTarget].
+ * @param progress finger travel since the claim in progress units, unclamped.
+ * @param anchor progress toward pop at the claim instant; see [anchoredProgress].
  */
 internal suspend fun Animatable<Float, AnimationVector1D>.snapToFinger(
     topIndex: Int,
     progress: Float,
+    anchor: Float = 0f,
 ) {
-    snapTo(fingerTarget(topIndex, progress))
+    snapTo(topIndex - anchoredProgress(anchor = anchor, fingerProgress = progress))
 }
 
 /**

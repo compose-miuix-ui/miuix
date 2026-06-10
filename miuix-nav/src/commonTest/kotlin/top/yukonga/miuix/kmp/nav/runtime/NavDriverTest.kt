@@ -39,6 +39,64 @@ class NavDriverTest {
         assertEquals(1f, fingerTarget(topIndex = 2, progress = 1.4f))
     }
 
+    // ---- anchoredProgress ----
+
+    @Test
+    fun anchoredProgress_zeroFinger_returnsAnchor_positiveAnchor() {
+        // Grab mid-push: first frame must map exactly back to the sampled anchor (zero jump).
+        assertEquals(0.5f, anchoredProgress(anchor = 0.5f, fingerProgress = 0f))
+    }
+
+    @Test
+    fun anchoredProgress_zeroFinger_returnsAnchor_negativeAnchor() {
+        // Grab mid-pop-settle: anchor below zero is preserved as-is on the first frame.
+        assertEquals(-0.25f, anchoredProgress(anchor = -0.25f, fingerProgress = 0f))
+    }
+
+    @Test
+    fun anchoredProgress_addsLinearly() {
+        // Slope stays exactly 1 (1:1 with the finger).
+        assertEquals(0.75f, anchoredProgress(anchor = 0.5f, fingerProgress = 0.25f))
+    }
+
+    @Test
+    fun anchoredProgress_saturatesAtOne() {
+        // anchor + finger > 1 pins at the fully-popped end.
+        assertEquals(1f, anchoredProgress(anchor = 0.5f, fingerProgress = 0.75f))
+    }
+
+    @Test
+    fun anchoredProgress_positiveAnchor_floorsAtZero() {
+        // Reverse drag from a mid-push grab can at most push the page back to rest, never past it.
+        assertEquals(0f, anchoredProgress(anchor = 0.5f, fingerProgress = -0.75f))
+    }
+
+    @Test
+    fun anchoredProgress_negativeAnchor_floorsAtAnchor() {
+        // Reverse drag during a pop-settle grab freezes the leaving entry at the grab point;
+        // it never re-reveals an already-popped page.
+        assertEquals(-0.25f, anchoredProgress(anchor = -0.25f, fingerProgress = -0.5f))
+    }
+
+    @Test
+    fun anchoredProgress_negativeAnchor_reelsThroughZero() {
+        // Forward drag reels the leaving entry out, then starts peeling the current top.
+        assertEquals(0.25f, anchoredProgress(anchor = -0.25f, fingerProgress = 0.5f))
+    }
+
+    @Test
+    fun anchoredProgress_deepNegativeAnchor_multiPopReel() {
+        // MultiPop interrupted mid-flight: anchors below -1 reel multiple leaving layers 1:1.
+        assertEquals(-1.75f, anchoredProgress(anchor = -2.25f, fingerProgress = 0.5f))
+    }
+
+    @Test
+    fun anchoredProgress_zeroAnchor_matchesLegacyClamp() {
+        // anchor == 0 degenerates to the legacy fingerTarget clamp (0..1).
+        assertEquals(0f, anchoredProgress(anchor = 0f, fingerProgress = -0.5f))
+        assertEquals(1f, anchoredProgress(anchor = 0f, fingerProgress = 1.5f))
+    }
+
     // ---- navBackCommitDecision ----
 
     @Test
