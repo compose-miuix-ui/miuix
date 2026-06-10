@@ -46,8 +46,9 @@ enum class NavCornerClipMode {
  *   (matching the platform), which still yields no rounding where the platform reports 0.
  * @property cornerClipMode which corners to round; [NavCornerClipMode.Leading] for slide-style
  *   transitions, [NavCornerClipMode.All] for card-style ones.
- * @property dimAmount maximum dim alpha applied to the covered layer during a transition. Set to 0f
- *   to disable dimming.
+ * @property dimAmount maximum alpha of the fullscreen dim scrim rendered just beneath the
+ *   top-most layer during a transition. It covers the revealed page and the [backdropColor]
+ *   area alike (the reference scrim spans the whole entering surface). Set to 0f to disable.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
  *   transition is in progress, so taps cannot reach a half-animated screen.
  * @property backdropColor solid color drawn behind every entry layer. Card-style transitions scale

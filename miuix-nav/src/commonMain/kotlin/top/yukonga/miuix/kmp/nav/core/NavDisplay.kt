@@ -373,6 +373,11 @@ private fun NavDisplayLayout(
             }
         }
 
+        // Highest visible layer; the fullscreen dim scrim renders just beneath it.
+        val topMostVisibleIndex = visibleEntries.fold(-1) { acc, e ->
+            maxOf(acc, indexByContentKey[e.contentKey] ?: -1)
+        }
+
         visibleEntries.fastForEach { entry ->
             key(entry.contentKey) {
                 // Local non-null guard, NOT a non-local `return@key`. A non-local return out of an
@@ -396,6 +401,24 @@ private fun NavDisplayLayout(
                     // layer below sideways while the modal is still sliding down (§4.3 boundary ownership).
                     val upperEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
                     val upperTransition = upperEntry?.transitionOrNull() ?: transition
+
+                    if (effects.dimAmount > 0f && entryIndex == topMostVisibleIndex && entryIndex > 0) {
+                        // Fullscreen dim scrim UNDER the top-most visible layer (reference shell
+                        // behavior): it must cover the entering page AND the backdrop revealed
+                        // around it when a card-style transition scales layers down — a scrim
+                        // inside the entry host would shrink with the page and leave the
+                        // surroundings undimmed.
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    // Depth of the layer below the top-most one drives the alpha,
+                                    // the same curve the per-covered-layer scrim used to apply.
+                                    alpha = effects.dimAlphaAt(presentation.animatedTop.value - (entryIndex - 1))
+                                }
+                                .background(Color.Black),
+                        )
+                    }
 
                     NavEntryHost(
                         entry = entry,
@@ -425,7 +448,8 @@ private fun NavDisplayLayout(
  * - selects the governing transition (own when d <= 0, upper when 0 < d) per §4.3 and applies its
  *   `transformEntry` with a [LiveNavTransitionScope] (per-frame deferred read);
  * - layers the orthogonal [effects] via [NavDisplayEffects]'s per-depth helpers
- *   (`shouldClipCornersAt` / `shouldBlockInputAt` / `dimAlphaAt`);
+ *   (`shouldClipCornersAt` / `shouldBlockInputAt`; the dim scrim is a fullscreen sibling rendered
+ *   by the layout, not a per-host overlay);
  * - scopes the content with the shared [stateHolder]'s `EntryStateContent`, a per-entry lifecycle
  *   owner, and a per-entry view-model store owner (Phase 5, real signatures);
  * - keeps composition identity via the surrounding `key(contentKey)` + a cached `movableContentOf`.
@@ -447,11 +471,6 @@ private fun NavEntryHost(
     layoutDirection: LayoutDirection,
     density: Density,
 ) {
-    // opaqueDepth of the upper transition decides culling of this (covered) layer; for the top
-    // entry its own transition's opaqueDepth applies. Use the larger so Modal-style transitions
-    // (opaqueDepth > 1) keep the lower layer alive.
-    val opaqueDepth = maxOf(ownTransition.opaqueDepth, upperTransition.opaqueDepth)
-
     // Cache a single movableContentOf per host so the entry's content keeps its state if the host is
     // moved within the call hierarchy across recompositions.
     val movableContent = remember {
@@ -529,20 +548,6 @@ private fun NavEntryHost(
                     movableContent { entry.Content() }
                 }
             }
-        }
-
-        // Dim scrim on the covered layer, alpha driven by a deferred relative-depth read via the
-        // effects helper.
-        if (effects.dimAmount > 0f && coarseDepth > 0f && coarseDepth <= opaqueDepth) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        val d = presentation.animatedTop.value - entryIndex
-                        alpha = effects.dimAlphaAt(d)
-                    }
-                    .background(Color.Black),
-            )
         }
     }
 }
