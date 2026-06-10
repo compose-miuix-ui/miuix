@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import top.yukonga.miuix.kmp.nav.core.NavEntry
+import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavRole
 
 /** Epsilon around zero within which an entry is treated as the steady-state top. */
@@ -84,6 +85,18 @@ internal class NavPresentation(initialTopIndex: Float) {
     /** Last classified stack mutation; surfaced to the transition scope via `change`. */
     var change: NavChange by mutableStateOf(NavChange.None)
         private set
+
+    /**
+     * Live predictive-back gesture context, surfaced to transitions via
+     * [top.yukonga.miuix.kmp.nav.transition.NavTransitionScope.gesture]. Snapshot state read
+     * inside deferred `graphicsLayer { }` blocks, so per-event updates invalidate draw only.
+     *
+     * Ownership: the gesture layers (swipe dismiss / predictive back) write it per event. On
+     * release the last value is **kept frozen through the settle** — clearing at lift would snap
+     * a touch-following transform origin back to center mid-animation — and cleared when the
+     * settle resolves (cancel settles back, or the leaving entry unloads on commit).
+     */
+    var gesture: NavGesture? by mutableStateOf(null)
 
     /**
      * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation

@@ -41,5 +41,5 @@ internal class LiveNavTransitionScope(
     override val role: NavRole
         get() = roleFor(relativeDepth, isRemoving)
 
-    override val gesture: NavGesture? get() = null
+    override val gesture: NavGesture? get() = presentation.gesture
 }

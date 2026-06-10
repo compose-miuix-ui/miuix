@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
@@ -51,6 +52,7 @@ import top.yukonga.miuix.kmp.nav.state.navMaxLifecycleFor
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryLifecycleOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
+import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
@@ -219,7 +221,15 @@ private fun NavDisplayLayout(
         enabled = backStack.size > 1,
         onProgress = { events ->
             drivePredictiveBack(
-                events = events,
+                // Mirror each event into the live gesture context for gesture-aware transitions
+                // (touch-following pivots etc.); NavBackEvent and NavGesture share field semantics.
+                events = events.onEach { event ->
+                    presentation.gesture = NavGesture(
+                        progress = event.progress,
+                        swipeEdge = event.swipeEdge,
+                        touchY = event.touchY,
+                    )
+                },
                 animatedTop = presentation.animatedTop,
                 topIndex = topIndex,
             )
@@ -228,12 +238,14 @@ private fun NavDisplayLayout(
             // Pop synchronously; convergence is owned by the renderer. The pop retargets
             // animateTopTo, which picks the programmatic curve for a from-rest discrete back
             // (identical to a programmatic pop) and the velocity-continuous spring when the
-            // gesture left the float mid-flight.
+            // gesture left the float mid-flight. The gesture context stays frozen through the
+            // settle and is cleared when the leaving entry unloads.
             currentOnBack.value()
         },
         onCancel = {
             backScope.launch {
                 presentation.animatedTop.settleTo(target = topIndex.toFloat())
+                presentation.gesture = null
             }
         },
     )
@@ -287,6 +299,9 @@ private fun NavDisplayLayout(
                 indexByContentKey.remove(e.contentKey)
                 presentation.unload(e)
             }
+            // A committed back gesture resolves here (its leaving entry just unloaded); release
+            // the gesture context that was kept frozen through the settle.
+            presentation.gesture = null
         }
     }
 
@@ -325,6 +340,7 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 onCommit = currentOnBack.value,
                 onCancel = {},
+                onGesture = { presentation.gesture = it },
             ),
     ) {
         // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The window

@@ -21,7 +21,9 @@ import top.yukonga.miuix.kmp.nav.runtime.anchoredProgress
 import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
+import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import kotlin.math.abs
 
 /**
@@ -77,6 +79,11 @@ import kotlin.math.abs
  * @param onCommit Invoked synchronously the moment a release is classified as a commit (pop the back
  *   stack here); the shared spring then settles `animatedTop` to the new top.
  * @param onCancel Invoked once after the cancel spring settles back to [topIndex].
+ * @param onGesture Receives the live [NavGesture] context per follow event (progress, edge, touch
+ *   position) for gesture-aware transitions, and `null` when the gesture has fully resolved. The
+ *   last value is intentionally kept through the release settle (a transition pivoting around the
+ *   touch point must not snap back to center at lift); the cancel branch clears it after its
+ *   settle, the commit branch leaves clearing to the host (the leaving entry's unload).
  */
 // composed { } is required here: the swipe needs composition-scoped state (coroutine scope,
 // up-to-date callbacks). A Modifier.Node rewrite is a deferred optimization, so suppress the
@@ -89,12 +96,22 @@ fun Modifier.navSwipeDismiss(
     topIndex: Int,
     onCommit: () -> Unit,
     onCancel: () -> Unit,
+    onGesture: (NavGesture?) -> Unit = {},
 ): Modifier = composed {
     if (!enabled || direction == NavSwipeDirection.None) return@composed this
 
     val scope = rememberCoroutineScope()
     val currentOnCommit = rememberUpdatedState(onCommit)
     val currentOnCancel = rememberUpdatedState(onCancel)
+    val currentOnGesture = rememberUpdatedState(onGesture)
+
+    // Edge semantics for gesture-aware transitions: a horizontal back swipe reads as starting from
+    // the screen edge the finger travels away from; vertical dismissal has no meaningful edge.
+    val swipeEdge = when (direction) {
+        NavSwipeDirection.LeftToRight -> NavSwipeEdge.Left
+        NavSwipeDirection.RightToLeft -> NavSwipeEdge.Right
+        else -> NavSwipeEdge.None
+    }
 
     val isHorizontal = direction == NavSwipeDirection.LeftToRight || direction == NavSwipeDirection.RightToLeft
     // Sign mapping a raw axis delta onto "progress toward dismiss": +1 when the dismiss direction is the
@@ -171,7 +188,18 @@ fun Modifier.navSwipeDismiss(
                 change.consume()
                 // Unclamped here; anchoredProgress clamps the total to [min(anchor, 0), 1].
                 val fingerProgress = dismissSign * drag / extent
-                scope.launch { animatedTop.snapToFinger(topIndex = topIndex, progress = fingerProgress, anchor = anchor) }
+                val touchY = change.position.y
+                scope.launch {
+                    animatedTop.snapToFinger(topIndex = topIndex, progress = fingerProgress, anchor = anchor)
+                    // Published inside the driver coroutine so the anchor is always the sampled one.
+                    currentOnGesture.value(
+                        NavGesture(
+                            progress = anchoredProgress(anchor = anchor, fingerProgress = fingerProgress).coerceAtLeast(0f),
+                            swipeEdge = swipeEdge,
+                            touchY = touchY,
+                        ),
+                    )
+                }
             }
 
             // --- Release: velocity-first / position-fallback, velocity-continuous spring handoff. ---
@@ -234,6 +262,9 @@ fun Modifier.navSwipeDismiss(
                         spec = NavDriverSpec.Default,
                         initialVelocity = depthVelocity.coerceAtMost(0f),
                     )
+                    // The gesture context stays frozen through the settle (no pivot snap at lift)
+                    // and is released only now, with the entry back at rest.
+                    currentOnGesture.value(null)
                     currentOnCancel.value()
                 }
             }
