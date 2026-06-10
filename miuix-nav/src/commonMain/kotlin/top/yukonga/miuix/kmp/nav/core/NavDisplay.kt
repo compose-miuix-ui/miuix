@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
@@ -483,11 +484,26 @@ private fun NavDisplayLayout(
 }
 
 /**
+ * Bit layout of the packed per-host depth-bucket mask (see [NavEntryHost]): bits 0..2 carry the
+ * [Lifecycle.State] ordinal of the lifecycle ceiling, the flag bits the three boolean gates. The
+ * mask stays below 64 so the boxed derived value always hits the small-integer cache — the
+ * per-frame derived recompute allocates nothing.
+ */
+private const val DEPTH_BUCKET_LIFECYCLE_MASK = 0b111
+private const val DEPTH_BUCKET_GOVERNS_OWN = 1 shl 3
+private const val DEPTH_BUCKET_CLIP_CORNERS = 1 shl 4
+private const val DEPTH_BUCKET_BLOCK_INPUT = 1 shl 5
+
+/**
  * Renders one presented entry as a pure function of [NavPresentation.animatedTop].
  *
- * The driving float is read **only** inside deferred `graphicsLayer { }` blocks (here and inside the
- * transition's own `transformEntry`), so per-frame changes never recompose this host. The host:
- * - computes the coarse `relativeDepth = animatedTop - entryIndex` (composition-time, integer bucket);
+ * Per-frame reads of the driving float happen **only** inside deferred `graphicsLayer { }` blocks
+ * (here and inside the transition's own `transformEntry`) and inside one threshold-bucketed
+ * [derivedStateOf]. The host's composition scope subscribes to the bucket mask, not the raw float,
+ * so a frame's float write re-runs only that pure calculation and the host recomposes only when
+ * the depth crosses a threshold (a handful of times per transition), never per frame. The host:
+ * - derives the packed depth buckets: lifecycle ceiling, governing-transition side, corner-clip
+ *   gate, input-block gate — every composition consumer of the depth is threshold-level;
  * - selects the governing transition (own when d <= 0, upper when 0 < d) per §4.3 and applies its
  *   `transformEntry` with a [LiveNavTransitionScope] (per-frame deferred read);
  * - layers the orthogonal [effects] via [NavDisplayEffects]'s per-depth helpers
@@ -520,20 +536,34 @@ private fun NavEntryHost(
         movableContentOf<@Composable () -> Unit> { inner -> inner() }
     }
 
-    // Coarse (composition-time) relative depth; only the integer bucket matters here, unlike the
-    // per-frame float read inside graphicsLayer.
-    val coarseDepth = presentation.animatedTop.value - entryIndex
+    // Composition-time depth decisions, bucketed. All four composition consumers of the driving
+    // float — the lifecycle ceiling, the governing-transition side, the corner-clip gate and the
+    // input-block gate — change only when the depth crosses a threshold, never per frame. Packing
+    // them into one derived Int keeps this host subscribed to the buckets instead of the raw float:
+    // each frame's float write re-runs only this calculation (pure math, allocation-free) while the
+    // host recomposes solely on an actual threshold crossing. Raw per-frame floats are read only
+    // inside the deferred graphicsLayer blocks installed below.
+    val depthBuckets by remember(presentation, entryIndex, entry, effects) {
+        derivedStateOf {
+            val d = presentation.animatedTop.value - entryIndex
+            var mask = navMaxLifecycleFor(entry.presentation, d).ordinal
+            if (d <= 0f) mask = mask or DEPTH_BUCKET_GOVERNS_OWN
+            if (effects.shouldClipCornersAt(d)) mask = mask or DEPTH_BUCKET_CLIP_CORNERS
+            if (effects.shouldBlockInputAt(d)) mask = mask or DEPTH_BUCKET_BLOCK_INPUT
+            mask
+        }
+    }
 
     // Per-entry state scopes. The view-model store owner and lifecycle owner are remembered per host;
     // the saveable holder is the shared one passed from NavDisplayLayout.
     val vmOwner = rememberNavEntryViewModelStoreOwner()
-    val maxLifecycle = navMaxLifecycleFor(entry.presentation, coarseDepth)
+    val maxLifecycle = Lifecycle.State.entries[depthBuckets and DEPTH_BUCKET_LIFECYCLE_MASK]
     val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
 
-    // Choose the governing transition at the coarse (integer-bucket) depth: own transition while at
-    // or entering the top (d <= 0), the upper neighbour's transition while covered (0 < d). The
-    // per-frame visual is then a pure deferred read inside the transition's own graphicsLayer.
-    val activeTransition = if (coarseDepth <= 0f) ownTransition else upperTransition
+    // Choose the governing transition at the bucketed depth: own transition while at or entering
+    // the top (d <= 0), the upper neighbour's transition while covered (0 < d). The per-frame
+    // visual is then a pure deferred read inside the transition's own graphicsLayer.
+    val activeTransition = if ((depthBuckets and DEPTH_BUCKET_GOVERNS_OWN) != 0) ownTransition else upperTransition
     val entryModifier = with(activeTransition) {
         Modifier.transformEntry(
             LiveNavTransitionScope(
@@ -548,7 +578,7 @@ private fun NavEntryHost(
         )
     }
 
-    val clipModifier = if (effects.shouldClipCornersAt(coarseDepth)) {
+    val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0) {
         // Squircle-clip the transitioning top entry. The radius comes from the effects, so callers
         // can follow the platform screen corner (e.g. rememberNavSystemCornerRadius); the corner
         // set follows the effects' clip mode. absoluteSquircleClip uses physical corners (never
@@ -571,7 +601,7 @@ private fun NavEntryHost(
         Modifier
     }
 
-    val blockInputModifier = if (effects.shouldBlockInputAt(coarseDepth)) {
+    val blockInputModifier = if ((depthBuckets and DEPTH_BUCKET_BLOCK_INPUT) != 0) {
         Modifier.pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) {

@@ -40,6 +40,7 @@ jetbrains-androidx-navigationevent = { module = "org.jetbrains.androidx.navigati
 jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }
+jetbrains-compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "jetbrains-lifecycle" }
