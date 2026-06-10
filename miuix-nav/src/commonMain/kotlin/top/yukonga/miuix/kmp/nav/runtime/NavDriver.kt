@@ -6,7 +6,10 @@ package top.yukonga.miuix.kmp.nav.runtime
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Immutable
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
@@ -78,6 +81,13 @@ internal data class NavDriverSpec(
     )
 
     /**
+     * Builds the fixed-duration tween used for programmatic full-step settles
+     * ([settleProgrammatic]): the established navigation curve ([NavProgrammaticEasing]) over
+     * [PROGRAMMATIC_DURATION_MILLIS], matching the nav3-based miuix navigation point for point.
+     */
+    fun programmaticTween(): TweenSpec<Float> = tween(durationMillis = PROGRAMMATIC_DURATION_MILLIS, easing = NavProgrammaticEasing)
+
+    /**
      * The most negative (toward-target) velocity a commit settle may be seeded with without
      * overshooting the target, given the [remainingDistance] still to travel (no-bounce
      * requirement).
@@ -116,6 +126,23 @@ internal data class NavDriverSpec(
          * within a few hundredths of an index. Tighter than the default 0.01 for px.
          */
         const val VISIBILITY_THRESHOLD: Float = 0.0025f
+
+        /**
+         * Duration of the programmatic full-step tween ([programmaticTween]). The same 500ms the
+         * established navigation uses; the curve completes in exactly this time regardless of
+         * distance (a multi-step pop sweeps all layers within the same window, like the
+         * reference's single content transition).
+         */
+        const val PROGRAMMATIC_DURATION_MILLIS: Int = 500
+
+        /**
+         * Minimum settle distance (in entry-index units) for a from-rest settle to qualify as a
+         * programmatic full step ([usesProgrammaticCurve]). Programmatic pushes/pops always move
+         * integer distances; anything shorter is a partial-position continuation (a released
+         * gesture, an interrupted transition) and belongs to the live spring. Slightly under 1
+         * to tolerate visibility-threshold residue from a previous settle.
+         */
+        const val FULL_STEP_THRESHOLD: Float = 0.999f
 
         /**
          * Velocity (in progress-units per second) above which a release is treated as a
@@ -205,4 +232,43 @@ internal suspend fun Animatable<Float, AnimationVector1D>.settleTo(
         animationSpec = spec.spring(),
         initialVelocity = initialVelocity,
     )
+}
+
+/**
+ * Whether a settle starting with [velocity] over [distance] should play the programmatic
+ * fixed-duration curve ([NavDriverSpec.programmaticTween]) instead of the live spring.
+ *
+ * Only a from-rest, full-step settle qualifies — exactly the programmatic push/pop case, which
+ * must match the established navigation curve point for point. Anything carrying velocity (an
+ * interrupted tween, a gesture handoff) or covering a partial distance (a settle resumed from a
+ * mid-gesture position) stays on the spring: a fixed-duration tween cannot seed velocity and
+ * would mis-pace short distances.
+ *
+ * @param velocity the driver's velocity at settle start (depth-units per second).
+ * @param distance signed distance from the current value to the target (entry-index units).
+ */
+internal fun usesProgrammaticCurve(velocity: Float, distance: Float): Boolean = velocity == 0f && abs(distance) >= NavDriverSpec.FULL_STEP_THRESHOLD
+
+/**
+ * Renderer-side settle: converges [this] `animatedTop` to [target], dispatching between the two
+ * settle curves (spec 2026-06-10 §"programmatic curve match"):
+ *
+ * - **From rest over a full step** (a programmatic push/pop/multi-pop): the fixed 500ms tween
+ *   with the established easing — identical pacing to the nav3-based miuix navigation.
+ * - **Anything else** (carrying velocity from an interrupted tween, or resuming from a partial
+ *   position after a gesture): the live shared spring via [settleTo], seeded with the current
+ *   velocity so the handoff is velocity-continuous.
+ *
+ * @param target destination value on the depth axis.
+ * @param spec spring + tween parameters; defaults to [NavDriverSpec.Default].
+ */
+internal suspend fun Animatable<Float, AnimationVector1D>.settleProgrammatic(
+    target: Float,
+    spec: NavDriverSpec = NavDriverSpec.Default,
+) {
+    if (usesProgrammaticCurve(velocity = velocity, distance = target - value)) {
+        animateTo(targetValue = target, animationSpec = spec.programmaticTween())
+    } else {
+        settleTo(target, spec)
+    }
 }

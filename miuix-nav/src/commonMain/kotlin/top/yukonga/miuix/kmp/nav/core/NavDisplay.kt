@@ -42,6 +42,7 @@ import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
 import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
+import top.yukonga.miuix.kmp.nav.runtime.settleProgrammatic
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
@@ -149,18 +150,22 @@ class NavEntryBuilder {
 internal fun entryProvider(builder: NavEntryBuilder.() -> Unit): (NavKey) -> NavEntry<*> = NavEntryBuilder().apply(builder).build()
 
 /**
- * Drives [NavPresentation.animatedTop] towards [target] with the single shared convergence spring,
- * unless a gesture currently owns the float (in which case the gesture layer snaps it via
- * `snapToFinger`). Implemented as a [LaunchedEffect] keyed on [target] that defers to the one shared
- * spring entry point `settleTo` (Phase 3, §0.3) — the renderer never builds its own
+ * Drives [NavPresentation.animatedTop] towards [target], unless a gesture currently owns the
+ * float (in which case the gesture layer snaps it via `snapToFinger`). Implemented as a
+ * [LaunchedEffect] keyed on [target] that defers to the driver's settle dispatch
+ * (`settleProgrammatic`: the fixed-duration programmatic curve from rest over a full step, the
+ * velocity-continuous shared spring otherwise) — the renderer never builds its own
  * [androidx.compose.animation.core.AnimationSpec].
  */
 @Composable
 private fun NavPresentation.animateTopTo(target: Float) {
     LaunchedEffect(target) {
-        if (animatedTop.value != target) {
-            animatedTop.settleTo(target)
-        }
+        if (animatedTop.value == target) return@LaunchedEffect
+        // A gesture-release settle toward this same target may already own the float (a swipe
+        // commit pops synchronously and queues its velocity-seeded settle ahead of this effect);
+        // defer to it instead of stomping the seeded spring with a fresh-from-rest curve.
+        if (animatedTop.isRunning && animatedTop.targetValue == target) return@LaunchedEffect
+        animatedTop.settleProgrammatic(target)
     }
 }
 
@@ -206,10 +211,10 @@ private fun NavDisplayLayout(
     val currentOnBack = rememberUpdatedState(onBack)
 
     // Wire the platform predictive back gesture to the single driver. Enabled only when there is
-    // something to pop (size > 1). During the gesture each NavBackEvent snaps animatedTop 1:1
-    // (Task 8.5); on commit the shared spring settles to topIndex - 1 and onBack() pops; on cancel
-    // the spring settles back to topIndex (Phase 3 single spring, §0.3). Modifier.navSwipeDismiss on
-    // the display container drives the same animatedTop for the interactive edge swipe.
+    // something to pop (size > 1). During the gesture each NavBackEvent snaps animatedTop 1:1;
+    // on commit onBack() pops and the renderer's animateTopTo converges to the new top; on cancel
+    // the shared spring settles back to topIndex. Modifier.navSwipeDismiss on the display
+    // container drives the same animatedTop for the interactive edge swipe.
     PredictiveBackHandler(
         enabled = backStack.size > 1,
         onProgress = { events ->
@@ -220,9 +225,10 @@ private fun NavDisplayLayout(
             )
         },
         onCommit = {
-            backScope.launch {
-                presentation.animatedTop.settleTo(target = (topIndex - 1).toFloat())
-            }
+            // Pop synchronously; convergence is owned by the renderer. The pop retargets
+            // animateTopTo, which picks the programmatic curve for a from-rest discrete back
+            // (identical to a programmatic pop) and the velocity-continuous spring when the
+            // gesture left the float mid-flight.
             currentOnBack.value()
         },
         onCancel = {

@@ -98,6 +98,39 @@ class NavDriverTest {
         assertEquals(1f, anchoredProgress(anchor = 0f, fingerProgress = 1.5f))
     }
 
+    // ---- usesProgrammaticCurve ----
+
+    @Test
+    fun programmaticCurve_fromRestFullStep() {
+        // A programmatic push/pop: at rest, one whole entry of travel.
+        assertEquals(true, usesProgrammaticCurve(velocity = 0f, distance = 1f))
+        assertEquals(true, usesProgrammaticCurve(velocity = 0f, distance = -1f))
+    }
+
+    @Test
+    fun programmaticCurve_fromRestMultiStep() {
+        // MultiPop sweeps several layers within the same fixed-duration window.
+        assertEquals(true, usesProgrammaticCurve(velocity = 0f, distance = -3f))
+    }
+
+    @Test
+    fun spring_whenCarryingVelocity() {
+        // An interrupted tween hands its instantaneous velocity to the spring continuation.
+        assertEquals(false, usesProgrammaticCurve(velocity = -2f, distance = 1f))
+    }
+
+    @Test
+    fun spring_forPartialDistance() {
+        // Resuming from a mid-gesture position: a fixed-duration tween would mis-pace it.
+        assertEquals(false, usesProgrammaticCurve(velocity = 0f, distance = 0.45f))
+    }
+
+    @Test
+    fun programmaticCurve_toleratesThresholdResidue() {
+        // A previous settle may leave the value within the visibility threshold of an integer.
+        assertEquals(true, usesProgrammaticCurve(velocity = 0f, distance = 0.9995f))
+    }
+
     // ---- noOvershootVelocityFloor ----
 
     @Test
