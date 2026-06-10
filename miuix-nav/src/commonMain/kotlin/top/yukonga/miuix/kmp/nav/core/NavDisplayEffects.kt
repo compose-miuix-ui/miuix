@@ -24,9 +24,8 @@ enum class NavCornerClipMode {
     Leading,
 
     /**
-     * All four corners — for card-style transitions (e.g.
-     * [top.yukonga.miuix.kmp.nav.transition.NavTransitions.AndroidCrossActivity]) that scale the
-     * whole page, so every corner meets visible background.
+     * All four corners — for card-style transitions that scale the whole page, so every corner
+     * meets visible background.
      */
     All,
 }
@@ -49,10 +48,9 @@ enum class NavCornerClipMode {
  * @property dimAmount maximum alpha of the fullscreen dim scrim rendered just beneath the
  *   top-most layer during a transition. It covers the revealed page and the [backdropColor]
  *   area alike (the reference scrim spans the whole entering surface). Set to 0f to disable.
- * @property holdDimDuringGesture when `true`, the scrim holds at [dimAmount] for the whole
- *   gesture and fades only across the post-commit sweep (the reference card-animation scrim);
- *   when `false` (default), it follows the depth linearly — lightening as the layer below is
- *   revealed — which is the established slide-style behavior.
+ *   The curve along the motion is owned by the governing transition
+ *   ([top.yukonga.miuix.kmp.nav.transition.NavTransition.scrimFraction]); this knob only caps
+ *   how dark it gets.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
  *   transition is in progress, so taps cannot reach a half-animated screen.
  * @property backdropColor solid color drawn behind every entry layer. Card-style transitions scale
@@ -67,19 +65,9 @@ data class NavDisplayEffects(
     val cornerClipRadius: Dp = 0.dp,
     val cornerClipMode: NavCornerClipMode = NavCornerClipMode.Leading,
     val dimAmount: Float = 0.5f,
-    val holdDimDuringGesture: Boolean = false,
     val blockInputDuringTransition: Boolean = true,
     val backdropColor: Color = Color.Unspecified,
 ) {
-    /**
-     * Dim alpha to apply to a covered layer at relative depth [relativeDepth]. The covered layer
-     * (0 < d) fades to at most [dimAmount] as it recedes; the top layer (d <= 0) is never dimmed.
-     *
-     * @param relativeDepth this entry's relative depth (`animatedTop - entryIndex`).
-     */
-    @Stable
-    fun dimAlphaAt(relativeDepth: Float): Float = if (dimAmount <= 0f) 0f else relativeDepth.coerceIn(0f, 1f) * dimAmount
-
     /**
      * Whether an entry should be corner-clipped at relative depth [relativeDepth], when
      * [enableCornerClip]:

@@ -67,6 +67,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import lazyfont.LazyText
+import navigation.CrossActivityTransition
 import navigation.Navigator
 import navigation.Route
 import top.yukonga.miuix.kmp.basic.Badge
@@ -208,14 +209,13 @@ fun AppContent(
                 cornerClipMode = if (isCrossActivityStyle) NavCornerClipMode.All else NavCornerClipMode.Leading,
                 // The cross-activity style uses the platform scrim constants (0.2 light / 0.8
                 // dark); the slide style keeps the established 0.5.
+                // The scrim curve itself (hold-during-gesture for the card style, depth-linear
+                // for the slide style) is owned by each transition via NavTransition.scrimFraction.
                 dimAmount = when {
                     !appState.enableDim -> 0f
                     isCrossActivityStyle -> if (isDarkTheme) 0.8f else 0.2f
                     else -> 0.5f
                 },
-                // The platform scrim holds steady while the finger drives; the slide style keeps
-                // the established depth-following dim.
-                holdDimDuringGesture = isCrossActivityStyle,
                 blockInputDuringTransition = appState.blockInputDuringTransition,
                 // Fill the area revealed around scaled-down layers with the page background, like
                 // the platform's back-animation background layer.
@@ -232,9 +232,11 @@ fun AppContent(
             else -> NavSwipeDirection.LeftToRight
         }
 
-        // Global transition style: the established default, or the platform cross-activity feel.
-        // Presets are singletons, so the expression itself is stable across recompositions.
-        val navTransition = if (isCrossActivityStyle) NavTransitions.AndroidCrossActivity else NavTransitions.MiuixDefault
+        // Global transition style: the established default, or the cross-activity feel — the
+        // latter is a fully custom transition defined in this app (navigation/CrossActivityTransition.kt)
+        // on the public API, not a library preset. Both are top-level singletons, so the
+        // expression itself is stable across recompositions.
+        val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
 
         NavDisplay(
             backStack = backStack,

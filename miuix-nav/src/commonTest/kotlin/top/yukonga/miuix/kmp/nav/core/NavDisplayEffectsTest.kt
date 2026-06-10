@@ -13,33 +13,6 @@ class NavDisplayEffectsTest {
     private val effects = NavDisplayEffects()
 
     @Test
-    fun dimAlpha_isZeroAtSettledTop() {
-        assertEquals(0f, effects.dimAlphaAt(0f))
-    }
-
-    @Test
-    fun dimAlpha_isZeroAboveTop() {
-        assertEquals(0f, effects.dimAlphaAt(-0.5f))
-    }
-
-    @Test
-    fun dimAlpha_rampsLinearlyAcrossFirstCoveredLayer() {
-        assertEquals(0.25f, effects.dimAlphaAt(0.5f))
-    }
-
-    @Test
-    fun dimAlpha_clampsAtFullDepth() {
-        assertEquals(0.5f, effects.dimAlphaAt(1f))
-        assertEquals(0.5f, effects.dimAlphaAt(2f))
-    }
-
-    @Test
-    fun dimAlpha_isZeroWhenDimDisabled() {
-        val noDim = NavDisplayEffects(dimAmount = 0f)
-        assertEquals(0f, noDim.dimAlphaAt(0.5f))
-    }
-
-    @Test
     fun clipCorners_onlyWhileLeadingTopTransitions() {
         assertTrue(effects.shouldClipCornersAt(-0.5f))
         assertFalse(effects.shouldClipCornersAt(0f))
@@ -69,7 +42,7 @@ class NavDisplayEffectsTest {
 
     @Test
     fun companionNone_disablesEverything() {
-        assertEquals(0f, NavDisplayEffects.None.dimAlphaAt(0.5f))
+        assertEquals(0f, NavDisplayEffects.None.dimAmount)
         assertFalse(NavDisplayEffects.None.shouldClipCornersAt(-0.5f))
         assertFalse(NavDisplayEffects.None.shouldBlockInputAt(0.5f))
     }

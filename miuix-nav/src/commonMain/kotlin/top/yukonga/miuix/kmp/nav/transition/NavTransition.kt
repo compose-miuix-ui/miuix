@@ -79,6 +79,27 @@ fun interface NavTransition {
      * default. Directions are physical (not mirrored for layout direction); see [NavSwipeDirection].
      */
     val dismissDirection: NavSwipeDirection get() = NavSwipeDirection.None
+
+    /**
+     * Alpha fraction (0..1) of the fullscreen dim scrim the host renders just beneath the top-most
+     * visible layer, evaluated each frame against [scope] — the context of the **covered layer
+     * directly below** that top-most layer, whose [NavTransitionScope.relativeDepth] runs from 0
+     * (fully revealed) to 1 (fully covered).
+     *
+     * The scrim is part of the covered treatment, so it is governed by the transition of the layer
+     * **above** (the same boundary-ownership rule as `transformEntry` for `0 < d`). The split of
+     * responsibilities with the effects layer: `NavDisplayEffects.dimAmount` owns whether the scrim
+     * exists and how dark it can get, this method owns the curve along the motion — the final scrim
+     * alpha is `dimAmount * scrimFraction(scope)`.
+     *
+     * The default follows the depth linearly (the scrim lightens as the layer below is revealed),
+     * which suits slide-style transitions. A card-style transition can instead hold the scrim during
+     * a gesture and fade it only across the post-commit sweep by reading [NavTransitionScope.gesture].
+     *
+     * The host evaluates this inside a deferred `graphicsLayer { }` block, so reads of [scope] are
+     * per-frame and cost no recomposition.
+     */
+    fun scrimFraction(scope: NavTransitionScope): Float = scope.relativeDepth.coerceIn(0f, 1f)
 }
 
 /**
@@ -94,16 +115,21 @@ fun interface NavTransition {
  * @param opaqueDepth see [NavTransition.opaqueDepth]; defaults to `1f`.
  * @param dismissDirection see [NavTransition.dismissDirection]; defaults to [NavSwipeDirection.None]
  *   (swipe-to-dismiss is opt-in).
+ * @param scrim see [NavTransition.scrimFraction]; the lambda receives the covered layer's scope and
+ *   returns the scrim alpha fraction (0..1). `null` (default) keeps the depth-linear default curve.
  * @param block the per-frame graphics-layer transform.
  */
 fun navGraphicsTransition(
     opaqueDepth: Float = 1f,
     dismissDirection: NavSwipeDirection = NavSwipeDirection.None,
+    scrim: ((NavTransitionScope) -> Float)? = null,
     block: GraphicsLayerScope.(NavTransitionScope) -> Unit,
 ): NavTransition = object : NavTransition {
     override val opaqueDepth: Float = opaqueDepth
 
     override val dismissDirection: NavSwipeDirection = dismissDirection
+
+    override fun scrimFraction(scope: NavTransitionScope): Float = scrim?.invoke(scope) ?: super.scrimFraction(scope)
 
     override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier = this.graphicsLayer { block(scope) }
 }

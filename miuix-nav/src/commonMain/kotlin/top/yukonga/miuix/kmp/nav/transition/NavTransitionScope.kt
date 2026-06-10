@@ -43,11 +43,13 @@ class NavGesture(
 )
 
 /**
- * The read-only context a [NavTransition] receives in [NavTransition.transformEntry].
+ * The read-only context a [NavTransition] receives in [NavTransition.transformEntry] and
+ * [NavTransition.scrimFraction].
  *
  * Every property is a deferred-read source: a [NavTransition] should read them inside a
  * `graphicsLayer { }` (or layout) block so the animation runs without recomposition. The property
- * set is exhaustive and fixed by the public contract (spec section 6.1) and must not be extended.
+ * set is append-only (spec section 6.1): existing properties never change meaning or disappear,
+ * but new deferred-read sources may be added in minor versions.
  */
 @Stable
 interface NavTransitionScope {

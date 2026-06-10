@@ -436,24 +436,28 @@ private fun NavDisplayLayout(
                         // around it when a card-style transition scales layers down — a scrim
                         // inside the entry host would shrink with the page and leave the
                         // surroundings undimmed.
+                        //
+                        // The scrim is part of the covered treatment, so the top entry's governing
+                        // transition owns its curve (§4.3 boundary ownership, NavTransition.scrimFraction),
+                        // evaluated against the covered layer directly below (depth 0 = revealed,
+                        // 1 = covered). The effects layer only caps the darkness (dimAmount). The
+                        // fraction is read inside the deferred graphicsLayer, so the per-frame float
+                        // never recomposes this layout.
+                        val belowEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex - 1 }
+                        val scrimScope = LiveNavTransitionScope(
+                            presentation = presentation,
+                            entryIndex = entryIndex - 1,
+                            isRemoving = belowEntry?.presentation?.isRemoving == true,
+                            change = presentation.change,
+                            layoutSize = layoutSize,
+                            layoutDirection = layoutDirection,
+                            density = density,
+                        )
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .graphicsLayer {
-                                    // Two scrim curves (effects.holdDimDuringGesture): the
-                                    // card-style reference holds at dimAmount while the finger
-                                    // drives (the depth below equals the release progress, so the
-                                    // fraction stays 1) and fades only across the post-commit
-                                    // sweep; the slide style follows the depth linearly, so the
-                                    // dim lightens as the layer below is revealed.
-                                    val below = (presentation.animatedTop.value - (entryIndex - 1)).coerceIn(0f, 1f)
-                                    val g = presentation.gesture
-                                    val fraction = if (g != null && effects.holdDimDuringGesture) {
-                                        (below / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f)
-                                    } else {
-                                        below
-                                    }
-                                    alpha = effects.dimAmount * fraction
+                                    alpha = effects.dimAmount * ownTransition.scrimFraction(scrimScope).coerceIn(0f, 1f)
                                 }
                                 .background(Color.Black),
                         )
