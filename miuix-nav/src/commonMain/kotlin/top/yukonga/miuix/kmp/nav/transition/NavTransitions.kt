@@ -80,27 +80,31 @@ object NavTransitions {
     }
 
     /**
-     * Platform cross-activity feel (the AOSP task open/close animation): the top page scales
-     * between 0.9 and 1 while fading (d: -1 -> 0), and the covered page stays **fully opaque**
-     * and parallaxes a quarter width toward the leading edge (d: 0 -> 1) — on pop the revealed
-     * page slides back in from -width/4 while the departing page scales down and fades out,
-     * matching the platform's programmatic pop spec (`slideIn(-width/4)` + `scaleOut(0.9)` +
-     * `fadeOut`). The covered page is never faded: the platform look derives its depth from
-     * scale and parallax alone, so pair this with `NavDisplayEffects(dimAmount = 0f)` for the
-     * authentic appearance.
+     * Platform cross-activity feel (the AOSP task open/close animation). The top page behaves
+     * like the platform's shrinking card (d: -1 -> 0): it scales between [CrossActivityMinScale]
+     * and 1 while drifting up to [CrossActivityDrift] toward the trailing edge, staying **fully
+     * opaque through the whole interactive range** — alpha falls only across the last
+     * [CrossActivityFadeWindow] of the exit, so a dragged page stays solid (like the platform
+     * card) and vanishes quickly once the commit settle carries it out. The covered page stays
+     * opaque and parallaxes a quarter width toward the leading edge (d: 0 -> 1), matching the
+     * platform's pop spec (`slideIn(-width/4)` for the revealed layer). No dim is baked in: the
+     * platform derives depth from scale and parallax alone, so pair this with
+     * `NavDisplayEffects(dimAmount = 0f)` for the authentic look.
      *
-     * The platform's gesture composite (both layers shrinking toward the touch point, then the
-     * revealed layer growing back after commit) is not a pure function of the depth sweep, so
-     * this preset keeps the programmatic spec's geometry for both drive modes — linear in `d`,
-     * 1:1 with the finger.
+     * The platform's full gesture composite (both layers shrinking toward the touch point, the
+     * revealed layer growing back after commit) is not a pure function of the depth sweep; this
+     * preset keeps a single `d -> visual` mapping for both drive modes — linear in `d`, 1:1 with
+     * the finger — chosen so the dragged and settling phases connect without a jump.
      */
     val AndroidCrossActivity: NavTransition = navGraphicsTransition(opaqueDepth = 1f) { scope ->
         val d = scope.relativeDepth
         if (d <= 0f) {
             val p = topProgress(d) // 0 off-edge, 1 at top
-            scaleX = 0.9f + 0.1f * p
+            scaleX = CrossActivityMinScale + (1f - CrossActivityMinScale) * p
             scaleY = scaleX
-            alpha = p
+            val trailing = if (scope.layoutDirection == LayoutDirection.Rtl) -1f else 1f
+            translationX = trailing * (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
+            alpha = (p / CrossActivityFadeWindow).coerceIn(0f, 1f)
         } else {
             // Covered: opaque, parallaxed a quarter width toward the leading edge. Mirrored for RTL.
             val sign = if (scope.layoutDirection == LayoutDirection.Rtl) 1f else -1f
@@ -184,6 +188,19 @@ object NavTransitions {
 
     /** Fixed horizontal offset used by [SharedAxisX]. */
     private val SharedAxisOffset = 30.dp
+
+    /** Smallest scale the [AndroidCrossActivity] top card shrinks to (the platform gesture value). */
+    private const val CrossActivityMinScale = 0.85f
+
+    /** Trailing-edge drift of the [AndroidCrossActivity] top card over its exit (platform commit offset). */
+    private val CrossActivityDrift = 96.dp
+
+    /**
+     * Fraction of the [AndroidCrossActivity] exit over which the top card fades, measured from the
+     * off-edge end: the card is fully opaque for the first 60% of travel (the interactive range)
+     * and fades out across the final 40% once a commit carries it away.
+     */
+    private const val CrossActivityFadeWindow = 0.4f
 }
 
 /**
