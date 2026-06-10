@@ -39,6 +39,7 @@ import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
 import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismiss
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
+import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
@@ -163,12 +164,23 @@ internal fun entryProvider(builder: NavEntryBuilder.() -> Unit): (NavKey) -> Nav
 @Composable
 private fun NavPresentation.animateTopTo(target: Float) {
     LaunchedEffect(target) {
+        // Consume the release velocity exactly once per retarget, whether or not it gets used.
+        val released = pendingSettleVelocity
+        pendingSettleVelocity = 0f
         if (animatedTop.value == target) return@LaunchedEffect
         // A gesture-release settle toward this same target may already own the float (a swipe
         // commit pops synchronously and queues its velocity-seeded settle ahead of this effect);
         // defer to it instead of stomping the seeded spring with a fresh-from-rest curve.
         if (animatedTop.isRunning && animatedTop.targetValue == target) return@LaunchedEffect
-        animatedTop.settleProgrammatic(target)
+        if (released < 0f && target < animatedTop.value) {
+            // A flung predictive-back commit: seed the spring with the gesture's release velocity
+            // so the settle carries the momentum (the reference feeds it into its post-commit
+            // spring, clamped toward the target). The no-overshoot floor keeps it bounce-free.
+            val floor = NavDriverSpec.Default.noOvershootVelocityFloor(animatedTop.value - target)
+            animatedTop.settleTo(target, initialVelocity = released.coerceAtLeast(floor))
+        } else {
+            animatedTop.settleProgrammatic(target)
+        }
     }
 }
 
@@ -221,14 +233,29 @@ private fun NavDisplayLayout(
     PredictiveBackHandler(
         enabled = backStack.size > 1,
         onProgress = { events ->
+            // Per-gesture trackers: the initial touch anchors vertical-follow transitions, the
+            // last two timestamped events estimate the release velocity (depth-units/sec).
+            var initialTouchY = Float.NaN
+            var lastProgress = 0f
+            var lastTimeMillis = 0L
             drivePredictiveBack(
                 // Mirror each event into the live gesture context for gesture-aware transitions
-                // (touch-following pivots etc.); NavBackEvent and NavGesture share field semantics.
+                // (touch-following shifts etc.); NavBackEvent and NavGesture share field semantics.
                 events = events.onEach { event ->
+                    if (initialTouchY.isNaN()) initialTouchY = event.touchY
+                    if (event.frameTimeMillis > lastTimeMillis && lastTimeMillis != 0L) {
+                        val progressVelocity = (event.progress - lastProgress) * 1000f / (event.frameTimeMillis - lastTimeMillis)
+                        presentation.pendingSettleVelocity = -progressVelocity
+                    }
+                    if (event.frameTimeMillis != 0L) {
+                        lastProgress = event.progress
+                        lastTimeMillis = event.frameTimeMillis
+                    }
                     presentation.gesture = NavGesture(
                         progress = event.progress,
                         swipeEdge = event.swipeEdge,
                         touchY = event.touchY,
+                        initialTouchY = initialTouchY,
                     )
                 },
                 animatedTop = presentation.animatedTop,
@@ -244,6 +271,7 @@ private fun NavDisplayLayout(
             currentOnBack.value()
         },
         onCancel = {
+            presentation.pendingSettleVelocity = 0f
             backScope.launch {
                 presentation.animatedTop.settleTo(target = topIndex.toFloat())
                 presentation.gesture = null
@@ -412,9 +440,19 @@ private fun NavDisplayLayout(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .graphicsLayer {
-                                    // Depth of the layer below the top-most one drives the alpha,
-                                    // the same curve the per-covered-layer scrim used to apply.
-                                    alpha = effects.dimAlphaAt(presentation.animatedTop.value - (entryIndex - 1))
+                                    // Reference scrim curve: constant at dimAmount while the
+                                    // finger drives (the depth below equals the release progress,
+                                    // so the fraction holds at 1), fading only across the
+                                    // post-commit sweep. A programmatic transition fades linearly
+                                    // with the depth below, as before.
+                                    val below = (presentation.animatedTop.value - (entryIndex - 1)).coerceIn(0f, 1f)
+                                    val g = presentation.gesture
+                                    val fraction = if (g != null) {
+                                        (below / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f)
+                                    } else {
+                                        below
+                                    }
+                                    alpha = effects.dimAmount * fraction
                                 }
                                 .background(Color.Black),
                         )

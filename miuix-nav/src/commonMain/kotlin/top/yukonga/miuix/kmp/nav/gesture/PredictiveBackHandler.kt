@@ -35,12 +35,15 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
  *   ESC, Web triggers) report [NavSwipeEdge.None].
  * @property touchY The vertical touch position in pixels, used by transitions that pivot or
  *   anchor the outgoing layer around the finger.
+ * @property frameTimeMillis Timestamp of the event in milliseconds, for estimating the gesture's
+ *   release velocity. `0` for sources without timing (discrete triggers).
  */
 @Stable
 class NavBackEvent(
     val progress: Float,
     val swipeEdge: NavSwipeEdge,
     val touchY: Float,
+    val frameTimeMillis: Long = 0,
 )
 
 /**
@@ -197,4 +200,5 @@ private fun NavigationEvent.toNavBackEvent(): NavBackEvent = NavBackEvent(
         else -> NavSwipeEdge.None
     },
     touchY = touchY,
+    frameTimeMillis = frameTimeMillis,
 )

@@ -99,6 +99,15 @@ internal class NavPresentation(initialTopIndex: Float) {
     var gesture: NavGesture? by mutableStateOf(null)
 
     /**
+     * Release velocity (depth-units per second, negative toward pop) estimated from the
+     * predictive-back event stream, handed to the renderer's next settle so a flung system back
+     * commits with momentum (the reference feeds the gesture velocity into its post-commit
+     * spring). Plain (non-snapshot) bookkeeping: written by the gesture layer, consumed exactly
+     * once by the settle launch, cleared on cancel.
+     */
+    var pendingSettleVelocity: Float = 0f
+
+    /**
      * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation
      * set, preserving leaving entries (flagged via [NavEntry.presentation]'s `isRemoving`) until they
      * are unloaded at relative depth <= -1. [change] is the classification computed by `navReconcile`
