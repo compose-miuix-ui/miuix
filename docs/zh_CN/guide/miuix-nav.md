@@ -75,7 +75,6 @@ reconciler 把每次变化分类为 `Push` / `Pop` / `MultiPush(n)` / `MultiPop(
 | :-- | :-- |
 | `Cupertino`（默认） | iOS 横滑 + 下层视差 + 调暗 |
 | `MiuixDefault` | 滑动 + 方角裁剪 + 调暗 |
-| `AndroidCrossActivity` | 缩放 0.9 + 淡出 |
 | `Scale` | 缩放 |
 | `Fade` | 淡入淡出 |
 | `SharedAxisX` | Material 共享 X 轴 |
@@ -140,9 +139,23 @@ val myTransition = navGraphicsTransition { scope ->
 
 `NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`layoutSize`、`layoutDirection`、`density`。
 
+转场同时拥有自己的 **scrim 曲线**：渲染在最顶层之下的全屏调暗遮罩由 `NavTransition.scrimFraction` 决定——曲线取自**上层**（即覆盖者）转场（与被覆盖层变换一致的边界归属规则），并以下方被覆盖层为参照求值（深度 0 = 完全显露，1 = 完全覆盖）——`NavDisplayEffects.dimAmount` 只封顶最大暗度。默认曲线随深度线性变化（下层显露得越多，调暗越浅）；经 `scrim` 参数传入自定义曲线，例如卡片式的「手势期间保持、提交后扫程内才淡出」：
+
+```kotlin
+val cardStyle = navGraphicsTransition(
+    scrim = { scope ->
+        val d = scope.relativeDepth.coerceIn(0f, 1f)
+        val g = scope.gesture
+        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f) else d
+    },
+) { scope -> /* transform */ }
+```
+
+一个完全基于该公共 API 实现的平台级完整转场——居中缩放、贴边、带阻尼的纵向跟手、提交后飞出以及上述手势保持 scrim——见示例应用中的 `CrossActivityTransition`（`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`）。
+
 ## 正交效果
 
-`NavDisplayEffects` 开关三项按相对深度计算的横切效果：
+`NavDisplayEffects` 承载叠加在当前转场之上的横切效果——圆角裁剪、调暗封顶、转场期输入拦截与背景底色（`backdropColor`）：
 
 ```kotlin
 NavDisplay(

@@ -75,7 +75,6 @@ A built-in preset library is available as `NavTransitions`:
 | :-- | :-- |
 | `Cupertino` (default) | iOS horizontal slide + lower-layer parallax + dim |
 | `MiuixDefault` | Slide + corner clip + dim |
-| `AndroidCrossActivity` | Scale 0.9 + fade |
 | `Scale` | Scale |
 | `Fade` | Fade |
 | `SharedAxisX` | Material shared X axis |
@@ -140,9 +139,23 @@ val myTransition = navGraphicsTransition { scope ->
 
 `NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `layoutSize`, `layoutDirection` and `density`.
 
+A transition also owns its **scrim curve**: the fullscreen dim rendered just beneath the top-most layer follows `NavTransition.scrimFraction` — taken from the transition governing the layer **above** (the covering entry's, the same boundary-ownership rule as the covered transform) and evaluated against the covered layer below (depth 0 = revealed, 1 = covered) — while `NavDisplayEffects.dimAmount` only caps how dark it gets. The default curve is linear in depth (the dim lightens as the layer below is revealed); pass a custom one via the `scrim` parameter, e.g. a card-style scrim that holds during a gesture and fades only across the post-commit sweep:
+
+```kotlin
+val cardStyle = navGraphicsTransition(
+    scrim = { scope ->
+        val d = scope.relativeDepth.coerceIn(0f, 1f)
+        val g = scope.gesture
+        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f) else d
+    },
+) { scope -> /* transform */ }
+```
+
+For a complete, platform-grade transition built entirely on this public API — centered scale, edge hug, damped vertical finger follow, post-commit fly-out and the gesture-held scrim above — see `CrossActivityTransition` in the example app (`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`).
+
 ## Orthogonal effects
 
-`NavDisplayEffects` toggles three cross-cutting effects, computed against relative depth:
+`NavDisplayEffects` holds the cross-cutting effects layered on top of the active transition — corner clip, dim cap, input blocking and a backdrop fill (`backdropColor`):
 
 ```kotlin
 NavDisplay(
