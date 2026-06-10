@@ -48,7 +48,7 @@ val LocalNavBackRequest = staticCompositionLocalOf { NavBackRequest() }
  * host's root node (which must be focusable) so a top-level ESC press maps to a back navigation.
  *
  * On iOS/macOS without a hardware keyboard this is inert; continuous edge swipes are handled by
- * [Modifier.navEdgeSwipe] instead.
+ * `Modifier.navSwipeDismiss` instead.
  */
 fun Modifier.navBackKeyModifier(enabled: Boolean, request: NavBackRequest): Modifier = if (!enabled) {
     this

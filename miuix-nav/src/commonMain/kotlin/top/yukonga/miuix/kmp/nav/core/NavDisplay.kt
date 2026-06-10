@@ -208,8 +208,8 @@ private fun NavDisplayLayout(
     // Wire the platform predictive back gesture to the single driver. Enabled only when there is
     // something to pop (size > 1). During the gesture each NavBackEvent snaps animatedTop 1:1
     // (Task 8.5); on commit the shared spring settles to topIndex - 1 and onBack() pops; on cancel
-    // the spring settles back to topIndex (Phase 3 single spring, §0.3). Modifier.navEdgeSwipe on the
-    // top (non-root) entry drives the same animatedTop for the interactive iOS-style edge swipe.
+    // the spring settles back to topIndex (Phase 3 single spring, §0.3). Modifier.navSwipeDismiss on
+    // the display container drives the same animatedTop for the interactive edge swipe.
     PredictiveBackHandler(
         enabled = backStack.size > 1,
         onProgress = { events ->
@@ -288,12 +288,38 @@ private fun NavDisplayLayout(
     // sets the target; the interactive gesture layer may snapToFinger it instead.
     presentation.animateTopTo(backStack.lastIndex.toFloat())
 
+    // Effective interactive dismiss direction of the CURRENT top entry: a per-route override wins,
+    // else its governing transition declares the natural direction. Rebuilding one entry to read
+    // its metadata is O(1) and only happens when the stack or the global transition changes.
+    val topDismissDirection = remember(currentKeyList, transition) {
+        val topEntry = entryProvider(currentKeyList.last())
+        topEntry.swipeDismissOrNull() ?: (topEntry.transitionOrNull() ?: transition).dismissDirection
+    }
+
     var layoutSize by remember { mutableStateOf(IntSize.Zero) }
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
     Box(
-        modifier = modifier.onSizeChanged { layoutSize = it },
+        // The unified swipe recognizer lives on the DISPLAY CONTAINER, not on the top entry's host:
+        // the host's hit-rect follows its graphicsLayer translation, so early in a push most of the
+        // screen belongs to the covered (input-blocked) layer below and an interrupting back-swipe
+        // could never engage. The container sees every pointer on the Initial pass parent-first —
+        // before any entry's nested scroll or input-blocking modifier — keeping the two-phase
+        // claiming contract (invariant 4) intact while making the whole screen grabbable at any
+        // point of an in-flight transition. At rest the behavior is unchanged (the settled top host
+        // was full-screen anyway).
+        modifier = modifier
+            .onSizeChanged { layoutSize = it }
+            .navSwipeDismiss(
+                // Never on the root (nothing to pop); NavSwipeDirection.None keeps it disabled.
+                enabled = topIndex > 0,
+                direction = topDismissDirection,
+                animatedTop = presentation.animatedTop,
+                topIndex = topIndex,
+                onCommit = currentOnBack.value,
+                onCancel = {},
+            ),
     ) {
         // Visible window (spec §4.4 / §9): an entry is visible when -1 < d <= opaqueDepth. The window
         // depth is the MAX opaqueDepth across the global transition and every presented entry's
@@ -340,11 +366,6 @@ private fun NavDisplayLayout(
                     val upperEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
                     val upperTransition = upperEntry?.transitionOrNull() ?: transition
 
-                    // Interactive dismiss direction for this (top) entry: a per-route override wins,
-                    // else the entry's own transition declares the natural direction (e.g. a Modal
-                    // dismisses downward, a horizontal slide rightward). NavSwipeDirection.None disables it.
-                    val dismissDirection = entry.swipeDismissOrNull() ?: ownTransition.dismissDirection
-
                     NavEntryHost(
                         entry = entry,
                         entryIndex = entryIndex,
@@ -357,15 +378,6 @@ private fun NavDisplayLayout(
                         layoutSize = layoutSize,
                         layoutDirection = layoutDirection,
                         density = density,
-                        hostModifier = Modifier.navSwipeDismiss(
-                            // Only the current top entry (and never the root) is interactively swipeable.
-                            enabled = entryIndex == topIndex && topIndex > 0,
-                            direction = dismissDirection,
-                            animatedTop = presentation.animatedTop,
-                            topIndex = topIndex,
-                            onCommit = currentOnBack.value,
-                            onCancel = {},
-                        ),
                     )
                 }
             }
@@ -403,7 +415,6 @@ private fun NavEntryHost(
     layoutSize: IntSize,
     layoutDirection: LayoutDirection,
     density: Density,
-    hostModifier: Modifier = Modifier,
 ) {
     // opaqueDepth of the upper transition decides culling of this (covered) layer; for the top
     // entry its own transition's opaqueDepth applies. Use the larger so Modal-style transitions
@@ -473,7 +484,7 @@ private fun NavEntryHost(
         Modifier
     }
 
-    Box(modifier = hostModifier.then(entryModifier).then(clipModifier).then(blockInputModifier)) {
+    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier)) {
         ProvideNavEntryViewModelStore(vmOwner) {
             ProvideNavEntryLifecycle(lifecycleOwner) {
                 stateHolder.EntryStateContent(entry.contentKey) {

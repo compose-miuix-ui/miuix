@@ -20,8 +20,8 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
  * [onCommit] / [onCancel] fires.
  *
  * Continuous, finger-following edge swipes on iOS are provided separately by
- * [Modifier.navEdgeSwipe], which drives `animatedTop` directly; this actual deliberately does not
- * attempt to synthesise a gesture stream for them.
+ * `Modifier.navSwipeDismiss`, which drives `animatedTop` directly; this actual deliberately does
+ * not attempt to synthesise a gesture stream for them.
  *
  * Keyboard wiring (ESC) is installed at the navigation host via [navBackKeyModifier]; this
  * composable itself holds no key listener so that the host owns focus placement.
