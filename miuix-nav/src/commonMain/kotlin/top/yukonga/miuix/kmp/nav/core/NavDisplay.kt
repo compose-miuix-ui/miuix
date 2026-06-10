@@ -316,10 +316,20 @@ private fun NavDisplayLayout(
         derivedStateOf {
             val top = presentation.animatedTop.value
             val currentSize = backStack.size
-            presentation.presented.filter { e ->
-                e.presentation.isRemoving &&
-                    (indexByContentKey[e.contentKey]?.let { index -> top - index <= -1f || index < currentSize } ?: true)
+            val presented = presentation.presented
+            // Hand-rolled scan: this calculation re-runs on every animation frame (it must, so the
+            // derived state can compare results), and the common nothing-leaving case has to stay
+            // allocation-free — no filter list, no closure, no boxing.
+            var result: MutableList<NavEntry<*>>? = null
+            for (i in presented.indices) {
+                val e = presented[i]
+                if (!e.presentation.isRemoving) continue
+                val index = indexByContentKey[e.contentKey]
+                if (index == null || top - index <= -1f || index < currentSize) {
+                    (result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }).add(e)
+                }
             }
+            result ?: emptyList()
         }
     }
     if (finishedLeaving.isNotEmpty()) {
@@ -387,19 +397,29 @@ private fun NavDisplayLayout(
         // per-route override — the renderer keeps a layer alive while ANY transition in play would, so
         // a Modal override (opaqueDepth 2f) keeps the layer below it visible even under a shallower
         // global transition. Over-keeping a hidden layer is cheap; under-keeping would blank it out.
-        // This derivedStateOf reads the coarse (composition-time) animatedTop value so only crossing an
-        // integer boundary re-evaluates the window; per-frame floats are read lazily in graphicsLayer.
+        // The derived calculation re-runs each animation frame (it must, so the derived state can
+        // compare results) but notifies readers only when the membership actually changes — i.e.
+        // when a window boundary is crossed; per-frame floats are otherwise read lazily in
+        // graphicsLayer. Hand-rolled max/filter keeps the per-frame re-run free of closures,
+        // iterators, and boxed floats; the only allocation left is the result list.
         val visibleEntries by remember(presentation, transition, indexByContentKey) {
             derivedStateOf {
                 val top = presentation.animatedTop.value
-                val windowDepth = presentation.presented.fold(transition.opaqueDepth) { acc, entry ->
-                    maxOf(acc, (entry.transitionOrNull() ?: transition).opaqueDepth)
+                val presented = presentation.presented
+                var windowDepth = transition.opaqueDepth
+                for (i in presented.indices) {
+                    val depth = (presented[i].transitionOrNull() ?: transition).opaqueDepth
+                    if (depth > windowDepth) windowDepth = depth
                 }
-                presentation.presented.filter { entry ->
-                    val index = indexByContentKey[entry.contentKey] ?: return@filter false
-                    val d = relativeDepth(top, index)
-                    isVisibleAt(d, windowDepth)
+                var result: MutableList<NavEntry<*>>? = null
+                for (i in presented.indices) {
+                    val entry = presented[i]
+                    val index = indexByContentKey[entry.contentKey] ?: continue
+                    if (isVisibleAt(relativeDepth(top, index), windowDepth)) {
+                        (result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }).add(entry)
+                    }
                 }
+                result ?: emptyList()
             }
         }
 
