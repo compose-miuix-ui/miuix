@@ -17,6 +17,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
+import top.yukonga.miuix.kmp.nav.runtime.anchoredProgress
 import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
@@ -27,7 +28,9 @@ import kotlin.math.abs
  * Interactive swipe-to-dismiss that drives `animatedTop` directly, finger-following, along the axis
  * and direction the current transition declares ([NavSwipeDirection]).
  *
- * Attach to the top (non-root) entry. A single unified pointer handler replaces the orientation-locked
+ * Attached by NavDisplay to the display container (so an in-flight transition can be grabbed from
+ * anywhere on screen, not just the moving top entry's translated bounds — the container sees every
+ * pointer on the Initial pass parent-first). A single unified pointer handler replaces the orientation-locked
  * `detectHorizontalDragGestures` / `detectVerticalDragGestures` detectors, which only owned one axis
  * and yielded the pointer to any other consumer — the source of two defects: an in-progress dismiss
  * cancelled the instant the finger drifted onto the cross axis (a nested scroll claimed the pointer),
@@ -47,10 +50,12 @@ import kotlin.math.abs
  *
  * [NavSwipeDirection.None] disables the gesture entirely (pop via back button / system back).
  *
- * While following, `animatedTop` is driven via Phase 3's [snapToFinger] to `topIndex - progress`,
- * where `progress` is the finger travel **in the dismiss direction since the claim point** over the
- * layout extent on that axis (clamped `0f..1f`) — linear, 1:1 with the finger (§7.1, no interpolation
- * on this axis).
+ * While following, `animatedTop` is driven via [snapToFinger] to
+ * `topIndex - anchoredProgress(anchor, fingerProgress)`, where `anchor` is the progress already
+ * travelled toward pop at the claim instant (sampled atomically with halting any in-flight settle —
+ * grab-anchor invariant 6, so interrupting a running push/pop transition is jump-free), and
+ * `fingerProgress` is the finger travel **in the dismiss direction since the claim point** over the
+ * layout extent on that axis — linear, 1:1 with the finger (§7.1, no interpolation on this axis).
  *
  * On release the decision is delegated to Phase 3's [navBackCommitDecision] (**velocity-first,
  * position-fallback**, §7.2), using the shared thresholds [NavDriverSpec.COMMIT_VELOCITY_THRESHOLD] /
@@ -136,6 +141,19 @@ fun Modifier.navSwipeDismiss(
                 }
             }
 
+            // --- Grab anchor (invariant 6): sampled atomically with halting the in-flight settle,
+            // inside the FIRST driver coroutine rather than this pointer handler. Between the event
+            // that claims the gesture and the moment a launched coroutine runs, the shared spring may
+            // still advance a frame; stop() first (cancelling the settle through the Animatable
+            // mutex) and THEN read the value, so the first snap target is exactly where the spring
+            // halted — zero jump. Later snap launches are FIFO-ordered after this one on the same
+            // (single-threaded) composition dispatcher, so they always observe the sampled anchor. ---
+            var anchor = Float.NaN
+            scope.launch {
+                animatedTop.stop()
+                anchor = topIndex - animatedTop.value
+            }
+
             // --- Follow phase: we own the pointer. Consume every change on both axes (so neither a nested
             // scroll nor any in-page handler sees the finger, and no cross-axis movement can cancel). The
             // dismiss follows the finger 1:1 from the claim point and ends only on lift. ---
@@ -151,12 +169,19 @@ fun Modifier.navSwipeDismiss(
                 val delta = change.positionChange()
                 drag += if (isHorizontal) delta.x else delta.y
                 change.consume()
-                val progress = (dismissSign * drag / extent).coerceIn(0f, 1f)
-                scope.launch { animatedTop.snapToFinger(topIndex = topIndex, progress = progress) }
+                // Unclamped here; anchoredProgress clamps the total to [min(anchor, 0), 1].
+                val fingerProgress = dismissSign * drag / extent
+                scope.launch { animatedTop.snapToFinger(topIndex = topIndex, progress = fingerProgress, anchor = anchor) }
             }
 
             // --- Release: velocity-first / position-fallback, velocity-continuous spring handoff. ---
-            val progress = (dismissSign * drag / extent).coerceIn(0f, 1f)
+            // If the finger lifted before the anchor coroutine ran (claim -> immediate lift), fall
+            // back to sampling here: the decision then sees the freshest value, and the settle below
+            // re-owns the float through the mutex either way.
+            val releaseAnchor = if (anchor.isNaN()) topIndex - animatedTop.value else anchor
+            // Total progress on the pop axis; negative totals (leaving entry frozen above the grab
+            // point) count as 0 for the commit decision — cancel-biased by construction.
+            val progress = anchoredProgress(anchor = releaseAnchor, fingerProgress = dismissSign * drag / extent).coerceAtLeast(0f)
             // Instantaneous release velocity along the axis, in pixels/sec, projected onto the dismiss
             // direction and normalised to progress-units/sec (positive points toward pop).
             val velocity = velocityTracker.calculateVelocity()
