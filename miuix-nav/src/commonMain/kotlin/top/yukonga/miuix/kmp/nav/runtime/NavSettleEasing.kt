@@ -59,7 +59,8 @@ internal class NavSettleEasing(
 
 /**
  * The single programmatic settle curve (`response = 0.8`, `damping = 0.95`), identical to the
- * `NavAnimationEasing` constant the nav3-based miuix navigation ships. Consumed by
- * [NavDriverSpec.programmaticTween].
+ * `NavAnimationEasing` constant the nav3-based miuix navigation ships. The default
+ * `NavMotion.programmatic` curve; public so transition presets can reuse the established curve
+ * in custom [top.yukonga.miuix.kmp.nav.transition.NavSettleSpec.Tween]s.
  */
-internal val NavProgrammaticEasing: Easing = NavSettleEasing(response = 0.8f, damping = 0.95f)
+val NavProgrammaticEasing: Easing = NavSettleEasing(response = 0.8f, damping = 0.95f)
