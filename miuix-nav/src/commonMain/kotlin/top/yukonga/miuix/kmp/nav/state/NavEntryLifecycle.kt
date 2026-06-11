@@ -26,16 +26,24 @@ import top.yukonga.miuix.kmp.nav.core.NavPresentationState
  * (`-1 < d < -0.5`, not removing) is STARTED while it slides in. Anything with `d <= -1` has left
  * the presentation window and is DESTROYED.
  *
+ * While a gesture owns the float ([gestureActive]) the RESUMED window is additionally capped at
+ * STARTED: a finger can hover and oscillate around the `+-0.5` thresholds without bound, and a
+ * pure d-mapping would flap the two adjacent entries RESUMED<->STARTED on every crossing. Capping
+ * for the whole gesture removes the flap statelessly (no hysteresis memory) and makes RESUMED mean
+ * "settled and interactive" — a mid-gesture layer has its input blocked anyway. Programmatic
+ * transitions keep the midpoint promotion: the settle curves are monotonic, single-crossing.
+ *
  * @param presentation the entry's render-state snapshot; only [NavPresentationState.isRemoving] is
  *   read by this mapping (role does not affect the lifecycle ceiling).
  * @param d the entry's relative depth (`animatedTop - entryIndex`).
+ * @param gestureActive whether an interactive gesture currently owns the driving float.
  * @return the lifecycle ceiling for this entry.
  */
-internal fun navMaxLifecycleFor(presentation: NavPresentationState, d: Float): Lifecycle.State = when {
+internal fun navMaxLifecycleFor(presentation: NavPresentationState, d: Float, gestureActive: Boolean): Lifecycle.State = when {
     d <= -1f -> Lifecycle.State.DESTROYED
     presentation.isRemoving -> Lifecycle.State.CREATED
     d < -0.5f -> Lifecycle.State.STARTED
-    d < 0.5f -> Lifecycle.State.RESUMED
+    d < 0.5f -> if (gestureActive) Lifecycle.State.STARTED else Lifecycle.State.RESUMED
     else -> Lifecycle.State.STARTED
 }
 

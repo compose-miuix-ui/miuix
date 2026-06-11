@@ -573,7 +573,7 @@ private fun NavEntryHost(
     val depthBuckets by remember(presentation, entryIndex, entry, effects) {
         derivedStateOf {
             val d = presentation.animatedTop.value - entryIndex
-            var mask = navMaxLifecycleFor(entry.presentation, d).ordinal
+            var mask = navMaxLifecycleFor(entry.presentation, d, presentation.gesture != null).ordinal
             if (d <= 0f) mask = mask or DEPTH_BUCKET_GOVERNS_OWN
             if (effects.shouldClipCornersAt(d)) mask = mask or DEPTH_BUCKET_CLIP_CORNERS
             if (effects.shouldBlockInputAt(d)) mask = mask or DEPTH_BUCKET_BLOCK_INPUT
