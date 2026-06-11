@@ -195,7 +195,7 @@ Keys must be `@Serializable` to survive process death. A non-serializable key do
 
 The v1 core **does not** ship a built-in result channel (no `navigateForResult` / `setResult` on `NavController`). Keep results out of the navigation runtime and pass them with whatever state mechanism you already use, or layer a tiny result bus on top of the back stack yourself.
 
-The example app's `Navigator` shows the recommended pattern — a `requestKey`-addressed `MutableSharedFlow` bus alongside the stack:
+The recommended shape is a `requestKey`-addressed bus alongside the stack — use a `MutableSharedFlow(replay = 1)` or a buffered `Channel`, so the result emitted right before the pop is not lost if the caller screen is not actively collecting at that moment:
 
 ```kotlin
 // navigateForResult(route, requestKey): push and arm a channel for requestKey.
