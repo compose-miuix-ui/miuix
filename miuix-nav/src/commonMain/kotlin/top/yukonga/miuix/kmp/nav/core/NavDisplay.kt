@@ -95,8 +95,12 @@ class NavEntryBuilder {
     /**
      * Registers how to render keys of type [T].
      *
-     * @param contentKey value-stable identity for the produced entry; when `null` the key instance
-     *   itself is used (data classes / data objects give stable equality out of the box).
+     * @param contentKey derives a value-stable identity for each entry from its route instance;
+     *   when `null` the key instance itself is used (data classes / data objects give stable
+     *   equality out of the box). Content keys must be UNIQUE across the whole back stack —
+     *   pushing two entries that resolve to equal content keys (e.g. the same route value twice)
+     *   is rejected with an [IllegalArgumentException] at reconcile time. The contentKey is also
+     *   the saveable-state identity, so it must be stable across recompositions and process death.
      * @param transition per-route transition override; `null` inherits [NavDisplay]'s global
      *   transition (see design §6.4). Stored in the entry's metadata.
      * @param swipeDismiss per-route interactive swipe-to-dismiss direction; `null` inherits the
@@ -106,7 +110,7 @@ class NavEntryBuilder {
      * @param content the composable rendering a key of type [T].
      */
     inline fun <reified T : NavKey> entry(
-        contentKey: Any? = null,
+        noinline contentKey: ((T) -> Any)? = null,
         transition: NavTransition? = null,
         swipeDismiss: NavSwipeDirection? = null,
         metadata: Map<String, Any> = emptyMap(),
@@ -120,7 +124,7 @@ class NavEntryBuilder {
             if (swipeDismiss != null) mergedMetadata = mergedMetadata + (NAV_SWIPE_DISMISS_METADATA_KEY to swipeDismiss)
             NavEntry(
                 key = typed,
-                contentKey = contentKey ?: typed,
+                contentKey = contentKey?.invoke(typed) ?: typed,
                 metadata = mergedMetadata,
                 content = content,
             )
@@ -137,8 +141,10 @@ class NavEntryBuilder {
     }
 
     /**
-     * Materializes the accumulated registrations into an entry lookup. Throws if a key has no
-     * registered [entry] of its (or a superclass') type.
+     * Materializes the accumulated registrations into an entry lookup. Matching is by the key's
+     * exact runtime class: register an [entry] for every concrete route type (supertype or
+     * interface registrations do NOT cover subtypes — common-code [kotlin.reflect.KClass] offers
+     * no portable superclass walk). Throws if a key has no registered [entry] of its exact type.
      */
     @PublishedApi
     internal fun build(): (NavKey) -> NavEntry<*> = { key ->
@@ -303,6 +309,18 @@ private fun NavDisplayLayout(
     remember(currentKeyList, entryProvider) {
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
+        // Content keys are the entry identity everywhere downstream (presentation reconcile,
+        // index map, saveable state, ViewModel store). A duplicate would fold two stack positions
+        // into one instance and wedge the presentation (index teleport -> transient d <= -1 ->
+        // lifecycle DESTROYED), so reject it here with an actionable message instead.
+        val seenContentKeys = HashSet<Any>(newContentKeys.size)
+        for (contentKey in newContentKeys) {
+            require(seenContentKeys.add(contentKey)) {
+                "Duplicate contentKey on the back stack: $contentKey. Every entry needs a unique " +
+                    "contentKey — derive a per-instance key via entry(contentKey = { route -> ... }) " +
+                    "or keep the route values distinct."
+            }
+        }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
         previousContentKeys[0] = newContentKeys
         currentEntries.forEachIndexed { index, e -> indexByContentKey[e.contentKey] = index }
