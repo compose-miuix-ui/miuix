@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.nav.runtime
 
+import androidx.compose.animation.core.LinearEasing
+import top.yukonga.miuix.kmp.nav.transition.NavSettleSpec
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -131,30 +133,38 @@ class NavDriverTest {
         assertEquals(true, usesProgrammaticCurve(velocity = 0f, distance = 0.9995f))
     }
 
-    // ---- noOvershootVelocityFloor ----
+    // ---- commitVelocityFloor ----
 
     @Test
     fun noOvershootFloor_zeroDistance_isZero() {
         // Released exactly at the target: any toward-target velocity would overshoot.
-        assertEquals(0f, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 0f))
+        assertEquals(0f, NavSettleSpec.Spring().commitVelocityFloor(remainingDistance = 0f))
     }
 
     @Test
     fun noOvershootFloor_isOmegaTimesDistance() {
         // Exact no-overshoot bound for a critically damped spring: v0 >= -ω·x0, ω = √stiffness.
-        assertEquals(-sqrt(NavDriverSpec.STIFFNESS), NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 1f), absoluteTolerance = 1e-4f)
+        assertEquals(-sqrt(NavDriverSpec.STIFFNESS), NavSettleSpec.Spring().commitVelocityFloor(remainingDistance = 1f), absoluteTolerance = 1e-4f)
     }
 
     @Test
     fun noOvershootFloor_scalesLinearlyWithDistance() {
-        val one = NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 1f)
-        assertEquals(2f * one, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = 2f), absoluteTolerance = 1e-4f)
+        val one = NavSettleSpec.Spring().commitVelocityFloor(remainingDistance = 1f)
+        assertEquals(2f * one, NavSettleSpec.Spring().commitVelocityFloor(remainingDistance = 2f), absoluteTolerance = 1e-4f)
     }
 
     @Test
     fun noOvershootFloor_negativeDistance_treatedAsZero() {
         // Defensive: a value already past the target must not produce a positive floor.
-        assertEquals(0f, NavDriverSpec.Default.noOvershootVelocityFloor(remainingDistance = -0.5f))
+        assertEquals(0f, NavSettleSpec.Spring().commitVelocityFloor(remainingDistance = -0.5f))
+    }
+
+    @Test
+    fun noOvershootFloor_absentForOptOutAndTween() {
+        // clampOvershoot = false (and any tween) removes the floor entirely.
+        val unclamped = NavSettleSpec.Spring(dampingRatio = 0.8f, stiffness = 280f, clampOvershoot = false)
+        assertEquals(Float.NEGATIVE_INFINITY, unclamped.commitVelocityFloor(remainingDistance = 1f))
+        assertEquals(Float.NEGATIVE_INFINITY, NavSettleSpec.Tween(450, LinearEasing).commitVelocityFloor(remainingDistance = 1f))
     }
 
     // ---- navBackCommitDecision ----

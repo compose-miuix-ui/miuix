@@ -4,11 +4,11 @@
 package top.yukonga.miuix.kmp.nav.runtime
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.SpringSpec
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.Immutable
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
+import top.yukonga.miuix.kmp.nav.transition.NavSettleSpec
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -54,108 +54,97 @@ internal fun anchoredProgress(anchor: Float, fingerProgress: Float): Float = (an
 internal fun fingerTarget(topIndex: Int, progress: Float): Float = topIndex - anchoredProgress(anchor = 0f, fingerProgress = progress)
 
 /**
- * The single source of truth for the shared `animatedTop` spring (spec §9
- * "single shared spring"). Bundles the spring parameters, the release commit/cancel
- * thresholds, the shared [Default] instance, and the [spring] factory consumed by
- * [settleTo] — so no other phase ever redefines spring or threshold constants.
- *
- * Holds no lambdas and is never mutated, so it is safely [@Immutable]. The spring
- * fields feed [spring]/[settleTo]; the threshold fields feed [navBackCommitDecision].
+ * Canonical constants of the shared `animatedTop` driver: the default spring/tween numbers
+ * (consumed as [NavSettleSpec] defaults) and the release commit/cancel thresholds (consumed by
+ * [navBackCommitDecision]). Settle curves themselves are per-transition
+ * ([top.yukonga.miuix.kmp.nav.transition.NavMotion]); no other phase redefines these constants.
  */
-@Immutable
-internal data class NavDriverSpec(
-    val dampingRatio: Float = DAMPING_RATIO,
-    val stiffness: Float = STIFFNESS,
-    val visibilityThreshold: Float = VISIBILITY_THRESHOLD,
-) {
+internal object NavDriverSpec {
     /**
-     * Builds the [SpringSpec] for this driver. Single factory reused by [settleTo]
-     * (and any future settle path), so the curve is identical everywhere. Calls the
-     * top-level `spring` factory via its fully-qualified name to avoid colliding with
-     * this same-named member function.
+     * Critically damped: the default never bounces. An underdamped settle (the earlier 0.9)
+     * oscillates past the target — invisible at ~0.15% when starting from rest, but a
+     * velocity-seeded commit (a flung back-swipe) overshoots visibly and springs back.
+     * Overshoot is per-transition opt-in ([NavSettleSpec.Spring] with `clampOvershoot = false`);
+     * this constant only seeds the default.
      */
-    fun spring(): SpringSpec<Float> = androidx.compose.animation.core.spring(
+    const val DAMPING_RATIO: Float = 1f
+
+    /**
+     * Low stiffness on the depth scale (units = entries). With [DAMPING_RATIO] and the tight
+     * [VISIBILITY_THRESHOLD], a full one-step push/pop settles in roughly half a second
+     * (`t ≈ -ln(threshold) / (damping·√stiffness)`), matching the established miuix navigation
+     * feel (a ~500ms transition) rather than a snappier default. The value keeps the decay
+     * envelope of the original tuning (`1·√146 ≈ 0.9·√180`), so moving to critical damping
+     * did not change the perceived duration.
+     */
+    const val STIFFNESS: Float = 146f
+
+    /**
+     * `animatedTop` is measured in entry-index units, so it converges visually once
+     * within a few hundredths of an index. Tighter than the default 0.01 for px.
+     */
+    const val VISIBILITY_THRESHOLD: Float = 0.0025f
+
+    /**
+     * Duration of the default programmatic full-step tween ([NavMotion.Default]'s
+     * `programmatic`). The same 500ms the established navigation uses; the curve completes in
+     * exactly this time regardless of distance (a multi-step pop sweeps all layers within the
+     * same window, like the reference's single content transition).
+     */
+    const val PROGRAMMATIC_DURATION_MILLIS: Int = 500
+
+    /**
+     * Minimum settle distance (in entry-index units) for a from-rest settle to qualify as a
+     * programmatic full step ([usesProgrammaticCurve]). Programmatic pushes/pops always move
+     * integer distances; anything shorter is a partial-position continuation (a released
+     * gesture, an interrupted transition) and belongs to the live spring. Slightly under 1
+     * to tolerate visibility-threshold residue from a previous settle.
+     */
+    const val FULL_STEP_THRESHOLD: Float = 0.999f
+
+    /**
+     * Velocity (in progress-units per second) above which a release is treated as a
+     * deliberate fling and commits/cancels by sign alone, ignoring position.
+     */
+    const val COMMIT_VELOCITY_THRESHOLD: Float = 1.0f
+
+    /** Position fallback: progress at/after which a low-velocity release commits. */
+    const val COMMIT_POSITION_THRESHOLD: Float = 0.5f
+}
+
+/** Maps a public settle spec onto the concrete Compose animation spec. */
+internal fun NavSettleSpec.toAnimationSpec(): AnimationSpec<Float> = when (this) {
+    is NavSettleSpec.Spring -> androidx.compose.animation.core.spring(
         dampingRatio = dampingRatio,
         stiffness = stiffness,
-        visibilityThreshold = visibilityThreshold,
+        visibilityThreshold = NavDriverSpec.VISIBILITY_THRESHOLD,
     )
 
-    /**
-     * Builds the fixed-duration tween used for programmatic full-step settles
-     * ([settleProgrammatic]): the established navigation curve ([NavProgrammaticEasing]) over
-     * [PROGRAMMATIC_DURATION_MILLIS], matching the nav3-based miuix navigation point for point.
-     */
-    fun programmaticTween(): TweenSpec<Float> = tween(durationMillis = PROGRAMMATIC_DURATION_MILLIS, easing = NavProgrammaticEasing)
+    is NavSettleSpec.Tween -> tween(durationMillis = durationMillis, easing = easing)
+}
 
-    /**
-     * The most negative (toward-target) velocity a commit settle may be seeded with without
-     * overshooting the target, given the [remainingDistance] still to travel (no-bounce
-     * requirement).
-     *
-     * For a critically damped spring `x(t) = e^(-ωt)·(x0 + (v0 + ω·x0)·t)`, the trajectory
-     * crosses zero iff `v0 < -ω·x0` — so flooring the seed at `-ω·distance` is the exact
-     * no-overshoot condition, not an approximation. Slower releases keep their full velocity
-     * (snap -> spring continuity intact); only the excess speed that could ONLY have become a
-     * visible bounce-back past the fully-popped position is dropped.
-     *
-     * @param remainingDistance distance from the current value down to the settle target, `>= 0`.
-     * @return the velocity floor (a value `<= 0`) to pass through `coerceAtLeast`.
-     */
-    fun noOvershootVelocityFloor(remainingDistance: Float): Float = if (remainingDistance <= 0f) 0f else -sqrt(stiffness) * remainingDistance
+/**
+ * The most negative (toward-target) velocity a commit settle may be seeded with without
+ * overshooting the target, given the [remainingDistance] still to travel.
+ *
+ * For a critically damped spring `x(t) = e^(-ωt)·(x0 + (v0 + ω·x0)·t)`, the trajectory crosses
+ * zero iff `v0 < -ω·x0` — so flooring the seed at `-√stiffness · distance` is the exact
+ * no-overshoot condition for the default (conservative for overdamped springs). Slower releases
+ * keep their full velocity (snap -> spring continuity intact); only the excess speed that could
+ * ONLY have become a visible bounce-back past the fully-popped position is dropped.
+ *
+ * Returns [Float.NEGATIVE_INFINITY] (no floor) when the spec opted out of clamping
+ * ([NavSettleSpec.Spring.clampOvershoot] `= false`) or cannot consume a seed velocity at all
+ * ([NavSettleSpec.Tween]).
+ *
+ * @param remainingDistance distance from the current value down to the settle target, `>= 0`.
+ * @return the velocity floor to pass through `coerceAtLeast`.
+ */
+internal fun NavSettleSpec.commitVelocityFloor(remainingDistance: Float): Float = when {
+    this is NavSettleSpec.Spring && clampOvershoot ->
+        if (remainingDistance <= 0f) 0f else -sqrt(stiffness) * remainingDistance
 
-    companion object {
-        /**
-         * Critically damped: navigation must never bounce. An underdamped settle (the earlier
-         * 0.9) oscillates past the target — invisible at ~0.15% when starting from rest, but a
-         * velocity-seeded commit (a flung back-swipe) overshoots visibly and springs back.
-         */
-        const val DAMPING_RATIO: Float = 1f
-
-        /**
-         * Low stiffness on the depth scale (units = entries). With [DAMPING_RATIO] and the tight
-         * [VISIBILITY_THRESHOLD], a full one-step push/pop settles in roughly half a second
-         * (`t ≈ -ln(threshold) / (damping·√stiffness)`), matching the established miuix navigation
-         * feel (a ~500ms transition) rather than a snappier default. The value keeps the decay
-         * envelope of the original tuning (`1·√146 ≈ 0.9·√180`), so moving to critical damping
-         * did not change the perceived duration.
-         */
-        const val STIFFNESS: Float = 146f
-
-        /**
-         * `animatedTop` is measured in entry-index units, so it converges visually once
-         * within a few hundredths of an index. Tighter than the default 0.01 for px.
-         */
-        const val VISIBILITY_THRESHOLD: Float = 0.0025f
-
-        /**
-         * Duration of the programmatic full-step tween ([programmaticTween]). The same 500ms the
-         * established navigation uses; the curve completes in exactly this time regardless of
-         * distance (a multi-step pop sweeps all layers within the same window, like the
-         * reference's single content transition).
-         */
-        const val PROGRAMMATIC_DURATION_MILLIS: Int = 500
-
-        /**
-         * Minimum settle distance (in entry-index units) for a from-rest settle to qualify as a
-         * programmatic full step ([usesProgrammaticCurve]). Programmatic pushes/pops always move
-         * integer distances; anything shorter is a partial-position continuation (a released
-         * gesture, an interrupted transition) and belongs to the live spring. Slightly under 1
-         * to tolerate visibility-threshold residue from a previous settle.
-         */
-        const val FULL_STEP_THRESHOLD: Float = 0.999f
-
-        /**
-         * Velocity (in progress-units per second) above which a release is treated as a
-         * deliberate fling and commits/cancels by sign alone, ignoring position.
-         */
-        const val COMMIT_VELOCITY_THRESHOLD: Float = 1.0f
-
-        /** Position fallback: progress at/after which a low-velocity release commits. */
-        const val COMMIT_POSITION_THRESHOLD: Float = 0.5f
-
-        /** Shared default instance to avoid per-frame allocation. */
-        val Default: NavDriverSpec = NavDriverSpec()
-    }
+    else -> Float.NEGATIVE_INFINITY
 }
 
 /**
@@ -212,36 +201,55 @@ internal suspend fun Animatable<Float, AnimationVector1D>.snapToFinger(
 }
 
 /**
- * Converges [this] `animatedTop` to [target] through the single shared spring
- * ([NavDriverSpec.spring], spec §7.1 "settle mode" / §9 "single shared spring").
- * Used for normal push/pop and for gesture release (commit -> `topIndex - 1`,
+ * Converges [this] `animatedTop` to [target] through the governing settle curve (spec §7.1
+ * "settle mode"). Used for normal push/pop and for gesture release (commit -> `topIndex - 1`,
  * cancel -> `topIndex`).
  *
  * By default [initialVelocity] is [this] Animatable's own current [velocity], so the
  * value AND its first derivative stay continuous across the snap->spring boundary,
  * eliminating the visual jolt a fresh-from-zero spring would cause. Callers that
  * track a separate finger velocity (e.g. an edge swipe whose drag delta differs
- * from the Animatable's internal velocity) may pass it explicitly.
+ * from the Animatable's internal velocity) may pass it explicitly. A [NavSettleSpec.Tween]
+ * spec ignores the seed (a tween cannot carry velocity).
  *
  * @param target destination value on the depth axis (an entry index, possibly fractional during interruption).
- * @param spec spring + threshold parameters; defaults to [NavDriverSpec.Default].
- * @param initialVelocity velocity (depth-units per second) to seed the spring with; defaults to the current [velocity].
+ * @param spec the settle curve; defaults to the default commit spring.
+ * @param initialVelocity velocity (depth-units per second) to seed the curve with; defaults to the current [velocity].
  */
 internal suspend fun Animatable<Float, AnimationVector1D>.settleTo(
     target: Float,
-    spec: NavDriverSpec = NavDriverSpec.Default,
+    spec: NavSettleSpec = NavMotion.Default.commit,
     initialVelocity: Float = velocity,
 ) {
     animateTo(
         targetValue = target,
-        animationSpec = spec.spring(),
+        animationSpec = spec.toAnimationSpec(),
         initialVelocity = initialVelocity,
     )
 }
 
 /**
+ * Cancel-direction settle: converges to [target] with the rest position pinned as an upper
+ * bound, so even an underdamped cancel spring can never carry the top entry past rest into the
+ * covered regime (boundary ownership, input blocking and the dim scrim all flip there). Bounds
+ * are cleared afterwards even if the settle is interrupted.
+ */
+internal suspend fun Animatable<Float, AnimationVector1D>.settleCancel(
+    target: Float,
+    spec: NavSettleSpec,
+    initialVelocity: Float = velocity,
+) {
+    updateBounds(lowerBound = null, upperBound = target)
+    try {
+        settleTo(target = target, spec = spec, initialVelocity = initialVelocity)
+    } finally {
+        updateBounds(lowerBound = null, upperBound = null)
+    }
+}
+
+/**
  * Whether a settle starting with [velocity] over [distance] should play the programmatic
- * fixed-duration curve ([NavDriverSpec.programmaticTween]) instead of the live spring.
+ * fixed-duration curve ([NavMotion.programmatic]) instead of the live spring.
  *
  * Only a from-rest, full-step settle qualifies — exactly the programmatic push/pop case, which
  * must match the established navigation curve point for point. Anything carrying velocity (an
@@ -255,25 +263,27 @@ internal suspend fun Animatable<Float, AnimationVector1D>.settleTo(
 internal fun usesProgrammaticCurve(velocity: Float, distance: Float): Boolean = velocity == 0f && abs(distance) >= NavDriverSpec.FULL_STEP_THRESHOLD
 
 /**
- * Renderer-side settle: converges [this] `animatedTop` to [target], dispatching between the two
- * settle curves (spec 2026-06-10 §"programmatic curve match"):
+ * Renderer-side settle: converges [this] `animatedTop` to [target], dispatching between the
+ * governing transition's settle curves (spec 2026-06-10 §"programmatic curve match"):
  *
- * - **From rest over a full step** (a programmatic push/pop/multi-pop): the fixed 500ms tween
- *   with the established easing — identical pacing to the nav3-based miuix navigation.
+ * - **From rest over a full step** (a programmatic push/pop/multi-pop): [NavMotion.programmatic]
+ *   as declared by the governing transition (the default reproduces the established 500ms curve).
  * - **Anything else** (carrying velocity from an interrupted tween, or resuming from a partial
- *   position after a gesture): the live shared spring via [settleTo], seeded with the current
- *   velocity so the handoff is velocity-continuous.
+ *   position after a gesture): the live spring via [settleTo], seeded with the current velocity
+ *   so the handoff is velocity-continuous. When the declared commit phase is a tween (which
+ *   cannot seed velocity), the default spring serves instead.
  *
  * @param target destination value on the depth axis.
- * @param spec spring + tween parameters; defaults to [NavDriverSpec.Default].
+ * @param motion the governing transition's settle physics; defaults to [NavMotion.Default].
  */
 internal suspend fun Animatable<Float, AnimationVector1D>.settleProgrammatic(
     target: Float,
-    spec: NavDriverSpec = NavDriverSpec.Default,
+    motion: NavMotion = NavMotion.Default,
 ) {
     if (usesProgrammaticCurve(velocity = velocity, distance = target - value)) {
-        animateTo(targetValue = target, animationSpec = spec.programmaticTween())
+        animateTo(targetValue = target, animationSpec = motion.programmatic.toAnimationSpec())
     } else {
-        settleTo(target, spec)
+        val spring = motion.commit as? NavSettleSpec.Spring ?: NavSettleSpec.Spring()
+        settleTo(target, spring)
     }
 }

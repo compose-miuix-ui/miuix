@@ -16,12 +16,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.runtime.anchoredProgress
+import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
+import top.yukonga.miuix.kmp.nav.runtime.settleCancel
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import kotlin.math.abs
@@ -76,6 +78,8 @@ import kotlin.math.abs
  * @param direction The dismiss axis + direction; [NavSwipeDirection.None] disables the gesture.
  * @param animatedTop The single shared depth driver.
  * @param topIndex Current top entry index being peeled away.
+ * @param motion Settle physics for the release settles (commit/cancel curves); NavDisplay resolves
+ *   it from the governing transition.
  * @param onCommit Invoked synchronously the moment a release is classified as a commit (pop the back
  *   stack here); the shared spring then settles `animatedTop` to the new top.
  * @param onCancel Invoked once after the cancel spring settles back to [topIndex].
@@ -94,6 +98,7 @@ fun Modifier.navSwipeDismiss(
     direction: NavSwipeDirection,
     animatedTop: Animatable<Float, AnimationVector1D>,
     topIndex: Int,
+    motion: NavMotion = NavMotion.Default,
     onCommit: () -> Unit,
     onCancel: () -> Unit,
     onGesture: (NavGesture?) -> Unit = {},
@@ -101,6 +106,7 @@ fun Modifier.navSwipeDismiss(
     if (!enabled || direction == NavSwipeDirection.None) return@composed this
 
     val scope = rememberCoroutineScope()
+    val currentMotion = rememberUpdatedState(motion)
     val currentOnCommit = rememberUpdatedState(onCommit)
     val currentOnCancel = rememberUpdatedState(onCancel)
     val currentOnGesture = rememberUpdatedState(onGesture)
@@ -239,16 +245,17 @@ fun Modifier.navSwipeDismiss(
                 // own the final convergence; the settle below only seeds the spring with the release velocity.
                 currentOnCommit.value()
                 scope.launch {
-                    // No-bounce commit: even a critically damped spring crosses its target once
-                    // when the seeded fling speed exceeds ω·distance, which reads as the entry
-                    // overshooting the fully-popped position and bouncing back. Floor the seed at
-                    // the exact no-overshoot bound (computed from the value the settle actually
-                    // starts at — all pending finger snaps are FIFO-ordered before this launch);
-                    // slower releases keep full snap -> spring velocity continuity.
-                    val floor = NavDriverSpec.Default.noOvershootVelocityFloor(animatedTop.value - (topIndex - 1f))
+                    // Seed the governing commit curve with the release velocity. The no-overshoot
+                    // floor applies only while the commit spec keeps overshoot clamped (the
+                    // default): even a critically damped spring crosses its target once when the
+                    // seeded fling speed exceeds ω·distance. The floor is computed from the value
+                    // the settle actually starts at — all pending finger snaps are FIFO-ordered
+                    // before this launch; slower releases keep full snap -> spring continuity.
+                    val motionNow = currentMotion.value
+                    val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - (topIndex - 1f))
                     animatedTop.settleTo(
                         target = (topIndex - 1).toFloat(),
-                        spec = NavDriverSpec.Default,
+                        spec = motionNow.commit,
                         initialVelocity = depthVelocity.coerceAtLeast(floor),
                     )
                 }
@@ -268,9 +275,9 @@ fun Modifier.navSwipeDismiss(
                 // kept, preserving the snap -> spring velocity continuity; it points away from the cancel
                 // target, so it can never cross it (no bounce, no overshoot floor needed on this branch).
                 scope.launch {
-                    animatedTop.settleTo(
+                    animatedTop.settleCancel(
                         target = topIndex.toFloat(),
-                        spec = NavDriverSpec.Default,
+                        spec = currentMotion.value.cancel,
                         initialVelocity = depthVelocity.coerceAtMost(0f),
                     )
                     // The gesture context stays frozen through the settle (no pivot snap at lift)

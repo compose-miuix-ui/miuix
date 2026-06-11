@@ -81,6 +81,14 @@ fun interface NavTransition {
     val dismissDirection: NavSwipeDirection get() = NavSwipeDirection.None
 
     /**
+     * Settle physics for the phases this transition governs (gesture commit / gesture cancel /
+     * programmatic full step). The host resolves the motion from the topmost presented entry's
+     * governing transition — during a pop that is the leaving entry, so a preset's own motion
+     * carries its exit. Defaults to the established navigation feel ([NavMotion.Default]).
+     */
+    val motion: NavMotion get() = NavMotion.Default
+
+    /**
      * Alpha fraction (0..1) of the fullscreen dim scrim the host renders just beneath the top-most
      * visible layer, evaluated each frame against [scope] — the context of the **covered layer
      * directly below** that top-most layer, whose [NavTransitionScope.relativeDepth] runs from 0
@@ -115,6 +123,7 @@ fun interface NavTransition {
  * @param opaqueDepth see [NavTransition.opaqueDepth]; defaults to `1f`.
  * @param dismissDirection see [NavTransition.dismissDirection]; defaults to [NavSwipeDirection.None]
  *   (swipe-to-dismiss is opt-in).
+ * @param motion see [NavTransition.motion]; defaults to [NavMotion.Default].
  * @param scrim see [NavTransition.scrimFraction]; the lambda receives the covered layer's scope and
  *   returns the scrim alpha fraction (0..1). `null` (default) keeps the depth-linear default curve.
  * @param block the per-frame graphics-layer transform.
@@ -122,12 +131,15 @@ fun interface NavTransition {
 fun navGraphicsTransition(
     opaqueDepth: Float = 1f,
     dismissDirection: NavSwipeDirection = NavSwipeDirection.None,
+    motion: NavMotion = NavMotion.Default,
     scrim: ((NavTransitionScope) -> Float)? = null,
     block: GraphicsLayerScope.(NavTransitionScope) -> Unit,
 ): NavTransition = object : NavTransition {
     override val opaqueDepth: Float = opaqueDepth
 
     override val dismissDirection: NavSwipeDirection = dismissDirection
+
+    override val motion: NavMotion = motion
 
     override fun scrimFraction(scope: NavTransitionScope): Float = scrim?.invoke(scope) ?: super.scrimFraction(scope)
 

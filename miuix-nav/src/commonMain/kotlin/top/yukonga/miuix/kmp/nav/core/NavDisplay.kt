@@ -40,12 +40,13 @@ import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
 import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismiss
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
-import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
+import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
 import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
+import top.yukonga.miuix.kmp.nav.runtime.settleCancel
 import top.yukonga.miuix.kmp.nav.runtime.settleProgrammatic
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.state.NavEntryViewModelStores
@@ -58,6 +59,7 @@ import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
@@ -171,7 +173,8 @@ internal fun entryProvider(builder: NavEntryBuilder.() -> Unit): (NavKey) -> Nav
  * [androidx.compose.animation.core.AnimationSpec].
  */
 @Composable
-private fun NavPresentation.animateTopTo(target: Float) {
+private fun NavPresentation.animateTopTo(target: Float, motion: NavMotion) {
+    val currentMotion = rememberUpdatedState(motion)
     LaunchedEffect(target) {
         // Consume the release velocity exactly once per retarget, whether or not it gets used.
         val released = pendingSettleVelocity
@@ -181,14 +184,16 @@ private fun NavPresentation.animateTopTo(target: Float) {
         // commit pops synchronously and queues its velocity-seeded settle ahead of this effect);
         // defer to it instead of stomping the seeded spring with a fresh-from-rest curve.
         if (animatedTop.isRunning && animatedTop.targetValue == target) return@LaunchedEffect
+        val motionNow = currentMotion.value
         if (released < 0f && target < animatedTop.value) {
-            // A flung predictive-back commit: seed the spring with the gesture's release velocity
-            // so the settle carries the momentum (the reference feeds it into its post-commit
-            // spring, clamped toward the target). The no-overshoot floor keeps it bounce-free.
-            val floor = NavDriverSpec.Default.noOvershootVelocityFloor(animatedTop.value - target)
-            animatedTop.settleTo(target, initialVelocity = released.coerceAtLeast(floor))
+            // A flung predictive-back commit: seed the governing transition's commit curve with
+            // the release velocity so the settle carries the momentum (the reference feeds it
+            // into its post-commit phase). The no-overshoot floor applies only while the commit
+            // spec keeps overshoot clamped.
+            val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - target)
+            animatedTop.settleTo(target, spec = motionNow.commit, initialVelocity = released.coerceAtLeast(floor))
         } else {
-            animatedTop.settleProgrammatic(target)
+            animatedTop.settleProgrammatic(target, motionNow)
         }
     }
 }
@@ -234,6 +239,64 @@ private fun NavDisplayLayout(
     val topIndex = backStack.lastIndex
     val backScope = rememberCoroutineScope()
     val currentOnBack = rememberUpdatedState(onBack)
+
+    // Build entries for the current back stack and reconcile. The build runs only when the back-stack
+    // key list changes; entry instances for surviving keys are reused by the presentation. The
+    // reconcile pass classifies the change against the PREVIOUS back-stack content keys (kept in a
+    // remembered holder, not the presented set — the latter still holds exiting keys) and precomputes a
+    // stable contentKey -> back-stack-index map so the render loop never rebuilds NavEntry instances to
+    // recover an index (no O(n^2)). Declared ahead of the gesture wiring: the settle physics
+    // resolution below feeds the gesture callbacks.
+    val currentKeyList = backStack.toList()
+    // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
+    // by UI, so it must not be snapshot state (no cross-phase back-write).
+    val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
+    // Persistent contentKey -> back-stack index. Current entries get their fresh index on each
+    // reconcile; a leaving (popped/replaced) entry KEEPS its last index here so it can still render
+    // its exit animation, and is pruned only when it has finished leaving (see the unload effect
+    // below). Plain (non-snapshot) map: it is mutated in lockstep with presentation.presented (a
+    // snapshot list) inside the reconcile block, and the visible-window derivedStateOf re-evaluates
+    // off that snapshot list rather than off this map.
+    val indexByContentKey = remember { mutableMapOf<Any, Int>() }
+    remember(currentKeyList, entryProvider) {
+        val currentEntries = currentKeyList.map { entryProvider(it) }
+        val newContentKeys = currentEntries.map { it.contentKey }
+        // Content keys are the entry identity everywhere downstream (presentation reconcile,
+        // index map, saveable state, ViewModel store). A duplicate would fold two stack positions
+        // into one instance and wedge the presentation (index teleport -> transient d <= -1 ->
+        // lifecycle DESTROYED), so reject it here with an actionable message instead.
+        val seenContentKeys = HashSet<Any>(newContentKeys.size)
+        for (contentKey in newContentKeys) {
+            require(seenContentKeys.add(contentKey)) {
+                "Duplicate contentKey on the back stack: $contentKey. Every entry needs a unique " +
+                    "contentKey — derive a per-instance key via entry(contentKey = { route -> ... }) " +
+                    "or keep the route values distinct."
+            }
+        }
+        presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
+        previousContentKeys[0] = newContentKeys
+        currentEntries.forEachIndexed { index, e -> indexByContentKey[e.contentKey] = index }
+    }
+
+    // Settle physics of the moving top boundary: the topmost PRESENTED entry's governing
+    // transition declares the curves (per-route override wins). During a pop the leaving entry
+    // is still the topmost presented entry until it unloads, so its motion carries its own exit
+    // settle. Derived off the snapshot list so it recomputes on reconcile/unload, never per frame.
+    val topMotion by remember(presentation, transition, indexByContentKey) {
+        derivedStateOf {
+            var topEntry: NavEntry<*>? = null
+            var topIdx = -1
+            val presented = presentation.presented
+            for (i in presented.indices) {
+                val idx = indexByContentKey[presented[i].contentKey] ?: continue
+                if (idx > topIdx) {
+                    topIdx = idx
+                    topEntry = presented[i]
+                }
+            }
+            (topEntry?.transitionOrNull() ?: transition).motion
+        }
+    }
 
     // Wire the platform predictive back gesture to the single driver. Enabled only when there is
     // something to pop (size > 1). During the gesture each NavBackEvent snaps animatedTop 1:1;
@@ -283,48 +346,11 @@ private fun NavDisplayLayout(
         onCancel = {
             presentation.pendingSettleVelocity = 0f
             backScope.launch {
-                presentation.animatedTop.settleTo(target = topIndex.toFloat())
+                presentation.animatedTop.settleCancel(target = topIndex.toFloat(), spec = topMotion.cancel)
                 presentation.gesture = null
             }
         },
     )
-
-    // Build entries for the current back stack and reconcile. The build runs only when the back-stack
-    // key list changes; entry instances for surviving keys are reused by the presentation. The
-    // reconcile pass classifies the change against the PREVIOUS back-stack content keys (kept in a
-    // remembered holder, not the presented set — the latter still holds exiting keys) and precomputes a
-    // stable contentKey -> back-stack-index map so the render loop never rebuilds NavEntry instances to
-    // recover an index (no O(n^2)).
-    val currentKeyList = backStack.toList()
-    // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
-    // by UI, so it must not be snapshot state (no cross-phase back-write).
-    val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
-    // Persistent contentKey -> back-stack index. Current entries get their fresh index on each
-    // reconcile; a leaving (popped/replaced) entry KEEPS its last index here so it can still render
-    // its exit animation, and is pruned only when it has finished leaving (see the unload effect
-    // below). Plain (non-snapshot) map: it is mutated in lockstep with presentation.presented (a
-    // snapshot list) inside the reconcile block, and the visible-window derivedStateOf re-evaluates
-    // off that snapshot list rather than off this map.
-    val indexByContentKey = remember { mutableMapOf<Any, Int>() }
-    remember(currentKeyList, entryProvider) {
-        val currentEntries = currentKeyList.map { entryProvider(it) }
-        val newContentKeys = currentEntries.map { it.contentKey }
-        // Content keys are the entry identity everywhere downstream (presentation reconcile,
-        // index map, saveable state, ViewModel store). A duplicate would fold two stack positions
-        // into one instance and wedge the presentation (index teleport -> transient d <= -1 ->
-        // lifecycle DESTROYED), so reject it here with an actionable message instead.
-        val seenContentKeys = HashSet<Any>(newContentKeys.size)
-        for (contentKey in newContentKeys) {
-            require(seenContentKeys.add(contentKey)) {
-                "Duplicate contentKey on the back stack: $contentKey. Every entry needs a unique " +
-                    "contentKey — derive a per-instance key via entry(contentKey = { route -> ... }) " +
-                    "or keep the route values distinct."
-            }
-        }
-        presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
-        previousContentKeys[0] = newContentKeys
-        currentEntries.forEachIndexed { index, e -> indexByContentKey[e.contentKey] = index }
-    }
 
     // Unload entries that have finished leaving — either they slid fully off the front edge
     // (relativeDepth <= -1, the pop case) or a current entry now occupies their index (the replace
@@ -367,9 +393,9 @@ private fun NavDisplayLayout(
         }
     }
 
-    // Drive the single shared float towards the new top index via the shared spring. The renderer only
-    // sets the target; the interactive gesture layer may snapToFinger it instead.
-    presentation.animateTopTo(backStack.lastIndex.toFloat())
+    // Drive the single shared float towards the new top index via the governing settle curves. The
+    // renderer only sets the target; the interactive gesture layer may snapToFinger it instead.
+    presentation.animateTopTo(backStack.lastIndex.toFloat(), topMotion)
 
     // Effective interactive dismiss direction of the CURRENT top entry: a per-route override wins,
     // else its governing transition declares the natural direction. Rebuilding one entry to read
@@ -401,6 +427,7 @@ private fun NavDisplayLayout(
                 direction = topDismissDirection,
                 animatedTop = presentation.animatedTop,
                 topIndex = topIndex,
+                motion = topMotion,
                 onCommit = currentOnBack.value,
                 onCancel = {},
                 onGesture = { presentation.gesture = it },
