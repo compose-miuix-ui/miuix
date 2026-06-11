@@ -30,8 +30,8 @@ private val FastOutExtraSlowIn: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
  * timeline is mapped onto the depth axis: the ramp occupies ≈8%-26% of wall time, which the
  * fast-start easing has already converted into ≈18%-55% of the travelled distance.
  */
-private const val ClassicFadeStart = 0.18f
-private const val ClassicFadeSpan = 0.37f
+private const val CLASSIC_FADE_START = 0.18f
+private const val CLASSIC_FADE_SPAN = 0.37f
 
 /** Programmatic timing of the classic window animations: a fixed 450ms eased tween. */
 private val ClassicMotion = NavMotion(
@@ -50,7 +50,7 @@ private val ClassicActivityOpen: NavTransition = navGraphicsTransition(motion = 
     if (d <= 0f) {
         val p = topProgress(d)
         translationX = (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-        alpha = ((p - ClassicFadeStart) / ClassicFadeSpan).coerceIn(0f, 1f)
+        alpha = ((p - CLASSIC_FADE_START) / CLASSIC_FADE_SPAN).coerceIn(0f, 1f)
     }
 }
 
@@ -66,7 +66,7 @@ private val ClassicActivityClose: NavTransition = navGraphicsTransition(motion =
     if (d <= 0f) {
         val p = topProgress(d)
         translationX = (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-        alpha = ((p - (1f - ClassicFadeStart - ClassicFadeSpan)) / ClassicFadeSpan).coerceIn(0f, 1f)
+        alpha = ((p - (1f - CLASSIC_FADE_START - CLASSIC_FADE_SPAN)) / CLASSIC_FADE_SPAN).coerceIn(0f, 1f)
     }
 }
 

@@ -76,5 +76,4 @@ private class NavDirectionalTransition(
  * [NavTransitionScope.gesture] is a fresh instance per move event and would recompose hosts per
  * event if read during composition); foreign scope implementations fall back to the raw field.
  */
-private fun NavTransitionScope.isGestureDriven(): Boolean =
-    (this as? LiveNavTransitionScope)?.gestureActive ?: (gesture != null)
+private fun NavTransitionScope.isGestureDriven(): Boolean = (this as? LiveNavTransitionScope)?.gestureActive ?: (gesture != null)
