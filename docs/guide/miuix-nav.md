@@ -188,7 +188,7 @@ The **input source** and its **semantics differ per platform** — the runtime n
 `rememberNavBackStack` persists the stack via `rememberSaveable` and a `kotlinx.serialization`-based saver.
 
 ::: warning
-Keys must be `@Serializable` to survive process death. A non-serializable key does not crash — it simply **degrades to in-memory only**: the entry stays navigable within the live process, but the back stack will **not** be restored after process death (Android low-memory kill, etc.). Make every route `@Serializable` if you need cross-process restoration.
+`@Serializable` is a **hard requirement** for every key in a `rememberNavBackStack` stack, not a soft hint. There are two distinct failure points: a key **type** that is not `@Serializable` throws `SerializationException` at the first composition of `rememberNavBackStack` (the serializer is captured there); a key **instance** outside the captured hierarchy — or a non-serializable subtype inside it — navigates fine all session and then throws at state-save time (on Android: when the app is backgrounded). If you cannot make keys serializable, build the stack with a plain in-memory list (`navBackStackOf`) instead of `rememberNavBackStack`.
 :::
 
 ## Returning a result to a previous screen

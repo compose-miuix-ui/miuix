@@ -188,7 +188,7 @@ NavDisplay(
 `rememberNavBackStack` 经 `rememberSaveable` + 基于 `kotlinx.serialization` 的 Saver 持久化返回栈。
 
 ::: warning
-key 必须 `@Serializable` 才能跨进程死亡恢复。非序列化 key **不会崩溃**——它会**退化为仅内存**：该 entry 在存活进程内仍可正常导航，但返回栈在进程死亡（Android 低内存杀进程等）后**不会**恢复。若需跨进程恢复，请确保每个路由都 `@Serializable`。
+对 `rememberNavBackStack` 的栈而言，`@Serializable` 是**硬性要求**而非软提示。失败点有两处：key **类型**未标 `@Serializable` 时，`rememberNavBackStack` 首次组合即抛 `SerializationException`（序列化器在此捕获）；key **实例**逃出捕获的层级——或层级内存在非序列化子类型——则整个会话导航正常，到状态保存时才抛出（Android 上即应用退后台时）。若无法让 key 可序列化，请改用纯内存栈（`navBackStackOf`），不要使用 `rememberNavBackStack`。
 :::
 
 ## 向上一屏回传结果

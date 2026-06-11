@@ -18,6 +18,9 @@ package top.yukonga.miuix.kmp.nav.core
  * }
  * ```
  *
- * Keys that are not `@Serializable` degrade to in-memory-only and will not survive process death.
+ * `@Serializable` is a hard requirement when the stack is persisted via [rememberNavBackStack]: a
+ * non-serializable key type throws `SerializationException` at the first composition (serializer
+ * capture), and a key escaping the captured hierarchy throws at state-save time. Stacks built with
+ * [navBackStackOf] are in-memory only and place no serializability requirement on keys.
  */
 public interface NavKey
