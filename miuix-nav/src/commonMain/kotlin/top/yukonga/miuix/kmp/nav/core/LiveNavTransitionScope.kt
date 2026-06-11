@@ -42,4 +42,7 @@ internal class LiveNavTransitionScope(
         get() = roleFor(relativeDepth, isRemoving)
 
     override val gesture: NavGesture? get() = presentation.gesture
+
+    /** Coarse gesture flag for composition-time branch dispatch (see navDirectionalTransition). */
+    internal val gestureActive: Boolean get() = presentation.gestureActive
 }

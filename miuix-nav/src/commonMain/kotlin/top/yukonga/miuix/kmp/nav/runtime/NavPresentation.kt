@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -97,6 +98,13 @@ internal class NavPresentation(initialTopIndex: Float) {
      * settle resolves (cancel settles back, or the leaving entry unloads on commit).
      */
     var gesture: NavGesture? by mutableStateOf(null)
+
+    /**
+     * Threshold-level flag for "a gesture currently owns the float". [gesture] is replaced per
+     * event (a fresh [NavGesture] each move), so composition-time readers must subscribe to this
+     * derived flag instead: it flips only at gesture start and at gesture resolution.
+     */
+    val gestureActive: Boolean by derivedStateOf { gesture != null }
 
     /**
      * Release velocity (depth-units per second, negative toward pop) estimated from the
