@@ -19,19 +19,45 @@ import kotlin.math.abs
 import kotlin.math.min
 
 /**
- * Cubic approximation of the reference window-animation interpolator (`fast_out_extra_slow_in`):
- * a fast start with a long gentle tail. The reference ships a two-segment path; a single cubic
- * keeps the perceived pacing without a path evaluator.
+ * Exact port of the reference window-animation interpolator (`fast_out_extra_slow_in`), a
+ * two-segment cubic path: `M 0,0 C 0.05,0 0.133333,0.06 0.166666,0.4` then
+ * `C 0.208333,0.82 0.25,1 1,1`. Each segment is evaluated as a unit-square cubic (the same
+ * solver [CubicBezierEasing] uses) and rescaled back into its sub-rectangle, so the curve
+ * matches the reference point for point — a single-cubic approximation deviates by up to 0.14
+ * in the mid-section, which visibly slows the slide's front.
  */
-private val FastOutExtraSlowIn: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+private val FastOutExtraSlowIn: Easing = run {
+    val knotX = 0.166666f
+    val knotY = 0.4f
+    // Segment control points normalized into each segment's unit square.
+    val first = CubicBezierEasing(0.05f / knotX, 0f, 0.133333f / knotX, 0.06f / knotY)
+    val second = CubicBezierEasing(
+        (0.208333f - knotX) / (1f - knotX),
+        (0.82f - knotY) / (1f - knotY),
+        (0.25f - knotX) / (1f - knotX),
+        (1f - knotY) / (1f - knotY),
+    )
+    Easing { fraction ->
+        if (fraction < knotX) {
+            knotY * first.transform(fraction / knotX)
+        } else {
+            knotY + (1f - knotY) * second.transform((fraction - knotX) / (1f - knotX))
+        }
+    }
+}
 
 /**
- * Fraction-of-travel window where the reference 83ms alpha ramp sits once the 450ms eased
- * timeline is mapped onto the depth axis: the ramp occupies ≈8%-26% of wall time, which the
- * fast-start easing has already converted into ≈18%-55% of the travelled distance.
+ * Fraction-of-travel windows where the reference 83ms linear-time alpha ramps sit once the 450ms
+ * `fast_out_extra_slow_in` timeline is mapped onto the travel axis. The easing front-loads the
+ * motion, so the short time windows stretch wide on the travel axis (verified frame-by-frame
+ * against a stock recording): open fade-in `[50ms, 133ms]` -> travel `[0.12, 0.83]`; close
+ * fade-out `[35ms, 118ms]` -> travel `[0.05, 0.79]`. Alpha is linear in time in the reference;
+ * linear-in-travel matches it within ~1% across the window.
  */
-private const val CLASSIC_FADE_START = 0.18f
-private const val CLASSIC_FADE_SPAN = 0.37f
+private const val OPEN_FADE_START = 0.12f
+private const val OPEN_FADE_SPAN = 0.71f
+private const val CLOSE_FADE_START = 0.21f
+private const val CLOSE_FADE_SPAN = 0.74f
 
 /** Programmatic timing of the classic window animations: a fixed 450ms eased tween. */
 private val ClassicMotion = NavMotion(
@@ -39,34 +65,51 @@ private val ClassicMotion = NavMotion(
 )
 
 /**
- * Classic activity open (push): the entering page slides in from [CrossActivityDrift] to the
- * physical right of its resting place while fading in early in the motion (the reference
- * `activity_open_enter`: a 96dp translate over 450ms with a short alpha ramp near the start).
- * The page being covered stays parked, like the reference open/close pairs. No scale anywhere —
- * the card treatment belongs exclusively to the gesture branch.
+ * Classic activity open (push), the reference `activity_open_enter` / `activity_open_exit`
+ * pair: the entering page slides in from [CrossActivityDrift] to the physical right while
+ * fading in across the front of the motion; the page being covered slides out the SAME distance
+ * to the physical left at full opacity (`open_exit` keeps alpha at 1 throughout). Both layers
+ * ride the same 450ms eased timeline; there is no dim and no scale — the card treatment belongs
+ * exclusively to the gesture branch. (The reference `extend` elements paint window edges beyond
+ * their bounds during the slide; the host's backdrop fill stands in for that here.)
  */
-private val ClassicActivityOpen: NavTransition = navGraphicsTransition(motion = ClassicMotion) { scope ->
+private val ClassicActivityOpen: NavTransition = navGraphicsTransition(
+    motion = ClassicMotion,
+    scrim = { 0f },
+) { scope ->
     val d = scope.relativeDepth
+    val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
     if (d <= 0f) {
         val p = topProgress(d)
-        translationX = (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-        alpha = ((p - CLASSIC_FADE_START) / CLASSIC_FADE_SPAN).coerceIn(0f, 1f)
+        translationX = (1f - p) * driftPx
+        alpha = ((p - OPEN_FADE_START) / OPEN_FADE_SPAN).coerceIn(0f, 1f)
+    } else {
+        // Covered page: slides 0 -> -96dp as it is covered (open_exit), never fading.
+        translationX = -coverProgress(d) * driftPx
     }
 }
 
 /**
- * Classic activity close (pop): the leaving page slides out [CrossActivityDrift] to the physical
- * right while fading out early in the motion (the reference `activity_close_exit`: the page is
- * gone visually within the first fifth of the 450ms window, then keeps sliding invisibly). The
- * revealed page below stays parked. Mirrors [ClassicActivityOpen] on the time axis, which is the
- * opposite end of the depth axis: early time on a pop means `p` still near 1.
+ * Classic activity close (pop), the reference `activity_close_exit` / `activity_close_enter`
+ * pair: the leaving page slides out [CrossActivityDrift] to the physical right while fading out
+ * across the front of the motion (early in TIME means `p` still near 1 on the depth axis); the
+ * revealed page below slides in from -[CrossActivityDrift] (physical left) to rest at full
+ * opacity (`close_enter` keeps alpha at 1 throughout). No dim, no scale.
  */
-private val ClassicActivityClose: NavTransition = navGraphicsTransition(motion = ClassicMotion) { scope ->
+private val ClassicActivityClose: NavTransition = navGraphicsTransition(
+    motion = ClassicMotion,
+    scrim = { 0f },
+) { scope ->
     val d = scope.relativeDepth
+    val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
     if (d <= 0f) {
         val p = topProgress(d)
-        translationX = (1f - p) * with(scope.density) { CrossActivityDrift.toPx() }
-        alpha = ((p - (1f - CLASSIC_FADE_START - CLASSIC_FADE_SPAN)) / CLASSIC_FADE_SPAN).coerceIn(0f, 1f)
+        translationX = (1f - p) * driftPx
+        alpha = ((p - CLOSE_FADE_START) / CLOSE_FADE_SPAN).coerceIn(0f, 1f)
+    } else {
+        // Revealed page: parked at -96dp while covered, slides to rest as the top leaves
+        // (close_enter), never fading.
+        translationX = -coverProgress(d) * driftPx
     }
 }
 
@@ -200,9 +243,9 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
  * preset:
  *
  * - **Programmatic push/pop** ([ClassicActivityOpen] / [ClassicActivityClose]): the classic
- *   window animations — a full-size 96dp slide with a short early fade over a fixed 450ms eased
- *   timeline. No card, no scale: a back-button pop on the platform never runs the gesture
- *   animation.
+ *   window animations — BOTH layers slide 96dp on a fixed 450ms eased timeline (the top fades
+ *   across the front of the motion, the other layer stays fully opaque), with no dim and no
+ *   scale: a back-button pop on the platform never runs the gesture animation.
  * - **Predictive back / edge swipe** ([CrossActivityPredictive]): the gesture-scaled card with
  *   the hold-then-fade scrim, a grow-back-to-full-size fly-out on commit, and a velocity-seeded
  *   underdamped commit spring (a hard fling visibly bounces, like the reference).
