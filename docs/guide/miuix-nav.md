@@ -153,6 +153,52 @@ val cardStyle = navGraphicsTransition(
 
 For a complete, platform-grade transition built entirely on this public API — centered scale, edge hug, damped vertical finger follow, post-commit fly-out and the gesture-held scrim above — see `CrossActivityTransition` in the example app (`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`).
 
+## Settle physics
+
+A transition also declares its **settle physics** via `NavTransition.motion`: the timing curves used once the geometry has to converge on its own (the gesture released, or a programmatic push/pop fired). `NavMotion` keys one `NavSettleSpec` per phase:
+
+| Phase | Runs when | Default |
+| :-- | :-- | :-- |
+| `commit` | A gesture release commits the pop (predictive back / edge swipe); seeded with the release velocity when it is a `Spring` | Critically damped spring (`dampingRatio 1`, `stiffness 146`) |
+| `cancel` | A gesture release cancels and the entry springs back to rest | Same spring |
+| `programmatic` | A from-rest, full-step push/pop (multi-step included) | 500ms tween on the established curve (`NavProgrammaticEasing`) |
+
+A `NavSettleSpec` is either a `Spring(dampingRatio, stiffness, clampOvershoot)` or a fixed-duration `Tween(durationMillis, easing)`:
+
+```kotlin
+val snappy = navGraphicsTransition(
+    motion = NavMotion(
+        // A flung release overshoots and bounces back, scaled by the throw.
+        commit = NavSettleSpec.Spring(dampingRatio = 0.8f, stiffness = 280f, clampOvershoot = false),
+        programmatic = NavSettleSpec.Tween(durationMillis = 450, easing = NavProgrammaticEasing),
+    ),
+) { scope -> /* transform */ }
+```
+
+The host resolves the motion from the **topmost presented entry's** governing transition (per-route overrides win), so during a pop the leaving entry's own motion carries its exit.
+
+Overshoot rules:
+
+- By default the commit settle floors its seed velocity at the exact no-overshoot bound, so navigation never bounces. Pass `clampOvershoot = false` to keep the full release velocity; an underdamped spring (`dampingRatio < 1`) overshoots by construction and **requires** that opt-out (the constructor rejects the ambiguous combination).
+- The **cancel** settle always pins the rest position as a bound: input blocking, boundary ownership and the dim scrim all flip past rest, so a cancel may never cross it regardless of its spring.
+- A `Tween` cannot carry a release velocity: as a commit spec it starts from the commit point with a velocity cut, and a velocity-carrying programmatic settle falls back to a spring.
+
+## Programmatic vs. predictive transitions
+
+By default one transition serves both drive modes — the visual is a pure function of depth, so the gesture and the programmatic settle replay the same geometry. When a design calls for **two distinct effect systems** (the platform itself animates a back-button pop and a predictive-back gesture completely differently), compose them with `navDirectionalTransition`:
+
+```kotlin
+val platformLike = navDirectionalTransition(
+    push = classicOpen,          // forward changes (and replace/initial)
+    pop = classicClose,          // programmatic pops; defaults to push
+    predictivePop = gestureCard, // while a gesture drives; defaults to pop
+)
+```
+
+Dispatch: a live gesture (predictive back or edge swipe — the context stays frozen through the whole release settle) always selects `predictivePop`; otherwise `NavChange.Pop` / `MultiPop` selects `pop`, and everything else selects `push`. Static contracts merge from their natural sources: `opaqueDepth` takes the max of the three, `dismissDirection` and the commit/cancel physics come from `predictivePop`, the programmatic curve from `pop` (`push.motion` is never consumed — use per-route overrides for route-level asymmetry).
+
+One trade-off to know: a gesture may grab the stack mid-programmatic-settle, switching the dispatch to `predictivePop` at the grab instant. If the two branches disagree geometrically at that depth, the style jumps for one frame — author branches that stay close in the grabbable range when that matters. The example's `CrossActivityTransition` is built exactly this way: classic 450ms slide+fade for programmatic push/pop, the gesture-scaled card with a velocity-seeded bouncing commit spring for predictive back.
+
 ## Orthogonal effects
 
 `NavDisplayEffects` holds the cross-cutting effects layered on top of the active transition — corner clip, dim cap, input blocking and a backdrop fill (`backdropColor`):
@@ -170,7 +216,7 @@ NavDisplay(
 
 ## Gesture back
 
-Back is built in and shares the same `animatedTop` and `NavTransition` as a normal pop — there is no separate predictive animation to maintain. When a gesture is in progress the finger drives `animatedTop` 1:1 (`snapTo`, no interpolator); on release a velocity-first / position-fallback decision commits or cancels, handing the lift velocity to the convergence spring so motion stays continuous.
+Back is built in and shares the same `animatedTop` and `NavTransition` as a normal pop — by default there is no separate predictive animation to maintain (opt into a split with [`navDirectionalTransition`](#programmatic-vs-predictive-transitions)). When a gesture is in progress the finger drives `animatedTop` 1:1 (`snapTo`, no interpolator); on release a velocity-first / position-fallback decision commits or cancels, handing the lift velocity to the governing commit curve so motion stays continuous.
 
 Two sources feed it: the **in-content swipe** (an all-platform Compose gesture, direction-aware per [Swipe-to-dismiss direction](#swipe-to-dismiss-direction) above) and the **platform back** (system predictive back / ESC / a custom trigger). Both stream into the same driver.
 

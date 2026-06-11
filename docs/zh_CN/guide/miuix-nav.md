@@ -153,6 +153,52 @@ val cardStyle = navGraphicsTransition(
 
 一个完全基于该公共 API 实现的平台级完整转场——居中缩放、贴边、带阻尼的纵向跟手、提交后飞出以及上述手势保持 scrim——见示例应用中的 `CrossActivityTransition`（`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`）。
 
+## Settle 物理
+
+转场还通过 `NavTransition.motion` 声明自己的 **settle 物理**：当几何必须自行收敛时（手势松开、或程序化出入栈触发）所用的时间曲线。`NavMotion` 按相位各持一份 `NavSettleSpec`：
+
+| 相位 | 触发时机 | 默认值 |
+| :-- | :-- | :-- |
+| `commit` | 手势松手提交 pop（预测返回 / 边缘滑动）；为 `Spring` 时以松手速度作为种子 | 临界阻尼弹簧（`dampingRatio 1`、`stiffness 146`） |
+| `cancel` | 手势松手取消，条目弹回静止位 | 同上弹簧 |
+| `programmatic` | 从静止出发的整步 push/pop（含多步） | 既有曲线（`NavProgrammaticEasing`）上的 500ms tween |
+
+`NavSettleSpec` 二选一：`Spring(dampingRatio, stiffness, clampOvershoot)` 或固定时长 `Tween(durationMillis, easing)`：
+
+```kotlin
+val snappy = navGraphicsTransition(
+    motion = NavMotion(
+        // 快甩松手会过冲并弹回，幅度随甩速缩放。
+        commit = NavSettleSpec.Spring(dampingRatio = 0.8f, stiffness = 280f, clampOvershoot = false),
+        programmatic = NavSettleSpec.Tween(durationMillis = 450, easing = NavProgrammaticEasing),
+    ),
+) { scope -> /* transform */ }
+```
+
+宿主从**最顶 presented 条目**的有效转场解析 motion（per-route 覆写优先），因此 pop 期间由离场条目自己的 motion 驱动其退场。
+
+过冲规则：
+
+- 默认情况下，commit settle 会把种子速度钳在精确的无过冲下界上，导航永不回弹。传 `clampOvershoot = false` 保留完整松手速度；欠阻尼弹簧（`dampingRatio < 1`）从结构上必然过冲，**必须**显式传该 opt-out（构造器会拒绝歧义组合）。
+- **cancel** settle 恒以静止位为边界钉住：越过静止位会翻转输入拦截、边界归属与调暗遮罩，因此 cancel 无论配什么弹簧都不会越界。
+- `Tween` 无法携带松手速度：作为 commit 曲线时从提交点起跑（速度截断），携带速度的程序化 settle 会回退到弹簧。
+
+## 程序化与预测性转场分离
+
+默认情况下一套转场同时伺服两种驱动——视觉是深度的纯函数，手势与程序化 settle 重放同一份几何。当设计需要**两套独立效果**时（平台本身对返回键 pop 与预测返回手势就是完全不同的两套动画），用 `navDirectionalTransition` 组合：
+
+```kotlin
+val platformLike = navDirectionalTransition(
+    push = classicOpen,          // 前进（及 replace/初始）
+    pop = classicClose,          // 程序化 pop；缺省回落到 push
+    predictivePop = gestureCard, // 手势驱动期间；缺省回落到 pop
+)
+```
+
+分发规则：活动手势（预测返回或边缘滑动——上下文冻结贯穿整段松手 settle）恒选 `predictivePop`；否则 `NavChange.Pop` / `MultiPop` 选 `pop`，其余选 `push`。静态契约按自然来源合并：`opaqueDepth` 取三者最大值，`dismissDirection` 与 commit/cancel 物理来自 `predictivePop`，程序化曲线来自 `pop`（`push.motion` 永不被消费——路由级不对称请用 per-route 覆写）。
+
+一个需要了解的取舍：手势可以在程序化 settle 中途抢占，抢占瞬间分发切到 `predictivePop`。若两个分支在该深度上的几何不一致，会有一帧风格跳变——在意时让两个分支在可抢占区间内保持几何接近。示例中的 `CrossActivityTransition` 正是这样构建的：程序化 push/pop 走经典 450ms 平移+淡变，预测返回走手势缩放卡片并配速度种子的回弹提交弹簧。
+
 ## 正交效果
 
 `NavDisplayEffects` 承载叠加在当前转场之上的横切效果——圆角裁剪、调暗封顶、转场期输入拦截与背景底色（`backdropColor`）：
@@ -170,7 +216,7 @@ NavDisplay(
 
 ## 手势返回
 
-返回已内置，且与普通 pop **共用同一个 `animatedTop` 与同一套 `NavTransition`**——无需为预测返回单独维护一套动画。手势进行中，手指以 1:1 驱动 `animatedTop`（`snapTo`，不过插值器）；松手时按「速度优先、位置兜底」判定 commit 或 cancel，并把松手瞬时速度作为初速度交接给收敛弹簧，保证运动连续。
+返回已内置，且与普通 pop **共用同一个 `animatedTop` 与同一套 `NavTransition`**——默认无需为预测返回单独维护一套动画（需要分离时用 [`navDirectionalTransition`](#程序化与预测性转场分离) 选择性开启）。手势进行中，手指以 1:1 驱动 `animatedTop`（`snapTo`，不过插值器）；松手时按「速度优先、位置兜底」判定 commit 或 cancel，并把松手瞬时速度作为初速度交接给有效 commit 曲线，保证运动连续。
 
 两个来源汇入它：**页面内滑动**（全平台的 Compose 手势，按上文[滑动关闭方向](#滑动关闭方向)区分方向）与**平台返回**（系统预测返回 / ESC / 自定义触发）。二者流入同一驱动。
 
