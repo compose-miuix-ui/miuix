@@ -48,12 +48,14 @@ import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.settleProgrammatic
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
+import top.yukonga.miuix.kmp.nav.state.NavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryViewModelStore
 import top.yukonga.miuix.kmp.nav.state.navMaxLifecycleFor
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryLifecycleOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
+import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
@@ -221,6 +223,7 @@ private fun NavDisplayLayout(
 ) {
     val presentation = rememberNavPresentation(backStack.lastIndex)
     val stateHolder = rememberNavSaveableStateHolder()
+    val viewModelStores = rememberNavEntryViewModelStores()
 
     val topIndex = backStack.lastIndex
     val backScope = rememberCoroutineScope()
@@ -309,9 +312,9 @@ private fun NavDisplayLayout(
     // (relativeDepth <= -1, the pop case) or a current entry now occupies their index (the replace
     // case, where the driver never moves past them). Such entries are no longer (or never were) in the
     // visible window, so no NavEntryHost runs to self-unload; prune them here at the layout level: drop
-    // the saved state and remove from the presentation set + index map. Each entry's per-entry
-    // ViewModelStore is cleared automatically by its host's RememberObserver.onForgotten when the host
-    // leaves composition.
+    // the saved state, clear the entry's ViewModelStore in the display registry, and remove from the
+    // presentation set + index map. The registry — not the host composition — owns store lifetime, so
+    // a depth-culled entry that is still on the back stack keeps its ViewModels.
     val finishedLeaving by remember(presentation, indexByContentKey) {
         derivedStateOf {
             val top = presentation.animatedTop.value
@@ -336,6 +339,7 @@ private fun NavDisplayLayout(
         SideEffect {
             finishedLeaving.fastForEach { e ->
                 stateHolder.removeState(e.contentKey)
+                viewModelStores.clearStore(e.contentKey)
                 indexByContentKey.remove(e.contentKey)
                 presentation.unload(e)
             }
@@ -490,6 +494,7 @@ private fun NavDisplayLayout(
                         entryIndex = entryIndex,
                         presentation = presentation,
                         stateHolder = stateHolder,
+                        viewModelStores = viewModelStores,
                         ownTransition = ownTransition,
                         upperTransition = upperTransition,
                         change = presentation.change,
@@ -543,6 +548,7 @@ private fun NavEntryHost(
     entryIndex: Int,
     presentation: NavPresentation,
     stateHolder: NavSaveableStateHolder,
+    viewModelStores: NavEntryViewModelStores,
     ownTransition: NavTransition,
     upperTransition: NavTransition,
     change: NavChange,
@@ -575,9 +581,10 @@ private fun NavEntryHost(
         }
     }
 
-    // Per-entry state scopes. The view-model store owner and lifecycle owner are remembered per host;
-    // the saveable holder is the shared one passed from NavDisplayLayout.
-    val vmOwner = rememberNavEntryViewModelStoreOwner()
+    // Per-entry state scopes. The lifecycle owner is remembered per host; the saveable holder and the
+    // view-model store registry are display-level and passed from NavDisplayLayout, so the entry's
+    // ViewModelStore outlives this host (depth culling must not clear it).
+    val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
     val maxLifecycle = Lifecycle.State.entries[depthBuckets and DEPTH_BUCKET_LIFECYCLE_MASK]
     val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
 
