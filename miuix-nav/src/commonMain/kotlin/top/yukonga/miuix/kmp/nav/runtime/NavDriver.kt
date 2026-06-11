@@ -194,6 +194,10 @@ internal fun navBackCommitDecision(
  * while the shared spring is mid-flight pass the progress sampled at the claim instant, making
  * the first snap a no-op (zero jump). Rest-state gestures pass the default `0f`.
  *
+ * A NaN [anchor] (a snap dispatched before the grab anchor was sampled) is a no-op: NaN written
+ * into the driving float is unrecoverable — every later sample, release decision, and settle
+ * integrates from the current value and nothing ever snaps it back to a finite absolute.
+ *
  * @param topIndex index of the current top entry (`backStack.lastIndex`).
  * @param progress finger travel since the claim in progress units, unclamped.
  * @param anchor progress toward pop at the claim instant; see [anchoredProgress].
@@ -203,6 +207,7 @@ internal suspend fun Animatable<Float, AnimationVector1D>.snapToFinger(
     progress: Float,
     anchor: Float = 0f,
 ) {
+    if (anchor.isNaN()) return
     snapTo(topIndex - anchoredProgress(anchor = anchor, fingerProgress = progress))
 }
 

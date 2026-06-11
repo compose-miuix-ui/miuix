@@ -159,12 +159,18 @@ fun Modifier.navSwipeDismiss(
             }
 
             // --- Grab anchor (invariant 6): sampled atomically with halting the in-flight settle,
-            // inside the FIRST driver coroutine rather than this pointer handler. Between the event
-            // that claims the gesture and the moment a launched coroutine runs, the shared spring may
-            // still advance a frame; stop() first (cancelling the settle through the Animatable
-            // mutex) and THEN read the value, so the first snap target is exactly where the spring
-            // halted — zero jump. Later snap launches are FIFO-ordered after this one on the same
-            // (single-threaded) composition dispatcher, so they always observe the sampled anchor. ---
+            // inside the FIRST driver coroutine rather than this pointer handler (this scope is
+            // @RestrictsSuspension — a foreign suspend call like stop() cannot run here). Between
+            // the event that claims the gesture and the moment a launched coroutine runs, the
+            // shared spring may still advance a frame; stop() first (cancelling the settle through
+            // the Animatable mutex) and THEN read the value, so the first snap target is exactly
+            // where the spring halted — zero jump. FIFO ordering on the single-threaded composition
+            // dispatcher guarantees this coroutine STARTS before any follow-phase snap, but NOT
+            // that it completes first: when a settle is mid-flight, stop() suspends across extra
+            // dispatcher slices while the cancelled animation unwinds, and on desktop/web a pointer
+            // event can interleave there and launch a snap that executes while anchor is still NaN.
+            // Such pre-anchor snaps are dropped at the launch site below (and snapToFinger itself
+            // rejects a NaN anchor): a NaN written into the driving float would be unrecoverable. ---
             var anchor = Float.NaN
             scope.launch {
                 animatedTop.stop()
@@ -190,6 +196,10 @@ fun Modifier.navSwipeDismiss(
                 val fingerProgress = dismissSign * drag / extent
                 val touchY = change.position.y
                 scope.launch {
+                    // Pre-anchor event (stop() above still unwinding a mid-flight settle): drop it.
+                    // At most the first 1-2 events on desktop/web; the first executed snap still
+                    // lands exactly on the sampled anchor, so the zero-jump grab is preserved.
+                    if (anchor.isNaN()) return@launch
                     animatedTop.snapToFinger(topIndex = topIndex, progress = fingerProgress, anchor = anchor)
                     // Published inside the driver coroutine so the anchor is always the sampled one.
                     currentOnGesture.value(
