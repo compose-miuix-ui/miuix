@@ -6,13 +6,11 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,6 +32,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.coroutines.delay
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -41,6 +41,8 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
@@ -50,6 +52,7 @@ import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
+import kotlin.time.Duration.Companion.milliseconds
 
 private val DropdownListTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private val DropdownListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
@@ -75,7 +78,7 @@ fun PullToRefreshPage(
 
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            delay(200)
+            delay(100.milliseconds)
             dropdownCount += 6
             isRefreshing = false
         }
@@ -94,6 +97,17 @@ fun PullToRefreshPage(
                         BackNavigationIcon(
                             onClick = { navigator.pop() },
                         )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { isRefreshing = true },
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Refresh,
+                                contentDescription = "Refresh",
+                                tint = MiuixTheme.colorScheme.onBackground,
+                            )
+                        }
                     },
                 )
             }
