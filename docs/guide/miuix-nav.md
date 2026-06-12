@@ -33,7 +33,6 @@ fun App() {
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
-        transition = NavTransitions.Cupertino,
     ) {
         entry<Route.Home> {
             HomeScreen(onOpen = { id -> backStack.add(Route.Detail(id)) })
@@ -73,11 +72,7 @@ A built-in preset library is available as `NavTransitions`:
 
 | Preset | Description |
 | :-- | :-- |
-| `Cupertino` (default) | iOS horizontal slide + lower-layer parallax |
-| `MiuixDefault` | Full-width slide + quarter-width parallax + light covered alpha falloff |
-| `Scale` | Scale |
-| `Fade` | Fade |
-| `SharedAxisX` | Material shared X axis |
+| `MiuixDefault` (default) | Full-width slide + quarter-width parallax + light covered alpha falloff |
 | `Modal` | Bottom-up slide; lower layer stays visible |
 | `None` | Instant, no animation |
 
@@ -86,7 +81,7 @@ The leading-edge corner clip and the dark dim scrim are not baked into any prese
 Set a global default on `NavDisplay(transition = ...)` and override per route with `entry(transition = ...)`:
 
 ```kotlin
-NavDisplay(backStack, transition = NavTransitions.Cupertino) {
+NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
     entry<Route.Home> { HomeScreen() }
     entry<Route.Detail>(transition = NavTransitions.Modal) { DetailScreen(it.id) }
 }
@@ -140,6 +135,15 @@ val myTransition = navGraphicsTransition { scope ->
 ```
 
 `NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `layoutSize`, `layoutDirection` and `density`.
+
+Generic looks (fade, scale, shared-axis, …) are deliberately not shipped as presets — each is a few lines on this builder. A cross-fade, for instance:
+
+```kotlin
+val fade = navGraphicsTransition { scope ->
+    val d = scope.relativeDepth
+    alpha = if (d <= 0f) (1f + d).coerceIn(0f, 1f) else 1f - d.coerceIn(0f, 1f)
+}
+```
 
 A transition also owns its **scrim curve**: the fullscreen dim rendered just beneath the top-most layer follows `NavTransition.scrimFraction` — taken from the transition governing the layer **above** (the covering entry's, the same boundary-ownership rule as the covered transform) and evaluated against the covered layer below (depth 0 = revealed, 1 = covered) — while `NavDisplayEffects.dimAmount` only caps how dark it gets. The default curve is linear in depth (the dim lightens as the layer below is revealed); pass a custom one via the `scrim` parameter, e.g. a card-style scrim that holds during a gesture and fades only across the post-commit sweep:
 

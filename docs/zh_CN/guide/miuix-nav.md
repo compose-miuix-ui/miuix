@@ -33,7 +33,6 @@ fun App() {
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
-        transition = NavTransitions.Cupertino,
     ) {
         entry<Route.Home> {
             HomeScreen(onOpen = { id -> backStack.add(Route.Detail(id)) })
@@ -73,11 +72,7 @@ reconciler 把每次变化分类为 `Push` / `Pop` / `MultiPush(n)` / `MultiPop(
 
 | 预设 | 描述 |
 | :-- | :-- |
-| `Cupertino`（默认） | iOS 横滑 + 下层视差 |
-| `MiuixDefault` | 全宽滑动 + 四分之一宽视差 + 被覆盖层轻微透明衰减 |
-| `Scale` | 缩放 |
-| `Fade` | 淡入淡出 |
-| `SharedAxisX` | Material 共享 X 轴 |
+| `MiuixDefault`（默认） | 全宽滑动 + 四分之一宽视差 + 被覆盖层轻微透明衰减 |
 | `Modal` | 上滑、下层保留可见 |
 | `None` | 瞬时无动画 |
 
@@ -86,7 +81,7 @@ reconciler 把每次变化分类为 `Push` / `Pop` / `MultiPush(n)` / `MultiPop(
 在 `NavDisplay(transition = ...)` 上设全局默认，并用 `entry(transition = ...)` 按路由覆盖：
 
 ```kotlin
-NavDisplay(backStack, transition = NavTransitions.Cupertino) {
+NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
     entry<Route.Home> { HomeScreen() }
     entry<Route.Detail>(transition = NavTransitions.Modal) { DetailScreen(it.id) }
 }
@@ -140,6 +135,15 @@ val myTransition = navGraphicsTransition { scope ->
 ```
 
 `NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`layoutSize`、`layoutDirection`、`density`。
+
+通用样式（淡入淡出、缩放、共享轴等）刻意不作为预设内置——在这个 builder 上每种只需几行。例如交叉淡入淡出：
+
+```kotlin
+val fade = navGraphicsTransition { scope ->
+    val d = scope.relativeDepth
+    alpha = if (d <= 0f) (1f + d).coerceIn(0f, 1f) else 1f - d.coerceIn(0f, 1f)
+}
+```
 
 转场同时拥有自己的 **scrim 曲线**：渲染在最顶层之下的全屏调暗遮罩由 `NavTransition.scrimFraction` 决定——曲线取自**上层**（即覆盖者）转场（与被覆盖层变换一致的边界归属规则），并以下方被覆盖层为参照求值（深度 0 = 完全显露，1 = 完全覆盖）——`NavDisplayEffects.dimAmount` 只封顶最大暗度。默认曲线随深度线性变化（下层显露得越多，调暗越浅）；经 `scrim` 参数传入自定义曲线，例如卡片式的「手势期间保持、提交后扫程内才淡出」：
 

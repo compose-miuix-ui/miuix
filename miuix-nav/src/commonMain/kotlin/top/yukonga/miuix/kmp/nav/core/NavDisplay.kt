@@ -774,7 +774,7 @@ fun NavDisplay(
     backStack: NavBackStack,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = { backStack.removeLastOrNull() },
-    transition: NavTransition = NavTransitions.Cupertino,
+    transition: NavTransition = NavTransitions.MiuixDefault,
     effects: NavDisplayEffects = NavDisplayEffects(),
     content: NavEntryBuilder.() -> Unit,
 ) {
@@ -805,7 +805,7 @@ fun NavDisplay(
     navController: NavController,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = { navController.pop() },
-    transition: NavTransition = NavTransitions.Cupertino,
+    transition: NavTransition = NavTransitions.MiuixDefault,
     effects: NavDisplayEffects = NavDisplayEffects(),
     content: NavEntryBuilder.() -> Unit,
 ) {
@@ -838,7 +838,7 @@ internal fun NavDisplay(
     entryProvider: (NavKey) -> NavEntry<*>,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = { backStack.removeLastOrNull() },
-    transition: NavTransition = NavTransitions.Cupertino,
+    transition: NavTransition = NavTransitions.MiuixDefault,
     effects: NavDisplayEffects = NavDisplayEffects(),
 ) {
     require(backStack.isNotEmpty()) { "NavDisplay back stack cannot be empty" }
