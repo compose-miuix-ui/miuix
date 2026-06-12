@@ -133,11 +133,19 @@ private val ClassicActivityOpen: NavTransition = navGraphicsTransition(
     if (d <= 0f) {
         val p = topProgress(d)
         translationX = (1f - p) * driftPx
-        val settle = scope.settle
-        alpha = if (settle != null) {
-            ((settle.elapsedMillis - OPEN_FADE_OFFSET) / CLASSIC_FADE_DURATION).coerceIn(0f, 1f)
+        // The alpha ramp belongs to the ANIMATING window only (the reference open_enter targets
+        // the opening activity; the page about to be covered runs open_exit at alpha 1). The
+        // wall-clock ramp is depth-blind, so without the role gate it would blank the resident
+        // top for the first frames of a push while its depth still sits at exactly 0.
+        alpha = if (scope.role == NavRole.Incoming) {
+            val settle = scope.settle
+            if (settle != null) {
+                ((settle.elapsedMillis - OPEN_FADE_OFFSET) / CLASSIC_FADE_DURATION).coerceIn(0f, 1f)
+            } else {
+                ((p - OPEN_FADE_START) / OPEN_FADE_SPAN).coerceIn(0f, 1f)
+            }
         } else {
-            ((p - OPEN_FADE_START) / OPEN_FADE_SPAN).coerceIn(0f, 1f)
+            1f
         }
     } else {
         // Covered page: slides 0 -> -96dp as it is covered (open_exit), never fading.
@@ -162,11 +170,18 @@ private val ClassicActivityClose: NavTransition = navGraphicsTransition(
     if (d <= 0f) {
         val p = topProgress(d)
         translationX = (1f - p) * driftPx
-        val settle = scope.settle
-        alpha = if (settle != null) {
-            (1f - (settle.elapsedMillis - CLOSE_FADE_OFFSET) / CLASSIC_FADE_DURATION).coerceIn(0f, 1f)
+        // Role-gated like the open ramp: only the LEAVING page fades (the reference
+        // close_exit); the revealed page reaching the top at the end of the pop would
+        // otherwise hit the exhausted wall-clock ramp (1 - (450-35)/83 < 0) and blank out.
+        alpha = if (scope.role == NavRole.Outgoing) {
+            val settle = scope.settle
+            if (settle != null) {
+                (1f - (settle.elapsedMillis - CLOSE_FADE_OFFSET) / CLASSIC_FADE_DURATION).coerceIn(0f, 1f)
+            } else {
+                ((p - CLOSE_FADE_START) / CLOSE_FADE_SPAN).coerceIn(0f, 1f)
+            }
         } else {
-            ((p - CLOSE_FADE_START) / CLOSE_FADE_SPAN).coerceIn(0f, 1f)
+            1f
         }
     } else {
         // Revealed page: parked at -96dp while covered, slides to rest as the top leaves
