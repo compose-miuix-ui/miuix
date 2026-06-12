@@ -183,6 +183,41 @@ Overshoot rules:
 - The **cancel** settle always pins the rest position as a bound: input blocking, boundary ownership and the dim scrim all flip past rest, so a cancel may never cross it regardless of its spring.
 - A `Tween` cannot carry a release velocity: as a commit spec it starts from the commit point with a velocity cut, and a velocity-carrying programmatic settle falls back to a spring.
 
+### The settle context
+
+While the driver animates on its own, the scope exposes `settle: NavSettle?` — the self-driven counterpart of `gesture` (finger driving → `gesture` non-null; settling → `settle` non-null; at rest → both null):
+
+| Field | Meaning |
+| :-- | :-- |
+| `phase` | `Commit` (gesture release committed), `Cancel` (springing back) or `Programmatic` (from-rest push/pop) |
+| `releaseVelocity` | The seeded release velocity, progress-units/sec toward pop; recorded even when the curve is a `Tween` (which cannot consume it) |
+| `elapsedMillis` | Wall-clock since the settle started, a per-frame deferred-read source (read it inside `graphicsLayer { }`) |
+
+This is what makes wall-clock curves and velocity overlays expressible without any extra animation machinery — an overlay spring is just closed-form math over `(releaseVelocity, elapsedMillis)`:
+
+```kotlin
+val withBounce = navGraphicsTransition(
+    motion = NavMotion(commit = NavSettleSpec.Tween(450, NavProgrammaticEasing)),
+) { scope ->
+    val s = scope.settle
+    // Deterministic track from the tween; a separate velocity-scaled bounce on top.
+    if (s?.phase == NavSettlePhase.Commit) {
+        val kick = (s.releaseVelocity * scope.layoutSize.width * 10f).coerceIn(0f, 1000f)
+        val omega = sqrt(200f)
+        val omegaD = omega * sqrt(1f - 0.75f * 0.75f)
+        val t = s.elapsedMillis / 1000f
+        val overlay = -(kick / omegaD) * exp(-0.75f * omega * t) * sin(omegaD * t)
+        scaleX = ((100f + overlay) / 100f).coerceAtMost(1f)
+        scaleY = scaleX
+        // A wall-clock fade, independent of the motion easing:
+        alpha = (1f - 5f * (s.elapsedMillis / 450f)).coerceAtLeast(0f)
+    }
+    /* depth-driven geometry as usual */
+}
+```
+
+One caveat: a grab-anytime interruption replaces the settle (and restarts `elapsedMillis`); design wall-clock curves to tolerate a restart, or fall back to depth-axis formulas when `settle == null`.
+
 ## Programmatic vs. predictive transitions
 
 By default one transition serves both drive modes — the visual is a pure function of depth, so the gesture and the programmatic settle replay the same geometry. When a design calls for **two distinct effect systems** (the platform itself animates a back-button pop and a predictive-back gesture completely differently), compose them with `navDirectionalTransition`:

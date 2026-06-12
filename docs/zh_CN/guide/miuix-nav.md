@@ -183,6 +183,41 @@ val snappy = navGraphicsTransition(
 - **cancel** settle 恒以静止位为边界钉住：越过静止位会翻转输入拦截、边界归属与调暗遮罩，因此 cancel 无论配什么弹簧都不会越界。
 - `Tween` 无法携带松手速度：作为 commit 曲线时从提交点起跑（速度截断），携带速度的程序化 settle 会回退到弹簧。
 
+### settle 上下文
+
+driver 自行动画期间，scope 暴露 `settle: NavSettle?`——与 `gesture` 互补的自驱动上下文（手指驱动 → `gesture` 非空；settle 中 → `settle` 非空；静止 → 两者皆空）：
+
+| 字段 | 含义 |
+| :-- | :-- |
+| `phase` | `Commit`（松手提交）/ `Cancel`（弹回静止）/ `Programmatic`（从静止的程序化出入栈） |
+| `releaseVelocity` | 播种的松手速度，progress-units/s 朝 pop 为正；即使曲线是 `Tween`（无法消费速度）也照常记录 |
+| `elapsedMillis` | settle 开始以来的墙钟毫秒数，逐帧延迟读取源（在 `graphicsLayer { }` 内读取） |
+
+这使墙钟曲线与速度叠加无需任何额外动画机制即可表达——叠加弹簧就是基于 `(releaseVelocity, elapsedMillis)` 的闭式数学：
+
+```kotlin
+val withBounce = navGraphicsTransition(
+    motion = NavMotion(commit = NavSettleSpec.Tween(450, NavProgrammaticEasing)),
+) { scope ->
+    val s = scope.settle
+    // 确定性轨道来自 tween；其上叠加独立的速度比例回弹。
+    if (s?.phase == NavSettlePhase.Commit) {
+        val kick = (s.releaseVelocity * scope.layoutSize.width * 10f).coerceIn(0f, 1000f)
+        val omega = sqrt(200f)
+        val omegaD = omega * sqrt(1f - 0.75f * 0.75f)
+        val t = s.elapsedMillis / 1000f
+        val overlay = -(kick / omegaD) * exp(-0.75f * omega * t) * sin(omegaD * t)
+        scaleX = ((100f + overlay) / 100f).coerceAtMost(1f)
+        scaleY = scaleX
+        // 与运动 easing 解耦的墙钟淡变：
+        alpha = (1f - 5f * (s.elapsedMillis / 450f)).coerceAtLeast(0f)
+    }
+    /* 其余深度驱动几何照常 */
+}
+```
+
+注意一点：grab-anytime 打断会替换 settle（`elapsedMillis` 重新计时）；墙钟曲线要么容忍重启，要么在 `settle == null` 时回退到深度轴公式。
+
 ## 程序化与预测性转场分离
 
 默认情况下一套转场同时伺服两种驱动——视觉是深度的纯函数，手势与程序化 settle 重放同一份几何。当设计需要**两套独立效果**时（平台本身对返回键 pop 与预测返回手势就是完全不同的两套动画），用 `navDirectionalTransition` 组合：
