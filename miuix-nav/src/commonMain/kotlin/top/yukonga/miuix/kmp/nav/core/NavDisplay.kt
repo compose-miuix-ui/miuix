@@ -50,7 +50,6 @@ import top.yukonga.miuix.kmp.nav.runtime.settleCancel
 import top.yukonga.miuix.kmp.nav.runtime.settleProgrammatic
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.trackSettle
-import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.state.NavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
@@ -62,6 +61,7 @@ import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.rememberNavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
+import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
