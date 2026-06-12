@@ -13,6 +13,7 @@ import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.roleFor
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavRole
+import top.yukonga.miuix.kmp.nav.transition.NavSettle
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionScope
 
 /**
@@ -42,6 +43,8 @@ internal class LiveNavTransitionScope(
         get() = roleFor(relativeDepth, isRemoving)
 
     override val gesture: NavGesture? get() = presentation.gesture
+
+    override val settle: NavSettle? get() = presentation.settle
 
     /** Coarse gesture flag for composition-time branch dispatch (see navDirectionalTransition). */
     internal val gestureActive: Boolean get() = presentation.gestureActive

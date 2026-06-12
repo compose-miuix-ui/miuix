@@ -42,6 +42,46 @@ class NavGesture(
     val initialTouchY: Float = touchY,
 )
 
+/** Which release path started the current settle. */
+enum class NavSettlePhase {
+    /** A gesture release committed the pop (predictive back or edge swipe). */
+    Commit,
+
+    /** A gesture release cancelled; the stack is springing back to rest. */
+    Cancel,
+
+    /** A from-rest programmatic push/pop (no gesture context). */
+    Programmatic,
+}
+
+/**
+ * Self-driven settle context, the counterpart of [NavGesture]: non-null exactly while the shared
+ * driver animates on its own (gesture released or programmatic change), null while a finger
+ * drives the float and at rest. Lets a transition run wall-clock curves (the reference fades its
+ * closing card and scrim on the post-commit clock, decoupled from the motion easing) and
+ * synthesize velocity overlays in closed form.
+ */
+@Stable
+interface NavSettle {
+    /** Which release path started this settle. */
+    val phase: NavSettlePhase
+
+    /**
+     * Velocity the settle was seeded with, in progress-units per second, positive toward pop;
+     * 0 when seeded from rest or when the platform provided no usable timing. Recorded even when
+     * the settle curve is a tween (which cannot consume it) — the reference feeds release
+     * velocity only into its bounce overlay, never into its main track.
+     */
+    val releaseVelocity: Float
+
+    /**
+     * Wall-clock milliseconds since this settle started; a per-frame deferred-read source (read
+     * inside `graphicsLayer { }` like [NavTransitionScope.relativeDepth]). Restarts when a new
+     * settle replaces an interrupted one.
+     */
+    val elapsedMillis: Float
+}
+
 /**
  * The read-only context a [NavTransition] receives in [NavTransition.transformEntry] and
  * [NavTransition.scrimFraction].
@@ -69,6 +109,13 @@ interface NavTransitionScope {
 
     /** Predictive-back gesture context, or `null` when the transition is not driven by a gesture. */
     val gesture: NavGesture?
+
+    /**
+     * Self-driven settle context, or `null` while a finger drives the float or the stack is at
+     * rest. Default `null` so existing implementations stay source-compatible (the property set
+     * is append-only).
+     */
+    val settle: NavSettle? get() = null
 
     /** The size of the navigation host layout, for translating depth into pixel offsets. */
     val layoutSize: IntSize

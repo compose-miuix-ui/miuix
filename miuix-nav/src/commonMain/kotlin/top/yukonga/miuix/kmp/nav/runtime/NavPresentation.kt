@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,9 +17,46 @@ import androidx.compose.runtime.setValue
 import top.yukonga.miuix.kmp.nav.core.NavEntry
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavRole
+import top.yukonga.miuix.kmp.nav.transition.NavSettle
+import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
+import kotlin.time.TimeSource
 
 /** Epsilon around zero within which an entry is treated as the steady-state top. */
 private const val TOP_EPSILON = 1e-3f
+
+/** Mutable [NavSettle] backing: per-settle constants plus a per-frame elapsed stamp. */
+internal class NavSettleState(
+    override val phase: NavSettlePhase,
+    override val releaseVelocity: Float,
+) : NavSettle {
+    override var elapsedMillis: Float by mutableFloatStateOf(0f)
+}
+
+/** Anything that can hold the published settle context ([NavPresentation]; a swipe-local holder). */
+internal interface NavSettleSink {
+    var settle: NavSettle?
+}
+
+/**
+ * Publishes a [NavSettleState] for the duration of [body], stamping wall-clock elapsed through
+ * the provided `onFrame` hook (call it from the settle's per-frame block so the stamp lands in
+ * the same frame as the value). The identity-guarded finally never clears a NEWER settle's
+ * context: an interrupted settle's coroutine may unwind after its replacement already published.
+ */
+internal suspend fun NavSettleSink.trackSettle(
+    phase: NavSettlePhase,
+    releaseVelocity: Float,
+    body: suspend (onFrame: () -> Unit) -> Unit,
+) {
+    val state = NavSettleState(phase = phase, releaseVelocity = releaseVelocity)
+    val start = TimeSource.Monotonic.markNow()
+    settle = state
+    try {
+        body { state.elapsedMillis = start.elapsedNow().inWholeMilliseconds.toFloat() }
+    } finally {
+        if (settle === state) settle = null
+    }
+}
 
 /**
  * Relative depth of an entry: `animatedTop - entryIndex` (design spec §4.1).
@@ -67,7 +105,7 @@ internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean = re
  * @param initialTopIndex the initial value of [animatedTop] (the top index of the initial back stack).
  */
 @Stable
-internal class NavPresentation(initialTopIndex: Float) {
+internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
     /**
      * The single driving float for the whole stack (spec §4.1 / §7.1 dual-mode driver).
      *
@@ -105,6 +143,13 @@ internal class NavPresentation(initialTopIndex: Float) {
      * derived flag instead: it flips only at gesture start and at gesture resolution.
      */
     val gestureActive: Boolean by derivedStateOf { gesture != null }
+
+    /**
+     * Published settle context (see [NavSettle]); written by [trackSettle] around every
+     * renderer/gesture-release settle, surfaced to transitions via the scope. Snapshot state:
+     * phase/velocity change per settle, elapsed per frame (deferred reads only).
+     */
+    override var settle: NavSettle? by mutableStateOf(null)
 
     /**
      * Release velocity (depth-units per second, negative toward pop) estimated from the
