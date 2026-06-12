@@ -64,17 +64,18 @@ private const val BOUNCE_MIN_KICK = 120f
 /**
  * Closed-form reference fling bounce: the underdamped spring response to the commit kick,
  * `-(kick/omegaD) * exp(-zeta*omega*t) * sin(omegaD*t)` on the scale-x100 axis, multiplied onto
- * both layers' scale and capped at 1 (shrink-then-recover, never enlarging). The kick converts
- * the release velocity to px/s (x layout width), scales by `100 * (1 - 0.9)`, doubles for edge
- * swipes, clamps to [0, 1000], and floors at 120 for near-instant commits so even a tap-back
- * bounces — the reference constants and decomposition (the main track never overshoots; only
- * this overlay consumes velocity).
+ * both layers' scale and capped at 1 (shrink-then-recover, never enlarging). The kick stays in
+ * the PROGRESS-velocity domain (the reference feeds its gesture-progress velocity straight into
+ * the spring): `|v| * 100 * (1 - 0.9)`, doubled for edge swipes, clamped to [0, 1000], floored
+ * at 120 for near-instant commits so even a tap-back bounces. A hard fling (~2-4 progress/s)
+ * lands a subtle ~1-3% dip and the floor ~3.7% — converting to px/s would slam every commit
+ * into the 1000 cap (a ~31% monster dip).
  */
-private fun bounceScale(settle: NavSettle?, gesture: NavGesture?, widthPx: Float): Float {
+private fun bounceScale(settle: NavSettle?, gesture: NavGesture?): Float {
     if (settle == null || settle.phase != NavSettlePhase.Commit || gesture == null) return 1f
     val factor = if (gesture.swipeEdge != NavSwipeEdge.None) 2f else 1f
     val floorKick = if (gesture.progress < 0.1f) BOUNCE_MIN_KICK else 0f
-    val kick = (abs(settle.releaseVelocity) * widthPx * 100f * (1f - CROSS_ACTIVITY_MIN_SCALE) * factor)
+    val kick = (abs(settle.releaseVelocity) * 100f * (1f - CROSS_ACTIVITY_MIN_SCALE) * factor)
         .coerceIn(floorKick, BOUNCE_MAX_KICK)
     if (kick <= 0f) return 1f
     val omega = sqrt(BOUNCE_STIFFNESS)
@@ -246,7 +247,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
     val committing = settle?.phase == NavSettlePhase.Commit
     val widthPx = scope.layoutSize.width.toFloat()
     val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
-    val bounce = bounceScale(settle, gesture, widthPx)
+    val bounce = bounceScale(settle, gesture)
     val hugMax = (
         widthPx * (1f - CROSS_ACTIVITY_MIN_SCALE) / 2f -
             with(scope.density) { CrossActivityEdgeMargin.toPx() }
