@@ -73,13 +73,15 @@ reconciler 把每次变化分类为 `Push` / `Pop` / `MultiPush(n)` / `MultiPop(
 
 | 预设 | 描述 |
 | :-- | :-- |
-| `Cupertino`（默认） | iOS 横滑 + 下层视差 + 调暗 |
-| `MiuixDefault` | 滑动 + 方角裁剪 + 调暗 |
+| `Cupertino`（默认） | iOS 横滑 + 下层视差 |
+| `MiuixDefault` | 全宽滑动 + 四分之一宽视差 + 被覆盖层轻微透明衰减 |
 | `Scale` | 缩放 |
 | `Fade` | 淡入淡出 |
 | `SharedAxisX` | Material 共享 X 轴 |
 | `Modal` | 上滑、下层保留可见 |
 | `None` | 瞬时无动画 |
+
+前缘平滑圆角裁剪与全屏调暗 scrim 不烘焙在任何预设内——它们由正交的 `NavDisplayEffects` 层提供（`enableCornerClip`、`dimAmount`，默认均开启）；转场本身只通过 `scrimFraction` 塑造调暗随运动的曲线。
 
 在 `NavDisplay(transition = ...)` 上设全局默认，并用 `entry(transition = ...)` 按路由覆盖：
 
@@ -271,6 +273,13 @@ NavDisplay(
 ::: warning
 对 `rememberNavBackStack` 的栈而言，`@Serializable` 是**硬性要求**而非软提示。失败点有两处：key **类型**未标 `@Serializable` 时，`rememberNavBackStack` 首次组合即抛 `SerializationException`（序列化器在此捕获）；key **实例**逃出捕获的层级——或层级内存在非序列化子类型——则整个会话导航正常，到状态保存时才抛出（Android 上即应用退后台时）。若无法让 key 可序列化，请改用纯内存栈（`navBackStackOf`），不要使用 `rememberNavBackStack`。
 :::
+
+### 条目状态与 `contentKey`
+
+每个条目的 `rememberSaveable` 状态以其 **contentKey** 为作用域——默认就是路由值本身，除非通过 `entry<T>(contentKey = { route -> ... })` 派生。在全栈唯一性检查之外还有两条要求：
+
+- **不同的 key 必须打印出不同的字符串。** 可保存状态槽位以 contentKey 的 `toString()` 为键。两个*不相等*却打印出同一字符串的 key——不同包下同名的 `data class` 路由（`data class` 的 `toString()` 不含包名），或 contentKey 工厂分别返回的 `Int 1` 与 `String "1"`——会在 reconcile 时被一条可操作的 `IllegalArgumentException` 拒绝，而不是静默共享并互相破坏对方的已存状态。
+- **字符串必须由值派生。** `data class` / `data object` 路由天然满足。保留默认恒等 `toString()`（`com.app.Detail@1a2b3c`）的路由类能通过所有运行时检查——字符串在会话内是唯一的——但进程死亡后会解析出全新的字符串，该条目的 `rememberSaveable` 状态会被静默重置。请坚持使用 `data class` / `data object` 路由，或让工厂返回由值派生的 key。
 
 ## 向上一屏回传结果
 

@@ -73,13 +73,15 @@ A built-in preset library is available as `NavTransitions`:
 
 | Preset | Description |
 | :-- | :-- |
-| `Cupertino` (default) | iOS horizontal slide + lower-layer parallax + dim |
-| `MiuixDefault` | Slide + corner clip + dim |
+| `Cupertino` (default) | iOS horizontal slide + lower-layer parallax |
+| `MiuixDefault` | Full-width slide + quarter-width parallax + light covered alpha falloff |
 | `Scale` | Scale |
 | `Fade` | Fade |
 | `SharedAxisX` | Material shared X axis |
 | `Modal` | Bottom-up slide; lower layer stays visible |
 | `None` | Instant, no animation |
+
+The leading-edge corner clip and the dark dim scrim are not baked into any preset — they come from the orthogonal `NavDisplayEffects` layer (`enableCornerClip`, `dimAmount`; both on by default), while each transition only shapes the scrim's curve along the motion via `scrimFraction`.
 
 Set a global default on `NavDisplay(transition = ...)` and override per route with `entry(transition = ...)`:
 
@@ -271,6 +273,13 @@ The **input source** and its **semantics differ per platform** — the runtime n
 ::: warning
 `@Serializable` is a **hard requirement** for every key in a `rememberNavBackStack` stack, not a soft hint. There are two distinct failure points: a key **type** that is not `@Serializable` throws `SerializationException` at the first composition of `rememberNavBackStack` (the serializer is captured there); a key **instance** outside the captured hierarchy — or a non-serializable subtype inside it — navigates fine all session and then throws at state-save time (on Android: when the app is backgrounded). If you cannot make keys serializable, build the stack with a plain in-memory list (`navBackStackOf`) instead of `rememberNavBackStack`.
 :::
+
+### Entry state and `contentKey`
+
+Each entry's `rememberSaveable` state is scoped by its **contentKey** — the route value itself, unless you derive one via `entry<T>(contentKey = { route -> ... })`. Two requirements apply on top of the stack-wide uniqueness check:
+
+- **Distinct keys must print distinct strings.** The saveable slot is keyed by the contentKey's `toString()`. Two *unequal* keys that print the same string — same-named `data class` routes in different packages (`data class` `toString()` omits the package), or an `Int 1` vs a `String "1"` returned from contentKey factories — are rejected at reconcile time with an actionable `IllegalArgumentException` instead of silently sharing and corrupting each other's saved state.
+- **The string must be value-derived.** `data class` / `data object` routes qualify out of the box. A route class that keeps the default identity `toString()` (`com.app.Detail@1a2b3c`) passes every runtime check — the string is unique within the session — but resolves to a new string after process death, so the entry's `rememberSaveable` state silently resets. Stick to `data class` / `data object` routes, or return a value-derived key from the factory.
 
 ## Returning a result to a previous screen
 

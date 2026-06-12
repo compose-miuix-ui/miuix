@@ -37,7 +37,7 @@ internal class NavSaveableStateHolder(
         contentKey: Any,
         content: @Composable () -> Unit,
     ) {
-        holder.SaveableStateProvider(saveableKey(contentKey), content)
+        holder.SaveableStateProvider(navSaveableKey(contentKey), content)
     }
 
     /**
@@ -48,7 +48,7 @@ internal class NavSaveableStateHolder(
      * @param contentKey the value-stable identity of the entry whose state should be dropped.
      */
     fun removeState(contentKey: Any) {
-        holder.removeState(saveableKey(contentKey))
+        holder.removeState(navSaveableKey(contentKey))
     }
 }
 
@@ -57,11 +57,22 @@ internal class NavSaveableStateHolder(
  *
  * `SaveableStateProvider` requires its key to be a type the platform can persist (on Android, only
  * Bundle-storable types — a raw `@Serializable` route object such as `Route.Home` is NOT one and
- * throws `IllegalArgumentException`). The `contentKey` is value-stable, so its [toString] is a stable,
- * unique String for `@Serializable` data classes / data objects and survives configuration changes
- * and process death. Used for both saving and removing so the slot identity is consistent.
+ * throws `IllegalArgumentException`). Keying by [toString] therefore demands two things of every
+ * contentKey beyond the equality-uniqueness the back stack already enforces:
+ * - **string-unique**: distinct-by-equals keys must not print one string. Kotlin data class
+ *   [toString] omits the package, so same-named route classes in different packages DO collide;
+ *   the reconcile-time guard in `NavDisplay` rejects any such collision (across the stack and
+ *   entries still animating out) before the slots can fold together.
+ * - **value-stable**: the string must survive configuration changes and process death. data
+ *   classes / data objects derive [toString] from value fields and qualify; a class keeping the
+ *   default identity `toString` (`pkg.Cls@1a2b3c`) is unique in-session — no runtime check can
+ *   flag it — but resolves to a NEW string after process restore, silently resetting the entry's
+ *   `rememberSaveable` state. Documented in the entry DSL and the guide.
+ *
+ * Used for both saving and removing so the slot identity is consistent, and shared with the
+ * reconcile-time guard so the validation and the actual slot key can never drift apart.
  */
-private fun saveableKey(contentKey: Any): String = contentKey.toString()
+internal fun navSaveableKey(contentKey: Any): String = contentKey.toString()
 
 /**
  * Remembers a [NavSaveableStateHolder] backed by a single [rememberSaveableStateHolder].

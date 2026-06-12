@@ -55,6 +55,7 @@ import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryViewModelStore
 import top.yukonga.miuix.kmp.nav.state.navMaxLifecycleFor
+import top.yukonga.miuix.kmp.nav.state.navSaveableKey
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryLifecycleOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStoreOwner
 import top.yukonga.miuix.kmp.nav.state.rememberNavEntryViewModelStores
@@ -105,6 +106,13 @@ class NavEntryBuilder {
      *   pushing two entries that resolve to equal content keys (e.g. the same route value twice)
      *   is rejected with an [IllegalArgumentException] at reconcile time. The contentKey is also
      *   the saveable-state identity, so it must be stable across recompositions and process death.
+     *   Saveable state is namespaced by the contentKey's `toString()`, which adds two requirements:
+     *   distinct keys must not print one string (data class `toString()` omits the package, so
+     *   same-named route classes in different packages collide — also rejected at reconcile time),
+     *   and the string must be value-derived. A key keeping the default identity `toString()`
+     *   (`pkg.Cls@1a2b3c`) passes every runtime check but resolves to a new string after process
+     *   death, silently resetting the entry's `rememberSaveable` state — use data classes / data
+     *   objects, or return a value-derived key here.
      * @param transition per-route transition override; `null` inherits [NavDisplay]'s global
      *   transition (see design §6.4). Stored in the entry's metadata.
      * @param swipeDismiss per-route interactive swipe-to-dismiss direction; `null` inherits the
@@ -277,12 +285,46 @@ private fun NavDisplayLayout(
         // index map, saveable state, ViewModel store). A duplicate would fold two stack positions
         // into one instance and wedge the presentation (index teleport -> transient d <= -1 ->
         // lifecycle DESTROYED), so reject it here with an actionable message instead.
+        // Saveable state is the one subsystem keyed by contentKey.toString() rather than by the
+        // key object (SaveableStateProvider needs a Bundle-storable key), so distinct-by-equals
+        // keys with an equal toString() would still collapse into one rememberSaveable slot:
+        // co-composed colliders crash in the saveable holder, separated ones silently corrupt
+        // each other's state. Validate both identity domains in the same pass.
         val seenContentKeys = HashSet<Any>(newContentKeys.size)
+        val keyBySaveableKey = HashMap<String, Any>(newContentKeys.size)
         for (contentKey in newContentKeys) {
             require(seenContentKeys.add(contentKey)) {
                 "Duplicate contentKey on the back stack: $contentKey. Every entry needs a unique " +
                     "contentKey — derive a per-instance key via entry(contentKey = { route -> ... }) " +
                     "or keep the route values distinct."
+            }
+            val saveableKey = navSaveableKey(contentKey)
+            val owner = keyBySaveableKey.put(saveableKey, contentKey)
+            require(owner == null) {
+                "Distinct contentKeys collapse to the same saveable-state key \"$saveableKey\": " +
+                    "$owner (${owner!!::class.simpleName}) and $contentKey " +
+                    "(${contentKey::class.simpleName}) are not equal, yet rememberSaveable state " +
+                    "is namespaced by contentKey.toString(), so these entries would corrupt each " +
+                    "other's saved state. Derive distinguishing keys via " +
+                    "entry(contentKey = { route -> ... })."
+            }
+        }
+        // Entries already off the back stack but still presented (animating out) keep their
+        // saveable slot until they unload, so an incoming key must not collide with them either.
+        // Keys equal to a current one are the revival path (pop + same-frame re-push) and fold
+        // back into the same entry, so only unequal leaving keys are checked.
+        presentation.presented.fastForEach { leaving ->
+            val leavingKey = leaving.contentKey
+            if (leavingKey !in seenContentKeys) {
+                val saveableKey = navSaveableKey(leavingKey)
+                val incoming = keyBySaveableKey[saveableKey]
+                require(incoming == null) {
+                    "contentKey $incoming (${incoming!!::class.simpleName}) collapses to the same " +
+                        "saveable-state key \"$saveableKey\" as $leavingKey " +
+                        "(${leavingKey::class.simpleName}), which left the back stack but is " +
+                        "still animating out and holds a live rememberSaveable slot. Derive " +
+                        "distinguishing keys via entry(contentKey = { route -> ... })."
+                }
             }
         }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
