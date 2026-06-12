@@ -35,6 +35,14 @@ internal class NavSettleState(
 /** Anything that can hold the published settle context ([NavPresentation]; a swipe-local holder). */
 internal interface NavSettleSink {
     var settle: NavSettle?
+
+    /**
+     * Hand-off slot for a gesture-release velocity (depth-units/sec): the renderer's next
+     * retarget consumes it exactly once and owns the commit settle. The swipe recognizer routes
+     * its commit through here instead of racing the renderer's UNDISPATCHED retarget effect with
+     * its own launched settle (which the post-pop disable would cancel anyway).
+     */
+    var pendingSettleVelocity: Float
 }
 
 /**
@@ -155,10 +163,11 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
      * Release velocity (depth-units per second, negative toward pop) estimated from the
      * predictive-back event stream, handed to the renderer's next settle so a flung system back
      * commits with momentum (the reference feeds the gesture velocity into its post-commit
-     * spring). Plain (non-snapshot) bookkeeping: written by the gesture layer, consumed exactly
-     * once by the settle launch, cleared on cancel.
+     * spring). Plain (non-snapshot) bookkeeping: written by the gesture layers (predictive back
+     * and the edge swipe's commit hand-off), consumed exactly once by the settle launch, cleared
+     * on cancel.
      */
-    var pendingSettleVelocity: Float = 0f
+    override var pendingSettleVelocity: Float = 0f
 
     /**
      * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation

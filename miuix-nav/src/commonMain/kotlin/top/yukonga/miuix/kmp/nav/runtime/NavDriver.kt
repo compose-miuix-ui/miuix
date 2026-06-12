@@ -220,11 +220,13 @@ internal suspend fun Animatable<Float, AnimationVector1D>.settleTo(
     target: Float,
     spec: NavSettleSpec = NavMotion.Default.commit,
     initialVelocity: Float = velocity,
+    onFrame: (() -> Unit)? = null,
 ) {
     animateTo(
         targetValue = target,
         animationSpec = spec.toAnimationSpec(),
         initialVelocity = initialVelocity,
+        block = if (onFrame != null) ({ onFrame() }) else null,
     )
 }
 
@@ -238,10 +240,11 @@ internal suspend fun Animatable<Float, AnimationVector1D>.settleCancel(
     target: Float,
     spec: NavSettleSpec,
     initialVelocity: Float = velocity,
+    onFrame: (() -> Unit)? = null,
 ) {
     updateBounds(lowerBound = null, upperBound = target)
     try {
-        settleTo(target = target, spec = spec, initialVelocity = initialVelocity)
+        settleTo(target = target, spec = spec, initialVelocity = initialVelocity, onFrame = onFrame)
     } finally {
         updateBounds(lowerBound = null, upperBound = null)
     }
@@ -279,11 +282,16 @@ internal fun usesProgrammaticCurve(velocity: Float, distance: Float): Boolean = 
 internal suspend fun Animatable<Float, AnimationVector1D>.settleProgrammatic(
     target: Float,
     motion: NavMotion = NavMotion.Default,
+    onFrame: (() -> Unit)? = null,
 ) {
     if (usesProgrammaticCurve(velocity = velocity, distance = target - value)) {
-        animateTo(targetValue = target, animationSpec = motion.programmatic.toAnimationSpec())
+        animateTo(
+            targetValue = target,
+            animationSpec = motion.programmatic.toAnimationSpec(),
+            block = if (onFrame != null) ({ onFrame() }) else null,
+        )
     } else {
         val spring = motion.commit as? NavSettleSpec.Spring ?: NavSettleSpec.Spring()
-        settleTo(target, spring)
+        settleTo(target, spring, onFrame = onFrame)
     }
 }

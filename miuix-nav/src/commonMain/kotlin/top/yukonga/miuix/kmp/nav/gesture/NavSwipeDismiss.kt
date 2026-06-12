@@ -16,14 +16,17 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.nav.runtime.NavSettleSink
 import top.yukonga.miuix.kmp.nav.runtime.anchoredProgress
 import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.settleCancel
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
 import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
+import top.yukonga.miuix.kmp.nav.runtime.trackSettle
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
+import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import kotlin.math.abs
@@ -92,7 +95,6 @@ import kotlin.math.abs
 // composed { } is required here: the swipe needs composition-scoped state (coroutine scope,
 // up-to-date callbacks). A Modifier.Node rewrite is a deferred optimization, so suppress the
 // no-composed lint locally rather than disabling the performance rule project-wide.
-@Suppress("ktlint:compose:modifier-composed-check")
 fun Modifier.navSwipeDismiss(
     enabled: Boolean,
     direction: NavSwipeDirection,
@@ -102,6 +104,35 @@ fun Modifier.navSwipeDismiss(
     onCommit: () -> Unit,
     onCancel: () -> Unit,
     onGesture: (NavGesture?) -> Unit = {},
+): Modifier = navSwipeDismissImpl(
+    enabled = enabled,
+    direction = direction,
+    animatedTop = animatedTop,
+    topIndex = topIndex,
+    motion = motion,
+    settleSink = null,
+    onCommit = onCommit,
+    onCancel = onCancel,
+    onGesture = onGesture,
+)
+
+/**
+ * Implementation body shared by the public [navSwipeDismiss] and NavDisplay's internal wiring:
+ * [settleSink], when present, publishes the release settle as a
+ * [top.yukonga.miuix.kmp.nav.transition.NavSettle] context (the bare public modifier drives and
+ * settles but publishes no context).
+ */
+@Suppress("ktlint:compose:modifier-composed-check")
+internal fun Modifier.navSwipeDismissImpl(
+    enabled: Boolean,
+    direction: NavSwipeDirection,
+    animatedTop: Animatable<Float, AnimationVector1D>,
+    topIndex: Int,
+    motion: NavMotion,
+    settleSink: NavSettleSink?,
+    onCommit: () -> Unit,
+    onCancel: () -> Unit,
+    onGesture: (NavGesture?) -> Unit,
 ): Modifier = composed {
     if (!enabled || direction == NavSwipeDirection.None) return@composed this
 
@@ -243,21 +274,31 @@ fun Modifier.navSwipeDismiss(
                 // would stay unchanged while the renderer's shared spring pulls `animatedTop` back to the
                 // un-popped top, so the page "springs back" and feels stuck. Popping first lets the renderer
                 // own the final convergence; the settle below only seeds the spring with the release velocity.
-                currentOnCommit.value()
-                scope.launch {
-                    // Seed the governing commit curve with the release velocity. The no-overshoot
-                    // floor applies only while the commit spec keeps overshoot clamped (the
-                    // default): even a critically damped spring crosses its target once when the
-                    // seeded fling speed exceeds ω·distance. The floor is computed from the value
-                    // the settle actually starts at — all pending finger snaps are FIFO-ordered
-                    // before this launch; slower releases keep full snap -> spring continuity.
-                    val motionNow = currentMotion.value
-                    val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - (topIndex - 1f))
-                    animatedTop.settleTo(
-                        target = (topIndex - 1).toFloat(),
-                        spec = motionNow.commit,
-                        initialVelocity = depthVelocity.coerceAtLeast(floor),
-                    )
+                if (settleSink != null) {
+                    // Unified ownership: hand the release velocity to the renderer the same way
+                    // the predictive-back path does and let its retarget own (and publish) the
+                    // commit settle. Launching our own settle here would lose the race against
+                    // the renderer's UNDISPATCHED retarget effect, and the post-pop disable
+                    // (topIndex drops to 0) cancels this scope before a queued launch even runs.
+                    settleSink.pendingSettleVelocity = depthVelocity
+                    currentOnCommit.value()
+                } else {
+                    currentOnCommit.value()
+                    scope.launch {
+                        // Seed the governing commit curve with the release velocity. The
+                        // no-overshoot floor applies only while the commit spec keeps overshoot
+                        // clamped (the default): even a critically damped spring crosses its
+                        // target once when the seeded fling speed exceeds ω·distance. The floor
+                        // is computed from the value the settle actually starts at — all pending
+                        // finger snaps are FIFO-ordered before this launch.
+                        val motionNow = currentMotion.value
+                        val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - (topIndex - 1f))
+                        animatedTop.settleTo(
+                            target = (topIndex - 1).toFloat(),
+                            spec = motionNow.commit,
+                            initialVelocity = depthVelocity.coerceAtLeast(floor),
+                        )
+                    }
                 }
             } else {
                 // Cancel keeps the entry in place (never marked removing), so its scope survives the settle
@@ -275,11 +316,21 @@ fun Modifier.navSwipeDismiss(
                 // kept, preserving the snap -> spring velocity continuity; it points away from the cancel
                 // target, so it can never cross it (no bounce, no overshoot floor needed on this branch).
                 scope.launch {
-                    animatedTop.settleCancel(
-                        target = topIndex.toFloat(),
-                        spec = currentMotion.value.cancel,
-                        initialVelocity = depthVelocity.coerceAtMost(0f),
-                    )
+                    val settleBody: suspend (onFrame: (() -> Unit)?) -> Unit = { onFrame ->
+                        animatedTop.settleCancel(
+                            target = topIndex.toFloat(),
+                            spec = currentMotion.value.cancel,
+                            initialVelocity = depthVelocity.coerceAtMost(0f),
+                            onFrame = onFrame,
+                        )
+                    }
+                    if (settleSink != null) {
+                        settleSink.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = progressVelocity) { onFrame ->
+                            settleBody(onFrame)
+                        }
+                    } else {
+                        settleBody(null)
+                    }
                     // The gesture context stays frozen through the settle (no pivot snap at lift)
                     // and is released only now, with the entry back at rest.
                     currentOnGesture.value(null)

@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
-import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismiss
+import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismissImpl
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
@@ -49,6 +49,8 @@ import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.settleCancel
 import top.yukonga.miuix.kmp.nav.runtime.settleProgrammatic
 import top.yukonga.miuix.kmp.nav.runtime.settleTo
+import top.yukonga.miuix.kmp.nav.runtime.trackSettle
+import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.state.NavEntryViewModelStores
 import top.yukonga.miuix.kmp.nav.state.NavSaveableStateHolder
 import top.yukonga.miuix.kmp.nav.state.ProvideNavEntryLifecycle
@@ -185,15 +187,25 @@ private fun NavPresentation.animateTopTo(target: Float, motion: NavMotion) {
         // defer to it instead of stomping the seeded spring with a fresh-from-rest curve.
         if (animatedTop.isRunning && animatedTop.targetValue == target) return@LaunchedEffect
         val motionNow = currentMotion.value
-        if (released < 0f && target < animatedTop.value) {
-            // A flung predictive-back commit: seed the governing transition's commit curve with
-            // the release velocity so the settle carries the momentum (the reference feeds it
-            // into its post-commit phase). The no-overshoot floor applies only while the commit
-            // spec keeps overshoot clamped.
-            val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - target)
-            animatedTop.settleTo(target, spec = motionNow.commit, initialVelocity = released.coerceAtLeast(floor))
+        if (gesture != null && target < animatedTop.value) {
+            // A gesture-driven back resolved into this retarget (the commit context stays frozen
+            // through the settle). Phase comes from the context, not the velocity: platforms
+            // without usable frame timing deliver released == 0 yet this is still a commit, and
+            // the governing commit curve (possibly a fixed-duration tween) must drive it. The
+            // no-overshoot floor applies only while the commit spec keeps overshoot clamped.
+            trackSettle(phase = NavSettlePhase.Commit, releaseVelocity = -released) { onFrame ->
+                val floor = motionNow.commit.commitVelocityFloor(animatedTop.value - target)
+                animatedTop.settleTo(
+                    target = target,
+                    spec = motionNow.commit,
+                    initialVelocity = released.coerceAtLeast(floor),
+                    onFrame = onFrame,
+                )
+            }
         } else {
-            animatedTop.settleProgrammatic(target, motionNow)
+            trackSettle(phase = NavSettlePhase.Programmatic, releaseVelocity = 0f) { onFrame ->
+                animatedTop.settleProgrammatic(target, motionNow, onFrame = onFrame)
+            }
         }
     }
 }
@@ -346,7 +358,9 @@ private fun NavDisplayLayout(
         onCancel = {
             presentation.pendingSettleVelocity = 0f
             backScope.launch {
-                presentation.animatedTop.settleCancel(target = topIndex.toFloat(), spec = topMotion.cancel)
+                presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
+                    presentation.animatedTop.settleCancel(target = topIndex.toFloat(), spec = topMotion.cancel, onFrame = onFrame)
+                }
                 presentation.gesture = null
             }
         },
@@ -421,13 +435,14 @@ private fun NavDisplayLayout(
         // was full-screen anyway).
         modifier = modifier
             .onSizeChanged { layoutSize = it }
-            .navSwipeDismiss(
+            .navSwipeDismissImpl(
                 // Never on the root (nothing to pop); NavSwipeDirection.None keeps it disabled.
                 enabled = topIndex > 0,
                 direction = topDismissDirection,
                 animatedTop = presentation.animatedTop,
                 topIndex = topIndex,
                 motion = topMotion,
+                settleSink = presentation,
                 onCommit = currentOnBack.value,
                 onCancel = {},
                 onGesture = { presentation.gesture = it },

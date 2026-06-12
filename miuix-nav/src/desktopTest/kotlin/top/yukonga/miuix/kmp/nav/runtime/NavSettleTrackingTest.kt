@@ -15,6 +15,7 @@ import kotlin.test.assertTrue
 
 private class TestSink : NavSettleSink {
     override var settle: NavSettle? = null
+    override var pendingSettleVelocity: Float = 0f
 }
 
 class NavSettleTrackingTest {
