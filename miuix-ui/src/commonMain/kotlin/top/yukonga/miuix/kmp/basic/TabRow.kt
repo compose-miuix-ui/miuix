@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
-import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -112,18 +112,8 @@ fun TabRow(
         val density = LocalDensity.current
         val tabWidthPx = with(density) { config.tabWidth.toPx() }
         val spacingPx = with(density) { itemSpacing.toPx() }
-        val indicatorOffset = remember { Animatable(0f) }
         val availableWidth = this.maxWidth
         var lastSettledSelectedTabIndex by remember(config.listState) { mutableIntStateOf(-1) }
-
-        LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
-            val target = selectedTabIndex * (tabWidthPx + spacingPx)
-            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
-                indicatorOffset.snapTo(target)
-            } else {
-                indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
-            }
-        }
 
         LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - config.tabWidth) / 2
@@ -148,7 +138,7 @@ fun TabRow(
         Box(Modifier.fillMaxSize()) {
             Box(
                 Modifier
-                    .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
+                    .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).roundToInt(), 0) }
                     .width(config.tabWidth)
                     .fillMaxHeight()
                     .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
@@ -277,7 +267,7 @@ fun TabRowWithContour(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .squircleSurface(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
+                .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
                 .padding(contourPadding),
         ) {
             Box(
@@ -330,11 +320,18 @@ private fun TabItem(
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = null,
 ) {
+    val outlineColor = MiuixTheme.colorScheme.outline
     Box(
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
-            .squircleClip(cornerRadius)
+            .squircleBorder(
+                width = { if (isSelected) 0.dp else 1.dp },
+                color = { outlineColor },
+                cornerRadius = cornerRadius,
+            )
+            // Clip only when an indication is supplied, to skip squircleClip's offscreen layer by default.
+            .then(if (indication != null) Modifier.squircleClip(cornerRadius) else Modifier)
             .selectable(
                 selected = isSelected,
                 onClick = onClick,
@@ -381,7 +378,8 @@ private fun TabItemWithContour(
         modifier = Modifier
             .fillMaxHeight()
             .width(width)
-            .squircleClip(cornerRadius)
+            // Clip only when an indication is supplied, to skip squircleClip's offscreen layer by default.
+            .then(if (indication != null) Modifier.squircleClip(cornerRadius) else Modifier)
             .selectable(
                 selected = isSelected,
                 onClick = onClick,
