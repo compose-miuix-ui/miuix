@@ -259,7 +259,7 @@ object NavigationRailDefaults {
 /**
  * Defines the display mode for items in a [NavigationRail].
  *
- * This controls whether to show both icon and text, icon only, text only,
+ * This controls whether to show both icon and text, icon only,
  * or icon with text only when selected.
  */
 enum class NavigationRailDisplayMode {

@@ -517,7 +517,7 @@ object FloatingNavigationBarDefaults {
 /**
  * Defines the display mode for items in a NavigationBar.
  *
- * This controls whether to show both icon and text, icon only, or text only.
+ * This controls whether to show both icon and text, icon only, or icon with text only when selected.
  */
 enum class NavigationBarDisplayMode {
     /** Show both icon and text. */
