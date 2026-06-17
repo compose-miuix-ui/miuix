@@ -49,17 +49,17 @@ import component.switchSection
 import component.tabRowSection
 import component.textFieldSection
 import component.tooltipSection
-import lazyfont.LazyInputField
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
@@ -308,7 +308,7 @@ fun MainPage(
                     SearchBar(
                         modifier = Modifier.padding(bottom = 12.dp),
                         inputField = {
-                            LazyInputField(
+                            InputField(
                                 query = searchValue,
                                 onQueryChange = { searchValue = it },
                                 onSearch = { expanded = false },
@@ -318,7 +318,7 @@ fun MainPage(
                             )
                         },
                         outsideEndAction = {
-                            LazyText(
+                            Text(
                                 modifier = Modifier
                                     .padding(end = 12.dp)
                                     .clickable(

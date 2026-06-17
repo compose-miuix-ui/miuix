@@ -19,13 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import lazyfont.LazyText
-import lazyfont.LazyTextField
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.ColorPalette
 import top.yukonga.miuix.kmp.basic.ColorPicker
 import top.yukonga.miuix.kmp.basic.ColorSpace
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.round
 
@@ -71,7 +71,7 @@ fun LazyListScope.colorPickerSection() {
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LazyText(
+                Text(
                     text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                         "${(selectedColor.green * 255).toInt()}, " +
                         "${(selectedColor.blue * 255).toInt()}, " +
@@ -113,7 +113,7 @@ private fun ColorPickerCard(colorSpace: ColorSpace) {
             modifier = Modifier.padding(bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LazyText(
+            Text(
                 text = "RGBA: ${(selectedColor.red * 255).toInt()}, " +
                     "${(selectedColor.green * 255).toInt()}, " +
                     "${(selectedColor.blue * 255).toInt()}, " +
@@ -139,7 +139,7 @@ private fun ColorHexTextField(
     colorHex: String,
     onUpdate: (String, Color?) -> Unit,
 ) {
-    LazyTextField(
+    TextField(
         value = colorHex,
         onValueChange = { newHex ->
             if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
@@ -153,7 +153,7 @@ private fun ColorHexTextField(
             }
         },
         leadingIcon = {
-            LazyText(
+            Text(
                 "HEX: #",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 16.dp),

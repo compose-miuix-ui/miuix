@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package lazyfont
+package webfont
 
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -89,7 +89,7 @@ internal suspend fun fetchTextOrNull(url: String): String? = suspendCancellableC
         { ok -> if (cont.isActive) cont.resume(ok) },
         { err ->
             if (cont.isActive) {
-                consoleWarn("[lazyfont] fetchText failed: $url -> $err")
+                consoleWarn("[webfont] fetchText failed: $url -> $err")
                 cont.resume(null)
             }
         },
@@ -107,7 +107,7 @@ internal suspend fun fetchBytesOrNull(url: String): ByteArray? = suspendCancella
         },
         { err ->
             if (cont.isActive) {
-                consoleWarn("[lazyfont] fetchBytes failed: $url -> $err")
+                consoleWarn("[webfont] fetchBytes failed: $url -> $err")
                 cont.resume(null)
             }
         },

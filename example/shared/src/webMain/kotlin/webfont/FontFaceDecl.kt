@@ -1,16 +1,15 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package lazyfont
+package webfont
 
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 
+/** One `@font-face` subset reduced to what the preloader needs: where to fetch it and how to tag it. */
 internal data class FontFaceDecl(
-    val family: String,
     val weight: FontWeight,
     val style: FontStyle,
-    val ranges: List<IntRange>,
     val url: String,
 )
 
@@ -19,12 +18,10 @@ internal fun parseCssFontFaces(css: String, baseUrl: String? = null): List<FontF
     val blockRegex = Regex("""@font-face\s*\{([^}]*)\}""", RegexOption.IGNORE_CASE)
     for (match in blockRegex.findAll(css)) {
         val body = match.groupValues[1]
-        val family = pickKey(body, "font-family")?.trim()?.trim('"', '\'') ?: continue
         val weight = parseWeight(pickKey(body, "font-weight"))
         val style = parseStyle(pickKey(body, "font-style"))
-        val ranges = parseUnicodeRange(pickKey(body, "unicode-range"))
         val url = pickFontUrl(pickKey(body, "src"), baseUrl) ?: continue
-        out += FontFaceDecl(family, weight, style, ranges, url)
+        out += FontFaceDecl(weight, style, url)
     }
     return out
 }
@@ -51,36 +48,6 @@ private fun parseWeight(raw: String?): FontWeight {
 }
 
 private fun parseStyle(raw: String?): FontStyle = if (raw?.trim()?.lowercase() == "italic") FontStyle.Italic else FontStyle.Normal
-
-private fun parseUnicodeRange(raw: String?): List<IntRange> {
-    if (raw.isNullOrBlank()) return listOf(0..0xFFFF)
-    val out = mutableListOf<IntRange>()
-    for (part in raw.split(',')) {
-        val seg = part.trim()
-        if (!seg.startsWith("U+", ignoreCase = true)) continue
-        val body = seg.removePrefix("U+").removePrefix("u+")
-        when {
-            body.contains('-') -> {
-                val pieces = body.split('-', limit = 2)
-                val l = pieces[0].toIntOrNull(16) ?: continue
-                val h = pieces[1].toIntOrNull(16) ?: continue
-                if (l <= h) out += l..h
-            }
-
-            body.contains('?') -> {
-                val lo = body.replace('?', '0').toIntOrNull(16) ?: continue
-                val hi = body.replace('?', 'F').toIntOrNull(16) ?: continue
-                if (lo <= hi) out += lo..hi
-            }
-
-            else -> {
-                val v = body.toIntOrNull(16) ?: continue
-                out += v..v
-            }
-        }
-    }
-    return if (out.isEmpty()) listOf(0..0xFFFF) else out
-}
 
 private fun pickFontUrl(srcRaw: String?, baseUrl: String?): String? {
     if (srcRaw == null) return null

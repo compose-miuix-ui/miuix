@@ -58,9 +58,9 @@ import androidx.compose.ui.zIndex
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import lazyfont.LazyInputField
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.InputField
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
@@ -156,7 +156,7 @@ fun SearchStatus.SearchPager(
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
             ) {
-                LazyText(
+                Text(
                     text = "Cancel",
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.primary,
@@ -225,7 +225,7 @@ fun SearchBar(
         { onSearchStatusChangeUpdated.value(searchStatusUpdated.value.copy(searchText = "")) }
     }
 
-    LazyInputField(
+    InputField(
         query = searchStatus.searchText,
         onQueryChange = { onSearchStatusChange(searchStatus.copy(searchText = it)) },
         label = searchStatus.label,
@@ -288,7 +288,7 @@ fun SearchBarFake(
     label: String,
     searchBarTopPadding: Dp = 12.dp,
 ) {
-    LazyInputField(
+    InputField(
         query = "",
         onQueryChange = { },
         label = label,

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="example [desktop]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="example [desktop, hot] 🔥" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/example/desktop" />
@@ -11,15 +11,25 @@
       <option name="taskNames">
         <list>
           <option value="hotRunDesktop" />
-          <option value="--auto" />
+          <option value="--mainClass" />
+          <option value="&quot;Main_desktopKt&quot;" />
         </list>
       </option>
       <option name="vmOptions" />
     </ExternalSystemSettings>
-    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+    <EXTENSION ID="org.jetbrains.compose.desktop.ide.hotreload.ComposeHotReloadRunConfigurationExtension">
+      <ComposeHotReload>
+        <isHotReloadWarmupEnabled>true</isHotReloadWarmupEnabled>
+        <useIntelliJJBR>true</useIntelliJJBR>
+      </ComposeHotReload>
+    </EXTENSION>
     <DebugAllEnabled>false</DebugAllEnabled>
     <RunAsTest>false</RunAsTest>
+    <GradleProfilingDisabled>false</GradleProfilingDisabled>
+    <GradleCoverageDisabled>false</GradleCoverageDisabled>
     <method v="2" />
   </configuration>
 </component>

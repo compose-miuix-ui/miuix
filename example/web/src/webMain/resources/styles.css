@@ -1,20 +1,4 @@
-/*
- * Copyright 2024 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
- /* For KernelSU WebUI */
+/* For KernelSU WebUI */
 @import url('https://mui.kernelsu.org/internal/insets.css');
 
 :root {
@@ -36,7 +20,8 @@
     }
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -87,7 +72,14 @@ html, body {
     letter-spacing: 0.3px;
 }
 
-#loading-bar {
+.loading-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.loading-bar {
     width: 180px;
     height: 4px;
     border-radius: 2px;
@@ -95,32 +87,29 @@ html, body {
     overflow: hidden;
 }
 
-#loading-bar-fill {
+.loading-bar-fill {
     height: 100%;
     width: 0;
     border-radius: 2px;
     background-color: var(--loading-accent);
 }
 
-#loading-status {
+.loading-status {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 180px;
     gap: 6px;
     font-size: 13px;
     color: var(--loading-sub);
     min-height: 18px;
 }
 
-#loading-label::after {
-    content: '.';
-    animation: ellipsis 1.5s infinite;
-}
-
-#loading.indeterminate #loading-percent {
+#loading.indeterminate #loading-percent-app {
     display: none;
 }
 
-#loading.indeterminate #loading-bar-fill {
+#loading.indeterminate #loading-bar-fill-app {
     width: 40%;
     animation: indeterminate 1.1s ease-in-out infinite;
 }
@@ -135,27 +124,8 @@ html, body {
     }
 }
 
-@keyframes ellipsis {
-    0% {
-        content: '.';
-    }
-
-    33% {
-        content: '..';
-    }
-
-    66% {
-        content: '...';
-    }
-
-    100% {
-        content: '.';
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    #loading-label::after,
-    #loading.indeterminate #loading-bar-fill {
+    #loading.indeterminate #loading-bar-fill-app {
         animation: none;
     }
 }

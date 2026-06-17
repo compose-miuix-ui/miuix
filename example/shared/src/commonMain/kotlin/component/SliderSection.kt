@@ -21,10 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalSlider
 import top.yukonga.miuix.kmp.preference.RangeSliderPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
@@ -164,7 +164,7 @@ fun LazyListScope.sliderSection() {
                         onValueChange = { verticalValue1 = it },
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
-                    LazyText(
+                    Text(
                         text = "Normal\n${(verticalValue1 * 100).toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -184,7 +184,7 @@ fun LazyListScope.sliderSection() {
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
-                    LazyText(
+                    Text(
                         text = "Steps\n${verticalValue2.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -205,7 +205,7 @@ fun LazyListScope.sliderSection() {
                         showKeyPoints = true,
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
-                    LazyText(
+                    Text(
                         text = "Points\n${verticalValue3.toInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -226,7 +226,7 @@ fun LazyListScope.sliderSection() {
                         keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
-                    LazyText(
+                    Text(
                         text = "Custom\n${verticalValue4.toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -244,7 +244,7 @@ fun LazyListScope.sliderSection() {
                         enabled = false,
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
-                    LazyText(
+                    Text(
                         text = "Disabled\n${(disabledVerticalValue * 100).toInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,

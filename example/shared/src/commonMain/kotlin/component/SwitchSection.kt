@@ -17,10 +17,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Switch
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -84,7 +84,7 @@ fun LazyListScope.switchSection() {
                     title = "Switch",
                     checked = superSwitchState.value,
                     endActions = {
-                        LazyText(
+                        Text(
                             text = superSwitch.value,
                             color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                         )
