@@ -57,7 +57,7 @@ kotlin {
             implementation(projects.miuixSquircle)
             implementation(libs.androidx.collection)
             implementation(libs.androidx.navigation3.runtime)
-            implementation(libs.jetbrains.androidx.navigationevent)
+            implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.lifecycle.runtime.compose)

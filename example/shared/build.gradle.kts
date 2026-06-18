@@ -53,7 +53,7 @@ kotlin {
         browser()
     }
 
-    js(IR) {
+    js {
         browser()
     }
 
@@ -71,8 +71,8 @@ kotlin {
                 implementation(projects.miuixIcons)
                 implementation(projects.miuixNavigation3Ui)
                 implementation(libs.androidx.navigation3.runtime)
+                implementation(libs.androidx.navigationevent)
                 implementation(libs.aboutlibraries.core)
-                implementation(libs.jetbrains.androidx.navigationevent)
                 implementation(libs.kotlinx.serialization.core)
             }
         }
