@@ -27,10 +27,10 @@ private const val FOCUS_ALPHA_DELTA = 0.08f
 private const val PRESS_ALPHA_DELTA = 0.10f
 private const val HOLD_DOWN_ALPHA_DELTA = 0.10f
 
-private val PRESS_ENTER_SPRING: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.2f)
-private val PRESS_EXIT_SPRING: SpringSpec<Float> = folmeSpring(damping = 0.95f, response = 0.35f)
-private val HOVER_ENTER_SPRING: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.6f)
-private val HOVER_EXIT_SPRING: SpringSpec<Float> = folmeSpring(damping = 0.96f, response = 0.2f)
+private val PressEnterSpring: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.2f)
+private val PressExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.95f, response = 0.35f)
+private val HoverEnterSpring: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.6f)
+private val HoverExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.96f, response = 0.2f)
 
 /**
  * Miuix default [Indication] that draws a rectangular overlay when pressed.
@@ -113,10 +113,10 @@ class MiuixIndication(
 
                     val spring =
                         when {
-                            previousPressed != isPressed -> if (isPressed) PRESS_ENTER_SPRING else PRESS_EXIT_SPRING
-                            previousHoldDown != isHoldDown -> if (isHoldDown) PRESS_ENTER_SPRING else PRESS_EXIT_SPRING
-                            previousHovered != isHovered -> if (isHovered) HOVER_ENTER_SPRING else HOVER_EXIT_SPRING
-                            previousFocused != isFocused -> if (isFocused) HOVER_ENTER_SPRING else HOVER_EXIT_SPRING
+                            previousPressed != isPressed -> if (isPressed) PressEnterSpring else PressExitSpring
+                            previousHoldDown != isHoldDown -> if (isHoldDown) PressEnterSpring else PressExitSpring
+                            previousHovered != isHovered -> if (isHovered) HoverEnterSpring else HoverExitSpring
+                            previousFocused != isFocused -> if (isFocused) HoverEnterSpring else HoverExitSpring
                             else -> return@collect
                         }
                     animateOverlay(spring)
