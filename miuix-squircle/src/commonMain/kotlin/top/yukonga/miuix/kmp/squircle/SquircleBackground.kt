@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
@@ -247,24 +248,49 @@ fun Modifier.absoluteSquircleSurface(
 
 /**
  * Shared squircle clip/surface mask for [squircleClip] / [squircleSurface] and their absolute
- * variants. Records content once into a display-list [GraphicsLayer] and replays it per region in
- * [drawSquircleMasked], keeping offscreen work proportional to the corners, not content height.
+ * variants. Up to [MAX_OFFSCREEN_PX] the node composites through one [CompositingStrategy.Offscreen]
+ * layer (cheap to cache and re-blit while scrolling) and only the corners are carved; past that a
+ * full-node offscreen would overflow the GPU max texture and render transparent, so the content is
+ * recorded and replayed per corner band instead — offscreen work tracks the corners, not the height.
  */
 private fun Modifier.squircleShaderMask(
     brush: SquircleShaderBrush,
     fillColor: Color?,
 ): Modifier = this
-    .graphicsLayer()
+    .graphicsLayer {
+        compositingStrategy =
+            if (maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX) {
+                CompositingStrategy.Offscreen
+            } else {
+                CompositingStrategy.Auto
+            }
+    }
     .drawWithCache {
         val layerPaint = Paint()
         val contentLayer = obtainGraphicsLayer()
         onDrawWithContent {
-            contentLayer.record { this@onDrawWithContent.drawContent() }
-            drawSquircleMasked(brush, fillColor, layerPaint, contentLayer)
+            if (maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX) {
+                drawSquircleFast(brush, fillColor)
+            } else {
+                contentLayer.record { this@onDrawWithContent.drawContent() }
+                drawSquircleBanded(brush, fillColor, layerPaint, contentLayer)
+            }
         }
     }
 
-private fun ContentDrawScope.drawSquircleMasked(
+// Fast path: the enclosing Offscreen layer holds fill + content, so DstIn carves straight against it.
+private fun ContentDrawScope.drawSquircleFast(
+    brush: SquircleShaderBrush,
+    fillColor: Color?,
+) {
+    if (fillColor != null) drawRect(fillColor)
+    drawContent()
+    maskSquircleCorners(brush, top = true, bottom = true)
+}
+
+// Oversize path: replay recorded content per corner band so no single offscreen exceeds the texture
+// max; the straight middle draws with no offscreen at all.
+private fun ContentDrawScope.drawSquircleBanded(
     brush: SquircleShaderBrush,
     fillColor: Color?,
     layerPaint: Paint,
@@ -276,32 +302,13 @@ private fun ContentDrawScope.drawSquircleMasked(
     val topBand = brush.topBandHeightPx(size)
     val bottomBand = brush.bottomBandHeightPx(size)
 
-    // Mask only the corner squares (opaque elsewhere); the full-node brush is clipped to each.
-    fun maskCorner(left: Float, top: Float, side: Float) {
-        if (side <= 0f) return
-        canvas.save()
-        canvas.clipRect(Rect(left, top, left + side, top + side))
-        drawRect(brush = brush, blendMode = BlendMode.DstIn)
-        canvas.restore()
-    }
-
     // One offscreen slice: fill + content + its corner pair(s). [clip] bounds a banded slice.
     fun maskedBand(top: Float, bottom: Float, maskTop: Boolean, maskBottom: Boolean, clip: Boolean) {
         canvas.saveLayer(Rect(0f, top, width, bottom), layerPaint)
         if (clip) canvas.clipRect(Rect(0f, top, width, bottom))
         if (fillColor != null) drawRect(fillColor)
         drawLayer(contentLayer)
-        if (maskTop) {
-            maskCorner(0f, 0f, brush.effectiveCornerPx(0, size))
-            val tr = brush.effectiveCornerPx(1, size)
-            maskCorner(width - tr, 0f, tr)
-        }
-        if (maskBottom) {
-            val br = brush.effectiveCornerPx(2, size)
-            maskCorner(width - br, height - br, br)
-            val bl = brush.effectiveCornerPx(3, size)
-            maskCorner(0f, height - bl, bl)
-        }
+        maskSquircleCorners(brush, top = maskTop, bottom = maskBottom)
         canvas.restore()
     }
 
@@ -320,6 +327,36 @@ private fun ContentDrawScope.drawSquircleMasked(
         drawLayer(contentLayer)
     }
     if (bottomBand > 0f) maskedBand(midBottom, height, maskTop = false, maskBottom = true, clip = true)
+}
+
+// Carve the corner squares (the shader is opaque elsewhere). Must run inside an offscreen already
+// holding fill + content, so DstIn has an alpha channel to carve against.
+private fun ContentDrawScope.maskSquircleCorners(
+    brush: SquircleShaderBrush,
+    top: Boolean,
+    bottom: Boolean,
+) {
+    val width = size.width
+    val height = size.height
+    val canvas = drawContext.canvas
+    fun corner(left: Float, topPx: Float, side: Float) {
+        if (side <= 0f) return
+        canvas.save()
+        canvas.clipRect(Rect(left, topPx, left + side, topPx + side))
+        drawRect(brush = brush, blendMode = BlendMode.DstIn)
+        canvas.restore()
+    }
+    if (top) {
+        corner(0f, 0f, brush.effectiveCornerPx(0, size))
+        val tr = brush.effectiveCornerPx(1, size)
+        corner(width - tr, 0f, tr)
+    }
+    if (bottom) {
+        val br = brush.effectiveCornerPx(2, size)
+        corner(width - br, height - br, br)
+        val bl = brush.effectiveCornerPx(3, size)
+        corner(0f, height - bl, bl)
+    }
 }
 
 @Composable
@@ -390,6 +427,10 @@ private class SquircleShaderBrush(
         return cornerTilesPx[index].coerceIn(0f, halfMin)
     }
 }
+
+// Max node dimension composited in one offscreen layer. 2048 px is the texture-size floor guaranteed
+// by GL ES 3.0 / WebGL2 / Metal, so it never overflows the GPU max texture; larger nodes go banded.
+private const val MAX_OFFSCREEN_PX = 2048f
 
 // π/4 — squircle → circle blend threshold. Above this ratio of cornerSize / halfMin the SDF result
 // is mixed with a pure circle SDF so capsule / pill / circle silhouettes degrade cleanly.
