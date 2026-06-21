@@ -10,17 +10,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.shader.RuntimeShader
@@ -28,6 +33,8 @@ import top.yukonga.miuix.kmp.shader.asComposeShader
 import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Squircle solid background — fill-only, descendants are NOT clipped.
@@ -76,8 +83,7 @@ fun Modifier.squircleBackground(
 }
 
 /**
- * Clips the subtree to the squircle silhouette. Costs one offscreen GPU
- * layer per node (cached when contents are stable).
+ * Clips the subtree to the squircle silhouette.
  *
  * Falls back to `Modifier.clip(RoundedCornerShape(cornerRadius))` when
  * runtime shaders are unavailable.
@@ -112,16 +118,11 @@ fun Modifier.squircleClip(
 ): Modifier {
     val brush = rememberSquircleBrush(Color.White, topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this.clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
-    return this
-        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-        .drawWithContent {
-            drawContent()
-            drawRect(brush = brush, blendMode = BlendMode.DstIn)
-        }
+    return this.squircleShaderMask(brush, fillColor = null)
 }
 
 /**
- * Fill + clip in a single offscreen layer — drop-in replacement for
+ * Fill + clip behind a squircle silhouette — drop-in replacement for
  * `.clip(RoundedCornerShape(r)).background(color)` with a squircle outline.
  *
  * @param color The fill [Color] drawn behind the clipped content.
@@ -160,13 +161,7 @@ fun Modifier.squircleSurface(
         ?: return this
             .clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
             .background(color)
-    return this
-        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-        .drawWithContent {
-            drawRect(color)
-            drawContent()
-            drawRect(brush = brush, blendMode = BlendMode.DstIn)
-        }
+    return this.squircleShaderMask(brush, fillColor = color)
 }
 
 /**
@@ -220,12 +215,7 @@ fun Modifier.absoluteSquircleClip(
 ): Modifier {
     val brush = rememberSquircleBrush(Color.White, topLeft, topRight, bottomRight, bottomLeft, extension)
         ?: return this.clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))
-    return this
-        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-        .drawWithContent {
-            drawContent()
-            drawRect(brush = brush, blendMode = BlendMode.DstIn)
-        }
+    return this.squircleShaderMask(brush, fillColor = null)
 }
 
 /**
@@ -252,13 +242,84 @@ fun Modifier.absoluteSquircleSurface(
         ?: return this
             .clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))
             .background(color)
-    return this
-        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-        .drawWithContent {
-            drawRect(color)
-            drawContent()
-            drawRect(brush = brush, blendMode = BlendMode.DstIn)
+    return this.squircleShaderMask(brush, fillColor = color)
+}
+
+/**
+ * Shared squircle clip/surface mask for [squircleClip] / [squircleSurface] and their absolute
+ * variants. Records content once into a display-list [GraphicsLayer] and replays it per region in
+ * [drawSquircleMasked], keeping offscreen work proportional to the corners, not content height.
+ */
+private fun Modifier.squircleShaderMask(
+    brush: SquircleShaderBrush,
+    fillColor: Color?,
+): Modifier = this
+    .graphicsLayer()
+    .drawWithCache {
+        val layerPaint = Paint()
+        val contentLayer = obtainGraphicsLayer()
+        onDrawWithContent {
+            contentLayer.record { this@onDrawWithContent.drawContent() }
+            drawSquircleMasked(brush, fillColor, layerPaint, contentLayer)
         }
+    }
+
+private fun ContentDrawScope.drawSquircleMasked(
+    brush: SquircleShaderBrush,
+    fillColor: Color?,
+    layerPaint: Paint,
+    contentLayer: GraphicsLayer,
+) {
+    val width = size.width
+    val height = size.height
+    val canvas = drawContext.canvas
+    val topBand = brush.topBandHeightPx(size)
+    val bottomBand = brush.bottomBandHeightPx(size)
+
+    // Mask only the corner squares (opaque elsewhere); the full-node brush is clipped to each.
+    fun maskCorner(left: Float, top: Float, side: Float) {
+        if (side <= 0f) return
+        canvas.save()
+        canvas.clipRect(Rect(left, top, left + side, top + side))
+        drawRect(brush = brush, blendMode = BlendMode.DstIn)
+        canvas.restore()
+    }
+
+    // One offscreen slice: fill + content + its corner pair(s). [clip] bounds a banded slice.
+    fun maskedBand(top: Float, bottom: Float, maskTop: Boolean, maskBottom: Boolean, clip: Boolean) {
+        canvas.saveLayer(Rect(0f, top, width, bottom), layerPaint)
+        if (clip) canvas.clipRect(Rect(0f, top, width, bottom))
+        if (fillColor != null) drawRect(fillColor)
+        drawLayer(contentLayer)
+        if (maskTop) {
+            maskCorner(0f, 0f, brush.effectiveCornerPx(0, size))
+            val tr = brush.effectiveCornerPx(1, size)
+            maskCorner(width - tr, 0f, tr)
+        }
+        if (maskBottom) {
+            val br = brush.effectiveCornerPx(2, size)
+            maskCorner(width - br, height - br, br)
+            val bl = brush.effectiveCornerPx(3, size)
+            maskCorner(0f, height - bl, bl)
+        }
+        canvas.restore()
+    }
+
+    // No straight middle: one offscreen for the whole (no-taller-than-wide) node.
+    if (height <= topBand + bottomBand) {
+        maskedBand(0f, height, maskTop = true, maskBottom = true, clip = false)
+        return
+    }
+
+    // Offscreen only the corner bands; replay the straight middle directly. Whole-pixel edges tile.
+    val midTop = ceil(topBand)
+    val midBottom = floor(height - bottomBand)
+    if (topBand > 0f) maskedBand(0f, midTop, maskTop = true, maskBottom = false, clip = true)
+    clipRect(top = midTop, bottom = midBottom) {
+        if (fillColor != null) drawRect(fillColor)
+        drawLayer(contentLayer)
+    }
+    if (bottomBand > 0f) maskedBand(midBottom, height, maskTop = false, maskBottom = true, clip = true)
 }
 
 @Composable
@@ -303,7 +364,7 @@ private class SquircleShaderBrush(
         val range = halfMin - threshold
         for (i in 0..3) {
             val tile = cornerTilesPx[i]
-            val effective = tile.coerceIn(0f, halfMin)
+            val effective = effectiveCornerPx(i, size)
             effectiveSizes[i] = effective
             halfRanges[i] = BakedSquircleSdf.HALF_RANGE * effective
             weights[i] = if (range <= 0f) 1f else ((tile - threshold) / range).coerceIn(0f, 1f)
@@ -316,6 +377,17 @@ private class SquircleShaderBrush(
         runtimeShader.setFloatUniform("bitmapSize", BakedSquircleSdf.SIZE.toFloat())
         runtimeShader.setInputShader("cornerSdf", bakedSdfShader)
         return runtimeShader.asComposeShader()
+    }
+
+    // Corner index order: 0 = topStart/topLeft, 1 = topEnd/topRight, 2 = bottomEnd/bottomRight, 3 = bottomStart/bottomLeft.
+    fun topBandHeightPx(size: Size): Float = maxOf(effectiveCornerPx(0, size), effectiveCornerPx(1, size))
+
+    fun bottomBandHeightPx(size: Size): Float = maxOf(effectiveCornerPx(2, size), effectiveCornerPx(3, size))
+
+    // Corner tile size the shader uses at [index], clamped to half the smaller side.
+    fun effectiveCornerPx(index: Int, size: Size): Float {
+        val halfMin = minOf(size.width, size.height) * 0.5f
+        return cornerTilesPx[index].coerceIn(0f, halfMin)
     }
 }
 

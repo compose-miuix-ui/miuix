@@ -151,6 +151,7 @@ fun NavTestPage(
                                 Spacer(Modifier.width(8.dp))
                                 Text(text = "End2", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -164,6 +165,7 @@ fun NavTestPage(
                                 Spacer(Modifier.width(8.dp))
                                 Text(text = "End2", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -178,6 +180,7 @@ fun NavTestPage(
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -192,6 +195,7 @@ fun NavTestPage(
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -203,6 +207,7 @@ fun NavTestPage(
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -211,6 +216,7 @@ fun NavTestPage(
                             endActions = {
                                 Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
@@ -219,6 +225,7 @@ fun NavTestPage(
                             endActions = {
                                 Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                     }
