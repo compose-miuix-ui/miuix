@@ -16,12 +16,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,6 +32,7 @@ import top.yukonga.miuix.kmp.shader.asComposeShader
 import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
+import top.yukonga.miuix.kmp.squircle.internal.makeLinearShader
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -436,13 +435,9 @@ private const val MAX_OFFSCREEN_PX = 2048f
 // is mixed with a pure circle SDF so capsule / pill / circle silhouettes degrade cleanly.
 private const val BLEND_THRESHOLD_RATIO = 0.7853982f
 
-// Decoded once per process — wraps the baked SDF bytes into a Skia ImageShader.
+// Decoded once per process; LINEAR-sampled so the corner branch does one bilinear tap (see [makeLinearShader]).
 private val bakedSdfShader: Shader by lazy {
-    ImageShader(
-        makeAlphaImageBitmap(BakedSquircleSdf.SIZE, BakedSquircleSdf.bytes),
-        TileMode.Clamp,
-        TileMode.Clamp,
-    )
+    makeLinearShader(makeAlphaImageBitmap(BakedSquircleSdf.SIZE, BakedSquircleSdf.bytes))
 }
 
 private const val SQUIRCLE_SHADER = """
@@ -453,19 +448,6 @@ uniform float4 halfRangesPx;
 uniform float4 blendWeights;
 uniform float bitmapSize;
 layout(color) uniform half4 color;
-
-half sampleSdfBilinear(float2 uv) {
-    float2 px = uv * bitmapSize - 0.5;
-    float2 i = floor(px);
-    float2 f = px - i;
-    half a00 = cornerSdf.eval(i + float2(0.5, 0.5)).a;
-    half a10 = cornerSdf.eval(i + float2(1.5, 0.5)).a;
-    half a01 = cornerSdf.eval(i + float2(0.5, 1.5)).a;
-    half a11 = cornerSdf.eval(i + float2(1.5, 1.5)).a;
-    half a0 = mix(a00, a10, half(f.x));
-    half a1 = mix(a01, a11, half(f.x));
-    return mix(a0, a1, half(f.y));
-}
 
 half4 main(float2 coord) {
     float dxL = coord.x;
@@ -490,7 +472,8 @@ half4 main(float2 coord) {
         return color;
     }
     float2 uv = float2(dx, dy) / cornerSize;
-    half sdfSample = sampleSdfBilinear(uv);
+    // LINEAR-sampled child: one tap == old 4-tap. Coord is uv*bitmapSize (NO -0.5; sampler adds half-texel).
+    half sdfSample = cornerSdf.eval(uv * bitmapSize).a;
     float squircleSdf = (1.0 - 2.0 * float(sdfSample)) * halfRangePx;
     float qx = cornerSize - dx;
     float qy = cornerSize - dy;
