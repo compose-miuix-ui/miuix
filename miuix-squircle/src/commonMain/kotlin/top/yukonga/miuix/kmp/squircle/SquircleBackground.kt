@@ -304,7 +304,7 @@ private fun ContentDrawScope.drawSquircleBanded(
     // One offscreen slice: fill + content + its corner pair(s). [clip] bounds a banded slice.
     fun maskedBand(top: Float, bottom: Float, maskTop: Boolean, maskBottom: Boolean, clip: Boolean) {
         canvas.saveLayer(Rect(0f, top, width, bottom), layerPaint)
-        if (clip) canvas.clipRect(Rect(0f, top, width, bottom))
+        if (clip) canvas.clipRect(0f, top, width, bottom)
         if (fillColor != null) drawRect(fillColor)
         drawLayer(contentLayer)
         maskSquircleCorners(brush, top = maskTop, bottom = maskBottom)
@@ -341,7 +341,7 @@ private fun ContentDrawScope.maskSquircleCorners(
     fun corner(left: Float, topPx: Float, side: Float) {
         if (side <= 0f) return
         canvas.save()
-        canvas.clipRect(Rect(left, topPx, left + side, topPx + side))
+        canvas.clipRect(left, topPx, left + side, topPx + side)
         drawRect(brush = brush, blendMode = BlendMode.DstIn)
         canvas.restore()
     }
