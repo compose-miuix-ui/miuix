@@ -72,9 +72,9 @@ class MiuixIndication(
             return targetAlpha
         }
 
-        private fun animateOverlay(spring: SpringSpec<Float>) {
+        private fun animateOverlay(spring: SpringSpec<Float>, fromPressRelease: Boolean) {
             val target = targetAlpha()
-            if (target == 0f) {
+            if (fromPressRelease || target == 0f) {
                 restingAnimation?.cancel()
                 restingAnimation =
                     coroutineScope.launch {
@@ -119,7 +119,9 @@ class MiuixIndication(
                             previousFocused != isFocused -> if (isFocused) HoverEnterSpring else HoverExitSpring
                             else -> return@collect
                         }
-                    animateOverlay(spring)
+                    val fromPressRelease =
+                        (previousPressed && !isPressed) || (previousHoldDown && !isHoldDown)
+                    animateOverlay(spring, fromPressRelease)
                 }
             }
         }
