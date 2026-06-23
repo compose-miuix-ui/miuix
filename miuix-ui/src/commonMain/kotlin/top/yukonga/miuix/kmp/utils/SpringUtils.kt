@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.utils
 
+import androidx.compose.runtime.withFrameNanos
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
@@ -122,5 +125,38 @@ internal class SpringEngine {
         }
 
         return false
+    }
+}
+
+/**
+ * Drive this spring from [startValue] to [targetValue] with [initialVelocity], calling [onFrame] each
+ * frame until it settles (or is cancelled), then [onSettle]. Shared by both overscroll implementations.
+ */
+internal suspend fun SpringEngine.runSettleAnimation(
+    startValue: Float,
+    targetValue: Float = 0f,
+    initialVelocity: Float,
+    onFrame: (currentPos: Float) -> Unit,
+    onSettle: () -> Unit,
+) {
+    start(startValue = startValue, targetValue = targetValue, initialVel = initialVelocity)
+    var lastFrameTimeNanos = -1L
+    var isFinished = false
+    try {
+        while (!isFinished && currentCoroutineContext().isActive) {
+            isFinished = withFrameNanos { frameTimeNanos ->
+                if (lastFrameTimeNanos == -1L) {
+                    lastFrameTimeNanos = frameTimeNanos
+                    return@withFrameNanos false
+                }
+                val dt = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
+                lastFrameTimeNanos = frameTimeNanos
+                val finished = step(dt)
+                onFrame(currentPos.toFloat())
+                finished
+            }
+        }
+    } finally {
+        onSettle()
     }
 }
