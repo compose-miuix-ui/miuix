@@ -15,10 +15,10 @@ import kotlin.math.sqrt
  * The step response of an underdamped spring baked into an [Easing], played over a fixed tween
  * duration.
  *
- * This reproduces, point for point, the enter/exit curve of the established (nav3-based) miuix
- * navigation — `NavTransitionEasing` in `miuix-navigation3-ui` — so programmatic push/pop keeps
- * the exact same pacing: a brisk middle (≈48% at a fifth of the duration) and a long, gentle
- * tail. The curve is monotone within `0..1` for the shipped parameters (its first crossing of
+ * This reproduces, point for point, the established enter/exit curve of miuix navigation, so
+ * programmatic push/pop keeps the exact same pacing: a brisk middle (≈48% at a fifth of the
+ * duration) and a long, gentle tail. The curve is monotone within `0..1` for the shipped
+ * parameters (its first crossing of
  * `1` lies past the played window), so it never bounces; `transform(1f)` lands at ≈0.99933 and
  * the tween's final frame snaps the residue.
  *

@@ -66,7 +66,7 @@ class BaselineProfileGenerator {
             device.wait(Until.hasObject(By.text("Home")), 2_000)
 
             // Scroll the Home tab
-            repeat(2) {
+            repeat(3) {
                 device.findObject(By.scrollable(true))?.fling(Direction.DOWN)
             }
             device.waitForIdle()

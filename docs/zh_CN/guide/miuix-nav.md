@@ -313,7 +313,3 @@ v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateFo
 | `NavController` 内置结果通道 | 不支持（见上一节） |
 
 这些边界的存在是为了让 v1 的 API 面保持精简、让连续深度模型保持唯一事实来源。它们已记录在册，留待 v2+。
-
-## 与「导航支持」的关系
-
-`miuix-nav` 是独立运行时，与 [`miuix-navigation3-ui`](/zh_CN/guide/navigation3) 并存。若需要连续深度运动与完全自定义的 float 驱动转场，选 `miuix-nav`；若你以 `androidx.navigation3` 为标准，选 `miuix-navigation3-ui`。

@@ -313,7 +313,3 @@ Port that approach (or a `SavedStateHandle`-style holder) into your own app laye
 | Built-in result channel on `NavController` | Not supported (see the section above) |
 
 These boundaries exist so the v1 surface stays small and the continuous-depth model stays the single source of truth. They are tracked for v2+.
-
-## Relationship to Navigation3 Support
-
-`miuix-nav` is an independent runtime and coexists with [`miuix-navigation3-ui`](/guide/navigation3). Pick `miuix-nav` for continuous-depth motion and fully custom float-driven transitions; pick `miuix-navigation3-ui` if you are standardizing on `androidx.navigation3`.
