@@ -7,7 +7,7 @@ plugins {
     id("com.diffplug.spotless")
 }
 
-val composeKtlintRules = "io.nlopez.compose.rules:ktlint:0.6.0"
+val composeKtlintRules = "io.nlopez.compose.rules:ktlint:0.6.2"
 val copyrightFile = rootProject.file("spotless/copyright.txt")
 val copyrightDelimiter = "^(?![ \\t]*(?:\\/\\/|\\/\\*)).*[\\w].*$"
 

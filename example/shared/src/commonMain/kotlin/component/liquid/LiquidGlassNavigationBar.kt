@@ -72,10 +72,10 @@ import component.animation.InteractiveHighlight
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
@@ -328,7 +328,7 @@ internal fun IosLiquidGlassNavigationBar(
                         contentDescription = null,
                     )
                 }
-                LazyText(
+                Text(
                     text = item.label,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Normal,

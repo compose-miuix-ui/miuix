@@ -1,161 +1,211 @@
 <!-- Copyright 2025, compose-miuix-ui contributors -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <meta name="color-scheme" content="light dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
     <title>Miuix</title>
-    <link rel="shortcut icon" href="./favicon.ico">
-    <link href="styles.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link href="styles.css" rel="stylesheet" type="text/css" />
     <script type="application/javascript">
-        // Loading overlay + real download progress.
-        // Installed before composeApp.js so fetch() of the wasm/runtime assets is tracked.
-        (function () {
-            var origFetch = window.fetch;
-            var loaded = 0;
-            var total = 0;
-            var sawLength = false;
-            var finished = false;
-            var shown = 0;
-            var target = 0;
-            var indeterminate = false;
-            var startedFill = false;
-            var bar = null;
-            var percentEl = null;
-            var labelEl = null;
+      // Loading overlay with two bars: app/runtime bytes (tracked by hooking fetch below) and CJK
+      // font subsets (count reported from Kotlin). Runs before composeApp.js so the hook is ready.
+      (function () {
+        var origFetch = window.fetch;
+        var loaded = 0;
+        var total = 0;
+        var sawLength = false;
+        var finished = false;
+        var indeterminate = false;
+        var startedFill = false;
+        var appBar = null;
+        var fontBar = null;
+        var appPct = null;
+        var fontPct = null;
+        var shownApp = 0,
+          targetApp = 0;
+        var shownFont = 0,
+          targetFont = 0;
+        var fontTotal = 0;
+        var fontDone = 0;
 
-            // Only track the heavy runtime payload (wasm + skiko side modules).
-            function shouldTrack(url) {
-                return /\.(wasm|mjs)(\?|#|$)/.test(url);
-            }
+        // Only track the heavy runtime payload (wasm + skiko side modules) for the app bar.
+        function shouldTrack(url) {
+          return /\.(wasm|mjs)(\?|#|$)/.test(url);
+        }
 
-            function setIndeterminate(on) {
-                if (indeterminate === on) return;
-                indeterminate = on;
-                var root = document.getElementById('loading');
-                if (root) root.classList.toggle('indeterminate', on);
-                if (on && bar) bar.style.width = ''; // hand width control to the CSS animation
-            }
+        function setIndeterminate(on) {
+          if (indeterminate === on) return;
+          indeterminate = on;
+          var root = document.getElementById("loading");
+          if (root) root.classList.toggle("indeterminate", on);
+          if (on && appBar) appBar.style.width = ""; // hand width control to the CSS animation
+        }
 
-            function tick() {
-                if (finished) return;
-                if (!bar) bar = document.getElementById('loading-bar-fill');
-                if (!percentEl) percentEl = document.getElementById('loading-percent');
-                if (!labelEl) labelEl = document.getElementById('loading-label');
+        function tick() {
+          if (finished) return;
+          if (!appBar) appBar = document.getElementById("loading-bar-fill-app");
+          if (!fontBar)
+            fontBar = document.getElementById("loading-bar-fill-font");
+          if (!appPct) appPct = document.getElementById("loading-percent-app");
+          if (!fontPct)
+            fontPct = document.getElementById("loading-percent-font");
 
-                if (sawLength && total > 0) {
-                    var frac = loaded / total;
-                    if (frac > 0.99) frac = 0.99; // reserve the last 1% for the app's first frame
-                    if (frac > target) target = frac;
-                }
-                shown += (target - shown) * 0.12; // ease toward target, never step backwards
+          // App/runtime bar: downloaded bytes.
+          if (sawLength && total > 0) {
+            var fa = loaded / total;
+            if (fa > 1) fa = 1;
+            if (fa > targetApp) targetApp = fa;
+          }
+          shownApp += (targetApp - shownApp) * 0.12; // ease toward target, never step backwards
+          if (!indeterminate) {
+            if (appBar) appBar.style.width = (shownApp * 100).toFixed(1) + "%";
+            if (appPct) appPct.textContent = Math.round(shownApp * 100) + "%";
+          }
 
-                if (!indeterminate) {
-                    if (bar) bar.style.width = (shown * 100).toFixed(1) + '%';
-                    if (percentEl) percentEl.textContent = Math.round(shown * 100) + '%';
-                }
-                if (labelEl && sawLength && total > 0 && loaded >= total) {
-                    labelEl.textContent = 'Starting';
-                }
-                requestAnimationFrame(tick);
-            }
+          // Font bar: count of settled subsets.
+          var ft = fontTotal > 0 ? fontDone / fontTotal : 0;
+          if (ft > 1) ft = 1;
+          if (ft > targetFont) targetFont = ft;
+          shownFont += (targetFont - shownFont) * 0.12;
+          if (fontBar) fontBar.style.width = (shownFont * 100).toFixed(1) + "%";
+          if (fontPct) fontPct.textContent = Math.round(shownFont * 100) + "%";
 
-            window.fetch = function (input, init) {
-                var url;
-                try {
-                    url = (typeof input === 'string') ? input : input.url;
-                } catch (e) {
-                    url = '';
-                }
-                if (!url || !shouldTrack(url)) return origFetch(input, init);
-                return origFetch(input, init).then(function (resp) {
-                    try {
-                        if (!resp || !resp.body || !resp.ok) return resp;
-                        var len = resp.headers.get('content-length');
-                        if (len) {
-                            total += parseInt(len, 10) || 0;
-                            sawLength = true;
+          requestAnimationFrame(tick);
+        }
+
+        window.fetch = function (input, init) {
+          var url;
+          try {
+            url = typeof input === "string" ? input : input.url;
+          } catch (e) {
+            url = "";
+          }
+          if (!url || !shouldTrack(url)) return origFetch(input, init);
+          return origFetch(input, init).then(function (resp) {
+            try {
+              if (!resp || !resp.body || !resp.ok) return resp;
+              var len = resp.headers.get("content-length");
+              if (len) {
+                total += parseInt(len, 10) || 0;
+                sawLength = true;
+              }
+              var reader = resp.body.getReader();
+              var stream = new ReadableStream({
+                start: function (controller) {
+                  function pump() {
+                    reader
+                      .read()
+                      .then(function (r) {
+                        if (r.done) {
+                          controller.close();
+                          return;
                         }
-                        var reader = resp.body.getReader();
-                        var stream = new ReadableStream({
-                            start: function (controller) {
-                                function pump() {
-                                    reader.read().then(function (r) {
-                                        if (r.done) {
-                                            controller.close();
-                                            return;
-                                        }
-                                        loaded += r.value.byteLength;
-                                        controller.enqueue(r.value);
-                                        pump();
-                                    }).catch(function (err) {
-                                        controller.error(err);
-                                    });
-                                }
-                                pump();
-                            }
-                        });
-                        // Preserve headers (Content-Type: application/wasm is required by instantiateStreaming).
-                        return new Response(stream, {
-                            status: resp.status,
-                            statusText: resp.statusText,
-                            headers: resp.headers
-                        });
-                    } catch (e) {
-                        return resp; // never let progress tracking break asset loading
-                    }
-                });
-            };
-
-            // If no Content-Length is ever seen (gzip / server quirk), fall back to an indeterminate bar.
-            setTimeout(function () {
-                if (!finished && !sawLength) setIndeterminate(true);
-            }, 1200);
-
-            window.__miuixLoading = {
-                finish: function () {
-                    finished = true;
-                    indeterminate = false;
-                    var root = document.getElementById('loading');
-                    var fill = document.getElementById('loading-bar-fill');
-                    var pct = document.getElementById('loading-percent');
-                    if (root) root.classList.remove('indeterminate');
-                    if (fill) fill.style.width = '100%';
-                    if (pct) pct.textContent = '100%';
-                    if (root) {
-                        root.classList.add('hidden');
-                        setTimeout(function () {
-                            if (root.parentNode) root.parentNode.removeChild(root);
-                        }, 300);
-                    }
-                }
-            };
-
-            if (!startedFill) {
-                startedFill = true;
-                requestAnimationFrame(tick);
+                        loaded += r.value.byteLength;
+                        controller.enqueue(r.value);
+                        pump();
+                      })
+                      .catch(function (err) {
+                        controller.error(err);
+                      });
+                  }
+                  pump();
+                },
+              });
+              // Preserve headers (Content-Type: application/wasm is required by instantiateStreaming).
+              return new Response(stream, {
+                status: resp.status,
+                statusText: resp.statusText,
+                headers: resp.headers,
+              });
+            } catch (e) {
+              return resp; // never let progress tracking break asset loading
             }
-        })();
+          });
+        };
+
+        // If no Content-Length is ever seen (gzip / server quirk), fall back to an indeterminate app bar.
+        setTimeout(function () {
+          if (!finished && !sawLength) setIndeterminate(true);
+        }, 1200);
+
+        window.__miuixLoading = {
+          finish: function () {
+            finished = true;
+            indeterminate = false;
+            var root = document.getElementById("loading");
+            if (root) root.classList.remove("indeterminate");
+            var a = document.getElementById("loading-bar-fill-app");
+            var f = document.getElementById("loading-bar-fill-font");
+            var ap = document.getElementById("loading-percent-app");
+            var fp = document.getElementById("loading-percent-font");
+            if (a) a.style.width = "100%";
+            if (f) f.style.width = "100%";
+            if (ap) ap.textContent = "100%";
+            if (fp) fp.textContent = "100%";
+            if (root) {
+              root.classList.add("hidden");
+              setTimeout(function () {
+                if (root.parentNode) root.parentNode.removeChild(root);
+              }, 300);
+            }
+          },
+          // Reported from Kotlin as each subset settles. Fonts start only after the runtime is
+          // up, so the app bar is snapped to 100% once the font phase begins.
+          fontProgress: function (done, total) {
+            if (finished) return;
+            fontTotal = total;
+            fontDone = done;
+            targetApp = 1;
+            setIndeterminate(false);
+          },
+        };
+
+        if (!startedFill) {
+          startedFill = true;
+          requestAnimationFrame(tick);
+        }
+      })();
     </script>
-</head>
-<body>
-<div id="loading">
-    <div id="loading-card">
-        <img id="loading-logo" src="ic_launcher.png" alt="Miuix" width="72" height="72">
+  </head>
+  <body>
+    <div id="loading">
+      <div id="loading-card">
+        <img
+          id="loading-logo"
+          src="ic_launcher.png"
+          alt="Miuix"
+          width="72"
+          height="72"
+        />
         <div id="loading-title">Miuix</div>
-        <div id="loading-bar">
-            <div id="loading-bar-fill"></div>
+        <div class="loading-row">
+          <div class="loading-bar">
+            <div class="loading-bar-fill" id="loading-bar-fill-app"></div>
+          </div>
+          <div class="loading-status">
+            <span class="loading-label">App</span>
+            <span class="loading-percent" id="loading-percent-app">0%</span>
+          </div>
         </div>
-        <div id="loading-status">
-            <span id="loading-label">Loading</span>
-            <span id="loading-percent"></span>
+        <div class="loading-row">
+          <div class="loading-bar">
+            <div class="loading-bar-fill" id="loading-bar-fill-font"></div>
+          </div>
+          <div class="loading-status">
+            <span class="loading-label">Font</span>
+            <span class="loading-percent" id="loading-percent-font">0%</span>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-<div id="composeApp"></div>
-</body>
-<script src="composeApp.js" type="application/javascript"></script>
+    <div id="composeApp"></div>
+  </body>
+  <script src="composeApp.js" type="application/javascript"></script>
 </html>

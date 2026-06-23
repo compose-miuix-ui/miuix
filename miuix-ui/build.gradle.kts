@@ -57,7 +57,7 @@ kotlin {
             api(projects.miuixSquircle)
             api(libs.jetbrains.compose.foundation)
 
-            implementation(libs.jetbrains.androidx.navigationevent)
+            implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
 
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform

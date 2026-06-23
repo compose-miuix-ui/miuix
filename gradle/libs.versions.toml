@@ -4,18 +4,18 @@ kotlin = "2.4.0"
 kotlinx-serialization = "1.11.0"
 kotlinx-collections-immutable = "0.4.0"
 
-about-libraries = "14.2.1"
+about-libraries = "15.0.0"
 androidx-activity = "1.13.0"
 androidx-collection = "1.6.0"
-androidx-navigation3 = "1.1.2"
-jetbrains-androidx-navigationevent = "1.1.0"
+androidx-navigation3 = "1.1.3"
+androidx-navigationevent = "1.1.2"
 jetbrains-compose-multiplatform = "1.11.1"
 jetbrains-compose-window-size = "1.9.0"
 jetbrains-dokka = "2.2.0"
 jetbrains-compose-hotReload = "1.1.1"
 jetbrains-lifecycle = "2.10.0"
 materialKolor-utilities = "4.1.1"
-spotless = "8.6.0"
+spotless = "8.7.0"
 
 junit = "1.3.0"
 espresso-core = "3.7.0"
@@ -36,7 +36,7 @@ aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "androidx-collection" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "androidx-navigation3" }
-jetbrains-androidx-navigationevent = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "jetbrains-androidx-navigationevent" }
+androidx-navigationevent = { module = "androidx.navigationevent:navigationevent-compose", version.ref = "androidx-navigationevent" }
 jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose-multiplatform" }
 jetbrains-compose-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-compose-window-size" }

@@ -22,13 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -220,32 +220,32 @@ private fun TextStyleItem(entry: TextStyleEntry) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LazyText(
+            Text(
                 text = entry.name,
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
-            LazyText(
+            Text(
                 text = entry.description,
                 style = MiuixTheme.textStyles.footnote2,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        LazyText(
+        Text(
             text = SAMPLE_TEXT_CN,
             style = entry.style,
             color = MiuixTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(2.dp))
-        LazyText(
+        Text(
             text = SAMPLE_TEXT_EN,
             style = entry.style,
             color = MiuixTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(2.dp))
-        LazyText(
+        Text(
             text = SAMPLE_TEXT_NUM,
             style = entry.style,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,

@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Email
 import top.yukonga.miuix.kmp.icon.extended.Favorites
@@ -48,21 +48,21 @@ fun LazyListScope.badgeSection() {
                             modifier = Modifier.size(28.dp),
                         )
                     }
-                    BadgedBox(badge = { Badge { LazyText("8") } }) {
+                    BadgedBox(badge = { Badge { Text("8") } }) {
                         Icon(
                             imageVector = MiuixIcons.Email,
                             contentDescription = "Email",
                             modifier = Modifier.size(28.dp),
                         )
                     }
-                    BadgedBox(badge = { Badge { LazyText("99+") } }) {
+                    BadgedBox(badge = { Badge { Text("99+") } }) {
                         Icon(
                             imageVector = MiuixIcons.Settings,
                             contentDescription = "Settings",
                             modifier = Modifier.size(28.dp),
                         )
                     }
-                    BadgedBox(badge = { Badge { LazyText("5") } }) {
+                    BadgedBox(badge = { Badge { Text("5") } }) {
                         Icon(
                             imageVector = MiuixIcons.Favorites,
                             contentDescription = "Favorites",

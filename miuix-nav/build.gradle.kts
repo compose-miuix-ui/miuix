@@ -53,7 +53,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.miuixSquircle)
-            implementation(libs.jetbrains.androidx.navigationevent)
+            implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.lifecycle.runtime.compose)

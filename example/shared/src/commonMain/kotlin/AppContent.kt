@@ -66,7 +66,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import lazyfont.LazyText
 import navigation.CrossActivityTransition
 import navigation.Navigator
 import navigation.Route
@@ -89,6 +88,7 @@ import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -669,7 +669,7 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
  */
 private fun navigationItemBadge(index: Int, show: Boolean): (@Composable () -> Unit)? = when {
     !show -> null
-    index == 1 -> ({ Badge { LazyText("8") } })
+    index == 1 -> ({ Badge { Text("8") } })
     index == 3 -> ({ Badge() })
     else -> null
 }

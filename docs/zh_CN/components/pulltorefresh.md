@@ -53,6 +53,10 @@ Surface {
 }
 ```
 
+::: tip `isRefreshing` 契约
+`isRefreshing` 是刷新操作的唯一事实来源，且为双向同步：在指示器空闲时将其置为 `true` 会程序化地展示刷新指示器（见下文），置回 `false` 则结束刷新。请在 `onRefresh` 中尽快将其置为 `true`——同步设置（如上例），或在 UI 作用域启动的协程中于首个挂起点之前设置。若指示器收回进入刷新状态时它仍为（或已重新变回）`false`，刷新会被视为已完成并立即播放完成动画；迟于此时到达的 `true` 会重新展示指示器。
+:::
+
 ## 组件状态
 
 PullToRefresh 组件有以下几种状态：
@@ -106,6 +110,18 @@ PullToRefreshDefaults 提供下拉刷新组件的默认值。
 | refreshTextStyle | TextStyle     | 默认的文本样式       | TextStyle(fontSize = 14.sp, fontWeight = Bold, color = color)                             |
 
 ## 进阶用法
+
+### 程序化刷新
+
+在指示器空闲时将 `isRefreshing` 置为 `true`，无需手势即可展示刷新指示器——例如进入页面时自动刷新：
+
+```kotlin
+LaunchedEffect(Unit) {
+    isRefreshing = true // 指示器展开并旋转，直到置回 false
+}
+```
+
+注意：指示器展示期间内容的嵌套滚动会被消费，与手势触发的刷新行为一致。
 
 ### 自定义刷新指示器颜色
 

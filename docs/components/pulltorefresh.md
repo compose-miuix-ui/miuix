@@ -53,6 +53,10 @@ Surface {
 }
 ```
 
+::: tip Contract for `isRefreshing`
+`isRefreshing` is the source of truth and is synchronized in both directions: raising it to `true` while the indicator is idle shows the indicator programmatically (see below), and lowering it to `false` ends the refresh. Set it to `true` promptly in `onRefresh` — synchronously (as above), or in a coroutine launched on the UI scope before its first suspension. If it is still (or already again) `false` when the indicator settles into the refreshing state, the refresh is treated as finished and the completion animation runs immediately; a `true` that arrives later shows the indicator again.
+:::
+
 ## Component States
 
 PullToRefresh has the following states:
@@ -104,6 +108,18 @@ PullToRefreshDefaults provides default values for the component.
 | refreshTextStyle | TextStyle     | Default text style      | TextStyle(fontSize = 14.sp, fontWeight = Bold, color = color)                             |
 
 ## Advanced Usage
+
+### Programmatic Refresh
+
+Setting `isRefreshing` to `true` while the indicator is idle shows the indicator without a gesture — for example, to refresh on entry:
+
+```kotlin
+LaunchedEffect(Unit) {
+    isRefreshing = true // The indicator expands and spins until set back to false
+}
+```
+
+Note that while the indicator is shown, nested scrolling of the content is consumed, consistent with a gesture-triggered refresh.
 
 ### Custom Indicator Color
 

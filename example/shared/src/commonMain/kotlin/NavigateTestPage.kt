@@ -23,13 +23,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import lazyfont.LazyText
 import navigation.Route
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
@@ -153,81 +153,88 @@ fun NavTestPage(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             startAction = {
-                                LazyText(text = "Start")
+                                Text(text = "Start")
                             },
                             endActions = {
-                                LazyText(text = "End1", textAlign = TextAlign.End)
+                                Text(text = "End1", textAlign = TextAlign.End)
                                 Spacer(Modifier.width(8.dp))
-                                LazyText(text = "End2", textAlign = TextAlign.End)
+                                Text(text = "End2", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             startAction = {
-                                LazyText(text = "Start")
+                                Text(text = "Start")
                             },
                             endActions = {
-                                LazyText(text = "End1", textAlign = TextAlign.End)
+                                Text(text = "End1", textAlign = TextAlign.End)
                                 Spacer(Modifier.width(8.dp))
-                                LazyText(text = "End2", textAlign = TextAlign.End)
+                                Text(text = "End2", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Title",
                             summary = "Summary",
                             startAction = {
-                                LazyText(text = "Start")
+                                Text(text = "Start")
                             },
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             startAction = {
-                                LazyText(text = "Start")
+                                Text(text = "Start")
                             },
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "Long Long Long Long Long End",
                                     textAlign = TextAlign.End,
                                 )
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Long Long Long Long Long Title",
                             summary = "Summary",
                             endActions = {
-                                LazyText(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
+                                Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                         ArrowPreference(
                             title = "Title",
                             summary = "Long Long Long Long Long Summary",
                             endActions = {
-                                LazyText(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
+                                Text(text = "Long Long Long Long Long End", textAlign = TextAlign.End)
                             },
+                            onClick = { /* Do nothing */ },
                             enabled = true,
                         )
                     }

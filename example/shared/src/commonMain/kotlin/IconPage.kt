@@ -45,12 +45,12 @@ import component.SearchBarFake
 import component.SearchPager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -246,13 +246,13 @@ fun IconsPage(
                             .padding(top = 12.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        LazyText(
+                        Text(
                             text = "Name",
                             modifier = Modifier.weight(1f),
                             style = MiuixTheme.textStyles.footnote1,
                             color = colorScheme.onSurfaceVariantActions,
                         )
-                        LazyText(
+                        Text(
                             text = "Tap to compare weights",
                             style = MiuixTheme.textStyles.footnote2,
                             color = colorScheme.onSurfaceVariantActions,
@@ -279,7 +279,7 @@ fun IconsPage(
                             .padding(bottom = bottomPadding),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            LazyText(
+                            Text(
                                 text = iconNames[index],
                                 modifier = Modifier.weight(1f),
                                 style = MiuixTheme.textStyles.body2,
@@ -318,7 +318,7 @@ fun IconsPage(
                                             modifier = Modifier.size(28.dp),
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        LazyText(
+                                        Text(
                                             text = label,
                                             style = MiuixTheme.textStyles.footnote2,
                                             color = colorScheme.onSurfaceVariantActions,

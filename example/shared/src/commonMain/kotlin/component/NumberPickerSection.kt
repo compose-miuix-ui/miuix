@@ -17,10 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.NumberPicker
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 
 fun LazyListScope.numberPickerSection() {
     item(key = "numberPicker") {
@@ -48,7 +48,7 @@ fun LazyListScope.numberPickerSection() {
                     wrapAround = true,
                     modifier = Modifier.weight(1f),
                 )
-                LazyText(
+                Text(
                     text = ":",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,

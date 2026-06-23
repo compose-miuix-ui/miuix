@@ -33,11 +33,11 @@ import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
 import component.highlight.HighlightConfig
 import component.highlight.rememberContainerHighlight
-import lazyfont.LazyText
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -154,12 +154,12 @@ private fun BlurDemo() {
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LazyText(
+                        Text(
                             text = "Texture Blur | R=${blurRadiusX.toInt()}",
                             style = MiuixTheme.textStyles.headline2,
                         )
                         Spacer(Modifier.height(4.dp))
-                        LazyText(
+                        Text(
                             text = "${currentBlend.first} | ${containerItems[containerIndex]}",
                             style = MiuixTheme.textStyles.body2,
                             color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -291,7 +291,7 @@ private fun ForegroundBlurDemo() {
                 bgModifier = Modifier.layerBackdrop(backdrop),
             ) {
                 // Foreground blur text
-                LazyText(
+                Text(
                     text = "Foreground Blur\nMiuix Demo",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Black,

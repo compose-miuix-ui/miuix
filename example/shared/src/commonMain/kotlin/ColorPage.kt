@@ -23,12 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import lazyfont.LazyText
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -272,7 +272,7 @@ private fun ColorBlock(displayName: String, surfaceColor: Color, textColor: Colo
             .squircleBorder(1.dp, textColor, ColorBlockCornerRadius),
         contentAlignment = Alignment.Center,
     ) {
-        LazyText(
+        Text(
             text = displayName,
             color = textColor,
             textAlign = TextAlign.Center,

@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
-import lazyfont.LazyText
 import misc.VersionInfo
 import navigation.Route
 import org.jetbrains.compose.resources.painterResource
@@ -58,6 +57,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
@@ -253,7 +253,7 @@ private fun AboutContent(
                     contentDescription = null,
                 )
             }
-            LazyText(
+            Text(
                 modifier = Modifier.padding(top = 12.dp, bottom = 5.dp)
                     .graphicsLayer {
                         val projectNameProgress = ((scrollProgressProvider() - 0.20f) / 0.15f).coerceIn(0f, 1f)
@@ -283,7 +283,7 @@ private fun AboutContent(
                 fontWeight = FontWeight.Bold,
                 fontSize = 35.sp,
             )
-            LazyText(
+            Text(
                 modifier = Modifier.fillMaxWidth()
                     .graphicsLayer {
                         val versionCodeProgress = ((scrollProgressProvider() - 0.05f) / 0.15f).coerceIn(0f, 1f)
@@ -365,7 +365,7 @@ private fun AboutContent(
                         ArrowPreference(
                             title = "View Source",
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "GitHub",
                                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -376,7 +376,7 @@ private fun AboutContent(
                         ArrowPreference(
                             title = "Join Group",
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "Telegram",
                                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -416,7 +416,7 @@ private fun AboutContent(
                         ArrowPreference(
                             title = "License",
                             endActions = {
-                                LazyText(
+                                Text(
                                     text = "Apache-2.0",
                                     fontSize = MiuixTheme.textStyles.body2.fontSize,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -484,7 +484,7 @@ private fun AboutContent(
 @Suppress("FunctionName")
 @Composable
 private fun ValueText(text: String) {
-    LazyText(
+    Text(
         text = text,
         fontSize = MiuixTheme.textStyles.body2.fontSize,
         color = MiuixTheme.colorScheme.onSurfaceVariantActions,

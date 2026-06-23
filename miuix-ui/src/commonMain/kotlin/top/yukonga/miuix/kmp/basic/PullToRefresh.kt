@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -85,10 +86,17 @@ import kotlin.math.sin
  * refresh is requested.
  *
  * @param isRefreshing A boolean state representing whether a refresh is currently in progress.
- * This state should be hoisted and is the source of truth for the refresh operation.
+ * This state should be hoisted and is the source of truth for the refresh operation, in both
+ * directions: raising it to `true` while the indicator is idle shows the indicator
+ * programmatically (e.g. refresh-on-entry), and lowering it to `false` ends the refresh. If it
+ * is `false` when the indicator settles into its refreshing state — because it was never
+ * raised, or was raised and lowered again before the next frame — the refresh is treated as
+ * already finished and the completion animation runs immediately; a `true` that arrives later
+ * shows the indicator again.
  * @param onRefresh A lambda to be invoked when a refresh is triggered by the user. This lambda
- * should initiate the data loading and is responsible for eventually setting `isRefreshing`
- * back to `false` upon completion.
+ * should initiate the data loading, set `isRefreshing` to `true`, and is responsible for
+ * eventually setting it back to `false` upon completion. It is not invoked when the indicator
+ * settles while `isRefreshing` is already `true`; the gesture joins the refresh in progress.
  * @param modifier The modifier to be applied to this container.
  * @param pullToRefreshState The state object that manages the UI and animations of the indicator.
  * See [rememberPullToRefreshState].
@@ -119,11 +127,24 @@ fun PullToRefresh(
     val coroutineScope = rememberCoroutineScope()
     val overScrollState = LocalOverScrollState.current
     val currentOnRefresh by rememberUpdatedState(onRefresh)
+    val currentIsRefreshing by rememberUpdatedState(isRefreshing)
+    // Level reader for long-lived closures; capturing the raw Boolean would freeze it.
+    val isRefreshingNow: () -> Boolean = remember { { currentIsRefreshing } }
 
-    LaunchedEffect(isRefreshing) {
+    // Two-way level sync with the hoisted isRefreshing. refreshState is a key on purpose:
+    // entering Refreshing re-samples the level, so a sub-frame true->false pulse cannot latch.
+    LaunchedEffect(isRefreshing, pullToRefreshState.refreshState) {
         if (!isRefreshing && pullToRefreshState.refreshState == RefreshState.Refreshing) {
-            // Data loading completed, end refresh
-            pullToRefreshState.finishRefreshing()
+            // Independent job: the Refreshing -> RefreshComplete re-key would cancel a direct
+            // suspend call mid completion animation.
+            coroutineScope.launch {
+                pullToRefreshState.finishRefreshing(isRefreshingNow)
+            }
+        } else if (isRefreshing && pullToRefreshState.refreshState == RefreshState.Idle) {
+            // Rising edge while idle: show the indicator programmatically.
+            coroutineScope.launch {
+                pullToRefreshState.showRefreshing(isRefreshingNow)
+            }
         }
     }
 
@@ -150,7 +171,7 @@ fun PullToRefresh(
                         event.changes.all { !it.pressed }
                     ) {
                         coroutineScope.launch {
-                            pullToRefreshState.handlePointerRelease(currentOnRefresh)
+                            pullToRefreshState.handlePointerRelease(currentOnRefresh, isRefreshingNow)
                         }
                     }
                 }
@@ -206,6 +227,18 @@ fun rememberPullToRefreshState(): PullToRefreshState {
     val windowInfo = LocalWindowInfo.current
     state.maxDragDistancePx = windowInfo.containerSize.height.toFloat()
     state.refreshThresholdOffset = windowInfo.containerSize.height.toFloat() * MAX_DRAWRATIO * THRESHOLD_RADIO
+
+    SideEffect {
+        // Re-glue a settled indicator when the threshold changes mid-refresh (window resize, or
+        // a show that ran before first measure): Refreshing visuals scale with pullProgress.
+        if (state.refreshState == RefreshState.Refreshing &&
+            state.animationJob == null &&
+            state.dragOffset != state.refreshThresholdOffset
+        ) {
+            state.dragOffset = state.refreshThresholdOffset
+            state.currentTouch = SpringMath.obtainTouchDistance(state.refreshThresholdOffset, state.maxDragDistancePx)
+        }
+    }
 
     return state
 }
@@ -323,7 +356,7 @@ class PullToRefreshState(
     /**
      * Enter the refresh queue
      */
-    internal suspend fun startRefreshing(onRefresh: () -> Unit) {
+    internal suspend fun startRefreshing(onRefresh: () -> Unit, isRefreshingNow: () -> Boolean) {
         if (!isRefreshing) {
             isRefreshing = true
             try {
@@ -331,8 +364,11 @@ class PullToRefreshState(
                 animateToSpring(refreshThresholdOffset)
             } finally {
                 if (!isTouching) {
+                    // Refreshing must be written before onRefresh(): the sync effect keys on this
+                    // change to re-sample the level; reordering re-opens the lost-pulse latch.
                     internalRefreshState = RefreshState.Refreshing
-                    onRefresh()
+                    // Already true: join the refresh in progress instead of firing a duplicate.
+                    if (!isRefreshingNow()) onRefresh()
                 } else {
                     isRefreshing = false
                 }
@@ -340,12 +376,26 @@ class PullToRefreshState(
         }
     }
 
+    /** Programmatically expands the indicator when the hoisted level turns true while idle. */
+    internal suspend fun showRefreshing(isRefreshingNow: () -> Boolean) {
+        // Re-check at run time: the launching effect may be stale (rapid toggle around Idle).
+        if (isRefreshing || internalRefreshState != RefreshState.Idle || !isRefreshingNow()) return
+        isRefreshing = true
+        // Refreshing consumes all nested scroll, so the expansion cannot be caught mid-flight.
+        internalRefreshState = RefreshState.Refreshing
+        animateToSpring(refreshThresholdOffset)
+    }
+
     /**
      * Called when the hoisted `isRefreshing` state becomes false.
      * Triggers the completion animation and resets the state.
      */
-    internal suspend fun finishRefreshing() {
-        if (isRefreshing) {
+    internal suspend fun finishRefreshing(isRefreshingNow: () -> Boolean) {
+        // Re-check at run time: a re-raised level keeps the spinner; the next falling edge retries.
+        if (isRefreshing && !isRefreshingNow()) {
+            // Stop a running programmatic expansion.
+            animationJob?.cancel()
+            // Cleared before the first suspension so queued duplicates no-op on the guard above.
             isRefreshing = false
             internalRefreshState = RefreshState.RefreshComplete
             startManualRefreshCompleteAnimation()
@@ -353,15 +403,16 @@ class PullToRefreshState(
     }
 
     /** Handles the pointer release event to either trigger a refresh or rebound the indicator. */
-    internal suspend fun handlePointerRelease(onRefresh: () -> Unit) {
-        isTouching = false
-
+    internal suspend fun handlePointerRelease(onRefresh: () -> Unit, isRefreshingNow: () -> Boolean) {
         if (isProcessingRelease || isRefreshing || isRebounding) return
+        // Cleared only by the launch that owns the release: desktop hover moves also launch this
+        // handler, and a pre-guard clear would erase a catch's isTouching and fire onRefresh.
+        isTouching = false
         isProcessingRelease = true
         try {
             if (dragOffset >= refreshThresholdOffset) {
                 // If pulled past threshold, will then call startRefreshing().
-                startRefreshing(onRefresh)
+                startRefreshing(onRefresh, isRefreshingNow)
             } else {
                 // If not pulled past threshold, rebound to the resting state using spring.
                 try {
@@ -369,7 +420,8 @@ class PullToRefreshState(
                     animateToSpring(0f)
                 } finally {
                     isRebounding = false
-                    resetToIdle()
+                    // Never write Idle under a live touch: a pending show would hijack the gesture.
+                    if (!isTouching) resetToIdle()
                 }
             }
         } finally {
@@ -378,8 +430,10 @@ class PullToRefreshState(
     }
 
     private suspend fun startManualRefreshCompleteAnimation() {
-        refreshCompleteAnimProgressState.floatValue = 0f
-        val animatedValue = Animatable(0f)
+        // Height-continuous handoff when completing mid-expansion; 0 once settled at the threshold.
+        val initialProgress = 1f - pullProgress
+        refreshCompleteAnimProgressState.floatValue = initialProgress
+        val animatedValue = Animatable(initialProgress)
         animatedValue.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)),
@@ -542,7 +596,8 @@ private fun createPullToRefreshConnection(
                     pullToRefreshState.animateToSpring(0f)
                 } finally {
                     pullToRefreshState.isRebounding = false
-                    pullToRefreshState.resetToIdle()
+                    // Never write Idle under a live touch: a pending show would hijack the gesture.
+                    if (!pullToRefreshState.isTouching) pullToRefreshState.resetToIdle()
                 }
             }
             return available
@@ -597,7 +652,10 @@ private fun RefreshHeader(
                     if (progress > 0.6f) (progress - 0.5f) * 2f else 0f
                 }
 
-                RefreshState.ThresholdReached, RefreshState.Refreshing -> 1f
+                RefreshState.ThresholdReached -> 1f
+
+                // pullProgress is 1 from a gesture; it ramps 0->1 only during a programmatic expansion.
+                RefreshState.Refreshing -> ((pullToRefreshState.pullProgress - 0.5f) * 2f).coerceIn(0f, 1f)
 
                 RefreshState.RefreshComplete -> {
                     (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f).coerceAtLeast(0f)
@@ -618,7 +676,7 @@ private fun RefreshHeader(
                     circleSize + offsetDp
                 }
 
-                RefreshState.Refreshing -> circleSize
+                RefreshState.Refreshing -> circleSize * pullToRefreshState.pullProgress
 
                 RefreshState.RefreshComplete -> circleSize * (1 - pullToRefreshState.refreshCompleteAnimProgress)
             }
@@ -637,7 +695,7 @@ private fun RefreshHeader(
                     (circleSize + 36.dp) + offsetDp
                 }
 
-                RefreshState.Refreshing -> circleSize + 36.dp
+                RefreshState.Refreshing -> (circleSize + 36.dp) * pullToRefreshState.pullProgress
 
                 RefreshState.RefreshComplete -> (circleSize + 36.dp) * (1 - pullToRefreshState.refreshCompleteAnimProgress)
             }
@@ -709,11 +767,13 @@ private fun RefreshIndicator(
                 }
 
                 RefreshState.Refreshing -> {
+                    // Same masking window as Pulling; exactly 1 when entered from a gesture.
+                    val expansionAlpha = ((pullToRefreshState.pullProgress - 0.2f) / 0.8f).coerceIn(0f, 1f)
                     drawRefreshingIndicator(
                         center,
                         indicatorRadiusPx,
                         ringStrokeWidthPx,
-                        color,
+                        color.copy(alpha = color.alpha * expansionAlpha),
                         rotationState?.value ?: 0f,
                     )
                 }
