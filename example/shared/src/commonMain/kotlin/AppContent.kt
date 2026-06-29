@@ -58,27 +58,17 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.NavDisplayTransitionEffects
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import androidx.savedstate.serialization.SavedStateConfiguration
 import component.liquid.IosLiquidGlassNavigationBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-import navigation3.Navigator
-import navigation3.Route
+import navigation.CrossActivityTransition
+import navigation.Navigator
+import navigation.Route
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -116,6 +106,13 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
+import top.yukonga.miuix.kmp.nav.core.NavDisplay
+import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
+import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.BlurredBar
@@ -162,29 +159,11 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    val serializersModule = remember {
-        SerializersModule {
-            polymorphic(NavKey::class) {
-                subclass(Route.Main::class)
-                subclass(Route.PullToRefresh::class)
-                subclass(Route.About::class)
-                subclass(Route.License::class)
-                subclass(Route.Navigation::class)
-                subclass(Route.MultiScaffold::class)
-            }
-        }
-    }
-
-    val savedStateConfig = remember(serializersModule) {
-        SavedStateConfiguration {
-            this.serializersModule = serializersModule
-        }
-    }
-
-    val backStack = rememberNavBackStack(
-        configuration = savedStateConfig,
-        Route.Main,
-    )
+    // miuix-nav back stack. The explicit <Route> supertype is required: a bare
+    // rememberNavBackStack(Route.Main) would infer T = the Route.Main singleton type and fail to
+    // encode the whole sealed hierarchy for save/restore. miuix-nav is reflection-free, so no
+    // SerializersModule / SavedStateConfiguration is needed for the @Serializable sealed Route.
+    val backStack = rememberNavBackStack<Route>(Route.Main)
     val navigator = remember { Navigator(backStack) }
 
     val navigationItems = remember {
@@ -206,62 +185,92 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
     ) {
-        val entryProvider = remember(backStack) {
-            entryProvider<NavKey> {
-                entry<Route.Main> {
-                    Home(
-                        padding = padding,
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                    )
-                }
-                entry<Route.PullToRefresh> {
-                    PullToRefreshPage(padding = padding)
-                }
-                entry<Route.About> {
-                    AboutPage(padding = padding)
-                }
-                entry<Route.License> {
-                    LicensePage(padding = padding)
-                }
-                entry<Route.Navigation> { route ->
-                    val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
-                    NavTestPage(
-                        index = index,
-                        padding = padding,
-                    )
-                }
-                entry<Route.MultiScaffold> {
-                    MultiScaffoldTestPage(padding = padding)
-                }
-            }
-        }
-
-        val entries = rememberDecoratedNavEntries(
-            backStack = backStack,
-            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
-            entryProvider = entryProvider,
-        )
-
-        val transitionEffects = remember(
+        // Follow the device screen corner so the slide-in clip matches the platform (0 on Desktop/Web).
+        val navCornerRadius = rememberNavSystemCornerRadius()
+        val isCrossActivityStyle = appState.navTransitionStyle == 1
+        val backdropColor = MiuixTheme.colorScheme.surface
+        val isDarkTheme = isInDarkTheme()
+        val effects = remember(
             appState.enableCornerClip,
+            navCornerRadius,
             appState.enableDim,
             appState.blockInputDuringTransition,
-            appState.popDirectionFollowsSwipeEdge,
+            isCrossActivityStyle,
+            backdropColor,
+            isDarkTheme,
         ) {
-            NavDisplayTransitionEffects(
+            NavDisplayEffects(
                 enableCornerClip = appState.enableCornerClip,
-                dimAmount = if (appState.enableDim) 0.5f else 0f,
+                // The cross-activity card should stay rounded on Desktop/Web too, where the
+                // platform reports no screen corner.
+                cornerClipRadius = if (isCrossActivityStyle && navCornerRadius <= 0.dp) 32.dp else navCornerRadius,
+                // The cross-activity card scales the whole page (round all four corners); the
+                // slide style rounds only the leading edge.
+                cornerClipMode = if (isCrossActivityStyle) NavCornerClipMode.All else NavCornerClipMode.Leading,
+                // The cross-activity style uses the platform scrim constants (0.2 light / 0.8
+                // dark); the slide style keeps the established 0.5.
+                // The scrim curve itself (hold-during-gesture for the card style, depth-linear
+                // for the slide style) is owned by each transition via NavTransition.scrimFraction.
+                dimAmount = when {
+                    !appState.enableDim -> 0f
+                    isCrossActivityStyle -> if (isDarkTheme) 0.8f else 0.2f
+                    else -> 0.5f
+                },
                 blockInputDuringTransition = appState.blockInputDuringTransition,
-                popDirectionFollowsSwipeEdge = appState.popDirectionFollowsSwipeEdge,
+                // Fill the area revealed around scaled-down layers with the page background, like
+                // the platform's back-animation background layer.
+                backdropColor = backdropColor,
             )
         }
 
+        // Swipe-to-dismiss is opt-in in miuix-nav and off by default; the example gates it behind a
+        // setting. Directions are physical (not mirrored), so pick per layout direction: rightward
+        // back-swipe under LTR, leftward under RTL.
+        val swipeBackDirection = when {
+            !appState.enableSwipeBack -> NavSwipeDirection.None
+            LocalLayoutDirection.current == LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
+            else -> NavSwipeDirection.LeftToRight
+        }
+
+        // Global transition style: the established default, or the cross-activity feel — the
+        // latter is a fully custom transition defined in this app (navigation/CrossActivityTransition.kt)
+        // on the public API, not a library preset. Both are top-level singletons, so the
+        // expression itself is stable across recompositions.
+        val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
+
         NavDisplay(
-            entries = entries,
+            backStack = backStack,
             onBack = { navigator.pop() },
-            transitionEffects = transitionEffects,
-        )
+            transition = navTransition,
+            effects = effects,
+        ) {
+            entry<Route.Main>(swipeDismiss = swipeBackDirection) {
+                Home(
+                    padding = padding,
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
+            }
+            entry<Route.PullToRefresh>(swipeDismiss = swipeBackDirection) {
+                PullToRefreshPage(padding = padding)
+            }
+            entry<Route.About>(swipeDismiss = swipeBackDirection) {
+                AboutPage(padding = padding)
+            }
+            entry<Route.License>(swipeDismiss = swipeBackDirection) {
+                LicensePage(padding = padding)
+            }
+            entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
+                val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
+                NavTestPage(
+                    index = index,
+                    padding = padding,
+                )
+            }
+            entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
+                MultiScaffoldTestPage(padding = padding)
+            }
+        }
     }
 
     AnimatedVisibility(
