@@ -93,7 +93,6 @@ import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -333,7 +332,6 @@ private fun WideScreenContent(
         if (appState.showNavigationBar) {
             NavigationRail(
                 state = railState,
-                mode = NavigationRailDisplayMode.entries[appState.navigationRailMode],
             ) {
                 navigationItems.forEachIndexed { index, item ->
                     NavigationRailItem(

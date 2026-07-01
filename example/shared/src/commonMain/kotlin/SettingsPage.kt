@@ -44,7 +44,6 @@ import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
-private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
 private val FloatingNavigationBarStyleOptions = listOf("Default", "iOS-like")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
@@ -201,14 +200,6 @@ private fun SettingsContent(
                             items = NavigationBarDisplayModeOptions,
                             selectedIndex = appState.navigationBarMode,
                             onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
-                        )
-                    }
-                    AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
-                        OverlayDropdownPreference(
-                            title = "NavigationRail Mode",
-                            items = NavigationRailDisplayModeOptions,
-                            selectedIndex = appState.navigationRailMode,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailMode = it) } },
                         )
                     }
                     AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen) {
