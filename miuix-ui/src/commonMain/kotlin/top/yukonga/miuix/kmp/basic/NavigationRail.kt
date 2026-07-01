@@ -356,20 +356,22 @@ private fun NavigationRailItemExpandable(
             },
         ) { measurables, constraints ->
             val width = constraints.maxWidth
+            val leadingInset = NavigationRailDefaults.ExpandedItemContentHorizontalPadding.roundToPx()
+            val expandedSpacing = NavigationRailDefaults.ExpandedItemIconTextSpacing.roundToPx()
             val iconPlaceable = measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0))
-            val labelPlaceable = measurables[2].measure(
-                Constraints(maxWidth = width.coerceAtLeast(0), maxHeight = constraints.maxHeight),
-            )
             val iconW = iconPlaceable.width
             val iconH = iconPlaceable.height
+            // Cap the label width to the space after the icon so long labels ellipsize, not hard-clip.
+            val expandedLabelMax = (width - leadingInset - iconW - expandedSpacing).coerceAtLeast(0)
+            val labelPlaceable = measurables[2].measure(
+                Constraints(maxWidth = lerp(width, expandedLabelMax, fraction), maxHeight = constraints.maxHeight),
+            )
             val labelH = labelPlaceable.height
 
             val topPad = NavigationRailDefaults.ItemVerticalPadding.roundToPx()
             val collapsedSpacing = NavigationRailDefaults.IconTextSpacing.roundToPx()
             val collapsedIndVPad = NavigationRailDefaults.CollapsedIndicatorVerticalPadding.roundToPx()
             val expandedVPad = NavigationRailDefaults.ExpandedItemContentVerticalPadding.roundToPx()
-            val leadingInset = NavigationRailDefaults.ExpandedItemContentHorizontalPadding.roundToPx()
-            val expandedSpacing = NavigationRailDefaults.ExpandedItemIconTextSpacing.roundToPx()
 
             val collapsedHeight = topPad + iconH + collapsedIndVPad * 2 + collapsedSpacing + labelH + topPad
             val expandedHeight = expandedVPad * 2 + maxOf(iconH, labelH)
