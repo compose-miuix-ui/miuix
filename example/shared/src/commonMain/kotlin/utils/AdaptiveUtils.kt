@@ -29,3 +29,13 @@ fun shouldShowThreePanes(): Boolean {
         widthDp >= 1200.dp
     }
 }
+
+@Composable
+fun shouldExpandNavigationRail(): Boolean {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    return with(density) {
+        val widthDp = windowInfo.containerSize.width.toDp()
+        widthDp >= 1200.dp
+    }
+}

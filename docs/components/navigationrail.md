@@ -11,7 +11,7 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 ```
 
 ## Basic Usage
@@ -38,6 +38,33 @@ Row {
 }
 ```
 
+## Expandable Rail
+
+Pass a `NavigationRailState` (created with `rememberNavigationRailState`) to make the rail expandable. A built-in toggle button appears at the top-left; tapping it animates the rail between its collapsed width and `expandedWidth`. When expanded, each item switches to a horizontal icon-and-label layout with a highlighted pill behind the selected item.
+
+```kotlin
+var selectedIndex by remember { mutableStateOf(0) }
+val items = listOf("Home", "Profile", "Settings")
+val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Contacts, MiuixIcons.Settings)
+val railState = rememberNavigationRailState()
+
+Row {
+    NavigationRail(state = railState) {
+        items.forEachIndexed { index, label ->
+            NavigationRailItem(
+                selected = selectedIndex == index,
+                onClick = { selectedIndex = index },
+                icon = icons[index],
+                label = label
+            )
+        }
+    }
+    // Content area
+}
+```
+
+You can also drive the state programmatically via `railState.expand()`, `railState.collapse()` or `railState.toggle()`. When `state` is left as `null` (the default), the rail keeps its classic non-expandable layout with no toggle button.
+
 ## Component States
 
 ### Selected State
@@ -51,12 +78,13 @@ Row {
 | Property Name              | Type                                   | Description                                   | Default Value                     | Required |
 | -------------------------- | -------------------------------------- | --------------------------------------------- | --------------------------------- | -------- |
 | modifier                   | Modifier                               | Modifier applied to the rail                  | Modifier                          | No       |
+| state                      | NavigationRailState?                   | Expand/collapse state; non-null makes the rail expandable | null                  | No       |
 | header                     | @Composable (ColumnScope.() -> Unit)?  | Header content (e.g. FAB or Logo)             | null                              | No       |
 | color                      | Color                                  | Background color of the rail                  | MiuixTheme.colorScheme.surface    | No       |
 | showDivider                | Boolean                                | Show divider line between rail and content    | true                              | No       |
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
-| minWidth                   | Dp                                     | Minimum width of the rail                     | NavigationRailDefaults.MinWidth   | No       |
-| mode                       | NavigationRailDisplayMode                  | Display mode for items                        | NavigationRailDisplayMode.IconAndText | No       |
+| minWidth                   | Dp                                     | Minimum (collapsed) width of the rail         | NavigationRailDefaults.MinWidth   | No       |
+| expandedWidth              | Dp                                     | Width of the rail when expanded               | NavigationRailDefaults.ExpandedWidth | No    |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
 ### NavigationRailItem Properties
@@ -77,23 +105,39 @@ The NavigationRailDefaults object provides default values for NavigationRail and
 
 #### Constants
 
-| Constant Name          | Type     | Description                                | Default Value |
-| ---------------------- | -------- | ------------------------------------------ | ------------- |
-| MinWidth               | Dp       | Minimum width of the rail                  | 80.dp         |
-| VerticalPadding        | Dp       | Vertical padding of the content            | 24.dp         |
-| HeaderSpacing          | Dp       | Spacing after the header                   | 24.dp         |
-| IconSize               | Dp       | Icon size                                  | 28.dp         |
-| IconTextSpacing        | Dp       | Spacing between icon and text              | 4.dp          |
-| ItemVerticalPadding    | Dp       | Vertical padding for each item             | 12.dp         |
-| LabelFontSize          | TextUnit | Label font size                            | 12.sp         |
-| SelectedPressedAlpha   | Float    | Alpha for selected pressed item            | 0.5f          |
-| UnselectedPressedAlpha | Float    | Alpha for unselected pressed item          | 0.6f          |
-| UnselectedAlpha        | Float    | Alpha for unselected item                  | 0.4f          |
+| Constant Name                      | Type     | Description                                | Default Value |
+| ---------------------------------- | -------- | ------------------------------------------ | ------------- |
+| MinWidth                           | Dp       | Minimum (collapsed) width of the rail      | 80.dp         |
+| ExpandedWidth                      | Dp       | Width of the rail when expanded            | 240.dp        |
+| VerticalPadding                    | Dp       | Vertical padding of the content            | 24.dp         |
+| HeaderSpacing                      | Dp       | Spacing after the header                   | 24.dp         |
+| IconSize                           | Dp       | Icon size                                  | 28.dp         |
+| IconTextSpacing                    | Dp       | Spacing between icon and text              | 4.dp          |
+| ItemVerticalPadding                | Dp       | Vertical padding for each item             | 12.dp         |
+| LabelFontSize                      | TextUnit | Label font size                            | 12.sp         |
+| ExpandedLabelFontSize              | TextUnit | Label font size when expanded              | 16.sp         |
+| ExpandedItemHorizontalMargin       | Dp       | Margin between an expanded item and edges  | 12.dp         |
+| ExpandedItemCornerRadius           | Dp       | Corner radius of the selected pill         | 16.dp         |
+| CollapsedIndicatorVerticalPadding  | Dp       | Padding of a collapsed item's indicator around its icon | 4.dp |
+| ExpandedItemContentHorizontalPadding | Dp     | Horizontal padding inside an expanded item | 14.dp         |
+| ExpandedItemContentVerticalPadding | Dp       | Vertical padding inside an expanded item   | 14.dp         |
+| ExpandedItemIconTextSpacing        | Dp       | Spacing between icon and label (expanded)  | 16.dp         |
 
-### NavigationRailDisplayMode
+### NavigationRailState
 
-| Value                 | Description                                       |
-| --------------------- | ------------------------------------------------- |
-| IconAndText           | Display both icon and text.                       |
-| IconOnly              | Display only icon.                                |
-| IconWithSelectedLabel | Display icon always, and text only when selected. |
+Create it with `rememberNavigationRailState(initialValue)` and pass it to `NavigationRail` to make the rail expandable.
+
+| Member       | Type                | Description                                    |
+| ------------ | ------------------- | ---------------------------------------------- |
+| currentValue | NavigationRailValue | The current expansion value                    |
+| isExpanded   | Boolean             | Whether the rail is currently expanded         |
+| expand()     | fun                 | Expands the rail                               |
+| collapse()   | fun                 | Collapses the rail                             |
+| toggle()     | fun                 | Toggles between collapsed and expanded         |
+
+### NavigationRailValue
+
+| Value     | Description                                     |
+| --------- | ----------------------------------------------- |
+| Collapsed | The rail is collapsed to `MinWidth`.            |
+| Expanded  | The rail is expanded to `ExpandedWidth`.        |
