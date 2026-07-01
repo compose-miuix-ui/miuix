@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -61,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.anim.folmeSpring
-import top.yukonga.miuix.kmp.basic.NavigationRailState.Companion.Saver
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Sidebar
 import top.yukonga.miuix.kmp.squircle.squircleBackground
@@ -85,7 +83,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
  * @param minWidth The minimum width of the [NavigationRail], used for the collapsed state.
  * @param expandedWidth The width of the [NavigationRail] when [state] is expanded.
- * @param mode The mode for displaying items in the [NavigationRail]. It can show icons, text or both.
  * @param content The content of the [NavigationRail], usually [NavigationRailItem]s.
  */
 @Composable
@@ -98,18 +95,19 @@ fun NavigationRail(
     defaultWindowInsetsPadding: Boolean = true,
     minWidth: Dp = NavigationRailDefaults.MinWidth,
     expandedWidth: Dp = NavigationRailDefaults.ExpandedWidth,
-    mode: NavigationRailDisplayMode = NavigationRailDisplayMode.IconAndText,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val isExpanded = state?.isExpanded == true
+    // Guard against a misconfigured expandedWidth narrower than the collapsed minWidth.
+    val effectiveExpandedWidth = expandedWidth.coerceAtLeast(minWidth)
     val animatedWidth by animateDpAsState(
-        targetValue = if (isExpanded) expandedWidth else minWidth,
+        targetValue = if (isExpanded) effectiveExpandedWidth else minWidth,
         animationSpec = folmeSpring(damping = 1f, response = 0.35f),
         label = "navigationRailWidth",
     )
     // Continuous 0..1 expansion fraction that items morph off; null when the rail is not expandable.
-    val expandProgress = if (expandedWidth > minWidth) {
-        ((animatedWidth - minWidth) / (expandedWidth - minWidth)).coerceIn(0f, 1f)
+    val expandProgress = if (effectiveExpandedWidth > minWidth) {
+        ((animatedWidth - minWidth) / (effectiveExpandedWidth - minWidth)).coerceIn(0f, 1f)
     } else if (isExpanded) {
         1f
     } else {
@@ -133,7 +131,13 @@ fun NavigationRail(
             modifier = Modifier
                 .width(animatedWidth)
                 .fillMaxHeight()
-                .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier.windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
+                    } else {
+                        Modifier
+                    },
+                )
                 .verticalScroll(rememberScrollState())
                 .selectableGroup()
                 .padding(vertical = NavigationRailDefaults.VerticalPadding),
@@ -149,7 +153,6 @@ fun NavigationRail(
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
             CompositionLocalProvider(
-                LocalNavigationRailDisplayMode provides mode,
                 LocalNavigationRailExpandProgress provides (if (state != null) expandProgress else null),
             ) {
                 content()
@@ -216,7 +219,6 @@ fun NavigationRailItem(
 
     val tint = MiuixTheme.colorScheme.onSurfaceContainer
     val fontWeight = FontWeight.Medium
-    val mode = LocalNavigationRailDisplayMode.current
 
     val expandProgress = LocalNavigationRailExpandProgress.current
     if (expandProgress != null) {
@@ -248,65 +250,27 @@ fun NavigationRailItem(
                 indication = LocalIndication.current,
             )
             .padding(vertical = NavigationRailDefaults.ItemVerticalPadding)
-            .animateContentSize()
             .then(if (badge != null) Modifier.badgeBounds() else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        when (mode) {
-            NavigationRailDisplayMode.IconAndText -> {
-                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
-                    Image(
-                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
-                        imageVector = icon,
-                        // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                }
-                Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
-                Text(
-                    text = label,
-                    color = tint,
-                    textAlign = TextAlign.Center,
-                    fontSize = NavigationRailDefaults.LabelFontSize,
-                    fontWeight = fontWeight,
-                )
-            }
-
-            NavigationRailDisplayMode.IconWithSelectedLabel -> {
-                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
-                    Image(
-                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
-                        imageVector = icon,
-                        // The label only exists in the tree when selected; name the icon otherwise to avoid double-read.
-                        contentDescription = if (selected) null else label,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                }
-                if (selected) {
-                    Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
-                    Text(
-                        text = label,
-                        color = tint,
-                        textAlign = TextAlign.Center,
-                        fontSize = NavigationRailDefaults.LabelFontSize,
-                        fontWeight = fontWeight,
-                    )
-                }
-            }
-
-            else -> {
-                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
-                    Image(
-                        modifier = iconModifier.size(NavigationRailDefaults.IconSize),
-                        imageVector = icon,
-                        contentDescription = label,
-                        colorFilter = ColorFilter.tint(tint),
-                    )
-                }
-            }
+        NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+            Image(
+                modifier = iconModifier.size(NavigationRailDefaults.IconSize),
+                imageVector = icon,
+                // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(tint),
+            )
         }
+        Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
+        Text(
+            text = label,
+            color = tint,
+            textAlign = TextAlign.Center,
+            fontSize = NavigationRailDefaults.LabelFontSize,
+            fontWeight = fontWeight,
+        )
     }
 }
 
@@ -485,28 +449,6 @@ object NavigationRailDefaults {
 }
 
 /**
- * Defines the display mode for items in a [NavigationRail].
- *
- * This controls whether to show both icon and text, icon only,
- * or icon with text only when selected.
- */
-enum class NavigationRailDisplayMode {
-    /** Show both icon and text. */
-    IconAndText,
-
-    /** Show icon only. */
-    IconOnly,
-
-    /** Show icon always, show text only when selected. */
-    IconWithSelectedLabel,
-}
-
-/**
- * A composition local to control the display mode for items in a [NavigationRail].
- */
-val LocalNavigationRailDisplayMode = compositionLocalOf { NavigationRailDisplayMode.IconAndText }
-
-/**
  * The hosting [NavigationRail]'s expansion fraction (0..1) used by items to morph, or null when the
  * rail is not expandable.
  */
@@ -560,7 +502,7 @@ class NavigationRailState(initialValue: NavigationRailValue = NavigationRailValu
         /** The default [Saver] for [NavigationRailState]. */
         val Saver: Saver<NavigationRailState, Int> = Saver(
             save = { it.currentValue.ordinal },
-            restore = { NavigationRailState(NavigationRailValue.entries[it]) },
+            restore = { NavigationRailState(NavigationRailValue.entries.getOrNull(it) ?: NavigationRailValue.Collapsed) },
         )
     }
 }
@@ -574,6 +516,6 @@ class NavigationRailState(initialValue: NavigationRailValue = NavigationRailValu
 @Composable
 fun rememberNavigationRailState(
     initialValue: NavigationRailValue = NavigationRailValue.Collapsed,
-): NavigationRailState = rememberSaveable(saver = Saver) {
+): NavigationRailState = rememberSaveable(saver = NavigationRailState.Saver) {
     NavigationRailState(initialValue)
 }
