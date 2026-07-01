@@ -11,7 +11,6 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 ```
 
@@ -86,7 +85,6 @@ You can also drive the state programmatically via `railState.expand()`, `railSta
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
 | minWidth                   | Dp                                     | Minimum (collapsed) width of the rail         | NavigationRailDefaults.MinWidth   | No       |
 | expandedWidth              | Dp                                     | Width of the rail when expanded               | NavigationRailDefaults.ExpandedWidth | No    |
-| mode                       | NavigationRailDisplayMode                  | Display mode for items                        | NavigationRailDisplayMode.IconAndText | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
 ### NavigationRailItem Properties
@@ -143,11 +141,3 @@ Create it with `rememberNavigationRailState(initialValue)` and pass it to `Navig
 | --------- | ----------------------------------------------- |
 | Collapsed | The rail is collapsed to `MinWidth`.            |
 | Expanded  | The rail is expanded to `ExpandedWidth`.        |
-
-### NavigationRailDisplayMode
-
-| Value                 | Description                                       |
-| --------------------- | ------------------------------------------------- |
-| IconAndText           | Display both icon and text.                       |
-| IconOnly              | Display only icon.                                |
-| IconWithSelectedLabel | Display icon always, and text only when selected. |

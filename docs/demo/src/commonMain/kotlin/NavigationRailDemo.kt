@@ -24,7 +24,6 @@ import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
@@ -69,7 +68,6 @@ fun NavigationRailDemo() {
                     Row(modifier = Modifier.fillMaxSize()) {
                         NavigationRail(
                             state = railState,
-                            mode = NavigationRailDisplayMode.IconAndText,
                         ) {
                             items.forEachIndexed { index, item ->
                                 NavigationRailItem(

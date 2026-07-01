@@ -11,7 +11,6 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 ```
 
@@ -86,7 +85,6 @@ Row {
 | defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
 | minWidth                   | Dp                                     | NavigationRail 收起时的最小宽度               | NavigationRailDefaults.MinWidth   | 否       |
 | expandedWidth              | Dp                                     | NavigationRail 展开时的宽度                   | NavigationRailDefaults.ExpandedWidth | 否    |
-| mode                       | NavigationRailDisplayMode                  | 项目的显示模式                                | NavigationRailDisplayMode.IconAndText | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |
 
 ### NavigationRailItem 属性
@@ -143,11 +141,3 @@ NavigationRailDefaults 对象提供了 NavigationRail 和 NavigationRailItem 组
 | --------- | --------------------------------- |
 | Collapsed | 导航栏收起到 `MinWidth`。         |
 | Expanded  | 导航栏展开到 `ExpandedWidth`。    |
-
-### NavigationRailDisplayMode
-
-| 值                    | 描述                                    |
-| --------------------- | --------------------------------------- |
-| IconAndText           | 同时显示图标和文本。                    |
-| IconOnly              | 仅显示图标。                            |
-| IconWithSelectedLabel | 始终显示图标，仅在选中时显示文本。      |
