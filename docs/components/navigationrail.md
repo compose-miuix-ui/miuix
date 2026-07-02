@@ -1,6 +1,6 @@
 # NavigationRail
 
-`NavigationRail` is a side navigation component in Miuix, suitable for wide screens. It offers different display modes (icon only, icon and text, icon with selected label).
+`NavigationRail` is a side navigation component in Miuix, suitable for wide screens. It displays items as icon-above-label and can optionally expand to a wide icon-beside-label layout via `NavigationRailState`.
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=navigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -65,12 +65,6 @@ Row {
 
 You can also drive the state programmatically via `railState.expand()`, `railState.collapse()` or `railState.toggle()`. When `state` is left as `null` (the default), the rail keeps its classic non-expandable layout with no toggle button.
 
-## Component States
-
-### Selected State
-
-`NavigationRailItem` automatically handles the visual style of the selected item, displaying it with bold text and highlighting the icon/text.
-
 ## Properties
 
 ### NavigationRail Properties
@@ -85,6 +79,9 @@ You can also drive the state programmatically via `railState.expand()`, `railSta
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
 | minWidth                   | Dp                                     | Minimum (collapsed) width of the rail         | NavigationRailDefaults.MinWidth   | No       |
 | expandedWidth              | Dp                                     | Width of the rail when expanded               | NavigationRailDefaults.ExpandedWidth | No    |
+| expandContentDescription   | String                                 | Accessible description of the toggle while collapsed | NavigationRailDefaults.ExpandContentDescription | No |
+| collapseContentDescription | String                                 | Accessible description of the toggle while expanded  | NavigationRailDefaults.CollapseContentDescription | No |
+| scrollState                | ScrollState                            | Scroll state of the rail's content column    | rememberScrollState()             | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
 ### NavigationRailItem Properties
@@ -122,6 +119,8 @@ The NavigationRailDefaults object provides default values for NavigationRail and
 | ExpandedItemContentHorizontalPadding | Dp     | Horizontal padding inside an expanded item | 14.dp         |
 | ExpandedItemContentVerticalPadding | Dp       | Vertical padding inside an expanded item   | 14.dp         |
 | ExpandedItemIconTextSpacing        | Dp       | Spacing between icon and label (expanded)  | 16.dp         |
+| ExpandContentDescription           | String   | Toggle description while collapsed         | "Expand navigation rail" |
+| CollapseContentDescription         | String   | Toggle description while expanded          | "Collapse navigation rail" |
 
 ### NavigationRailState
 

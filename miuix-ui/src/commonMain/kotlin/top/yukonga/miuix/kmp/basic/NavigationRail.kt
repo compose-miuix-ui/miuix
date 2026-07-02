@@ -3,9 +3,11 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +28,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -36,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +52,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,7 +61,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -76,13 +83,21 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  *
  * @param modifier The modifier to be applied to the [NavigationRail].
  * @param state Controls the expanded/collapsed state; pass a [rememberNavigationRailState] to make
- *   the rail expandable, or null (default) for the classic non-expandable rail.
+ *   the rail expandable, or null (default) for the classic non-expandable rail. Keep the same
+ *   nullness across window size changes and drive it via [NavigationRailState.expand] /
+ *   [NavigationRailState.collapse]; flipping between null and non-null at runtime swaps the item
+ *   layout in a single frame without animation.
  * @param header The header of the [NavigationRail], usually a [FloatingActionButton] or a logo.
  * @param color The color of the [NavigationRail].
  * @param showDivider Whether to show the divider line between the [NavigationRail] and the content.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
  * @param minWidth The minimum width of the [NavigationRail], used for the collapsed state.
  * @param expandedWidth The width of the [NavigationRail] when [state] is expanded.
+ * @param expandContentDescription The accessible description of the built-in toggle while the rail
+ *   is collapsed; override it to localize the announcement.
+ * @param collapseContentDescription The accessible description of the built-in toggle while the
+ *   rail is expanded; override it to localize the announcement.
+ * @param scrollState The [ScrollState] of the rail's scrollable content column.
  * @param content The content of the [NavigationRail], usually [NavigationRailItem]s.
  */
 @Composable
@@ -95,27 +110,32 @@ fun NavigationRail(
     defaultWindowInsetsPadding: Boolean = true,
     minWidth: Dp = NavigationRailDefaults.MinWidth,
     expandedWidth: Dp = NavigationRailDefaults.ExpandedWidth,
+    expandContentDescription: String = NavigationRailDefaults.ExpandContentDescription,
+    collapseContentDescription: String = NavigationRailDefaults.CollapseContentDescription,
+    scrollState: ScrollState = rememberScrollState(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val isExpanded = state?.isExpanded == true
+    val hasState = state != null
     // Guard against a misconfigured expandedWidth narrower than the collapsed minWidth.
     val effectiveExpandedWidth = expandedWidth.coerceAtLeast(minWidth)
-    val animatedWidth by animateDpAsState(
-        targetValue = if (isExpanded) effectiveExpandedWidth else minWidth,
-        animationSpec = folmeSpring(damping = 1f, response = 0.35f),
-        label = "navigationRailWidth",
+    // Single 0..1 timeline that both the rail width and the item morph derive from. It is read
+    // only inside layout-phase blocks (and the small label leaf), so spring frames re-layout the
+    // rail without recomposing it or its items.
+    val expandProgress = animateFloatAsState(
+        targetValue = if (isExpanded) 1f else 0f,
+        animationSpec = RailExpandSpring,
+        label = "navigationRailExpandProgress",
     )
-    // Continuous 0..1 expansion fraction that items morph off; null when the rail is not expandable.
-    val expandProgress = if (effectiveExpandedWidth > minWidth) {
-        ((animatedWidth - minWidth) / (effectiveExpandedWidth - minWidth)).coerceIn(0f, 1f)
-    } else if (isExpanded) {
-        1f
-    } else {
-        0f
+    val expandInfo = remember(expandProgress, minWidth) {
+        NavigationRailExpandInfo(progress = expandProgress, collapsedWidth = minWidth)
     }
     Row(
+        // Background is painted before the insets padding so the rail color extends under the
+        // start cutout / side navigation bar instead of exposing the window background.
         modifier = modifier
             .fillMaxHeight()
+            .background(color)
             .then(
                 if (defaultWindowInsetsPadding) {
                     Modifier
@@ -124,28 +144,43 @@ fun NavigationRail(
                 } else {
                     Modifier
                 },
-            )
-            .background(color),
+            ),
     ) {
         Column(
             modifier = Modifier
-                .width(animatedWidth)
+                .layout { measurable, constraints ->
+                    val targetWidth = if (hasState) {
+                        lerp(minWidth, effectiveExpandedWidth, expandProgress.value.coerceIn(0f, 1f))
+                    } else {
+                        minWidth
+                    }
+                    val width = targetWidth.roundToPx().coerceIn(constraints.minWidth, constraints.maxWidth)
+                    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                    layout(width, placeable.height) { placeable.placeRelative(0, 0) }
+                }
                 .fillMaxHeight()
                 .then(
                     if (defaultWindowInsetsPadding) {
-                        Modifier.windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
-                    } else {
                         Modifier
+                            .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
+                            .verticalScroll(scrollState)
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                    } else {
+                        Modifier.verticalScroll(scrollState)
                     },
                 )
-                .verticalScroll(rememberScrollState())
                 .selectableGroup()
                 .padding(vertical = NavigationRailDefaults.VerticalPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
         ) {
             if (state != null) {
-                NavigationRailExpandToggle(state = state)
+                NavigationRailExpandToggle(
+                    state = state,
+                    info = expandInfo,
+                    expandContentDescription = expandContentDescription,
+                    collapseContentDescription = collapseContentDescription,
+                )
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
             if (header != null) {
@@ -153,7 +188,7 @@ fun NavigationRail(
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
             CompositionLocalProvider(
-                LocalNavigationRailExpandProgress provides (if (state != null) expandProgress else null),
+                LocalNavigationRailExpandInfo provides (if (state != null) expandInfo else null),
             ) {
                 content()
             }
@@ -165,32 +200,40 @@ fun NavigationRail(
 }
 
 /**
- * The built-in expand/collapse toggle button at the top of an expandable [NavigationRail]. It is
- * anchored to the start and sized so its centered icon lands on the same baseline as the item icons.
+ * The built-in expand/collapse toggle button at the top of an expandable [NavigationRail]. Its
+ * horizontal position morphs between the collapsed rail's center and the expanded start margin
+ * (coincident at the default dimensions), keeping its centered icon on the same baseline as the
+ * item icons at every fraction. The progress read happens in the layout phase, so spring frames
+ * re-place the button without recomposing it.
  */
 @Composable
 private fun NavigationRailExpandToggle(
     state: NavigationRailState,
+    info: NavigationRailExpandInfo,
+    expandContentDescription: String,
+    collapseContentDescription: String,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = NavigationRailDefaults.ExpandedItemHorizontalMargin),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
+    IconButton(
+        onClick = { state.toggle() },
+        modifier = Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints.copy(minWidth = 0))
+            val fraction = info.progress.value.coerceIn(0f, 1f)
+            val collapsedX = (info.collapsedWidth.toPx() - placeable.width) / 2f
+            val expandedX = NavigationRailDefaults.ExpandedItemHorizontalMargin.toPx()
+            val x = lerp(collapsedX, expandedX, fraction).fastRoundToInt()
+            layout(constraints.maxWidth, placeable.height) {
+                placeable.placeRelative(x, 0)
+            }
+        },
+        minWidth = NavigationRailDefaults.IconSize + NavigationRailDefaults.ExpandedItemContentHorizontalPadding * 2,
+        minHeight = NavigationRailDefaults.IconSize + NavigationRailDefaults.ExpandedItemContentVerticalPadding * 2,
     ) {
-        IconButton(
-            onClick = { state.toggle() },
-            minWidth = NavigationRailDefaults.IconSize + NavigationRailDefaults.ExpandedItemContentHorizontalPadding * 2,
-            minHeight = NavigationRailDefaults.IconSize + NavigationRailDefaults.ExpandedItemContentVerticalPadding * 2,
-        ) {
-            Icon(
-                modifier = Modifier.size(NavigationRailDefaults.IconSize),
-                imageVector = MiuixIcons.Basic.Sidebar,
-                contentDescription = if (state.isExpanded) "Collapse navigation rail" else "Expand navigation rail",
-                tint = MiuixTheme.colorScheme.onSurfaceContainer,
-            )
-        }
+        Icon(
+            modifier = Modifier.size(NavigationRailDefaults.IconSize),
+            imageVector = MiuixIcons.Basic.Sidebar,
+            contentDescription = if (state.isExpanded) collapseContentDescription else expandContentDescription,
+            tint = MiuixTheme.colorScheme.onSurfaceContainer,
+        )
     }
 }
 
@@ -219,11 +262,12 @@ fun NavigationRailItem(
 
     val tint = MiuixTheme.colorScheme.onSurfaceContainer
     val fontWeight = FontWeight.Medium
+    val iconColorFilter = remember(tint) { ColorFilter.tint(tint) }
 
-    val expandProgress = LocalNavigationRailExpandProgress.current
-    if (expandProgress != null) {
+    val expandInfo = LocalNavigationRailExpandInfo.current
+    if (expandInfo != null) {
         NavigationRailItemExpandable(
-            progress = expandProgress,
+            info = expandInfo,
             selected = selected,
             onClick = onClick,
             icon = icon,
@@ -231,6 +275,7 @@ fun NavigationRailItem(
             enabled = enabled,
             tint = tint,
             fontWeight = fontWeight,
+            iconColorFilter = iconColorFilter,
             interactionSource = interactionSource,
             badge = badge,
             modifier = modifier,
@@ -260,7 +305,7 @@ fun NavigationRailItem(
                 imageVector = icon,
                 // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(tint),
+                colorFilter = iconColorFilter,
             )
         }
         Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
@@ -275,15 +320,17 @@ fun NavigationRailItem(
 }
 
 /**
- * The morphing layout for a [NavigationRailItem] in an expandable [NavigationRail], driven by the
- * continuous [progress] fraction (0 collapsed, 1 expanded). A single [Layout] interpolates between
- * icon-above-label (collapsed) and icon-before-label (expanded); the icon keeps a fixed start
- * baseline and the selection indicator hugs the icon while collapsed, growing to the full item
- * once expanded.
+ * The morphing layout for a [NavigationRailItem] in an expandable [NavigationRail]. A single
+ * [Layout] interpolates between icon-above-label (collapsed) and icon-before-label (expanded),
+ * driven by the continuous fraction in [info], which is read only inside the measure pass (and by
+ * the small label leaf), so spring frames re-layout the item without recomposing it. The icon
+ * morphs between the collapsed rail's horizontal center and the expanded pill's start inset
+ * (coincident at the default dimensions), and the selection indicator hugs the icon while
+ * collapsed, growing to the full pill once expanded.
  */
 @Composable
 private fun NavigationRailItemExpandable(
-    progress: Float,
+    info: NavigationRailExpandInfo,
     selected: Boolean,
     onClick: () -> Unit,
     icon: ImageVector,
@@ -291,21 +338,17 @@ private fun NavigationRailItemExpandable(
     enabled: Boolean,
     tint: Color,
     fontWeight: FontWeight,
+    iconColorFilter: ColorFilter,
     interactionSource: MutableInteractionSource,
     badge: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    val fraction = progress.coerceIn(0f, 1f)
-    val collapsedSp = NavigationRailDefaults.LabelFontSize.value
-    val expandedSp = NavigationRailDefaults.ExpandedLabelFontSize.value
-    val labelFontSize = (collapsedSp + (expandedSp - collapsedSp) * fraction).sp
     val indicatorColor = MiuixTheme.colorScheme.surfaceContainerHigh
     val indication = LocalIndication.current
+    val progress = info.progress
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NavigationRailDefaults.ExpandedItemHorizontalMargin)
-            .clip(RoundedCornerShape(NavigationRailDefaults.ExpandedItemCornerRadius))
             .selectable(
                 selected = selected,
                 onClick = onClick,
@@ -323,7 +366,8 @@ private fun NavigationRailItemExpandable(
                 // icon (not the label) while collapsed.
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(NavigationRailDefaults.ExpandedItemCornerRadius))
+                        .layoutId("indicator")
+                        .clip(ExpandedItemShape)
                         .then(
                             if (selected) {
                                 Modifier.squircleBackground(
@@ -336,36 +380,44 @@ private fun NavigationRailItemExpandable(
                         )
                         .indication(interactionSource, indication),
                 )
-                NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                NavigationItemIcon(badge = badge, modifier = Modifier.layoutId("icon")) { iconModifier ->
                     Image(
                         modifier = iconModifier.size(NavigationRailDefaults.IconSize),
                         imageVector = icon,
                         // Decorative: the always-present label names the item; avoids double-read.
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(tint),
+                        colorFilter = iconColorFilter,
                     )
                 }
-                Text(
-                    text = label,
-                    color = tint,
-                    fontSize = labelFontSize,
+                NavigationRailItemLabel(
+                    info = info,
+                    label = label,
+                    tint = tint,
                     fontWeight = fontWeight,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.layoutId("label"),
                 )
             },
         ) { measurables, constraints ->
+            // Reading the fraction here (not in composition) makes spring frames measure-only.
+            val fraction = progress.value.coerceIn(0f, 1f)
             val width = constraints.maxWidth
+            val marginPx = NavigationRailDefaults.ExpandedItemHorizontalMargin.roundToPx()
             val leadingInset = NavigationRailDefaults.ExpandedItemContentHorizontalPadding.roundToPx()
             val expandedSpacing = NavigationRailDefaults.ExpandedItemIconTextSpacing.roundToPx()
-            val iconPlaceable = measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0))
+
+            val iconPlaceable = measurables.fastFirst { it.layoutId == "icon" }
+                .measure(constraints.copy(minWidth = 0, minHeight = 0))
             val iconW = iconPlaceable.width
             val iconH = iconPlaceable.height
-            // Cap the label width to the space after the icon so long labels ellipsize, not hard-clip.
-            val expandedLabelMax = (width - leadingInset - iconW - expandedSpacing).coerceAtLeast(0)
-            val labelPlaceable = measurables[2].measure(
+
+            // Collapsed, the label may use the full item width (matching the classic rail);
+            // expanded, it is capped to the pill's content area with a trailing inset symmetric to
+            // the leading one, so long labels ellipsize instead of hard-clipping.
+            val expandedLabelMax = (width - 2 * marginPx - 2 * leadingInset - iconW - expandedSpacing).coerceAtLeast(0)
+            val labelPlaceable = measurables.fastFirst { it.layoutId == "label" }.measure(
                 Constraints(maxWidth = lerp(width, expandedLabelMax, fraction), maxHeight = constraints.maxHeight),
             )
+            val labelW = labelPlaceable.width
             val labelH = labelPlaceable.height
 
             val topPad = NavigationRailDefaults.ItemVerticalPadding.roundToPx()
@@ -373,34 +425,81 @@ private fun NavigationRailItemExpandable(
             val collapsedIndVPad = NavigationRailDefaults.CollapsedIndicatorVerticalPadding.roundToPx()
             val expandedVPad = NavigationRailDefaults.ExpandedItemContentVerticalPadding.roundToPx()
 
+            // Geometry is interpolated in float and rounded exactly once per coordinate to avoid
+            // per-frame parity wobble between independently rounded values.
             val collapsedHeight = topPad + iconH + collapsedIndVPad * 2 + collapsedSpacing + labelH + topPad
             val expandedHeight = expandedVPad * 2 + maxOf(iconH, labelH)
-            val height = lerp(collapsedHeight, expandedHeight, fraction)
+            val height = lerp(collapsedHeight.toFloat(), expandedHeight.toFloat(), fraction).fastRoundToInt()
 
-            // Icon keeps a fixed start inset (which also centers it while collapsed); only its Y morphs.
-            val iconX = leadingInset
-            val iconCenterX = iconX + iconW / 2
-            val iconY = lerp(topPad + collapsedIndVPad, (height - iconH) / 2, fraction)
+            // Icon morphs from the collapsed rail's center to the pill's start inset (coincident
+            // at the default dimensions, so the start baseline stays fixed there).
+            val collapsedIconX = (info.collapsedWidth.toPx() - iconW) / 2f
+            val expandedIconX = (marginPx + leadingInset).toFloat()
+            val iconX = lerp(collapsedIconX, expandedIconX, fraction).fastRoundToInt()
+            val iconY = lerp((topPad + collapsedIndVPad).toFloat(), (height - iconH) / 2f, fraction).fastRoundToInt()
 
-            // Indicator hugs the icon while collapsed and grows to wrap the whole item once expanded.
-            val indicatorH = lerp(iconH + collapsedIndVPad * 2, iconH + expandedVPad * 2, fraction)
-            val indicatorW = lerp(iconW + leadingInset * 2, width, fraction)
-            val indicatorY = iconY - (indicatorH - iconH) / 2
-            val indicatorPlaceable = measurables[0].measure(Constraints.fixed(indicatorW, indicatorH))
+            // Indicator is built symmetrically around the icon's resolved rect so their centers
+            // stay locked at every fraction; it hugs the icon while collapsed and grows to the
+            // full pill once expanded.
+            val indicatorVPad = lerp(collapsedIndVPad.toFloat(), expandedVPad.toFloat(), fraction).fastRoundToInt()
+            val indicatorH = iconH + indicatorVPad * 2
+            val indicatorY = iconY - indicatorVPad
+            val indicatorX = lerp(collapsedIconX - leadingInset, marginPx.toFloat(), fraction).fastRoundToInt()
+            val indicatorW = lerp((iconW + leadingInset * 2).toFloat(), (width - marginPx * 2).toFloat(), fraction)
+                .fastRoundToInt()
+                .coerceAtLeast(0)
+            val indicatorPlaceable = measurables.fastFirst { it.layoutId == "indicator" }
+                .measure(Constraints.fixed(indicatorW, indicatorH))
 
             // Label sits centered under the icon while collapsed and at its end while expanded.
             val collapsedLabelY = topPad + iconH + collapsedIndVPad * 2 + collapsedSpacing
-            val labelX = lerp(iconCenterX - labelPlaceable.width / 2, leadingInset + iconW + expandedSpacing, fraction)
-            val labelY = lerp(collapsedLabelY, (height - labelH) / 2, fraction)
+            val collapsedLabelX = collapsedIconX + iconW / 2f - labelW / 2f
+            val expandedLabelX = (marginPx + leadingInset + iconW + expandedSpacing).toFloat()
+            val labelX = lerp(collapsedLabelX, expandedLabelX, fraction).fastRoundToInt().coerceAtLeast(0)
+            val labelY = lerp(collapsedLabelY.toFloat(), (height - labelH) / 2f, fraction).fastRoundToInt()
 
             layout(width, height) {
-                indicatorPlaceable.place(0, indicatorY)
-                iconPlaceable.place(iconX, iconY)
-                labelPlaceable.place(labelX, labelY)
+                indicatorPlaceable.placeRelative(indicatorX, indicatorY)
+                iconPlaceable.placeRelative(iconX, iconY)
+                labelPlaceable.placeRelative(labelX, labelY)
             }
         }
     }
 }
+
+/**
+ * The morphing label of an expandable [NavigationRailItem]. Font size is a composition-phase
+ * input, so the per-frame progress read is confined to this small leaf: only it and the
+ * underlying [Text] restart while the rail animates.
+ */
+@Composable
+private fun NavigationRailItemLabel(
+    info: NavigationRailExpandInfo,
+    label: String,
+    tint: Color,
+    fontWeight: FontWeight,
+    modifier: Modifier = Modifier,
+) {
+    val fraction = info.progress.value.coerceIn(0f, 1f)
+    val collapsedSp = NavigationRailDefaults.LabelFontSize.value
+    val expandedSp = NavigationRailDefaults.ExpandedLabelFontSize.value
+    Text(
+        text = label,
+        modifier = modifier,
+        color = tint,
+        fontSize = lerp(collapsedSp, expandedSp, fraction).sp,
+        fontWeight = fontWeight,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** Spring for the expand/collapse progress; the threshold trims the invisible settle tail. */
+private val RailExpandSpring: SpringSpec<Float> =
+    folmeSpring(damping = 1f, response = 0.35f, visibilityThreshold = 0.001f)
+
+/** Shared clip shape of the expanded item pill and its selection indicator. */
+private val ExpandedItemShape = RoundedCornerShape(NavigationRailDefaults.ExpandedItemCornerRadius)
 
 /** Contains default values used by [NavigationRail] and [NavigationRailItem]. */
 object NavigationRailDefaults {
@@ -448,13 +547,30 @@ object NavigationRailDefaults {
 
     /** The spacing between the icon and label of an expanded item. */
     val ExpandedItemIconTextSpacing = 16.dp
+
+    /** The default content description of the built-in toggle while the rail is collapsed. */
+    val ExpandContentDescription = "Expand navigation rail"
+
+    /** The default content description of the built-in toggle while the rail is expanded. */
+    val CollapseContentDescription = "Collapse navigation rail"
 }
 
 /**
- * The hosting [NavigationRail]'s expansion fraction (0..1) used by items to morph, or null when the
- * rail is not expandable.
+ * Expansion parameters a hosting expandable [NavigationRail] shares with its items: the continuous
+ * 0..1 [progress] (read inside layout-phase blocks so spring frames never recompose readers) and
+ * the rail's [collapsedWidth] used to center collapsed item icons.
  */
-internal val LocalNavigationRailExpandProgress = compositionLocalOf<Float?> { null }
+@Stable
+internal class NavigationRailExpandInfo(
+    val progress: State<Float>,
+    val collapsedWidth: Dp,
+)
+
+/**
+ * The hosting [NavigationRail]'s expansion parameters used by items to morph, or null when the
+ * rail is not expandable. The provided instance is identity-stable across animation frames.
+ */
+internal val LocalNavigationRailExpandInfo = compositionLocalOf<NavigationRailExpandInfo?> { null }
 
 /**
  * The possible expansion states of a [NavigationRail].

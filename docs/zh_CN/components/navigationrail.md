@@ -1,6 +1,6 @@
 # NavigationRail
 
-`NavigationRail` 是 Miuix 中的侧边导航组件，适用于宽屏设备。提供不同的显示模式（仅图标、图标和文本、仅选中项显示文本）。
+`NavigationRail` 是 Miuix 中的侧边导航组件，适用于宽屏设备。项目以「图标在上、文字在下」的形式展示，并可通过 `NavigationRailState` 展开为「图标 + 文字」横排的宽布局。
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=navigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -65,12 +65,6 @@ Row {
 
 你也可以通过 `railState.expand()`、`railState.collapse()` 或 `railState.toggle()` 以编程方式控制状态。当 `state` 保持为 `null`（默认值）时，导航栏保持经典的不可展开布局，且不显示切换按钮。
 
-## 组件状态
-
-### 选中状态
-
-`NavigationRailItem` 都会自动处理选中项的视觉样式，选中项将显示粗体文本并高亮图标/文本。
-
 ## 属性
 
 ### NavigationRail 属性
@@ -85,6 +79,9 @@ Row {
 | defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
 | minWidth                   | Dp                                     | NavigationRail 收起时的最小宽度               | NavigationRailDefaults.MinWidth   | 否       |
 | expandedWidth              | Dp                                     | NavigationRail 展开时的宽度                   | NavigationRailDefaults.ExpandedWidth | 否    |
+| expandContentDescription   | String                                 | 收起状态下切换按钮的无障碍描述                | NavigationRailDefaults.ExpandContentDescription | 否 |
+| collapseContentDescription | String                                 | 展开状态下切换按钮的无障碍描述                | NavigationRailDefaults.CollapseContentDescription | 否 |
+| scrollState                | ScrollState                            | 内容列的滚动状态                              | rememberScrollState()             | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |
 
 ### NavigationRailItem 属性
@@ -122,6 +119,8 @@ NavigationRailDefaults 对象提供了 NavigationRail 和 NavigationRailItem 组
 | ExpandedItemContentHorizontalPadding | Dp     | 展开项内部的水平内边距       | 14.dp  |
 | ExpandedItemContentVerticalPadding | Dp       | 展开项内部的垂直内边距       | 14.dp  |
 | ExpandedItemIconTextSpacing        | Dp       | 展开项图标与文字间距         | 16.dp  |
+| ExpandContentDescription           | String   | 收起时切换按钮的无障碍描述   | "Expand navigation rail" |
+| CollapseContentDescription         | String   | 展开时切换按钮的无障碍描述   | "Collapse navigation rail" |
 
 ### NavigationRailState
 
