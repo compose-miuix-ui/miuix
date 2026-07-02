@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -302,6 +301,12 @@ fun FloatingNavigationBar(
         }
     }
 
+    val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+    val animatedCaptionBarHeight by animateDpAsState(
+        targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
+        animationSpec = tween(durationMillis = 300),
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -317,7 +322,7 @@ fun FloatingNavigationBar(
                 .defaultMinSize(minHeight = 52.dp)
                 .then(
                     if (defaultWindowInsetsPadding) {
-                        Modifier.windowInsetsPadding(WindowInsets.captionBar.only(WindowInsetsSides.Bottom))
+                        Modifier.padding(bottom = animatedCaptionBarHeight)
                     } else {
                         Modifier
                     },
