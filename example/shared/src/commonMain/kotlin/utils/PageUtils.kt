@@ -9,15 +9,19 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -44,6 +48,15 @@ fun Modifier.pageScrollModifiers(
     .fillMaxHeight()
 
 @Composable
+fun Modifier.pageHorizontalPadding(outerPadding: PaddingValues): Modifier {
+    val layoutDirection = LocalLayoutDirection.current
+    return padding(
+        start = outerPadding.calculateStartPadding(layoutDirection),
+        end = outerPadding.calculateEndPadding(layoutDirection),
+    )
+}
+
+@Composable
 fun pageContentPadding(
     innerPadding: PaddingValues,
     outerPadding: PaddingValues,
@@ -53,7 +66,10 @@ fun pageContentPadding(
     extraEnd: Dp = 0.dp,
     extraBottom: Dp = 0.dp,
 ): PaddingValues {
+    val layoutDirection = LocalLayoutDirection.current
     val topPadding = innerPadding.calculateTopPadding() + extraTop
+    val startPadding = outerPadding.calculateStartPadding(layoutDirection) + extraStart
+    val endPadding = outerPadding.calculateEndPadding(layoutDirection) + extraEnd
     val bottomPadding = outerPadding.calculateBottomPadding() + extraBottom + if (isWideScreen) {
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues()
             .calculateBottomPadding()
@@ -61,11 +77,11 @@ fun pageContentPadding(
         0.dp
     }
 
-    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom) {
+    return remember(topPadding, startPadding, endPadding, bottomPadding) {
         PaddingValues(
             top = topPadding,
-            start = extraStart,
-            end = extraEnd,
+            start = startPadding,
+            end = endPadding,
             bottom = bottomPadding,
         )
     }
@@ -77,6 +93,8 @@ fun AdaptiveTopAppBar(
     showTopAppBar: Boolean,
     isWideScreen: Boolean,
     scrollBehavior: ScrollBehavior,
+    modifier: Modifier = Modifier,
+    outerPadding: PaddingValues = PaddingValues(),
     subtitle: String = "",
     color: Color = MiuixTheme.colorScheme.surface,
     navigationIcon: @Composable () -> Unit = {},
@@ -87,6 +105,7 @@ fun AdaptiveTopAppBar(
         if (isWideScreen) {
             SmallTopAppBar(
                 title = title,
+                modifier = modifier.pageHorizontalPadding(outerPadding),
                 subtitle = subtitle,
                 color = color,
                 scrollBehavior = scrollBehavior,
@@ -98,6 +117,7 @@ fun AdaptiveTopAppBar(
         } else {
             TopAppBar(
                 title = title,
+                modifier = modifier.pageHorizontalPadding(outerPadding),
                 subtitle = subtitle,
                 color = color,
                 scrollBehavior = scrollBehavior,

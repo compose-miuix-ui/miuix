@@ -150,6 +150,7 @@ fun IconsPage(
                         showTopAppBar = appState.showTopAppBar,
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
+                        outerPadding = padding,
                         color = barColor,
                     ) {
                         Box(

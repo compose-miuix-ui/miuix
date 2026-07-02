@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import misc.VersionInfo
 import navigation3.Route
@@ -65,6 +68,7 @@ fun SettingsPage(
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val layoutDirection = LocalLayoutDirection.current
 
     Scaffold(
         topBar = {
@@ -74,6 +78,7 @@ fun SettingsPage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    outerPadding = padding,
                     color = barColor,
                     subtitle = "v${VersionInfo.VERSION_NAME} (${VersionInfo.VERSION_CODE})",
                 )
@@ -82,7 +87,9 @@ fun SettingsPage(
     ) { innerPadding ->
         SettingsContent(
             padding = PaddingValues(
+                start = padding.calculateStartPadding(layoutDirection),
                 top = innerPadding.calculateTopPadding(),
+                end = padding.calculateEndPadding(layoutDirection),
                 bottom = padding.calculateBottomPadding(),
             ),
             topAppBarScrollBehavior = topAppBarScrollBehavior,

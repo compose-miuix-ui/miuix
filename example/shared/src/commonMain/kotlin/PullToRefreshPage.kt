@@ -92,6 +92,7 @@ fun PullToRefreshPage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    outerPadding = padding,
                     color = barColor,
                     navigationIcon = {
                         BackNavigationIcon(

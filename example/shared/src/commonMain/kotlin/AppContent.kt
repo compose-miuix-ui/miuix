@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -79,7 +82,9 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import navigation3.Navigator
 import navigation3.Route
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.DividerDefaults
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
@@ -93,6 +98,7 @@ import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailDefaults
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -120,6 +126,7 @@ import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.FPSMonitor
+import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
 import kotlin.math.abs
@@ -321,6 +328,9 @@ private fun WideScreenContent(
 ) {
     val appState = LocalAppState.current
     val page = mainPagerState.selectedPage
+    val backdrop = rememberBlurBackdrop()
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val expandRail = shouldExpandNavigationRail()
     val railState = rememberNavigationRailState(
         initialValue = if (expandRail) NavigationRailValue.Expanded else NavigationRailValue.Collapsed,
@@ -328,22 +338,19 @@ private fun WideScreenContent(
     LaunchedEffect(expandRail) {
         if (expandRail) railState.expand() else railState.collapse()
     }
-    Row {
-        if (appState.showNavigationBar) {
-            NavigationRail(
-                state = railState,
-            ) {
-                navigationItems.forEachIndexed { index, item ->
-                    NavigationRailItem(
-                        selected = page == index,
-                        onClick = { mainPagerState.animateToPage(index) },
-                        icon = item.icon,
-                        label = item.label,
-                        badge = navigationItemBadge(index, appState.showNavigationBarBadge),
-                    )
-                }
-            }
-        }
+    val railWidth by animateDpAsState(
+        targetValue = if (railState.isExpanded) {
+            NavigationRailDefaults.ExpandedWidth
+        } else {
+            NavigationRailDefaults.MinWidth
+        },
+        animationSpec = folmeSpring(damping = 1f, response = 0.35f),
+        label = "wideNavigationRailWidth",
+    )
+    val railContainerWidth = railWidth + DividerDefaults.Thickness
+    val contentStartPadding = if (appState.showNavigationBar) railContainerWidth else 0.dp
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
@@ -365,14 +372,64 @@ private fun WideScreenContent(
             },
             floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
         ) { padding ->
-            AppPager(
-                snackbarHostState = snackbarHostState,
-                padding = PaddingValues(top = padding.calculateTopPadding()),
-                pagerState = mainPagerState.pagerState,
+            Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+                AppPager(
+                    snackbarHostState = snackbarHostState,
+                    padding = PaddingValues(
+                        start = padding.calculateStartPadding(layoutDirection) + contentStartPadding,
+                        top = padding.calculateTopPadding(),
+                        end = padding.calculateEndPadding(layoutDirection),
+                        bottom = padding.calculateBottomPadding(),
+                    ),
+                    pagerState = mainPagerState.pagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding()
+                        .padding(end = padding.calculateEndPadding(layoutDirection)),
+                )
+            }
+        }
+
+        if (appState.showNavigationBar) {
+            Box(
                 modifier = Modifier
-                    .imePadding()
-                    .padding(end = padding.calculateEndPadding(layoutDirection)),
-            )
+                    .align(Alignment.CenterStart)
+                    .width(railContainerWidth)
+                    .fillMaxHeight()
+                    .then(
+                        if (blurActive) {
+                            Modifier.textureBlur(
+                                backdrop = backdrop,
+                                shape = RectangleShape,
+                                blurRadius = 25f,
+                                colors = BlurDefaults.blurColors(
+                                    blendColors = listOf(
+                                        BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
+                                    ),
+                                ),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .background(barColor),
+            ) {
+                NavigationRail(
+                    modifier = Modifier.fillMaxHeight(),
+                    state = railState,
+                    color = barColor,
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        NavigationRailItem(
+                            selected = page == index,
+                            onClick = { mainPagerState.animateToPage(index) },
+                            icon = item.icon,
+                            label = item.label,
+                            badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+                        )
+                    }
+                }
+            }
         }
     }
 }

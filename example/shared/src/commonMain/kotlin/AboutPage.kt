@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,6 +80,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.BlurredBar
 import utils.pageContentPadding
+import utils.pageHorizontalPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
@@ -107,6 +111,7 @@ fun AboutPage(
     }
 
     val backdrop = rememberBlurBackdrop()
+    val layoutDirection = LocalLayoutDirection.current
     // Defer the frame-rate scroll read out of composition: these booleans only flip at the
     // single 1f threshold, so derivedStateOf recomposes the bar on flip rather than every frame.
     val collapsed by remember { derivedStateOf { scrollProgress == 1f } }
@@ -125,6 +130,7 @@ fun AboutPage(
             BlurredBar(backdrop, blurActive) {
                 SmallTopAppBar(
                     title = "About",
+                    modifier = Modifier.pageHorizontalPadding(padding),
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     titleColor = titleColor,
@@ -141,7 +147,9 @@ fun AboutPage(
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             AboutContent(
                 padding = PaddingValues(
+                    start = padding.calculateStartPadding(layoutDirection),
                     top = innerPadding.calculateTopPadding(),
+                    end = padding.calculateEndPadding(layoutDirection),
                     bottom = padding.calculateBottomPadding(),
                 ),
                 topAppBarScrollBehavior = topAppBarScrollBehavior,

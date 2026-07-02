@@ -252,6 +252,7 @@ fun MainPage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    outerPadding = padding,
                     color = barColor,
                     actions = {
                         TooltipBox(text = "Options") {
