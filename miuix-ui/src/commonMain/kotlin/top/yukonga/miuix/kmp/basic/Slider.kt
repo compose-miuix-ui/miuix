@@ -1073,6 +1073,8 @@ internal class SliderHapticState {
 
         if (hasCustomKeyPoints && keyPointFractions.isNotEmpty()) {
             handleKeyPointHaptic(currentValue, valueRange, hapticFeedback, keyPointFractions, isNotAtEdge)
+        } else if (!isNotAtEdge) {
+            lastStep = currentValue
         } else if (currentValue != lastStep && isNotAtEdge) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             lastStep = currentValue
@@ -1232,6 +1234,8 @@ internal class RangeSliderHapticState {
                 }
 
                 onKeyPointUpdate(currentlyAtKeyPoint)
+            } else if (!isNotAtEdge) {
+                onLastStepUpdate(currentValue)
             } else if (currentValue != lastStep && isNotAtEdge) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onLastStepUpdate(currentValue)
