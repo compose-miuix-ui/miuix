@@ -80,10 +80,14 @@ fun IconsPage(
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val density = LocalDensity.current
-    // Quantize the collapse-driven padding to whole pixels to avoid sub-pixel jitter while collapsing.
-    val dynamicTopPadding by remember(topAppBarScrollBehavior, density) {
+    // Quantized to whole pixels to avoid sub-pixel jitter; always 0 on wide screens (pinned SmallTopAppBar).
+    val dynamicTopPadding by remember(topAppBarScrollBehavior, density, isWideScreen) {
         derivedStateOf {
-            with(density) { (12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction)).roundToPx().toDp() }
+            if (isWideScreen) {
+                0.dp
+            } else {
+                with(density) { (12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction)).roundToPx().toDp() }
+            }
         }
     }
 
