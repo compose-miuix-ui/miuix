@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -318,16 +317,7 @@ fun FloatingNavigationBar(
                 .defaultMinSize(minHeight = 52.dp)
                 .then(
                     if (defaultWindowInsetsPadding) {
-                        Modifier
-                            .then(
-                                if (platform() != Platform.IOS) {
-                                    Modifier
-                                        .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Bottom))
-                                } else {
-                                    Modifier
-                                },
-                            )
-                            .windowInsetsPadding(WindowInsets.captionBar.only(WindowInsetsSides.Bottom))
+                        Modifier.windowInsetsPadding(WindowInsets.captionBar.only(WindowInsetsSides.Bottom))
                     } else {
                         Modifier
                     },
