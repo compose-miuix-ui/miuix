@@ -76,8 +76,10 @@ Basic icons include commonly used basic UI elements such as arrows and checkmark
 | `ArrowRight` | - | - | <img src="/icons/basic/ArrowRight.svg" width="24" height="24" /> | - | - |
 | `ArrowUpDown` | - | - | <img src="/icons/basic/ArrowUpDown.svg" width="24" height="24" /> | - | - |
 | `Check` | - | - | <img src="/icons/basic/Check.svg" width="24" height="24" /> | - | - |
+| `Close` | - | - | <img src="/icons/basic/Close.svg" width="24" height="24" /> | - | - |
 | `Search` | - | - | <img src="/icons/basic/Search.svg" width="24" height="24" /> | - | - |
 | `SearchCleanup` | - | - | <img src="/icons/basic/SearchCleanup.svg" width="24" height="24" /> | - | - |
+| `Sidebar` | - | - | <img src="/icons/basic/Sidebar.svg" width="24" height="24" /> | - | - |
 
 ### Extended Icons
 
@@ -131,6 +133,7 @@ Extended icons include a wide variety of icons for different use cases. Below is
 | `GridView` | <img src="/icons/extended/GridView.Light.svg" width="24" height="24" /> | <img src="/icons/extended/GridView.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/GridView.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/GridView.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/GridView.Demibold.svg" width="24" height="24" /> |
 | `Help` | <img src="/icons/extended/Help.Light.svg" width="24" height="24" /> | <img src="/icons/extended/Help.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/Help.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/Help.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/Help.Demibold.svg" width="24" height="24" /> |
 | `Hide` | <img src="/icons/extended/Hide.Light.svg" width="24" height="24" /> | <img src="/icons/extended/Hide.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/Hide.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/Hide.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/Hide.Demibold.svg" width="24" height="24" /> |
+| `Home` | <img src="/icons/extended/Home.Light.svg" width="24" height="24" /> | <img src="/icons/extended/Home.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/Home.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/Home.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/Home.Demibold.svg" width="24" height="24" /> |
 | `HorizontalSplit` | <img src="/icons/extended/HorizontalSplit.Light.svg" width="24" height="24" /> | <img src="/icons/extended/HorizontalSplit.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/HorizontalSplit.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/HorizontalSplit.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/HorizontalSplit.Demibold.svg" width="24" height="24" /> |
 | `Image` | <img src="/icons/extended/Image.Light.svg" width="24" height="24" /> | <img src="/icons/extended/Image.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/Image.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/Image.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/Image.Demibold.svg" width="24" height="24" /> |
 | `Import` | <img src="/icons/extended/Import.Light.svg" width="24" height="24" /> | <img src="/icons/extended/Import.Normal.svg" width="24" height="24" /> | <img src="/icons/extended/Import.Regular.svg" width="24" height="24" /> | <img src="/icons/extended/Import.Medium.svg" width="24" height="24" /> | <img src="/icons/extended/Import.Demibold.svg" width="24" height="24" /> |

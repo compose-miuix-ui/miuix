@@ -51,6 +51,7 @@ import top.yukonga.miuix.kmp.icon.extended.Forward
 import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.Help
 import top.yukonga.miuix.kmp.icon.extended.Hide
+import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
 import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Import
@@ -210,6 +211,7 @@ val MiuixIcons.All: Map<String, List<ImageVector>>
             MiuixIcons.Light.GridView,
             MiuixIcons.Light.Help,
             MiuixIcons.Light.Hide,
+            MiuixIcons.Light.Home,
             MiuixIcons.Light.HorizontalSplit,
             MiuixIcons.Light.Image,
             MiuixIcons.Light.Import,
@@ -367,6 +369,7 @@ val MiuixIcons.All: Map<String, List<ImageVector>>
             MiuixIcons.Normal.GridView,
             MiuixIcons.Normal.Help,
             MiuixIcons.Normal.Hide,
+            MiuixIcons.Normal.Home,
             MiuixIcons.Normal.HorizontalSplit,
             MiuixIcons.Normal.Image,
             MiuixIcons.Normal.Import,
@@ -524,6 +527,7 @@ val MiuixIcons.All: Map<String, List<ImageVector>>
             MiuixIcons.Regular.GridView,
             MiuixIcons.Regular.Help,
             MiuixIcons.Regular.Hide,
+            MiuixIcons.Regular.Home,
             MiuixIcons.Regular.HorizontalSplit,
             MiuixIcons.Regular.Image,
             MiuixIcons.Regular.Import,
@@ -681,6 +685,7 @@ val MiuixIcons.All: Map<String, List<ImageVector>>
             MiuixIcons.Medium.GridView,
             MiuixIcons.Medium.Help,
             MiuixIcons.Medium.Hide,
+            MiuixIcons.Medium.Home,
             MiuixIcons.Medium.HorizontalSplit,
             MiuixIcons.Medium.Image,
             MiuixIcons.Medium.Import,
@@ -838,6 +843,7 @@ val MiuixIcons.All: Map<String, List<ImageVector>>
             MiuixIcons.Demibold.GridView,
             MiuixIcons.Demibold.Help,
             MiuixIcons.Demibold.Hide,
+            MiuixIcons.Demibold.Home,
             MiuixIcons.Demibold.HorizontalSplit,
             MiuixIcons.Demibold.Image,
             MiuixIcons.Demibold.Import,
