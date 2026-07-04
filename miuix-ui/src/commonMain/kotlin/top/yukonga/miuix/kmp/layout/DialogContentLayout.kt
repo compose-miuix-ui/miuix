@@ -89,6 +89,7 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  *   is cancelled mid-flight (e.g., by [show] toggling back to true).
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param topInset Optional top inset override. If null, calculated from window insets.
+ * @param maxWidth The maximum width of the dialog.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -109,6 +110,7 @@ internal fun DialogContentLayout(
     onDismissFinished: (() -> Unit)? = null,
     defaultWindowInsetsPadding: Boolean = true,
     topInset: Dp? = null,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -244,6 +246,7 @@ internal fun DialogContentLayout(
             onDismissRequest = requestDismiss,
             modifier = contentModifier,
             topInset = topInset,
+            maxWidth = maxWidth,
             content = {
                 CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                     content()
@@ -269,6 +272,7 @@ internal fun DialogContent(
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
     topInset: Dp? = null,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -307,7 +311,7 @@ internal fun DialogContent(
     }
 
     val contentModifier = modifier
-        .widthIn(max = DialogDefaults.MaxWidth)
+        .widthIn(max = maxWidth)
         .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
         .onGloballyPositioned { coordinates ->
             dialogHeightPx.intValue = coordinates.size.height

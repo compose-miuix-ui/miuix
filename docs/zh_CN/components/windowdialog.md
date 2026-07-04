@@ -71,6 +71,7 @@ WindowDialog(
 | outsideMargin              | DpSize                 | 相对窗口边缘的外部边距                         | DialogDefaults.outsideMargin     | 否       |
 | insideMargin               | DpSize                 | 对话框内容内部边距                             | DialogDefaults.insideMargin      | 否       |
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距（输入法/导航/标题） | true                                   | 否       |
+| maxWidth                   | Dp                     | 对话框最大宽度                                 | DialogDefaults.MaxWidth          | 否       |
 | content                    | @Composable () -> Unit | 对话框内容                                     | -                                      | 是       |
 
 ### DialogDefaults
@@ -79,6 +80,7 @@ WindowDialog(
 
 | 属性名        | 类型   | 说明               |
 | ------------- | ------ | ------------------ |
+| MaxWidth      | Dp     | 对话框默认最大宽度 |
 | outsideMargin | DpSize | 对话框外部默认边距 |
 | insideMargin  | DpSize | 对话框内部默认边距 |
 

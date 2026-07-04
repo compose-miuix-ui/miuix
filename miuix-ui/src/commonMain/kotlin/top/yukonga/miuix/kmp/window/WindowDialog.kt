@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
@@ -40,6 +41,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param outsideMargin The margin outside the [WindowDialog].
  * @param insideMargin The margin inside the [WindowDialog].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [WindowDialog].
+ * @param maxWidth The maximum width of the [WindowDialog].
  * @param content The [Composable] content of the [WindowDialog].
  */
 @Composable
@@ -57,6 +59,7 @@ fun WindowDialog(
     outsideMargin: DpSize = DialogDefaults.outsideMargin,
     insideMargin: DpSize = DialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
     content: @Composable () -> Unit,
 ) {
     val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -94,6 +97,7 @@ fun WindowDialog(
         onDismissFinished = onDismissFinished,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         topInset = safeTopInset,
+        maxWidth = maxWidth,
         content = {
             CompositionLocalProvider(
                 LocalDismissState provides {

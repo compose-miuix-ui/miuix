@@ -75,6 +75,7 @@ Scaffold {
 | insideMargin               | DpSize                 | 对话框内部内容的边距                         | DialogDefaults.insideMargin      | 否       |
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距                   | true                                  | 否       |
 | renderInRootScaffold       | Boolean                | 是否在根（最外层）Scaffold 中渲染对话框。为 true 时，对话框覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染 | true | 否 |
+| maxWidth                   | Dp                     | 对话框最大宽度                               | DialogDefaults.MaxWidth          | 否       |
 | content                    | @Composable () -> Unit | 对话框的内容                                 | -                                     | 是       |
 
 ### DialogDefaults
@@ -83,6 +84,7 @@ Scaffold {
 
 | 属性名        | 类型   | 说明               |
 | ------------- | ------ | ------------------ |
+| MaxWidth      | Dp     | 对话框默认最大宽度 |
 | outsideMargin | DpSize | 对话框外部默认边距 |
 | insideMargin  | DpSize | 对话框内部默认边距 |
 
