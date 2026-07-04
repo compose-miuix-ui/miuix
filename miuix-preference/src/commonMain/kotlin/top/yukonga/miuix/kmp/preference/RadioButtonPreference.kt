@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -64,6 +66,8 @@ fun RadioButtonPreference(
     enabled: Boolean = true,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
+    val hapticFeedback = LocalHapticFeedback.current
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
 
     BasicComponent(
         modifier = modifier,
@@ -76,11 +80,12 @@ fun RadioButtonPreference(
             {
                 Row {
                     if (radioButtonLocation == RadioButtonLocation.Start) {
-                        RadioButtonPreferenceStartAction(
+                        RadioButton(
+                            modifier = Modifier.padding(end = 5.dp),
                             selected = selected,
-                            onClick = currentOnClick,
+                            onClick = null,
                             enabled = enabled,
-                            radioButtonColors = radioButtonColors,
+                            colors = radioButtonColors,
                         )
                     }
 
@@ -111,69 +116,26 @@ fun RadioButtonPreference(
             }
 
             if (radioButtonLocation == RadioButtonLocation.End) {
-                RadioButtonPreferenceEndAction(
+                RadioButton(
                     selected = selected,
-                    onClick = currentOnClick,
+                    onClick = null,
                     enabled = enabled,
-                    radioButtonColors = radioButtonColors,
+                    colors = radioButtonColors,
                 )
             }
         },
         bottomAction = bottomAction,
         onClick = {
-            currentOnClick.takeIf { enabled }?.invoke()
+            currentOnClick.takeIf { enabled }?.let { onClick ->
+                onClick()
+                currentHapticFeedback.performHapticFeedback(
+                    if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
+                )
+            }
         },
         role = Role.RadioButton,
         holdDownState = holdDownState,
         enabled = enabled,
-    )
-}
-
-@Composable
-private fun RadioButtonPreferenceStartAction(
-    selected: Boolean,
-    onClick: (() -> Unit)?,
-    enabled: Boolean,
-    radioButtonColors: RadioButtonColors,
-) {
-    val currentOnClick by rememberUpdatedState(onClick)
-    val wrappedOnClick = remember(onClick != null) {
-        if (onClick != null) {
-            { currentOnClick?.invoke() ?: Unit }
-        } else {
-            null
-        }
-    }
-    RadioButton(
-        modifier = Modifier
-            .padding(end = 5.dp),
-        selected = selected,
-        onClick = wrappedOnClick,
-        enabled = enabled,
-        colors = radioButtonColors,
-    )
-}
-
-@Composable
-private fun RadioButtonPreferenceEndAction(
-    selected: Boolean,
-    onClick: (() -> Unit)?,
-    enabled: Boolean,
-    radioButtonColors: RadioButtonColors,
-) {
-    val currentOnClick by rememberUpdatedState(onClick)
-    val wrappedOnClick = remember(onClick != null) {
-        if (onClick != null) {
-            { currentOnClick?.invoke() ?: Unit }
-        } else {
-            null
-        }
-    }
-    RadioButton(
-        selected = selected,
-        onClick = wrappedOnClick,
-        enabled = enabled,
-        colors = radioButtonColors,
     )
 }
 
