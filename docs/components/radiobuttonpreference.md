@@ -1,8 +1,8 @@
 # RadioButtonPreference
 
-`RadioButtonPreference` is a radio button component in Miuix that provides a title, summary, and radio button control. It supports click interactions and is commonly used in single-select settings and selection lists.
+`RadioButtonPreference` is a radio button component in Miuix that provides a title, summary, and radio button control. It supports click interactions and is commonly used in single-select settings and selection lists. When an item is selected, its title and summary are tinted with the theme color.
 
-<div style="position: relative; height: 293px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=radioButtonPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
@@ -14,27 +14,22 @@ import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 ## Basic Usage
 
-RadioButtonPreference is typically used within a mutually exclusive group:
+RadioButtonPreference is typically used within a mutually exclusive group, with each option placed in its own card:
 
 ```kotlin
+val options = listOf("Option A", "Option B", "Option C")
 var selectedIndex by remember { mutableIntStateOf(0) }
 
-Card {
-    RadioButtonPreference(
-        title = "Option A",
-        selected = selectedIndex == 0,
-        onClick = { selectedIndex = 0 }
-    )
-    RadioButtonPreference(
-        title = "Option B",
-        selected = selectedIndex == 1,
-        onClick = { selectedIndex = 1 }
-    )
-    RadioButtonPreference(
-        title = "Option C",
-        selected = selectedIndex == 2,
-        onClick = { selectedIndex = 2 }
-    )
+options.forEachIndexed { index, option ->
+    Card(
+        modifier = Modifier.padding(bottom = 12.dp)
+    ) {
+        RadioButtonPreference(
+            title = option,
+            selected = selectedIndex == index,
+            onClick = { selectedIndex = index }
+        )
+    }
 }
 ```
 
@@ -76,8 +71,10 @@ RadioButtonPreference(
 | onClick           | (() -> Unit)?                   | Callback when radio button is clicked   | -                                         | Yes      |
 | modifier          | Modifier                        | Modifier applied to component           | Modifier                                  | No       |
 | titleColor        | BasicComponentColors            | Title text color configuration          | BasicComponentDefaults.titleColor()       | No       |
+| selectedTitleColor | BasicComponentColors           | Title text color configuration when selected | BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary) | No |
 | summary           | String?                         | Summary description                     | null                                      | No       |
 | summaryColor      | BasicComponentColors            | Summary text color configuration        | BasicComponentDefaults.summaryColor()     | No       |
+| selectedSummaryColor | BasicComponentColors         | Summary text color configuration when selected | BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary) | No |
 | radioButtonColors | RadioButtonColors               | RadioButton control color configuration | RadioButtonDefaults.radioButtonColors()   | No       |
 | endActions        | @Composable RowScope.() -> Unit | Custom end content                      | {}                                        | No       |
 | bottomAction      | @Composable (() -> Unit)?       | Custom bottom content                   | null                                      | No       |

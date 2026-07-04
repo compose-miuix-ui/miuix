@@ -23,6 +23,7 @@ import top.yukonga.miuix.kmp.basic.RadioButton
 import top.yukonga.miuix.kmp.basic.RadioButtonColors
 import top.yukonga.miuix.kmp.basic.RadioButtonDefaults
 import top.yukonga.miuix.kmp.preference.internal.StartActionSlot
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * A radio button with a title and a summary.
@@ -32,8 +33,10 @@ import top.yukonga.miuix.kmp.preference.internal.StartActionSlot
  * @param onClick The callback when the [RadioButtonPreference] is clicked.
  * @param modifier The modifier to be applied to the [RadioButtonPreference].
  * @param titleColor The color of the title.
+ * @param selectedTitleColor The color of the title when the [RadioButtonPreference] is selected.
  * @param summary The summary of the [RadioButtonPreference].
  * @param summaryColor The color of the summary.
+ * @param selectedSummaryColor The color of the summary when the [RadioButtonPreference] is selected.
  * @param radioButtonColors The [RadioButtonColors] of the [RadioButtonPreference].
  * @param startAction The [Composable] content on the start side of the [RadioButtonPreference].
  * @param endActions The [Composable] content on the end side of the [RadioButtonPreference].
@@ -51,8 +54,10 @@ fun RadioButtonPreference(
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
+    selectedTitleColor: BasicComponentColors = BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
+    selectedSummaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary),
     radioButtonColors: RadioButtonColors = RadioButtonDefaults.radioButtonColors(),
     startAction: @Composable (() -> Unit)? = null,
     endActions: @Composable (RowScope.() -> Unit)? = null,
@@ -68,9 +73,9 @@ fun RadioButtonPreference(
         modifier = modifier,
         insideMargin = insideMargin,
         title = title,
-        titleColor = titleColor,
+        titleColor = if (selected) selectedTitleColor else titleColor,
         summary = summary,
-        summaryColor = summaryColor,
+        summaryColor = if (selected) selectedSummaryColor else summaryColor,
         startAction = if (radioButtonLocation == RadioButtonLocation.Start || startAction != null) {
             {
                 Row {

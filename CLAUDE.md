@@ -29,21 +29,21 @@ Before committing, run `./gradlew spotlessCheck`; only run `./gradlew spotlessAp
 
 ## Repository Structure
 
-| Directory               | Purpose                                                       |
-| :---------------------- | :------------------------------------------------------------ |
-| `miuix-core/`           | Utilities + MiuixIcons base (depended on by `ui` and `icons`) |
-| `miuix-ui/`             | Main UI library                                               |
-| `miuix-preference/`     | Preference / menu / popup components                          |
+| Directory               | Purpose                                                                    |
+| :---------------------- | :------------------------------------------------------------------------- |
+| `miuix-core/`           | Utilities + MiuixIcons base (depended on by `ui` and `icons`)              |
+| `miuix-ui/`             | Main UI library                                                            |
+| `miuix-preference/`     | Preference / menu / popup components                                       |
 | `miuix-shader/`         | Runtime shader / render effect abstraction (used by `blur` and `squircle`) |
-| `miuix-blur/`           | Blur effects (Android minSdk=33; depends on `miuix-shader`)   |
-| `miuix-squircle/`       | Squircle corner shapes (depends on `miuix-shader`)            |
-| `miuix-icons/`          | Extended icon resources                                       |
-| `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip) |
-| `example/`              | Demo app                                                      |
-| `baselineprofile/`      | Android baseline profile generation                           |
-| `docs/`                 | VitePress documentation site                                  |
-| `build-plugins/`        | Custom Gradle plugins                                         |
-| `gradle/`               | Version catalog + wrapper                                     |
+| `miuix-blur/`           | Blur effects (Android minSdk=33; depends on `miuix-shader`)                |
+| `miuix-squircle/`       | Squircle corner shapes (depends on `miuix-shader`)                         |
+| `miuix-icons/`          | Extended icon resources                                                    |
+| `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip)          |
+| `example/`              | Demo app                                                                   |
+| `baselineprofile/`      | Android baseline profile generation                                        |
+| `docs/`                 | VitePress documentation site                                               |
+| `build-plugins/`        | Custom Gradle plugins                                                      |
+| `gradle/`               | Version catalog + wrapper                                                  |
 
 ### Component Source Layout
 
@@ -224,6 +224,6 @@ Format: `<scope>: <summary>`
 
 - Scopes: `library`, `docs`, `example`, `build`, `fix`, `fix(deps)`, `chore(deps)`
 - Keep subject line ≤ 72 characters, sentence case, no trailing period
-- Reference PRs/issues as `(#1234)` at end
+- Reference PRs as `(#1234)` at subject end; issues as `* Fix #1234` in the body
 - Check recent `git log --oneline` to stay consistent with current conventions
 - **Run `./gradlew spotlessCheck` before every commit; only run `./gradlew spotlessApply` if violations are reported**

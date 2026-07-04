@@ -44,11 +44,15 @@ fun RadioButtonDemo() {
                     selected = selectedIndex == 0,
                     onClick = { selectedIndex = 0 },
                 )
+            }
+            Card {
                 RadioButtonPreference(
                     title = "Option B",
                     selected = selectedIndex == 1,
                     onClick = { selectedIndex = 1 },
                 )
+            }
+            Card {
                 RadioButtonPreference(
                     title = "Option C",
                     selected = selectedIndex == 2,

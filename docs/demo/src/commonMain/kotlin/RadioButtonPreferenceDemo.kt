@@ -44,17 +44,23 @@ fun RadioButtonPreferenceDemo() {
                     selected = selectedIndex == 0,
                     onClick = { selectedIndex = 0 },
                 )
+            }
+            Card {
                 RadioButtonPreference(
                     title = "Option B",
                     summary = "With summary description",
                     selected = selectedIndex == 1,
                     onClick = { selectedIndex = 1 },
                 )
+            }
+            Card {
                 RadioButtonPreference(
                     title = "Option C",
                     selected = selectedIndex == 2,
                     onClick = { selectedIndex = 2 },
                 )
+            }
+            Card {
                 RadioButtonPreference(
                     title = "Disabled RadioButton",
                     summary = "This radio button is currently unavailable",

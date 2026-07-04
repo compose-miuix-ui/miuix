@@ -1,8 +1,8 @@
 # RadioButtonPreference
 
-`RadioButtonPreference` 是 Miuix 中的单选按钮组件，提供标题、摘要和单选按钮控件。它支持点击交互，常用于单选设置和选择列表。
+`RadioButtonPreference` 是 Miuix 中的单选按钮组件，提供标题、摘要和单选按钮控件。它支持点击交互，常用于单选设置和选择列表。选项被选中时，其标题和摘要会以主题色着色。
 
-<div style="position: relative; height: 293px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=radioButtonPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
@@ -14,27 +14,22 @@ import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 ## 基本用法
 
-RadioButtonPreference 通常在互斥选择组中使用：
+RadioButtonPreference 通常在互斥选择组中使用，每个选项放在独立的卡片中：
 
 ```kotlin
+val options = listOf("选项 A", "选项 B", "选项 C")
 var selectedIndex by remember { mutableIntStateOf(0) }
 
-Card {
-    RadioButtonPreference(
-        title = "选项 A",
-        selected = selectedIndex == 0,
-        onClick = { selectedIndex = 0 }
-    )
-    RadioButtonPreference(
-        title = "选项 B",
-        selected = selectedIndex == 1,
-        onClick = { selectedIndex = 1 }
-    )
-    RadioButtonPreference(
-        title = "选项 C",
-        selected = selectedIndex == 2,
-        onClick = { selectedIndex = 2 }
-    )
+options.forEachIndexed { index, option ->
+    Card(
+        modifier = Modifier.padding(bottom = 12.dp)
+    ) {
+        RadioButtonPreference(
+            title = option,
+            selected = selectedIndex == index,
+            onClick = { selectedIndex = index }
+        )
+    }
 }
 ```
 
@@ -76,8 +71,10 @@ RadioButtonPreference(
 | onClick           | (() -> Unit)?                   | 点击单选按钮时的回调         | -                                         | 是       |
 | modifier          | Modifier                        | 应用于组件的修饰符           | Modifier                                  | 否       |
 | titleColor        | BasicComponentColors            | 标题文本颜色配置             | BasicComponentDefaults.titleColor()       | 否       |
+| selectedTitleColor | BasicComponentColors           | 选中状态时标题文本颜色配置   | BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary) | 否 |
 | summary           | String?                         | 摘要描述                     | null                                      | 否       |
 | summaryColor      | BasicComponentColors            | 摘要文本颜色配置             | BasicComponentDefaults.summaryColor()     | 否       |
+| selectedSummaryColor | BasicComponentColors         | 选中状态时摘要文本颜色配置   | BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary) | 否 |
 | radioButtonColors | RadioButtonColors               | 单选按钮控件颜色配置         | RadioButtonDefaults.radioButtonColors()   | 否       |
 | endActions        | @Composable RowScope.() -> Unit | 自定义末尾内容               | {}                                        | 否       |
 | bottomAction      | @Composable (() -> Unit)?       | 自定义底部内容               | null                                      | 否       |
