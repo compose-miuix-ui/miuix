@@ -7,7 +7,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
@@ -49,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
@@ -70,7 +72,6 @@ import top.yukonga.miuix.kmp.icon.basic.Close
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -140,6 +141,9 @@ private enum class SnackbarSwipeToDismissValue {
     EndToStart,
     Settled,
 }
+
+/** Gap kept between the newest snackbar and the bottom edge of the [SnackbarHost]. */
+private val HostBottomPadding = 12.dp
 
 /**
  * State of the [SnackbarHost].
@@ -271,12 +275,13 @@ fun SnackbarHost(
     canSwipeToDismiss: Boolean = true,
     content: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 ) {
+    val bottomPaddingPx = with(LocalDensity.current) { HostBottomPadding.roundToPx() }
     Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
         LazyColumn(
             reverseLayout = true,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(bottom = 12.dp),
+            contentPadding = PaddingValues(bottom = HostBottomPadding),
         ) {
             itemsIndexed(state.currentSnackbars, key = { _, entry -> entry.id }) { index, entry ->
                 val visibleState = remember { MutableTransitionState(false) }
@@ -338,16 +343,27 @@ fun SnackbarHost(
                             } catch (_: IllegalStateException) {
                                 0f
                             }
-                            IntOffset(offset.roundToInt(), 0)
+                            IntOffset(offset.fastRoundToInt(), 0)
                         }
-                        .zIndex((state.currentSnackbars.size - index).toFloat())
-                        .then(if (entry.visible) Modifier.animateItem() else Modifier),
+                        .zIndex((state.currentSnackbars.size - index).toFloat()),
                     visibleState = visibleState,
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut() + shrinkVertically(
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                        shrinkTowards = Alignment.Bottom,
+                    // No animateItem (placement lag gets clipped), no alpha on moving parts
+                    // (fading layers clip to their bounds), and the exit's clip applies to enter.
+                    enter = slideInVertically(initialOffsetY = { bottomPaddingPx }) + expandVertically(
+                        expandFrom = Alignment.Top,
+                        clip = false,
                     ),
+                    exit = if (index == 0) {
+                        slideOutVertically(targetOffsetY = { bottomPaddingPx }) + shrinkVertically(
+                            shrinkTowards = Alignment.Top,
+                            clip = false,
+                        )
+                    } else {
+                        fadeOut(spring(stiffness = Spring.StiffnessMedium)) + shrinkVertically(
+                            shrinkTowards = Alignment.Top,
+                            clip = false,
+                        )
+                    },
                 ) {
                     content(entry.data)
                 }

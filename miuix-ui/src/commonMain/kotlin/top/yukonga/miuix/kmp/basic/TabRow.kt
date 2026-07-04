@@ -50,11 +50,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.math.roundToInt
 
 /**
  * A [TabRow] with Miuix style.
@@ -117,7 +117,7 @@ fun TabRow(
 
         LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - config.tabWidth) / 2
-            val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
+            val offsetPx = with(density) { -centerOffset.toPx() }.fastRoundToInt()
             if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
                 config.listState.scrollToItem(selectedTabIndex, offsetPx)
             } else {
@@ -138,7 +138,7 @@ fun TabRow(
         Box(Modifier.fillMaxSize()) {
             Box(
                 Modifier
-                    .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).roundToInt(), 0) }
+                    .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).fastRoundToInt(), 0) }
                     .width(config.tabWidth)
                     .fillMaxHeight()
                     .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
@@ -246,7 +246,7 @@ fun TabRowWithContour(
 
         LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
             val centerOffset = (availableWidth - (contourPadding * 2) - config.tabWidth) / 2
-            val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()
+            val offsetPx = with(density) { -centerOffset.toPx() }.fastRoundToInt()
             if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
                 config.listState.scrollToItem(selectedTabIndex, offsetPx)
             } else {
@@ -272,7 +272,7 @@ fun TabRowWithContour(
         ) {
             Box(
                 Modifier
-                    .offset { IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0) }
+                    .offset { IntOffset((indicatorOffset.value - scrollOffset).fastRoundToInt(), 0) }
                     .width(config.tabWidth)
                     .fillMaxHeight()
                     .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),

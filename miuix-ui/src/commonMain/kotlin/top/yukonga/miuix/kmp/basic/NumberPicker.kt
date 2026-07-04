@@ -41,11 +41,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * A [NumberPicker] component with Miuix style.
@@ -116,7 +116,7 @@ fun NumberPicker(
     // Haptic feedback when crossing item boundaries during scroll
     val effectiveIndex by remember(currentIndex, itemCount, wrapAround) {
         derivedStateOf {
-            val rawIndex = currentIndex + totalOffset.roundToInt()
+            val rawIndex = currentIndex + totalOffset.fastRoundToInt()
             if (wrapAround) {
                 ((rawIndex % itemCount) + itemCount) % itemCount
             } else {
@@ -202,12 +202,12 @@ fun NumberPicker(
                                 // Reset bounds
                                 flingAnimatable.updateBounds(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
                                 // Snap to nearest item
-                                val snappedTarget = flingAnimatable.value.roundToInt().toFloat()
+                                val snappedTarget = flingAnimatable.value.fastRoundToInt().toFloat()
                                 flingAnimatable.animateTo(
                                     targetValue = snappedTarget,
                                     animationSpec = spring(dampingRatio = 1f, stiffness = 400f),
                                 )
-                                val offsetInt = flingAnimatable.value.roundToInt()
+                                val offsetInt = flingAnimatable.value.fastRoundToInt()
                                 val newIndex = if (wrapAround) {
                                     ((currentIndex + offsetInt) % itemCount + itemCount) % itemCount
                                 } else {
@@ -230,8 +230,8 @@ fun NumberPicker(
     ) {
         if (itemHeightPx > 0) {
             val currentTotalOffset = totalOffset
-            val centerItemOffset = currentTotalOffset - currentTotalOffset.roundToInt()
-            val roundedOffset = currentTotalOffset.roundToInt()
+            val centerItemOffset = currentTotalOffset - currentTotalOffset.fastRoundToInt()
+            val roundedOffset = currentTotalOffset.fastRoundToInt()
             val selectedColor = colors.selectedTextColor(enabled)
             val unselectedColor = colors.unselectedTextColor(enabled)
             val resolvedTextStyle = if (textStyle.fontWeight == null) textStyle.copy(fontWeight = FontWeight.SemiBold) else textStyle

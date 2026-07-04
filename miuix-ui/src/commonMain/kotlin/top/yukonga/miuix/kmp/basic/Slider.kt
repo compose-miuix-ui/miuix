@@ -55,10 +55,10 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * A [Slider] component with Miuix style.
@@ -1265,7 +1265,7 @@ private fun resolveValueFromFraction(
             val stepCount = steps + 1
             val start = valueRange.start.toDouble()
             val end = valueRange.endInclusive.toDouble()
-            val stepIndex = (f * stepCount).roundToInt().coerceIn(0, stepCount)
+            val stepIndex = (f * stepCount).fastRoundToInt().coerceIn(0, stepCount)
             (start + (end - start) * stepIndex / stepCount).toFloat()
         }
 
