@@ -106,8 +106,8 @@ CheckboxPreference(
 | endActions       | @Composable (RowScope.() -> Unit)? | Custom content before checkbox       | null                                  | No       |
 | checkboxLocation | CheckboxLocation                   | Checkbox position                    | CheckboxLocation.Start                | No       |
 | bottomAction     | @Composable (() -> Unit)?          | Custom bottom content                | null                                  | No       |
-| holdDownState    | Boolean                            | Whether the component is held down   | false                                 | No       |
 | insideMargin     | PaddingValues                      | Internal content padding             | BasicComponentDefaults.InsideMargin   | No       |
+| holdDownState    | Boolean                            | Whether the component is held down   | false                                 | No       |
 | enabled          | Boolean                            | Whether component is interactive     | true                                  | No       |
 
 ## Advanced Usage

@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -32,11 +34,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param selected The selected state of the [RadioButtonPreference].
  * @param onClick The callback when the [RadioButtonPreference] is clicked.
  * @param modifier The modifier to be applied to the [RadioButtonPreference].
- * @param titleColor The color of the title.
- * @param selectedTitleColor The color of the title when the [RadioButtonPreference] is selected.
  * @param summary The summary of the [RadioButtonPreference].
- * @param summaryColor The color of the summary.
- * @param selectedSummaryColor The color of the summary when the [RadioButtonPreference] is selected.
+ * @param colors The [RadioButtonPreferenceColors] of the title and summary.
  * @param radioButtonColors The [RadioButtonColors] of the [RadioButtonPreference].
  * @param startAction The [Composable] content on the start side of the [RadioButtonPreference].
  * @param endActions The [Composable] content on the end side of the [RadioButtonPreference].
@@ -53,11 +52,8 @@ fun RadioButtonPreference(
     selected: Boolean,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
-    selectedTitleColor: BasicComponentColors = BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary),
     summary: String? = null,
-    summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    selectedSummaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary),
+    colors: RadioButtonPreferenceColors = RadioButtonPreferenceDefaults.radioButtonPreferenceColors(),
     radioButtonColors: RadioButtonColors = RadioButtonDefaults.radioButtonColors(),
     startAction: @Composable (() -> Unit)? = null,
     endActions: @Composable (RowScope.() -> Unit)? = null,
@@ -73,9 +69,9 @@ fun RadioButtonPreference(
         modifier = modifier,
         insideMargin = insideMargin,
         title = title,
-        titleColor = if (selected) selectedTitleColor else titleColor,
+        titleColor = colors.titleColor(selected),
         summary = summary,
-        summaryColor = if (selected) selectedSummaryColor else summaryColor,
+        summaryColor = colors.summaryColor(selected),
         startAction = if (radioButtonLocation == RadioButtonLocation.Start || startAction != null) {
             {
                 Row {
@@ -179,6 +175,40 @@ private fun RadioButtonPreferenceEndAction(
         enabled = enabled,
         colors = radioButtonColors,
     )
+}
+
+object RadioButtonPreferenceDefaults {
+    /**
+     * The default colors of the title and summary.
+     */
+    @Composable
+    fun radioButtonPreferenceColors(
+        titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
+        selectedTitleColor: BasicComponentColors = BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary),
+        summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
+        selectedSummaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary),
+    ): RadioButtonPreferenceColors = remember(titleColor, selectedTitleColor, summaryColor, selectedSummaryColor) {
+        RadioButtonPreferenceColors(
+            titleColor = titleColor,
+            selectedTitleColor = selectedTitleColor,
+            summaryColor = summaryColor,
+            selectedSummaryColor = selectedSummaryColor,
+        )
+    }
+}
+
+@Immutable
+data class RadioButtonPreferenceColors(
+    private val titleColor: BasicComponentColors,
+    private val selectedTitleColor: BasicComponentColors,
+    private val summaryColor: BasicComponentColors,
+    private val selectedSummaryColor: BasicComponentColors,
+) {
+    @Stable
+    internal fun titleColor(selected: Boolean): BasicComponentColors = if (selected) selectedTitleColor else titleColor
+
+    @Stable
+    internal fun summaryColor(selected: Boolean): BasicComponentColors = if (selected) selectedSummaryColor else summaryColor
 }
 
 enum class RadioButtonLocation {

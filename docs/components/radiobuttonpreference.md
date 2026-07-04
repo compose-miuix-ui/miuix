@@ -70,17 +70,35 @@ RadioButtonPreference(
 | selected          | Boolean                         | Radio button selected state             | -                                         | Yes      |
 | onClick           | (() -> Unit)?                   | Callback when radio button is clicked   | -                                         | Yes      |
 | modifier          | Modifier                        | Modifier applied to component           | Modifier                                  | No       |
-| titleColor        | BasicComponentColors            | Title text color configuration          | BasicComponentDefaults.titleColor()       | No       |
-| selectedTitleColor | BasicComponentColors           | Title text color configuration when selected | BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary) | No |
 | summary           | String?                         | Summary description                     | null                                      | No       |
-| summaryColor      | BasicComponentColors            | Summary text color configuration        | BasicComponentDefaults.summaryColor()     | No       |
-| selectedSummaryColor | BasicComponentColors         | Summary text color configuration when selected | BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary) | No |
+| colors            | RadioButtonPreferenceColors     | Title and summary color configuration   | RadioButtonPreferenceDefaults.radioButtonPreferenceColors() | No |
 | radioButtonColors | RadioButtonColors               | RadioButton control color configuration | RadioButtonDefaults.radioButtonColors()   | No       |
-| endActions        | @Composable RowScope.() -> Unit | Custom end content                      | {}                                        | No       |
+| startAction       | @Composable (() -> Unit)?       | Custom start content                    | null                                      | No       |
+| endActions        | @Composable (RowScope.() -> Unit)? | Custom end content                   | null                                      | No       |
+| radioButtonLocation | RadioButtonLocation           | Radio button position (Start or End)    | RadioButtonLocation.Start                 | No       |
 | bottomAction      | @Composable (() -> Unit)?       | Custom bottom content                   | null                                      | No       |
-| holdDownState     | Boolean                         | Whether the component is held down      | false                                     | No       |
 | insideMargin      | PaddingValues                   | Internal content padding                | BasicComponentDefaults.InsideMargin       | No       |
+| holdDownState     | Boolean                         | Whether the component is held down      | false                                     | No       |
 | enabled           | Boolean                         | Whether component is interactive        | true                                      | No       |
+
+### RadioButtonPreferenceDefaults Object
+
+The RadioButtonPreferenceDefaults object provides default color configurations for the RadioButtonPreference component.
+
+#### Methods
+
+| Method Name                   | Type                        | Description                                         |
+| ----------------------------- | --------------------------- | --------------------------------------------------- |
+| radioButtonPreferenceColors() | RadioButtonPreferenceColors | Creates default color config for title and summary |
+
+### RadioButtonPreferenceColors Class
+
+| Property Name        | Type                 | Description                    |
+| -------------------- | -------------------- | ------------------------------ |
+| titleColor           | BasicComponentColors | Title text color               |
+| selectedTitleColor   | BasicComponentColors | Title text color when selected |
+| summaryColor         | BasicComponentColors | Summary text color             |
+| selectedSummaryColor | BasicComponentColors | Summary text color when selected |
 
 ## Advanced Usage
 
@@ -91,12 +109,14 @@ var selected by remember { mutableStateOf(false) }
 
 RadioButtonPreference(
     title = "Custom Colors",
-    titleColor = BasicComponentDefaults.titleColor(
-        color = MiuixTheme.colorScheme.primary
-    ),
     summary = "RadioButton with custom colors",
-    summaryColor = BasicComponentDefaults.summaryColor(
-        color = MiuixTheme.colorScheme.secondary
+    colors = RadioButtonPreferenceDefaults.radioButtonPreferenceColors(
+        titleColor = BasicComponentDefaults.titleColor(
+            color = MiuixTheme.colorScheme.primary
+        ),
+        summaryColor = BasicComponentDefaults.summaryColor(
+            color = MiuixTheme.colorScheme.secondary
+        )
     ),
     selected = selected,
     onClick = { selected = !selected },

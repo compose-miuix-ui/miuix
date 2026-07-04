@@ -70,17 +70,35 @@ RadioButtonPreference(
 | selected          | Boolean                         | 单选按钮的选中状态           | -                                         | 是       |
 | onClick           | (() -> Unit)?                   | 点击单选按钮时的回调         | -                                         | 是       |
 | modifier          | Modifier                        | 应用于组件的修饰符           | Modifier                                  | 否       |
-| titleColor        | BasicComponentColors            | 标题文本颜色配置             | BasicComponentDefaults.titleColor()       | 否       |
-| selectedTitleColor | BasicComponentColors           | 选中状态时标题文本颜色配置   | BasicComponentDefaults.titleColor(color = MiuixTheme.colorScheme.primary) | 否 |
 | summary           | String?                         | 摘要描述                     | null                                      | 否       |
-| summaryColor      | BasicComponentColors            | 摘要文本颜色配置             | BasicComponentDefaults.summaryColor()     | 否       |
-| selectedSummaryColor | BasicComponentColors         | 选中状态时摘要文本颜色配置   | BasicComponentDefaults.summaryColor(color = MiuixTheme.colorScheme.primary) | 否 |
+| colors            | RadioButtonPreferenceColors     | 标题与摘要颜色配置           | RadioButtonPreferenceDefaults.radioButtonPreferenceColors() | 否 |
 | radioButtonColors | RadioButtonColors               | 单选按钮控件颜色配置         | RadioButtonDefaults.radioButtonColors()   | 否       |
-| endActions        | @Composable RowScope.() -> Unit | 自定义末尾内容               | {}                                        | 否       |
+| startAction       | @Composable (() -> Unit)?       | 自定义起始内容               | null                                      | 否       |
+| endActions        | @Composable (RowScope.() -> Unit)? | 自定义末尾内容            | null                                      | 否       |
+| radioButtonLocation | RadioButtonLocation           | 单选按钮位置（Start 或 End） | RadioButtonLocation.Start                 | 否       |
 | bottomAction      | @Composable (() -> Unit)?       | 自定义底部内容               | null                                      | 否       |
-| holdDownState     | Boolean                         | 组件是否处于按下状态         | false                                     | 否       |
 | insideMargin      | PaddingValues                   | 内部内容边距                 | BasicComponentDefaults.InsideMargin       | 否       |
+| holdDownState     | Boolean                         | 组件是否处于按下状态         | false                                     | 否       |
 | enabled           | Boolean                         | 组件是否可交互               | true                                      | 否       |
+
+### RadioButtonPreferenceDefaults 对象
+
+RadioButtonPreferenceDefaults 对象提供了 RadioButtonPreference 组件的默认颜色配置。
+
+#### 方法
+
+| 方法名                        | 类型                        | 说明                           |
+| ----------------------------- | --------------------------- | ------------------------------ |
+| radioButtonPreferenceColors() | RadioButtonPreferenceColors | 创建标题与摘要的默认颜色配置   |
+
+### RadioButtonPreferenceColors 类
+
+| 属性名               | 类型                 | 说明                   |
+| -------------------- | -------------------- | ---------------------- |
+| titleColor           | BasicComponentColors | 标题文本颜色           |
+| selectedTitleColor   | BasicComponentColors | 选中状态时标题文本颜色 |
+| summaryColor         | BasicComponentColors | 摘要文本颜色           |
+| selectedSummaryColor | BasicComponentColors | 选中状态时摘要文本颜色 |
 
 ## 进阶用法
 
@@ -91,12 +109,14 @@ var selected by remember { mutableStateOf(false) }
 
 RadioButtonPreference(
     title = "自定义颜色",
-    titleColor = BasicComponentDefaults.titleColor(
-        color = MiuixTheme.colorScheme.primary
-    ),
     summary = "带自定义颜色的单选按钮",
-    summaryColor = BasicComponentDefaults.summaryColor(
-        color = MiuixTheme.colorScheme.secondary
+    colors = RadioButtonPreferenceDefaults.radioButtonPreferenceColors(
+        titleColor = BasicComponentDefaults.titleColor(
+            color = MiuixTheme.colorScheme.primary
+        ),
+        summaryColor = BasicComponentDefaults.summaryColor(
+            color = MiuixTheme.colorScheme.secondary
+        )
     ),
     selected = selected,
     onClick = { selected = !selected },
