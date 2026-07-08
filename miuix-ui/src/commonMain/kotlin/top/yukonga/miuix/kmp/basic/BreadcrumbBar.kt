@@ -39,7 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -203,7 +203,7 @@ private fun BreadcrumbSegment(
             .then(
                 if (onPositioned != null) {
                     Modifier.onGloballyPositioned { coordinates ->
-                        val pos = coordinates.positionInRoot()
+                        val pos = coordinates.positionInParent()
                         onPositioned(pos.x, coordinates.size.width.toFloat())
                     }
                 } else {
