@@ -78,30 +78,30 @@ fun BreadcrumbBar(
     var highlightItemX by remember { mutableFloatStateOf(0f) }
     var highlightItemWidth by remember { mutableFloatStateOf(0f) }
     var positioned by remember { mutableStateOf(false) }
+    var lastSettledHighlightIndex by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(highlightIndex) {
-        // scroll to highlight when highlightIndex changed
-        if (!positioned) return@LaunchedEffect
-        if (highlightItemWidth > 0f) {
-            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
-            if (viewportWidth > 0f) {
-                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
-                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
-                resolvedScrollState.animateScrollTo(targetScroll.toInt())
-            }
-        }
+        // Wait for the newly highlighted segment to be positioned before scrolling.
+        positioned = false
     }
 
-    LaunchedEffect(positioned) {
+    LaunchedEffect(positioned, highlightItemX, highlightItemWidth) {
         if (!positioned) return@LaunchedEffect
-        if (highlightItemWidth > 0f) {
-            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
-            if (viewportWidth > 0f) {
-                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
-                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
-                resolvedScrollState.scrollTo(targetScroll.toInt())
-            }
+        if (highlightItemWidth <= 0f) return@LaunchedEffect
+
+        val viewportWidth = resolvedScrollState.viewportSize.toFloat()
+        if (viewportWidth <= 0f) return@LaunchedEffect
+
+        val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
+            .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
+            .toInt()
+
+        if (lastSettledHighlightIndex < 0 || lastSettledHighlightIndex == highlightIndex) {
+            resolvedScrollState.scrollTo(targetScroll)
+        } else {
+            resolvedScrollState.animateScrollTo(targetScroll)
         }
+        lastSettledHighlightIndex = highlightIndex
     }
 
     Row(
