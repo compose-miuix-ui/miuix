@@ -77,7 +77,8 @@ data class BreadcrumbItem(
  * @param onItemClick Callback invoked with the index of the clicked item.
  * @param modifier The modifier to be applied to the [BreadcrumbBar].
  * @param highlightIndex The index of the highlighted item. Defaults to the last item.
- * @param enabled Whether the [BreadcrumbBar] is interactive.
+ * @param enabled Whether the items are clickable. When disabled, items use the disabled color
+ *   scheme but horizontal scrolling remains active.
  * @param colors The [BreadcrumbBarColors] of the [BreadcrumbBar].
  * @param insideMargin The margin inside the [BreadcrumbBar].
  * @param itemMaxWidth The maximum width of each capsule-shaped item. Text beyond this is truncated.

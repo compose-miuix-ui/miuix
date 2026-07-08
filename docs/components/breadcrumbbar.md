@@ -75,18 +75,18 @@ BreadcrumbBar(
 
 ### BreadcrumbBar Properties
 
-| Property Name     | Type                      | Description                                                                 | Default Value                               | Required |
-| ----------------- | ------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- | -------- |
-| items             | List\<BreadcrumbItem>     | The list of breadcrumb items to display                                     | -                                           | Yes      |
-| onItemClick       | (Int) -> Unit             | Callback invoked with the index of the clicked item                         | -                                           | Yes      |
-| modifier          | Modifier                  | Modifier applied to the breadcrumb bar                                      | Modifier                                    | No       |
-| highlightIndex    | Int                       | Index of the highlighted segment                                            | items.lastIndex                             | No       |
-| enabled           | Boolean                   | Whether the breadcrumb bar is interactive                                   | true                                        | No       |
-| colors            | BreadcrumbBarColors       | Color configuration for the breadcrumb bar                                  | BreadcrumbBarDefaults.breadcrumbBarColors() | No       |
-| insideMargin      | PaddingValues             | Internal padding of the breadcrumb bar                                      | BreadcrumbBarDefaults.InsideMargin          | No       |
-| scrollState       | ScrollState?              | Scroll state for horizontal scrolling; if null an internal state is created | null                                        | No       |
-| interactionSource | MutableInteractionSource? | Interaction source for the items                                            | null                                        | No       |
-| indication        | Indication?               | Indication for click interactions                                           | LocalIndication.current                     | No       |
+| Property Name     | Type                      | Description                                                                    | Default Value                               | Required |
+| ----------------- | ------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------- | -------- |
+| items             | List\<BreadcrumbItem>     | The list of breadcrumb items to display                                        | -                                           | Yes      |
+| onItemClick       | (Int) -> Unit             | Callback invoked with the index of the clicked item                            | -                                           | Yes      |
+| modifier          | Modifier                  | Modifier applied to the breadcrumb bar                                         | Modifier                                    | No       |
+| highlightIndex    | Int                       | Index of the highlighted segment                                               | items.lastIndex                             | No       |
+| enabled           | Boolean                   | Whether items are clickable; horizontal scrolling remains active when disabled | true                                        | No       |
+| colors            | BreadcrumbBarColors       | Color configuration for the breadcrumb bar                                     | BreadcrumbBarDefaults.breadcrumbBarColors() | No       |
+| insideMargin      | PaddingValues             | Internal padding of the breadcrumb bar                                         | BreadcrumbBarDefaults.InsideMargin          | No       |
+| scrollState       | ScrollState?              | Scroll state for horizontal scrolling; if null an internal state is created    | null                                        | No       |
+| interactionSource | MutableInteractionSource? | Interaction source for the items                                               | null                                        | No       |
+| indication        | Indication?               | Indication for click interactions                                              | LocalIndication.current                     | No       |
 
 ### BreadcrumbItem Properties
 

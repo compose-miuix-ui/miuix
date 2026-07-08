@@ -75,18 +75,18 @@ BreadcrumbBar(
 
 ### BreadcrumbBar 属性
 
-| 属性名            | 类型                       | 说明                               | 默认值                                      | 是否必须 |
-| ----------------- | -------------------------- | ---------------------------------- | ------------------------------------------- | -------- |
-| items             | List&lt;BreadcrumbItem&gt; | 要显示的面包屑项列表               | -                                           | 是       |
-| onItemClick       | (Int) -> Unit              | 点击某段时触发，回传索引           | -                                           | 是       |
-| modifier          | Modifier                   | 应用于面包屑栏的修饰符             | Modifier                                    | 否       |
-| highlightIndex    | Int                        | 高亮段的索引                       | items.lastIndex                             | 否       |
-| enabled           | Boolean                    | 面包屑栏是否可交互                 | true                                        | 否       |
-| colors            | BreadcrumbBarColors        | 面包屑栏颜色配置                   | BreadcrumbBarDefaults.breadcrumbBarColors() | 否       |
-| insideMargin      | PaddingValues              | 面包屑栏内部边距                   | BreadcrumbBarDefaults.InsideMargin          | 否       |
-| scrollState       | ScrollState?               | 水平滚动的状态，为 null 时内部创建 | null                                        | 否       |
-| interactionSource | MutableInteractionSource?  | 交互源                             | null                                        | 否       |
-| indication        | Indication?                | 点击交互的反馈效果                 | LocalIndication.current                     | 否       |
+| 属性名            | 类型                       | 说明                                   | 默认值                                      | 是否必须 |
+| ----------------- | -------------------------- | -------------------------------------- | ------------------------------------------- | -------- |
+| items             | List&lt;BreadcrumbItem&gt; | 要显示的面包屑项列表                   | -                                           | 是       |
+| onItemClick       | (Int) -> Unit              | 点击某段时触发，回传索引               | -                                           | 是       |
+| modifier          | Modifier                   | 应用于面包屑栏的修饰符                 | Modifier                                    | 否       |
+| highlightIndex    | Int                        | 高亮段的索引                           | items.lastIndex                             | 否       |
+| enabled           | Boolean                    | 面包屑项是否可点击；禁用时仍可水平滚动 | true                                        | 否       |
+| colors            | BreadcrumbBarColors        | 面包屑栏颜色配置                       | BreadcrumbBarDefaults.breadcrumbBarColors() | 否       |
+| insideMargin      | PaddingValues              | 面包屑栏内部边距                       | BreadcrumbBarDefaults.InsideMargin          | 否       |
+| scrollState       | ScrollState?               | 水平滚动的状态，为 null 时内部创建     | null                                        | 否       |
+| interactionSource | MutableInteractionSource?  | 交互源                                 | null                                        | 否       |
+| indication        | Indication?                | 点击交互的反馈效果                     | LocalIndication.current                     | 否       |
 
 ### BreadcrumbItem 属性
 
