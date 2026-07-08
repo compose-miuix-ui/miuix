@@ -27,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -39,7 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -108,31 +107,32 @@ fun BreadcrumbBar(
     var highlightItemX by remember { mutableFloatStateOf(0f) }
     var highlightItemWidth by remember { mutableFloatStateOf(0f) }
     var positioned by remember { mutableStateOf(false) }
-    var lastSettledHighlightIndex by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(highlightIndex) {
-        // Wait for the newly highlighted segment to be positioned before scrolling.
-        positioned = false
-    }
-
-    LaunchedEffect(positioned, highlightItemX, highlightItemWidth) {
+        // scroll to highlight when highlightIndex changed
         if (!hasHighlight) return@LaunchedEffect
         if (!positioned) return@LaunchedEffect
-        if (highlightItemWidth <= 0f) return@LaunchedEffect
-
-        val viewportWidth = resolvedScrollState.viewportSize.toFloat()
-        if (viewportWidth <= 0f) return@LaunchedEffect
-
-        val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
-            .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
-            .toInt()
-
-        if (lastSettledHighlightIndex < 0 || lastSettledHighlightIndex == highlightIndex) {
-            resolvedScrollState.scrollTo(targetScroll)
-        } else {
-            resolvedScrollState.animateScrollTo(targetScroll)
+        if (highlightItemWidth > 0f) {
+            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
+            if (viewportWidth > 0f) {
+                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
+                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
+                resolvedScrollState.animateScrollTo(targetScroll.toInt())
+            }
         }
-        lastSettledHighlightIndex = highlightIndex
+    }
+
+    LaunchedEffect(positioned) {
+        if (!hasHighlight) return@LaunchedEffect
+        if (!positioned) return@LaunchedEffect
+        if (highlightItemWidth > 0f) {
+            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
+            if (viewportWidth > 0f) {
+                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
+                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
+                resolvedScrollState.scrollTo(targetScroll.toInt())
+            }
+        }
     }
 
     Row(
@@ -203,7 +203,7 @@ private fun BreadcrumbSegment(
             .then(
                 if (onPositioned != null) {
                     Modifier.onGloballyPositioned { coordinates ->
-                        val pos = coordinates.positionInParent()
+                        val pos = coordinates.positionInRoot()
                         onPositioned(pos.x, coordinates.size.width.toFloat())
                     }
                 } else {
