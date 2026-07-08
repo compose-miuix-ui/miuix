@@ -77,6 +77,7 @@ data class BreadcrumbItem(
  * @param onItemClick Callback invoked with the index of the clicked item.
  * @param modifier The modifier to be applied to the [BreadcrumbBar].
  * @param highlightIndex The index of the highlighted item. Defaults to the last item.
+ *   Pass a negative value (e.g. `-1`) to disable highlighting and auto-scroll entirely.
  * @param enabled Whether the items are clickable. When disabled, items use the disabled color
  *   scheme but horizontal scrolling remains active.
  * @param colors The [BreadcrumbBarColors] of the [BreadcrumbBar].
@@ -103,6 +104,7 @@ fun BreadcrumbBar(
 ) {
     val currentOnItemClick by rememberUpdatedState(onItemClick)
     val resolvedScrollState = scrollState ?: rememberScrollState()
+    val hasHighlight = highlightIndex >= 0
     var highlightItemX by remember { mutableFloatStateOf(0f) }
     var highlightItemWidth by remember { mutableFloatStateOf(0f) }
     var positioned by remember { mutableStateOf(false) }
@@ -114,6 +116,7 @@ fun BreadcrumbBar(
     }
 
     LaunchedEffect(positioned, highlightItemX, highlightItemWidth) {
+        if (!hasHighlight) return@LaunchedEffect
         if (!positioned) return@LaunchedEffect
         if (highlightItemWidth <= 0f) return@LaunchedEffect
 
@@ -146,13 +149,13 @@ fun BreadcrumbBar(
             }
             BreadcrumbSegment(
                 text = item.text ?: item.path,
-                highlighted = index == highlightIndex,
+                highlighted = hasHighlight && index == highlightIndex,
                 enabled = enabled,
                 colors = colors,
                 itemMaxWidth = itemMaxWidth,
                 interactionSource = interactionSource,
                 indication = indication,
-                onPositioned = if (index == highlightIndex) {
+                onPositioned = if (hasHighlight && index == highlightIndex) {
                     { x, width ->
                         highlightItemX = x + resolvedScrollState.value
                         highlightItemWidth = width
