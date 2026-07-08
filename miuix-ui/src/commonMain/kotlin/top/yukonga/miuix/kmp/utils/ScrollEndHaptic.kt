@@ -27,7 +27,6 @@ private const val POST_FLING_CONSUMED_VELOCITY_THRESHOLD = 25.0f
  * A [NestedScrollConnection] that provides haptic feedback when a scrollable container
  * is flung to its start or end boundaries.
  *
- * @param hapticFeedback The [HapticFeedback] instance to perform feedback.
  * @param hapticFeedbackType The type of haptic feedback to perform.
  */
 private class ScrollEndHapticNode(
@@ -70,7 +69,7 @@ private class ScrollEndHapticNode(
         // Flinging beyond the top boundary.
         if (available.y > POST_FLING_AVAILABLE_VELOCITY_THRESHOLD && !consumed.y.filter(POST_FLING_CONSUMED_VELOCITY_THRESHOLD)) {
             if (scrollEndHapticState != ScrollEndHapticState.TopBoundaryHit) {
-                hapticFeedback.performHapticFeedback(hapticFeedbackType)
+                hapticFeedback.performHapticFeedbackCompat(hapticFeedbackType)
                 scrollEndHapticState = ScrollEndHapticState.TopBoundaryHit
             }
         }
@@ -80,7 +79,7 @@ private class ScrollEndHapticNode(
             )
         ) {
             if (scrollEndHapticState != ScrollEndHapticState.BottomBoundaryHit) {
-                hapticFeedback.performHapticFeedback(hapticFeedbackType)
+                hapticFeedback.performHapticFeedbackCompat(hapticFeedbackType)
                 scrollEndHapticState = ScrollEndHapticState.BottomBoundaryHit
             }
         }

@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import kotlin.math.absoluteValue
 
 /**
@@ -120,7 +121,7 @@ fun Switch(
                 value = checked,
                 onValueChange = { v ->
                     currentOnCheckedChange?.invoke(v)
-                    currentHapticFeedback.performHapticFeedback(
+                    currentHapticFeedback.performHapticFeedbackCompat(
                         if (v) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
                     )
                 },
@@ -183,11 +184,11 @@ fun Switch(
                                     hasVibrated = false
                                 } else if (!hasVibrated) {
                                     if ((checked && dragOffset == -21f) || (!checked && dragOffset == 0f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                                        hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ToggleOff)
                                         hasVibrated = true
                                         hasVibratedOnce = true
                                     } else if ((checked && dragOffset == 0f) || (!checked && dragOffset == 21f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                        hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ToggleOn)
                                         hasVibrated = true
                                         hasVibratedOnce = true
                                     }
@@ -203,9 +204,9 @@ fun Switch(
                                 if (dragOffset.absoluteValue > 21f / 2f) currentOnCheckedChange?.invoke(!checked)
                                 if (!hasVibratedOnce && dragOffset.absoluteValue >= 1f) {
                                     if ((checked && dragOffset <= -11f) || (!checked && dragOffset <= 10f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                                        hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ToggleOff)
                                     } else if ((checked && dragOffset >= -10f) || (!checked && dragOffset >= 11f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                        hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ToggleOn)
                                     }
                                 }
                                 currentDragInteraction?.let { interactionSource.tryEmit(DragInteraction.Stop(it)) }

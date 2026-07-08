@@ -52,6 +52,7 @@ import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import top.yukonga.miuix.kmp.window.WindowListPopup
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
@@ -280,7 +281,7 @@ fun TopBarActions() {
                             isSelected = selectedIndex == index,
                             index = index,
                             onSelectedIndexChange = { selectedIdx ->
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                                hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.Confirm)
                                 selectedIndex = selectedIdx
                                 state?.invoke()
                             },

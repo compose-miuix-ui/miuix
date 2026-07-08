@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.RadioButtonColors
 import top.yukonga.miuix.kmp.basic.RadioButtonDefaults
 import top.yukonga.miuix.kmp.preference.internal.StartActionSlot
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * A radio button with a title and a summary.
@@ -128,7 +129,7 @@ fun RadioButtonPreference(
         onClick = {
             currentOnClick.takeIf { enabled }?.let { onClick ->
                 onClick()
-                currentHapticFeedback.performHapticFeedback(
+                currentHapticFeedback.performHapticFeedbackCompat(
                     if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
                 )
             }

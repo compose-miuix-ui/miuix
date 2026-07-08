@@ -30,6 +30,7 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.popup.OverlayDropdownPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * A dropdown with a title and a summary.
@@ -158,7 +159,7 @@ fun OverlayDropdownPreference(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }
@@ -263,7 +264,7 @@ fun OverlayDropdownPreference(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }

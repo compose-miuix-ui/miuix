@@ -32,6 +32,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.popup.OverlayDropdownDialog
 import top.yukonga.miuix.kmp.popup.OverlayDropdownPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * A spinner component with Miuix style. (Popup Mode)
@@ -201,7 +202,7 @@ fun OverlaySpinnerPreference(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }
@@ -433,7 +434,7 @@ fun OverlaySpinnerPreference(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }

@@ -69,6 +69,7 @@ import top.yukonga.miuix.kmp.utils.LocalOverScrollState
 import top.yukonga.miuix.kmp.utils.OverScrollState
 import top.yukonga.miuix.kmp.utils.SpringEngine
 import top.yukonga.miuix.kmp.utils.SpringMath
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -620,7 +621,7 @@ private fun RefreshHeader(
 
     LaunchedEffect(pullToRefreshState.refreshState) {
         if (pullToRefreshState.refreshState == RefreshState.ThresholdReached) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+            hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.GestureThresholdActivate)
         }
     }
 

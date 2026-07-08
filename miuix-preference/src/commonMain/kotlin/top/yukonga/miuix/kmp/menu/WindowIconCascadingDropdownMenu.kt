@@ -19,6 +19,7 @@ import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.IconButtonDefaults
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import top.yukonga.miuix.kmp.window.WindowCascadingListPopup
 
 /**
@@ -101,7 +102,7 @@ fun WindowIconCascadingDropdownMenu(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }

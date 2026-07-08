@@ -20,6 +20,7 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.IconButtonDefaults
 import top.yukonga.miuix.kmp.overlay.OverlayCascadingListPopup
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for a single [DropdownEntry].
@@ -104,7 +105,7 @@ fun OverlayIconCascadingDropdownMenu(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }

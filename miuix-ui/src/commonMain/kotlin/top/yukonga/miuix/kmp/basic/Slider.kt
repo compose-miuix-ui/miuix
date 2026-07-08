@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import kotlin.math.abs
 
 /**
@@ -1060,7 +1061,7 @@ internal class SliderHapticState {
     ) {
         val isAtEdge = currentValue == valueRange.start || currentValue == valueRange.endInclusive
         if (isAtEdge && !edgeFeedbackTriggered) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+            hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.GestureThresholdActivate)
             edgeFeedbackTriggered = true
         } else if (!isAtEdge) {
             edgeFeedbackTriggered = false
@@ -1081,7 +1082,7 @@ internal class SliderHapticState {
         } else if (!isNotAtEdge) {
             lastStep = currentValue
         } else if (currentValue != lastStep && isNotAtEdge) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.TextHandleMove)
             lastStep = currentValue
         }
     }
@@ -1104,7 +1105,7 @@ internal class SliderHapticState {
         val currentlyAtKeyPoint = nearestDist < threshold
 
         if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.TextHandleMove)
         }
 
         isAtKeyPoint = currentlyAtKeyPoint
@@ -1214,7 +1215,7 @@ internal class RangeSliderHapticState {
         val isAtEdge = currentValue == targetEdge
 
         if (isAtEdge && !edgeFeedbackTriggered) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+            hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.GestureThresholdActivate)
             onEdgeFeedbackUpdate(true)
         } else if (!isAtEdge) {
             onEdgeFeedbackUpdate(false)
@@ -1235,14 +1236,14 @@ internal class RangeSliderHapticState {
                 val currentlyAtKeyPoint = nearestDist < threshold
 
                 if (currentlyAtKeyPoint && !isAtKeyPoint && isNotAtEdge) {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.TextHandleMove)
                 }
 
                 onKeyPointUpdate(currentlyAtKeyPoint)
             } else if (!isNotAtEdge) {
                 onLastStepUpdate(currentValue)
             } else if (currentValue != lastStep && isNotAtEdge) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.TextHandleMove)
                 onLastStepUpdate(currentValue)
             }
         }

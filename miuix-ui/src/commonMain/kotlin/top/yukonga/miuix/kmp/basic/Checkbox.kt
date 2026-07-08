@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.SinkFeedback
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import top.yukonga.miuix.kmp.utils.pressable
 
 /**
@@ -147,7 +148,7 @@ fun Checkbox(
             state = state,
             onClick = {
                 currentOnClickState.value?.invoke()
-                currentHapticFeedback.performHapticFeedback(
+                currentHapticFeedback.performHapticFeedbackCompat(
                     when (state) {
                         ToggleableState.Off -> HapticFeedbackType.ToggleOn
                         ToggleableState.On -> HapticFeedbackType.ToggleOff

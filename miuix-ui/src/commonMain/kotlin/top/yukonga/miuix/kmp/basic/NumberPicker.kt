@@ -45,6 +45,7 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import kotlin.math.abs
 
 /**
@@ -132,7 +133,7 @@ fun NumberPicker(
             .collect { index ->
                 if (index != lastHapticIndex) {
                     if (isUserScrolling) {
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        hapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.TextHandleMove)
                     }
                     lastHapticIndex = index
                 }

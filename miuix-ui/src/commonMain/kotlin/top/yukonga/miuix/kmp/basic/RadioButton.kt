@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.SinkFeedback
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import top.yukonga.miuix.kmp.utils.pressable
 
 /**
@@ -98,7 +99,7 @@ fun RadioButton(
             selected = selected,
             onClick = {
                 currentOnClickState.value?.invoke()
-                currentHapticFeedback.performHapticFeedback(
+                currentHapticFeedback.performHapticFeedbackCompat(
                     if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
                 )
             },

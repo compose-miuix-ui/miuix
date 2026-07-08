@@ -24,6 +24,7 @@ import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.popup.WindowDropdownPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * A [BasicComponent] wrapper that opens a [WindowDropdownPopup] for a single [DropdownEntry].
@@ -114,7 +115,7 @@ fun WindowDropdownMenu(
                 setExpanded(!isDropdownExpanded.value)
                 if (isDropdownExpanded.value) {
                     isHoldDown.value = true
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.ContextClick)
                 }
             }
         }

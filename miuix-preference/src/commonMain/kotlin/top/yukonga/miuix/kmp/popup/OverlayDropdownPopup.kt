@@ -24,6 +24,7 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 
 /**
  * Overlay dropdown popup for a single [DropdownEntry].
@@ -78,7 +79,7 @@ fun OverlayDropdownPopup(
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     val onItemClicked: (Int, Int) -> Unit = remember {
         { entryIdx, itemIdx ->
-            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.Confirm)
             currentEntries.getOrNull(entryIdx)?.let { entry ->
                 entry.items.getOrNull(itemIdx)?.onClick?.invoke()
             }
@@ -165,7 +166,7 @@ fun OverlayDropdownDialog(
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     val onItemClicked: (Int, Int) -> Unit = remember {
         { entryIdx, itemIdx ->
-            currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+            currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.Confirm)
             currentEntries.getOrNull(entryIdx)?.let { entry ->
                 entry.items.getOrNull(itemIdx)?.onClick?.invoke()
             }

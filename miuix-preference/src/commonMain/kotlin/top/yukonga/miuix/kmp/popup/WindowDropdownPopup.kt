@@ -23,6 +23,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.utils.performHapticFeedbackCompat
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.window.WindowListPopup
 
@@ -84,7 +85,7 @@ fun WindowDropdownPopup(
         val currentDismiss by rememberUpdatedState(dismiss)
         val onItemClicked: (Int, Int) -> Unit = remember {
             { entryIdx, itemIdx ->
-                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.Confirm)
                 currentEntries.getOrNull(entryIdx)?.let { entry ->
                     entry.items.getOrNull(itemIdx)?.onClick?.invoke()
                 }
@@ -169,7 +170,7 @@ fun WindowDropdownDialog(
             val currentDismiss by rememberUpdatedState(dismiss)
             val onItemClicked: (Int, Int) -> Unit = remember {
                 { entryIdx, itemIdx ->
-                    currentHapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                    currentHapticFeedback.performHapticFeedbackCompat(HapticFeedbackType.Confirm)
                     currentEntries.getOrNull(entryIdx)?.let { entry ->
                         entry.items.getOrNull(itemIdx)?.onClick?.invoke()
                     }
