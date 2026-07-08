@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -78,6 +80,7 @@ data class BreadcrumbItem(
  * @param enabled Whether the [BreadcrumbBar] is interactive.
  * @param colors The [BreadcrumbBarColors] of the [BreadcrumbBar].
  * @param insideMargin The margin inside the [BreadcrumbBar].
+ * @param itemMaxWidth The maximum width of each capsule-shaped item. Text beyond this is truncated.
  * @param scrollState The [ScrollState] to be used for horizontal scrolling. If null, an internal
  *   state is created. Pass a shared state to synchronize scrolling across multiple bars.
  * @param interactionSource The [MutableInteractionSource] to be used for the items.
@@ -92,6 +95,7 @@ fun BreadcrumbBar(
     enabled: Boolean = true,
     colors: BreadcrumbBarColors = BreadcrumbBarDefaults.breadcrumbBarColors(),
     insideMargin: PaddingValues = BreadcrumbBarDefaults.InsideMargin,
+    itemMaxWidth: Dp = BreadcrumbBarDefaults.ItemMaxWidth,
     scrollState: ScrollState? = null,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = LocalIndication.current,
@@ -144,6 +148,7 @@ fun BreadcrumbBar(
                 highlighted = index == highlightIndex,
                 enabled = enabled,
                 colors = colors,
+                itemMaxWidth = itemMaxWidth,
                 interactionSource = interactionSource,
                 indication = indication,
                 onPositioned = if (index == highlightIndex) {
@@ -167,6 +172,7 @@ private fun BreadcrumbSegment(
     highlighted: Boolean,
     enabled: Boolean,
     colors: BreadcrumbBarColors,
+    itemMaxWidth: Dp,
     interactionSource: MutableInteractionSource?,
     indication: Indication?,
     onPositioned: ((x: Float, width: Float) -> Unit)?,
@@ -189,6 +195,7 @@ private fun BreadcrumbSegment(
     Box(
         modifier = Modifier
             .height(BreadcrumbBarDefaults.ItemHeight)
+            .widthIn(max = itemMaxWidth)
             .then(
                 if (onPositioned != null) {
                     Modifier.onGloballyPositioned { coordinates ->
@@ -259,6 +266,12 @@ object BreadcrumbBarDefaults {
      * and right ends form complete semicircles.
      */
     val ItemHorizontalPadding = 10.dp
+
+    /**
+     * The default maximum width of each capsule-shaped item. Prevents a single segment with a long
+     * name from stretching the bar excessively; text beyond this width is truncated with ellipsis.
+     */
+    val ItemMaxWidth = 160.dp
 
     /**
      * The default [BreadcrumbBarColors] for all breadcrumb bars.
