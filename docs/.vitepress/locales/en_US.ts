@@ -63,6 +63,7 @@ export default defineConfig({
                         { text: "NavigationBar", link: "/components/navigationbar" },
                         { text: "NavigationRail", link: "/components/navigationrail" },
                         { text: "TabRow", link: "/components/tabrow" },
+                        { text: "BreadcrumbBar", link: "/components/breadcrumbbar" },
                         { text: "Card", link: "/components/card" },
                         { text: "BasicComponent", link: "/components/basiccomponent" },
                         { text: "Button", link: "/components/button" },

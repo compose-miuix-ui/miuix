@@ -32,6 +32,7 @@ import component.badgeSection
 import component.basicComponentSection
 import component.blurSection
 import component.bottomSheetSection
+import component.breadcrumbBarSection
 import component.buttonSection
 import component.cardSection
 import component.checkboxSection
@@ -355,6 +356,7 @@ fun MainPage(
                     radioButtonSection()
                     buttonSection()
                     tabRowSection()
+                    breadcrumbBarSection()
                     arrowSection()
                     dialogSection()
                     bottomSheetSection()
