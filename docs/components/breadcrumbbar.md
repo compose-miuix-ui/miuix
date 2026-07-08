@@ -84,7 +84,8 @@ BreadcrumbBar(
 | enabled           | Boolean                   | Whether items are clickable; horizontal scrolling remains active when disabled  | true                                        | No       |
 | colors            | BreadcrumbBarColors       | Color configuration for the breadcrumb bar                                      | BreadcrumbBarDefaults.breadcrumbBarColors() | No       |
 | insideMargin      | PaddingValues             | Internal padding of the breadcrumb bar                                          | BreadcrumbBarDefaults.InsideMargin          | No       |
-| scrollState       | ScrollState?              | Scroll state for horizontal scrolling; if null an internal state is created     | null                                        | No       |
+| itemMaxWidth      | Dp                        | Maximum width of each capsule-shaped item; text beyond this is truncated        | BreadcrumbBarDefaults.ItemMaxWidth          | No       |
+| scrollState       | ScrollState?              | Scroll state for horizontal scrolling; pass an externally hoisted state to preserve scroll position across recompositions | null | No    |
 | interactionSource | MutableInteractionSource? | Interaction source for the items                                                | null                                        | No       |
 | indication        | Indication?               | Indication for click interactions                                               | LocalIndication.current                     | No       |
 
@@ -106,6 +107,7 @@ The BreadcrumbBarDefaults object provides default values and color configuration
 | InsideMargin          | PaddingValues | Internal padding of the breadcrumb bar | PaddingValues(horizontal = 12.dp, vertical = 8.dp) |
 | ItemHeight            | Dp            | Height of each capsule-shaped item     | 32.dp         |
 | ItemHorizontalPadding | Dp            | Horizontal padding of each item (equals the corner radius for full semicircle ends) | 10.dp |
+| ItemMaxWidth          | Dp            | Maximum width of each capsule-shaped item; text beyond this is truncated | 160.dp |
 
 #### Methods
 

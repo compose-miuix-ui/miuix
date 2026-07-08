@@ -84,7 +84,7 @@ data class BreadcrumbItem(
  * @param insideMargin The margin inside the [BreadcrumbBar].
  * @param itemMaxWidth The maximum width of each capsule-shaped item. Text beyond this is truncated.
  * @param scrollState The [ScrollState] to be used for horizontal scrolling. If null, an internal
- *   state is created. Pass a shared state to synchronize scrolling across multiple bars.
+ *   state is created. Pass an externally hoisted state to preserve scroll position across recompositions.
  * @param interactionSource The [MutableInteractionSource] to be used for the items.
  * @param indication The [Indication] to be used for click interactions.
  */
