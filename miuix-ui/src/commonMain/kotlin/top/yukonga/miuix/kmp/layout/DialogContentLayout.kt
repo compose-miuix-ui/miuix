@@ -92,6 +92,8 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  * @param maxWidth The maximum width of the dialog.
  * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
  *   instead of bottom slide-in). If null, detected from the window size.
+ * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
+ *   for the centered presentation, or derived from the screen corner radius when bottom-attached.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -114,6 +116,7 @@ internal fun DialogContentLayout(
     topInset: Dp? = null,
     maxWidth: Dp = DialogDefaults.MaxWidth,
     largeScreen: Boolean? = null,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -254,6 +257,7 @@ internal fun DialogContentLayout(
             modifier = contentModifier,
             topInset = topInset,
             maxWidth = maxWidth,
+            cornerRadius = cornerRadius,
             content = {
                 CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                     content()
@@ -281,6 +285,7 @@ internal fun DialogContent(
     modifier: Modifier = Modifier,
     topInset: Dp? = null,
     maxWidth: Dp = DialogDefaults.MaxWidth,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -290,9 +295,14 @@ internal fun DialogContent(
         if (isLargeScreen) Alignment.Center else Alignment.BottomCenter
     }
     val roundedCorner = getRoundedCorner()
-    val bottomCornerRadius = remember(roundedCorner, outsideMargin.width, isLargeScreen) {
-        val offset = if (isLargeScreen) 0.dp else outsideMargin.width
-        (roundedCorner - offset).coerceAtLeast(32.dp)
+    val resolvedCornerRadius = cornerRadius ?: remember(roundedCorner, outsideMargin.width, isLargeScreen) {
+        if (isLargeScreen) {
+            // A centered dialog does not hug the screen corners, so the concentric
+            // screen-radius derivation below does not apply.
+            DialogDefaults.CornerRadius
+        } else {
+            (roundedCorner - outsideMargin.width).coerceAtLeast(32.dp)
+        }
     }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
@@ -344,7 +354,7 @@ internal fun DialogContent(
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
         }
-        .squircleSurface(color = backgroundColor, cornerRadius = bottomCornerRadius)
+        .squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
     Box(
@@ -438,6 +448,12 @@ object DialogDefaults {
      * tablet / desktop windows.
      */
     val MaxWidth = 420.dp
+
+    /**
+     * The default corner radius of the dialog in the centered (large-screen) presentation.
+     * The bottom-attached presentation derives its radius from the screen corner radius instead.
+     */
+    val CornerRadius = 32.dp
 
     /**
      * The default margin outside the dialog.

@@ -77,6 +77,7 @@ Scaffold {
 | renderInRootScaffold       | Boolean                | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
 | largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
+| cornerRadius               | Dp?                    | Overrides the dialog corner radius. When null, DialogDefaults.CornerRadius for the centered presentation, or derived from the screen corner radius when bottom-attached | null | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                     | Yes      |
 
 ### DialogDefaults Object
@@ -88,6 +89,7 @@ The DialogDefaults object provides default settings for the OverlayDialog compon
 | Property Name | Type   | Description                    |
 | ------------- | ------ | ------------------------------ |
 | MaxWidth      | Dp     | Default maximum dialog width   |
+| CornerRadius  | Dp     | Default corner radius of the centered (large-screen) presentation |
 | outsideMargin | DpSize | Default dialog external margin |
 | insideMargin  | DpSize | Default dialog internal margin |
 
