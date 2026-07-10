@@ -93,7 +93,8 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
  *   instead of bottom slide-in). If null, detected from the window size.
  * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
- *   for the centered presentation, or derived from the screen corner radius when bottom-attached.
+ *   for the centered presentation, or derived from the screen corner radius (clamped to
+ *   32dp..48dp) when bottom-attached.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -301,7 +302,7 @@ internal fun DialogContent(
             // screen-radius derivation below does not apply.
             DialogDefaults.CornerRadius
         } else {
-            (roundedCorner - outsideMargin.width).coerceAtLeast(32.dp)
+            (roundedCorner - outsideMargin.width).coerceIn(32.dp, 48.dp)
         }
     }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)

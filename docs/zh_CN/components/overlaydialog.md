@@ -77,7 +77,7 @@ Scaffold {
 | renderInRootScaffold       | Boolean                | 是否在根（最外层）Scaffold 中渲染对话框。为 true 时，对话框覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染 | true | 否 |
 | maxWidth                   | Dp                     | 对话框最大宽度                               | DialogDefaults.MaxWidth          | 否       |
 | largeScreen                | Boolean?               | 覆盖大屏呈现样式（居中缩放淡入而非底部滑入）。为 null 时根据窗口尺寸自动检测 | null | 否 |
-| cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导 | null | 否 |
+| cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导（限制在 32dp..48dp） | null | 否 |
 | content                    | @Composable () -> Unit | 对话框的内容                                 | -                                     | 是       |
 
 ### DialogDefaults

@@ -73,7 +73,7 @@ WindowDialog(
 | defaultWindowInsetsPadding | Boolean                | 是否应用默认窗口插入内边距（输入法/导航/标题） | true                                   | 否       |
 | maxWidth                   | Dp                     | 对话框最大宽度                                 | DialogDefaults.MaxWidth          | 否       |
 | largeScreen                | Boolean?               | 覆盖大屏呈现样式（居中缩放淡入而非底部滑入）。为 null 时根据窗口尺寸自动检测 | null | 否 |
-| cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导 | null | 否 |
+| cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导（限制在 32dp..48dp） | null | 否 |
 | content                    | @Composable () -> Unit | 对话框内容                                     | -                                      | 是       |
 
 ### DialogDefaults
