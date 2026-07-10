@@ -219,18 +219,21 @@ internal fun DialogContentLayout(
             )
         }
 
-        val contentModifier = modifier.graphicsLayer {
-            val progress = animationProgress.value
-            if (isLargeScreen) {
-                val scale = 0.8f + 0.2f * progress
-                scaleX = scale
-                scaleY = scale
-                alpha = progress
-            } else {
-                translationY = (1f - progress) * windowInfo.containerDpSize.height.toPx()
-                alpha = 1f
+        // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
+        val contentModifier = Modifier
+            .graphicsLayer {
+                val progress = animationProgress.value
+                if (isLargeScreen) {
+                    val scale = 0.8f + 0.2f * progress
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                } else {
+                    translationY = (1f - progress) * windowInfo.containerDpSize.height.toPx()
+                    alpha = 1f
+                }
             }
-        }
+            .then(modifier)
 
         DialogContent(
             title = title,
@@ -310,15 +313,11 @@ internal fun DialogContent(
         if (isLargeScreen) 0f else with(density) { (bottomPadding + outsideMargin.height).toPx() }
     }
 
-    val contentModifier = modifier
-        .widthIn(max = maxWidth)
-        .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
-        .onGloballyPositioned { coordinates ->
-            dialogHeightPx.intValue = coordinates.size.height
-        }
+    val contentModifier = Modifier
         .graphicsLayer {
             // Apply predictive back animation; branch inside the block so the modifier chain
             // produces a single graphicsLayer node instead of swapping nodes per recomposition.
+            // Must precede the user modifier so its draw modifiers follow the transform (issue #373).
             if (isLargeScreen) {
                 val scale = 1f - (backProgress.value * 0.2f)
                 scaleX = scale
@@ -331,6 +330,12 @@ internal fun DialogContent(
                 }
                 translationY = backProgress.value * maxOffset
             }
+        }
+        .then(modifier)
+        .widthIn(max = maxWidth)
+        .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
+        .onGloballyPositioned { coordinates ->
+            dialogHeightPx.intValue = coordinates.size.height
         }
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
