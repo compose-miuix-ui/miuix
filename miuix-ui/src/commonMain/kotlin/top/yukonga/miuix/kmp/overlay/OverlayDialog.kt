@@ -36,6 +36,8 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  *   When true (default), the dialog covers the full screen. When false, it renders within the
  *   current Scaffold's bounds.
  * @param maxWidth The maximum width of the [OverlayDialog].
+ * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
+ *   instead of bottom slide-in). If null, detected from the window size.
  * @param content The [Composable] content of the [OverlayDialog].
  */
 @Composable
@@ -55,6 +57,7 @@ fun OverlayDialog(
     defaultWindowInsetsPadding: Boolean = true,
     renderInRootScaffold: Boolean = true,
     maxWidth: Dp = DialogDefaults.MaxWidth,
+    largeScreen: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
     DialogContentLayout(
@@ -86,6 +89,7 @@ fun OverlayDialog(
         onDismissFinished = onDismissFinished,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         maxWidth = maxWidth,
+        largeScreen = largeScreen,
         content = content,
     )
 }

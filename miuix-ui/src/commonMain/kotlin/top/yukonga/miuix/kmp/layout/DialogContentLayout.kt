@@ -90,6 +90,8 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param topInset Optional top inset override. If null, calculated from window insets.
  * @param maxWidth The maximum width of the dialog.
+ * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
+ *   instead of bottom slide-in). If null, detected from the window size.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -111,6 +113,7 @@ internal fun DialogContentLayout(
     defaultWindowInsetsPadding: Boolean = true,
     topInset: Dp? = null,
     maxWidth: Dp = DialogDefaults.MaxWidth,
+    largeScreen: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -121,7 +124,7 @@ internal fun DialogContentLayout(
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
     val keyboardController = LocalSoftwareKeyboardController.current
-    val isLargeScreen = DialogDefaults.isLargeScreen()
+    val isLargeScreen = largeScreen ?: DialogDefaults.isLargeScreen()
 
     LaunchedEffect(show) {
         // Snapshot at launch so a window-resize crossing the breakpoint mid-animation does not
@@ -247,6 +250,7 @@ internal fun DialogContentLayout(
             backProgress = backProgress,
             dialogHeightPx = dialogHeightPx,
             onDismissRequest = requestDismiss,
+            isLargeScreen = isLargeScreen,
             modifier = contentModifier,
             topInset = topInset,
             maxWidth = maxWidth,
@@ -273,6 +277,7 @@ internal fun DialogContent(
     backProgress: Animatable<Float, *>,
     dialogHeightPx: MutableIntState,
     onDismissRequest: (() -> Unit)?,
+    isLargeScreen: Boolean,
     modifier: Modifier = Modifier,
     topInset: Dp? = null,
     maxWidth: Dp = DialogDefaults.MaxWidth,
@@ -281,7 +286,6 @@ internal fun DialogContent(
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-    val isLargeScreen = DialogDefaults.isLargeScreen()
     val contentAlignment = remember(isLargeScreen) {
         if (isLargeScreen) Alignment.Center else Alignment.BottomCenter
     }

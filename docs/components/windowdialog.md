@@ -72,6 +72,7 @@ WindowDialog(
 | insideMargin               | DpSize                 | Inner padding for dialog content                              | DialogDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                | Apply default insets padding (IME, nav, caption)              | true                                   | No       |
 | maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
+| largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                      | Yes      |
 
 ### DialogDefaults

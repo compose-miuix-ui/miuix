@@ -76,6 +76,7 @@ Scaffold {
 | defaultWindowInsetsPadding | Boolean                | Whether to apply default window insets padding                | true                                  | No       |
 | renderInRootScaffold       | Boolean                | Whether to render the dialog in the root (outermost) Scaffold. When true, the dialog covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
+| largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                     | Yes      |
 
 ### DialogDefaults Object

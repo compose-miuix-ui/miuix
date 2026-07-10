@@ -48,6 +48,8 @@ fun LazyListScope.dialogSection() {
         var showWideWindowDialog by remember { mutableStateOf(false) }
         var wideSuperDialogHoldDown by remember { mutableStateOf(false) }
         var wideWindowDialogHoldDown by remember { mutableStateOf(false) }
+        var showCenteredDialog by remember { mutableStateOf(false) }
+        var centeredDialogHoldDown by remember { mutableStateOf(false) }
 
         SmallTitle(text = "Dialog")
         Card(
@@ -91,6 +93,15 @@ fun LazyListScope.dialogSection() {
                 },
                 holdDownState = wideWindowDialogHoldDown,
             )
+            ArrowPreference(
+                title = "Centered Dialog (O)",
+                summary = "Force the large-screen presentation with largeScreen = true",
+                onClick = {
+                    showCenteredDialog = true
+                    centeredDialogHoldDown = true
+                },
+                holdDownState = centeredDialogHoldDown,
+            )
         }
 
         OverlayDialogDemo(
@@ -112,6 +123,11 @@ fun LazyListScope.dialogSection() {
             show = showWideWindowDialog,
             onDismissRequest = { showWideWindowDialog = false },
             onDismissFinished = { wideWindowDialogHoldDown = false },
+        )
+        CenteredOverlayDialogDemo(
+            show = showCenteredDialog,
+            onDismissRequest = { showCenteredDialog = false },
+            onDismissFinished = { centeredDialogHoldDown = false },
         )
     }
 }
@@ -175,6 +191,40 @@ private fun WindowDialogDemo(
                 TextButton(
                     text = "Confirm",
                     onClick = { dismissState?.invoke() },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun CenteredOverlayDialogDemo(
+    show: Boolean,
+    onDismissRequest: () -> Unit,
+    onDismissFinished: () -> Unit,
+) {
+    OverlayDialog(
+        show = show,
+        title = "Centered Dialog",
+        summary = "largeScreen = true forces the centered presentation on any window size.",
+        largeScreen = true,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        content = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                TextButton(
+                    text = "Cancel",
+                    onClick = onDismissRequest,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(20.dp))
+                TextButton(
+                    text = "Confirm",
+                    onClick = onDismissRequest,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                 )

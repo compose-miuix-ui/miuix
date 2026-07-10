@@ -42,6 +42,8 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param insideMargin The margin inside the [WindowDialog].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [WindowDialog].
  * @param maxWidth The maximum width of the [WindowDialog].
+ * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
+ *   instead of bottom slide-in). If null, detected from the window size.
  * @param content The [Composable] content of the [WindowDialog].
  */
 @Composable
@@ -60,6 +62,7 @@ fun WindowDialog(
     insideMargin: DpSize = DialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     maxWidth: Dp = DialogDefaults.MaxWidth,
+    largeScreen: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
     val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -98,6 +101,7 @@ fun WindowDialog(
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         topInset = safeTopInset,
         maxWidth = maxWidth,
+        largeScreen = largeScreen,
         content = {
             CompositionLocalProvider(
                 LocalDismissState provides {
