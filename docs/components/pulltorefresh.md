@@ -83,18 +83,25 @@ PullToRefresh has the following states:
 | circleSize              | Dp                     | Indicator circle size          | PullToRefreshDefaults.circleSize       | No       |
 | refreshTexts            | List\<String>          | Text list for different states | PullToRefreshDefaults.refreshTexts     | No       |
 | refreshTextStyle        | TextStyle              | Refresh text style             | PullToRefreshDefaults.refreshTextStyle | No       |
+| onPullProgress          | ((Float) -> Unit)?     | Real-time full-range drag progress (0-1) callback | null                    | No       |
 | content                 | @Composable () -> Unit | Scrollable content composable  | None                                   | Yes      |
 
 ### PullToRefreshState Class
 
 PullToRefreshState manages the UI state of the refresh indicator and can be created using `rememberPullToRefreshState()`. It should only be used for UI state, while refresh logic should be controlled by `isRefreshing` and `onRefresh`.
 
-| Property Name               | Type         | Description                |
-| --------------------------- | ------------ | -------------------------- |
-| refreshState                | RefreshState | Current refresh state      |
-| isRefreshing                | Boolean      | Whether it is refreshing   |
-| pullProgress                | Float        | Pull progress (0-1)        |
-| refreshCompleteAnimProgress | Float        | Refresh complete animation |
+`rememberPullToRefreshState()` accepts an optional `refreshThreshold` parameter to customize the pull progress percentage required to trigger refresh:
+
+| Parameter        | Type  | Description                                                                                 | Default |
+| ---------------- | ----- | ------------------------------------------------------------------------------------------- | ------- |
+| refreshThreshold | Float | Pull progress threshold (0.0~1.0). 0.125 means 12.5% of full drag range. 1.0 requires maximum stretch. | 0.125 |
+
+| Property Name               | Type         | Description                                                     |
+| --------------------------- | ------------ | --------------------------------------------------------------- |
+| refreshState                | RefreshState | Current refresh state                                           |
+| pullProgress                | Float        | Pull progress (0-1) relative to the effective trigger threshold |
+| fullDragProgress            | Float        | Full-range drag progress (0-1) across the entire visual range   |
+| visualProgress              | Float        | Visual scaling progress (0-1) of the indicator circle           |
 
 ### PullToRefreshDefaults Object
 
@@ -143,6 +150,37 @@ PullToRefresh(
         "Refresh successful",
     ),
     // Other properties
+) {
+    // Content
+}
+```
+
+### Custom Refresh Threshold
+
+```kotlin
+val pullToRefreshState = rememberPullToRefreshState(
+    refreshThreshold = 0.5f // 50% of full drag range
+)
+
+PullToRefresh(
+    isRefreshing = isRefreshing,
+    onRefresh = { isRefreshing = true },
+    pullToRefreshState = pullToRefreshState,
+) {
+    // Content
+}
+```
+
+### Real-time Pull Progress Callback
+
+```kotlin
+PullToRefresh(
+    isRefreshing = isRefreshing,
+    onRefresh = { isRefreshing = true },
+    pullToRefreshState = pullToRefreshState,
+    onPullProgress = { progress ->
+        // React to full-range drag progress in real time (0.0 to 1.0)
+    },
 ) {
     // Content
 }
