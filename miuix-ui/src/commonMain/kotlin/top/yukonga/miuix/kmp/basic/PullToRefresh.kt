@@ -231,13 +231,13 @@ fun PullToRefresh(
  *
  * @param refreshThreshold An optional pull progress threshold (0.0 ~ 1.0)
  * representing the percentage of the full damped drag range required to trigger refresh.
- * Default is 0.125 (12.5%). Lower values make refresh easier to trigger; higher values
+ * Default is 0.4 (40%). Lower values make refresh easier to trigger; higher values
  * require a deeper pull.
  * @return A remembered instance of [PullToRefreshState].
  */
 @Composable
 fun rememberPullToRefreshState(
-    refreshThreshold: Float = 0.125f,
+    refreshThreshold: Float = 0.4f,
 ): PullToRefreshState {
     val coroutineScope = rememberCoroutineScope()
 

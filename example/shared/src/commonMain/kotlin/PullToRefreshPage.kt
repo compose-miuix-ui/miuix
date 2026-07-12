@@ -80,7 +80,7 @@ fun PullToRefreshPage(
     val isWideScreen = LocalIsWideScreen.current
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
-    var thresholdValue by remember { mutableFloatStateOf(0.125f) }
+    var thresholdValue by remember { mutableFloatStateOf(0.4f) }
     var currentPullProgress by remember { mutableFloatStateOf(0f) }
     val pullToRefreshState = rememberPullToRefreshState(
         refreshThreshold = thresholdValue,
