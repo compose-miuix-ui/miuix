@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.highlight.drawHighlight
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
+import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
@@ -63,8 +64,8 @@ private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { 
  *   [BackdropEffectScope] (e.g. [blur], [blendColors], [colorControls]).
  * @param highlight Optional edge highlight resolved against the [BackdropEffectScope] and painted
  *   on top of the content; returning `null` skips drawing.
- * @param layerBlock Optional graphics layer transformation applied to this composable and used to
- *   inverse-transform the recorded backdrop so it stays aligned.
+ * @param layerBlock Optional graphics layer transformation applied to this composable and inverted
+ *   on the backdrop sampling so the backdrop stays screen-aligned; safe to animate.
  * @param onDrawBehind Optional draw callback invoked before the blurred backdrop, behind it.
  * @param onDrawBackdrop Wraps the backdrop drawing call, letting callers transform or intercept the
  *   recorded content; defaults to invoking it directly.
@@ -311,6 +312,34 @@ private class DrawBackdropNode(
     private val secondary = LevelTarget()
     private var crossfadeResultLayer: GraphicsLayer? = null
 
+    // layerBlock scale captured per draw for the display-space inverse (see renderBlurInto);
+    // 1f when absent or rotating.
+    private var displayCompScaleX = 1f
+    private var displayCompScaleY = 1f
+    private var inverseCapture: InverseLayerScope? = null
+
+    private fun DrawScope.captureLayerScale() {
+        val lb = layerBlock
+        if (lb == null) {
+            displayCompScaleX = 1f
+            displayCompScaleY = 1f
+            return
+        }
+        val capture = inverseCapture ?: InverseLayerScope().also { inverseCapture = it }
+        capture.reset()
+        capture.size = effectScope.size
+        capture.density = density
+        capture.fontScale = fontScale
+        capture.lb()
+        if (capture.rotationZ == 0f && capture.scaleX != 0f && capture.scaleY != 0f) {
+            displayCompScaleX = capture.scaleX
+            displayCompScaleY = capture.scaleY
+        } else {
+            displayCompScaleX = 1f
+            displayCompScaleY = 1f
+        }
+    }
+
     /** True when the radius sits in a transition band and [primary] (lo) + [secondary] (hi) cross-fade. */
     private var blending: Boolean by mutableStateOf(false)
 
@@ -325,7 +354,7 @@ private class DrawBackdropNode(
 
     private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
 
-    private fun DrawScope.recordBackdrop(target: LevelTarget) {
+    private fun DrawScope.recordBackdrop(target: LevelTarget, inverseInRecord: Boolean) {
         val currentPadding = target.padding
         val scaleFactor = target.cascadeFirstStepScale
         val scaledPadding = if (currentPadding == 0f) {
@@ -341,7 +370,7 @@ private class DrawBackdropNode(
                     drawBackdrop(
                         density = effectScope,
                         coordinates = layoutCoordinates,
-                        layerBlock = layerBlock,
+                        layerBlock = if (inverseInRecord) layerBlock else null,
                         downscaleFactor = scaleFactor,
                     )
                 }
@@ -349,8 +378,27 @@ private class DrawBackdropNode(
         }
     }
 
-    /** Renders [target]'s blurred backdrop (record → cascade downsample → upscale) into this DrawScope. */
+    /**
+     * Renders [target]'s blurred backdrop, choosing where the [layerBlock] inverse is applied.
+     *
+     * A pure scale on a downscaled level is inverted here at full display resolution — inverting
+     * inside the recording resamples the downscaled grid fractionally every animation frame and
+     * flickers. Pivot is the node origin: `localPositionOf` already absorbs any transformOrigin
+     * displacement, leaving exactly a pivot-zero scale. Rotation and full-resolution levels keep
+     * the record-space inverse, whose recording covers the inverse-scaled region by construction.
+     */
     private fun DrawScope.renderBlurInto(target: LevelTarget) {
+        val sx = displayCompScaleX
+        val sy = displayCompScaleY
+        if (target.downscaleFactor > 1 && (sx != 1f || sy != 1f)) {
+            scale(1f / sx, 1f / sy, Offset.Zero) { renderBlurLevel(target, inverseInRecord = false) }
+        } else {
+            renderBlurLevel(target, inverseInRecord = true)
+        }
+    }
+
+    /** Record → cascade downsample → upscale for one level. */
+    private fun DrawScope.renderBlurLevel(target: LevelTarget, inverseInRecord: Boolean) {
         val layer = target.mainLayer ?: return
         val currentPadding = target.padding
         val scaleFactor = target.downscaleFactor
@@ -359,7 +407,7 @@ private class DrawBackdropNode(
 
         if (scaleFactor <= 1) {
             target.cascadeFirstStepScale = 1
-            recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
+            recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target, inverseInRecord) }
             layer.topLeft =
                 if (currentPadding != 0f) {
                     IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
@@ -371,7 +419,7 @@ private class DrawBackdropNode(
             target.cascadeFirstStepScale = 2
             val w = (fullWidth / 2).coerceAtLeast(1)
             val h = (fullHeight / 2).coerceAtLeast(1)
-            recordLayer(layer, size = IntSize(w, h)) { recordBackdrop(target) }
+            recordLayer(layer, size = IntSize(w, h)) { recordBackdrop(target, inverseInRecord) }
             drawUpscaledLayer(
                 target,
                 layer,
@@ -394,7 +442,7 @@ private class DrawBackdropNode(
 
             // Step 0: record backdrop at ½ size (GPU bilinear, no shader).
             val firstCascade = target.obtainCascade(0)
-            recordLayer(firstCascade, size = IntSize(firstW, firstH)) { recordBackdrop(target) }
+            recordLayer(firstCascade, size = IntSize(firstW, firstH)) { recordBackdrop(target, inverseInRecord) }
 
             when (scaleFactor) {
                 4 -> {
@@ -510,6 +558,7 @@ private class DrawBackdropNode(
         if (effectScope.update(this)) {
             updateEffects()
         }
+        captureLayerScale()
         onDrawBehind?.invoke(this)
         renderBlurInto(primary)
         if (blending) {
