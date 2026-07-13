@@ -109,11 +109,13 @@ import kotlin.math.sin
  * @param circleSize The size of the refresh indicator's animated circle.
  * @param refreshTexts A list of strings representing the text shown in different states.
  * @param refreshTextStyle The [TextStyle] for the refresh indicator text.
- * @param onPullProgress A callback invoked on every frame during a pull gesture, providing the
- * current drag progress across the full visual range from 0.0 to 1.0 (where 1.0 represents the
- * maximum stretch distance). Unlike threshold-relative progress, this value continues to increase
- * when the user pulls beyond the threshold. Useful for external components that need to react to
- * pull depth in real time.
+ * @param onPullProgress A callback that observes [PullToRefreshState.fullDragProgress]: the drag
+ * progress across the full visual range from 0.0 to 1.0 (where 1.0 represents the maximum
+ * stretch distance). Unlike threshold-relative progress, this value continues to increase when
+ * the user pulls beyond the threshold. Invoked once with the current value on composition, then
+ * on every change — whether driven by a pull gesture or by the programmatic expansion and
+ * completion animations. Useful for external components that need to react to pull depth in
+ * real time.
  * @param content The content to be displayed inside the container.
  */
 @Composable
@@ -141,7 +143,7 @@ fun PullToRefresh(
     // Reified callback reference that stays current without re-keying the LaunchedEffect.
     val currentOnPullProgress by rememberUpdatedState(onPullProgress)
 
-    // Emit pullProgress changes to the callback, coalesced per frame via snapshotFlow.
+    // Emit fullDragProgress changes to the callback, coalesced per frame via snapshotFlow.
     LaunchedEffect(pullToRefreshState) {
         snapshotFlow { pullToRefreshState.fullDragProgress }
             .collect { progress ->
@@ -231,13 +233,13 @@ fun PullToRefresh(
  *
  * @param refreshThreshold An optional pull progress threshold (0.0 ~ 1.0)
  * representing the percentage of the full damped drag range required to trigger refresh.
- * Default is 0.4 (40%). Lower values make refresh easier to trigger; higher values
- * require a deeper pull.
+ * Default is 0.25 (25%). Lower values make refresh easier to trigger; higher values
+ * require a deeper pull. 0.0 triggers on any pull, however small.
  * @return A remembered instance of [PullToRefreshState].
  */
 @Composable
 fun rememberPullToRefreshState(
-    refreshThreshold: Float = 0.4f,
+    refreshThreshold: Float = 0.25f,
 ): PullToRefreshState {
     val coroutineScope = rememberCoroutineScope()
 
@@ -250,13 +252,15 @@ fun rememberPullToRefreshState(
     // Update context-dependent properties on the state instance to ensure it's always current.
     val windowInfo = LocalWindowInfo.current
     state.maxDragDistancePx = windowInfo.containerSize.height.toFloat()
+    // The largest dragOffset a full-window finger travel can produce under SpringMath damping.
+    state.fullDragRangePx = SpringMath.obtainDampingDistance(1f, state.maxDragDistancePx)
     state.refreshThreshold = refreshThreshold.coerceIn(0f, 1f)
-    state.triggerProgressOffset = state.refreshThreshold * (state.maxDragDistancePx / 3f)
+    state.triggerProgressOffset = state.refreshThreshold * state.fullDragRangePx
     state.refreshThresholdOffset = windowInfo.containerSize.height.toFloat() * MAX_DRAWRATIO * THRESHOLD_RADIO
 
     SideEffect {
         // Re-glue a settled indicator when the threshold changes mid-refresh (window resize, or
-        // a show that ran before first measure): Refreshing visuals scale with visualProgress,
+        // a show that ran before first measure): Refreshing visuals scale with visualProgress.
         val target = state.refreshThresholdOffset
         if (state.refreshState == RefreshState.Refreshing &&
             state.animationJob == null &&
@@ -291,18 +295,19 @@ class PullToRefreshState(
     internal var coroutineScope: CoroutineScope,
 ) {
     internal var maxDragDistancePx: Float = 0f
+    internal var fullDragRangePx: Float = 0f
     internal var refreshThresholdOffset: Float = 0f
     internal var triggerProgressOffset: Float = 0f
 
-    /** The effective threshold used for progress calculation, spring targets, and rendering.
-     * Takes the larger of the built-in visual threshold and the user-configured trigger threshold,
-     * ensuring smooth animation continuity regardless of which is larger. */
+    /** The larger of the built-in visual threshold and the user-configured trigger threshold;
+     * the denominator of [pullProgress]. */
     internal val effectiveThresholdOffset: Float
         get() = max(refreshThresholdOffset, triggerProgressOffset)
 
-    /** The pull progress threshold (0.0~1.0) at which a refresh is triggered,
-     * relative to the full damped drag range. */
+    /** The pull progress threshold (0.0~1.0) at which a refresh is triggered, relative to the
+     * full damped drag range. Configured through [rememberPullToRefreshState]. */
     var refreshThreshold: Float = 0f
+        internal set
 
     /** The drag offset in pixels. */
     var dragOffset by mutableFloatStateOf(0f)
@@ -315,8 +320,9 @@ class PullToRefreshState(
     /** The current visual [RefreshState] of the component. */
     val refreshState: RefreshState get() = internalRefreshState
 
-    /** The progress of the pull gesture, from 0.0 to 1.0, relative to the effective
-     * trigger threshold. At 1.0 the state transitions to [RefreshState.ThresholdReached]. */
+    /** The progress of the pull gesture, from 0.0 to 1.0, relative to the effective threshold
+     * (the larger of the visual threshold and the trigger threshold). With a trigger threshold
+     * below the visual threshold, [RefreshState.ThresholdReached] occurs before this reaches 1.0. */
     val pullProgress: Float by derivedStateOf {
         if (effectiveThresholdOffset > 0f) {
             (dragOffset / effectiveThresholdOffset).coerceIn(0f, 1f)
@@ -330,22 +336,25 @@ class PullToRefreshState(
      * Unlike [pullProgress] which saturates at 1.0 once the threshold is reached,
      * this value continues to grow as the user pulls further beyond the threshold. */
     val fullDragProgress: Float by derivedStateOf {
-        if (maxDragDistancePx > 0f) {
-            (dragOffset / (maxDragDistancePx / 3f)).coerceIn(0f, 1f)
+        if (fullDragRangePx > 0f) {
+            (dragOffset / fullDragRangePx).coerceIn(0f, 1f)
         } else {
             0f
         }
     }
 
-    /** The visual scaling progress of the indicator, from 0.0 to 1.0.
-     * Always uses the built-in [refreshThresholdOffset] as denominator,
-     * so the circle scaling animation completes at a fixed pull distance
-     * regardless of the user-configured trigger threshold. */
+    /** The visual scaling progress of the indicator, from 0.0 to 1.0. The scale-up completes
+     * at the smaller of the built-in visual threshold and the trigger threshold, so entering
+     * [RefreshState.ThresholdReached] always coincides with a fully scaled indicator. */
     val visualProgress: Float by derivedStateOf {
-        if (refreshThresholdOffset > 0f) {
-            (dragOffset / refreshThresholdOffset).coerceIn(0f, 1f)
-        } else {
-            0f
+        val scaleEndOffset = min(refreshThresholdOffset, triggerProgressOffset)
+        when {
+            scaleEndOffset > 0f -> (dragOffset / scaleEndOffset).coerceIn(0f, 1f)
+
+            // A zero trigger threshold means any pull is already past the threshold.
+            dragOffset > 0f -> 1f
+
+            else -> 0f
         }
     }
 
@@ -447,6 +456,13 @@ class PullToRefreshState(
         // Refreshing consumes all nested scroll, so the expansion cannot be caught mid-flight.
         internalRefreshState = RefreshState.Refreshing
         animateToSpring(refreshThresholdOffset)
+        // Chase a threshold that moved while the spring ran. Covers a show on the mount frame:
+        // the window has not reported its size yet, so the first spring settles at a threshold
+        // of 0 (invisible indicator), and the SideEffect re-glue skips while animationJob is
+        // set — without this loop the indicator would stay invisible for the whole refresh.
+        while (internalRefreshState == RefreshState.Refreshing && dragOffset != refreshThresholdOffset) {
+            animateToSpring(refreshThresholdOffset)
+        }
     }
 
     /**
@@ -456,13 +472,9 @@ class PullToRefreshState(
     internal suspend fun finishRefreshing(isRefreshingNow: () -> Boolean) {
         // Re-check at run time: a re-raised level keeps the spinner; the next falling edge retries.
         if (isRefreshing && !isRefreshingNow()) {
-            // Stop a running programmatic expansion.
+            // Stop a running programmatic expansion; the completion animation picks dragOffset
+            // up from wherever the cancelled spring left it (height-continuous handoff).
             animationJob?.cancel()
-            // Force dragOffset to the visual threshold so visualProgress = 1.
-            // Without this, a cancelled animateToSpring may leave dragOffset mid-flight,
-            // causing visualProgress < 1 and a visible position jump in the next frame.
-            dragOffset = refreshThresholdOffset
-            currentTouch = SpringMath.obtainTouchDistance(refreshThresholdOffset, maxDragDistancePx)
             // Cleared before the first suspension so queued duplicates no-op on the guard above.
             isRefreshing = false
             internalRefreshState = RefreshState.RefreshComplete
@@ -478,7 +490,7 @@ class PullToRefreshState(
         isTouching = false
         isProcessingRelease = true
         try {
-            if (dragOffset >= triggerProgressOffset) {
+            if (dragOffset > 0f && dragOffset >= triggerProgressOffset) {
                 // If pulled past threshold, will then call startRefreshing().
                 startRefreshing(onRefresh, isRefreshingNow)
             } else {
@@ -498,8 +510,14 @@ class PullToRefreshState(
     }
 
     private suspend fun startManualRefreshCompleteAnimation() {
-        // Height-continuous handoff when completing mid-expansion; 0 once settled at the threshold.
-        val initialProgress = 1f - visualProgress
+        // Height-continuous handoff when completing mid-expansion; 0 once settled at the
+        // threshold. Must be the exact inverse of the drive formula below so the first frame
+        // re-derives the dragOffset the cancelled spring left behind.
+        val initialProgress = if (refreshThresholdOffset > 0f) {
+            1f - (dragOffset / refreshThresholdOffset).coerceIn(0f, 1f)
+        } else {
+            1f
+        }
         refreshCompleteAnimProgressState.floatValue = initialProgress
         val animatedValue = Animatable(initialProgress)
         animatedValue.animateTo(
@@ -508,8 +526,7 @@ class PullToRefreshState(
         ) {
             refreshCompleteAnimProgressState.floatValue = this.value
             // Drive dragOffset so indicatorHeight tracks the continuous else formula
-            val t = this.value
-            dragOffset = refreshThresholdOffset * (1f - t)
+            dragOffset = refreshThresholdOffset * (1f - this.value)
             currentTouch = SpringMath.obtainTouchDistance(dragOffset, maxDragDistancePx)
         }
         internalRefreshState = RefreshState.Idle
@@ -541,7 +558,7 @@ class PullToRefreshState(
                     dragOffset = sign(currentTouch) * dampedDist
 
                     when {
-                        triggerProgressOffset > 0f && dragOffset >= triggerProgressOffset -> RefreshState.ThresholdReached
+                        dragOffset > 0f && dragOffset >= triggerProgressOffset -> RefreshState.ThresholdReached
                         dragOffset > 0 -> RefreshState.Pulling
                         else -> RefreshState.Idle
                     }.also { nextState ->
@@ -743,11 +760,7 @@ private fun RefreshHeader(
                 RefreshState.Idle -> 0.dp
 
                 else -> if (stretchExtraDp <= 0.dp) {
-                    if (pullToRefreshState.refreshState == RefreshState.ThresholdReached && pullToRefreshState.visualProgress < 1f) {
-                        circleSize
-                    } else {
-                        circleSize * pullToRefreshState.visualProgress
-                    }
+                    circleSize * pullToRefreshState.visualProgress
                 } else {
                     circleSize + stretchExtraDp
                 }
@@ -761,11 +774,7 @@ private fun RefreshHeader(
                 RefreshState.Idle -> 0.dp
 
                 else -> if (stretchExtraDp <= 0.dp) {
-                    if (pullToRefreshState.refreshState == RefreshState.ThresholdReached && pullToRefreshState.visualProgress < 1f) {
-                        circleSize + 36.dp
-                    } else {
-                        (circleSize + 36.dp) * pullToRefreshState.visualProgress
-                    }
+                    (circleSize + 36.dp) * pullToRefreshState.visualProgress
                 } else {
                     (circleSize + 36.dp) + stretchExtraDp
                 }
@@ -867,7 +876,7 @@ private fun RefreshIndicator(
                         indicatorRadiusPx,
                         ringStrokeWidthPx,
                         color,
-                        (1f - pullToRefreshState.visualProgress).coerceIn(0f, 1f),
+                        pullToRefreshState.refreshCompleteAnimProgress,
                     )
                 }
             }

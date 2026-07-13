@@ -94,7 +94,7 @@ PullToRefreshState manages the UI state of the refresh indicator and can be crea
 
 | Parameter        | Type  | Description                                                                                 | Default |
 | ---------------- | ----- | ------------------------------------------------------------------------------------------- | ------- |
-| refreshThreshold | Float | Pull progress threshold (0.0~1.0). 0.4 means 40% of full drag range. 1.0 requires maximum stretch. | 0.4 |
+| refreshThreshold | Float | Pull progress threshold (0.0~1.0). 0.25 means 25% of full drag range. 0.0 triggers on any pull; 1.0 requires maximum stretch. | 0.25 |
 
 | Property Name               | Type         | Description                                                     |
 | --------------------------- | ------------ | --------------------------------------------------------------- |
