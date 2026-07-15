@@ -55,10 +55,10 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * A [Slider] component with Miuix style.
@@ -224,7 +224,7 @@ fun Slider(
                                 val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
                                 val calculatedValue = fractionToValue(fractionForValue)
                                 onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue)
+                                hapticState.reset(calculatedValue, valueRange, coercedValue)
                             },
                             onDragStopped = {
                                 isDragging = false
@@ -427,7 +427,7 @@ fun VerticalSlider(
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue)
+                                hapticState.reset(calculatedValue, valueRange, coercedValue)
                             },
                             onDragStopped = {
                                 isDragging = false
@@ -650,7 +650,7 @@ fun RangeSlider(
                                         isDraggingEnd = true
 
                                         endDragOffset = tentativeStartOffset
-                                        hapticState.resetEnd(currentEndValue)
+                                        hapticState.resetEnd(currentEndValue, valueRange)
                                         hapticState.inheritEndKeyPoint()
 
                                         val visualFractionEnd = horizontalVisualFraction(endDragOffset, layoutWidth, layoutHeight)
@@ -691,7 +691,7 @@ fun RangeSlider(
                                         isDraggingEnd = false
                                         isDraggingStart = true
                                         startDragOffset = tentativeEndOffset
-                                        hapticState.resetStart(currentStartValue)
+                                        hapticState.resetStart(currentStartValue, valueRange)
                                         hapticState.inheritStartKeyPoint()
 
                                         val visualFractionStart = horizontalVisualFraction(startDragOffset, layoutWidth, layoutHeight)
@@ -743,24 +743,24 @@ fun RangeSlider(
                                     isOnStartThumb && !isOnEndThumb -> {
                                         isDraggingStart = true
                                         startDragOffset = offset.x
-                                        hapticState.resetStart(coercedStart)
+                                        hapticState.resetStart(coercedStart, valueRange)
                                     }
 
                                     !isOnStartThumb && isOnEndThumb -> {
                                         isDraggingEnd = true
                                         endDragOffset = offset.x
-                                        hapticState.resetEnd(coercedEnd)
+                                        hapticState.resetEnd(coercedEnd, valueRange)
                                     }
 
                                     isOnStartThumb && isOnEndThumb -> {
                                         if (lastDraggedIsStart) {
                                             isDraggingStart = true
                                             startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart)
+                                            hapticState.resetStart(coercedStart, valueRange)
                                         } else {
                                             isDraggingEnd = true
                                             endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd)
+                                            hapticState.resetEnd(coercedEnd, valueRange)
                                         }
                                     }
 
@@ -770,11 +770,11 @@ fun RangeSlider(
                                         if (diffStart <= diffEnd) {
                                             isDraggingStart = true
                                             startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart)
+                                            hapticState.resetStart(coercedStart, valueRange)
                                         } else {
                                             isDraggingEnd = true
                                             endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd)
+                                            hapticState.resetEnd(coercedEnd, valueRange)
                                         }
                                     }
                                 }
@@ -1025,8 +1025,13 @@ internal class SliderHapticState {
     private var lastStep: Float = 0f
     private var isAtKeyPoint: Boolean = false
 
-    fun reset(currentValue: Float) {
-        edgeFeedbackTriggered = false
+    fun reset(
+        currentValue: Float,
+        valueRange: ClosedFloatingPointRange<Float>,
+        previousValue: Float = currentValue,
+    ) {
+        val isAtEdge = currentValue == valueRange.start || currentValue == valueRange.endInclusive
+        edgeFeedbackTriggered = isAtEdge && previousValue == currentValue
         lastStep = currentValue
         isAtKeyPoint = false
     }
@@ -1073,6 +1078,8 @@ internal class SliderHapticState {
 
         if (hasCustomKeyPoints && keyPointFractions.isNotEmpty()) {
             handleKeyPointHaptic(currentValue, valueRange, hapticFeedback, keyPointFractions, isNotAtEdge)
+        } else if (!isNotAtEdge) {
+            lastStep = currentValue
         } else if (currentValue != lastStep && isNotAtEdge) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             lastStep = currentValue
@@ -1116,14 +1123,14 @@ internal class RangeSliderHapticState {
     private var startIsAtKeyPoint: Boolean = false
     private var endIsAtKeyPoint: Boolean = false
 
-    fun resetStart(currentValue: Float) {
-        startEdgeFeedbackTriggered = false
+    fun resetStart(currentValue: Float, valueRange: ClosedFloatingPointRange<Float>) {
+        startEdgeFeedbackTriggered = currentValue == valueRange.start
         startLastStep = currentValue
         startIsAtKeyPoint = false
     }
 
-    fun resetEnd(currentValue: Float) {
-        endEdgeFeedbackTriggered = false
+    fun resetEnd(currentValue: Float, valueRange: ClosedFloatingPointRange<Float>) {
+        endEdgeFeedbackTriggered = currentValue == valueRange.endInclusive
         endLastStep = currentValue
         endIsAtKeyPoint = false
     }
@@ -1232,6 +1239,8 @@ internal class RangeSliderHapticState {
                 }
 
                 onKeyPointUpdate(currentlyAtKeyPoint)
+            } else if (!isNotAtEdge) {
+                onLastStepUpdate(currentValue)
             } else if (currentValue != lastStep && isNotAtEdge) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onLastStepUpdate(currentValue)
@@ -1256,7 +1265,7 @@ private fun resolveValueFromFraction(
             val stepCount = steps + 1
             val start = valueRange.start.toDouble()
             val end = valueRange.endInclusive.toDouble()
-            val stepIndex = (f * stepCount).roundToInt().coerceIn(0, stepCount)
+            val stepIndex = (f * stepCount).fastRoundToInt().coerceIn(0, stepCount)
             (start + (end - start) * stepIndex / stepCount).toFloat()
         }
 

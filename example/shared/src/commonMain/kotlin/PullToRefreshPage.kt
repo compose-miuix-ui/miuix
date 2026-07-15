@@ -6,18 +6,21 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,18 +28,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.coroutines.delay
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
@@ -45,17 +49,18 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
+import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 import kotlin.time.Duration.Companion.milliseconds
-
-private val DropdownListTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-private val DropdownListBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
 
 @Composable
 fun PullToRefreshPage(
@@ -65,7 +70,12 @@ fun PullToRefreshPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
-    val pullToRefreshState = rememberPullToRefreshState()
+    var showSettings by remember { mutableStateOf(false) }
+    var thresholdValue by remember { mutableFloatStateOf(0.25f) }
+    var currentPullProgress by remember { mutableFloatStateOf(0f) }
+    val pullToRefreshState = rememberPullToRefreshState(
+        refreshThreshold = thresholdValue,
+    )
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
     val backdrop = rememberBlurBackdrop()
@@ -129,6 +139,7 @@ fun PullToRefreshPage(
                 pullToRefreshState = pullToRefreshState,
                 topAppBarScrollBehavior = if (appState.showTopAppBar) topAppBarScrollBehavior else null,
                 contentPadding = contentPadding,
+                onPullProgress = { currentPullProgress = it },
             ) {
                 val lazyListState = rememberLazyListState()
                 Box {
@@ -141,22 +152,48 @@ fun PullToRefreshPage(
                         ),
                         contentPadding = contentPadding,
                     ) {
+                        item(key = "progress_card") {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                cornerRadius = 12.dp,
+                                insideMargin = PaddingValues(16.dp),
+                                colors = CardDefaults.defaultColors(
+                                    color = MiuixTheme.colorScheme.surfaceContainer,
+                                ),
+                                pressFeedbackType = PressFeedbackType.Sink,
+                                showIndication = true,
+                                onClick = { showSettings = true },
+                            ) {
+                                Text(
+                                    text = "Pull Progress: ${(currentPullProgress * 100).toInt()}%",
+                                    style = MiuixTheme.textStyles.body1,
+                                    color = MiuixTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = "Threshold: ${(thresholdValue * 100).toInt()}%",
+                                    style = MiuixTheme.textStyles.body2,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                )
+                            }
+                        }
                         items(
                             count = dropdownCount,
                             key = { "dropdown_$it" },
                         ) { i ->
                             val isFirst = i == 0
                             val isLast = i == dropdownCount - 1
-                            val shape = when {
-                                isFirst -> DropdownListTopShape
-                                isLast -> DropdownListBottomShape
-                                else -> RectangleShape
-                            }
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 12.dp)
-                                    .clip(shape)
+                                    .squircleClip(
+                                        topStart = if (isFirst) 16.dp else 0.dp,
+                                        topEnd = if (isFirst) 16.dp else 0.dp,
+                                        bottomEnd = if (isLast) 16.dp else 0.dp,
+                                        bottomStart = if (isLast) 16.dp else 0.dp,
+                                    )
                                     .background(MiuixTheme.colorScheme.surfaceContainer),
                             ) {
                                 if (i % 2 == 0) {
@@ -189,5 +226,39 @@ fun PullToRefreshPage(
                 }
             }
         }
+    }
+
+    WindowBottomSheet(
+        title = "PullToRefresh Settings",
+        show = showSettings,
+        onDismissRequest = { showSettings = false },
+    ) {
+        Card(
+            insideMargin = PaddingValues(),
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryContainer,
+            ),
+        ) {
+            SliderPreference(
+                title = "Refresh Threshold",
+                summary = if (thresholdValue == 0f) {
+                    "Any pull triggers refresh."
+                } else {
+                    "Pull ${(thresholdValue * 100).toInt()}% of the drag range to refresh."
+                },
+                value = thresholdValue,
+                onValueChange = { thresholdValue = it },
+                valueRange = 0f..1f,
+                steps = 99,
+                showKeyPoints = true,
+                keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+            )
+        }
+        Spacer(
+            Modifier.padding(
+                bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+            ),
+        )
     }
 }

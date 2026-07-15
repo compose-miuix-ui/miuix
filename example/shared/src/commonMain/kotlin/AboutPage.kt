@@ -128,7 +128,6 @@ fun AboutPage(
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     titleColor = titleColor,
-                    defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         BackNavigationIcon(
                             onClick = { navigator.pop() },
@@ -331,107 +330,108 @@ private fun AboutContent(
             }
 
             item(key = "about") {
-                Column(
-                    modifier = Modifier
-                        .fillParentMaxHeight()
-                        .padding(bottom = scrollPadding.calculateBottomPadding()),
-                ) {
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp)
-                            .then(
-                                if (backdrop != null) {
-                                    Modifier
-                                        .textureBlur(
-                                            backdrop = backdrop,
-                                            shape = RoundedCornerShape(16.dp),
-                                            blurRadius = blurRadius,
-                                            noiseCoefficient = noiseCoefficient,
-                                            colors = BlurDefaults.blurColors(
-                                                blendColors = cardBlend,
-                                                brightness = brightness,
-                                                contrast = contrast,
-                                                saturation = saturation,
-                                            ),
-                                        )
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                        colors = CardDefaults.defaultColors(
-                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                            Color.Transparent,
-                        ),
+                Box {
+                    Spacer(Modifier.fillParentMaxHeight())
+                    Column(
+                        modifier = Modifier.padding(bottom = scrollPadding.calculateBottomPadding()),
                     ) {
-                        ArrowPreference(
-                            title = "View Source",
-                            endActions = {
-                                Text(
-                                    text = "GitHub",
-                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                )
-                            },
-                            onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
-                        )
-                        ArrowPreference(
-                            title = "Join Group",
-                            endActions = {
-                                Text(
-                                    text = "Telegram",
-                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                )
-                            },
-                            onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
-                        )
-                    }
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(top = 12.dp)
-                            .then(
-                                if (backdrop != null) {
-                                    Modifier
-                                        .textureBlur(
-                                            backdrop = backdrop,
-                                            shape = RoundedCornerShape(16.dp),
-                                            blurRadius = blurRadius,
-                                            noiseCoefficient = noiseCoefficient,
-                                            colors = BlurDefaults.blurColors(
-                                                blendColors = cardBlend,
-                                                brightness = brightness,
-                                                contrast = contrast,
-                                                saturation = saturation,
-                                            ),
-                                        )
-                                } else {
-                                    Modifier
-                                },
+                        Card(
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                                .then(
+                                    if (backdrop != null) {
+                                        Modifier
+                                            .textureBlur(
+                                                backdrop = backdrop,
+                                                shape = RoundedCornerShape(16.dp),
+                                                blurRadius = blurRadius,
+                                                noiseCoefficient = noiseCoefficient,
+                                                colors = BlurDefaults.blurColors(
+                                                    blendColors = cardBlend,
+                                                    brightness = brightness,
+                                                    contrast = contrast,
+                                                    saturation = saturation,
+                                                ),
+                                            )
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                            colors = CardDefaults.defaultColors(
+                                if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                                Color.Transparent,
                             ),
-                        colors = CardDefaults.defaultColors(
-                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                            Color.Transparent,
-                        ),
-                    ) {
-                        ArrowPreference(
-                            title = "License",
-                            endActions = {
-                                Text(
-                                    text = "Apache-2.0",
-                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                )
-                            },
-                            onClick = {
-                                uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                            },
-                        )
-                        ArrowPreference(
-                            title = "Third Party Licenses",
-                            onClick = { navigator.push(Route.License) },
-                        )
+                        ) {
+                            ArrowPreference(
+                                title = "View Source",
+                                endActions = {
+                                    Text(
+                                        text = "GitHub",
+                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                    )
+                                },
+                                onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
+                            )
+                            ArrowPreference(
+                                title = "Join Group",
+                                endActions = {
+                                    Text(
+                                        text = "Telegram",
+                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                    )
+                                },
+                                onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
+                            )
+                        }
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(top = 12.dp)
+                                .then(
+                                    if (backdrop != null) {
+                                        Modifier
+                                            .textureBlur(
+                                                backdrop = backdrop,
+                                                shape = RoundedCornerShape(16.dp),
+                                                blurRadius = blurRadius,
+                                                noiseCoefficient = noiseCoefficient,
+                                                colors = BlurDefaults.blurColors(
+                                                    blendColors = cardBlend,
+                                                    brightness = brightness,
+                                                    contrast = contrast,
+                                                    saturation = saturation,
+                                                ),
+                                            )
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                            colors = CardDefaults.defaultColors(
+                                if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                                Color.Transparent,
+                            ),
+                        ) {
+                            ArrowPreference(
+                                title = "License",
+                                endActions = {
+                                    Text(
+                                        text = "Apache-2.0",
+                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                    )
+                                },
+                                onClick = {
+                                    uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                                },
+                            )
+                            ArrowPreference(
+                                title = "Third Party Licenses",
+                                onClick = { navigator.push(Route.License) },
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }

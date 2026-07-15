@@ -1213,7 +1213,7 @@ private fun ColorSlider(
                     dragOffset = x
                     val newValue = handleSliderInteraction(x, sliderWidthPxState, sliderHeightPx)
                     onValueChangedState.value(newValue)
-                    hapticState.reset(newValue)
+                    hapticState.reset(newValue, 0f..1f, value)
                 },
             ),
     ) {

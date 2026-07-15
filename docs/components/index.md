@@ -21,6 +21,7 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [NavigationBar](../components/navigationbar)               | Bottom navigation component                | Main page switching                   |
 | [NavigationRail](../components/navigationrail)             | Side navigation component                  | Main page switching (Large screen)    |
 | [TabRow](../components/tabrow)                             | Horizontal tab bar                         | Content category browsing             |
+| [BreadcrumbBar](../components/breadcrumbbar)               | Horizontal breadcrumb navigation bar         | File path navigation, location trail   |
 | [Card](../components/card)                                 | Container with related information         | Information display, content grouping |
 | [BasicComponent](../components/basiccomponent)             | Universal base component                   | Custom component development          |
 | [Button](../components/button)                             | Interactive element for triggering actions | Form submission, action confirmation  |

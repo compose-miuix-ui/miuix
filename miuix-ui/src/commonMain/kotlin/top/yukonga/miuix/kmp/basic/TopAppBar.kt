@@ -62,13 +62,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.TopAppBarState.Companion.Saver
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * A [TopAppBar] with Miuix style that can collapse and expand based on the
@@ -725,7 +725,7 @@ private fun TopAppBarLayout(
                     modifier = Modifier
                         .offset {
                             val v = scrolledOffset()
-                            IntOffset(0, if (v.isNaN()) 0 else v.roundToInt())
+                            IntOffset(0, v.fastRoundToInt())
                         }
                         .onSizeChanged { updateHeightOffsetLimit(it.height) },
                 ) {
@@ -802,7 +802,7 @@ private fun TopAppBarLayout(
             if (maxTitleWidth == Constraints.Infinity) {
                 maxTitleWidth
             } else {
-                (maxTitleWidth * TitleWidthFraction).roundToInt()
+                (maxTitleWidth * TitleWidthFraction).fastRoundToInt()
             }
 
         val titlePlaceable =
@@ -1027,7 +1027,7 @@ private fun SmallTopAppBarLayout(
             if (maxTitleWidth == Constraints.Infinity) {
                 maxTitleWidth
             } else {
-                (maxTitleWidth * TitleWidthFraction).roundToInt()
+                (maxTitleWidth * TitleWidthFraction).fastRoundToInt()
             }
 
         val titlePlaceable =

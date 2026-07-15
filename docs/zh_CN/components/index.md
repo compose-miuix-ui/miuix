@@ -21,6 +21,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Over
 | [NavigationBar](../components/navigationbar)               | 底部导航组件           | 主要页面切换         |
 | [NavigationRail](../components/navigationrail)             | 侧边导航组件           | 主要页面切换（大屏）  |
 | [TabRow](../components/tabrow)                             | 水平标签页切换栏       | 内容分类浏览         |
+| [BreadcrumbBar](../components/breadcrumbbar)               | 水平面包屑导航栏       | 文件路径导航、位置轨迹 |
 | [Card](../components/card)                                 | 包含相关信息的容器     | 信息展示、内容分组   |
 | [BasicComponent](../components/basiccomponent)             | 通用基础组件           | 自定义组件开发       |
 | [Button](../components/button)                             | 触发操作的交互元素     | 表单提交、操作确认   |

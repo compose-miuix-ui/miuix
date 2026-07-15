@@ -19,14 +19,15 @@ import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 fun LazyListScope.radioButtonSection() {
     item(key = "radioButton") {
         SmallTitle(text = "RadioButton")
+        RadioButtonCardsDemo()
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
-            SuperRadioButtonDemo()
             RadioButtonPreference(
                 title = "Disabled RadioButton",
+                summary = "This option is unavailable",
                 selected = true,
                 enabled = false,
                 onClick = {},
@@ -36,25 +37,21 @@ fun LazyListScope.radioButtonSection() {
 }
 
 @Composable
-private fun SuperRadioButtonDemo() {
+private fun RadioButtonCardsDemo() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
-    RadioButtonPreference(
-        title = "Option A",
-        summary = "Selected: ${selectedIndex == 0}",
-        selected = selectedIndex == 0,
-        onClick = { selectedIndex = 0 },
-    )
-    RadioButtonPreference(
-        title = "Option B",
-        summary = "Selected: ${selectedIndex == 1}",
-        selected = selectedIndex == 1,
-        onClick = { selectedIndex = 1 },
-    )
-    RadioButtonPreference(
-        title = "Option C",
-        summary = "Selected: ${selectedIndex == 2}",
-        selected = selectedIndex == 2,
-        onClick = { selectedIndex = 2 },
-    )
+    listOf("Option A", "Option B", "Option C").forEachIndexed { index, title ->
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
+            RadioButtonPreference(
+                title = title,
+                summary = "Selected: ${selectedIndex == index}",
+                selected = selectedIndex == index,
+                onClick = { selectedIndex = index },
+            )
+        }
+    }
 }

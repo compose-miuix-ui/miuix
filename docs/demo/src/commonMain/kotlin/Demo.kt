@@ -46,6 +46,7 @@ private val availableComponents = listOf(
     AvailableComponent("NavigationBar", "navigationBar") { NavigationBarDemo() },
     AvailableComponent("NavigationRail", "navigationRail") { NavigationRailDemo() },
     AvailableComponent("TabRow", "tabRow") { TabRowDemo() },
+    AvailableComponent("BreadcrumbBar", "breadcrumbBar") { BreadcrumbBarDemo() },
     AvailableComponent("Card", "card") { CardDemo() },
     AvailableComponent("BasicComponent", "basicComponent") { BasicComponentDemo() },
     AvailableComponent("Button", "button") { ButtonDemo() },

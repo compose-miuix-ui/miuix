@@ -89,6 +89,12 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  *   is cancelled mid-flight (e.g., by [show] toggling back to true).
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param topInset Optional top inset override. If null, calculated from window insets.
+ * @param maxWidth The maximum width of the dialog.
+ * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
+ *   instead of bottom slide-in). If null, detected from the window size.
+ * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
+ *   for the centered presentation, or derived from the screen corner radius (clamped to
+ *   32dp..48dp) when bottom-attached.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -109,6 +115,9 @@ internal fun DialogContentLayout(
     onDismissFinished: (() -> Unit)? = null,
     defaultWindowInsetsPadding: Boolean = true,
     topInset: Dp? = null,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
+    largeScreen: Boolean? = null,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -119,7 +128,7 @@ internal fun DialogContentLayout(
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
     val keyboardController = LocalSoftwareKeyboardController.current
-    val isLargeScreen = DialogDefaults.isLargeScreen()
+    val isLargeScreen = largeScreen ?: DialogDefaults.isLargeScreen()
 
     LaunchedEffect(show) {
         // Snapshot at launch so a window-resize crossing the breakpoint mid-animation does not
@@ -217,18 +226,21 @@ internal fun DialogContentLayout(
             )
         }
 
-        val contentModifier = modifier.graphicsLayer {
-            val progress = animationProgress.value
-            if (isLargeScreen) {
-                val scale = 0.8f + 0.2f * progress
-                scaleX = scale
-                scaleY = scale
-                alpha = progress
-            } else {
-                translationY = (1f - progress) * windowInfo.containerDpSize.height.toPx()
-                alpha = 1f
+        // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
+        val contentModifier = Modifier
+            .graphicsLayer {
+                val progress = animationProgress.value
+                if (isLargeScreen) {
+                    val scale = 0.8f + 0.2f * progress
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                } else {
+                    translationY = (1f - progress) * windowInfo.containerDpSize.height.toPx()
+                    alpha = 1f
+                }
             }
-        }
+            .then(modifier)
 
         DialogContent(
             title = title,
@@ -242,8 +254,11 @@ internal fun DialogContentLayout(
             backProgress = backProgress,
             dialogHeightPx = dialogHeightPx,
             onDismissRequest = requestDismiss,
+            isLargeScreen = isLargeScreen,
             modifier = contentModifier,
             topInset = topInset,
+            maxWidth = maxWidth,
+            cornerRadius = cornerRadius,
             content = {
                 CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                     content()
@@ -267,21 +282,28 @@ internal fun DialogContent(
     backProgress: Animatable<Float, *>,
     dialogHeightPx: MutableIntState,
     onDismissRequest: (() -> Unit)?,
+    isLargeScreen: Boolean,
     modifier: Modifier = Modifier,
     topInset: Dp? = null,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     val windowHeight = windowInfo.containerDpSize.height
-    val isLargeScreen = DialogDefaults.isLargeScreen()
     val contentAlignment = remember(isLargeScreen) {
         if (isLargeScreen) Alignment.Center else Alignment.BottomCenter
     }
     val roundedCorner = getRoundedCorner()
-    val bottomCornerRadius = remember(roundedCorner, outsideMargin.width, isLargeScreen) {
-        val offset = if (isLargeScreen) 0.dp else outsideMargin.width
-        (roundedCorner - offset).coerceAtLeast(32.dp)
+    val resolvedCornerRadius = cornerRadius ?: remember(roundedCorner, outsideMargin.width, isLargeScreen) {
+        if (isLargeScreen) {
+            // A centered dialog does not hug the screen corners, so the concentric
+            // screen-radius derivation below does not apply.
+            DialogDefaults.CornerRadius
+        } else {
+            (roundedCorner - outsideMargin.width).coerceIn(32.dp, 48.dp)
+        }
     }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
 
@@ -306,15 +328,11 @@ internal fun DialogContent(
         if (isLargeScreen) 0f else with(density) { (bottomPadding + outsideMargin.height).toPx() }
     }
 
-    val contentModifier = modifier
-        .widthIn(max = DialogDefaults.MaxWidth)
-        .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
-        .onGloballyPositioned { coordinates ->
-            dialogHeightPx.intValue = coordinates.size.height
-        }
+    val contentModifier = Modifier
         .graphicsLayer {
             // Apply predictive back animation; branch inside the block so the modifier chain
             // produces a single graphicsLayer node instead of swapping nodes per recomposition.
+            // Must precede the user modifier so its draw modifiers follow the transform (issue #373).
             if (isLargeScreen) {
                 val scale = 1f - (backProgress.value * 0.2f)
                 scaleX = scale
@@ -328,10 +346,16 @@ internal fun DialogContent(
                 translationY = backProgress.value * maxOffset
             }
         }
+        .then(modifier)
+        .widthIn(max = maxWidth)
+        .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
+        .onGloballyPositioned { coordinates ->
+            dialogHeightPx.intValue = coordinates.size.height
+        }
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
         }
-        .squircleSurface(color = backgroundColor, cornerRadius = bottomCornerRadius)
+        .squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
     Box(
@@ -425,6 +449,12 @@ object DialogDefaults {
      * tablet / desktop windows.
      */
     val MaxWidth = 420.dp
+
+    /**
+     * The default corner radius of the dialog in the centered (large-screen) presentation.
+     * The bottom-attached presentation derives its radius from the screen corner radius instead.
+     */
+    val CornerRadius = 32.dp
 
     /**
      * The default margin outside the dialog.

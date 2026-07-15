@@ -271,13 +271,16 @@ internal fun BottomSheetContentLayout(
                 },
             contentAlignment = Alignment.BottomCenter,
         ) {
-            val sheetModifier = modifier.graphicsLayer {
-                val progress = animationProgress.value
-                val currentHeight = sheetHeightPx.intValue.toFloat()
-                val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
-                val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
-                translationY = baseOffset * (1f - progress) + dragOffsetY.value
-            }
+            // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
+            val sheetModifier = Modifier
+                .graphicsLayer {
+                    val progress = animationProgress.value
+                    val currentHeight = sheetHeightPx.intValue.toFloat()
+                    val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
+                    val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
+                    translationY = baseOffset * (1f - progress) + dragOffsetY.value
+                }
+                .then(modifier)
 
             BottomSheetContent(
                 title = title,

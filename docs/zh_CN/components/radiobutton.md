@@ -2,7 +2,7 @@
 
 `RadioButton` 是 Miuix 中的基础选择组件，支持两种状态：选中和未选中。选中时显示对勾动画指示器，未选中时不显示任何指示器。适用于单选场景，即从一组选项中只能选择一个。
 
-<div style="position: relative; height: 220px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 264px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=radioButton" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
@@ -96,8 +96,10 @@ RadioButton(
 val options = listOf("选项 A", "选项 B", "选项 C")
 var selectedIndex by remember { mutableIntStateOf(0) }
 
-Card {
-    options.forEachIndexed { index, option ->
+options.forEachIndexed { index, option ->
+    Card(
+        modifier = Modifier.padding(bottom = 12.dp)
+    ) {
         RadioButtonPreference(
             title = option,
             selected = selectedIndex == index,

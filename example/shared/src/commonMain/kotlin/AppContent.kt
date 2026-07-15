@@ -83,13 +83,14 @@ import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
@@ -101,7 +102,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
+import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
@@ -115,9 +116,8 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
-import utils.BlurredBar
 import utils.FPSMonitor
-import utils.rememberBlurBackdrop
+import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
 import kotlin.math.abs
 
@@ -168,7 +168,7 @@ fun AppContent(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
+            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Home),
             NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Create),
             NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
             NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Edit),
@@ -329,27 +329,27 @@ private fun WideScreenContent(
     mainPagerState: MainPagerState,
 ) {
     val appState = LocalAppState.current
-    val backdrop = rememberBlurBackdrop()
-    val blurActive = backdrop != null
-    val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val page = mainPagerState.selectedPage
+    val expandRail = shouldExpandNavigationRail()
+    val railState = rememberNavigationRailState(
+        initialValue = if (expandRail) NavigationRailValue.Expanded else NavigationRailValue.Collapsed,
+    )
+    LaunchedEffect(expandRail) {
+        if (expandRail) railState.expand() else railState.collapse()
+    }
     Row {
         if (appState.showNavigationBar) {
-            BlurredBar(backdrop, blurActive) {
-                NavigationRail(
-                    modifier = Modifier.background(barColor),
-                    color = barColor,
-                    mode = NavigationRailDisplayMode.entries[appState.navigationRailMode],
-                ) {
-                    navigationItems.forEachIndexed { index, item ->
-                        NavigationRailItem(
-                            selected = page == index,
-                            onClick = { mainPagerState.animateToPage(index) },
-                            icon = item.icon,
-                            label = item.label,
-                            badge = navigationItemBadge(index, appState.showNavigationBarBadge),
-                        )
-                    }
+            NavigationRail(
+                state = railState,
+            ) {
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationRailItem(
+                        selected = page == index,
+                        onClick = { mainPagerState.animateToPage(index) },
+                        icon = item.icon,
+                        label = item.label,
+                        badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+                    )
                 }
             }
         }
@@ -374,16 +374,14 @@ private fun WideScreenContent(
             },
             floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
         ) { padding ->
-            Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
-                AppPager(
-                    snackbarHostState = snackbarHostState,
-                    padding = PaddingValues(top = padding.calculateTopPadding()),
-                    pagerState = mainPagerState.pagerState,
-                    modifier = Modifier
-                        .imePadding()
-                        .padding(end = padding.calculateEndPadding(layoutDirection)),
-                )
-            }
+            AppPager(
+                snackbarHostState = snackbarHostState,
+                padding = PaddingValues(top = padding.calculateTopPadding()),
+                pagerState = mainPagerState.pagerState,
+                modifier = Modifier
+                    .imePadding()
+                    .padding(end = padding.calculateEndPadding(layoutDirection)),
+            )
         }
     }
 }

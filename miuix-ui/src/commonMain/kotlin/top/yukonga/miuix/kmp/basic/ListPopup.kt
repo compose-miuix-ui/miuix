@@ -605,11 +605,8 @@ fun ListPopupContent(
     val backgroundColor = MiuixTheme.colorScheme.surfaceContainer
 
     Box(
-        modifier = modifier
-            .onGloballyPositioned { coordinates ->
-                val size = coordinates.size
-                if (popupContentSize != size) onPopupContentSizeChange(size)
-            }
+        // The layer must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
+        modifier = Modifier
             .graphicsLayer {
                 val fraction = fractionProgress()
                 val scale = 0.15f + 0.85f * fraction
@@ -617,6 +614,11 @@ fun ListPopupContent(
                 scaleY = scale
                 alpha = alphaProgress()
                 transformOrigin = localTransformOrigin
+            }
+            .then(modifier)
+            .onGloballyPositioned { coordinates ->
+                val size = coordinates.size
+                if (popupContentSize != size) onPopupContentSizeChange(size)
             }
             .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius, isSquircleEnabled())
             .background(color = backgroundColor),

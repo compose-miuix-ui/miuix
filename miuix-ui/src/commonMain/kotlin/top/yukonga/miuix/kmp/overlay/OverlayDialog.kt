@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
@@ -34,6 +35,12 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  * @param renderInRootScaffold Whether to render the dialog in the root (outermost) Scaffold.
  *   When true (default), the dialog covers the full screen. When false, it renders within the
  *   current Scaffold's bounds.
+ * @param maxWidth The maximum width of the [OverlayDialog].
+ * @param largeScreen Optional override for the large-screen presentation (centered scale/fade
+ *   instead of bottom slide-in). If null, detected from the window size.
+ * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
+ *   for the centered presentation, or derived from the screen corner radius (clamped to
+ *   32dp..48dp) when bottom-attached.
  * @param content The [Composable] content of the [OverlayDialog].
  */
 @Composable
@@ -52,6 +59,9 @@ fun OverlayDialog(
     insideMargin: DpSize = DialogDefaults.insideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    maxWidth: Dp = DialogDefaults.MaxWidth,
+    largeScreen: Boolean? = null,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     DialogContentLayout(
@@ -82,6 +92,9 @@ fun OverlayDialog(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        maxWidth = maxWidth,
+        largeScreen = largeScreen,
+        cornerRadius = cornerRadius,
         content = content,
     )
 }

@@ -24,9 +24,9 @@ import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.icon.extended.Settings
@@ -56,6 +56,7 @@ fun NavigationRailDemo() {
                 NavigationItem("Settings", MiuixIcons.Settings),
             )
             var selectedIndex by remember { mutableIntStateOf(0) }
+            val railState = rememberNavigationRailState()
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -66,7 +67,7 @@ fun NavigationRailDemo() {
                 ) {
                     Row(modifier = Modifier.fillMaxSize()) {
                         NavigationRail(
-                            mode = NavigationRailDisplayMode.IconAndText,
+                            state = railState,
                         ) {
                             items.forEachIndexed { index, item ->
                                 NavigationRailItem(

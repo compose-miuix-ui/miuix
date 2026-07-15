@@ -71,6 +71,9 @@ WindowDialog(
 | outsideMargin              | DpSize                 | Outer margin (window edges)                                   | DialogDefaults.outsideMargin     | No       |
 | insideMargin               | DpSize                 | Inner padding for dialog content                              | DialogDefaults.insideMargin      | No       |
 | defaultWindowInsetsPadding | Boolean                | Apply default insets padding (IME, nav, caption)              | true                                   | No       |
+| maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
+| largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
+| cornerRadius               | Dp?                    | Overrides the dialog corner radius. When null, DialogDefaults.CornerRadius for the centered presentation, or derived from the screen corner radius (clamped to 32dp..48dp) when bottom-attached | null | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                      | Yes      |
 
 ### DialogDefaults
@@ -79,6 +82,8 @@ WindowDialog(
 
 | Name          | Type   | Description                      |
 | ------------- | ------ | -------------------------------- |
+| MaxWidth      | Dp     | Default maximum dialog width     |
+| CornerRadius  | Dp     | Default corner radius of the centered (large-screen) presentation |
 | outsideMargin | DpSize | Default outer margin for dialog  |
 | insideMargin  | DpSize | Default inner padding for dialog |
 
