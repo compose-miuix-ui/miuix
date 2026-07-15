@@ -34,7 +34,7 @@ private fun sigmaToBlurRadius(sigma: Float): Float = ((sigma - 0.5f) / 0.57735f)
 /**
  * Gradient band masks cached per scope: they depend only on the gradient, never the radii, so an
  * animating radius reuses them — their runtime-shader snapshots are the only expensive nodes in
- * the composite rebuild.
+ * the stack rebuild.
  */
 private class ProgressiveMaskCache {
     var ax = Float.NaN
@@ -42,7 +42,6 @@ private class ProgressiveMaskCache {
     var projFull = Float.NaN
     var projZero = Float.NaN
     var curve = Float.NaN
-    lateinit var level3: android.graphics.RenderEffect
     lateinit var level2: android.graphics.RenderEffect
     lateinit var level1: android.graphics.RenderEffect
 
@@ -50,12 +49,17 @@ private class ProgressiveMaskCache {
     lateinit var ramp: android.graphics.RenderEffect
 }
 
-// A runtime shader binds one source child here, so the composite is a blend-mode DAG instead:
-// masked levels SrcOver-stacked over the sharp base ≡ PROGRESSIVE_COMPOSITE_SHADER's mix chain.
-internal actual fun progressiveCompositeEffect(
+// A runtime shader binds one source child here, so the stack is a blend-mode DAG instead: masked
+// levels SrcOver-stacked over the unmasked lightest level ≡ PROGRESSIVE_COMPOSITE_SHADER's first
+// two mix segments (the blend to sharp is the caller's full-res overlay).
+internal actual fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,
-    sigmaX: Float,
-    sigmaY: Float,
+    sigma0X: Float,
+    sigma0Y: Float,
+    sigma1X: Float,
+    sigma1Y: Float,
+    sigma2X: Float,
+    sigma2Y: Float,
     ax: Float,
     ay: Float,
     projFull: Float,
@@ -82,7 +86,6 @@ internal actual fun progressiveCompositeEffect(
             return android.graphics.RenderEffect.createRuntimeShaderEffect(androidMask, "child")
         }
 
-        masks.level3 = bandMask(3f, 3f)
         masks.level2 = bandMask(2f, 3f)
         masks.level1 = bandMask(1f, 3f)
         masks.ramp = bandMask(1f, 1f)
@@ -94,24 +97,26 @@ internal actual fun progressiveCompositeEffect(
     }
     val pre = preEffect?.asAndroidRenderEffect()
 
-    fun maskedLevel(fraction: Float, maskEffect: android.graphics.RenderEffect): android.graphics.RenderEffect {
-        val radiusX = sigmaToBlurRadius(sigmaX * fraction)
-        val radiusY = sigmaToBlurRadius(sigmaY * fraction)
-        var node: android.graphics.RenderEffect? = pre
-        if (radiusX > 0f || radiusY > 0f) {
-            node = if (node == null) {
-                android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, Shader.TileMode.CLAMP)
-            } else {
-                android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, node, Shader.TileMode.CLAMP)
-            }
+    // pre → blur for one level; null = the level is the (pre-chained) source itself.
+    fun blurred(sigmaX: Float, sigmaY: Float): android.graphics.RenderEffect? {
+        val radiusX = sigmaToBlurRadius(sigmaX)
+        val radiusY = sigmaToBlurRadius(sigmaY)
+        if (radiusX <= 0f && radiusY <= 0f) return pre
+        return if (pre == null) {
+            android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, Shader.TileMode.CLAMP)
+        } else {
+            android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, pre, Shader.TileMode.CLAMP)
         }
+    }
+
+    fun maskedLevel(sigmaX: Float, sigmaY: Float, maskEffect: android.graphics.RenderEffect): android.graphics.RenderEffect {
+        val node = blurred(sigmaX, sigmaY)
         return if (node == null) maskEffect else android.graphics.RenderEffect.createChainEffect(maskEffect, node)
     }
 
-    var stack = android.graphics.RenderEffect.createOffsetEffect(0f, 0f)
-    stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(PROGRESSIVE_LEVEL_FRACTION_2, masks.level3), BlendMode.SRC_OVER)
-    stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(PROGRESSIVE_LEVEL_FRACTION_1, masks.level2), BlendMode.SRC_OVER)
-    stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(PROGRESSIVE_LEVEL_FRACTION_0, masks.level1), BlendMode.SRC_OVER)
+    var stack = blurred(sigma2X, sigma2Y) ?: android.graphics.RenderEffect.createOffsetEffect(0f, 0f)
+    stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma1X, sigma1Y, masks.level2), BlendMode.SRC_OVER)
+    stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma0X, sigma0Y, masks.level1), BlendMode.SRC_OVER)
     if (postEffect != null) {
         val postBranch = android.graphics.RenderEffect.createChainEffect(
             masks.ramp,

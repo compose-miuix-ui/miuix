@@ -202,13 +202,16 @@ internal fun createProgressiveBlurEffect(
 }
 
 /**
- * Converts radii + gradient into the [progressiveCompositeEffect] inputs (sigma, axis, band in
- * component px). Zero radii are valid — the levels collapse to identity while the pre/post chains
- * keep riding the ramp; returning null instead would poison the caller's supported flag.
+ * Converts radii + gradient into the [progressiveStackEffect] inputs: per-level box-compensated
+ * sigmas in the downscaled layer's space and the band in downscaled, padded px. Zero radii are
+ * valid — the levels collapse to identity while the pre/post chains keep riding the ramp;
+ * returning null instead would poison the caller's supported flag.
  */
-internal fun createProgressiveCompositeEffect(
+internal fun createProgressiveStackEffect(
     radiusX: Float,
     radiusY: Float,
+    exp: Int,
+    padding: Float,
     compW: Float,
     compH: Float,
     angleDeg: Float,
@@ -219,9 +222,63 @@ internal fun createProgressiveCompositeEffect(
     postEffect: RenderEffect?,
     scope: BackdropEffectScopeImpl,
 ): RenderEffect? {
+    val downScale = 1 shl exp
     val sigmaX = radiusX.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
 
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val padProj = padding * (ax + ay)
+    val projFull = (projMin + startFraction * span + padProj) / downScale
+    var projZero = (projMin + endFraction * span + padProj) / downScale
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // Downscaled-space sigma supplying the variance the pyramid's box prefilter doesn't already
+    // cover; 0 (skip the blur) when the prefilter alone reaches the level's target.
+    fun levelSigma(sigma: Float, fraction: Float): Float {
+        val target = sigma * fraction
+        if (target <= 0f) return 0f
+        val residual = (target * target - IMPLIED_BOX_VARIANCE[exp]) / (downScale * downScale)
+        return if (residual > 0.01f) sqrt(residual) else 0f
+    }
+
+    return progressiveStackEffect(
+        scope,
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_0),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_0),
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_1),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_1),
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_2),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_2),
+        ax,
+        ay,
+        projFull,
+        projZero,
+        curve.coerceIn(0.05f, 20f),
+        preEffect,
+        postEffect,
+    )
+}
+
+/**
+ * Mask keeping only the ramp's clear-end cross-fade, `clamp(3·raw − 2, 0, 1)`
+ * (via [PROGRESSIVE_LEVEL_MASK_SHADER] with `in_level = −2`, `in_slope = −3`): applied to the
+ * full-resolution sharp layer drawn over the upscaled level stack, it reproduces the composite's
+ * final `mix(blur2, clear, …)` segment with a genuinely sharp end. Band in unpadded component px.
+ */
+internal fun createProgressiveSharpRampEffect(
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect {
     val rad = angleDeg * (PI / 180.0)
     val ax = cos(rad).toFloat()
     val ay = sin(rad).toFloat()
@@ -232,18 +289,14 @@ internal fun createProgressiveCompositeEffect(
     var projZero = projMin + endFraction * span
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
 
-    return progressiveCompositeEffect(
-        scope,
-        sigmaX,
-        sigmaY,
-        ax,
-        ay,
-        projFull,
-        projZero,
-        curve.coerceIn(0.05f, 20f),
-        preEffect,
-        postEffect,
-    )
+    val shader = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
+        setFloatUniform("in_gradAxis", ax, ay)
+        setFloatUniform("in_gradBand", projFull, projZero)
+        setFloatUniform("in_curve", curve.coerceIn(0.05f, 20f))
+        setFloatUniform("in_level", -2f)
+        setFloatUniform("in_slope", -3f)
+    }
+    return runtimeShaderEffect(shader, "child")
 }
 
 /**

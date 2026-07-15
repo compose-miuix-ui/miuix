@@ -176,9 +176,9 @@ fun Modifier.textureEffect(
  * full-resolution clear end. Ideal for navigation bars and edge fades. Same color / blend / noise /
  * highlight pipeline as [textureBlur], applied so the effects fade out with the blur.
  *
- * Costs more than [textureBlur]: the sharp clear end requires recording the backdrop at full
- * resolution (no downscale) and evaluating several graduated blur levels of it per frame. Prefer
- * it for bars and edge bands over large fills.
+ * Costs more than [textureBlur]: on top of the downscaled level stack, the pixel-sharp clear end
+ * adds a full-resolution overlay pass per frame. Prefer it for bars and edge bands over large
+ * fills.
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape The shape provider for the blur region clipping.

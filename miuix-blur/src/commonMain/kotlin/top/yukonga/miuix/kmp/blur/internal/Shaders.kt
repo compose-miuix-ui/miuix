@@ -99,11 +99,13 @@ internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
 internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
 
 /**
- * Multi-level progressive composite (Skiko multi-child runtime shader): a sharp [clearChild] plus
- * three graduated Gaussian levels ([blur0] strongest … [blur2] lightest), interpolated along the
- * gradient so the blur strength itself ramps — graduated levels are what make the ramp read as
- * progressive rather than one blur cross-faded with sharp. Android builds the identical image as a
- * blend-mode DAG — see [PROGRESSIVE_LEVEL_MASK_SHADER].
+ * Multi-level progressive composite (Skiko multi-child runtime shader): three graduated Gaussian
+ * levels ([blur0] strongest … [blur2] lightest) interpolated along the gradient so the blur
+ * strength itself ramps — graduated levels are what make the ramp read as progressive rather than
+ * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
+ * lightest level (degenerating the last mix segment); the true sharp end is a separate
+ * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]. Android builds the identical
+ * image as a blend-mode DAG of the same masks.
  */
 internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader clearChild;
@@ -132,9 +134,10 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
 
 /**
  * Band mask for the progressive composite: weight `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2, 3} = the level stops (SrcOver-stacked
- * over a sharp base ≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
- * continuous `1 − raw` ramp for the post-effect chain.
+ * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
+ * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
+ * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
+ * rising `clamp(3·raw − 2, 0, 1)` ramp masking the full-resolution sharp overlay.
  */
 internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;

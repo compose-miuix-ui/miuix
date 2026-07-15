@@ -31,10 +31,14 @@ internal actual fun runtimeShaderEffect(
     null,
 ).asComposeRenderEffect()
 
-internal actual fun progressiveCompositeEffect(
+internal actual fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,
-    sigmaX: Float,
-    sigmaY: Float,
+    sigma0X: Float,
+    sigma0Y: Float,
+    sigma1X: Float,
+    sigma1Y: Float,
+    sigma2X: Float,
+    sigma2Y: Float,
     ax: Float,
     ay: Float,
     projFull: Float,
@@ -50,16 +54,25 @@ internal actual fun progressiveCompositeEffect(
     }
     val pre = preEffect?.skiaImageFilter
 
-    // Each level is pre → blur; clearChild samples the source untouched (null input).
-    fun level(fraction: Float): ImageFilter = ImageFilter.makeBlur(sigmaX * fraction, sigmaY * fraction, FilterTileMode.CLAMP, pre, null)
+    // Each level is pre → blur; null = the (pre-chained) source itself.
+    fun level(sigmaX: Float, sigmaY: Float): ImageFilter? = if (sigmaX <= 0f && sigmaY <= 0f) {
+        pre
+    } else {
+        ImageFilter.makeBlur(sigmaX, sigmaY, FilterTileMode.CLAMP, pre, null)
+    }
+
+    // clearChild := blur2, degenerating the shader's last mix segment to the lightest level; the
+    // true sharp end is the caller's full-resolution overlay. Skia evaluates the shared instance
+    // once.
+    val blur2 = level(sigma2X, sigma2Y)
     var filter = ImageFilter.makeRuntimeShader(
         shader.asSkikoRuntimeShader(),
         arrayOf("clearChild", "blur0", "blur1", "blur2"),
-        arrayOf<ImageFilter?>(
-            null,
-            level(PROGRESSIVE_LEVEL_FRACTION_0),
-            level(PROGRESSIVE_LEVEL_FRACTION_1),
-            level(PROGRESSIVE_LEVEL_FRACTION_2),
+        arrayOf(
+            blur2,
+            level(sigma0X, sigma0Y),
+            level(sigma1X, sigma1Y),
+            blur2,
         ),
     )
     if (postEffect != null) {

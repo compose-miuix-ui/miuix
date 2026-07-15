@@ -49,7 +49,8 @@ import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
-import top.yukonga.miuix.kmp.blur.internal.createProgressiveCompositeEffect
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpRampEffect
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 
@@ -76,9 +77,9 @@ private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { 
  * @param contentBlendMode The [BlendMode] used to composite the composable's content over the blur.
  *   [BlendMode.DstIn] masks the blur by the content alpha (foreground blur).
  * @param progressiveGradient When non-null, renders the backdrop as a multi-level progressive
- *   composite: a full-resolution sharp base plus graduated native Gaussian levels of the same
- *   source, cross-faded along this gradient so the blur strength ramps continuously from full to
- *   pixel-sharp. Requires a matching [progressiveBlur] in [effects] (as
+ *   composite: graduated native Gaussian levels cross-faded along this gradient on the downscaled
+ *   layer, plus a full-resolution sharp overlay on the clear end — the blur strength ramps
+ *   continuously from full to pixel-sharp. Requires a matching [progressiveBlur] in [effects] (as
  *   [Modifier.progressiveTextureBlur] wires) — it records the target radii the composite renders;
  *   without one the gradient is ignored and [effects] draws uniformly.
  * @param enabled Whether the backdrop effect is active. When false, content draws normally without
@@ -569,23 +570,31 @@ private class DrawBackdropNode(
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
     private var contentBoundsRect: Rect? = null
 
-    // Progressive (gradient) blur: a full-res sharp layer carrying the multi-level composite
-    // RenderEffect, cached on its inputs. The supported flags gate platforms whose
-    // progressiveCompositeEffect() returns null.
-    private var compositeLayer: GraphicsLayer? = null
+    // Progressive (gradient) blur, split by resolution: the level stack renders through the
+    // downscaled [primary] machinery, and [sharpLayer] overlays the full-resolution backdrop
+    // masked to the ramp's clear-end cross-fade — the only band that needs native pixels. The
+    // supported flags gate platforms whose progressiveStackEffect() returns null.
+    private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
-    private var cachedCompositeEffect: RenderEffect? = null
-    private var cachedCompositeRadiusX = Float.NaN
-    private var cachedCompositeRadiusY = Float.NaN
-    private var cachedCompositeW = Float.NaN
-    private var cachedCompositeH = Float.NaN
-    private var cachedCompositeGradient: ProgressiveBlur? = null
+    private var sharpOverlayActive = false
 
-    // Pre-/post-blur chains folded into the cached composite; compared by identity (the scope's
-    // per-effect caches keep the references stable while their inputs hold).
-    private var cachedCompositePre: RenderEffect? = null
-    private var cachedCompositePost: RenderEffect? = null
+    // Downscaled level-stack effect, cached on its inputs; pre/post chains compared by identity
+    // (the scope's per-effect caches keep the references stable while their inputs hold).
+    private var cachedStackEffect: RenderEffect? = null
+    private var cachedStackRadiusX = Float.NaN
+    private var cachedStackRadiusY = Float.NaN
+    private var cachedStackW = Float.NaN
+    private var cachedStackH = Float.NaN
+    private var cachedStackGradient: ProgressiveBlur? = null
+    private var cachedStackPre: RenderEffect? = null
+    private var cachedStackPost: RenderEffect? = null
+
+    // Sharp overlay ramp mask: radius-independent, cached on gradient + size.
+    private var sharpRampEffect: RenderEffect? = null
+    private var sharpRampGradient: ProgressiveBlur? = null
+    private var sharpRampW = Float.NaN
+    private var sharpRampH = Float.NaN
 
     /** Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level. */
     private fun DrawScope.drawBlurredBackdrop() {
@@ -606,60 +615,14 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Records the sharp backdrop at full resolution into [compositeLayer] and attaches the
-     * multi-level composite [RenderEffect]. Returns false when [progressiveBlur] recorded no radii
-     * or the platform can't express the composite — the caller then draws uniformly.
+     * Records the backdrop at full resolution into [sharpLayer] and draws it masked to the ramp's
+     * clear-end cross-fade over the upscaled level stack — the composite's `mix(blur2, clear, …)`
+     * segment with genuinely sharp native pixels.
      */
-    private fun DrawScope.drawProgressiveComposite(gradient: ProgressiveBlur): Boolean {
-        if (compositeAttempted && !compositeSupported) return false
-        val rX = effectScope.cachedProgRadiusX
-        val rY = effectScope.cachedProgRadiusY
-        if (rX.isNaN() || rY.isNaN()) return false
-        val sw = size.width
-        val sh = size.height
-        val pre = effectScope.progressivePreEffect
-        val post = effectScope.renderEffect
-        val composite = if (cachedCompositeEffect != null &&
-            cachedCompositeRadiusX == rX &&
-            cachedCompositeRadiusY == rY &&
-            cachedCompositeW == sw &&
-            cachedCompositeH == sh &&
-            cachedCompositeGradient == gradient &&
-            cachedCompositePre === pre &&
-            cachedCompositePost === post
-        ) {
-            cachedCompositeEffect
-        } else {
-            val built = createProgressiveCompositeEffect(
-                rX,
-                rY,
-                sw,
-                sh,
-                gradient.angle,
-                gradient.startFraction,
-                gradient.endFraction,
-                gradient.curve,
-                pre,
-                post,
-                effectScope,
-            )
-            compositeAttempted = true
-            compositeSupported = built != null
-            if (built != null) {
-                cachedCompositeEffect = built
-                cachedCompositeRadiusX = rX
-                cachedCompositeRadiusY = rY
-                cachedCompositeW = sw
-                cachedCompositeH = sh
-                cachedCompositeGradient = gradient
-                cachedCompositePre = pre
-                cachedCompositePost = post
-            }
-            built
-        } ?: return false
-        val w = sw.toInt().coerceAtLeast(1)
-        val h = sh.toInt().coerceAtLeast(1)
-        val layer = compositeLayer ?: graphicsContext.createGraphicsLayer().also { compositeLayer = it }
+    private fun DrawScope.drawSharpOverlay() {
+        val w = size.width.toInt().coerceAtLeast(1)
+        val h = size.height.toInt().coerceAtLeast(1)
+        val layer = sharpLayer ?: graphicsContext.createGraphicsLayer().also { sharpLayer = it }
         recordLayer(layer, size = IntSize(w, h)) {
             onDrawBackdrop {
                 with(backdrop) {
@@ -672,9 +635,8 @@ private class DrawBackdropNode(
                 }
             }
         }
-        layer.renderEffect = composite
+        layer.renderEffect = sharpRampEffect
         drawLayer(layer)
-        return true
     }
 
     override fun ContentDrawScope.draw() {
@@ -688,16 +650,9 @@ private class DrawBackdropNode(
         captureLayerScale()
         onDrawBehind?.invoke(this)
 
-        val gradient = progressiveGradient
-        if (gradient == null) {
-            drawBlurredBackdrop()
-        } else if (!drawProgressiveComposite(gradient)) {
-            // Composite unsupported: the effects chain skipped its own build while the flag was
-            // still assumed, so rebuild (the flag re-derives as false) before drawing uniformly.
-            if (effectScope.progressiveCompositeActive && compositeAttempted && !compositeSupported) {
-                updateEffects()
-            }
-            drawBlurredBackdrop()
+        drawBlurredBackdrop()
+        if (sharpOverlayActive) {
+            drawSharpOverlay()
         }
 
         onDrawSurface?.invoke(this)
@@ -756,8 +711,9 @@ private class DrawBackdropNode(
         if (!enabled) return
         primary.ensureMain()
 
-        // Gradient mode: progressiveBlur() only records radii for the composite; re-derives as
-        // false once a platform reports the composite unsupported.
+        // Gradient mode: progressiveBlur() records radii + downscale and splits the chain; the
+        // stack is assembled below once the post chain is known. Re-derives as false once a
+        // platform reports the stack unsupported.
         effectScope.progressiveCompositeActive =
             progressiveGradient != null && !(compositeAttempted && !compositeSupported)
 
@@ -766,6 +722,11 @@ private class DrawBackdropNode(
         effectScope.forcedDownscaleExp = -1
         effectScope.apply(effects)
         chainFullResNoiseIfNeeded()
+        if (effectScope.progressiveCompositeActive) {
+            finalizeProgressiveComposite()
+        } else {
+            sharpOverlayActive = false
+        }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
         primary.padding = effectScope.padding
         primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
@@ -794,12 +755,100 @@ private class DrawBackdropNode(
     }
 
     /**
+     * Composite mode: progressiveBlur() recorded the level radii + downscale and split the
+     * effects chain; assemble the downscaled level-stack effect (pre → levels → ramp-masked post)
+     * into [BackdropEffectScope.renderEffect] for [primary], and the full-res ramp mask for
+     * [sharpLayer]. Re-runs the effects uniformly when the platform can't express the stack.
+     */
+    private fun finalizeProgressiveComposite() {
+        val scope = effectScope
+        val gradient = progressiveGradient
+        val rX = scope.cachedProgRadiusX
+        val rY = scope.cachedProgRadiusY
+        if (gradient == null || rX.isNaN() || rY.isNaN()) {
+            // No progressiveBlur call in the effects block: draw uniformly, gradient ignored.
+            sharpOverlayActive = false
+            return
+        }
+        val paddedW = scope.cachedProgSizeW
+        val paddedH = scope.cachedProgSizeH
+        val pre = scope.progressivePreEffect
+        val post = scope.renderEffect
+        val stack = if (cachedStackEffect != null &&
+            cachedStackRadiusX == rX &&
+            cachedStackRadiusY == rY &&
+            cachedStackW == paddedW &&
+            cachedStackH == paddedH &&
+            cachedStackGradient == gradient &&
+            cachedStackPre === pre &&
+            cachedStackPost === post
+        ) {
+            cachedStackEffect
+        } else {
+            createProgressiveStackEffect(
+                rX,
+                rY,
+                scope.cachedProgExp,
+                scope.padding,
+                scope.size.width,
+                scope.size.height,
+                gradient.angle,
+                gradient.startFraction,
+                gradient.endFraction,
+                gradient.curve,
+                pre,
+                post,
+                scope,
+            )?.also {
+                cachedStackEffect = it
+                cachedStackRadiusX = rX
+                cachedStackRadiusY = rY
+                cachedStackW = paddedW
+                cachedStackH = paddedH
+                cachedStackGradient = gradient
+                cachedStackPre = pre
+                cachedStackPost = post
+            }
+        }
+        compositeAttempted = true
+        compositeSupported = stack != null
+        if (stack == null) {
+            // Unsupported: rebuild the whole chain with the flag re-derived as false, so
+            // progressiveBlur() falls back to its uniform loop-shader build.
+            scope.progressiveCompositeActive = false
+            scope.apply(effects)
+            chainFullResNoiseIfNeeded()
+            sharpOverlayActive = false
+            return
+        }
+        scope.renderEffect = stack
+
+        val sw = scope.size.width
+        val sh = scope.size.height
+        if (sharpRampEffect == null || sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh) {
+            sharpRampEffect = createProgressiveSharpRampEffect(
+                sw,
+                sh,
+                gradient.angle,
+                gradient.startFraction,
+                gradient.endFraction,
+                gradient.curve,
+                scope,
+            )
+            sharpRampGradient = gradient
+            sharpRampW = sw
+            sharpRampH = sh
+        }
+        sharpOverlayActive = true
+    }
+
+    /**
      * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
      * [drawUpscaledLayer] so each screen pixel still gets independent dithering.
      *
-     * Cached on input identity + coefficient: the noise pass ends the composite's post-blur
-     * chain, which [drawProgressiveComposite] compares by identity — a fresh effect per pass
-     * would rebuild the whole composite on every [updateEffects].
+     * Cached on input identity + coefficient: the noise pass can end the composite's post-blur
+     * chain, which [finalizeProgressiveComposite] compares by identity — a fresh effect per pass
+     * would rebuild the whole level stack on every [updateEffects].
      */
     private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
@@ -921,16 +970,21 @@ private class DrawBackdropNode(
      * supported flags survive (platform capability doesn't change).
      */
     fun releaseCompositeResources() {
-        compositeLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
-        compositeLayer = null
-        cachedCompositeEffect = null
-        cachedCompositeRadiusX = Float.NaN
-        cachedCompositeRadiusY = Float.NaN
-        cachedCompositeW = Float.NaN
-        cachedCompositeH = Float.NaN
-        cachedCompositeGradient = null
-        cachedCompositePre = null
-        cachedCompositePost = null
+        sharpLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        sharpLayer = null
+        sharpOverlayActive = false
+        cachedStackEffect = null
+        cachedStackRadiusX = Float.NaN
+        cachedStackRadiusY = Float.NaN
+        cachedStackW = Float.NaN
+        cachedStackH = Float.NaN
+        cachedStackGradient = null
+        cachedStackPre = null
+        cachedStackPost = null
+        sharpRampEffect = null
+        sharpRampGradient = null
+        sharpRampW = Float.NaN
+        sharpRampH = Float.NaN
     }
 
     fun releaseGraphicsLayers() {

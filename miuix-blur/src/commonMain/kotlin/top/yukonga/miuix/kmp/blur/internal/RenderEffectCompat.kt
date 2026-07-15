@@ -23,26 +23,33 @@ internal expect fun runtimeShaderEffect(
 ): RenderEffect
 
 /**
- * Builds the multi-level progressive composite [RenderEffect]: a sharp base plus three graduated
- * native Gaussian levels of the same source, cross-faded along the two-point gradient `(ax, ay)`
- * between [projFull] and [projZero] — [PROGRESSIVE_COMPOSITE_SHADER]'s continuous-LOD ramp. Skiko
- * mixes the levels in one multi-child runtime shader; Android builds the equivalent blend-mode DAG.
+ * Builds the downscaled progressive **level stack** [RenderEffect]: the lightest Gaussian level as
+ * an unmasked base with the two stronger levels band-masked and SrcOver-stacked on top ≡ the first
+ * two mix segments of [PROGRESSIVE_COMPOSITE_SHADER]; the ramp's final blend to sharp is drawn
+ * separately as a full-resolution overlay (see `createProgressiveSharpRampEffect`) so only that
+ * band pays full-res cost. Skiko mixes the levels in one multi-child runtime shader; Android
+ * builds the equivalent blend-mode DAG.
  *
- * [preEffect] wraps each Gaussian level's input (`pre → blur`); [postEffect] applies to the
- * composite output, faded by the continuous `1 − raw` ramp — weighting it per level instead would
- * hold it flat for two thirds of the band (a visible knee). The sharp base stays untouched, so
- * every effect fades out with the blur toward the clear end.
+ * Per-level sigmas are box-compensated, in the downscaled layer's space (0 skips that level's
+ * blur); the band is in downscaled, padded px. [preEffect] wraps each level's input
+ * (`pre → blur`); [postEffect] applies to the stack output, faded by the continuous `1 − raw`
+ * ramp — weighting it per level instead would hold it flat for two thirds of the band (a visible
+ * knee). The sharp overlay stays untouched, so every effect fades out with the blur.
  *
- * Returns null only where the platform cannot express the composite; callers then fall back to
- * the uniform draw path.
+ * Returns null only where the platform cannot express the stack; callers then fall back to the
+ * uniform draw path.
  *
  * [scope] supplies the shader cache plus [BackdropEffectScopeImpl.progressiveMaskScratch] for
  * radius-independent platform caches.
  */
-internal expect fun progressiveCompositeEffect(
+internal expect fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,
-    sigmaX: Float,
-    sigmaY: Float,
+    sigma0X: Float,
+    sigma0Y: Float,
+    sigma1X: Float,
+    sigma1Y: Float,
+    sigma2X: Float,
+    sigma2Y: Float,
     ax: Float,
     ay: Float,
     projFull: Float,

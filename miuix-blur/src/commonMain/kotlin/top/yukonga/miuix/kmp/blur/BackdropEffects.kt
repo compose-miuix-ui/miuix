@@ -11,6 +11,7 @@ import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
+import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
@@ -112,8 +113,9 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
  * samples the downscaled backdrop (soft, not pixel-sharp).
  *
  * Paired with `drawBackdrop`'s `progressiveGradient` (as [Modifier.progressiveTextureBlur] wires),
- * the draw path renders the multi-level composite instead — with a genuinely sharp clear end — and
- * this call only records the target radii for it.
+ * the draw path renders the multi-level composite instead — a downscaled level stack plus a
+ * genuinely sharp full-resolution clear end — and this call only records the target radii and
+ * downscale for it.
  *
  * @param radiusX Horizontal blur radius in pixels at full strength.
  * @param radiusY Vertical blur radius in pixels at full strength. Defaults to [radiusX].
@@ -127,14 +129,38 @@ fun BackdropEffectScope.progressiveBlur(
     if (!isRuntimeShaderSupported()) return
     val scope = impl
     if (scope.progressiveCompositeActive) {
-        // The composite consumes only the radii, so skip building the never-drawn loop shader.
-        // Radius 0 stays here (levels collapse to identity, effects keep riding the ramp).
-        scope.cachedProgRadiusX = radiusX.coerceAtLeast(0f)
-        scope.cachedProgRadiusY = radiusY.coerceAtLeast(0f)
+        // Composite mode: the level stack renders on the downscaled layer and is assembled after
+        // the effects block (once the post chain is known); the sharp end is a separate full-res
+        // overlay. Record radii + downscale here and split the chain. Radius 0 stays (levels
+        // collapse to identity, effects keep riding the ramp).
+        val rX = radiusX.coerceAtLeast(0f)
+        val rY = radiusY.coerceAtLeast(0f)
+        // Size the downscale for the MIDDLE level: the lightest level's variance then stays above
+        // the pyramid's implied box variance at common radii (box compensation keeps its total
+        // variance exact), while every stack pass runs on 1/sf² pixels. The sharp end never rides
+        // this layer, so it doesn't constrain sf.
+        val sigma1 = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_1
+        val exp = downScaleExpFor(sigma1 * sigma1)
+        val sf = 1 shl exp
+        val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+        if (kernelPadding > padding) {
+            padding = kernelPadding
+        }
+        val paddedW = size.width + padding * 2f
+        val paddedH = size.height + padding * 2f
+        // apply() compares these against the final padding to detect a stale sampling clamp.
+        scope.blurBuiltPaddedW = paddedW
+        scope.blurBuiltPaddedH = paddedH
+        scope.cachedProgRadiusX = rX
+        scope.cachedProgRadiusY = rY
+        scope.cachedProgExp = exp
+        scope.cachedProgSizeW = paddedW
+        scope.cachedProgSizeH = paddedH
         scope.cachedProgResult = null
         // Split the effects block here: chained-so-far → pre-blur, what follows → post-blur.
         scope.progressivePreEffect = renderEffect
         renderEffect = null
+        downscaleFactor = sf
         return
     }
     if (radiusX <= 0f && radiusY <= 0f) return
