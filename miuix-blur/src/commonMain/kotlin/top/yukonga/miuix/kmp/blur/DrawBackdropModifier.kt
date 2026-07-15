@@ -796,10 +796,22 @@ private class DrawBackdropNode(
     /**
      * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
      * [drawUpscaledLayer] so each screen pixel still gets independent dithering.
+     *
+     * Cached on input identity + coefficient: the noise pass ends the composite's post-blur
+     * chain, which [drawProgressiveComposite] compares by identity — a fresh effect per pass
+     * would rebuild the whole composite on every [updateEffects].
      */
     private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1) {
+            val input = effectScope.renderEffect
+            if (effectScope.cachedNoiseChainResult != null &&
+                effectScope.cachedNoiseChainInput === input &&
+                effectScope.cachedNoiseChainCoeff == noiseCoeff
+            ) {
+                effectScope.renderEffect = effectScope.cachedNoiseChainResult
+                return
+            }
             effectScope.runtimeShaderEffect(
                 key = "NoiseDither",
                 shaderString = NOISE_DITHER_SHADER,
@@ -807,6 +819,9 @@ private class DrawBackdropNode(
             ) {
                 setFloatUniform("noise_coeff", noiseCoeff)
             }
+            effectScope.cachedNoiseChainInput = input
+            effectScope.cachedNoiseChainCoeff = noiseCoeff
+            effectScope.cachedNoiseChainResult = effectScope.renderEffect
         }
     }
 

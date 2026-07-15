@@ -283,6 +283,10 @@ val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 
 `colors` and `noiseCoefficient` use the same pipeline as [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
 
+::: warning Performance
+The pixel-sharp clear end requires recording the backdrop at full resolution (no downscale) and evaluating several graduated blur levels of it per frame — noticeably more GPU bandwidth than `textureBlur` over the same area. Prefer progressive blur for bars and edge bands rather than large fills.
+:::
+
 ::: tip
 Inside a custom `drawBackdrop` pipeline, `progressiveTextureBlurEffect(...)` runs the same preset chain in the `effects` block. Pair it with `drawBackdrop`'s `progressiveGradient` parameter (same gradient) so the clear end stays genuinely sharp — `Modifier.progressiveTextureBlur` wires both together.
 :::

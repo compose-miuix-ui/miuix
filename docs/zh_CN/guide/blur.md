@@ -278,6 +278,10 @@ val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 
 `colors` 与 `noiseCoefficient` 使用与 [`textureBlur`](#颜色配置) 相同的管线，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。
 
+::: warning 性能
+像素级锐利的清晰端要求以全分辨率（无降采样）录制背景，并每帧对其求值多个分级模糊层——GPU 带宽开销明显高于同面积的 `textureBlur`。渐进模糊适合用在栏、边缘过渡带上，不建议覆盖大面积区域。
+:::
+
 ::: tip
 在自定义 `drawBackdrop` 管线中，`progressiveTextureBlurEffect(...)` 在 `effects` 块内运行同样的预设链；需搭配 `drawBackdrop` 的 `progressiveGradient` 参数（传入同一 gradient）以保证清晰端真正锐利——`Modifier.progressiveTextureBlur` 已将两者接好。
 :::

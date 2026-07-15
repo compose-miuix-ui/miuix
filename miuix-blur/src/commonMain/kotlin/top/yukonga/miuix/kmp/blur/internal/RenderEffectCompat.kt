@@ -5,8 +5,8 @@ package top.yukonga.miuix.kmp.blur.internal
 
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RenderEffect
+import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
 
 /**
  * Chains [other] after this [RenderEffect]. If this is null, returns [other] directly.
@@ -35,9 +35,12 @@ internal expect fun runtimeShaderEffect(
  *
  * Returns null only where the platform cannot express the composite; callers then fall back to
  * the uniform draw path.
+ *
+ * [scope] supplies the shader cache plus [BackdropEffectScopeImpl.progressiveMaskScratch] for
+ * radius-independent platform caches.
  */
 internal expect fun progressiveCompositeEffect(
-    shaderCache: RuntimeShaderCache,
+    scope: BackdropEffectScopeImpl,
     sigmaX: Float,
     sigmaY: Float,
     ax: Float,

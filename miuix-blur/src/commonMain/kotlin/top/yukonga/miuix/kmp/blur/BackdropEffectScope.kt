@@ -214,6 +214,18 @@ internal abstract class BackdropEffectScopeImpl :
     internal var progressivePreEffect: RenderEffect? = null
 
     /**
+     * Platform scratch for progressiveCompositeEffect's radius-independent caches (Android keeps
+     * its gradient band masks here). Opaque to common code; dropped on [reset].
+     */
+    internal var progressiveMaskScratch: Any? = null
+
+    // Full-res noise pass cache, keyed on chain input identity + coefficient: keeps the chained
+    // result stable across updateEffects() runs so the composite's post-chain identity check hits.
+    internal var cachedNoiseChainInput: RenderEffect? = null
+    internal var cachedNoiseChainCoeff: Float = Float.NaN
+    internal var cachedNoiseChainResult: RenderEffect? = null
+
+    /**
      * When >= 0, [blur] builds at this exact downscale exponent instead of the adaptive choice.
      * The node sets it for the cross-fade lo/hi passes; -1 means auto. Internal — not exposed on
      * the public [BackdropEffectScope] interface.
@@ -331,6 +343,10 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgResult = null
         progressiveCompositeActive = false
         progressivePreEffect = null
+        progressiveMaskScratch = null
+        cachedNoiseChainInput = null
+        cachedNoiseChainCoeff = Float.NaN
+        cachedNoiseChainResult = null
         forcedDownscaleExp = -1
         blurBlendExpLo = 0
         blurBlendExpHi = 0

@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.skiaImageFilter
 import org.jetbrains.skia.BlendMode
 import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.ImageFilter
-import top.yukonga.miuix.kmp.blur.RuntimeShaderCache
+import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import top.yukonga.miuix.kmp.shader.RuntimeShader
 import top.yukonga.miuix.kmp.shader.asSkikoRuntimeShader
 
@@ -32,7 +32,7 @@ internal actual fun runtimeShaderEffect(
 ).asComposeRenderEffect()
 
 internal actual fun progressiveCompositeEffect(
-    shaderCache: RuntimeShaderCache,
+    scope: BackdropEffectScopeImpl,
     sigmaX: Float,
     sigmaY: Float,
     ax: Float,
@@ -43,7 +43,7 @@ internal actual fun progressiveCompositeEffect(
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
 ): RenderEffect? {
-    val shader = shaderCache.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
+    val shader = scope.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
         setFloatUniform("in_gradAxis", ax, ay)
         setFloatUniform("in_gradBand", projFull, projZero)
         setFloatUniform("in_curve", curve)
@@ -63,7 +63,7 @@ internal actual fun progressiveCompositeEffect(
         ),
     )
     if (postEffect != null) {
-        val maskShader = shaderCache.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
+        val maskShader = scope.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
             setFloatUniform("in_curve", curve)
