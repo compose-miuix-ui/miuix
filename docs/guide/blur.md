@@ -240,6 +240,50 @@ val colors = BlurColors(
 )
 ```
 
+## Progressive Blur
+
+`Modifier.progressiveTextureBlur` applies a gradient backdrop blur: the blur strength ramps continuously from full to zero along a direction, with a genuine medium blur in the middle of the ramp and a pixel-sharp, full-resolution clear end. Ideal for navigation bars and edge fades.
+
+```kotlin
+import top.yukonga.miuix.kmp.blur.ProgressiveBlur
+import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
+
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(200.dp)
+        .progressiveTextureBlur(
+            backdrop = backdrop,
+            shape = RectangleShape,
+            gradient = ProgressiveBlur.Top, // Strongest at the top, sharp at the bottom
+            blurRadius = 20f
+        )
+) {
+    // Content
+}
+```
+
+### Gradient Direction and Band
+
+`ProgressiveBlur` describes the ramp as a two-point linear gradient: the blur is at full strength at `startFraction` and fades to zero at `endFraction`, measured along `angle` (degrees, clockwise from the +X axis). Use the presets for the common edge fades, or adjust the band with `copy`:
+
+```kotlin
+// Presets cover the four edge fades
+ProgressiveBlur.Top      // angle = 90°, strongest at the top edge
+ProgressiveBlur.Bottom   // angle = 270°, strongest at the bottom edge
+ProgressiveBlur.Left     // angle = 0°, strongest at the left edge
+ProgressiveBlur.Right    // angle = 180°, strongest at the right edge
+
+// Custom band: full strength until 30% of the extent, sharp from 90% on
+val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f)
+```
+
+`colors` and `noiseCoefficient` use the same pipeline as [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
+
+::: tip
+Inside a custom `drawBackdrop` pipeline, `progressiveTextureBlurEffect(...)` runs the same preset chain in the `effects` block. Pair it with `drawBackdrop`'s `progressiveGradient` parameter (same gradient) so the clear end stays genuinely sharp — `Modifier.progressiveTextureBlur` wires both together.
+:::
+
 ## Advanced Usage
 
 ### Independent X/Y Blur Radii
@@ -367,6 +411,34 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | enabled | Boolean | Whether blur is active, when false the effect is skipped and content draws normally | true | No |
 
 \* Required only in the independent radii overload.
+
+### progressiveTextureBlur Parameters
+
+| Parameter Name | Type | Description | Default Value | Required |
+| --- | --- | --- | --- | --- |
+| backdrop | Backdrop | The backdrop providing background content to blur | - | Yes |
+| shape | Shape | Shape for the blur region clipping | - | Yes |
+| gradient | ProgressiveBlur | Direction and band controlling where the blur is full vs zero | ProgressiveBlur.Top | No |
+| blurRadius | Float | Blur radius in dp at full strength. Clamped to [0, 150] | 20f | No |
+| blurRadiusX | Float | Horizontal blur radius in dp at full strength (independent radii overload) | - | Yes* |
+| blurRadiusY | Float | Vertical blur radius in dp at full strength (independent radii overload) | - | Yes* |
+| noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
+| colors | BlurColors | Color adjustments and blend layers, fading out with the blur | BlurColors() | No |
+| highlight | Highlight? | Optional edge highlight painted on top of the content. `null` skips drawing | null | No |
+| contentBlendMode | BlendMode | Blend mode for compositing content over the blur | SrcOver | No |
+| enabled | Boolean | Whether blur is active, when false the effect is skipped and content draws normally | true | No |
+
+\* Required only in the independent radii overload.
+
+### ProgressiveBlur Properties
+
+| Property Name | Type | Description | Default Value |
+| --- | --- | --- | --- |
+| angle | Float | Gradient direction in degrees, clockwise from the +X axis: 0 fades left→right, 90 top→bottom, 180 right→left, 270 bottom→top | 90f |
+| startFraction | Float | Fraction in [0, 1] of the projected extent along angle where the blur is at full strength | 0f |
+| endFraction | Float | Fraction in [0, 1] where the blur fades to zero; may be smaller than startFraction to reverse the ramp, must differ from it | 1f |
+
+Presets: `ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` cover the four edge fades.
 
 ### BlurColors Properties
 

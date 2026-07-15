@@ -36,6 +36,119 @@ internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
     if (i == 0) "" else buildBlurShader(i)
 }
 
+/** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
+internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
+
+/**
+ * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
+ * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). The loop bound
+ * [maxTap] must be a compile-time constant (AGSL); `abs(i) > radius` skips the unused reach.
+ */
+internal fun buildProgressiveBlurShader(maxTap: Int): String = """
+    uniform shader child;
+    uniform float2 in_maxCoord;
+    uniform float2 in_step;
+    uniform float in_maxRadius;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_noise;
+
+    float progRand(float2 co) {
+        return fract(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
+    }
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float intensity = 1.0 - raw * raw * (3.0 - 2.0 * raw);
+        float radius = in_maxRadius * intensity;
+        if (radius < 0.5) {
+            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
+            if (s.a > 0.0039) {
+                return half4(s.rgb / s.a, 1.0);
+            }
+            return s;
+        }
+        float sigma = radius * 0.5 + 0.5;
+        float jitter = (progRand(xy) - 0.5) * in_noise;
+        half4 color = half4(0.0);
+        float total = 0.0;
+        for (int i = -$maxTap; i <= $maxTap; i++) {
+            float fi = float(i);
+            if (abs(fi) > radius) continue;
+            float w = exp(-(fi * fi) / (2.0 * sigma * sigma));
+            float2 c = clamp(xy + (fi + jitter) * in_step, float2(0.5), in_maxCoord);
+            color += child.eval(c) * half(w);
+            total += w;
+        }
+        color = color / half(max(total, 0.0001));
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;
+    }
+"""
+
+/** Pre-built progressive Blur shader (single loop-based variant). */
+internal val PROGRESSIVE_BLUR_SHADER: String = buildProgressiveBlurShader(PROGRESSIVE_BLUR_MAX_TAP)
+
+/** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
+internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
+internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
+internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
+
+/**
+ * Multi-level progressive composite (Skiko multi-child runtime shader): a sharp [clearChild] plus
+ * three graduated Gaussian levels ([blur0] strongest … [blur2] lightest), interpolated along the
+ * gradient so the blur strength itself ramps — graduated levels are what make the ramp read as
+ * progressive rather than one blur cross-faded with sharp. Android builds the identical image as a
+ * blend-mode DAG — see [PROGRESSIVE_LEVEL_MASK_SHADER].
+ */
+internal const val PROGRESSIVE_COMPOSITE_SHADER = """
+    uniform shader clearChild;
+    uniform shader blur0;
+    uniform shader blur1;
+    uniform shader blur2;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = raw * raw * (3.0 - 2.0 * raw);
+        // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
+        // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
+        float pos = raw * 3.0;
+        if (pos < 1.0) {
+            return mix(blur0.eval(xy), blur1.eval(xy), pos);
+        } else if (pos < 2.0) {
+            return mix(blur1.eval(xy), blur2.eval(xy), pos - 1.0);
+        }
+        return mix(blur2.eval(xy), clearChild.eval(xy), pos - 2.0);
+    }
+"""
+
+/**
+ * Band mask for the progressive composite: weight `clamp(in_level − in_slope·raw, 0, 1)` of the
+ * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2, 3} = the level stops (SrcOver-stacked
+ * over a sharp base ≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
+ * continuous `1 − raw` ramp for the post-effect chain.
+ */
+internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
+    uniform shader child;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_level;
+    uniform float in_slope;
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = raw * raw * (3.0 - 2.0 * raw);
+        return child.eval(xy) * half(clamp(in_level - raw * in_slope, 0.0, 1.0));
+    }
+"""
+
 /**
  * Brightness / contrast / saturation adjustment.
  *

@@ -96,7 +96,7 @@ fun PullToRefreshPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
+            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
                 AdaptiveTopAppBar(
                     title = "Popup",
                     showTopAppBar = appState.showTopAppBar,

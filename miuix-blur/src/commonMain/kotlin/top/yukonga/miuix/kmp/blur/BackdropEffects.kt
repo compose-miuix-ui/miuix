@@ -15,6 +15,8 @@ import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
@@ -88,6 +90,101 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
             scope.cachedBlurSizeH = paddedH
             scope.cachedBlurExp = exp
             scope.cachedBlurResult = it
+        }
+    } ?: return
+
+    downscaleFactor = sf
+    renderEffect = renderEffect?.chain(effect) ?: effect
+}
+
+/**
+ * Chains a separable **progressive** (gradient) Blur into the scope's
+ * [BackdropEffectScope.renderEffect]: a true variable-radius blur whose radius ramps continuously
+ * from full to zero along [gradient]. It uses the same adaptive downscale as [blur], so it never
+ * blocks/aliases at large radii — but that single downscale also means the `intensity → 0` end
+ * samples the downscaled backdrop (soft, not pixel-sharp).
+ *
+ * Paired with `drawBackdrop`'s `progressiveGradient` (as [Modifier.progressiveTextureBlur] wires),
+ * the draw path renders the multi-level composite instead — with a genuinely sharp clear end — and
+ * this call only records the target radii for it.
+ *
+ * @param radiusX Horizontal blur radius in pixels at full strength.
+ * @param radiusY Vertical blur radius in pixels at full strength. Defaults to [radiusX].
+ * @param gradient Direction and band controlling where the blur is full vs zero.
+ */
+fun BackdropEffectScope.progressiveBlur(
+    radiusX: Float,
+    radiusY: Float = radiusX,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
+) {
+    if (!isRuntimeShaderSupported()) return
+    val scope = impl
+    if (scope.progressiveCompositeActive) {
+        // The composite consumes only the radii, so skip building the never-drawn loop shader.
+        // Radius 0 stays here (levels collapse to identity, effects keep riding the ramp).
+        scope.cachedProgRadiusX = radiusX.coerceAtLeast(0f)
+        scope.cachedProgRadiusY = radiusY.coerceAtLeast(0f)
+        scope.cachedProgResult = null
+        // Split the effects block here: chained-so-far → pre-blur, what follows → post-blur.
+        scope.progressivePreEffect = renderEffect
+        renderEffect = null
+        return
+    }
+    if (radiusX <= 0f && radiusY <= 0f) return
+    val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
+
+    // Same adaptive downscale as blur(): the box prefilter at each level is what keeps the fixed
+    // 7-tap kernel from aliasing (blocky banding) at large radii. Capping it would defeat that.
+    val exp = downScaleExpFor(maxOf(sigmaX * sigmaX, sigmaY * sigmaY))
+    val sf = 1 shl exp
+
+    val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+    if (kernelPadding > padding) {
+        padding = kernelPadding
+    }
+
+    val compW = size.width
+    val compH = size.height
+    val paddedW = compW + padding * 2f
+    val paddedH = compH + padding * 2f
+
+    val effect = if (scope.cachedProgResult != null &&
+        scope.cachedProgRadiusX == radiusX &&
+        scope.cachedProgRadiusY == radiusY &&
+        scope.cachedProgSizeW == paddedW &&
+        scope.cachedProgSizeH == paddedH &&
+        scope.cachedProgExp == exp &&
+        scope.cachedProgAngle == gradient.angle &&
+        scope.cachedProgStart == gradient.startFraction &&
+        scope.cachedProgEnd == gradient.endFraction
+    ) {
+        scope.cachedProgResult
+    } else {
+        createProgressiveBlurEffect(
+            radiusX,
+            radiusY,
+            sf,
+            adjustedVarianceForExp(sigmaX * sigmaX, exp),
+            adjustedVarianceForExp(sigmaY * sigmaY, exp),
+            Size(paddedW, paddedH),
+            padding,
+            compW,
+            compH,
+            gradient.angle,
+            gradient.startFraction,
+            gradient.endFraction,
+            scope,
+        ).also {
+            scope.cachedProgRadiusX = radiusX
+            scope.cachedProgRadiusY = radiusY
+            scope.cachedProgSizeW = paddedW
+            scope.cachedProgSizeH = paddedH
+            scope.cachedProgExp = exp
+            scope.cachedProgAngle = gradient.angle
+            scope.cachedProgStart = gradient.startFraction
+            scope.cachedProgEnd = gradient.endFraction
+            scope.cachedProgResult = it
         }
     } ?: return
 
@@ -217,5 +314,35 @@ fun BackdropEffectScope.textureBlurEffect(
     noiseDither(noiseCoefficient)
     colorControls(colors.brightness, colors.contrast, colors.saturation)
     blur(clampedX * density, clampedY * density)
+    blendColors(colors)
+}
+
+/**
+ * Runs the progressive (gradient) texture-blur preset chain inside a custom [drawBackdrop] effect
+ * block: like [textureBlurEffect] but with [progressiveBlur] in place of [blur], so the blur radius
+ * ramps from full to zero along [gradient].
+ *
+ * Pair this with `drawBackdrop`'s `progressiveGradient` (same [gradient]) so the draw path renders
+ * the multi-level composite with a genuinely sharp full-resolution clear end —
+ * [Modifier.progressiveTextureBlur] wires both together.
+ *
+ * @param blurRadiusX Horizontal blur radius in dp at full strength.
+ * @param blurRadiusY Vertical blur radius in dp at full strength. Defaults to [blurRadiusX].
+ * @param gradient Direction and band controlling where the blur is full vs zero.
+ * @param noiseCoefficient Noise dithering coefficient. 0 disables noise.
+ * @param colors Color adjustments and blend layers applied after blur.
+ */
+fun BackdropEffectScope.progressiveTextureBlurEffect(
+    blurRadiusX: Float,
+    blurRadiusY: Float = blurRadiusX,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
+    noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
+    colors: BlurColors = BlurColors(),
+) {
+    val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    noiseDither(noiseCoefficient)
+    colorControls(colors.brightness, colors.contrast, colors.saturation)
+    progressiveBlur(clampedX * density, clampedY * density, gradient)
     blendColors(colors)
 }

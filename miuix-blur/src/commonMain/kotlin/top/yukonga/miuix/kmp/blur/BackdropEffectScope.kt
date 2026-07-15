@@ -179,6 +179,31 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedColorSaturation: Float = Float.NaN
     internal var cachedColorResult: RenderEffect? = null
 
+    // progressiveBlur() builds a gradient-scaled variant; cache it on the same inputs plus the
+    // gradient (angle/start/end) so an animating radius over a fixed gradient rebuilds once per size.
+    internal var cachedProgRadiusX: Float = Float.NaN
+    internal var cachedProgRadiusY: Float = Float.NaN
+    internal var cachedProgSizeW: Float = Float.NaN
+    internal var cachedProgSizeH: Float = Float.NaN
+    internal var cachedProgExp: Int = -1
+    internal var cachedProgAngle: Float = Float.NaN
+    internal var cachedProgStart: Float = Float.NaN
+    internal var cachedProgEnd: Float = Float.NaN
+    internal var cachedProgResult: RenderEffect? = null
+
+    /**
+     * True while the draw path renders the gradient ramp via the multi-level composite:
+     * [progressiveBlur] then only records radii and skips building its (never drawn) loop-shader
+     * effect. Cleared when the composite is unsupported so the fallback gets a full build.
+     */
+    internal var progressiveCompositeActive: Boolean = false
+
+    /**
+     * Effects chained before [progressiveBlur] while [progressiveCompositeActive] — the composite's
+     * pre-blur chain; what's chained after stays in [renderEffect] as the post-blur chain.
+     */
+    internal var progressivePreEffect: RenderEffect? = null
+
     /**
      * When >= 0, [blur] builds at this exact downscale exponent instead of the adaptive choice.
      * The node sets it for the cross-fade lo/hi passes; -1 means auto. Internal — not exposed on
@@ -219,6 +244,13 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1
         noiseCoefficient = 0f
+        // Cleared before each pass so a frame that runs only progressiveBlur (which never sets a
+        // cross-fade bracket) can't inherit a stale bracket from a previous blur()-based frame.
+        blurBlendExpLo = 0
+        blurBlendExpHi = 0
+        blurBlendFactor = 0f
+        // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
+        progressivePreEffect = null
         effects()
     }
 
@@ -243,6 +275,17 @@ internal abstract class BackdropEffectScopeImpl :
         cachedColorContrast = Float.NaN
         cachedColorSaturation = Float.NaN
         cachedColorResult = null
+        cachedProgRadiusX = Float.NaN
+        cachedProgRadiusY = Float.NaN
+        cachedProgSizeW = Float.NaN
+        cachedProgSizeH = Float.NaN
+        cachedProgExp = -1
+        cachedProgAngle = Float.NaN
+        cachedProgStart = Float.NaN
+        cachedProgEnd = Float.NaN
+        cachedProgResult = null
+        progressiveCompositeActive = false
+        progressivePreEffect = null
         forcedDownscaleExp = -1
         blurBlendExpLo = 0
         blurBlendExpHi = 0

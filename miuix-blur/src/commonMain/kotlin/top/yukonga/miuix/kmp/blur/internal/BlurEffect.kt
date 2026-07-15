@@ -6,7 +6,12 @@ package top.yukonga.miuix.kmp.blur.internal
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.exp
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /** Conversion factor from blur radius in pixels to Blur sigma. */
 internal const val BLUR_RADIUS_TO_SIGMA = 0.45f
@@ -112,6 +117,116 @@ internal fun createBlurEffect(
     }
 
     return effect
+}
+
+/**
+ * Builds the separable **progressive** Blur [RenderEffect] (H then V): a variable-radius Gaussian
+ * whose radius ramps from full to zero along [angleDeg], at the same adaptive [downScale] as
+ * [createBlurEffect]. The gradient axis/band ([startFraction]/[endFraction] of the component's
+ * projected extent) are converted here into the downscaled, padded layer's coordinate space;
+ * [size] is the padded layer size, [compW]/[compH] the unpadded component in full-resolution px.
+ */
+internal fun createProgressiveBlurEffect(
+    radiusX: Float,
+    radiusY: Float,
+    downScale: Int,
+    adjustedVarianceX: Float,
+    adjustedVarianceY: Float,
+    size: Size,
+    padding: Float,
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect? {
+    if (radiusX <= 0f && radiusY <= 0f) return null
+
+    val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
+    val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
+
+    // Gradient axis + band in the downscaled, padded layer's coordinate space.
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFullComp = projMin + startFraction * span
+    val projZeroComp = projMin + endFraction * span
+    val padProj = padding * (ax + ay)
+    val projFull = (projFullComp + padProj) / downScale
+    var projZero = (projZeroComp + padProj) / downScale
+    // Degenerate band (start == end, or a zero-extent axis) would divide by zero in the shader.
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
+    val maxCap = PROGRESSIVE_BLUR_MAX_TAP.toFloat()
+    val maxRadiusX = (2f * sqrt(adjustedVarianceX) - 1f).coerceIn(0f, maxCap)
+    val maxRadiusY = (2f * sqrt(adjustedVarianceY) - 1f).coerceIn(0f, maxCap)
+
+    var effect: RenderEffect? = null
+
+    if (radiusX > 0f && maxRadiusX >= 0.5f) {
+        val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d$downScale", PROGRESSIVE_BLUR_SHADER).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
+            setFloatUniform("in_step", 1f, 0f)
+            setFloatUniform("in_maxRadius", maxRadiusX)
+            setFloatUniform("in_gradAxis", ax, ay)
+            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_noise", 0f)
+        }
+        effect = runtimeShaderEffect(hShader, "child")
+    }
+
+    if (radiusY > 0f && maxRadiusY >= 0.5f) {
+        val vShader = scope.obtainRuntimeShader("LMPGaussLoop_V_d$downScale", PROGRESSIVE_BLUR_SHADER).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
+            setFloatUniform("in_step", 0f, 1f)
+            setFloatUniform("in_maxRadius", maxRadiusY)
+            setFloatUniform("in_gradAxis", ax, ay)
+            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_noise", 0f)
+        }
+        effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
+            ?: runtimeShaderEffect(vShader, "child")
+    }
+
+    return effect
+}
+
+/**
+ * Converts radii + gradient into the [progressiveCompositeEffect] inputs (sigma, axis, band in
+ * component px). Zero radii are valid — the levels collapse to identity while the pre/post chains
+ * keep riding the ramp; returning null instead would poison the caller's supported flag.
+ */
+internal fun createProgressiveCompositeEffect(
+    radiusX: Float,
+    radiusY: Float,
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    preEffect: RenderEffect?,
+    postEffect: RenderEffect?,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect? {
+    val sigmaX = radiusX.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
+
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFull = projMin + startFraction * span
+    var projZero = projMin + endFraction * span
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    return progressiveCompositeEffect(scope, sigmaX, sigmaY, ax, ay, projFull, projZero, preEffect, postEffect)
 }
 
 /**

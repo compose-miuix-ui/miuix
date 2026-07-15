@@ -49,6 +49,7 @@ import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveCompositeEffect
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 
@@ -74,6 +75,12 @@ private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { 
  * @param onDrawFront Optional draw callback invoked last, on top of the content and highlight.
  * @param contentBlendMode The [BlendMode] used to composite the composable's content over the blur.
  *   [BlendMode.DstIn] masks the blur by the content alpha (foreground blur).
+ * @param progressiveGradient When non-null, renders the backdrop as a multi-level progressive
+ *   composite: a full-resolution sharp base plus graduated native Gaussian levels of the same
+ *   source, cross-faded along this gradient so the blur strength ramps continuously from full to
+ *   pixel-sharp. Requires a matching [progressiveBlur] in [effects] (as
+ *   [Modifier.progressiveTextureBlur] wires) — it records the target radii the composite renders;
+ *   without one the gradient is ignored and [effects] draws uniformly.
  * @param enabled Whether the backdrop effect is active. When false, content draws normally without
  *   blur. Also gated by [isRuntimeShaderSupported].
  */
@@ -88,6 +95,7 @@ fun Modifier.drawBackdrop(
     onDrawSurface: (DrawScope.() -> Unit)? = null,
     onDrawFront: (DrawScope.() -> Unit)? = null,
     contentBlendMode: BlendMode = BlendMode.SrcOver,
+    progressiveGradient: ProgressiveBlur? = null,
     enabled: Boolean = true,
 ): Modifier {
     // The effect pipeline (blur / blend / highlight / custom passes) is built on RuntimeShader.
@@ -108,6 +116,7 @@ fun Modifier.drawBackdrop(
                 onDrawSurface = onDrawSurface,
                 onDrawFront = onDrawFront,
                 contentBlendMode = contentBlendMode,
+                progressiveGradient = progressiveGradient,
                 enabled = effectiveEnabled,
             ),
         )
@@ -124,6 +133,7 @@ private class DrawBackdropElement(
     val onDrawSurface: (DrawScope.() -> Unit)?,
     val onDrawFront: (DrawScope.() -> Unit)?,
     val contentBlendMode: BlendMode = BlendMode.SrcOver,
+    val progressiveGradient: ProgressiveBlur? = null,
     val enabled: Boolean = true,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
@@ -138,6 +148,7 @@ private class DrawBackdropElement(
         onDrawSurface = onDrawSurface,
         onDrawFront = onDrawFront,
         contentBlendMode = contentBlendMode,
+        progressiveGradient = progressiveGradient,
         enabled = enabled,
     )
 
@@ -153,6 +164,7 @@ private class DrawBackdropElement(
         node.onDrawSurface = onDrawSurface
         node.onDrawFront = onDrawFront
         node.contentBlendMode = contentBlendMode
+        node.progressiveGradient = progressiveGradient
         node.enabled = enabled
         if (enabledChanged) {
             if (!enabled) {
@@ -182,6 +194,7 @@ private class DrawBackdropElement(
         if (onDrawSurface != other.onDrawSurface) return false
         if (onDrawFront != other.onDrawFront) return false
         if (contentBlendMode != other.contentBlendMode) return false
+        if (progressiveGradient != other.progressiveGradient) return false
         if (enabled != other.enabled) return false
         return true
     }
@@ -197,6 +210,7 @@ private class DrawBackdropElement(
         result = 31 * result + (onDrawSurface?.hashCode() ?: 0)
         result = 31 * result + (onDrawFront?.hashCode() ?: 0)
         result = 31 * result + contentBlendMode.hashCode()
+        result = 31 * result + (progressiveGradient?.hashCode() ?: 0)
         result = 31 * result + enabled.hashCode()
         return result
     }
@@ -213,6 +227,7 @@ private class DrawBackdropNode(
     var onDrawSurface: (DrawScope.() -> Unit)?,
     var onDrawFront: (DrawScope.() -> Unit)?,
     var contentBlendMode: BlendMode = BlendMode.SrcOver,
+    var progressiveGradient: ProgressiveBlur? = null,
     var enabled: Boolean = true,
 ) : Modifier.Node(),
     LayoutModifierNode,
@@ -550,16 +565,26 @@ private class DrawBackdropNode(
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
     private var contentBoundsRect: Rect? = null
 
-    override fun ContentDrawScope.draw() {
-        if (!enabled) {
-            drawContent()
-            return
-        }
-        if (effectScope.update(this)) {
-            updateEffects()
-        }
-        captureLayerScale()
-        onDrawBehind?.invoke(this)
+    // Progressive (gradient) blur: a full-res sharp layer carrying the multi-level composite
+    // RenderEffect, cached on its inputs. The supported flags gate platforms whose
+    // progressiveCompositeEffect() returns null.
+    private var compositeLayer: GraphicsLayer? = null
+    private var compositeAttempted = false
+    private var compositeSupported = false
+    private var cachedCompositeEffect: RenderEffect? = null
+    private var cachedCompositeRadiusX = Float.NaN
+    private var cachedCompositeRadiusY = Float.NaN
+    private var cachedCompositeW = Float.NaN
+    private var cachedCompositeH = Float.NaN
+    private var cachedCompositeGradient: ProgressiveBlur? = null
+
+    // Pre-/post-blur chains folded into the cached composite; compared by identity (the scope's
+    // per-effect caches keep the references stable while their inputs hold).
+    private var cachedCompositePre: RenderEffect? = null
+    private var cachedCompositePost: RenderEffect? = null
+
+    /** Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level. */
+    private fun DrawScope.drawBlurredBackdrop() {
         renderBlurInto(primary)
         if (blending) {
             // Cross-fade band: composite the higher level on top of the lower one with alpha = blendFactor.
@@ -574,6 +599,100 @@ private class DrawBackdropNode(
             result.alpha = blendFactor
             drawLayer(result)
         }
+    }
+
+    /**
+     * Records the sharp backdrop at full resolution into [compositeLayer] and attaches the
+     * multi-level composite [RenderEffect]. Returns false when [progressiveBlur] recorded no radii
+     * or the platform can't express the composite — the caller then draws uniformly.
+     */
+    private fun DrawScope.drawProgressiveComposite(gradient: ProgressiveBlur): Boolean {
+        if (compositeAttempted && !compositeSupported) return false
+        val rX = effectScope.cachedProgRadiusX
+        val rY = effectScope.cachedProgRadiusY
+        if (rX.isNaN() || rY.isNaN()) return false
+        val sw = size.width
+        val sh = size.height
+        val pre = effectScope.progressivePreEffect
+        val post = effectScope.renderEffect
+        val composite = if (cachedCompositeEffect != null &&
+            cachedCompositeRadiusX == rX &&
+            cachedCompositeRadiusY == rY &&
+            cachedCompositeW == sw &&
+            cachedCompositeH == sh &&
+            cachedCompositeGradient == gradient &&
+            cachedCompositePre === pre &&
+            cachedCompositePost === post
+        ) {
+            cachedCompositeEffect
+        } else {
+            val built = createProgressiveCompositeEffect(
+                rX,
+                rY,
+                sw,
+                sh,
+                gradient.angle,
+                gradient.startFraction,
+                gradient.endFraction,
+                pre,
+                post,
+                effectScope,
+            )
+            compositeAttempted = true
+            compositeSupported = built != null
+            if (built != null) {
+                cachedCompositeEffect = built
+                cachedCompositeRadiusX = rX
+                cachedCompositeRadiusY = rY
+                cachedCompositeW = sw
+                cachedCompositeH = sh
+                cachedCompositeGradient = gradient
+                cachedCompositePre = pre
+                cachedCompositePost = post
+            }
+            built
+        } ?: return false
+        val w = sw.toInt().coerceAtLeast(1)
+        val h = sh.toInt().coerceAtLeast(1)
+        val layer = compositeLayer ?: graphicsContext.createGraphicsLayer().also { compositeLayer = it }
+        recordLayer(layer, size = IntSize(w, h)) {
+            with(backdrop) {
+                drawBackdrop(
+                    density = effectScope,
+                    coordinates = layoutCoordinates,
+                    layerBlock = layerBlock,
+                    downscaleFactor = 1,
+                )
+            }
+        }
+        layer.renderEffect = composite
+        drawLayer(layer)
+        return true
+    }
+
+    override fun ContentDrawScope.draw() {
+        if (!enabled) {
+            drawContent()
+            return
+        }
+        if (effectScope.update(this)) {
+            updateEffects()
+        }
+        captureLayerScale()
+        onDrawBehind?.invoke(this)
+
+        val gradient = progressiveGradient
+        if (gradient == null) {
+            drawBlurredBackdrop()
+        } else if (!drawProgressiveComposite(gradient)) {
+            // Composite unsupported: the effects chain skipped its own build while the flag was
+            // still assumed, so rebuild (the flag re-derives as false) before drawing uniformly.
+            if (effectScope.progressiveCompositeActive && compositeAttempted && !compositeSupported) {
+                updateEffects()
+            }
+            drawBlurredBackdrop()
+        }
+
         onDrawSurface?.invoke(this)
 
         if (contentBlendMode == BlendMode.SrcOver) {
@@ -629,6 +748,11 @@ private class DrawBackdropNode(
     private fun updateEffects() {
         if (!enabled) return
         primary.ensureMain()
+
+        // Gradient mode: progressiveBlur() only records radii for the composite; re-derives as
+        // false once a platform reports the composite unsupported.
+        effectScope.progressiveCompositeActive =
+            progressiveGradient != null && !(compositeAttempted && !compositeSupported)
 
         // Pass 1 (auto): build the lower bracket level into [primary]; blur() also stashes the
         // cross-fade bracket (computeDownScaleBlend) on the scope for us to read below.
@@ -774,6 +898,16 @@ private class DrawBackdropNode(
         secondary.release()
         crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
         crossfadeResultLayer = null
+        compositeLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        compositeLayer = null
+        cachedCompositeEffect = null
+        cachedCompositeRadiusX = Float.NaN
+        cachedCompositeRadiusY = Float.NaN
+        cachedCompositeW = Float.NaN
+        cachedCompositeH = Float.NaN
+        cachedCompositeGradient = null
+        cachedCompositePre = null
+        cachedCompositePost = null
         blending = false
         effectScope.reset()
     }

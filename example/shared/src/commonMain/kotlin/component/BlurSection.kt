@@ -41,15 +41,17 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
-import top.yukonga.miuix.kmp.shared.generated.resources.blur_test_bg
+import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
@@ -63,6 +65,136 @@ fun LazyListScope.blurSection() {
     item(key = "foreground_blur") {
         SmallTitle(text = "Foreground Blur")
         ForegroundBlurDemo()
+    }
+    item(key = "progressive_blur") {
+        SmallTitle(text = "Progressive Blur")
+        ProgressiveBlurDemo()
+    }
+}
+
+@Composable
+private fun ProgressiveBlurDemo() {
+    var blurRadius by remember { mutableFloatStateOf(20f) }
+    var startFraction by remember { mutableFloatStateOf(0f) }
+    var endFraction by remember { mutableFloatStateOf(1f) }
+
+    val isInDark = isInDarkTheme()
+    val blendConfigs = remember(isInDark) {
+        listOf(
+            "None" to emptyList(),
+            "Info Thin" to if (isInDark) ColorBlendToken.Info_Thin_Dark else ColorBlendToken.Info_Thin_Light,
+            "Info Regular" to if (isInDark) ColorBlendToken.Info_Regular_Dark else ColorBlendToken.Info_Regular_Light,
+            "Colored Thin" to if (isInDark) ColorBlendToken.Colored_Thin_Dark else ColorBlendToken.Colored_Thin_Light,
+            "Colored Regular" to if (isInDark) ColorBlendToken.Colored_Regular_Dark else ColorBlendToken.Colored_Regular_Light,
+            "Colored Thick" to if (isInDark) ColorBlendToken.Colored_Thick_Dark else ColorBlendToken.Colored_Thick_Light,
+            "Pured Regular" to if (isInDark) ColorBlendToken.Pured_Regular_Dark else ColorBlendToken.Pured_Regular_Light,
+            "Pured Thick" to if (isInDark) ColorBlendToken.Pured_Thick_Dark else ColorBlendToken.Pured_Thick_Light,
+            "Overlay Thin" to if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Overlay_Thin_Light,
+            "Overlay Thick" to if (isInDark) ColorBlendToken.Overlay_Thick_Dark else ColorBlendToken.Overlay_Thick_Light,
+        )
+    }
+    var blendModeIndex by remember { mutableIntStateOf(0) }
+    val currentBlend = blendConfigs[blendModeIndex]
+    val blendModeItems = remember(blendConfigs) { blendConfigs.map { it.first } }
+
+    val directions = remember {
+        listOf(
+            "Top" to ProgressiveBlur.Top,
+            "Bottom" to ProgressiveBlur.Bottom,
+            "Left" to ProgressiveBlur.Left,
+            "Right" to ProgressiveBlur.Right,
+        )
+    }
+    val directionItems = remember { directions.map { it.first } }
+    var directionIndex by remember { mutableIntStateOf(0) }
+    val baseDirection = directions[directionIndex].second
+    val gradient = remember(baseDirection, startFraction, endFraction) {
+        baseDirection.copy(startFraction = startFraction, endFraction = endFraction)
+    }
+
+    val backdrop = rememberLayerBackdrop()
+
+    Column(
+        modifier = Modifier.padding(horizontal = 12.dp),
+    ) {
+        Card(
+            modifier = Modifier.padding(bottom = 12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp),
+            ) {
+                // Background layer (captured by layerBackdrop)
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .layerBackdrop(backdrop),
+                ) {
+                    BlurBackground()
+                }
+
+                // Blur overlay
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .progressiveTextureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(0.dp),
+                            gradient = gradient,
+                            blurRadius = blurRadius,
+                            colors = BlurDefaults.blurColors(blendColors = currentBlend.second),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Progressive Blur\n${directionItems[directionIndex]} | R=${blurRadius.toInt()} | ${currentBlend.first}",
+                        style = MiuixTheme.textStyles.headline2,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                    )
+                }
+            }
+
+            OverlayDropdownPreference(
+                title = "Direction",
+                items = directionItems,
+                selectedIndex = directionIndex,
+                onSelectedIndexChange = { directionIndex = it },
+            )
+
+            OverlayDropdownPreference(
+                title = "Blend Mode",
+                items = blendModeItems,
+                selectedIndex = blendModeIndex,
+                onSelectedIndexChange = { blendModeIndex = it },
+            )
+
+            HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+
+            SliderPreference(
+                title = "Blur Radius",
+                valueText = "${blurRadius.toInt()}",
+                value = blurRadius / 50f,
+                onValueChange = { blurRadius = it * 50f },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            SliderPreference(
+                title = "Start",
+                valueText = "${(startFraction * 100).toInt() / 100f}",
+                value = startFraction,
+                onValueChange = { startFraction = it },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            SliderPreference(
+                title = "End",
+                valueText = "${(endFraction * 100).toInt() / 100f}",
+                value = endFraction,
+                onValueChange = { endFraction = it },
+            )
+        }
     }
 }
 
@@ -128,7 +260,7 @@ private fun BlurDemo() {
                         .matchParentSize()
                         .layerBackdrop(backdrop),
                 ) {
-                    StaticBackground()
+                    BlurBackground()
                 }
 
                 // Blur overlay
@@ -385,9 +517,9 @@ private fun ForegroundBlurDemo() {
 }
 
 @Composable
-private fun StaticBackground() {
+private fun BlurBackground() {
     Image(
-        painter = painterResource(Res.drawable.blur_test_bg),
+        painter = painterResource(Res.drawable.blur_test),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
