@@ -198,7 +198,7 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
                 _presented.add(e)
             } else {
                 // Reuse existing instance; clear any stale leaving flag (re-push of same key) and
-                // adopt the freshly built registration payload (content / metadata).
+                // adopt the freshly built registration payload (route key / content / metadata).
                 val existing = _presented.first { it.contentKey == e.contentKey }
                 existing.presentation = existing.presentation.copy(isRemoving = false)
                 existing.adoptFrom(e)
