@@ -16,12 +16,16 @@ import androidx.compose.runtime.Immutable
  *   the blur is at full strength.
  * @param endFraction Fraction in `[0, 1]` where the blur fades to zero. May be smaller than
  *   [startFraction] to reverse the ramp; must differ from it.
+ * @param curve Power-curve exponent reshaping the falloff between the fixed endpoints: `< 1`
+ *   concentrates the radius change toward the strong end (fast early change, long soft tail),
+ *   `> 1` toward the clear end. Must be positive.
  */
 @Immutable
 data class ProgressiveBlur(
     val angle: Float = 90f,
     val startFraction: Float = 0f,
     val endFraction: Float = 1f,
+    val curve: Float = 1f,
 ) {
     companion object {
         /** Blur strongest at the top edge, fading to clear at the bottom. */

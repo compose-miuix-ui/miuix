@@ -189,6 +189,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgAngle: Float = Float.NaN
     internal var cachedProgStart: Float = Float.NaN
     internal var cachedProgEnd: Float = Float.NaN
+    internal var cachedProgCurve: Float = Float.NaN
     internal var cachedProgResult: RenderEffect? = null
 
     /**
@@ -251,6 +252,12 @@ internal abstract class BackdropEffectScopeImpl :
         blurBlendFactor = 0f
         // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
         progressivePreEffect = null
+        // Composite mode: clear the recorded radii so a stale ramp can't outlive an effects block
+        // that stops calling progressiveBlur; standalone mode keeps them (loop-effect cache key).
+        if (progressiveCompositeActive) {
+            cachedProgRadiusX = Float.NaN
+            cachedProgRadiusY = Float.NaN
+        }
         effects()
     }
 
@@ -283,6 +290,7 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgAngle = Float.NaN
         cachedProgStart = Float.NaN
         cachedProgEnd = Float.NaN
+        cachedProgCurve = Float.NaN
         cachedProgResult = null
         progressiveCompositeActive = false
         progressivePreEffect = null

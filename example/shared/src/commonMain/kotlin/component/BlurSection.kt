@@ -77,6 +77,7 @@ private fun ProgressiveBlurDemo() {
     var blurRadius by remember { mutableFloatStateOf(20f) }
     var startFraction by remember { mutableFloatStateOf(0f) }
     var endFraction by remember { mutableFloatStateOf(1f) }
+    var curve by remember { mutableFloatStateOf(1f) }
 
     val isInDark = isInDarkTheme()
     val blendConfigs = remember(isInDark) {
@@ -108,8 +109,8 @@ private fun ProgressiveBlurDemo() {
     val directionItems = remember { directions.map { it.first } }
     var directionIndex by remember { mutableIntStateOf(0) }
     val baseDirection = directions[directionIndex].second
-    val gradient = remember(baseDirection, startFraction, endFraction) {
-        baseDirection.copy(startFraction = startFraction, endFraction = endFraction)
+    val gradient = remember(baseDirection, startFraction, endFraction, curve) {
+        baseDirection.copy(startFraction = startFraction, endFraction = endFraction, curve = curve)
     }
 
     val backdrop = rememberLayerBackdrop()
@@ -193,6 +194,14 @@ private fun ProgressiveBlurDemo() {
                 valueText = "${(endFraction * 100).toInt() / 100f}",
                 value = endFraction,
                 onValueChange = { endFraction = it },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            SliderPreference(
+                title = "Curve",
+                valueText = "${(curve * 100).toInt() / 100f}",
+                value = (curve - 0.25f) / 2.75f,
+                onValueChange = { curve = 0.25f + it * 2.75f },
             )
         }
     }

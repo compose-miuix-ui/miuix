@@ -157,7 +157,8 @@ fun BackdropEffectScope.progressiveBlur(
         scope.cachedProgExp == exp &&
         scope.cachedProgAngle == gradient.angle &&
         scope.cachedProgStart == gradient.startFraction &&
-        scope.cachedProgEnd == gradient.endFraction
+        scope.cachedProgEnd == gradient.endFraction &&
+        scope.cachedProgCurve == gradient.curve
     ) {
         scope.cachedProgResult
     } else {
@@ -174,6 +175,7 @@ fun BackdropEffectScope.progressiveBlur(
             gradient.angle,
             gradient.startFraction,
             gradient.endFraction,
+            gradient.curve,
             scope,
         ).also {
             scope.cachedProgRadiusX = radiusX
@@ -184,6 +186,7 @@ fun BackdropEffectScope.progressiveBlur(
             scope.cachedProgAngle = gradient.angle
             scope.cachedProgStart = gradient.startFraction
             scope.cachedProgEnd = gradient.endFraction
+            scope.cachedProgCurve = gradient.curve
             scope.cachedProgResult = it
         }
     } ?: return

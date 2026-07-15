@@ -271,6 +271,9 @@ ProgressiveBlur.Right    // angle = 180°，右侧最强
 
 // 自定义区间：前 30% 保持满强度，90% 处完全清晰
 val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f)
+
+// 自定义衰减曲线：前半段半径变化明显，后半段留长而柔和的尾部
+val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
 `colors` 与 `noiseCoefficient` 使用与 [`textureBlur`](#颜色配置) 相同的管线，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。
@@ -432,6 +435,7 @@ Box(
 | angle | Float | 渐变方向（角度，从 +X 轴顺时针）：0 从左向右淡出，90 从上向下，180 从右向左，270 从下向上 | 90f |
 | startFraction | Float | 沿 angle 投影范围内模糊为满强度的位置，范围 [0, 1] | 0f |
 | endFraction | Float | 模糊降为零的位置，范围 [0, 1]；可小于 startFraction 以反转过渡，但不能与其相等 | 1f |
+| curve | Float | 幂次衰减曲线，端点固定不变：< 1 时半径变化集中在强端（前段变化明显、尾部柔长），> 1 时集中在清晰端。必须为正数 | 1f |
 
 预设：`ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` 覆盖四个方向的边缘淡出。
 

@@ -44,6 +44,7 @@ internal expect fun progressiveCompositeEffect(
     ay: Float,
     projFull: Float,
     projZero: Float,
+    curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
 ): RenderEffect?

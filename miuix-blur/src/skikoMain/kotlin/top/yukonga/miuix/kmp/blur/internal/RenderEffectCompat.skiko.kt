@@ -39,12 +39,14 @@ internal actual fun progressiveCompositeEffect(
     ay: Float,
     projFull: Float,
     projZero: Float,
+    curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
 ): RenderEffect? {
     val shader = shaderCache.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
         setFloatUniform("in_gradAxis", ax, ay)
         setFloatUniform("in_gradBand", projFull, projZero)
+        setFloatUniform("in_curve", curve)
     }
     val pre = preEffect?.skiaImageFilter
 
@@ -64,6 +66,7 @@ internal actual fun progressiveCompositeEffect(
         val maskShader = shaderCache.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_curve", curve)
             setFloatUniform("in_level", 1f)
             setFloatUniform("in_slope", 1f)
         }

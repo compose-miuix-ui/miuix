@@ -634,6 +634,7 @@ private class DrawBackdropNode(
                 gradient.angle,
                 gradient.startFraction,
                 gradient.endFraction,
+                gradient.curve,
                 pre,
                 post,
                 effectScope,
@@ -656,13 +657,15 @@ private class DrawBackdropNode(
         val h = sh.toInt().coerceAtLeast(1)
         val layer = compositeLayer ?: graphicsContext.createGraphicsLayer().also { compositeLayer = it }
         recordLayer(layer, size = IntSize(w, h)) {
-            with(backdrop) {
-                drawBackdrop(
-                    density = effectScope,
-                    coordinates = layoutCoordinates,
-                    layerBlock = layerBlock,
-                    downscaleFactor = 1,
-                )
+            onDrawBackdrop {
+                with(backdrop) {
+                    drawBackdrop(
+                        density = effectScope,
+                        coordinates = layoutCoordinates,
+                        layerBlock = layerBlock,
+                        downscaleFactor = 1,
+                    )
+                }
             }
         }
         layer.renderEffect = composite

@@ -139,6 +139,7 @@ internal fun createProgressiveBlurEffect(
     angleDeg: Float,
     startFraction: Float,
     endFraction: Float,
+    curve: Float,
     scope: BackdropEffectScopeImpl,
 ): RenderEffect? {
     if (radiusX <= 0f && radiusY <= 0f) return null
@@ -168,6 +169,8 @@ internal fun createProgressiveBlurEffect(
 
     var effect: RenderEffect? = null
 
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+
     if (radiusX > 0f && maxRadiusX >= 0.5f) {
         val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d$downScale", PROGRESSIVE_BLUR_SHADER).apply {
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
@@ -175,6 +178,7 @@ internal fun createProgressiveBlurEffect(
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_curve", clampedCurve)
             setFloatUniform("in_noise", 0f)
         }
         effect = runtimeShaderEffect(hShader, "child")
@@ -187,6 +191,7 @@ internal fun createProgressiveBlurEffect(
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_curve", clampedCurve)
             setFloatUniform("in_noise", 0f)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
@@ -209,6 +214,7 @@ internal fun createProgressiveCompositeEffect(
     angleDeg: Float,
     startFraction: Float,
     endFraction: Float,
+    curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
     scope: BackdropEffectScopeImpl,
@@ -226,7 +232,18 @@ internal fun createProgressiveCompositeEffect(
     var projZero = projMin + endFraction * span
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
 
-    return progressiveCompositeEffect(scope, sigmaX, sigmaY, ax, ay, projFull, projZero, preEffect, postEffect)
+    return progressiveCompositeEffect(
+        scope,
+        sigmaX,
+        sigmaY,
+        ax,
+        ay,
+        projFull,
+        projZero,
+        curve.coerceIn(0.05f, 20f),
+        preEffect,
+        postEffect,
+    )
 }
 
 /**

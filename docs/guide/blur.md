@@ -276,6 +276,9 @@ ProgressiveBlur.Right    // angle = 180°, strongest at the right edge
 
 // Custom band: full strength until 30% of the extent, sharp from 90% on
 val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f)
+
+// Custom falloff: pronounced radius change early in the band, long soft tail after
+val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
 `colors` and `noiseCoefficient` use the same pipeline as [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
@@ -437,6 +440,7 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | angle | Float | Gradient direction in degrees, clockwise from the +X axis: 0 fades left→right, 90 top→bottom, 180 right→left, 270 bottom→top | 90f |
 | startFraction | Float | Fraction in [0, 1] of the projected extent along angle where the blur is at full strength | 0f |
 | endFraction | Float | Fraction in [0, 1] where the blur fades to zero; may be smaller than startFraction to reverse the ramp, must differ from it | 1f |
+| curve | Float | Power-curve exponent reshaping the falloff between the fixed endpoints: < 1 concentrates the radius change toward the strong end, > 1 toward the clear end. Must be positive | 1f |
 
 Presets: `ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` cover the four edge fades.
 

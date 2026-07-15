@@ -51,6 +51,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int): String = """
     uniform float in_maxRadius;
     uniform float2 in_gradAxis;
     uniform float2 in_gradBand;
+    uniform float in_curve;
     uniform float in_noise;
 
     float progRand(float2 co) {
@@ -60,7 +61,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int): String = """
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        float intensity = 1.0 - raw * raw * (3.0 - 2.0 * raw);
+        float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         float radius = in_maxRadius * intensity;
         if (radius < 0.5) {
             half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
@@ -111,11 +112,12 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader blur2;
     uniform float2 in_gradAxis;
     uniform float2 in_gradBand;
+    uniform float in_curve;
 
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = raw * raw * (3.0 - 2.0 * raw);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
         float pos = raw * 3.0;
@@ -138,13 +140,14 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;
     uniform float2 in_gradAxis;
     uniform float2 in_gradBand;
+    uniform float in_curve;
     uniform float in_level;
     uniform float in_slope;
 
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = raw * raw * (3.0 - 2.0 * raw);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         return child.eval(xy) * half(clamp(in_level - raw * in_slope, 0.0, 1.0));
     }
 """

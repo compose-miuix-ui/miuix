@@ -41,12 +41,14 @@ internal actual fun progressiveCompositeEffect(
     ay: Float,
     projFull: Float,
     projZero: Float,
+    curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
 ): RenderEffect? {
     val mask = shaderCache.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER)
     mask.setFloatUniform("in_gradAxis", ax, ay)
     mask.setFloatUniform("in_gradBand", projFull, projZero)
+    mask.setFloatUniform("in_curve", curve)
     val androidMask = mask.asAndroidRuntimeShader()
     val pre = preEffect?.asAndroidRenderEffect()
 
