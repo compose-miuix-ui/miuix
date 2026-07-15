@@ -403,14 +403,13 @@ internal fun IosLiquidGlassNavigationBar(
                                     backdrop = backdrop,
                                     shape = { pillShape },
                                     effects = {
+                                        // 24dp lens refraction + 16dp press-scale reach, raised before blur() reads it.
+                                        padding = maxOf(padding, 40.dp.toPx())
                                         vibrancy()
                                         blur(
                                             4.dp.toPx(),
                                             4.dp.toPx(),
                                         )
-                                        // 24dp lens refraction + 16dp press-scale sampling reach; must be
-                                        // set before lens() so its uniforms match the recording padding.
-                                        padding = maxOf(padding, 40.dp.toPx())
                                         lens(
                                             refractionHeight = 24.dp.toPx(),
                                             refractionAmount = 24.dp.toPx(),

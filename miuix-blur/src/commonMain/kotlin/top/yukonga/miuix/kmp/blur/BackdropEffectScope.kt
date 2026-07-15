@@ -27,7 +27,11 @@ sealed interface BackdropEffectScope :
     val layoutDirection: LayoutDirection
     val shape: Shape
 
-    /** Extra padding to extend the backdrop layer to accommodate blur overflow. */
+    /**
+     * Extra padding to extend the backdrop layer to accommodate blur overflow. Effects may only
+     * raise it. Prefer raising it before any effect that reads it — a raise after [blur] still
+     * works, but re-runs the effect block once with the final value.
+     */
     var padding: Float
 
     /** The accumulated render effect chain. */
@@ -160,6 +164,10 @@ internal abstract class BackdropEffectScopeImpl :
     internal val blendModesBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS)
     internal val blendColorsBuffer: FloatArray = FloatArray(MAX_BLEND_LAYERS * 4)
 
+    // Padded size blur() built its sampling clamp from in the current apply(); NaN = no blur ran.
+    internal var blurBuiltPaddedW: Float = Float.NaN
+    internal var blurBuiltPaddedH: Float = Float.NaN
+
     // chain() allocates a native RenderEffect — cache last result keyed on inputs (incl. level).
     internal var cachedBlurRadiusX: Float = Float.NaN
     internal var cachedBlurRadiusY: Float = Float.NaN
@@ -219,7 +227,25 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1
         noiseCoefficient = 0f
+        blurBuiltPaddedW = Float.NaN
+        blurBuiltPaddedH = Float.NaN
         effects()
+        // blur() bakes its sampling clamp from the padding at its call site; if a later effect
+        // raised the padding, re-run once with the final value preset (padding only grows, so
+        // one pass converges). Otherwise the clamp sits inside the recording and its bottom/right
+        // edge smears.
+        if (!blurBuiltPaddedW.isNaN() &&
+            (blurBuiltPaddedW != size.width + padding * 2f || blurBuiltPaddedH != size.height + padding * 2f)
+        ) {
+            val finalPadding = padding
+            renderEffect = null
+            downscaleFactor = 1
+            noiseCoefficient = 0f
+            blurBuiltPaddedW = Float.NaN
+            blurBuiltPaddedH = Float.NaN
+            padding = finalPadding
+            effects()
+        }
     }
 
     fun reset() {
@@ -231,6 +257,8 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1
         noiseCoefficient = 0f
+        blurBuiltPaddedW = Float.NaN
+        blurBuiltPaddedH = Float.NaN
         cachedBlurRadiusX = Float.NaN
         cachedBlurRadiusY = Float.NaN
         cachedBlurSizeW = Float.NaN

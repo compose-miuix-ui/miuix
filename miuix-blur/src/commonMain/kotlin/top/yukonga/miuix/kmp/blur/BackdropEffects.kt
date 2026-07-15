@@ -25,6 +25,9 @@ internal const val MAX_BLEND_LAYERS = 8
  * adjusts [BackdropEffectScope.padding] to cover the kernel reach, and updates
  * [BackdropEffectScope.downscaleFactor]. Non-positive radii skip that axis.
  *
+ * Raising [BackdropEffectScope.padding] after [blur] is safe (the effect block re-runs once
+ * with the final padding), but raising it beforehand avoids the rebuild.
+ *
  * Typical use:
  * ```
  * Modifier.drawBackdrop(backdrop, shape = { shape }, effects = {
@@ -63,6 +66,10 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
 
     val paddedW = size.width + padding * 2f
     val paddedH = size.height + padding * 2f
+
+    // apply() compares these against the final padding to detect a stale sampling clamp.
+    scope.blurBuiltPaddedW = paddedW
+    scope.blurBuiltPaddedH = paddedH
 
     val effect = if (scope.cachedBlurResult != null &&
         scope.cachedBlurRadiusX == radiusX &&
