@@ -250,8 +250,8 @@ Box(
         .progressiveTextureBlur(
             backdrop = backdrop,
             shape = RectangleShape,
-            gradient = ProgressiveBlur.Top, // 顶部最强，底部锐利
-            blurRadius = 20f
+            blurRadius = 20f,
+            gradient = ProgressiveBlur.Top // 顶部最强，底部锐利
         )
 ) {
     // 内容
@@ -416,10 +416,10 @@ Box(
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop | 提供模糊背景内容的 Backdrop | - | 是 |
 | shape | Shape | 模糊区域裁剪的形状 | - | 是 |
-| gradient | ProgressiveBlur | 控制模糊满强度与清晰位置的方向和区间 | ProgressiveBlur.Top | 否 |
 | blurRadius | Float | 满强度处的模糊半径（dp）。限制在 [0, 150] 范围内 | 20f | 否 |
 | blurRadiusX | Float | 满强度处的水平模糊半径（dp，独立半径重载） | - | 是* |
 | blurRadiusY | Float | 满强度处的垂直模糊半径（dp，独立半径重载） | - | 是* |
+| gradient | ProgressiveBlur | 控制模糊满强度与清晰位置的方向和区间 | ProgressiveBlur.Top | 否 |
 | noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0.0045f | 否 |
 | colors | BlurColors | 颜色调整和混合图层，随模糊一起淡出 | BlurColors() | 否 |
 | highlight | Highlight? | 可选的边缘高光，绘制在内容之上。`null` 时跳过 | null | 否 |

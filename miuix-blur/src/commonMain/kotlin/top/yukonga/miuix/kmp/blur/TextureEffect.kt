@@ -178,10 +178,10 @@ fun Modifier.textureEffect(
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape The shape provider for the blur region clipping.
- * @param gradient Direction and band controlling where the blur is full vs zero. Defaults to
- *   [ProgressiveBlur.Top].
  * @param blurRadius The blur radius in dp at full strength. Internally converted to pixels using
  *   display density. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
+ * @param gradient Direction and band controlling where the blur is full vs zero. Defaults to
+ *   [ProgressiveBlur.Top].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
@@ -191,8 +191,8 @@ fun Modifier.textureEffect(
 fun Modifier.progressiveTextureBlur(
     backdrop: Backdrop,
     shape: Shape,
-    gradient: ProgressiveBlur = ProgressiveBlur.Top,
     blurRadius: Float = BlurDefaults.BlurRadius,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
     highlight: Highlight? = null,
@@ -201,9 +201,9 @@ fun Modifier.progressiveTextureBlur(
 ): Modifier = progressiveTextureBlur(
     backdrop = backdrop,
     shape = shape,
-    gradient = gradient,
     blurRadiusX = blurRadius,
     blurRadiusY = blurRadius,
+    gradient = gradient,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
     highlight = highlight,
@@ -216,11 +216,11 @@ fun Modifier.progressiveTextureBlur(
  *
  * @param backdrop The [Backdrop] providing the background content to blur.
  * @param shape The shape provider for the blur region clipping.
- * @param gradient Direction and band controlling where the blur is full vs zero.
  * @param blurRadiusX The horizontal blur radius in dp at full strength. Clamped to
  *   [0, [BlurDefaults.MaxBlurRadius]].
  * @param blurRadiusY The vertical blur radius in dp at full strength. Clamped to
  *   [0, [BlurDefaults.MaxBlurRadius]].
+ * @param gradient Direction and band controlling where the blur is full vs zero.
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
@@ -230,9 +230,9 @@ fun Modifier.progressiveTextureBlur(
 fun Modifier.progressiveTextureBlur(
     backdrop: Backdrop,
     shape: Shape,
-    gradient: ProgressiveBlur = ProgressiveBlur.Top,
     blurRadiusX: Float,
     blurRadiusY: Float,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
     highlight: Highlight? = null,

@@ -156,6 +156,10 @@ fun BackdropEffectScope.progressiveBlur(
     val paddedW = compW + padding * 2f
     val paddedH = compH + padding * 2f
 
+    // apply() compares these against the final padding to detect a stale sampling clamp.
+    scope.blurBuiltPaddedW = paddedW
+    scope.blurBuiltPaddedH = paddedH
+
     val effect = if (scope.cachedProgResult != null &&
         scope.cachedProgRadiusX == radiusX &&
         scope.cachedProgRadiusY == radiusY &&

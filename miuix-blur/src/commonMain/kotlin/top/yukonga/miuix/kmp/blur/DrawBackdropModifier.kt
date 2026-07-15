@@ -154,6 +154,7 @@ private class DrawBackdropElement(
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
+        val gradientCleared = node.progressiveGradient != null && progressiveGradient == null
         node.backdrop = backdrop
         node.updateShape(shape)
         node.effects = effects
@@ -166,6 +167,9 @@ private class DrawBackdropElement(
         node.contentBlendMode = contentBlendMode
         node.progressiveGradient = progressiveGradient
         node.enabled = enabled
+        if (gradientCleared) {
+            node.releaseCompositeResources()
+        }
         if (enabledChanged) {
             if (!enabled) {
                 node.releaseGraphicsLayers()
@@ -896,11 +900,12 @@ private class DrawBackdropNode(
         }
     }
 
-    fun releaseGraphicsLayers() {
-        primary.release()
-        secondary.release()
-        crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
-        crossfadeResultLayer = null
+    /**
+     * Drops the composite layer and its caches. Called when [progressiveGradient] is cleared on a
+     * live node so the full-resolution offscreen layer doesn't outlive the gradient mode; the
+     * supported flags survive (platform capability doesn't change).
+     */
+    fun releaseCompositeResources() {
         compositeLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
         compositeLayer = null
         cachedCompositeEffect = null
@@ -911,6 +916,14 @@ private class DrawBackdropNode(
         cachedCompositeGradient = null
         cachedCompositePre = null
         cachedCompositePost = null
+    }
+
+    fun releaseGraphicsLayers() {
+        primary.release()
+        secondary.release()
+        crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        crossfadeResultLayer = null
+        releaseCompositeResources()
         blending = false
         effectScope.reset()
     }

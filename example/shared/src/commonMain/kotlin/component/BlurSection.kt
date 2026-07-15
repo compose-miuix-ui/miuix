@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -141,9 +142,9 @@ private fun ProgressiveBlurDemo() {
                         .matchParentSize()
                         .progressiveTextureBlur(
                             backdrop = backdrop,
-                            shape = RoundedCornerShape(0.dp),
-                            gradient = gradient,
+                            shape = RectangleShape,
                             blurRadius = blurRadius,
+                            gradient = gradient,
                             colors = BlurDefaults.blurColors(blendColors = currentBlend.second),
                         ),
                     contentAlignment = Alignment.Center,

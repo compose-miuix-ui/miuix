@@ -255,8 +255,8 @@ Box(
         .progressiveTextureBlur(
             backdrop = backdrop,
             shape = RectangleShape,
-            gradient = ProgressiveBlur.Top, // Strongest at the top, sharp at the bottom
-            blurRadius = 20f
+            blurRadius = 20f,
+            gradient = ProgressiveBlur.Top // Strongest at the top, sharp at the bottom
         )
 ) {
     // Content
@@ -421,10 +421,10 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop | The backdrop providing background content to blur | - | Yes |
 | shape | Shape | Shape for the blur region clipping | - | Yes |
-| gradient | ProgressiveBlur | Direction and band controlling where the blur is full vs zero | ProgressiveBlur.Top | No |
 | blurRadius | Float | Blur radius in dp at full strength. Clamped to [0, 150] | 20f | No |
 | blurRadiusX | Float | Horizontal blur radius in dp at full strength (independent radii overload) | - | Yes* |
 | blurRadiusY | Float | Vertical blur radius in dp at full strength (independent radii overload) | - | Yes* |
+| gradient | ProgressiveBlur | Direction and band controlling where the blur is full vs zero | ProgressiveBlur.Top | No |
 | noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
 | colors | BlurColors | Color adjustments and blend layers, fading out with the blur | BlurColors() | No |
 | highlight | Highlight? | Optional edge highlight painted on top of the content. `null` skips drawing | null | No |
