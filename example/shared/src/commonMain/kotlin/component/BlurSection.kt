@@ -76,6 +76,7 @@ fun LazyListScope.blurSection() {
 @Composable
 private fun ProgressiveBlurDemo() {
     var blurRadius by remember { mutableFloatStateOf(20f) }
+    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var startFraction by remember { mutableFloatStateOf(0f) }
     var endFraction by remember { mutableFloatStateOf(1f) }
     var curve by remember { mutableFloatStateOf(1f) }
@@ -145,6 +146,7 @@ private fun ProgressiveBlurDemo() {
                             shape = RectangleShape,
                             blurRadius = blurRadius,
                             gradient = gradient,
+                            noiseCoefficient = noiseCoefficient,
                             colors = BlurDefaults.blurColors(blendColors = currentBlend.second),
                         ),
                     contentAlignment = Alignment.Center,
@@ -179,6 +181,14 @@ private fun ProgressiveBlurDemo() {
                 valueText = "${blurRadius.toInt()}",
                 value = blurRadius / 50f,
                 onValueChange = { blurRadius = it * 50f },
+                insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            )
+
+            SliderPreference(
+                title = "Noise",
+                valueText = "${(noiseCoefficient * 10000).toInt() / 10000f}",
+                value = noiseCoefficient / 0.1f,
+                onValueChange = { noiseCoefficient = it * 0.1f },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
 
