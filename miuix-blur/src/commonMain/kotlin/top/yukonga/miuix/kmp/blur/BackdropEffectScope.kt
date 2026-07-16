@@ -41,9 +41,11 @@ sealed interface BackdropEffectScope :
     var downscaleFactor: Int
 
     /**
-     * Noise dithering coefficient for full-resolution application.
-     * When [downscaleFactor] > 1, noise is applied at full resolution after upscaling
-     * rather than in the RenderEffect chain, so that each screen pixel gets independent noise.
+     * Noise dithering coefficient. When [downscaleFactor] > 1, noise is applied at full
+     * resolution after upscaling rather than in the RenderEffect chain, so that each screen
+     * pixel gets independent noise. The progressive composite additionally folds an anti-banding
+     * dither into the downscaled stack, and skips the full-resolution pass while the coefficient
+     * is low enough that the grain itself is imperceptible.
      */
     var noiseCoefficient: Float
 }

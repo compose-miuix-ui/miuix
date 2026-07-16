@@ -61,6 +61,16 @@ import kotlin.math.floor
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 
+// The stack dither exists to break quantization staircases, which ~1 LSB (≈ 0.008 peak-to-peak)
+// already does; anything above only adds downscale-texel-sized grain that grows with the radius.
+private const val STACK_DITHER_MAX = 0.009f
+
+// Above this coefficient the noise is deliberate visible grain, which must land per screen pixel
+// to stay radius-independent — the full-resolution noise pass runs. At or below it the grain is
+// imperceptible and the capped stack dither alone covers anti-banding, so the round-trip is
+// skipped.
+private const val NOISE_GRAIN_THRESHOLD = 0.005f
+
 /**
  * Applies a backdrop effect to this composable.
  *
@@ -577,8 +587,9 @@ private class DrawBackdropNode(
 
     // Progressive (gradient) blur, split by resolution: the level stack renders through the
     // downscaled [primary] machinery, and [sharpLayer] overlays the full-resolution backdrop
-    // masked to the ramp's clear-end cross-fade — the only band that needs native pixels. The
-    // supported flags gate platforms whose progressiveStackEffect() returns null.
+    // through the overlay effect (variable loop blur + ramp mask) on the ramp's clear end — the
+    // only band that needs native pixels. The supported flags gate platforms whose
+    // progressiveStackEffect() returns null.
     private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
@@ -598,16 +609,18 @@ private class DrawBackdropNode(
 
     // Pre-quantization dither pass chained after the stack (cached on its coefficient): the
     // stack's ramps (post tint fade, level cross-fades) are smooth low-contrast gradients that
-    // band when first written to the 8-bit layer — the full-resolution noise pass runs after
-    // that write and can only mask the staircase. Dithering before the write breaks it; ~1 LSB
-    // needs 2× the (default 0.0045 ≈ ±0.6 LSB) coefficient. Grain lands at downscale-texel size
-    // but at this amplitude stays invisible.
+    // band when first written to the 8-bit layer — a noise pass after that write can only mask
+    // the staircase; dithering before it breaks it. Amplitude = min(2 × coefficient,
+    // [STACK_DITHER_MAX]): the default 0.0045 alone is ≈ ±0.6 LSB, short of the ~1 LSB the
+    // staircase needs. Grain lands at downscale-texel size but at this amplitude stays invisible.
     private var stackDitherEffect: RenderEffect? = null
     private var stackDitherCoeff = Float.NaN
 
-    // True while the stack chain carries the pre-quantization dither: the noise already rides the
-    // upscale, so the full-resolution noise layer round-trip (record + noise pass) is skipped —
-    // quantization of the final write is dithered by the noise the signal carries.
+    // True while the stack's pre-quantization dither fully covers the noise duty (coefficient at
+    // or below [NOISE_GRAIN_THRESHOLD]): the noise rides the upscale, so the full-resolution
+    // noise layer round-trip (record + noise pass) is skipped — quantization of the final write
+    // is dithered by the noise the signal carries. Deliberate visible grain keeps the full-res
+    // pass so its size stays one screen pixel at every radius.
     private var stackDitherChained = false
 
     private fun obtainStackDitherEffect(coeff: Float): RenderEffect {
@@ -802,8 +815,9 @@ private class DrawBackdropNode(
 
     /**
      * Composite mode: progressiveBlur() recorded the level radii + downscale and split the
-     * effects chain; assemble the downscaled level-stack effect (pre → levels → ramp-masked post)
-     * into [BackdropEffectScope.renderEffect] for [primary], and the full-res ramp mask for
+     * effects chain; assemble the downscaled level-stack effect (pre → levels → ramp-masked post
+     * → pre-quantization dither) into [BackdropEffectScope.renderEffect] for [primary], and the
+     * full-res overlay effect (variable loop blur + ramp mask) with its band bbox for
      * [sharpLayer]. Re-runs the effects uniformly when the platform can't express the stack.
      */
     private fun finalizeProgressiveComposite() {
@@ -822,8 +836,10 @@ private class DrawBackdropNode(
         val pre = scope.progressivePreEffect
         val post = scope.renderEffect
         // Pre-quantization dither only helps on a downscaled stack (exp > 0); at full resolution
-        // chainFullResNoiseIfNeeded already dithers the single write.
-        val ditherCoeff = if (scope.cachedProgExp > 0 && scope.noiseCoefficient > 0f) scope.noiseCoefficient * 2f else 0f
+        // chainFullResNoiseIfNeeded already dithers the single write. Capped at the anti-banding
+        // amplitude: the aesthetic remainder of the coefficient renders at full resolution.
+        val noiseCoeff = scope.noiseCoefficient
+        val ditherCoeff = if (scope.cachedProgExp > 0 && noiseCoeff > 0f) minOf(noiseCoeff * 2f, STACK_DITHER_MAX) else 0f
         val stack = if (cachedStackEffect != null &&
             cachedStackRadiusX == rX &&
             cachedStackRadiusY == rY &&
@@ -877,7 +893,7 @@ private class DrawBackdropNode(
             return
         }
         scope.renderEffect = stack
-        stackDitherChained = ditherCoeff > 0f
+        stackDitherChained = ditherCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD
 
         val sw = scope.size.width
         val sh = scope.size.height
@@ -938,7 +954,8 @@ private class DrawBackdropNode(
 
     /**
      * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
-     * [drawUpscaledLayer] so each screen pixel still gets independent dithering.
+     * [drawUpscaledLayer] so each screen pixel still gets independent dithering — unless the
+     * composite stack carries the duty itself ([stackDitherChained]).
      *
      * Cached on input identity + coefficient: the noise pass can end the composite's post-blur
      * chain, which [finalizeProgressiveComposite] compares by identity — a fresh effect per pass
@@ -1009,9 +1026,9 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Upscales [layer] to full resolution. When noise dithering is active the upscaled content
-     * is staged in [target]'s noise layer first so noise lands per screen pixel instead of per
-     * scaled block.
+     * Upscales [layer] to full resolution. When noise dithering is active — and not already
+     * carried by the composite stack ([stackDitherChained]) — the upscaled content is staged in
+     * [target]'s noise layer first so noise lands per screen pixel instead of per scaled block.
      */
     private fun DrawScope.drawUpscaledLayer(
         target: LevelTarget,
