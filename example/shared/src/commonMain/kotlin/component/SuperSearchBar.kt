@@ -45,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.onClick
@@ -74,10 +76,11 @@ fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
     offsetY: Dp,
     defaultResult: @Composable () -> Unit,
-    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp) -> Unit = { searchStatus, onStatusChange, padding ->
-        SearchBar(searchStatus, onStatusChange, padding)
+    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp, Color) -> Unit = { searchStatus, onStatusChange, padding, color ->
+        SearchBar(searchStatus, onStatusChange, padding, color)
     },
     searchBarTopPadding: Dp = 12.dp,
+    collapsedCapsuleColor: Color? = null,
     result: LazyListScope.() -> Unit,
 ) {
     val searchStatus = this
@@ -134,7 +137,11 @@ fun SearchStatus.SearchPager(
                 }
                 .then(
                     if (!searchStatus.isCollapsed()) {
-                        Modifier.background(MiuixTheme.colorScheme.surface)
+                        if (collapsedCapsuleColor != null) {
+                            Modifier.drawBehind { drawRect(surfaceColor.copy(alpha = surfaceAlpha)) }
+                        } else {
+                            Modifier.background(surfaceColor)
+                        }
                     } else {
                         Modifier
                     },
@@ -143,12 +150,21 @@ fun SearchStatus.SearchPager(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (!searchStatus.isCollapsed()) {
+                val capsuleColor = collapsedCapsuleColor?.let {
+                    lerp(it, MiuixTheme.colorScheme.surfaceContainerHigh, surfaceAlpha)
+                } ?: MiuixTheme.colorScheme.surfaceContainerHigh
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surface),
+                        .then(
+                            if (collapsedCapsuleColor != null) {
+                                Modifier.drawBehind { drawRect(surfaceColor.copy(alpha = surfaceAlpha)) }
+                            } else {
+                                Modifier.background(surfaceColor)
+                            },
+                        ),
                 ) {
-                    expandBar(searchStatus, onSearchStatusChange, searchBarTopPadding)
+                    expandBar(searchStatus, onSearchStatusChange, searchBarTopPadding, capsuleColor)
                 }
             }
             AnimatedVisibility(
@@ -216,6 +232,7 @@ fun SearchBar(
     searchStatus: SearchStatus,
     onSearchStatusChange: (SearchStatus) -> Unit,
     searchBarTopPadding: Dp = 12.dp,
+    color: Color = MiuixTheme.colorScheme.surfaceContainerHigh,
 ) {
     val focusRequester = remember { FocusRequester() }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -265,6 +282,7 @@ fun SearchBar(
             .padding(horizontal = 12.dp)
             .padding(top = searchBarTopPadding, bottom = 6.dp)
             .focusRequester(focusRequester),
+        color = color,
         onSearch = {},
         expanded = searchStatus.shouldExpand(),
         onExpandedChange = {
@@ -287,6 +305,7 @@ fun SearchBar(
 fun SearchBarFake(
     label: String,
     searchBarTopPadding: Dp = 12.dp,
+    capsuleColor: Color? = null,
 ) {
     InputField(
         query = "",
@@ -306,6 +325,7 @@ fun SearchBarFake(
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
             .padding(top = searchBarTopPadding, bottom = 6.dp),
+        color = capsuleColor ?: MiuixTheme.colorScheme.surfaceContainerHigh,
         onSearch = { },
         enabled = false,
         expanded = false,
