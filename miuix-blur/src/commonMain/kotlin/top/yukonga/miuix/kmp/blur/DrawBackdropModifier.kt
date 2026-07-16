@@ -51,8 +51,11 @@ import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpRampEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
+import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
+import kotlin.math.ceil
+import kotlin.math.floor
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 
@@ -590,11 +593,15 @@ private class DrawBackdropNode(
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
 
-    // Sharp overlay ramp mask: radius-independent, cached on gradient + size.
+    // Sharp overlay ramp mask + band bbox (the only region paying full-resolution cost):
+    // radius-independent, cached on gradient + size. A null effect with matching cache keys means
+    // the band lies outside the component and the overlay is skipped entirely.
     private var sharpRampEffect: RenderEffect? = null
     private var sharpRampGradient: ProgressiveBlur? = null
     private var sharpRampW = Float.NaN
     private var sharpRampH = Float.NaN
+    private var sharpBandOffset = IntOffset.Zero
+    private var sharpBandSize = IntSize.Zero
 
     /** Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level. */
     private fun DrawScope.drawBlurredBackdrop() {
@@ -615,27 +622,32 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Records the backdrop at full resolution into [sharpLayer] and draws it masked to the ramp's
-     * clear-end cross-fade over the upscaled level stack — the composite's `mix(blur2, clear, …)`
-     * segment with genuinely sharp native pixels.
+     * Records the backdrop at full resolution into [sharpLayer] — only the band bbox where the
+     * ramp mask is non-zero — and draws it masked to the ramp's clear-end cross-fade over the
+     * upscaled level stack: the composite's `mix(blur2, clear, …)` segment with genuinely sharp
+     * native pixels.
      */
     private fun DrawScope.drawSharpOverlay() {
-        val w = size.width.toInt().coerceAtLeast(1)
-        val h = size.height.toInt().coerceAtLeast(1)
+        val bandSize = sharpBandSize
+        if (bandSize.width <= 0 || bandSize.height <= 0) return
+        val bandOffset = sharpBandOffset
         val layer = sharpLayer ?: graphicsContext.createGraphicsLayer().also { sharpLayer = it }
-        recordLayer(layer, size = IntSize(w, h)) {
-            onDrawBackdrop {
-                with(backdrop) {
-                    drawBackdrop(
-                        density = effectScope,
-                        coordinates = layoutCoordinates,
-                        layerBlock = layerBlock,
-                        downscaleFactor = 1,
-                    )
+        recordLayer(layer, size = bandSize) {
+            translate(-bandOffset.x.toFloat(), -bandOffset.y.toFloat()) {
+                onDrawBackdrop {
+                    with(backdrop) {
+                        drawBackdrop(
+                            density = effectScope,
+                            coordinates = layoutCoordinates,
+                            layerBlock = layerBlock,
+                            downscaleFactor = 1,
+                        )
+                    }
                 }
             }
         }
         layer.renderEffect = sharpRampEffect
+        layer.topLeft = bandOffset
         drawLayer(layer)
     }
 
@@ -825,21 +837,44 @@ private class DrawBackdropNode(
 
         val sw = scope.size.width
         val sh = scope.size.height
-        if (sharpRampEffect == null || sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh) {
-            sharpRampEffect = createProgressiveSharpRampEffect(
+        if (sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh) {
+            val band = progressiveSharpBandBounds(
                 sw,
                 sh,
                 gradient.angle,
                 gradient.startFraction,
                 gradient.endFraction,
                 gradient.curve,
-                scope,
             )
+            if (band == null || band.width < 1f || band.height < 1f) {
+                sharpRampEffect = null
+                sharpBandOffset = IntOffset.Zero
+                sharpBandSize = IntSize.Zero
+            } else {
+                val left = floor(band.left).toInt()
+                val top = floor(band.top).toInt()
+                sharpBandOffset = IntOffset(left, top)
+                sharpBandSize = IntSize(
+                    (ceil(band.right).toInt() - left).coerceAtLeast(1),
+                    (ceil(band.bottom).toInt() - top).coerceAtLeast(1),
+                )
+                sharpRampEffect = createProgressiveSharpRampEffect(
+                    sw,
+                    sh,
+                    left.toFloat(),
+                    top.toFloat(),
+                    gradient.angle,
+                    gradient.startFraction,
+                    gradient.endFraction,
+                    gradient.curve,
+                    scope,
+                )
+            }
             sharpRampGradient = gradient
             sharpRampW = sw
             sharpRampH = sh
         }
-        sharpOverlayActive = true
+        sharpOverlayActive = sharpRampEffect != null
     }
 
     /**
@@ -985,6 +1020,8 @@ private class DrawBackdropNode(
         sharpRampGradient = null
         sharpRampW = Float.NaN
         sharpRampH = Float.NaN
+        sharpBandOffset = IntOffset.Zero
+        sharpBandSize = IntSize.Zero
     }
 
     fun releaseGraphicsLayers() {

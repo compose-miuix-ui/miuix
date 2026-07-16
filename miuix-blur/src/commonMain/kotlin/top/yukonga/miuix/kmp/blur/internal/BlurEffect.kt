@@ -3,13 +3,16 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.exp
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -269,10 +272,14 @@ internal fun createProgressiveStackEffect(
  * (via [PROGRESSIVE_LEVEL_MASK_SHADER] with `in_level = −2`, `in_slope = −3`): applied to the
  * full-resolution sharp layer drawn over the upscaled level stack, it reproduces the composite's
  * final `mix(blur2, clear, …)` segment with a genuinely sharp end. Band in unpadded component px.
+ * [originX]/[originY] — the sharp layer's top-left in component space (it records only the band's
+ * bbox, see [progressiveSharpBandBounds]) — is folded into the band so layer-local coords line up.
  */
 internal fun createProgressiveSharpRampEffect(
     compW: Float,
     compH: Float,
+    originX: Float,
+    originY: Float,
     angleDeg: Float,
     startFraction: Float,
     endFraction: Float,
@@ -288,15 +295,81 @@ internal fun createProgressiveSharpRampEffect(
     val projFull = projMin + startFraction * span
     var projZero = projMin + endFraction * span
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+    val originProj = originX * ax + originY * ay
 
     val shader = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
         setFloatUniform("in_gradAxis", ax, ay)
-        setFloatUniform("in_gradBand", projFull, projZero)
+        setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
         setFloatUniform("in_curve", curve.coerceIn(0.05f, 20f))
         setFloatUniform("in_level", -2f)
         setFloatUniform("in_slope", -3f)
     }
     return runtimeShaderEffect(shader, "child")
+}
+
+/**
+ * Component-space bounding box of the region where [createProgressiveSharpRampEffect]'s mask is
+ * non-zero (`pow(smoothstep(raw), curve) > 2/3`, inverted analytically to a threshold line on the
+ * gradient projection, clipped to the component rect with a 1px rounding margin). The sharp
+ * overlay records and draws only this sub-rect instead of the whole component. Null = the band
+ * lies entirely outside the component and the overlay can be skipped outright.
+ */
+internal fun progressiveSharpBandBounds(
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+): Rect? {
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFull = projMin + startFraction * span
+    var projZero = projMin + endFraction * span
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // raw′ > 2/3 ⟺ smoothstep(raw) > (2/3)^(1/curve) ⟺ raw > rawThr, via the analytic
+    // smoothstep inverse t = 0.5 − sin(asin(1 − 2y) / 3).
+    val ssThr = (2.0 / 3.0).pow(1.0 / curve.coerceIn(0.05f, 20f))
+    val rawThr = (0.5 - sin(asin(1.0 - 2.0 * ssThr) / 3.0)).toFloat()
+    val pThr = projFull + rawThr * (projZero - projFull)
+    val sign = if (projZero >= projFull) 1f else -1f
+
+    var minX = Float.POSITIVE_INFINITY
+    var minY = Float.POSITIVE_INFINITY
+    var maxX = Float.NEGATIVE_INFINITY
+    var maxY = Float.NEGATIVE_INFINITY
+    fun include(x: Float, y: Float) {
+        if (x < minX) minX = x
+        if (y < minY) minY = y
+        if (x > maxX) maxX = x
+        if (y > maxY) maxY = y
+    }
+
+    val xs = floatArrayOf(0f, compW, compW, 0f)
+    val ys = floatArrayOf(0f, 0f, compH, compH)
+    for (i in 0..3) {
+        val j = (i + 1) and 3
+        val di = (xs[i] * ax + ys[i] * ay - pThr) * sign
+        val dj = (xs[j] * ax + ys[j] * ay - pThr) * sign
+        if (di >= 0f) include(xs[i], ys[i])
+        if ((di < 0f) != (dj < 0f)) {
+            val t = di / (di - dj)
+            include(xs[i] + (xs[j] - xs[i]) * t, ys[i] + (ys[j] - ys[i]) * t)
+        }
+    }
+    if (minX > maxX || minY > maxY) return null
+
+    return Rect(
+        (minX - 1f).coerceAtLeast(0f),
+        (minY - 1f).coerceAtLeast(0f),
+        (maxX + 1f).coerceAtMost(compW),
+        (maxY + 1f).coerceAtMost(compH),
+    )
 }
 
 /**
