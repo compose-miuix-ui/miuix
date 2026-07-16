@@ -66,6 +66,7 @@ SearchBar(
 | label             | String                    | 搜索框为空时显示的提示文本 | ""       | 否    |
 | enabled           | Boolean                   | 是否启用搜索框       | true     | 否    |
 | textStyle         | TextStyle                 | 搜索框中文本的样式     | null     | 否    |
+| color             | Color                     | 输入框胶囊的背景色，自绘背景（如背景模糊）时可传 Color.Transparent | surfaceContainerHigh | 否    |
 | leadingIcon       | @Composable (() -> Unit)? | 前置图标          | 默认放大镜    | 否    |
 | trailingIcon      | @Composable (() -> Unit)? | 后置图标          | 默认清除按钮   | 否    |
 | interactionSource | MutableInteractionSource? | 交互源           | null     | 否    |
