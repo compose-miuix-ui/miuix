@@ -276,7 +276,7 @@ val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f
 val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
-`colors` 与 `noiseCoefficient` 使用与 [`textureBlur`](#颜色配置) 相同的管线，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。
+`colors` 与 `noiseCoefficient` 的用法与 [`textureBlur`](#颜色配置) 一致，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。
 
 ::: warning 性能
 多级模糊层已在降采样分辨率上求值，但像素级锐利的清晰端仍需每帧额外一个全分辨率覆盖 pass——GPU 带宽开销高于同面积的 `textureBlur`。渐进模糊适合用在栏、边缘过渡带上，不建议覆盖大面积区域。
@@ -393,7 +393,7 @@ Box(
 | `padding` | Float | 模糊溢出的额外内边距 |
 | `renderEffect` | RenderEffect? | 累积的效果链 |
 | `downscaleFactor` | Int | 降采样系数（1、2、4、8、16） |
-| `noiseCoefficient` | Float | 全分辨率噪声抖动系数 |
+| `noiseCoefficient` | Float | 噪声抖动系数 |
 
 ## 属性
 

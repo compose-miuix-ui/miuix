@@ -281,7 +281,7 @@ val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f
 val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
-`colors` and `noiseCoefficient` use the same pipeline as [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
+`colors` and `noiseCoefficient` work the same way as in [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
 
 ::: warning Performance
 On top of the downscaled multi-level blur, the pixel-sharp clear end adds a full-resolution overlay pass per frame — more GPU bandwidth than `textureBlur` over the same area. Prefer progressive blur for bars and edge bands rather than large fills.
@@ -398,7 +398,7 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | `padding` | Float | Extra padding for blur overflow |
 | `renderEffect` | RenderEffect? | Accumulated effect chain |
 | `downscaleFactor` | Int | Downsampling factor (1, 2, 4, 8, 16) |
-| `noiseCoefficient` | Float | Noise dithering coefficient for full-resolution application |
+| `noiseCoefficient` | Float | Noise dithering coefficient |
 
 ## Properties
 
