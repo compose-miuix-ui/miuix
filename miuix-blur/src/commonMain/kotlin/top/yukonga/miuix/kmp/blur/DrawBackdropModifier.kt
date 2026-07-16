@@ -49,6 +49,7 @@ import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
+import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpOverlayEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
@@ -593,15 +594,36 @@ private class DrawBackdropNode(
     private var cachedStackGradient: ProgressiveBlur? = null
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
+    private var cachedStackDither = Float.NaN
+
+    // Pre-quantization dither pass chained after the stack (cached on its coefficient): the
+    // stack's ramps (post tint fade, level cross-fades) are smooth low-contrast gradients that
+    // band when first written to the 8-bit layer — the full-resolution noise pass runs after
+    // that write and can only mask the staircase. Dithering before the write breaks it; ~1 LSB
+    // needs 2× the (default 0.0045 ≈ ±0.6 LSB) coefficient. Grain lands at downscale-texel size
+    // but at this amplitude stays invisible.
+    private var stackDitherEffect: RenderEffect? = null
+    private var stackDitherCoeff = Float.NaN
+
+    private fun obtainStackDitherEffect(coeff: Float): RenderEffect {
+        val cached = stackDitherEffect
+        if (cached != null && stackDitherCoeff == coeff) return cached
+        val shader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
+        shader.setFloatUniform("noise_coeff", coeff)
+        return runtimeShaderEffect(shader, "child").also {
+            stackDitherEffect = it
+            stackDitherCoeff = coeff
+        }
+    }
 
     // Sharp overlay effect (variable loop blur + ramp mask) + band bbox (the only region paying
     // full-resolution cost), cached on gradient + size + radii/exp (the loop blur's handoff radius
     // tracks blur2). A null effect with matching cache keys means the band lies outside the
     // component and the overlay is skipped entirely.
-    private var sharpRampEffect: RenderEffect? = null
-    private var sharpRampGradient: ProgressiveBlur? = null
-    private var sharpRampW = Float.NaN
-    private var sharpRampH = Float.NaN
+    private var sharpOverlayEffect: RenderEffect? = null
+    private var sharpOverlayGradient: ProgressiveBlur? = null
+    private var sharpOverlayW = Float.NaN
+    private var sharpOverlayH = Float.NaN
     private var sharpRadiusX = Float.NaN
     private var sharpRadiusY = Float.NaN
     private var sharpExp = -1
@@ -652,7 +674,7 @@ private class DrawBackdropNode(
                 }
             }
         }
-        layer.renderEffect = sharpRampEffect
+        layer.renderEffect = sharpOverlayEffect
         layer.topLeft = bandOffset
         drawLayer(layer)
     }
@@ -792,6 +814,9 @@ private class DrawBackdropNode(
         val paddedH = scope.cachedProgSizeH
         val pre = scope.progressivePreEffect
         val post = scope.renderEffect
+        // Pre-quantization dither only helps on a downscaled stack (exp > 0); at full resolution
+        // chainFullResNoiseIfNeeded already dithers the single write.
+        val ditherCoeff = if (scope.cachedProgExp > 0 && scope.noiseCoefficient > 0f) scope.noiseCoefficient * 2f else 0f
         val stack = if (cachedStackEffect != null &&
             cachedStackRadiusX == rX &&
             cachedStackRadiusY == rY &&
@@ -799,7 +824,8 @@ private class DrawBackdropNode(
             cachedStackH == paddedH &&
             cachedStackGradient == gradient &&
             cachedStackPre === pre &&
-            cachedStackPost === post
+            cachedStackPost === post &&
+            cachedStackDither == ditherCoeff
         ) {
             cachedStackEffect
         } else {
@@ -817,7 +843,9 @@ private class DrawBackdropNode(
                 pre,
                 post,
                 scope,
-            )?.also {
+            )?.let { built ->
+                if (ditherCoeff > 0f) built.chain(obtainStackDitherEffect(ditherCoeff)) else built
+            }?.also {
                 cachedStackEffect = it
                 cachedStackRadiusX = rX
                 cachedStackRadiusY = rY
@@ -826,6 +854,7 @@ private class DrawBackdropNode(
                 cachedStackGradient = gradient
                 cachedStackPre = pre
                 cachedStackPost = post
+                cachedStackDither = ditherCoeff
             }
         }
         compositeAttempted = true
@@ -844,7 +873,7 @@ private class DrawBackdropNode(
         val sw = scope.size.width
         val sh = scope.size.height
         val exp = scope.cachedProgExp
-        if (sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh ||
+        if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
             sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
         ) {
             // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
@@ -860,7 +889,7 @@ private class DrawBackdropNode(
                 margin = loopReach,
             )
             if (band == null || band.width < 1f || band.height < 1f) {
-                sharpRampEffect = null
+                sharpOverlayEffect = null
                 sharpBandOffset = IntOffset.Zero
                 sharpBandSize = IntSize.Zero
             } else {
@@ -871,7 +900,7 @@ private class DrawBackdropNode(
                     (ceil(band.right).toInt() - left).coerceAtLeast(1),
                     (ceil(band.bottom).toInt() - top).coerceAtLeast(1),
                 )
-                sharpRampEffect = createProgressiveSharpOverlayEffect(
+                sharpOverlayEffect = createProgressiveSharpOverlayEffect(
                     rX,
                     rY,
                     exp,
@@ -888,14 +917,14 @@ private class DrawBackdropNode(
                     scope,
                 )
             }
-            sharpRampGradient = gradient
-            sharpRampW = sw
-            sharpRampH = sh
+            sharpOverlayGradient = gradient
+            sharpOverlayW = sw
+            sharpOverlayH = sh
             sharpRadiusX = rX
             sharpRadiusY = rY
             sharpExp = exp
         }
-        sharpOverlayActive = sharpRampEffect != null
+        sharpOverlayActive = sharpOverlayEffect != null
     }
 
     /**
@@ -1037,10 +1066,13 @@ private class DrawBackdropNode(
         cachedStackGradient = null
         cachedStackPre = null
         cachedStackPost = null
-        sharpRampEffect = null
-        sharpRampGradient = null
-        sharpRampW = Float.NaN
-        sharpRampH = Float.NaN
+        cachedStackDither = Float.NaN
+        stackDitherEffect = null
+        stackDitherCoeff = Float.NaN
+        sharpOverlayEffect = null
+        sharpOverlayGradient = null
+        sharpOverlayW = Float.NaN
+        sharpOverlayH = Float.NaN
         sharpRadiusX = Float.NaN
         sharpRadiusY = Float.NaN
         sharpExp = -1

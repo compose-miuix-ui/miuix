@@ -175,7 +175,8 @@ internal fun createProgressiveBlurEffect(
     val clampedCurve = curve.coerceIn(0.05f, 20f)
 
     if (radiusX > 0f && maxRadiusX >= 0.5f) {
-        val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d$downScale", PROGRESSIVE_BLUR_SHADER).apply {
+        val tap = progressiveLoopTapBound(maxRadiusX)
+        val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 1f, 0f)
             setFloatUniform("in_maxRadius", maxRadiusX)
@@ -188,7 +189,8 @@ internal fun createProgressiveBlurEffect(
     }
 
     if (radiusY > 0f && maxRadiusY >= 0.5f) {
-        val vShader = scope.obtainRuntimeShader("LMPGaussLoop_V_d$downScale", PROGRESSIVE_BLUR_SHADER).apply {
+        val tap = progressiveLoopTapBound(maxRadiusY)
+        val vShader = scope.obtainRuntimeShader("LMPGaussLoop_V_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 0f, 1f)
             setFloatUniform("in_maxRadius", maxRadiusY)
@@ -289,8 +291,8 @@ private fun progressiveSharpRawThreshold(curve: Float): Float {
 
 /**
  * Full effect for the full-resolution sharp overlay: an optional variable-radius loop blur
- * (H then V) chained into the ramp's clear-end cross-fade mask (`clamp(3·raw − 2, 0, 1)` via
- * [PROGRESSIVE_LEVEL_MASK_SHADER] with `in_level = −2`, `in_slope = −3`).
+ * (H then V) with the ramp's clear-end cross-fade mask (`clamp(3·raw − 2, 0, 1)`) folded into
+ * the last pass ([PROGRESSIVE_LEVEL_MASK_SHADER] runs standalone only when no axis blurs).
  *
  * The loop blur makes the handoff read as one continuous blur instead of a double exposure:
  * alpha-fading pixel-sharp content over the stack's `blur2` would superimpose crisp edges on a
@@ -342,10 +344,16 @@ internal fun createProgressiveSharpOverlayEffect(
     val maxRadiusX = progressiveSharpLoopRadius(radiusX, exp)
     val maxRadiusY = progressiveSharpLoopRadius(radiusY, exp)
 
-    var effect: RenderEffect? = null
-    fun loopPass(key: String, maxRadius: Float, stepX: Float, stepY: Float) {
-        if (maxRadius < 0.5f) return
-        val shader = scope.obtainRuntimeShader(key, PROGRESSIVE_BLUR_SHADER).apply {
+    val hasH = maxRadiusX >= 0.5f
+    val hasV = maxRadiusY >= 0.5f
+
+    fun loopPass(axis: String, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean): RenderEffect {
+        val tap = progressiveLoopTapBound(maxRadius)
+        val variant = if (masked) "_m" else ""
+        val shader = scope.obtainRuntimeShader(
+            "ProgSharpLoop_${axis}_t$tap$variant",
+            progressiveBlurShaderForTap(tap, masked),
+        ).apply {
             setFloatUniform("in_maxCoord", bandW - 0.5f, bandH - 0.5f)
             setFloatUniform("in_step", stepX, stepY)
             setFloatUniform("in_maxRadius", maxRadius)
@@ -353,24 +361,39 @@ internal fun createProgressiveSharpOverlayEffect(
             setFloatUniform("in_gradBand", loopFull, loopZero)
             setFloatUniform("in_curve", 1f)
             setFloatUniform("in_noise", 0f)
+            if (masked) {
+                setFloatUniform("in_maskBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_maskCurve", clampedCurve)
+            }
         }
-        effect = effect.chain(runtimeShaderEffect(shader, "child"))
+        return runtimeShaderEffect(shader, "child")
     }
-    loopPass("ProgSharpLoop_H", maxRadiusX, 1f, 0f)
-    loopPass("ProgSharpLoop_V", maxRadiusY, 0f, 1f)
 
-    val mask = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
-        setFloatUniform("in_gradAxis", ax, ay)
-        setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
-        setFloatUniform("in_curve", clampedCurve)
-        setFloatUniform("in_level", -2f)
-        setFloatUniform("in_slope", -3f)
+    // The ramp mask is folded into the last loop pass (one fewer full-resolution band pass);
+    // only the no-blur case runs it standalone.
+    return when {
+        hasH && hasV -> loopPass("H", maxRadiusX, 1f, 0f, masked = false)
+            .chain(loopPass("V", maxRadiusY, 0f, 1f, masked = true))
+
+        hasH -> loopPass("H", maxRadiusX, 1f, 0f, masked = true)
+
+        hasV -> loopPass("V", maxRadiusY, 0f, 1f, masked = true)
+
+        else -> {
+            val mask = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
+                setFloatUniform("in_gradAxis", ax, ay)
+                setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_curve", clampedCurve)
+                setFloatUniform("in_level", -2f)
+                setFloatUniform("in_slope", -3f)
+            }
+            runtimeShaderEffect(mask, "child")
+        }
     }
-    return effect.chain(runtimeShaderEffect(mask, "child"))
 }
 
 /**
- * Component-space bounding box of the region where [createProgressiveSharpRampEffect]'s mask is
+ * Component-space bounding box of the region where [createProgressiveSharpOverlayEffect]'s mask is
  * non-zero (`pow(smoothstep(raw), curve) > 2/3`, inverted analytically to a threshold line on the
  * gradient projection, clipped to the component rect with a [margin] against rounding and the
  * overlay loop blur's tap reach). The sharp overlay records and draws only this sub-rect instead

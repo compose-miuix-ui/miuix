@@ -48,7 +48,7 @@ private class ProgressiveMaskCache {
     /** Continuous `1 − raw` ramp (in_level = in_slope = 1) masking the post-effect branch. */
     lateinit var ramp: android.graphics.RenderEffect
 
-    /** Uniform-free unpremul pass chained after each level blur; built once per scope. */
+    /** Uniform-free unpremul pass chained after the unmasked base blur; built once per scope. */
     var unpremul: android.graphics.RenderEffect? = null
 }
 
@@ -99,24 +99,20 @@ internal actual fun progressiveStackEffect(
         masks.curve = curve
     }
     val pre = preEffect?.asAndroidRenderEffect()
-    val unpremul = masks.unpremul ?: android.graphics.RenderEffect.createRuntimeShaderEffect(
-        scope.obtainRuntimeShader("ProgUnpremul", UNPREMUL_SHADER).asAndroidRuntimeShader(),
-        "child",
-    ).also { masks.unpremul = it }
 
-    // pre → blur → unpremul for one level; null = the level is the (pre-chained) source itself.
-    // The unpremul keeps a level opaque where its native blur mixed in the padding ring's
-    // transparency, so the band masks scale alpha from 1 and no sharp content bleeds through.
+    // pre → blur for one level; null = the level is the (pre-chained) source itself. A blurred
+    // level's alpha must be renormalized to opaque before it composites (its native blur mixes in
+    // the padding ring's transparency, and sharp content bleeds through otherwise): the masked
+    // levels get that inline from the band mask, the unmasked base from a chained unpremul pass.
     fun blurred(sigmaX: Float, sigmaY: Float): android.graphics.RenderEffect? {
         val radiusX = sigmaToBlurRadius(sigmaX)
         val radiusY = sigmaToBlurRadius(sigmaY)
         if (radiusX <= 0f && radiusY <= 0f) return pre
-        val blur = if (pre == null) {
+        return if (pre == null) {
             android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, Shader.TileMode.CLAMP)
         } else {
             android.graphics.RenderEffect.createBlurEffect(radiusX, radiusY, pre, Shader.TileMode.CLAMP)
         }
-        return android.graphics.RenderEffect.createChainEffect(unpremul, blur)
     }
 
     fun maskedLevel(sigmaX: Float, sigmaY: Float, maskEffect: android.graphics.RenderEffect): android.graphics.RenderEffect {
@@ -124,7 +120,20 @@ internal actual fun progressiveStackEffect(
         return if (node == null) maskEffect else android.graphics.RenderEffect.createChainEffect(maskEffect, node)
     }
 
-    var stack = blurred(sigma2X, sigma2Y) ?: android.graphics.RenderEffect.createOffsetEffect(0f, 0f)
+    val base = blurred(sigma2X, sigma2Y)
+    var stack = when {
+        base == null -> android.graphics.RenderEffect.createOffsetEffect(0f, 0f)
+
+        base === pre -> base
+
+        else -> {
+            val unpremul = masks.unpremul ?: android.graphics.RenderEffect.createRuntimeShaderEffect(
+                scope.obtainRuntimeShader("ProgUnpremul", UNPREMUL_SHADER).asAndroidRuntimeShader(),
+                "child",
+            ).also { masks.unpremul = it }
+            android.graphics.RenderEffect.createChainEffect(unpremul, base)
+        }
+    }
     stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma1X, sigma1Y, masks.level2), BlendMode.SRC_OVER)
     stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma0X, sigma0Y, masks.level1), BlendMode.SRC_OVER)
     if (postEffect != null) {

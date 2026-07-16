@@ -26,7 +26,7 @@ internal expect fun runtimeShaderEffect(
  * Builds the downscaled progressive **level stack** [RenderEffect]: the lightest Gaussian level as
  * an unmasked base with the two stronger levels band-masked and SrcOver-stacked on top ≡ the first
  * two mix segments of [PROGRESSIVE_COMPOSITE_SHADER]; the ramp's final blend to sharp is drawn
- * separately as a full-resolution overlay (see `createProgressiveSharpRampEffect`) so only that
+ * separately as a full-resolution overlay (see `createProgressiveSharpOverlayEffect`) so only that
  * band pays full-res cost. Skiko mixes the levels in one multi-child runtime shader; Android
  * builds the equivalent blend-mode DAG.
  *

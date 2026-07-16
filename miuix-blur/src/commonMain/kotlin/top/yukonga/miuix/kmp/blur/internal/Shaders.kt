@@ -41,15 +41,40 @@ internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 
 /**
  * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
- * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). The loop bound
- * [maxTap] must be a compile-time constant (AGSL). The outermost taps feather in over their last
- * pixel of reach (`clamp(radius − |i| + 1, 0, 1)`), keeping the kernel — and its normalization —
- * continuous in radius: a hard `|i| > radius` cutoff drops taps with weight up to `e⁻² ≈ 0.135`
- * as the per-pixel radius crosses integer offsets, which reads as equal-radius stripes along the
- * gradient. The feather also makes the kernel collapse smoothly to identity at radius 0, so the
- * early-exit is a pure fast path for the clear plateau, not a visible switch.
+ * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`), sampling the
+ * symmetric tap pairs together (center hoisted out of the loop). The loop bound [maxTap] must be
+ * a compile-time constant (AGSL) — pick it via [progressiveLoopTapBound] so a small max radius
+ * doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP] unrolled iterations per fragment. The outermost taps
+ * feather in over their last pixel of reach (`clamp(radius − i + 1, 0, 1)`), keeping the kernel —
+ * and its normalization — continuous in radius: a hard `i > radius` cutoff drops taps with weight
+ * up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer offsets, which reads as equal-radius
+ * stripes along the gradient. The feather also makes the kernel collapse smoothly to identity at
+ * radius 0, so the early-exit is a pure fast path for the clear plateau, not a visible switch.
+ *
+ * With [masked], the sharp overlay's clear-end cross-fade weight (`smoothstep(clamp(3·raw′ − 2))`
+ * over its own `in_maskBand`/`in_maskCurve`) is folded into the output, saving the separate
+ * [PROGRESSIVE_LEVEL_MASK_SHADER] pass — one full-resolution band pass per frame.
  */
-internal fun buildProgressiveBlurShader(maxTap: Int): String = """
+internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
+    val maskUniforms = if (masked) {
+        """
+    uniform float2 in_maskBand;
+    uniform float in_maskCurve;
+"""
+    } else {
+        ""
+    }
+    val maskWeight = if (masked) {
+        """
+        float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
+        mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
+        float mw = clamp(mraw * 3.0 - 2.0, 0.0, 1.0);
+        mw = mw * mw * (3.0 - 2.0 * mw);
+"""
+    } else {
+        "        float mw = 1.0;"
+    }
+    return """
     uniform shader child;
     uniform float2 in_maxCoord;
     uniform float2 in_step;
@@ -58,46 +83,67 @@ internal fun buildProgressiveBlurShader(maxTap: Int): String = """
     uniform float2 in_gradBand;
     uniform float in_curve;
     uniform float in_noise;
-
+$maskUniforms
     float progRand(float2 co) {
         return fract(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
     }
 
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
+$maskWeight
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
         float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         float radius = in_maxRadius * intensity;
         if (radius <= 0.0) {
             half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
             if (s.a > 0.0039) {
-                return half4(s.rgb / s.a, 1.0);
+                return half4(s.rgb / s.a, 1.0) * half(mw);
             }
-            return s;
+            return s * half(mw);
         }
         float sigma = radius * 0.5 + 0.5;
-        float jitter = (progRand(xy) - 0.5) * in_noise;
-        half4 color = half4(0.0);
-        float total = 0.0;
-        for (int i = -$maxTap; i <= $maxTap; i++) {
+        float2 jitter = ((progRand(xy) - 0.5) * in_noise) * in_step;
+        half4 color = child.eval(clamp(xy + jitter, float2(0.5), in_maxCoord));
+        float total = 1.0;
+        for (int i = 1; i <= $maxTap; i++) {
             float fi = float(i);
-            float reach = clamp(radius - abs(fi) + 1.0, 0.0, 1.0);
+            float reach = clamp(radius - fi + 1.0, 0.0, 1.0);
             if (reach <= 0.0) continue;
             float w = exp(-(fi * fi) / (2.0 * sigma * sigma)) * reach;
-            float2 c = clamp(xy + (fi + jitter) * in_step, float2(0.5), in_maxCoord);
-            color += child.eval(c) * half(w);
-            total += w;
+            float2 o = fi * in_step;
+            color += (child.eval(clamp(xy + o + jitter, float2(0.5), in_maxCoord)) +
+                child.eval(clamp(xy - o + jitter, float2(0.5), in_maxCoord))) * half(w);
+            total += 2.0 * w;
         }
         color = color / half(max(total, 0.0001));
         if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0);
+            return half4(color.rgb / color.a, 1.0) * half(mw);
         }
-        return color;
+        return color * half(mw);
     }
 """
+}
 
-/** Pre-built progressive Blur shader (single loop-based variant). */
-internal val PROGRESSIVE_BLUR_SHADER: String = buildProgressiveBlurShader(PROGRESSIVE_BLUR_MAX_TAP)
+/** Lazily built progressive Blur shader sources, indexed by tap bound; second array = masked. */
+private val PROGRESSIVE_BLUR_SHADER_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+private val PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+
+/** The progressive Blur shader source with loop bound [tapBound] (from [progressiveLoopTapBound]). */
+internal fun progressiveBlurShaderForTap(tapBound: Int, masked: Boolean = false): String {
+    val cache = if (masked) PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP else PROGRESSIVE_BLUR_SHADER_BY_TAP
+    return cache[tapBound] ?: buildProgressiveBlurShader(tapBound, masked).also { cache[tapBound] = it }
+}
+
+/**
+ * Compile-time loop bound for [maxRadius]: the next multiple of 4 covering it, capped at
+ * [PROGRESSIVE_BLUR_MAX_TAP]. Quantizing keeps the shader-variant count small (and an animating
+ * radius from recompiling per frame) while a small radius skips most of the unrolled iterations
+ * the full bound would cost per fragment.
+ */
+internal fun progressiveLoopTapBound(maxRadius: Float): Int {
+    val needed = kotlin.math.ceil(maxRadius).toInt()
+    return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
+}
 
 /** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
 internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
@@ -158,9 +204,9 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
 
 /**
  * Renormalizes a premultiplied blur result to opaque — [buildBlurShader]'s unpremul terminator as
- * a standalone pass. Chained after each native level blur in the Android progressive stack, where
- * the blend-mode DAG needs every level opaque *before* its band mask scales alpha (the Skiko
- * composite applies the same terminator inline instead).
+ * a standalone pass. Chained after the Android progressive stack's unmasked base blur, the one
+ * level whose alpha nothing else renormalizes (masked levels get it inline from
+ * [PROGRESSIVE_LEVEL_MASK_SHADER]; the Skiko composite applies it as its own terminator).
  */
 internal const val UNPREMUL_SHADER = """
     uniform shader child;
@@ -182,7 +228,10 @@ internal const val UNPREMUL_SHADER = """
  * rising `clamp(3·raw − 2, 0, 1)` ramp masking the full-resolution sharp overlay. The clamped
  * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
  * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
- * platforms zero the walk's derivative at the segment stops alike.
+ * platforms zero the walk's derivative at the segment stops alike. The child is renormalized to
+ * opaque before weighting — this is the Android masked levels' unpremul terminator (their native
+ * blurs mix in the padding ring's transparency), folded in here to save a pass; a no-op for the
+ * already-opaque children of the other mask uses.
  */
 internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;
@@ -198,7 +247,11 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
         raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
         w = w * w * (3.0 - 2.0 * w);
-        return child.eval(xy) * half(w);
+        half4 c = child.eval(xy);
+        if (c.a > 0.0039) {
+            c = half4(c.rgb / c.a, 1.0);
+        }
+        return c * half(w);
     }
 """
 
