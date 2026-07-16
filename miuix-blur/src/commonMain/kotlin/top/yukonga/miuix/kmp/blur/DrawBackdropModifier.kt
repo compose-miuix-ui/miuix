@@ -605,6 +605,11 @@ private class DrawBackdropNode(
     private var stackDitherEffect: RenderEffect? = null
     private var stackDitherCoeff = Float.NaN
 
+    // True while the stack chain carries the pre-quantization dither: the noise already rides the
+    // upscale, so the full-resolution noise layer round-trip (record + noise pass) is skipped —
+    // quantization of the final write is dithered by the noise the signal carries.
+    private var stackDitherChained = false
+
     private fun obtainStackDitherEffect(coeff: Float): RenderEffect {
         val cached = stackDitherEffect
         if (cached != null && stackDitherCoeff == coeff) return cached
@@ -766,6 +771,7 @@ private class DrawBackdropNode(
             finalizeProgressiveComposite()
         } else {
             sharpOverlayActive = false
+            stackDitherChained = false
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
         primary.padding = effectScope.padding
@@ -808,6 +814,7 @@ private class DrawBackdropNode(
         if (gradient == null || rX.isNaN() || rY.isNaN()) {
             // No progressiveBlur call in the effects block: draw uniformly, gradient ignored.
             sharpOverlayActive = false
+            stackDitherChained = false
             return
         }
         val paddedW = scope.cachedProgSizeW
@@ -866,9 +873,11 @@ private class DrawBackdropNode(
             scope.apply(effects)
             chainFullResNoiseIfNeeded()
             sharpOverlayActive = false
+            stackDitherChained = false
             return
         }
         scope.renderEffect = stack
+        stackDitherChained = ditherCoeff > 0f
 
         val sw = scope.size.width
         val sh = scope.size.height
@@ -1015,7 +1024,7 @@ private class DrawBackdropNode(
         fullWidth: Int,
         fullHeight: Int,
     ) {
-        val noiseCoeff = effectScope.noiseCoefficient
+        val noiseCoeff = if (stackDitherChained) 0f else effectScope.noiseCoefficient
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
             val noiseL = target.noiseLayer
@@ -1069,6 +1078,7 @@ private class DrawBackdropNode(
         cachedStackDither = Float.NaN
         stackDitherEffect = null
         stackDitherCoeff = Float.NaN
+        stackDitherChained = false
         sharpOverlayEffect = null
         sharpOverlayGradient = null
         sharpOverlayW = Float.NaN

@@ -41,21 +41,28 @@ internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 
 /**
  * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
- * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`), sampling the
- * symmetric tap pairs together (center hoisted out of the loop). The loop bound [maxTap] must be
- * a compile-time constant (AGSL) — pick it via [progressiveLoopTapBound] so a small max radius
- * doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP] unrolled iterations per fragment. The outermost taps
- * feather in over their last pixel of reach (`clamp(radius − i + 1, 0, 1)`), keeping the kernel —
- * and its normalization — continuous in radius: a hard `i > radius` cutoff drops taps with weight
- * up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer offsets, which reads as equal-radius
- * stripes along the gradient. The feather also makes the kernel collapse smoothly to identity at
- * radius 0, so the early-exit is a pure fast path for the clear plateau, not a visible switch.
+ * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps
+ * are merged into one bilinear fetch at their weight-averaged fractional offset (the per-pixel-σ
+ * analogue of [buildBlurShader]'s static pair merge; child sampling is bilinear on both
+ * platforms), sampled as symmetric ± pairs with the center hoisted out — halving the texture
+ * fetches. The loop bound [maxTap] must be an EVEN compile-time constant (AGSL) — pick it via
+ * [progressiveLoopTapBound] so a small max radius doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP]
+ * unrolled iterations per fragment.
+ *
+ * The outermost tap feathers in over its last pixel of reach (`clamp(radius − i + 1, 0, 1)`),
+ * keeping the kernel — its normalization AND the merged offsets — continuous in radius: a hard
+ * cutoff drops taps with weight up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer
+ * offsets, which reads as equal-radius stripes along the gradient. The feather also makes the
+ * kernel collapse smoothly to identity at radius 0, so the early-exit is a pure fast path for
+ * the clear plateau, not a visible switch.
  *
  * With [masked], the sharp overlay's clear-end cross-fade weight (`smoothstep(clamp(3·raw′ − 2))`
  * over its own `in_maskBand`/`in_maskCurve`) is folded into the output, saving the separate
- * [PROGRESSIVE_LEVEL_MASK_SHADER] pass — one full-resolution band pass per frame.
+ * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments (the band bbox's reach margin,
+ * where the radius is at its most expensive) skip the kernel outright.
  */
 internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
+    require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
     val maskUniforms = if (masked) {
         """
     uniform float2 in_maskBand;
@@ -70,6 +77,9 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
         mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
         float mw = clamp(mraw * 3.0 - 2.0, 0.0, 1.0);
         mw = mw * mw * (3.0 - 2.0 * mw);
+        if (mw <= 0.0) {
+            return half4(0.0);
+        }
 """
     } else {
         "        float mw = 1.0;"
@@ -101,19 +111,22 @@ $maskWeight
             }
             return s * half(mw);
         }
-        float sigma = radius * 0.5 + 0.5;
+        float inv2s2 = -1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
         float2 jitter = ((progRand(xy) - 0.5) * in_noise) * in_step;
         half4 color = child.eval(clamp(xy + jitter, float2(0.5), in_maxCoord));
         float total = 1.0;
-        for (int i = 1; i <= $maxTap; i++) {
-            float fi = float(i);
-            float reach = clamp(radius - fi + 1.0, 0.0, 1.0);
-            if (reach <= 0.0) continue;
-            float w = exp(-(fi * fi) / (2.0 * sigma * sigma)) * reach;
-            float2 o = fi * in_step;
+        for (int j = 0; j < ${maxTap / 2}; j++) {
+            float a = float(2 * j + 1);
+            float ra = clamp(radius - a + 1.0, 0.0, 1.0);
+            if (ra <= 0.0) continue;
+            float b = a + 1.0;
+            float wa = exp(a * a * inv2s2) * ra;
+            float wb = exp(b * b * inv2s2) * clamp(radius - b + 1.0, 0.0, 1.0);
+            float wsum = wa + wb;
+            float2 o = ((a * wa + b * wb) / wsum) * in_step;
             color += (child.eval(clamp(xy + o + jitter, float2(0.5), in_maxCoord)) +
-                child.eval(clamp(xy - o + jitter, float2(0.5), in_maxCoord))) * half(w);
-            total += 2.0 * w;
+                child.eval(clamp(xy - o + jitter, float2(0.5), in_maxCoord))) * half(wsum);
+            total += 2.0 * wsum;
         }
         color = color / half(max(total, 0.0001));
         if (color.a > 0.0039) {
