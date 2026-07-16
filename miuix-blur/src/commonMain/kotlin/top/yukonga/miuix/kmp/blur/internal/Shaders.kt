@@ -42,7 +42,12 @@ internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 /**
  * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
  * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). The loop bound
- * [maxTap] must be a compile-time constant (AGSL); `abs(i) > radius` skips the unused reach.
+ * [maxTap] must be a compile-time constant (AGSL). The outermost taps feather in over their last
+ * pixel of reach (`clamp(radius − |i| + 1, 0, 1)`), keeping the kernel — and its normalization —
+ * continuous in radius: a hard `|i| > radius` cutoff drops taps with weight up to `e⁻² ≈ 0.135`
+ * as the per-pixel radius crosses integer offsets, which reads as equal-radius stripes along the
+ * gradient. The feather also makes the kernel collapse smoothly to identity at radius 0, so the
+ * early-exit is a pure fast path for the clear plateau, not a visible switch.
  */
 internal fun buildProgressiveBlurShader(maxTap: Int): String = """
     uniform shader child;
@@ -63,7 +68,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int): String = """
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
         float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         float radius = in_maxRadius * intensity;
-        if (radius < 0.5) {
+        if (radius <= 0.0) {
             half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
             if (s.a > 0.0039) {
                 return half4(s.rgb / s.a, 1.0);
@@ -76,8 +81,9 @@ internal fun buildProgressiveBlurShader(maxTap: Int): String = """
         float total = 0.0;
         for (int i = -$maxTap; i <= $maxTap; i++) {
             float fi = float(i);
-            if (abs(fi) > radius) continue;
-            float w = exp(-(fi * fi) / (2.0 * sigma * sigma));
+            float reach = clamp(radius - abs(fi) + 1.0, 0.0, 1.0);
+            if (reach <= 0.0) continue;
+            float w = exp(-(fi * fi) / (2.0 * sigma * sigma)) * reach;
             float2 c = clamp(xy + (fi + jitter) * in_step, float2(0.5), in_maxCoord);
             color += child.eval(c) * half(w);
             total += w;
@@ -105,7 +111,11 @@ internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
  * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
  * lightest level (degenerating the last mix segment); the true sharp end is a separate
  * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]. Android builds the identical
- * image as a blend-mode DAG of the same masks.
+ * image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
+ * walk's derivative kinks at the segment stops otherwise read as Mach-band stripes, and zeroing
+ * the slope at the stops removes them without spatial noise (which would scale with the
+ * downscale's texel size). Must stay in lockstep with [PROGRESSIVE_LEVEL_MASK_SHADER]'s weight
+ * smoothstep — `s(1 − x) = 1 − s(x)` is what keeps the Android DAG identical to this mix chain.
  */
 internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader clearChild;
@@ -123,12 +133,44 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
         float pos = raw * 3.0;
+        half4 color;
         if (pos < 1.0) {
-            return mix(blur0.eval(xy), blur1.eval(xy), pos);
+            float f = pos * pos * (3.0 - 2.0 * pos);
+            color = mix(blur0.eval(xy), blur1.eval(xy), f);
         } else if (pos < 2.0) {
-            return mix(blur1.eval(xy), blur2.eval(xy), pos - 1.0);
+            float f = pos - 1.0;
+            f = f * f * (3.0 - 2.0 * f);
+            color = mix(blur1.eval(xy), blur2.eval(xy), f);
+        } else {
+            float f = pos - 2.0;
+            f = f * f * (3.0 - 2.0 * f);
+            color = mix(blur2.eval(xy), clearChild.eval(xy), f);
         }
-        return mix(blur2.eval(xy), clearChild.eval(xy), pos - 2.0);
+        // Unpremul terminator (same rationale as buildBlurShader): the native level blurs mix
+        // the padding ring's transparency into the edges; without renormalizing to opaque, the
+        // sharp content below bleeds through the semi-transparent rim.
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;
+    }
+"""
+
+/**
+ * Renormalizes a premultiplied blur result to opaque — [buildBlurShader]'s unpremul terminator as
+ * a standalone pass. Chained after each native level blur in the Android progressive stack, where
+ * the blend-mode DAG needs every level opaque *before* its band mask scales alpha (the Skiko
+ * composite applies the same terminator inline instead).
+ */
+internal const val UNPREMUL_SHADER = """
+    uniform shader child;
+
+    half4 main(float2 xy) {
+        half4 c = child.eval(xy);
+        if (c.a > 0.0039) {
+            return half4(c.rgb / c.a, 1.0);
+        }
+        return c;
     }
 """
 
@@ -137,7 +179,10 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
  * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
  * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
  * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
- * rising `clamp(3·raw − 2, 0, 1)` ramp masking the full-resolution sharp overlay.
+ * rising `clamp(3·raw − 2, 0, 1)` ramp masking the full-resolution sharp overlay. The clamped
+ * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
+ * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
+ * platforms zero the walk's derivative at the segment stops alike.
  */
 internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;
@@ -151,7 +196,9 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
         raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        return child.eval(xy) * half(clamp(in_level - raw * in_slope, 0.0, 1.0));
+        float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
+        w = w * w * (3.0 - 2.0 * w);
+        return child.eval(xy) * half(w);
     }
 """
 

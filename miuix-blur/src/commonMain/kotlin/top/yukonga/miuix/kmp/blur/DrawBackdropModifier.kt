@@ -49,9 +49,10 @@ import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
-import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpRampEffect
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpOverlayEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
+import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import kotlin.math.ceil
@@ -593,13 +594,17 @@ private class DrawBackdropNode(
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
 
-    // Sharp overlay ramp mask + band bbox (the only region paying full-resolution cost):
-    // radius-independent, cached on gradient + size. A null effect with matching cache keys means
-    // the band lies outside the component and the overlay is skipped entirely.
+    // Sharp overlay effect (variable loop blur + ramp mask) + band bbox (the only region paying
+    // full-resolution cost), cached on gradient + size + radii/exp (the loop blur's handoff radius
+    // tracks blur2). A null effect with matching cache keys means the band lies outside the
+    // component and the overlay is skipped entirely.
     private var sharpRampEffect: RenderEffect? = null
     private var sharpRampGradient: ProgressiveBlur? = null
     private var sharpRampW = Float.NaN
     private var sharpRampH = Float.NaN
+    private var sharpRadiusX = Float.NaN
+    private var sharpRadiusY = Float.NaN
+    private var sharpExp = -1
     private var sharpBandOffset = IntOffset.Zero
     private var sharpBandSize = IntSize.Zero
 
@@ -623,9 +628,10 @@ private class DrawBackdropNode(
 
     /**
      * Records the backdrop at full resolution into [sharpLayer] — only the band bbox where the
-     * ramp mask is non-zero — and draws it masked to the ramp's clear-end cross-fade over the
-     * upscaled level stack: the composite's `mix(blur2, clear, …)` segment with genuinely sharp
-     * native pixels.
+     * ramp mask is non-zero — and draws it over the upscaled level stack through the overlay
+     * effect: a variable loop blur ramping from blur2's strength to zero, masked to the ramp's
+     * clear-end cross-fade. The composite's `mix(blur2, clear, …)` segment as one continuous
+     * sharpening with a genuinely sharp native end.
      */
     private fun DrawScope.drawSharpOverlay() {
         val bandSize = sharpBandSize
@@ -837,7 +843,13 @@ private class DrawBackdropNode(
 
         val sw = scope.size.width
         val sh = scope.size.height
-        if (sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh) {
+        val exp = scope.cachedProgExp
+        if (sharpRampGradient != gradient || sharpRampW != sw || sharpRampH != sh ||
+            sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
+        ) {
+            // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
+            // on rows/columns the ramp mask zeroes out.
+            val loopReach = ceil(maxOf(progressiveSharpLoopRadius(rX, exp), progressiveSharpLoopRadius(rY, exp))) + 1f
             val band = progressiveSharpBandBounds(
                 sw,
                 sh,
@@ -845,6 +857,7 @@ private class DrawBackdropNode(
                 gradient.startFraction,
                 gradient.endFraction,
                 gradient.curve,
+                margin = loopReach,
             )
             if (band == null || band.width < 1f || band.height < 1f) {
                 sharpRampEffect = null
@@ -858,11 +871,16 @@ private class DrawBackdropNode(
                     (ceil(band.right).toInt() - left).coerceAtLeast(1),
                     (ceil(band.bottom).toInt() - top).coerceAtLeast(1),
                 )
-                sharpRampEffect = createProgressiveSharpRampEffect(
+                sharpRampEffect = createProgressiveSharpOverlayEffect(
+                    rX,
+                    rY,
+                    exp,
                     sw,
                     sh,
                     left.toFloat(),
                     top.toFloat(),
+                    sharpBandSize.width.toFloat(),
+                    sharpBandSize.height.toFloat(),
                     gradient.angle,
                     gradient.startFraction,
                     gradient.endFraction,
@@ -873,6 +891,9 @@ private class DrawBackdropNode(
             sharpRampGradient = gradient
             sharpRampW = sw
             sharpRampH = sh
+            sharpRadiusX = rX
+            sharpRadiusY = rY
+            sharpExp = exp
         }
         sharpOverlayActive = sharpRampEffect != null
     }
@@ -1020,6 +1041,9 @@ private class DrawBackdropNode(
         sharpRampGradient = null
         sharpRampW = Float.NaN
         sharpRampH = Float.NaN
+        sharpRadiusX = Float.NaN
+        sharpRadiusY = Float.NaN
+        sharpExp = -1
         sharpBandOffset = IntOffset.Zero
         sharpBandSize = IntSize.Zero
     }
