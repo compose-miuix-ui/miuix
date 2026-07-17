@@ -52,6 +52,7 @@ import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpOverlayEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
+import top.yukonga.miuix.kmp.blur.internal.progressiveLoopTapBound
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
@@ -93,7 +94,7 @@ private const val NOISE_GRAIN_THRESHOLD = 0.005f
  *   [BlendMode.DstIn] masks the blur by the content alpha (foreground blur).
  * @param progressiveGradient When non-null, renders the backdrop as a multi-level progressive
  *   composite: graduated native Gaussian levels cross-faded along this gradient on the downscaled
- *   layer, plus a full-resolution sharp overlay on the clear end — the blur strength ramps
+ *   layer, with a genuinely sharp full-resolution clear end — the blur strength ramps
  *   continuously from full to pixel-sharp. Requires a matching [progressiveBlur] in [effects] (as
  *   [Modifier.progressiveTextureBlur] wires) — it records the target radii the composite renders;
  *   without one the gradient is ignored and [effects] draws uniformly.
@@ -588,15 +589,17 @@ private class DrawBackdropNode(
     // Progressive (gradient) blur, split by resolution: the level stack renders through the
     // downscaled [primary] machinery, and [sharpLayer] overlays the full-resolution backdrop
     // through the overlay effect (variable loop blur + ramp mask) on the ramp's clear end — the
-    // only band that needs native pixels. The supported flags gate platforms whose
-    // progressiveStackEffect() returns null.
+    // only band that needs native pixels. At full resolution the stack completes the sharp end
+    // itself (nativeSharpEnd) and the overlay stays inactive. The supported flags gate platforms
+    // whose progressiveStackEffect() returns null.
     private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
     private var sharpOverlayActive = false
 
     // Downscaled level-stack effect, cached on its inputs; pre/post chains compared by identity
-    // (the scope's per-effect caches keep the references stable while their inputs hold).
+    // (the scope's per-effect caches keep the references stable while their inputs hold), the
+    // recorded post blend by value.
     private var cachedStackEffect: RenderEffect? = null
     private var cachedStackRadiusX = Float.NaN
     private var cachedStackRadiusY = Float.NaN
@@ -605,14 +608,15 @@ private class DrawBackdropNode(
     private var cachedStackGradient: ProgressiveBlur? = null
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
+    private var cachedStackPostBlend: BlurColors? = null
     private var cachedStackDither = Float.NaN
 
-    // Pre-quantization dither pass chained after the stack (cached on its coefficient): the
-    // stack's ramps (post tint fade, level cross-fades) are smooth low-contrast gradients that
-    // band when first written to the 8-bit layer — a noise pass after that write can only mask
-    // the staircase; dithering before it breaks it. Amplitude = min(2 × coefficient,
-    // [STACK_DITHER_MAX]): the default 0.0045 alone is ≈ ±0.6 LSB, short of the ~1 LSB the
-    // staircase needs. Grain lands at downscale-texel size but at this amplitude stays invisible.
+    // Dither/noise pass chained after the assembled stack, cached on its coefficient. exp > 0:
+    // pre-quantization dither at min(2 × coefficient, [STACK_DITHER_MAX]) — the stack's smooth
+    // ramps band when first written to the 8-bit layer, and a noise pass after that write can
+    // only mask the staircase (the default 0.0045 alone is ≈ ±0.6 LSB, short of the ~1 LSB the
+    // staircase needs; grain lands at downscale-texel size but stays invisible at this
+    // amplitude). exp == 0: the same pass carries the full coefficient, already per screen pixel.
     private var stackDitherEffect: RenderEffect? = null
     private var stackDitherCoeff = Float.NaN
 
@@ -670,8 +674,8 @@ private class DrawBackdropNode(
      * Records the backdrop at full resolution into [sharpLayer] — only the band bbox where the
      * ramp mask is non-zero — and draws it over the upscaled level stack through the overlay
      * effect: a variable loop blur ramping from blur2's strength to zero, masked to the ramp's
-     * clear-end cross-fade. The composite's `mix(blur2, clear, …)` segment as one continuous
-     * sharpening with a genuinely sharp native end.
+     * clear-end cross-fade. Renders the composite's `mix(blur2, clear, …)` segment as one
+     * continuous sharpening with a genuinely sharp native end.
      */
     private fun DrawScope.drawSharpOverlay() {
         val bandSize = sharpBandSize
@@ -779,10 +783,12 @@ private class DrawBackdropNode(
         // cross-fade bracket (computeDownScaleBlend) on the scope for us to read below.
         effectScope.forcedDownscaleExp = -1
         effectScope.apply(effects)
-        chainFullResNoiseIfNeeded()
         if (effectScope.progressiveCompositeActive) {
+            // Noise is finalize's duty here — chained after the assembled stack, not into the
+            // post chain (which the composite ramp-weights).
             finalizeProgressiveComposite()
         } else {
+            chainFullResNoiseIfNeeded()
             sharpOverlayActive = false
             stackDitherChained = false
         }
@@ -815,10 +821,11 @@ private class DrawBackdropNode(
 
     /**
      * Composite mode: progressiveBlur() recorded the level radii + downscale and split the
-     * effects chain; assemble the downscaled level-stack effect (pre → levels → ramp-masked post
-     * → pre-quantization dither) into [BackdropEffectScope.renderEffect] for [primary], and the
-     * full-res overlay effect (variable loop blur + ramp mask) with its band bbox for
-     * [sharpLayer]. Re-runs the effects uniformly when the platform can't express the stack.
+     * effects chain; assemble the downscaled level-stack effect (pre → levels → folded ramp
+     * blend or ramp-masked post branch → dither/noise) into [BackdropEffectScope.renderEffect]
+     * for [primary], and the full-res overlay effect (variable loop blur + ramp mask) with its
+     * band bbox for [sharpLayer]. Re-runs the effects uniformly when the platform can't express
+     * the stack.
      */
     private fun finalizeProgressiveComposite() {
         val scope = effectScope
@@ -827,6 +834,7 @@ private class DrawBackdropNode(
         val rY = scope.cachedProgRadiusY
         if (gradient == null || rX.isNaN() || rY.isNaN()) {
             // No progressiveBlur call in the effects block: draw uniformly, gradient ignored.
+            chainFullResNoiseIfNeeded()
             sharpOverlayActive = false
             stackDitherChained = false
             return
@@ -834,12 +842,23 @@ private class DrawBackdropNode(
         val paddedW = scope.cachedProgSizeW
         val paddedH = scope.cachedProgSizeH
         val pre = scope.progressivePreEffect
-        val post = scope.renderEffect
-        // Pre-quantization dither only helps on a downscaled stack (exp > 0); at full resolution
-        // chainFullResNoiseIfNeeded already dithers the single write. Capped at the anti-banding
-        // amplitude: the aesthetic remainder of the coefficient renders at full resolution.
+        var post = scope.renderEffect
+        var postBlend = scope.progressivePostBlend
+        if (postBlend != null && post != null) {
+            // Mixed post chain (effects chained after the recorded blend): restore the blend at
+            // the chain head and take the general branch form for the whole chain.
+            post = obtainBlendColorsEffect(scope, postBlend).chain(post)
+            postBlend = null
+        }
+        // exp > 0: pre-quantization dither capped at the anti-banding amplitude (the aesthetic
+        // remainder renders per screen pixel via the upscale noise pass); exp == 0: the layer is
+        // already full resolution, so this slot carries the full coefficient.
         val noiseCoeff = scope.noiseCoefficient
-        val ditherCoeff = if (scope.cachedProgExp > 0 && noiseCoeff > 0f) minOf(noiseCoeff * 2f, STACK_DITHER_MAX) else 0f
+        val ditherCoeff = when {
+            noiseCoeff <= 0f -> 0f
+            scope.cachedProgExp > 0 -> minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
+            else -> noiseCoeff
+        }
         val stack = if (cachedStackEffect != null &&
             cachedStackRadiusX == rX &&
             cachedStackRadiusY == rY &&
@@ -848,6 +867,7 @@ private class DrawBackdropNode(
             cachedStackGradient == gradient &&
             cachedStackPre === pre &&
             cachedStackPost === post &&
+            cachedStackPostBlend == postBlend &&
             cachedStackDither == ditherCoeff
         ) {
             cachedStackEffect
@@ -865,6 +885,7 @@ private class DrawBackdropNode(
                 gradient.curve,
                 pre,
                 post,
+                postBlend,
                 scope,
             )?.let { built ->
                 if (ditherCoeff > 0f) built.chain(obtainStackDitherEffect(ditherCoeff)) else built
@@ -877,6 +898,7 @@ private class DrawBackdropNode(
                 cachedStackGradient = gradient
                 cachedStackPre = pre
                 cachedStackPost = post
+                cachedStackPostBlend = postBlend
                 cachedStackDither = ditherCoeff
             }
         }
@@ -898,12 +920,20 @@ private class DrawBackdropNode(
         val sw = scope.size.width
         val sh = scope.size.height
         val exp = scope.cachedProgExp
+        if (exp == 0) {
+            // nativeSharpEnd already bound the clear end to the native source — no overlay needed.
+            sharpOverlayActive = false
+            return
+        }
         if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
             sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
         ) {
             // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
-            // on rows/columns the ramp mask zeroes out.
-            val loopReach = ceil(maxOf(progressiveSharpLoopRadius(rX, exp), progressiveSharpLoopRadius(rY, exp))) + 1f
+            // on rows/columns the ramp mask zeroes out; quantized to the loop's tap bound
+            // (multiples of 4, ≥ the reach) so an animating radius doesn't resize the band and
+            // reallocate the overlay layer's backing texture.
+            val loopReach =
+                (progressiveLoopTapBound(maxOf(progressiveSharpLoopRadius(rX, exp), progressiveSharpLoopRadius(rY, exp))) + 1).toFloat()
             val band = progressiveSharpBandBounds(
                 sw,
                 sh,
@@ -955,11 +985,11 @@ private class DrawBackdropNode(
     /**
      * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
      * [drawUpscaledLayer] so each screen pixel still gets independent dithering — unless the
-     * composite stack carries the duty itself ([stackDitherChained]).
+     * composite stack carries the duty itself ([stackDitherChained]). Composite pass 1 skips
+     * this: [finalizeProgressiveComposite] chains noise after the assembled stack instead.
      *
-     * Cached on input identity + coefficient: the noise pass can end the composite's post-blur
-     * chain, which [finalizeProgressiveComposite] compares by identity — a fresh effect per pass
-     * would rebuild the whole level stack on every [updateEffects].
+     * Cached on input identity + coefficient so repeated [updateEffects] runs don't allocate a
+     * fresh native effect per pass.
      */
     private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
@@ -1092,6 +1122,7 @@ private class DrawBackdropNode(
         cachedStackGradient = null
         cachedStackPre = null
         cachedStackPost = null
+        cachedStackPostBlend = null
         cachedStackDither = Float.NaN
         stackDitherEffect = null
         stackDitherCoeff = Float.NaN

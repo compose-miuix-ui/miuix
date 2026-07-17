@@ -216,6 +216,14 @@ internal abstract class BackdropEffectScopeImpl :
     internal var progressivePreEffect: RenderEffect? = null
 
     /**
+     * A [blendColors] call directly following [progressiveBlur] while [progressiveCompositeActive],
+     * recorded instead of built: the composite folds it into the stack's ramp-weighted single
+     * pass — the SrcOver branch form would re-evaluate the whole level stack for its second
+     * reference (platform filter caches don't dedupe shared instances).
+     */
+    internal var progressivePostBlend: BlurColors? = null
+
+    /**
      * Platform scratch for progressiveCompositeEffect's radius-independent caches (Android keeps
      * its gradient band masks here). Opaque to common code; dropped on [reset].
      */
@@ -276,6 +284,7 @@ internal abstract class BackdropEffectScopeImpl :
         blurBlendFactor = 0f
         // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
         progressivePreEffect = null
+        progressivePostBlend = null
         // Composite mode: clear the recorded radii so a stale ramp can't outlive an effects block
         // that stops calling progressiveBlur; standalone mode keeps them (loop-effect cache key).
         if (progressiveCompositeActive) {
@@ -301,6 +310,7 @@ internal abstract class BackdropEffectScopeImpl :
             blurBlendExpHi = 0
             blurBlendFactor = 0f
             progressivePreEffect = null
+            progressivePostBlend = null
             if (progressiveCompositeActive) {
                 cachedProgRadiusX = Float.NaN
                 cachedProgRadiusY = Float.NaN
@@ -345,6 +355,7 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgResult = null
         progressiveCompositeActive = false
         progressivePreEffect = null
+        progressivePostBlend = null
         progressiveMaskScratch = null
         cachedNoiseChainInput = null
         cachedNoiseChainCoeff = Float.NaN

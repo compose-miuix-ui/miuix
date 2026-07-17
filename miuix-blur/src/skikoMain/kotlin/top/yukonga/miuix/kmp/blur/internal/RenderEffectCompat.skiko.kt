@@ -46,6 +46,7 @@ internal actual fun progressiveStackEffect(
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
+    nativeSharpEnd: Boolean,
 ): RenderEffect? {
     val shader = scope.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
         setFloatUniform("in_gradAxis", ax, ay)
@@ -61,15 +62,15 @@ internal actual fun progressiveStackEffect(
         ImageFilter.makeBlur(sigmaX, sigmaY, FilterTileMode.CLAMP, pre, null)
     }
 
-    // clearChild := blur2, degenerating the shader's last mix segment to the lightest level; the
-    // true sharp end is the caller's full-resolution overlay. Skia evaluates the shared instance
-    // once.
+    // clearChild := blur2 by default, degenerating the last mix segment (the sharp end is the
+    // caller's full-res overlay); with nativeSharpEnd the (pre-chained) source binds instead —
+    // a null child samples the source. Skia evaluates the shared blur2 instance once.
     val blur2 = level(sigma2X, sigma2Y)
     var filter = ImageFilter.makeRuntimeShader(
         shader.asSkikoRuntimeShader(),
         arrayOf("clearChild", "blur0", "blur1", "blur2"),
         arrayOf(
-            blur2,
+            if (nativeSharpEnd) pre else blur2,
             level(sigma0X, sigma0Y),
             level(sigma1X, sigma1Y),
             blur2,

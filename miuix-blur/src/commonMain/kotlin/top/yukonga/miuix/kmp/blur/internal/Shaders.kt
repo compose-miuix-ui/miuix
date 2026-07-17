@@ -168,9 +168,10 @@ internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
  * levels ([blur0] strongest … [blur2] lightest) interpolated along the gradient so the blur
  * strength itself ramps — graduated levels are what make the ramp read as progressive rather than
  * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
- * lightest level (degenerating the last mix segment); the true sharp end is a separate
- * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]. Android builds the identical
- * image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
+ * lightest level (degenerating the last mix segment; the true sharp end is a separate
+ * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]) — except at full resolution,
+ * where [clearChild] binds the source and the blend to sharp completes in-stack. Android builds
+ * the identical image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
  * walk's derivative kinks at the segment stops otherwise read as Mach-band stripes, and zeroing
  * the slope at the stops removes them without spatial noise (which would scale with the
  * downscale's texel size). Must stay in lockstep with [PROGRESSIVE_LEVEL_MASK_SHADER]'s weight
@@ -238,7 +239,8 @@ internal const val UNPREMUL_SHADER = """
  * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
  * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
  * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
- * rising `clamp(3·raw − 2, 0, 1)` ramp masking the full-resolution sharp overlay. The clamped
+ * rising `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end (the full-resolution overlay, or the
+ * Android stack's native source level at full resolution). The clamped
  * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
  * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
  * platforms zero the walk's derivative at the segment stops alike. The child is renormalized to
@@ -514,22 +516,31 @@ internal val BLOOM_STROKE_SHADER_DUAL: String = buildBloomStrokeShader(dualPeak 
  *   would otherwise reserve for the longest path.
  * - `includeExtended = true` (any layer has `mode > 28`): emits the full set, identical to
  *   the prior monolithic shader.
+ * - `rampMix = true`: the progressive composite's folded post pass — the blend chain runs on a
+ *   single child eval and the result is ramp-mixed over the untouched source, replacing the
+ *   SrcOver branch form that evaluates the stack below twice.
  *
  * The standard family is the common case — keeping it lean lifts move-GPU occupancy on
  * Adreno / Mali where Lab path register pressure otherwise capped warp parallelism.
  */
-internal fun buildBlendModeShader(includeExtended: Boolean): String = buildString {
+internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = false): String = buildString {
     append(BLEND_MODE_SHADER_HEADER)
-    if (includeExtended) {
-        append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
-        append(BLEND_MODE_SHADER_MAIN_EXTENDED)
-    } else {
-        append(BLEND_MODE_SHADER_MAIN_STANDARD)
-    }
+    if (includeExtended) append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
+    if (rampMix) append(BLEND_MODE_SHADER_RAMP_UNIFORMS)
+    append(
+        when {
+            rampMix && includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP
+            rampMix -> BLEND_MODE_SHADER_MAIN_STANDARD_RAMP
+            includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED
+            else -> BLEND_MODE_SHADER_MAIN_STANDARD
+        },
+    )
 }
 
 internal val BLEND_MODE_SHADER_STANDARD: String = buildBlendModeShader(includeExtended = false)
 internal val BLEND_MODE_SHADER_EXTENDED: String = buildBlendModeShader(includeExtended = true)
+internal val BLEND_MODE_SHADER_STANDARD_RAMP: String = buildBlendModeShader(includeExtended = false, rampMix = true)
+internal val BLEND_MODE_SHADER_EXTENDED_RAMP: String = buildBlendModeShader(includeExtended = true, rampMix = true)
 
 /** Uniforms, standard mode helpers (0-28), and `doBlend` dispatch — shared by both families. */
 private const val BLEND_MODE_SHADER_HEADER = """
@@ -985,6 +996,22 @@ private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
     }
 """
 
+/** Ramp band uniforms + weight for the progressive composite's folded post pass. */
+private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_curve;
+
+    float rampWeight(float2 fragCoord) {
+        float p = dot(fragCoord, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        float w = 1.0 - raw;
+        return w * w * (3.0 - 2.0 * w);
+    }
+
+"""
+
 /** Flat `main` — standard family only, no unpremul/premul roundtrip. */
 private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
     half4 main(float2 fragCoord) {
@@ -998,6 +1025,59 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
             currentColor = doBlend(mode, layerColor, currentColor);
         }
         return currentColor;
+    }
+"""
+
+/** [BLEND_MODE_SHADER_MAIN_STANDARD] with the blended result ramp-mixed over the source. */
+private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
+    half4 main(float2 fragCoord) {
+        half4 src = child.eval(fragCoord);
+        half4 currentColor = src;
+        int count = int(layerCount);
+
+        for (int i = 0; i < 8; i++) {
+            if (i >= count) break;
+            half4 layerColor = layerColors[i];
+            int mode = int(blendModes[i]);
+            currentColor = doBlend(mode, layerColor, currentColor);
+        }
+        return mix(src, currentColor, half(rampWeight(fragCoord)));
+    }
+"""
+
+/** [BLEND_MODE_SHADER_MAIN_EXTENDED] with the blended result ramp-mixed over the source. */
+private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
+    half4 main(float2 fragCoord) {
+        half4 src = child.eval(fragCoord);
+        float4 currentColor = float4(src);
+        int count = int(layerCount);
+
+        for (int i = 0; i < 8; i++) {
+            if (i >= count) break;
+            half4 layerColor = layerColors[i];
+            int mode = int(blendModes[i]);
+            // Standard modes produce premultiplied result directly
+            if (mode <= 28) {
+                currentColor = float4(doBlend(mode, layerColor, half4(currentColor)));
+            } else {
+                // Unpremultiply for custom modes (they expect straight alpha)
+                float bgA = currentColor.a;
+                float3 bgStr = bgA > 0.0001 ? currentColor.rgb / bgA : float3(0.0);
+                half lcA = layerColor.a;
+                half3 lcStr = lcA > 0.0 ? layerColor.rgb / lcA : half3(0.0);
+
+                half4 bg = half4(half3(bgStr), half(bgA));
+                half4 lc = half4(lcStr, lcA);
+
+                // getBlendModeColor handles alpha internally, returns unpremultiplied result
+                half4 blended = getBlendModeColor(bg, bg, mode, lc);
+
+                // Re-premultiply
+                float outA = float(blended.a);
+                currentColor = float4(float3(blended.rgb) * outA, outA);
+            }
+        }
+        return mix(src, half4(currentColor), half(rampWeight(fragCoord)));
     }
 """
 

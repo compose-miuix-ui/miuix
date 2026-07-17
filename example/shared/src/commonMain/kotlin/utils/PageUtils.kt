@@ -157,8 +157,8 @@ fun BlurredBar(
                     .progressiveTextureBlur(
                         backdrop = backdrop,
                         shape = RectangleShape,
-                        gradient = ProgressiveBlur.Top.copy(curve = 2f),
-                        blurRadius = 15f,
+                        gradient = ProgressiveBlur.Top.copy(curve = 2.2f),
+                        blurRadius = 10f,
                         colors = barBlurColors(progressive = true),
                     ),
             )

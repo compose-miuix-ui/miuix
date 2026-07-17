@@ -7,6 +7,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.buildRampBlendColorsEffect
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
@@ -211,6 +213,14 @@ internal fun createProgressiveBlurEffect(
  * sigmas in the downscaled layer's space and the band in downscaled, padded px. Zero radii are
  * valid — the levels collapse to identity while the pre/post chains keep riding the ramp;
  * returning null instead would poison the caller's supported flag.
+ *
+ * At `exp == 0` the levels run at full resolution and the stack binds its clear end to the
+ * native source (`nativeSharpEnd`, see [progressiveStackEffect]) — the caller skips the sharp
+ * overlay entirely.
+ *
+ * [postBlend] is the recorded blend-only post chain, folded in as a single ramp-mixing pass
+ * chained after the stack ([buildRampBlendColorsEffect]) so the stack is evaluated exactly once;
+ * [postEffect] is the general branch form and at most one of the two is non-null.
  */
 internal fun createProgressiveStackEffect(
     radiusX: Float,
@@ -225,6 +235,7 @@ internal fun createProgressiveStackEffect(
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
+    postBlend: BlurColors?,
     scope: BackdropEffectScopeImpl,
 ): RenderEffect? {
     val downScale = 1 shl exp
@@ -242,8 +253,8 @@ internal fun createProgressiveStackEffect(
     var projZero = (projMin + endFraction * span + padProj) / downScale
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
 
-    // Downscaled-space sigma supplying the variance the pyramid's box prefilter doesn't already
-    // cover; 0 (skip the blur) when the prefilter alone reaches the level's target.
+    // Downscaled-space sigma supplying the variance the downscale cascade's box prefilter doesn't
+    // already cover; 0 (skip the blur) when the prefilter alone reaches the level's target.
     fun levelSigma(sigma: Float, fraction: Float): Float {
         val target = sigma * fraction
         if (target <= 0f) return 0f
@@ -251,7 +262,8 @@ internal fun createProgressiveStackEffect(
         return if (residual > 0.01f) sqrt(residual) else 0f
     }
 
-    return progressiveStackEffect(
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+    val stack = progressiveStackEffect(
         scope,
         levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_0),
         levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_0),
@@ -263,16 +275,22 @@ internal fun createProgressiveStackEffect(
         ay,
         projFull,
         projZero,
-        curve.coerceIn(0.05f, 20f),
+        clampedCurve,
         preEffect,
         postEffect,
-    )
+        nativeSharpEnd = exp == 0,
+    ) ?: return null
+    return if (postBlend != null) {
+        stack.chain(buildRampBlendColorsEffect(scope, postBlend, ax, ay, projFull, projZero, clampedCurve))
+    } else {
+        stack
+    }
 }
 
 /**
  * Blur radius (loop-shader convention, `radius = 2σ − 1`) matching `blur2`'s total effective
  * Gaussian at downscale [exp] — the larger of its target sigma ([PROGRESSIVE_LEVEL_FRACTION_2])
- * and the level pyramid's box-prefilter floor, which the downscaled layer can never render below.
+ * and the downscale cascade's box-prefilter floor, which the downscaled layer can never render below.
  * Capped at the loop shader's constant tap bound. This is what the sharp overlay's variable blur
  * must start from for a seamless handoff (see [createProgressiveSharpOverlayEffect]).
  */

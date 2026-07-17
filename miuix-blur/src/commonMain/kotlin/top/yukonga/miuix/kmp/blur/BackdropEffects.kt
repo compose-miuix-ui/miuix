@@ -8,7 +8,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
 import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
@@ -131,8 +133,8 @@ fun BackdropEffectScope.progressiveBlur(
     if (scope.progressiveCompositeActive) {
         // Composite mode: the level stack renders on the downscaled layer and is assembled after
         // the effects block (once the post chain is known); the sharp end is a separate full-res
-        // overlay. Record radii + downscale here and split the chain. Radius 0 stays (levels
-        // collapse to identity, effects keep riding the ramp).
+        // overlay (in-stack at full resolution). Record radii + downscale here and split the
+        // chain. Radius 0 stays (levels collapse to identity, effects keep riding the ramp).
         val rX = radiusX.coerceAtLeast(0f)
         val rY = radiusY.coerceAtLeast(0f)
         // Size the downscale for the MIDDLE level: the lightest level's variance then stays above
@@ -259,66 +261,107 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (!isRuntimeShaderSupported()) return
     val scope = impl
 
-    // Reuse the cached blend effect on an unchanged config — a hit skips the color conversions,
-    // uniform uploads and effect creation, leaving only the chain. Keyed on the BlurColors value,
-    // so callers that rebuild it (or its list) each frame still hit.
-    val cached = scope.cachedBlendResult
-    val effect = if (cached != null && scope.cachedBlendColors == colors) {
-        cached
-    } else {
-        buildBlendColorsEffect(scope, colors).also {
-            scope.cachedBlendColors = colors
-            scope.cachedBlendResult = it
-        }
+    // Composite mode: a blend directly following progressiveBlur is recorded for the stack's
+    // folded ramp pass instead of chained (see BackdropEffectScopeImpl.progressivePostBlend).
+    if (scope.progressiveCompositeActive && !scope.cachedProgRadiusX.isNaN() &&
+        renderEffect == null && scope.progressivePostBlend == null
+    ) {
+        scope.progressivePostBlend = colors
+        return
     }
 
-    renderEffect = renderEffect.chain(effect)
+    renderEffect = renderEffect.chain(obtainBlendColorsEffect(scope, colors))
 }
 
-/** Builds the blend-layer [RenderEffect] for [colors] (no chaining); see [blendColors] for caching. */
-private fun buildBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
+/**
+ * Returns the blend-layer [RenderEffect] for [colors], cached on an unchanged config — a hit
+ * skips the color conversions, uniform uploads and effect creation. Keyed on the BlurColors
+ * value, so callers that rebuild it (or its list) each frame still hit.
+ */
+internal fun obtainBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
+    val cached = scope.cachedBlendResult
+    if (cached != null && scope.cachedBlendColors == colors) return cached
+
+    val needsExtended = colors.needsExtendedBlend()
+    val shader = scope.obtainRuntimeShader(
+        if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd",
+        if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD,
+    )
+    shader.setBlendLayerUniforms(scope, colors, needsExtended)
+    return createRuntimeShaderEffect(shader, "child").also {
+        scope.cachedBlendColors = colors
+        scope.cachedBlendResult = it
+    }
+}
+
+/**
+ * The progressive composite's folded post pass: [obtainBlendColorsEffect]'s blend chain with the
+ * result ramp-mixed over the untouched source inside the same pass, so the stack below is
+ * evaluated exactly once. Band inputs are in the stack's downscaled, padded space. Uncached —
+ * the caller's stack cache holds the assembled effect.
+ */
+internal fun buildRampBlendColorsEffect(
+    scope: BackdropEffectScopeImpl,
+    colors: BlurColors,
+    ax: Float,
+    ay: Float,
+    projFull: Float,
+    projZero: Float,
+    curve: Float,
+): RenderEffect {
+    val needsExtended = colors.needsExtendedBlend()
+    val shader = scope.obtainRuntimeShader(
+        if (needsExtended) "MiBlendModesExtRamp" else "MiBlendModesStdRamp",
+        if (needsExtended) BLEND_MODE_SHADER_EXTENDED_RAMP else BLEND_MODE_SHADER_STANDARD_RAMP,
+    )
+    shader.setBlendLayerUniforms(scope, colors, needsExtended)
+    shader.setFloatUniform("in_gradAxis", ax, ay)
+    shader.setFloatUniform("in_gradBand", projFull, projZero)
+    shader.setFloatUniform("in_curve", curve)
+    return createRuntimeShaderEffect(shader, "child")
+}
+
+private fun BlurColors.needsExtendedBlend(): Boolean {
+    val layerCount = minOf(blendColors.size, MAX_BLEND_LAYERS)
+    return (0 until layerCount).any { blendColors[it].mode.value >= 100 }
+}
+
+private fun RuntimeShader.setBlendLayerUniforms(scope: BackdropEffectScopeImpl, colors: BlurColors, needsExtended: Boolean) {
     val layerList = colors.blendColors
     val layerCount = minOf(layerList.size, MAX_BLEND_LAYERS)
     val modes = scope.blendModesBuffer
     val colorData = scope.blendColorsBuffer
 
-    val needsExtended = (0 until layerCount).any { layerList[it].mode.value >= 100 }
-    val shaderKey = if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd"
-    val shaderSource = if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD
+    setFloatUniform("layerCount", layerCount.toFloat())
 
-    val shader = scope.obtainRuntimeShader(shaderKey, shaderSource).apply {
-        setFloatUniform("layerCount", layerCount.toFloat())
-
-        // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
-        // Zero unused trailing slots to avoid stale state from a previous invocation.
-        for (i in 0 until layerCount) {
-            val entry = layerList[i]
-            modes[i] = entry.mode.value.toFloat()
-            val c = entry.color.convert(ColorSpaces.Srgb)
-            val a = c.alpha
-            colorData[i * 4] = c.red * a
-            colorData[i * 4 + 1] = c.green * a
-            colorData[i * 4 + 2] = c.blue * a
-            colorData[i * 4 + 3] = a
-        }
-        for (i in layerCount until MAX_BLEND_LAYERS) {
-            modes[i] = 0f
-            colorData[i * 4] = 0f
-            colorData[i * 4 + 1] = 0f
-            colorData[i * 4 + 2] = 0f
-            colorData[i * 4 + 3] = 0f
-        }
-        setFloatUniform("blendModes", modes)
-        setFloatUniform("layerColors", colorData)
-        // Standard family doesn't declare these uniforms; setting them would error.
-        if (needsExtended) {
-            setFloatUniform("uSaturation", colors.saturation)
-            setFloatUniform("uBrightness", colors.brightness)
-            setFloatUniform("uLuminanceAmount", 0f)
-            setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
-        }
+    // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
+    // Zero unused trailing slots to avoid stale state from a previous invocation.
+    for (i in 0 until layerCount) {
+        val entry = layerList[i]
+        modes[i] = entry.mode.value.toFloat()
+        val c = entry.color.convert(ColorSpaces.Srgb)
+        val a = c.alpha
+        colorData[i * 4] = c.red * a
+        colorData[i * 4 + 1] = c.green * a
+        colorData[i * 4 + 2] = c.blue * a
+        colorData[i * 4 + 3] = a
     }
-    return createRuntimeShaderEffect(shader, "child")
+    for (i in layerCount until MAX_BLEND_LAYERS) {
+        modes[i] = 0f
+        colorData[i * 4] = 0f
+        colorData[i * 4 + 1] = 0f
+        colorData[i * 4 + 2] = 0f
+        colorData[i * 4 + 3] = 0f
+    }
+    setFloatUniform("blendModes", modes)
+    setFloatUniform("layerColors", colorData)
+    // Standard family doesn't declare these uniforms; setting them would error.
+    if (needsExtended) {
+        setFloatUniform("uSaturation", colors.saturation)
+        setFloatUniform("uBrightness", colors.brightness)
+        setFloatUniform("uLuminanceAmount", 0f)
+        setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
+    }
 }
 
 /**

@@ -36,6 +36,12 @@ internal expect fun runtimeShaderEffect(
  * ramp — weighting it per level instead would hold it flat for two thirds of the band (a visible
  * knee). The sharp overlay stays untouched, so every effect fades out with the blur.
  *
+ * [nativeSharpEnd] binds the ramp's clear end to the (pre-chained) source instead of leaving the
+ * last mix segment degenerate: at full resolution (exp == 0) the source is already native pixels,
+ * so the blend to sharp completes in-stack and the caller skips the sharp overlay. Implementations
+ * must keep the stack's exact profile (same masks, same segment stops) — an approximate profile
+ * visibly pops when an animating radius crosses the downscale boundary.
+ *
  * Returns null only where the platform cannot express the stack; callers then fall back to the
  * uniform draw path.
  *
@@ -57,4 +63,5 @@ internal expect fun progressiveStackEffect(
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
+    nativeSharpEnd: Boolean,
 ): RenderEffect?

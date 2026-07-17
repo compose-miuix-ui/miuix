@@ -48,13 +48,17 @@ private class ProgressiveMaskCache {
     /** Continuous `1 − raw` ramp (in_level = in_slope = 1) masking the post-effect branch. */
     lateinit var ramp: android.graphics.RenderEffect
 
+    /** Rising `clamp(3·raw − 2)` ramp (in_level = −2, in_slope = −3) masking the native sharp end. */
+    lateinit var sharp: android.graphics.RenderEffect
+
     /** Uniform-free unpremul pass chained after the unmasked base blur; built once per scope. */
     var unpremul: android.graphics.RenderEffect? = null
 }
 
 // A runtime shader binds one source child here, so the stack is a blend-mode DAG instead: masked
 // levels SrcOver-stacked over the unmasked lightest level ≡ PROGRESSIVE_COMPOSITE_SHADER's first
-// two mix segments (the blend to sharp is the caller's full-res overlay).
+// two mix segments (the blend to sharp is the caller's full-res overlay, or the in-stack source
+// level with nativeSharpEnd).
 internal actual fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,
     sigma0X: Float,
@@ -70,6 +74,7 @@ internal actual fun progressiveStackEffect(
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
+    nativeSharpEnd: Boolean,
 ): RenderEffect? {
     val masks = scope.progressiveMaskScratch as? ProgressiveMaskCache
         ?: ProgressiveMaskCache().also { scope.progressiveMaskScratch = it }
@@ -92,6 +97,7 @@ internal actual fun progressiveStackEffect(
         masks.level2 = bandMask(2f, 3f)
         masks.level1 = bandMask(1f, 3f)
         masks.ramp = bandMask(1f, 1f)
+        masks.sharp = bandMask(-2f, -3f)
         masks.ax = ax
         masks.ay = ay
         masks.projFull = projFull
@@ -136,6 +142,16 @@ internal actual fun progressiveStackEffect(
     }
     stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma1X, sigma1Y, masks.level2), BlendMode.SRC_OVER)
     stack = android.graphics.RenderEffect.createBlendModeEffect(stack, maskedLevel(sigma0X, sigma0Y, masks.level1), BlendMode.SRC_OVER)
+    if (nativeSharpEnd) {
+        // The rising-masked (pre-chained) source ≡ the composite's last mix segment; its
+        // smoothstep stays complementary to the level masks.
+        val sharpLevel = if (pre == null) {
+            masks.sharp
+        } else {
+            android.graphics.RenderEffect.createChainEffect(masks.sharp, pre)
+        }
+        stack = android.graphics.RenderEffect.createBlendModeEffect(stack, sharpLevel, BlendMode.SRC_OVER)
+    }
     if (postEffect != null) {
         val postBranch = android.graphics.RenderEffect.createChainEffect(
             masks.ramp,
