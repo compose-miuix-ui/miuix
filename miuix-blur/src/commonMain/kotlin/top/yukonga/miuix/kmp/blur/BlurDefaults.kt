@@ -152,6 +152,9 @@ object BlurDefaults {
     /** Default noise dithering coefficient for anti-banding. 0 disables noise. */
     val NoiseCoefficient: Float = 0.0045f
 
+    /** Default noise dithering coefficient for progressive blur. 0 disables noise. */
+    val ProgressiveNoiseCoefficient: Float = 0f
+
     /** Maximum allowed blur radius in dp. */
     val MaxBlurRadius: Float = 150f
 

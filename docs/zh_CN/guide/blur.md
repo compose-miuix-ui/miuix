@@ -276,7 +276,7 @@ val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f
 val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
-`colors` 与 `noiseCoefficient` 的用法与 [`textureBlur`](#颜色配置) 一致，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。
+`colors` 与 `noiseCoefficient` 的用法与 [`textureBlur`](#颜色配置) 一致，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。注意渐进模糊的 `noiseCoefficient` 默认为 `0f`（禁用）：噪点叠在模糊渐变上比叠在均匀模糊上更显眼。
 
 ::: warning 性能
 多级模糊层已在降采样分辨率上求值，但像素级锐利的清晰端仍需每帧额外一个全分辨率覆盖 pass——GPU 带宽开销高于同面积的 `textureBlur`。渐进模糊适合用在栏、边缘过渡带上，不建议覆盖大面积区域。
@@ -424,7 +424,7 @@ Box(
 | blurRadiusX | Float | 满强度处的水平模糊半径（dp，独立半径重载） | - | 是* |
 | blurRadiusY | Float | 满强度处的垂直模糊半径（dp，独立半径重载） | - | 是* |
 | gradient | ProgressiveBlur | 控制模糊满强度与清晰位置的方向和区间 | ProgressiveBlur.Top | 否 |
-| noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0.0045f | 否 |
+| noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0f | 否 |
 | colors | BlurColors | 颜色调整和混合图层，随模糊一起淡出 | BlurColors() | 否 |
 | highlight | Highlight? | 可选的边缘高光，绘制在内容之上。`null` 时跳过 | null | 否 |
 | contentBlendMode | BlendMode | 内容在模糊上方合成的混合模式 | SrcOver | 否 |

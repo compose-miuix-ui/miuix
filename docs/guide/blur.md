@@ -281,7 +281,7 @@ val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f
 val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
 ```
 
-`colors` and `noiseCoefficient` work the same way as in [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge.
+`colors` and `noiseCoefficient` work the same way as in [`textureBlur`](#color-configuration), but they apply to the blurred region only and fade out together with the blur — the clear end blends seamlessly into the surrounding content instead of showing a tinted edge. Note that progressive blur defaults `noiseCoefficient` to `0f` (disabled): grain riding a blur gradient is more visible than grain on a uniform blur.
 
 ::: warning Performance
 On top of the downscaled multi-level blur, the pixel-sharp clear end adds a full-resolution overlay pass per frame — more GPU bandwidth than `textureBlur` over the same area. Prefer progressive blur for bars and edge bands rather than large fills.
@@ -429,7 +429,7 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | blurRadiusX | Float | Horizontal blur radius in dp at full strength (independent radii overload) | - | Yes* |
 | blurRadiusY | Float | Vertical blur radius in dp at full strength (independent radii overload) | - | Yes* |
 | gradient | ProgressiveBlur | Direction and band controlling where the blur is full vs zero | ProgressiveBlur.Top | No |
-| noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
+| noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0f | No |
 | colors | BlurColors | Color adjustments and blend layers, fading out with the blur | BlurColors() | No |
 | highlight | Highlight? | Optional edge highlight painted on top of the content. `null` skips drawing | null | No |
 | contentBlendMode | BlendMode | Blend mode for compositing content over the blur | SrcOver | No |

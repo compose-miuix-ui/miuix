@@ -76,7 +76,7 @@ fun LazyListScope.blurSection() {
 @Composable
 private fun ProgressiveBlurDemo() {
     var blurRadius by remember { mutableFloatStateOf(20f) }
-    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
+    var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.ProgressiveNoiseCoefficient) }
     var startFraction by remember { mutableFloatStateOf(0f) }
     var endFraction by remember { mutableFloatStateOf(1f) }
     var curve by remember { mutableFloatStateOf(1f) }

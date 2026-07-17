@@ -412,14 +412,14 @@ fun BackdropEffectScope.textureBlurEffect(
  * @param blurRadiusX Horizontal blur radius in dp at full strength.
  * @param blurRadiusY Vertical blur radius in dp at full strength. Defaults to [blurRadiusX].
  * @param gradient Direction and band controlling where the blur is full vs zero.
- * @param noiseCoefficient Noise dithering coefficient. 0 disables noise.
+ * @param noiseCoefficient Noise dithering coefficient. 0 (the default) disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  */
 fun BackdropEffectScope.progressiveTextureBlurEffect(
     blurRadiusX: Float,
     blurRadiusY: Float = blurRadiusX,
     gradient: ProgressiveBlur = ProgressiveBlur.Top,
-    noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
+    noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
 ) {
     val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)

@@ -186,7 +186,7 @@ fun Modifier.textureEffect(
  *   display density. Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param gradient Direction and band controlling where the blur is full vs zero. Defaults to
  *   [ProgressiveBlur.Top].
- * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
+ * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 (the default) disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -197,7 +197,7 @@ fun Modifier.progressiveTextureBlur(
     shape: Shape,
     blurRadius: Float = BlurDefaults.BlurRadius,
     gradient: ProgressiveBlur = ProgressiveBlur.Top,
-    noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
+    noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
     highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
@@ -225,7 +225,7 @@ fun Modifier.progressiveTextureBlur(
  * @param blurRadiusY The vertical blur radius in dp at full strength. Clamped to
  *   [0, [BlurDefaults.MaxBlurRadius]].
  * @param gradient Direction and band controlling where the blur is full vs zero.
- * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
+ * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 (the default) disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
  * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
@@ -237,7 +237,7 @@ fun Modifier.progressiveTextureBlur(
     blurRadiusX: Float,
     blurRadiusY: Float,
     gradient: ProgressiveBlur = ProgressiveBlur.Top,
-    noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
+    noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
     highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
