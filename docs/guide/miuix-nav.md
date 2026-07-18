@@ -152,10 +152,14 @@ val cardStyle = navGraphicsTransition(
     scrim = { scope ->
         val d = scope.relativeDepth.coerceIn(0f, 1f)
         val g = scope.gesture
-        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f) else d
+        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.001f)).coerceIn(0f, 1f) else d
     },
 ) { scope -> /* transform */ }
 ```
+
+::: tip Progress saturates below 1
+`gesture.progress` never reaches exactly `1` — the driver saturates finger-driven progress just under the fully-popped boundary (also shielding devices that misreport back-gesture progress past 1). Division by `1 - progress` is therefore safe, **as long as any floor on the denominator stays at or below that headroom** (the `0.001` above). A larger floor (e.g. `0.01`) breaks the drag identity `depth == 1 - progress` in the last percent and visibly collapses the scrim on such devices.
+:::
 
 For a complete, platform-grade transition built entirely on this public API — centered scale, edge hug, damped vertical finger follow, post-commit fly-out and the gesture-held scrim above — see `CrossActivityTransition` in the example app (`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`).
 
@@ -242,15 +246,27 @@ One trade-off to know: a gesture may grab the stack mid-programmatic-settle, swi
 
 ## Orthogonal effects
 
-`NavDisplayEffects` holds the cross-cutting effects layered on top of the active transition — corner clip, dim cap, input blocking and a backdrop fill (`backdropColor`):
+`NavDisplayEffects` holds the cross-cutting effects layered on top of the active transition, computed per depth independently of the transition itself:
+
+| Property | Default | Description |
+| :-- | :-- | :-- |
+| `enableCornerClip` | `true` | Clip the transitioning top entry with smooth rounded corners while it animates over the layer below |
+| `cornerClipRadius` | `0.dp` | Radius of that clip; pass `rememberNavSystemCornerRadius()` to follow the device screen corner (still no rounding where the platform reports 0) |
+| `cornerClipMode` | `Leading` | Which corners to round: `Leading` — the corners meeting the screen edge, for slide-style transitions; `All` — every corner, for card-style transitions that scale the whole page |
+| `dimAmount` | `0.5f` | Maximum alpha of the fullscreen dim scrim beneath the top-most layer; the curve along the motion belongs to the transition (`scrimFraction`), this only caps darkness. `0f` disables |
+| `blockInputDuringTransition` | `true` | Swallow touch input on mid-transition entries, so taps cannot reach a half-animated screen |
+| `backdropColor` | `Unspecified` | Solid fill behind every entry layer — card-style transitions scale pages below full size, revealing the area behind the host; pass the theme background so it reads as the page extending outward |
+
+`NavDisplayEffects.Default` is the table above; `NavDisplayEffects.None` disables everything. A card-style setup:
 
 ```kotlin
 NavDisplay(
     backStack = backStack,
     effects = NavDisplayEffects(
-        enableCornerClip = true,
-        dimAmount = 0.5f,
-        blockInputDuringTransition = true,
+        cornerClipRadius = rememberNavSystemCornerRadius(),
+        cornerClipMode = NavCornerClipMode.All,
+        dimAmount = 0.32f,
+        backdropColor = MiuixTheme.colorScheme.background,
     ),
 ) { /* ... */ }
 ```
@@ -284,6 +300,14 @@ Each entry's `rememberSaveable` state is scoped by its **contentKey** — the ro
 
 - **Distinct keys must print distinct strings.** The saveable slot is keyed by the contentKey's `toString()`. Two *unequal* keys that print the same string — same-named `data class` routes in different packages (`data class` `toString()` omits the package), or an `Int 1` vs a `String "1"` returned from contentKey factories — are rejected at reconcile time with an actionable `IllegalArgumentException` instead of silently sharing and corrupting each other's saved state.
 - **The string must be value-derived.** `data class` / `data object` routes qualify out of the box. A route class that keeps the default identity `toString()` (`com.app.Detail@1a2b3c`) passes every runtime check — the string is unique within the session — but resolves to a new string after process death, so the entry's `rememberSaveable` state silently resets. Stick to `data class` / `data object` routes, or return a value-derived key from the factory.
+
+## Entry lifecycle and ViewModels
+
+Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`, so `collectAsStateWithLifecycle`, `viewModel()` and store-based DI scope per screen with no extra setup.
+
+Lifecycle is a pure function of depth: the settled top is `RESUMED`; covered, incoming and leaving layers are `STARTED`; an entry being removed drops to `CREATED` until it unloads. While a **gesture** drives the stack, everyone is capped at `STARTED` — `RESUMED` means "settled, sole top", so work keyed on it does not flap while a finger hovers around the transition thresholds.
+
+ViewModel stores are owned by the display, not the entry's composition: a covered entry keeps its ViewModels for as long as it stays on the back stack, and the store is cleared when the entry is popped.
 
 ## Returning a result to a previous screen
 

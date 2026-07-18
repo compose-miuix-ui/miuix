@@ -152,10 +152,14 @@ val cardStyle = navGraphicsTransition(
     scrim = { scope ->
         val d = scope.relativeDepth.coerceIn(0f, 1f)
         val g = scope.gesture
-        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f) else d
+        if (g != null) (d / (1f - g.progress).coerceAtLeast(0.001f)).coerceIn(0f, 1f) else d
     },
 ) { scope -> /* transform */ }
 ```
+
+::: tip 进度饱和在 1 之下
+`gesture.progress` 永远不会精确到达 `1`——驱动器把手指驱动的进度饱和在「完全弹出」边界之下（同时屏蔽了把返回手势进度报过 1 的设备）。因此除以 `1 - progress` 是安全的，**前提是分母的下限不超过该余量**（即上例的 `0.001`）。更大的下限（如 `0.01`）会在最后百分之一破坏拖拽恒等式 `depth == 1 - progress`，在这类设备上表现为 scrim 明显坍缩。
+:::
 
 一个完全基于该公共 API 实现的平台级完整转场——居中缩放、贴边、带阻尼的纵向跟手、提交后飞出以及上述手势保持 scrim——见示例应用中的 `CrossActivityTransition`（`example/shared/src/commonMain/kotlin/navigation/CrossActivityTransition.kt`）。
 
@@ -242,15 +246,27 @@ val platformLike = navDirectionalTransition(
 
 ## 正交效果
 
-`NavDisplayEffects` 承载叠加在当前转场之上的横切效果——圆角裁剪、调暗封顶、转场期输入拦截与背景底色（`backdropColor`）：
+`NavDisplayEffects` 承载叠加在当前转场之上的横切效果，按深度独立于转场本身计算：
+
+| 属性 | 默认值 | 描述 |
+| :-- | :-- | :-- |
+| `enableCornerClip` | `true` | 顶层 entry 在下层之上运动期间，以平滑圆角裁剪它 |
+| `cornerClipRadius` | `0.dp` | 裁剪半径；传 `rememberNavSystemCornerRadius()` 可跟随设备屏幕圆角（平台报告为 0 时同样不裁圆角） |
+| `cornerClipMode` | `Leading` | 裁哪些角：`Leading` —— 与屏幕边缘相接的前缘角，适合滑动类转场；`All` —— 四角全裁，适合整页缩放的卡片类转场 |
+| `dimAmount` | `0.5f` | 最顶层之下全屏调暗遮罩的最大 alpha；随运动的曲线归转场所有（`scrimFraction`），此处只封顶暗度。`0f` 关闭 |
+| `blockInputDuringTransition` | `true` | 拦截转场中途 entry 上的触摸输入，点击不会落到半动画状态的页面 |
+| `backdropColor` | `Unspecified` | 所有 entry 图层背后的纯色底——卡片类转场把下层页面缩到不足全尺寸、露出宿主背后的区域；传主题背景色使其读作页面向外延伸 |
+
+`NavDisplayEffects.Default` 即上表默认值；`NavDisplayEffects.None` 全部关闭。卡片式配置示例：
 
 ```kotlin
 NavDisplay(
     backStack = backStack,
     effects = NavDisplayEffects(
-        enableCornerClip = true,
-        dimAmount = 0.5f,
-        blockInputDuringTransition = true,
+        cornerClipRadius = rememberNavSystemCornerRadius(),
+        cornerClipMode = NavCornerClipMode.All,
+        dimAmount = 0.32f,
+        backdropColor = MiuixTheme.colorScheme.background,
     ),
 ) { /* ... */ }
 ```
@@ -284,6 +300,14 @@ NavDisplay(
 
 - **不同的 key 必须打印出不同的字符串。** 可保存状态槽位以 contentKey 的 `toString()` 为键。两个*不相等*却打印出同一字符串的 key——不同包下同名的 `data class` 路由（`data class` 的 `toString()` 不含包名），或 contentKey 工厂分别返回的 `Int 1` 与 `String "1"`——会在 reconcile 时被一条可操作的 `IllegalArgumentException` 拒绝，而不是静默共享并互相破坏对方的已存状态。
 - **字符串必须由值派生。** `data class` / `data object` 路由天然满足。保留默认恒等 `toString()`（`com.app.Detail@1a2b3c`）的路由类能通过所有运行时检查——字符串在会话内是唯一的——但进程死亡后会解析出全新的字符串，该条目的 `rememberSaveable` 状态会被静默重置。请坚持使用 `data class` / `data object` 路由，或让工厂返回由值派生的 key。
+
+## 条目生命周期与 ViewModel
+
+每个 entry 运行在自己的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下，`collectAsStateWithLifecycle`、`viewModel()` 与基于 store 的依赖注入无需额外配置即可按屏幕划分作用域。
+
+生命周期是深度的纯函数：静止的顶层为 `RESUMED`；被覆盖层、正在进入与正在离开的层为 `STARTED`；正在移除的 entry 降为 `CREATED` 直到卸载。**手势**驱动期间所有层封顶为 `STARTED`——`RESUMED` 意为「已静止的唯一顶层」，依赖它的逻辑不会因手指在转场阈值附近徘徊而反复触发。
+
+ViewModel store 由 display 持有，而非 entry 的组合：被覆盖的 entry 只要仍在返回栈上就保留其 ViewModel，entry 被 pop 时清空对应 store。
 
 ## 向上一屏回传结果
 
