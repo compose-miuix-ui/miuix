@@ -14,6 +14,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -274,10 +275,10 @@ private fun NavDisplayLayout(
     // Persistent contentKey -> back-stack index. Current entries get their fresh index on each
     // reconcile; a leaving (popped/replaced) entry KEEPS its last index here so it can still render
     // its exit animation, and is pruned only when it has finished leaving (see the unload effect
-    // below). Plain (non-snapshot) map: it is mutated in lockstep with presentation.presented (a
-    // snapshot list) inside the reconcile block, and the visible-window derivedStateOf re-evaluates
-    // off that snapshot list rather than off this map.
-    val indexByContentKey = remember { mutableMapOf<Any, Int>() }
+    // below). Snapshot map, written only on actual change: a pure back-stack reorder changes
+    // neither presentation.presented nor the driving float, so these index writes are the only
+    // signal that re-evaluates the visible window and the entry hosts.
+    val indexByContentKey = remember { mutableStateMapOf<Any, Int>() }
     remember(currentKeyList, entryProvider) {
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
@@ -329,7 +330,9 @@ private fun NavDisplayLayout(
         }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
         previousContentKeys[0] = newContentKeys
-        currentEntries.forEachIndexed { index, e -> indexByContentKey[e.contentKey] = index }
+        currentEntries.forEachIndexed { index, e ->
+            if (indexByContentKey[e.contentKey] != index) indexByContentKey[e.contentKey] = index
+        }
     }
 
     // Settle physics of the moving top boundary: the topmost PRESENTED entry's governing
@@ -507,7 +510,8 @@ private fun NavDisplayLayout(
         // compare results) but notifies readers only when the membership actually changes — i.e.
         // when a window boundary is crossed; per-frame floats are otherwise read lazily in
         // graphicsLayer. Hand-rolled max/filter keeps the per-frame re-run free of closures,
-        // iterators, and boxed floats; the only allocation left is the result list.
+        // iterators, and boxed floats; the only allocation left is the result list, emitted in
+        // stack-index order (bottom first) so composition order matches draw order.
         val visibleEntries by remember(presentation, transition, indexByContentKey) {
             derivedStateOf {
                 val top = presentation.animatedTop.value
@@ -522,7 +526,13 @@ private fun NavDisplayLayout(
                     val entry = presented[i]
                     val index = indexByContentKey[entry.contentKey] ?: continue
                     if (isVisibleAt(relativeDepth(top, index), windowDepth)) {
-                        (result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }).add(entry)
+                        val list = result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }
+                        // Insertion-sorted by stack index: composition order is draw order, and a
+                        // pure back-stack reorder leaves `presented` in its old order. Stable, so a
+                        // replace transient (equal index) keeps the newer instance on top.
+                        var at = list.size
+                        while (at > 0 && (indexByContentKey[list[at - 1].contentKey] ?: -1) > index) at--
+                        list.add(at, entry)
                     }
                 }
                 result ?: emptyList()
