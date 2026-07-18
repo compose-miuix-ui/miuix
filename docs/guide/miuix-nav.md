@@ -309,6 +309,16 @@ Lifecycle is a pure function of depth: the settled top is `RESUMED`; covered, in
 
 ViewModel stores are owned by the display, not the entry's composition: a covered entry keeps its ViewModels for as long as it stays on the back stack, and the store is cleared when the entry is popped.
 
+## Nesting a NavDisplay
+
+A `NavDisplay` can be nested inside an entry (tabs hosting their own stacks, a flow within a flow). Back, state and lifecycle all nest correctly:
+
+- **Back**: each entry's back consumers (a nested display, an in-entry back handler) register under an entry-scoped dispatcher that is active only while that entry is the interactive top. The top entry's inner stack consumes back first; once the inner stack is at its root, back falls through to the outer display. A covered entry's inner stack never intercepts.
+- **State**: the inner display's back stack, saveable state and ViewModels are all namespaced under the hosting entry — popping the hosting entry disposes the whole nested scope, including inner ViewModels (they live inside the hosting entry's `ViewModelStore`).
+- **Lifecycle**: inner entries cap at the hosting entry's ceiling — a covered host holds everything inside it at or below `STARTED`.
+
+One rule to know: the **swipe** gesture is claimed by the outer display first (the recognizer is deliberately parent-first). Host an interactive inner stack in the outer **root** entry (where the outer swipe is disabled anyway), or disable the outer gesture on the hosting route with `entry(swipeDismiss = NavSwipeDirection.None)`.
+
 ## Returning a result to a previous screen
 
 The v1 core **does not** ship a built-in result channel (no `navigateForResult` / `setResult` on `NavController`). Keep results out of the navigation runtime and pass them with whatever state mechanism you already use, or layer a tiny result bus on top of the back stack yourself.
@@ -332,7 +342,6 @@ Port that approach (or a `SavedStateHandle`-style holder) into your own app laye
 | Multi-pane / list-detail adaptive layout | Not supported (single stack only) |
 | Dialog / bottom-sheet scene strategy (overlay destinations) | Not supported |
 | Shared-element transitions across destinations | Not supported |
-| Nested `NavDisplay` (a back stack inside an entry) | Not supported |
 | KSP / annotation-based route registration | Not supported (register entries via the `entry<T> { }` DSL) |
 | Built-in result channel on `NavController` | Not supported (see the section above) |
 

@@ -309,6 +309,16 @@ NavDisplay(
 
 ViewModel store 由 display 持有，而非 entry 的组合：被覆盖的 entry 只要仍在返回栈上就保留其 ViewModel，entry 被 pop 时清空对应 store。
 
+## 嵌套 NavDisplay
+
+`NavDisplay` 可以嵌套在 entry 内部（各 tab 持有自己的栈、流程内嵌子流程）。返回、状态与生命周期均正确嵌套：
+
+- **返回**：entry 内的返回消费者（嵌套 display、entry 内的返回处理器）注册在一个仅当该 entry 是交互顶层时才激活的作用域派发器之下。顶层 entry 的内层栈优先消费返回；内层栈到达根后，返回穿透给外层 display。被覆盖 entry 的内层栈永远不会截获返回。
+- **状态**：内层 display 的返回栈、可保存状态与 ViewModel 全部归属宿主 entry 的命名空间——pop 宿主 entry 会销毁整个嵌套作用域，内层 ViewModel（存放在宿主 entry 的 `ViewModelStore` 内）随之清理。
+- **生命周期**：内层 entry 以宿主 entry 的上限封顶——宿主被覆盖时其内部所有内容不超过 `STARTED`。
+
+一条须知规则：**滑动**手势由外层 display 优先认领（识别器有意为 parent-first）。请把可交互的内层栈放在外层**根** entry 上（那里外层滑动本就禁用），或在宿主路由上用 `entry(swipeDismiss = NavSwipeDirection.None)` 关闭外层手势。
+
 ## 向上一屏回传结果
 
 v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateForResult` / `setResult`）。请把结果留在导航运行时之外，用你已有的状态机制传递，或自行在返回栈之上叠一层极小的结果总线。
@@ -332,7 +342,6 @@ v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateFo
 | 多窗格 / 列表-详情自适应布局 | 不支持（仅单栈） |
 | Dialog / 底部表单 场景策略（覆盖型目的地） | 不支持 |
 | 跨目的地的共享元素转场（SharedTransition） | 不支持 |
-| 嵌套 `NavDisplay`（entry 内再套一个返回栈） | 不支持 |
 | KSP / 注解式路由注册 | 不支持（用 `entry<T> { }` DSL 注册 entry） |
 | `NavController` 内置结果通道 | 不支持（见上一节） |
 
