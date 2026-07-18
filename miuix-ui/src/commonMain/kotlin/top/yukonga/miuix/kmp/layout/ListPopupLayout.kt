@@ -34,7 +34,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ListPopupContent
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
@@ -83,6 +82,7 @@ internal fun ListPopupLayout(
     val fractionProgress = remember { Animatable(0f) }
     val alphaProgress = remember { Animatable(0f) }
     val dimProgress = remember { Animatable(0f) }
+    val backProgress = remember { Animatable(0f) }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
@@ -93,6 +93,7 @@ internal fun ListPopupLayout(
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            backProgress.snapTo(0f)
             launch { fractionProgress.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
             launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
             if (enableWindowDim) {
@@ -110,6 +111,7 @@ internal fun ListPopupLayout(
             fractionProgress.snapTo(0f)
             alphaProgress.snapTo(0f)
             dimProgress.snapTo(0f)
+            backProgress.snapTo(0f)
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -154,13 +156,7 @@ internal fun ListPopupLayout(
             isBackEnabled = show,
             onBackCancelled = {
                 coroutineScope.launch {
-                    // joinAll keeps the three reset coroutines as children of this launch so
-                    // structural cancellation propagates if a new gesture supersedes the reset.
-                    joinAll(
-                        launch { fractionProgress.animateTo(1f, ListPopupDefaults.ResetAnimationSpec) },
-                        launch { alphaProgress.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) },
-                        launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) },
-                    )
+                    backProgress.animateTo(0f, ListPopupDefaults.ResetAnimationSpec)
                 }
             },
             onBackCompleted = { requestDismiss() },
@@ -175,10 +171,7 @@ internal fun ListPopupLayout(
                         transitionState is NavigationEventTransitionState.InProgress &&
                         transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
                     ) {
-                        val progress = transitionState.latestEvent.progress
-                        fractionProgress.snapTo(1f - progress)
-                        alphaProgress.snapTo(1f - progress)
-                        dimProgress.snapTo(1f - progress)
+                        backProgress.snapTo(transitionState.latestEvent.progress)
                     }
                 }
         }
@@ -191,7 +184,7 @@ internal fun ListPopupLayout(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            alpha = dimProgress.value
+                            alpha = dimProgress.value * (1f - backProgress.value)
                         }
                         .background(MiuixTheme.colorScheme.windowDimming),
                 )
@@ -245,8 +238,8 @@ internal fun ListPopupLayout(
                 ListPopupContent(
                     popupContentSize = popupContentSize,
                     onPopupContentSizeChange = { popupContentSize = it },
-                    fractionProgress = { fractionProgress.value },
-                    alphaProgress = { alphaProgress.value },
+                    fractionProgress = { fractionProgress.value * (1f - backProgress.value) },
+                    alphaProgress = { alphaProgress.value * (1f - backProgress.value) },
                     popupLayoutPosition = layoutInfo.popupLayoutPosition,
                     localTransformOrigin = layoutInfo.localTransformOrigin,
                     content = {
