@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
@@ -35,6 +37,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.Lifecycle
+import androidx.navigationevent.NavigationEventDispatcher
+import androidx.navigationevent.NavigationEventDispatcherOwner
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
@@ -215,6 +220,60 @@ private fun NavPresentation.animateTopTo(target: Float, motion: NavMotion) {
             trackSettle(phase = NavSettlePhase.Programmatic, releaseVelocity = 0f) { onFrame ->
                 animatedTop.settleProgrammatic(target, motionNow, onFrame = onFrame)
             }
+        }
+    }
+}
+
+/**
+ * Provides [owner] as the entry-scoped back dispatcher when present; renders [content] directly
+ * when the host has no back source. The branch is static per platform in practice.
+ */
+@Composable
+private fun ProvideNavEntryBackScope(
+    owner: NavigationEventDispatcherOwner?,
+    content: @Composable () -> Unit,
+) {
+    if (owner != null) {
+        CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner, content = content)
+    } else {
+        content()
+    }
+}
+
+/**
+ * Remembers the entry-scoped child [NavigationEventDispatcherOwner]. Deliberately NOT the
+ * library's `rememberNavigationEventDispatcherOwner`: `dispose()` cascades to descendants and is
+ * not idempotent, so a nested display's dispatchers would be torn down twice (ancestor cascade +
+ * their own movable-content-deferred dispose effect) and throw. Both writes are guarded here; the
+ * initial enabled state applies at construction (no first-frame window).
+ */
+@Composable
+private fun rememberNavEntryDispatcherOwner(
+    enabled: Boolean,
+    parent: NavigationEventDispatcherOwner,
+): NavigationEventDispatcherOwner {
+    val dispatcher = remember(parent) {
+        NavigationEventDispatcher(parent = parent.navigationEventDispatcher).also { it.isEnabled = enabled }
+    }
+    SideEffect {
+        try {
+            dispatcher.isEnabled = enabled
+        } catch (_: IllegalStateException) {
+            // Ancestor cascade-disposed this dispatcher mid-teardown; the write is moot.
+        }
+    }
+    DisposableEffect(dispatcher) {
+        onDispose {
+            try {
+                dispatcher.dispose()
+            } catch (_: IllegalStateException) {
+                // Already disposed by an ancestor's cascade; idempotent by construction here.
+            }
+        }
+    }
+    return remember(dispatcher) {
+        object : NavigationEventDispatcherOwner {
+            override val navigationEventDispatcher: NavigationEventDispatcher = dispatcher
         }
     }
 }
@@ -698,6 +757,20 @@ private fun NavEntryHost(
     val maxLifecycle = Lifecycle.State.entries[depthBuckets and DEPTH_BUCKET_LIFECYCLE_MASK]
     val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
 
+    // Per-entry back-dispatcher scope: back consumers inside this entry (a nested NavDisplay, an
+    // in-entry back handler) register under a child dispatcher enabled only while the entry is the
+    // interactive top — a covered entry stays composed, and its later-registered handlers would
+    // otherwise win the shared dispatcher's LIFO arbitration and steal the system back. The child
+    // shares the parent's processor, so precedence among enabled handlers is unchanged. Skipped
+    // when the host has no back source.
+    val parentDispatcherOwner = LocalNavigationEventDispatcherOwner.current
+    val entryDispatcherOwner = if (parentDispatcherOwner != null) {
+        val interactiveTop = (depthBuckets and DEPTH_BUCKET_GOVERNS_OWN) != 0 && !entry.presentation.isRemoving
+        rememberNavEntryDispatcherOwner(enabled = interactiveTop, parent = parentDispatcherOwner)
+    } else {
+        null
+    }
+
     // Choose the governing transition at the bucketed depth: own transition while at or entering
     // the top (d <= 0), the upper neighbour's transition while covered (0 < d). The per-frame
     // visual is then a pure deferred read inside the transition's own graphicsLayer.
@@ -752,11 +825,23 @@ private fun NavEntryHost(
         Modifier
     }
 
-    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier)) {
-        ProvideNavEntryViewModelStore(vmOwner) {
-            ProvideNavEntryLifecycle(lifecycleOwner) {
-                stateHolder.EntryStateContent(entry.contentKey) {
-                    movableContent { entry.Content() }
+    // Pages are input-opaque within their bounds: a hit-testable but non-consuming filter keeps a
+    // touch on a blank region of this entry from falling through to the covered (invisible but
+    // still composed) entry below. In-page consumers and the container swipe are unaffected —
+    // this only removes lower SIBLINGS from the hit path.
+    val opaqueInputModifier = Modifier.pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) awaitPointerEvent()
+        }
+    }
+
+    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier).then(opaqueInputModifier)) {
+        ProvideNavEntryBackScope(entryDispatcherOwner) {
+            ProvideNavEntryViewModelStore(vmOwner) {
+                ProvideNavEntryLifecycle(lifecycleOwner) {
+                    stateHolder.EntryStateContent(entry.contentKey) {
+                        movableContent { entry.Content() }
+                    }
                 }
             }
         }
