@@ -254,7 +254,7 @@ One trade-off to know: a gesture may grab the stack mid-programmatic-settle, swi
 | `cornerClipRadius` | `0.dp` | Radius of that clip; pass `rememberNavSystemCornerRadius()` to follow the device screen corner (still no rounding where the platform reports 0) |
 | `cornerClipMode` | `Leading` | Which corners to round: `Leading` — the corners meeting the screen edge, for slide-style transitions; `All` — every corner, for card-style transitions that scale the whole page |
 | `dimAmount` | `0.5f` | Maximum alpha of the fullscreen dim scrim beneath the top-most layer; the curve along the motion belongs to the transition (`scrimFraction`), this only caps darkness. `0f` disables |
-| `blockInputDuringTransition` | `false` | Swallow touch input on mid-transition entries, so taps cannot reach a half-animated screen |
+| `blockInputDuringTransition` | `true` | Swallow touch input on mid-transition entries, so taps cannot reach a half-animated screen |
 | `backdropColor` | `Unspecified` | Solid fill behind every entry layer — card-style transitions scale pages below full size, revealing the area behind the host; pass the theme background so it reads as the page extending outward |
 
 `NavDisplayEffects.Default` is the table above; `NavDisplayEffects.None` disables everything. A card-style setup:

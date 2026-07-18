@@ -65,7 +65,7 @@ data class NavDisplayEffects(
     val cornerClipRadius: Dp = 0.dp,
     val cornerClipMode: NavCornerClipMode = NavCornerClipMode.Leading,
     val dimAmount: Float = 0.5f,
-    val blockInputDuringTransition: Boolean = false,
+    val blockInputDuringTransition: Boolean = true,
     val backdropColor: Color = Color.Unspecified,
 ) {
     /**
@@ -101,7 +101,7 @@ data class NavDisplayEffects(
     }
 
     companion object {
-        /** The default effects (corner clip on, 0.5 dim, input blocking off). */
+        /** The default effects (corner clip on, 0.5 dim, input blocking on). */
         val Default: NavDisplayEffects = NavDisplayEffects()
 
         /** All effects disabled: no corner clip, no dim, no input blocking. */

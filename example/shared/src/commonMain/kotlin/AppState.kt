@@ -30,7 +30,7 @@ data class AppState(
     val enableScrollEndHaptic: Boolean = true,
     val enableCornerClip: Boolean = true,
     val enableDim: Boolean = true,
-    val blockInputDuringTransition: Boolean = false,
+    val blockInputDuringTransition: Boolean = true,
     val enableSwipeBack: Boolean = false,
     val navTransitionStyle: Int = 0,
     // Squircle
