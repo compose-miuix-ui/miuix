@@ -319,6 +319,31 @@ A `NavDisplay` can be nested inside an entry (tabs hosting their own stacks, a f
 
 One rule to know: the **swipe** gesture is claimed by the outer display first (the recognizer is deliberately parent-first). Host an interactive inner stack in the outer **root** entry (where the outer swipe is disabled anyway), or disable the outer gesture on the hosting route with `entry(swipeDismiss = NavSwipeDirection.None)`.
 
+## Multi-pane layouts (a pattern, not an API)
+
+The library deliberately stays a single flat stack; adaptive layouts compose **around** `NavDisplay` instead. A `NavDisplay` measures its own container, so placing it in a pane makes every transition and gesture pane-relative with no configuration:
+
+```kotlin
+if (isWideScreen) {
+    Row {
+        NavigationRail(...)                                    // persistent chrome
+        Box(Modifier.weight(1f).clipToBounds()) { NavDisplay(backStack, ...) { ... } }
+    }
+} else {
+    NavDisplay(backStack, ...) { ... }
+}
+```
+
+Rules of the pattern, each learned the hard way:
+
+- **Clip the pane** (`clipToBounds`): transition layers translate outside the pane (covered-page parallax, fly-outs) and would otherwise draw over the chrome next to it.
+- **Zero the screen-corner clip radius in panes** (`cornerClipRadius = 0.dp`): the pane edge is mid-screen; the device corner radius belongs to physical screen edges only.
+- **Drop edge insets the chrome already consumed**: a pane sitting right of a rail must not add the display-cutout start padding again.
+- **Two displays under one parent are supported**: ViewModel registries are per-display, and each display's back handler arms only while its own stack has more than one entry.
+- **A detail pane needs a placeholder root** — an empty back stack is rejected — and moving keys between stacks loses their state (saveable/ViewModel scopes are per-display); to survive a posture change, move the whole `NavDisplay` between layout slots with an app-level `movableContentOf` instead.
+
+The example app's wide-screen layout (`example/shared/src/commonMain/kotlin/AppContent.kt`) implements the persistent-rail variant of this pattern.
+
 ## Returning a result to a previous screen
 
 The v1 core **does not** ship a built-in result channel (no `navigateForResult` / `setResult` on `NavController`). Keep results out of the navigation runtime and pass them with whatever state mechanism you already use, or layer a tiny result bus on top of the back stack yourself.
@@ -339,7 +364,6 @@ Port that approach (or a `SavedStateHandle`-style holder) into your own app laye
 
 | Capability | v1 status |
 | :-- | :-- |
-| Multi-pane / list-detail adaptive layout | Not supported (single stack only) |
 | Dialog / bottom-sheet scene strategy (overlay destinations) | Not supported |
 | Shared-element transitions across destinations | Not supported |
 | KSP / annotation-based route registration | Not supported (register entries via the `entry<T> { }` DSL) |

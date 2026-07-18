@@ -319,6 +319,31 @@ ViewModel store 由 display 持有，而非 entry 的组合：被覆盖的 entry
 
 一条须知规则：**滑动**手势由外层 display 优先认领（识别器有意为 parent-first）。请把可交互的内层栈放在外层**根** entry 上（那里外层滑动本就禁用），或在宿主路由上用 `entry(swipeDismiss = NavSwipeDirection.None)` 关闭外层手势。
 
+## 多窗格布局（模式，而非 API）
+
+库有意保持单一扁平栈；自适应布局在 `NavDisplay` **外围**组合实现。`NavDisplay` 以自身容器测量，放进窗格后所有转场与手势天然以窗格为参照，无需任何配置：
+
+```kotlin
+if (isWideScreen) {
+    Row {
+        NavigationRail(...)                                    // 常驻侧栏
+        Box(Modifier.weight(1f).clipToBounds()) { NavDisplay(backStack, ...) { ... } }
+    }
+} else {
+    NavDisplay(backStack, ...) { ... }
+}
+```
+
+该模式的几条规则（均为实践验证）：
+
+- **窗格必须裁剪**（`clipToBounds`）：转场图层会平移出窗格边界（被覆盖页视差、飞出动画），不裁剪会画到旁边的侧栏上。
+- **窗格内屏幕圆角归零**（`cornerClipRadius = 0.dp`）：窗格边界在屏幕中间，设备圆角只属于物理屏幕边缘。
+- **去掉侧栏已消费的边缘 insets**：紧贴 rail 右侧的窗格不应再叠加屏幕缺口的 start padding。
+- **同一父级下多个 display 受支持**：ViewModel 注册表按 display 隔离，每个 display 的返回处理器仅在自身栈超过一个条目时启用。
+- **详情窗格需要占位根路由**——空返回栈会被拒绝；且跨栈迁移 key 会丢失其状态（saveable/ViewModel 作用域按 display 隔离）；要在窗格形态切换时保住状态，请用 app 级 `movableContentOf` 移动**整个** `NavDisplay`，而不是迁移 key。
+
+示例应用的宽屏布局（`example/shared/src/commonMain/kotlin/AppContent.kt`）实现了该模式的常驻 rail 变体。
+
 ## 向上一屏回传结果
 
 v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateForResult` / `setResult`）。请把结果留在导航运行时之外，用你已有的状态机制传递，或自行在返回栈之上叠一层极小的结果总线。
@@ -339,7 +364,6 @@ v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateFo
 
 | 能力 | v1 状态 |
 | :-- | :-- |
-| 多窗格 / 列表-详情自适应布局 | 不支持（仅单栈） |
 | Dialog / 底部表单 场景策略（覆盖型目的地） | 不支持 |
 | 跨目的地的共享元素转场（SharedTransition） | 不支持 |
 | KSP / 注解式路由注册 | 不支持（用 `entry<T> { }` DSL 注册 entry） |
