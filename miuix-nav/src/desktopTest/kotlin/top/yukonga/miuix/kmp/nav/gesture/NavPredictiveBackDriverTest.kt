@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.nav.gesture
 import androidx.compose.animation.core.Animatable
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,11 +36,11 @@ class NavPredictiveBackDriverTest {
     }
 
     @Test
-    fun progress_saturatesAtFullyPopped() = runBlocking {
-        // anchor 0.75 + progress 0.5 clamps at 1 -> animatedTop pins at topIndex - 1.
+    fun progress_saturatesJustAboveFullyPopped() = runBlocking {
+        // anchor 0.75 + progress 0.5 pins just above topIndex - 1 (see MAX_FINGER_PROGRESS).
         val animatedTop = Animatable(0.25f)
         drivePredictiveBack(events = flowOf(event(0f), event(0.5f)), animatedTop = animatedTop, topIndex = 1)
-        assertEquals(0f, animatedTop.value)
+        assertEquals(1f - NavDriverSpec.MAX_FINGER_PROGRESS, animatedTop.value)
     }
 
     @Test

@@ -193,7 +193,8 @@ internal class NavigationEventFlowAdapter(
 
 /** Maps a dispatcher [NavigationEvent] to the common [NavBackEvent]. */
 private fun NavigationEvent.toNavBackEvent(): NavBackEvent = NavBackEvent(
-    progress = progress,
+    // Misconfigured devices can report progress past 1; enforce the documented 0..1 contract.
+    progress = progress.coerceIn(0f, 1f),
     swipeEdge = when (swipeEdge) {
         NavigationEvent.EDGE_LEFT -> NavSwipeEdge.Left
         NavigationEvent.EDGE_RIGHT -> NavSwipeEdge.Right

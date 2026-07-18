@@ -24,8 +24,10 @@ import kotlin.math.sqrt
  * jump by construction.
  *
  * Clamp range:
- * - upper bound `1f`: the fully-popped end; an `anchor > 0` grab saturates early (the page pins
- *   at the end while the finger keeps travelling), matching the reference interactive-pop feel.
+ * - upper bound [NavDriverSpec.MAX_FINGER_PROGRESS], just under the fully-popped end (see the
+ *   constant for why exactly 1 is never reachable by a finger); an `anchor > 0` grab saturates
+ *   early (the page pins at the end while the finger keeps travelling), matching the reference
+ *   interactive-pop feel.
  * - lower bound `min(anchor, 0f)`: with `anchor >= 0` a reverse drag can at most push the page
  *   back to rest (never into the covered regime — the static analogue of the cancel velocity
  *   clamp); with `anchor < 0` it can at most freeze the leaving entry at the grab point, never
@@ -33,9 +35,9 @@ import kotlin.math.sqrt
  *
  * @param anchor progress toward pop at the claim instant, signed; `0f` for a rest-state grab.
  * @param fingerProgress finger travel since the claim in progress units, unclamped.
- * @return total progress on the pop axis, in `min(anchor, 0f)..1f`.
+ * @return total progress on the pop axis, in `min(anchor, 0f)..`[NavDriverSpec.MAX_FINGER_PROGRESS].
  */
-internal fun anchoredProgress(anchor: Float, fingerProgress: Float): Float = (anchor + fingerProgress).coerceIn(anchor.coerceAtMost(0f), 1f)
+internal fun anchoredProgress(anchor: Float, fingerProgress: Float): Float = (anchor + fingerProgress).coerceIn(anchor.coerceAtMost(0f), NavDriverSpec.MAX_FINGER_PROGRESS)
 
 /**
  * Pure mapping from a rest-state gesture progress to the `animatedTop` target value.
@@ -48,7 +50,7 @@ internal fun anchoredProgress(anchor: Float, fingerProgress: Float): Float = (an
  * easing into its fraction).
  *
  * @param topIndex index of the current top entry in the back stack (`lastIndex`).
- * @param progress raw gesture progress; clamped to `0f..1f` by [anchoredProgress].
+ * @param progress raw gesture progress; clamped to `0f..`[NavDriverSpec.MAX_FINGER_PROGRESS] by [anchoredProgress].
  * @return the `animatedTop` value the gesture should snap to.
  */
 internal fun fingerTarget(topIndex: Int, progress: Float): Float = topIndex - anchoredProgress(anchor = 0f, fingerProgress = progress)
@@ -110,6 +112,14 @@ internal object NavDriverSpec {
 
     /** Position fallback: progress at/after which a low-velocity release commits. */
     const val COMMIT_POSITION_THRESHOLD: Float = 0.5f
+
+    /**
+     * Upper saturation of a finger-driven position ([anchoredProgress]), just under the
+     * fully-popped end: `d = -1` (visible-window exit + unload) is reserved for a committed
+     * settle. An overdriven gesture — back progress misreported past 1, or a full-extent
+     * swipe — would otherwise blank the outgoing entry and its dim scrim mid-gesture.
+     */
+    const val MAX_FINGER_PROGRESS: Float = 0.999f
 }
 
 /** Maps a public settle spec onto the concrete Compose animation spec. */

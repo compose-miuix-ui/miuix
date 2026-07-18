@@ -28,8 +28,9 @@ class NavDriverTest {
     }
 
     @Test
-    fun fingerTarget_fullProgress_isTopMinusOne() {
-        assertEquals(1f, fingerTarget(topIndex = 2, progress = 1f))
+    fun fingerTarget_fullProgress_saturatesJustAboveTopMinusOne() {
+        // A finger position never reaches the fully-popped end (see MAX_FINGER_PROGRESS).
+        assertEquals(2f - NavDriverSpec.MAX_FINGER_PROGRESS, fingerTarget(topIndex = 2, progress = 1f))
     }
 
     @Test
@@ -39,7 +40,8 @@ class NavDriverTest {
 
     @Test
     fun fingerTarget_clampsProgressAboveOne() {
-        assertEquals(1f, fingerTarget(topIndex = 2, progress = 1.4f))
+        // Misreported progress past 1 saturates at the same sub-1 cap.
+        assertEquals(2f - NavDriverSpec.MAX_FINGER_PROGRESS, fingerTarget(topIndex = 2, progress = 1.4f))
     }
 
     // ---- anchoredProgress ----
@@ -63,9 +65,9 @@ class NavDriverTest {
     }
 
     @Test
-    fun anchoredProgress_saturatesAtOne() {
-        // anchor + finger > 1 pins at the fully-popped end.
-        assertEquals(1f, anchoredProgress(anchor = 0.5f, fingerProgress = 0.75f))
+    fun anchoredProgress_saturatesJustBelowFullyPopped() {
+        // anchor + finger > 1 pins just under the fully-popped end (d = -1 is terminal).
+        assertEquals(NavDriverSpec.MAX_FINGER_PROGRESS, anchoredProgress(anchor = 0.5f, fingerProgress = 0.75f))
     }
 
     @Test
@@ -95,9 +97,9 @@ class NavDriverTest {
 
     @Test
     fun anchoredProgress_zeroAnchor_matchesLegacyClamp() {
-        // anchor == 0 degenerates to the legacy fingerTarget clamp (0..1).
+        // anchor == 0 degenerates to the legacy fingerTarget clamp (0..MAX_FINGER_PROGRESS).
         assertEquals(0f, anchoredProgress(anchor = 0f, fingerProgress = -0.5f))
-        assertEquals(1f, anchoredProgress(anchor = 0f, fingerProgress = 1.5f))
+        assertEquals(NavDriverSpec.MAX_FINGER_PROGRESS, anchoredProgress(anchor = 0f, fingerProgress = 1.5f))
     }
 
     // ---- usesProgrammaticCurve ----
