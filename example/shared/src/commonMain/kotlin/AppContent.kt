@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
@@ -52,6 +53,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -107,12 +109,14 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.nav.core.NavBackStack
 import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
@@ -185,8 +189,9 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
     ) {
-        // Follow the device screen corner so the slide-in clip matches the platform (0 on Desktop/Web).
-        val navCornerRadius = rememberNavSystemCornerRadius()
+        // Follow the device screen corner so the slide-in clip matches the platform (0 on
+        // Desktop/Web). The two-pane layout animates inside a mid-screen pane, so no screen corner.
+        val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
         val isCrossActivityStyle = appState.navTransitionStyle == 1
         val backdropColor = MiuixTheme.colorScheme.surface
         val isDarkTheme = isInDarkTheme()
@@ -238,41 +243,43 @@ fun AppContent(
         // expression itself is stable across recompositions.
         val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
 
-        NavDisplay(
-            backStack = backStack,
-            onBack = { navigator.pop() },
-            transition = navTransition,
-            effects = effects,
-        ) {
-            entry<Route.Main>(swipeDismiss = swipeBackDirection) {
-                Home(
-                    padding = padding,
-                    navigationItems = navigationItems,
-                    mainPagerState = mainPagerState,
-                )
+        if (isWideScreen) {
+            // Two-pane layout: the rail is app chrome, not a navigation layer — every route
+            // animates inside the right pane, whose NavDisplay measures its own container
+            // (pane-relative transitions and gestures).
+            Row(modifier = Modifier.fillMaxSize()) {
+                if (appState.showNavigationBar) {
+                    PersistentNavigationRail(
+                        navigationItems = navigationItems,
+                        mainPagerState = mainPagerState,
+                    )
+                }
+                // clipToBounds: transition layers translate outside the pane (covered-page
+                // parallax); without the clip they would draw over the rail.
+                Box(modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
+                    AppNavHost(
+                        backStack = backStack,
+                        navigator = navigator,
+                        transition = navTransition,
+                        effects = effects,
+                        swipeBackDirection = swipeBackDirection,
+                        padding = padding,
+                        navigationItems = navigationItems,
+                        mainPagerState = mainPagerState,
+                    )
+                }
             }
-            entry<Route.PullToRefresh>(swipeDismiss = swipeBackDirection) {
-                PullToRefreshPage(padding = padding)
-            }
-            entry<Route.About>(swipeDismiss = swipeBackDirection) {
-                AboutPage(padding = padding)
-            }
-            entry<Route.License>(swipeDismiss = swipeBackDirection) {
-                LicensePage(padding = padding)
-            }
-            entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
-                val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
-                NavTestPage(
-                    index = index,
-                    padding = padding,
-                )
-            }
-            entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
-                MultiScaffoldTestPage(padding = padding)
-            }
-            entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
-                NestedNavTestPage(padding = padding)
-            }
+        } else {
+            AppNavHost(
+                backStack = backStack,
+                navigator = navigator,
+                transition = navTransition,
+                effects = effects,
+                swipeBackDirection = swipeBackDirection,
+                padding = padding,
+                navigationItems = navigationItems,
+                mainPagerState = mainPagerState,
+            )
         }
     }
 
@@ -287,6 +294,92 @@ fun AppContent(
                 .statusBarsPadding()
                 .captionBarPadding(),
         )
+    }
+}
+
+@Composable
+private fun AppNavHost(
+    backStack: NavBackStack,
+    navigator: Navigator,
+    transition: NavTransition,
+    effects: NavDisplayEffects,
+    swipeBackDirection: NavSwipeDirection,
+    padding: PaddingValues,
+    navigationItems: List<NavigationItem>,
+    mainPagerState: MainPagerState,
+) {
+    NavDisplay(
+        backStack = backStack,
+        onBack = { navigator.pop() },
+        transition = transition,
+        effects = effects,
+    ) {
+        entry<Route.Main>(swipeDismiss = swipeBackDirection) {
+            Home(
+                padding = padding,
+                navigationItems = navigationItems,
+                mainPagerState = mainPagerState,
+            )
+        }
+        entry<Route.PullToRefresh>(swipeDismiss = swipeBackDirection) {
+            PullToRefreshPage(padding = padding)
+        }
+        entry<Route.About>(swipeDismiss = swipeBackDirection) {
+            AboutPage(padding = padding)
+        }
+        entry<Route.License>(swipeDismiss = swipeBackDirection) {
+            LicensePage(padding = padding)
+        }
+        entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
+            val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
+            NavTestPage(
+                index = index,
+                padding = padding,
+            )
+        }
+        entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
+            MultiScaffoldTestPage(padding = padding)
+        }
+        entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
+            NestedNavTestPage(padding = padding)
+        }
+    }
+}
+
+/**
+ * Wide-screen chrome: the always-visible navigation rail on the left of the two-pane layout.
+ * A rail tab first pops the pane's stack back to the main route, then switches the pager.
+ */
+@Composable
+private fun PersistentNavigationRail(
+    navigationItems: List<NavigationItem>,
+    mainPagerState: MainPagerState,
+) {
+    val appState = LocalAppState.current
+    val navigator = LocalNavigator.current
+    val page = mainPagerState.selectedPage
+    val expandRail = shouldExpandNavigationRail()
+    val railState = rememberNavigationRailState(
+        initialValue = if (expandRail) NavigationRailValue.Expanded else NavigationRailValue.Collapsed,
+    )
+    LaunchedEffect(expandRail) {
+        if (expandRail) railState.expand() else railState.collapse()
+    }
+    NavigationRail(
+        state = railState,
+    ) {
+        navigationItems.forEachIndexed { index, item ->
+            NavigationRailItem(
+                selected = page == index,
+                onClick = {
+                    navigator.popUntil { it is Route.Main }
+                    mainPagerState.animateToPage(index)
+                },
+                icon = item.icon,
+                label = item.label,
+                badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+            )
+        }
     }
 }
 
@@ -308,7 +401,6 @@ private fun Home(
     ) {
         if (isWideScreen) {
             WideScreenContent(
-                navigationItems = navigationItems,
                 snackbarHostState = snackbarHostState,
                 layoutDirection = layoutDirection,
                 mainPagerState = mainPagerState,
@@ -326,66 +418,40 @@ private fun Home(
 
 @Composable
 private fun WideScreenContent(
-    navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
     mainPagerState: MainPagerState,
 ) {
     val appState = LocalAppState.current
-    val page = mainPagerState.selectedPage
-    val expandRail = shouldExpandNavigationRail()
-    val railState = rememberNavigationRailState(
-        initialValue = if (expandRail) NavigationRailValue.Expanded else NavigationRailValue.Collapsed,
-    )
-    LaunchedEffect(expandRail) {
-        if (expandRail) railState.expand() else railState.collapse()
-    }
-    Row {
-        if (appState.showNavigationBar) {
-            NavigationRail(
-                state = railState,
-            ) {
-                navigationItems.forEachIndexed { index, item ->
-                    NavigationRailItem(
-                        selected = page == index,
-                        onClick = { mainPagerState.animateToPage(index) },
-                        icon = item.icon,
-                        label = item.label,
-                        badge = navigationItemBadge(index, appState.showNavigationBarBadge),
-                    )
-                }
-            }
-        }
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentWindowInsets =
-            WindowInsets.systemBars.union(
-                WindowInsets.displayCutout.exclude(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Start),
-                ),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentWindowInsets =
+        WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Start),
             ),
-            floatingActionButton = {
-                FloatingActionButton(show = appState.showFloatingActionButton)
-            },
-            floatingActionButtonPosition = appState.floatingActionButtonPosition.toFabPosition(),
-            floatingToolbar = {
-                FloatingToolbar(
-                    showFloatingToolbar = appState.showFloatingToolbar,
-                    floatingToolbarOrientation = appState.floatingToolbarOrientation,
-                )
-            },
-            floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
-        ) { padding ->
-            AppPager(
-                snackbarHostState = snackbarHostState,
-                padding = PaddingValues(top = padding.calculateTopPadding()),
-                pagerState = mainPagerState.pagerState,
-                modifier = Modifier
-                    .imePadding()
-                    .padding(end = padding.calculateEndPadding(layoutDirection)),
+        ),
+        floatingActionButton = {
+            FloatingActionButton(show = appState.showFloatingActionButton)
+        },
+        floatingActionButtonPosition = appState.floatingActionButtonPosition.toFabPosition(),
+        floatingToolbar = {
+            FloatingToolbar(
+                showFloatingToolbar = appState.showFloatingToolbar,
+                floatingToolbarOrientation = appState.floatingToolbarOrientation,
             )
-        }
+        },
+        floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
+    ) { padding ->
+        AppPager(
+            snackbarHostState = snackbarHostState,
+            padding = PaddingValues(top = padding.calculateTopPadding()),
+            pagerState = mainPagerState.pagerState,
+            modifier = Modifier
+                .imePadding()
+                .padding(end = padding.calculateEndPadding(layoutDirection)),
+        )
     }
 }
 

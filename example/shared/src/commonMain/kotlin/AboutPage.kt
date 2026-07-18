@@ -128,6 +128,7 @@ fun AboutPage(
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     titleColor = titleColor,
+                    defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         BackNavigationIcon(
                             onClick = { navigator.pop() },
@@ -175,7 +176,7 @@ private fun AboutContent(
         padding,
         padding,
         isWideScreen,
-        extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
     val logoPadding = pageContentPadding(
@@ -183,7 +184,7 @@ private fun AboutContent(
         padding,
         isWideScreen,
         extraTop = 40.dp,
-        extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
         extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
     )
 
