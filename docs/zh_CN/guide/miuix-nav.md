@@ -301,6 +301,8 @@ NavDisplay(
 - **不同的 key 必须打印出不同的字符串。** 可保存状态槽位以 contentKey 的 `toString()` 为键。两个*不相等*却打印出同一字符串的 key——不同包下同名的 `data class` 路由（`data class` 的 `toString()` 不含包名），或 contentKey 工厂分别返回的 `Int 1` 与 `String "1"`——会在 reconcile 时被一条可操作的 `IllegalArgumentException` 拒绝，而不是静默共享并互相破坏对方的已存状态。
 - **字符串必须由值派生。** `data class` / `data object` 路由天然满足。保留默认恒等 `toString()`（`com.app.Detail@1a2b3c`）的路由类能通过所有运行时检查——字符串在会话内是唯一的——但进程死亡后会解析出全新的字符串，该条目的 `rememberSaveable` 状态会被静默重置。请坚持使用 `data class` / `data object` 路由，或让工厂返回由值派生的 key。
 
+唯一性同时意味着**连点防抖**是应用层职责：导航按钮被快速点击两次会把同一路由值推入两次并被拒绝。请让 push 幂等——跳过已在栈上的 key（见示例应用的 `Navigator.push`）——或让每个实例携带唯一值。
+
 ## 条目生命周期与 ViewModel
 
 每个 entry 运行在自己的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下，`collectAsStateWithLifecycle`、`viewModel()` 与基于 store 的依赖注入无需额外配置即可按屏幕划分作用域。

@@ -145,8 +145,15 @@ fun NestedNavTestPage(padding: PaddingValues) {
                                 entry<InnerRoute.Level> { route ->
                                     InnerLevelContent(
                                         depth = route.depth,
-                                        onPushInner = { innerBackStack.add(InnerRoute.Level(route.depth + 1)) },
-                                        onPopInner = { innerBackStack.removeLastOrNull() },
+                                        // Idempotent: a double tap would push a duplicate contentKey.
+                                        onPushInner = {
+                                            val next = InnerRoute.Level(route.depth + 1)
+                                            if (next !in innerBackStack) innerBackStack.add(next)
+                                        },
+                                        // The inner root must stay: an empty stack is rejected.
+                                        onPopInner = {
+                                            if (innerBackStack.size > 1) innerBackStack.removeLastOrNull()
+                                        },
                                         onPushOuter = { navigator.push(Route.Navigation(Random.nextLong().toString())) },
                                     )
                                 }

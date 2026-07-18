@@ -14,10 +14,14 @@ class Navigator(
     val backStack: NavBackStack,
 ) {
     /**
-     * Push a key onto the back stack.
+     * Push a key onto the back stack, idempotently: a double tap pushing the same route value
+     * twice is a duplicate contentKey (rejected by the runtime), so skip keys already present.
+     * Routes needing multiple live instances carry unique values instead.
      */
     fun push(key: NavKey) {
-        backStack.add(key)
+        if (key !in backStack) {
+            backStack.add(key)
+        }
     }
 
     /**

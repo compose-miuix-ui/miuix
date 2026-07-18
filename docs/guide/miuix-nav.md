@@ -301,6 +301,8 @@ Each entry's `rememberSaveable` state is scoped by its **contentKey** — the ro
 - **Distinct keys must print distinct strings.** The saveable slot is keyed by the contentKey's `toString()`. Two *unequal* keys that print the same string — same-named `data class` routes in different packages (`data class` `toString()` omits the package), or an `Int 1` vs a `String "1"` returned from contentKey factories — are rejected at reconcile time with an actionable `IllegalArgumentException` instead of silently sharing and corrupting each other's saved state.
 - **The string must be value-derived.** `data class` / `data object` routes qualify out of the box. A route class that keeps the default identity `toString()` (`com.app.Detail@1a2b3c`) passes every runtime check — the string is unique within the session — but resolves to a new string after process death, so the entry's `rememberSaveable` state silently resets. Stick to `data class` / `data object` routes, or return a value-derived key from the factory.
 
+Uniqueness also makes **double taps** an app-level concern: a navigation button tapped twice in quick succession pushes the same route value twice and is rejected. Make pushes idempotent — skip keys already on the stack (see the example app's `Navigator.push`) — or give each instance a unique value.
+
 ## Entry lifecycle and ViewModels
 
 Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`, so `collectAsStateWithLifecycle`, `viewModel()` and store-based DI scope per screen with no extra setup.
