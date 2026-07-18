@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -144,6 +145,8 @@ fun SearchBar(
  *   respond to user input, and it will appear visually disabled and disabled to accessibility
  *   services.
  * @param textStyle Style configuration that applies at character level such as color, font etc.
+ * @param color the background color of the input field's capsule. Pass [Color.Transparent] when
+ *   drawing your own background behind it (e.g. a backdrop blur).
  * @param leadingIcon the leading icon to be displayed at the start of the input field.
  * @param trailingIcon the trailing icon to be displayed at the end of the input field.
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
@@ -162,6 +165,7 @@ fun InputField(
     label: String = "",
     enabled: Boolean = true,
     textStyle: TextStyle? = null,
+    color: Color = MiuixTheme.colorScheme.surfaceContainerHigh,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
@@ -253,7 +257,7 @@ fun InputField(
             Box(
                 modifier = Modifier
                     .background(
-                        color = MiuixTheme.colorScheme.surfaceContainerHigh,
+                        color = color,
                         shape = capsuleShape,
                     ),
                 contentAlignment = Alignment.CenterStart,

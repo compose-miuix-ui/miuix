@@ -36,6 +36,7 @@ data class AppState(
     val enableSquircle: Boolean = true,
     // Blur
     val enableBlur: Boolean = true,
+    val blurStyle: Int = 0,
 )
 
 val LocalAppState = compositionLocalOf<AppState> {

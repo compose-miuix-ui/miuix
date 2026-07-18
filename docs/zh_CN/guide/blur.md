@@ -235,6 +235,57 @@ val colors = BlurColors(
 )
 ```
 
+## 渐进模糊
+
+`Modifier.progressiveTextureBlur` 应用渐变背景模糊：模糊强度沿指定方向从满强度连续过渡到零，过渡带中段是真实的中等模糊，清晰端保持全分辨率像素级锐利。适合导航栏、边缘淡出等场景。
+
+```kotlin
+import top.yukonga.miuix.kmp.blur.ProgressiveBlur
+import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
+
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(200.dp)
+        .progressiveTextureBlur(
+            backdrop = backdrop,
+            shape = RectangleShape,
+            blurRadius = 20f,
+            gradient = ProgressiveBlur.Top // 顶部最强，底部锐利
+        )
+) {
+    // 内容
+}
+```
+
+### 渐变方向与区间
+
+`ProgressiveBlur` 用两点线性渐变描述过渡：沿 `angle`（角度，从 +X 轴顺时针）投影，模糊在 `startFraction` 处为满强度，在 `endFraction` 处降为零。常见的边缘淡出直接用预设，也可通过 `copy` 调整区间：
+
+```kotlin
+// 预设覆盖四个方向的边缘淡出
+ProgressiveBlur.Top      // angle = 90°，顶部最强
+ProgressiveBlur.Bottom   // angle = 270°，底部最强
+ProgressiveBlur.Left     // angle = 0°，左侧最强
+ProgressiveBlur.Right    // angle = 180°，右侧最强
+
+// 自定义区间：前 30% 保持满强度，90% 处完全清晰
+val gradient = ProgressiveBlur.Top.copy(startFraction = 0.3f, endFraction = 0.9f)
+
+// 自定义衰减曲线：前半段半径变化明显，后半段留长而柔和的尾部
+val frontLoaded = ProgressiveBlur.Top.copy(curve = 0.5f)
+```
+
+`colors` 与 `noiseCoefficient` 的用法与 [`textureBlur`](#颜色配置) 一致，但只作用于模糊区域并随模糊一起淡出——清晰端与周围内容无缝衔接，不会出现染色硬边。注意渐进模糊的 `noiseCoefficient` 默认为 `0f`（禁用）：噪点叠在模糊渐变上比叠在均匀模糊上更显眼。
+
+::: warning 性能
+多级模糊层已在降采样分辨率上求值，但像素级锐利的清晰端仍需每帧额外一个全分辨率覆盖 pass——GPU 带宽开销高于同面积的 `textureBlur`。渐进模糊适合用在栏、边缘过渡带上，不建议覆盖大面积区域。
+:::
+
+::: tip
+在自定义 `drawBackdrop` 管线中，`progressiveTextureBlurEffect(...)` 在 `effects` 块内运行同样的预设链；需搭配 `drawBackdrop` 的 `progressiveGradient` 参数（传入同一 gradient）以保证清晰端真正锐利——`Modifier.progressiveTextureBlur` 已将两者接好。
+:::
+
 ## 进阶用法
 
 ### 独立 X/Y 模糊半径
@@ -342,7 +393,7 @@ Box(
 | `padding` | Float | 模糊溢出的额外内边距 |
 | `renderEffect` | RenderEffect? | 累积的效果链 |
 | `downscaleFactor` | Int | 降采样系数（1、2、4、8、16） |
-| `noiseCoefficient` | Float | 全分辨率噪声抖动系数 |
+| `noiseCoefficient` | Float | 噪声抖动系数 |
 
 ## 属性
 
@@ -362,6 +413,35 @@ Box(
 | enabled | Boolean | 是否启用模糊，为 false 时跳过效果并正常绘制内容 | true | 否 |
 
 \* 仅在独立半径重载中必须。
+
+### progressiveTextureBlur 参数
+
+| 参数名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| backdrop | Backdrop | 提供模糊背景内容的 Backdrop | - | 是 |
+| shape | Shape | 模糊区域裁剪的形状 | - | 是 |
+| blurRadius | Float | 满强度处的模糊半径（dp）。限制在 [0, 150] 范围内 | 20f | 否 |
+| blurRadiusX | Float | 满强度处的水平模糊半径（dp，独立半径重载） | - | 是* |
+| blurRadiusY | Float | 满强度处的垂直模糊半径（dp，独立半径重载） | - | 是* |
+| gradient | ProgressiveBlur | 控制模糊满强度与清晰位置的方向和区间 | ProgressiveBlur.Top | 否 |
+| noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0f | 否 |
+| colors | BlurColors | 颜色调整和混合图层，随模糊一起淡出 | BlurColors() | 否 |
+| highlight | Highlight? | 可选的边缘高光，绘制在内容之上。`null` 时跳过 | null | 否 |
+| contentBlendMode | BlendMode | 内容在模糊上方合成的混合模式 | SrcOver | 否 |
+| enabled | Boolean | 是否启用模糊，为 false 时跳过效果并正常绘制内容 | true | 否 |
+
+\* 仅在独立半径重载中必须。
+
+### ProgressiveBlur 属性
+
+| 属性名 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| angle | Float | 渐变方向（角度，从 +X 轴顺时针）：0 从左向右淡出，90 从上向下，180 从右向左，270 从下向上 | 90f |
+| startFraction | Float | 沿 angle 投影范围内模糊为满强度的位置，范围 [0, 1] | 0f |
+| endFraction | Float | 模糊降为零的位置，范围 [0, 1]；可小于 startFraction 以反转过渡，但不能与其相等 | 1f |
+| curve | Float | 幂次衰减曲线，端点固定不变：< 1 时半径变化集中在强端（前段变化明显、尾部柔长），> 1 时集中在清晰端。必须为正数 | 1f |
+
+预设：`ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` 覆盖四个方向的边缘淡出。
 
 ### BlurColors 属性
 

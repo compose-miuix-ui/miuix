@@ -58,7 +58,7 @@ fun MultiScaffoldTestPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
+            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
                 AdaptiveTopAppBar(
                     title = "Multi-Scaffold Test",
                     showTopAppBar = appState.showTopAppBar,

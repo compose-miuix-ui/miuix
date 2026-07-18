@@ -8,13 +8,18 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
+import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
+import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
@@ -103,6 +108,133 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
 }
 
 /**
+ * Chains a separable **progressive** (gradient) Blur into the scope's
+ * [BackdropEffectScope.renderEffect]: a true variable-radius blur whose radius ramps continuously
+ * from full to zero along [gradient]. It uses the same adaptive downscale as [blur], so it never
+ * blocks/aliases at large radii — but that single downscale also means the `intensity → 0` end
+ * samples the downscaled backdrop (soft, not pixel-sharp).
+ *
+ * Paired with `drawBackdrop`'s `progressiveGradient` (as [Modifier.progressiveTextureBlur] wires),
+ * the draw path renders the multi-level composite instead — a downscaled level stack plus a
+ * genuinely sharp full-resolution clear end — and this call only records the target radii and
+ * downscale for it.
+ *
+ * @param radiusX Horizontal blur radius in pixels at full strength.
+ * @param radiusY Vertical blur radius in pixels at full strength. Defaults to [radiusX].
+ * @param gradient Direction and band controlling where the blur is full vs zero.
+ */
+fun BackdropEffectScope.progressiveBlur(
+    radiusX: Float,
+    radiusY: Float = radiusX,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
+) {
+    if (!isRuntimeShaderSupported()) return
+    val scope = impl
+    if (scope.progressiveCompositeActive) {
+        // Composite mode: the level stack renders on the downscaled layer and is assembled after
+        // the effects block (once the post chain is known); the sharp end is a separate full-res
+        // overlay (in-stack at full resolution). Record radii + downscale here and split the
+        // chain. Radius 0 stays (levels collapse to identity, effects keep riding the ramp).
+        val rX = radiusX.coerceAtLeast(0f)
+        val rY = radiusY.coerceAtLeast(0f)
+        // Size the downscale for the MIDDLE level: the lightest level's variance then stays above
+        // the pyramid's implied box variance at common radii (box compensation keeps its total
+        // variance exact), while every stack pass runs on 1/sf² pixels. The sharp end never rides
+        // this layer, so it doesn't constrain sf.
+        val sigma1 = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_1
+        val exp = downScaleExpFor(sigma1 * sigma1)
+        val sf = 1 shl exp
+        val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+        if (kernelPadding > padding) {
+            padding = kernelPadding
+        }
+        val paddedW = size.width + padding * 2f
+        val paddedH = size.height + padding * 2f
+        // apply() compares these against the final padding to detect a stale sampling clamp.
+        scope.blurBuiltPaddedW = paddedW
+        scope.blurBuiltPaddedH = paddedH
+        scope.cachedProgRadiusX = rX
+        scope.cachedProgRadiusY = rY
+        scope.cachedProgExp = exp
+        scope.cachedProgSizeW = paddedW
+        scope.cachedProgSizeH = paddedH
+        scope.cachedProgResult = null
+        // Split the effects block here: chained-so-far → pre-blur, what follows → post-blur.
+        scope.progressivePreEffect = renderEffect
+        renderEffect = null
+        downscaleFactor = sf
+        return
+    }
+    if (radiusX <= 0f && radiusY <= 0f) return
+    val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
+
+    // Same adaptive downscale as blur(): the box prefilter at each level is what keeps the fixed
+    // 7-tap kernel from aliasing (blocky banding) at large radii. Capping it would defeat that.
+    val exp = downScaleExpFor(maxOf(sigmaX * sigmaX, sigmaY * sigmaY))
+    val sf = 1 shl exp
+
+    val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+    if (kernelPadding > padding) {
+        padding = kernelPadding
+    }
+
+    val compW = size.width
+    val compH = size.height
+    val paddedW = compW + padding * 2f
+    val paddedH = compH + padding * 2f
+
+    // apply() compares these against the final padding to detect a stale sampling clamp.
+    scope.blurBuiltPaddedW = paddedW
+    scope.blurBuiltPaddedH = paddedH
+
+    val effect = if (scope.cachedProgResult != null &&
+        scope.cachedProgRadiusX == radiusX &&
+        scope.cachedProgRadiusY == radiusY &&
+        scope.cachedProgSizeW == paddedW &&
+        scope.cachedProgSizeH == paddedH &&
+        scope.cachedProgExp == exp &&
+        scope.cachedProgAngle == gradient.angle &&
+        scope.cachedProgStart == gradient.startFraction &&
+        scope.cachedProgEnd == gradient.endFraction &&
+        scope.cachedProgCurve == gradient.curve
+    ) {
+        scope.cachedProgResult
+    } else {
+        createProgressiveBlurEffect(
+            radiusX,
+            radiusY,
+            sf,
+            adjustedVarianceForExp(sigmaX * sigmaX, exp),
+            adjustedVarianceForExp(sigmaY * sigmaY, exp),
+            Size(paddedW, paddedH),
+            padding,
+            compW,
+            compH,
+            gradient.angle,
+            gradient.startFraction,
+            gradient.endFraction,
+            gradient.curve,
+            scope,
+        ).also {
+            scope.cachedProgRadiusX = radiusX
+            scope.cachedProgRadiusY = radiusY
+            scope.cachedProgSizeW = paddedW
+            scope.cachedProgSizeH = paddedH
+            scope.cachedProgExp = exp
+            scope.cachedProgAngle = gradient.angle
+            scope.cachedProgStart = gradient.startFraction
+            scope.cachedProgEnd = gradient.endFraction
+            scope.cachedProgCurve = gradient.curve
+            scope.cachedProgResult = it
+        }
+    } ?: return
+
+    downscaleFactor = sf
+    renderEffect = renderEffect?.chain(effect) ?: effect
+}
+
+/**
  * Registers a noise dither pass with the given [coefficient]. Non-positive values are ignored.
  * Noise is applied at full resolution after upscaling so each screen pixel gets independent
  * dithering, which prevents banding visible at low blur radii.
@@ -129,66 +261,107 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (!isRuntimeShaderSupported()) return
     val scope = impl
 
-    // Reuse the cached blend effect on an unchanged config — a hit skips the color conversions,
-    // uniform uploads and effect creation, leaving only the chain. Keyed on the BlurColors value,
-    // so callers that rebuild it (or its list) each frame still hit.
-    val cached = scope.cachedBlendResult
-    val effect = if (cached != null && scope.cachedBlendColors == colors) {
-        cached
-    } else {
-        buildBlendColorsEffect(scope, colors).also {
-            scope.cachedBlendColors = colors
-            scope.cachedBlendResult = it
-        }
+    // Composite mode: a blend directly following progressiveBlur is recorded for the stack's
+    // folded ramp pass instead of chained (see BackdropEffectScopeImpl.progressivePostBlend).
+    if (scope.progressiveCompositeActive && !scope.cachedProgRadiusX.isNaN() &&
+        renderEffect == null && scope.progressivePostBlend == null
+    ) {
+        scope.progressivePostBlend = colors
+        return
     }
 
-    renderEffect = renderEffect.chain(effect)
+    renderEffect = renderEffect.chain(obtainBlendColorsEffect(scope, colors))
 }
 
-/** Builds the blend-layer [RenderEffect] for [colors] (no chaining); see [blendColors] for caching. */
-private fun buildBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
+/**
+ * Returns the blend-layer [RenderEffect] for [colors], cached on an unchanged config — a hit
+ * skips the color conversions, uniform uploads and effect creation. Keyed on the BlurColors
+ * value, so callers that rebuild it (or its list) each frame still hit.
+ */
+internal fun obtainBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
+    val cached = scope.cachedBlendResult
+    if (cached != null && scope.cachedBlendColors == colors) return cached
+
+    val needsExtended = colors.needsExtendedBlend()
+    val shader = scope.obtainRuntimeShader(
+        if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd",
+        if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD,
+    )
+    shader.setBlendLayerUniforms(scope, colors, needsExtended)
+    return createRuntimeShaderEffect(shader, "child").also {
+        scope.cachedBlendColors = colors
+        scope.cachedBlendResult = it
+    }
+}
+
+/**
+ * The progressive composite's folded post pass: [obtainBlendColorsEffect]'s blend chain with the
+ * result ramp-mixed over the untouched source inside the same pass, so the stack below is
+ * evaluated exactly once. Band inputs are in the stack's downscaled, padded space. Uncached —
+ * the caller's stack cache holds the assembled effect.
+ */
+internal fun buildRampBlendColorsEffect(
+    scope: BackdropEffectScopeImpl,
+    colors: BlurColors,
+    ax: Float,
+    ay: Float,
+    projFull: Float,
+    projZero: Float,
+    curve: Float,
+): RenderEffect {
+    val needsExtended = colors.needsExtendedBlend()
+    val shader = scope.obtainRuntimeShader(
+        if (needsExtended) "MiBlendModesExtRamp" else "MiBlendModesStdRamp",
+        if (needsExtended) BLEND_MODE_SHADER_EXTENDED_RAMP else BLEND_MODE_SHADER_STANDARD_RAMP,
+    )
+    shader.setBlendLayerUniforms(scope, colors, needsExtended)
+    shader.setFloatUniform("in_gradAxis", ax, ay)
+    shader.setFloatUniform("in_gradBand", projFull, projZero)
+    shader.setFloatUniform("in_curve", curve)
+    return createRuntimeShaderEffect(shader, "child")
+}
+
+private fun BlurColors.needsExtendedBlend(): Boolean {
+    val layerCount = minOf(blendColors.size, MAX_BLEND_LAYERS)
+    return (0 until layerCount).any { blendColors[it].mode.value >= 100 }
+}
+
+private fun RuntimeShader.setBlendLayerUniforms(scope: BackdropEffectScopeImpl, colors: BlurColors, needsExtended: Boolean) {
     val layerList = colors.blendColors
     val layerCount = minOf(layerList.size, MAX_BLEND_LAYERS)
     val modes = scope.blendModesBuffer
     val colorData = scope.blendColorsBuffer
 
-    val needsExtended = (0 until layerCount).any { layerList[it].mode.value >= 100 }
-    val shaderKey = if (needsExtended) "MiBlendModesExt" else "MiBlendModesStd"
-    val shaderSource = if (needsExtended) BLEND_MODE_SHADER_EXTENDED else BLEND_MODE_SHADER_STANDARD
+    setFloatUniform("layerCount", layerCount.toFloat())
 
-    val shader = scope.obtainRuntimeShader(shaderKey, shaderSource).apply {
-        setFloatUniform("layerCount", layerCount.toFloat())
-
-        // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
-        // Zero unused trailing slots to avoid stale state from a previous invocation.
-        for (i in 0 until layerCount) {
-            val entry = layerList[i]
-            modes[i] = entry.mode.value.toFloat()
-            val c = entry.color.convert(ColorSpaces.Srgb)
-            val a = c.alpha
-            colorData[i * 4] = c.red * a
-            colorData[i * 4 + 1] = c.green * a
-            colorData[i * 4 + 2] = c.blue * a
-            colorData[i * 4 + 3] = a
-        }
-        for (i in layerCount until MAX_BLEND_LAYERS) {
-            modes[i] = 0f
-            colorData[i * 4] = 0f
-            colorData[i * 4 + 1] = 0f
-            colorData[i * 4 + 2] = 0f
-            colorData[i * 4 + 3] = 0f
-        }
-        setFloatUniform("blendModes", modes)
-        setFloatUniform("layerColors", colorData)
-        // Standard family doesn't declare these uniforms; setting them would error.
-        if (needsExtended) {
-            setFloatUniform("uSaturation", colors.saturation)
-            setFloatUniform("uBrightness", colors.brightness)
-            setFloatUniform("uLuminanceAmount", 0f)
-            setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
-        }
+    // Skiko lacks IntArray / array-indexed Color uniform — pack into flat float arrays.
+    // Zero unused trailing slots to avoid stale state from a previous invocation.
+    for (i in 0 until layerCount) {
+        val entry = layerList[i]
+        modes[i] = entry.mode.value.toFloat()
+        val c = entry.color.convert(ColorSpaces.Srgb)
+        val a = c.alpha
+        colorData[i * 4] = c.red * a
+        colorData[i * 4 + 1] = c.green * a
+        colorData[i * 4 + 2] = c.blue * a
+        colorData[i * 4 + 3] = a
     }
-    return createRuntimeShaderEffect(shader, "child")
+    for (i in layerCount until MAX_BLEND_LAYERS) {
+        modes[i] = 0f
+        colorData[i * 4] = 0f
+        colorData[i * 4 + 1] = 0f
+        colorData[i * 4 + 2] = 0f
+        colorData[i * 4 + 3] = 0f
+    }
+    setFloatUniform("blendModes", modes)
+    setFloatUniform("layerColors", colorData)
+    // Standard family doesn't declare these uniforms; setting them would error.
+    if (needsExtended) {
+        setFloatUniform("uSaturation", colors.saturation)
+        setFloatUniform("uBrightness", colors.brightness)
+        setFloatUniform("uLuminanceAmount", 0f)
+        setFloatUniform("uLuminanceValues", 0f, 0f, 0f, 0f)
+    }
 }
 
 /**
@@ -224,5 +397,35 @@ fun BackdropEffectScope.textureBlurEffect(
     noiseDither(noiseCoefficient)
     colorControls(colors.brightness, colors.contrast, colors.saturation)
     blur(clampedX * density, clampedY * density)
+    blendColors(colors)
+}
+
+/**
+ * Runs the progressive (gradient) texture-blur preset chain inside a custom [drawBackdrop] effect
+ * block: like [textureBlurEffect] but with [progressiveBlur] in place of [blur], so the blur radius
+ * ramps from full to zero along [gradient].
+ *
+ * Pair this with `drawBackdrop`'s `progressiveGradient` (same [gradient]) so the draw path renders
+ * the multi-level composite with a genuinely sharp full-resolution clear end —
+ * [Modifier.progressiveTextureBlur] wires both together.
+ *
+ * @param blurRadiusX Horizontal blur radius in dp at full strength.
+ * @param blurRadiusY Vertical blur radius in dp at full strength. Defaults to [blurRadiusX].
+ * @param gradient Direction and band controlling where the blur is full vs zero.
+ * @param noiseCoefficient Noise dithering coefficient. 0 (the default) disables noise.
+ * @param colors Color adjustments and blend layers applied after blur.
+ */
+fun BackdropEffectScope.progressiveTextureBlurEffect(
+    blurRadiusX: Float,
+    blurRadiusY: Float = blurRadiusX,
+    gradient: ProgressiveBlur = ProgressiveBlur.Top,
+    noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
+    colors: BlurColors = BlurColors(),
+) {
+    val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    noiseDither(noiseCoefficient)
+    colorControls(colors.brightness, colors.contrast, colors.saturation)
+    progressiveBlur(clampedX * density, clampedY * density, gradient)
     blendColors(colors)
 }

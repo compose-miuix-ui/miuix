@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -130,7 +131,12 @@ fun IconsPage(
     // Blur state
     val backdrop = rememberBlurBackdrop()
     val blurActive = backdrop != null
-    val barColor = if (blurActive) colorScheme.surface.copy(alpha = 0f) else colorScheme.surface
+    val barColor = if (blurActive) Color.Transparent else colorScheme.surface
+    val searchCapsuleColor = if (blurActive) {
+        colorScheme.surfaceContainerHigh.copy(alpha = 0.8f)
+    } else {
+        null
+    }
 
     // Scroll state
     val lazyListState = rememberLazyListState()
@@ -138,7 +144,7 @@ fun IconsPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
+            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
                 searchStatus.TopAppBarAnim(backgroundColor = barColor) {
                     AdaptiveTopAppBar(
                         title = "Icon",
@@ -167,7 +173,7 @@ fun IconsPage(
                                     },
                                 ),
                         ) {
-                            SearchBarFake(searchStatus.label, dynamicTopPadding)
+                            SearchBarFake(searchStatus.label, dynamicTopPadding, searchCapsuleColor)
                         }
                     }
                 }
@@ -179,6 +185,7 @@ fun IconsPage(
                 offsetY = searchOffsetY,
                 defaultResult = {},
                 searchBarTopPadding = dynamicTopPadding,
+                collapsedCapsuleColor = searchCapsuleColor,
             ) {
                 items(
                     count = filteredIndices.size,
