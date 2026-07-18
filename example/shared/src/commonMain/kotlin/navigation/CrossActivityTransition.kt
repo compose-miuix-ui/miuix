@@ -238,7 +238,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
             s?.phase == NavSettlePhase.Commit -> (1f - s.elapsedMillis / 450f).coerceIn(0f, 1f)
 
             // Finger driving (and the cancel settle, context frozen): hold at full strength.
-            g != null -> (scope.relativeDepth.coerceIn(0f, 1f) / (1f - g.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f)
+            g != null -> (scope.relativeDepth.coerceIn(0f, 1f) / (1f - g.progress).coerceAtLeast(MIN_RELEASE_SPAN)).coerceIn(0f, 1f)
 
             else -> scope.relativeDepth.coerceIn(0f, 1f)
         }
@@ -264,7 +264,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
             // fraction, so this lerp is point-for-point the reference rect lerp — from the EASED
             // commit pose back to full size while flying out, hug frozen at its commit value
             // (the reference offsets the commit-time rect; it never re-centers).
-            val releaseP = (1f - gesture.progress).coerceAtLeast(0.01f)
+            val releaseP = (1f - gesture.progress).coerceAtLeast(MIN_RELEASE_SPAN)
             val post = (1f - p / releaseP).coerceIn(0f, 1f)
             val releasePE = shapedTopProgress(releaseP, gesture)
             val committedScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * releasePE
@@ -288,7 +288,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
                 scope.role == NavRole.Outgoing && gesture != null -> {
                     // Interrupted-commit fallback (no settle context): keep the depth-axis fade
                     // so a grabbed leaving card never flashes back to full opacity.
-                    val releaseP = (1f - gesture.progress).coerceAtLeast(0.01f)
+                    val releaseP = (1f - gesture.progress).coerceAtLeast(MIN_RELEASE_SPAN)
                     (1f - (1f - p / releaseP).coerceIn(0f, 1f) * 3.5f).coerceAtLeast(0f)
                 }
 
@@ -405,6 +405,13 @@ private fun coverProgress(d: Float): Float = d.coerceIn(0f, 1f)
 
 /** Smallest scale of the cross-activity card (the reference `MAX_SCALE = 0.9`). */
 private const val CROSS_ACTIVITY_MIN_SCALE = 0.9f
+
+/**
+ * Floor of every `1 - progress` denominator, at/below the library's sub-1 progress cap: a
+ * larger floor breaks the drag identity `depth == 1 - progress` near the cap (scrim collapse,
+ * revealed-layer snap) on devices that misreport progress past 1.
+ */
+private const val MIN_RELEASE_SPAN = 0.001f
 
 /**
  * Behind-offset of the revealed layer, post-commit fly-out distance of the card, and slide
