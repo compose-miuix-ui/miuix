@@ -36,6 +36,240 @@ internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
     if (i == 0) "" else buildBlurShader(i)
 }
 
+/** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
+internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
+
+/**
+ * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
+ * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps
+ * are merged into one bilinear fetch at their weight-averaged fractional offset (the per-pixel-σ
+ * analogue of [buildBlurShader]'s static pair merge; child sampling is bilinear on both
+ * platforms), sampled as symmetric ± pairs with the center hoisted out — halving the texture
+ * fetches. The loop bound [maxTap] must be an EVEN compile-time constant (AGSL) — pick it via
+ * [progressiveLoopTapBound] so a small max radius doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP]
+ * unrolled iterations per fragment.
+ *
+ * The outermost tap feathers in over its last pixel of reach (`clamp(radius − i + 1, 0, 1)`),
+ * keeping the kernel — its normalization AND the merged offsets — continuous in radius: a hard
+ * cutoff drops taps with weight up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer
+ * offsets, which reads as equal-radius stripes along the gradient. The feather also makes the
+ * kernel collapse smoothly to identity at radius 0, so the early-exit is a pure fast path for
+ * the clear plateau, not a visible switch.
+ *
+ * With [masked], the sharp overlay's clear-end cross-fade weight (`smoothstep(clamp(3·raw′ − 2))`
+ * over its own `in_maskBand`/`in_maskCurve`) is folded into the output, saving the separate
+ * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments (the band bbox's reach margin,
+ * where the radius is at its most expensive) skip the kernel outright.
+ */
+internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
+    require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
+    val maskUniforms = if (masked) {
+        """
+    uniform float2 in_maskBand;
+    uniform float in_maskCurve;
+"""
+    } else {
+        ""
+    }
+    val maskWeight = if (masked) {
+        """
+        float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
+        mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
+        float mw = clamp(mraw * 3.0 - 2.0, 0.0, 1.0);
+        mw = mw * mw * (3.0 - 2.0 * mw);
+        if (mw <= 0.0) {
+            return half4(0.0);
+        }
+"""
+    } else {
+        "        float mw = 1.0;"
+    }
+    return """
+    uniform shader child;
+    uniform float2 in_maxCoord;
+    uniform float2 in_step;
+    uniform float in_maxRadius;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_curve;
+    uniform float in_noise;
+$maskUniforms
+    float progRand(float2 co) {
+        return fract(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
+    }
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+$maskWeight
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        float radius = in_maxRadius * intensity;
+        if (radius <= 0.0) {
+            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
+            if (s.a > 0.0039) {
+                return half4(s.rgb / s.a, 1.0) * half(mw);
+            }
+            return s * half(mw);
+        }
+        float inv2s2 = -1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
+        float2 jitter = ((progRand(xy) - 0.5) * in_noise) * in_step;
+        half4 color = child.eval(clamp(xy + jitter, float2(0.5), in_maxCoord));
+        float total = 1.0;
+        for (int j = 0; j < ${maxTap / 2}; j++) {
+            float a = float(2 * j + 1);
+            float ra = clamp(radius - a + 1.0, 0.0, 1.0);
+            if (ra <= 0.0) continue;
+            float b = a + 1.0;
+            float wa = exp(a * a * inv2s2) * ra;
+            float wb = exp(b * b * inv2s2) * clamp(radius - b + 1.0, 0.0, 1.0);
+            float wsum = wa + wb;
+            float2 o = ((a * wa + b * wb) / wsum) * in_step;
+            color += (child.eval(clamp(xy + o + jitter, float2(0.5), in_maxCoord)) +
+                child.eval(clamp(xy - o + jitter, float2(0.5), in_maxCoord))) * half(wsum);
+            total += 2.0 * wsum;
+        }
+        color = color / half(max(total, 0.0001));
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0) * half(mw);
+        }
+        return color * half(mw);
+    }
+"""
+}
+
+/** Lazily built progressive Blur shader sources, indexed by tap bound; second array = masked. */
+private val PROGRESSIVE_BLUR_SHADER_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+private val PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+
+/** The progressive Blur shader source with loop bound [tapBound] (from [progressiveLoopTapBound]). */
+internal fun progressiveBlurShaderForTap(tapBound: Int, masked: Boolean = false): String {
+    val cache = if (masked) PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP else PROGRESSIVE_BLUR_SHADER_BY_TAP
+    return cache[tapBound] ?: buildProgressiveBlurShader(tapBound, masked).also { cache[tapBound] = it }
+}
+
+/**
+ * Compile-time loop bound for [maxRadius]: the next multiple of 4 covering it, capped at
+ * [PROGRESSIVE_BLUR_MAX_TAP]. Quantizing keeps the shader-variant count small (and an animating
+ * radius from recompiling per frame) while a small radius skips most of the unrolled iterations
+ * the full bound would cost per fragment.
+ */
+internal fun progressiveLoopTapBound(maxRadius: Float): Int {
+    val needed = kotlin.math.ceil(maxRadius).toInt()
+    return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
+}
+
+/** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
+internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
+internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
+internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
+
+/**
+ * Multi-level progressive composite (Skiko multi-child runtime shader): three graduated Gaussian
+ * levels ([blur0] strongest … [blur2] lightest) interpolated along the gradient so the blur
+ * strength itself ramps — graduated levels are what make the ramp read as progressive rather than
+ * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
+ * lightest level (degenerating the last mix segment; the true sharp end is a separate
+ * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]) — except at full resolution,
+ * where [clearChild] binds the source and the blend to sharp completes in-stack. Android builds
+ * the identical image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
+ * walk's derivative kinks at the segment stops otherwise read as Mach-band stripes, and zeroing
+ * the slope at the stops removes them without spatial noise (which would scale with the
+ * downscale's texel size). Must stay in lockstep with [PROGRESSIVE_LEVEL_MASK_SHADER]'s weight
+ * smoothstep — `s(1 − x) = 1 − s(x)` is what keeps the Android DAG identical to this mix chain.
+ */
+internal const val PROGRESSIVE_COMPOSITE_SHADER = """
+    uniform shader clearChild;
+    uniform shader blur0;
+    uniform shader blur1;
+    uniform shader blur2;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_curve;
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
+        // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
+        float pos = raw * 3.0;
+        half4 color;
+        if (pos < 1.0) {
+            float f = pos * pos * (3.0 - 2.0 * pos);
+            color = mix(blur0.eval(xy), blur1.eval(xy), f);
+        } else if (pos < 2.0) {
+            float f = pos - 1.0;
+            f = f * f * (3.0 - 2.0 * f);
+            color = mix(blur1.eval(xy), blur2.eval(xy), f);
+        } else {
+            float f = pos - 2.0;
+            f = f * f * (3.0 - 2.0 * f);
+            color = mix(blur2.eval(xy), clearChild.eval(xy), f);
+        }
+        // Unpremul terminator (same rationale as buildBlurShader): the native level blurs mix
+        // the padding ring's transparency into the edges; without renormalizing to opaque, the
+        // sharp content below bleeds through the semi-transparent rim.
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;
+    }
+"""
+
+/**
+ * Renormalizes a premultiplied blur result to opaque — [buildBlurShader]'s unpremul terminator as
+ * a standalone pass. Chained after the Android progressive stack's unmasked base blur, the one
+ * level whose alpha nothing else renormalizes (masked levels get it inline from
+ * [PROGRESSIVE_LEVEL_MASK_SHADER]; the Skiko composite applies it as its own terminator).
+ */
+internal const val UNPREMUL_SHADER = """
+    uniform shader child;
+
+    half4 main(float2 xy) {
+        half4 c = child.eval(xy);
+        if (c.a > 0.0039) {
+            return half4(c.rgb / c.a, 1.0);
+        }
+        return c;
+    }
+"""
+
+/**
+ * Band mask for the progressive composite: weight `clamp(in_level − in_slope·raw, 0, 1)` of the
+ * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
+ * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
+ * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
+ * rising `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end (the full-resolution overlay, or the
+ * Android stack's native source level at full resolution). The clamped
+ * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
+ * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
+ * platforms zero the walk's derivative at the segment stops alike. The child is renormalized to
+ * opaque before weighting — this is the Android masked levels' unpremul terminator (their native
+ * blurs mix in the padding ring's transparency), folded in here to save a pass; a no-op for the
+ * already-opaque children of the other mask uses.
+ */
+internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
+    uniform shader child;
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_curve;
+    uniform float in_level;
+    uniform float in_slope;
+
+    half4 main(float2 xy) {
+        float p = dot(xy, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
+        w = w * w * (3.0 - 2.0 * w);
+        half4 c = child.eval(xy);
+        if (c.a > 0.0039) {
+            c = half4(c.rgb / c.a, 1.0);
+        }
+        return c * half(w);
+    }
+"""
+
 /**
  * Brightness / contrast / saturation adjustment.
  *
@@ -282,22 +516,31 @@ internal val BLOOM_STROKE_SHADER_DUAL: String = buildBloomStrokeShader(dualPeak 
  *   would otherwise reserve for the longest path.
  * - `includeExtended = true` (any layer has `mode > 28`): emits the full set, identical to
  *   the prior monolithic shader.
+ * - `rampMix = true`: the progressive composite's folded post pass — the blend chain runs on a
+ *   single child eval and the result is ramp-mixed over the untouched source, replacing the
+ *   SrcOver branch form that evaluates the stack below twice.
  *
  * The standard family is the common case — keeping it lean lifts move-GPU occupancy on
  * Adreno / Mali where Lab path register pressure otherwise capped warp parallelism.
  */
-internal fun buildBlendModeShader(includeExtended: Boolean): String = buildString {
+internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = false): String = buildString {
     append(BLEND_MODE_SHADER_HEADER)
-    if (includeExtended) {
-        append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
-        append(BLEND_MODE_SHADER_MAIN_EXTENDED)
-    } else {
-        append(BLEND_MODE_SHADER_MAIN_STANDARD)
-    }
+    if (includeExtended) append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
+    if (rampMix) append(BLEND_MODE_SHADER_RAMP_UNIFORMS)
+    append(
+        when {
+            rampMix && includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP
+            rampMix -> BLEND_MODE_SHADER_MAIN_STANDARD_RAMP
+            includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED
+            else -> BLEND_MODE_SHADER_MAIN_STANDARD
+        },
+    )
 }
 
 internal val BLEND_MODE_SHADER_STANDARD: String = buildBlendModeShader(includeExtended = false)
 internal val BLEND_MODE_SHADER_EXTENDED: String = buildBlendModeShader(includeExtended = true)
+internal val BLEND_MODE_SHADER_STANDARD_RAMP: String = buildBlendModeShader(includeExtended = false, rampMix = true)
+internal val BLEND_MODE_SHADER_EXTENDED_RAMP: String = buildBlendModeShader(includeExtended = true, rampMix = true)
 
 /** Uniforms, standard mode helpers (0-28), and `doBlend` dispatch — shared by both families. */
 private const val BLEND_MODE_SHADER_HEADER = """
@@ -753,6 +996,22 @@ private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
     }
 """
 
+/** Ramp band uniforms + weight for the progressive composite's folded post pass. */
+private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
+    uniform float2 in_gradAxis;
+    uniform float2 in_gradBand;
+    uniform float in_curve;
+
+    float rampWeight(float2 fragCoord) {
+        float p = dot(fragCoord, in_gradAxis);
+        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        float w = 1.0 - raw;
+        return w * w * (3.0 - 2.0 * w);
+    }
+
+"""
+
 /** Flat `main` — standard family only, no unpremul/premul roundtrip. */
 private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
     half4 main(float2 fragCoord) {
@@ -766,6 +1025,59 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
             currentColor = doBlend(mode, layerColor, currentColor);
         }
         return currentColor;
+    }
+"""
+
+/** [BLEND_MODE_SHADER_MAIN_STANDARD] with the blended result ramp-mixed over the source. */
+private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
+    half4 main(float2 fragCoord) {
+        half4 src = child.eval(fragCoord);
+        half4 currentColor = src;
+        int count = int(layerCount);
+
+        for (int i = 0; i < 8; i++) {
+            if (i >= count) break;
+            half4 layerColor = layerColors[i];
+            int mode = int(blendModes[i]);
+            currentColor = doBlend(mode, layerColor, currentColor);
+        }
+        return mix(src, currentColor, half(rampWeight(fragCoord)));
+    }
+"""
+
+/** [BLEND_MODE_SHADER_MAIN_EXTENDED] with the blended result ramp-mixed over the source. */
+private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
+    half4 main(float2 fragCoord) {
+        half4 src = child.eval(fragCoord);
+        float4 currentColor = float4(src);
+        int count = int(layerCount);
+
+        for (int i = 0; i < 8; i++) {
+            if (i >= count) break;
+            half4 layerColor = layerColors[i];
+            int mode = int(blendModes[i]);
+            // Standard modes produce premultiplied result directly
+            if (mode <= 28) {
+                currentColor = float4(doBlend(mode, layerColor, half4(currentColor)));
+            } else {
+                // Unpremultiply for custom modes (they expect straight alpha)
+                float bgA = currentColor.a;
+                float3 bgStr = bgA > 0.0001 ? currentColor.rgb / bgA : float3(0.0);
+                half lcA = layerColor.a;
+                half3 lcStr = lcA > 0.0 ? layerColor.rgb / lcA : half3(0.0);
+
+                half4 bg = half4(half3(bgStr), half(bgA));
+                half4 lc = half4(lcStr, lcA);
+
+                // getBlendModeColor handles alpha internally, returns unpremultiplied result
+                half4 blended = getBlendModeColor(bg, bg, mode, lc);
+
+                // Re-premultiply
+                float outA = float(blended.a);
+                currentColor = float4(float3(blended.rgb) * outA, outA);
+            }
+        }
+        return mix(src, half4(currentColor), half(rampWeight(fragCoord)));
     }
 """
 

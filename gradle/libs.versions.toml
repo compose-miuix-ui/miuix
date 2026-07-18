@@ -4,7 +4,7 @@ kotlin = "2.4.10"
 kotlinx-serialization = "1.11.0"
 kotlinx-collections-immutable = "0.4.0"
 
-about-libraries = "15.0.3"
+about-libraries = "15.0.4"
 androidx-activity = "1.13.0"
 androidx-collection = "1.6.0"
 androidx-navigationevent = "1.1.2"

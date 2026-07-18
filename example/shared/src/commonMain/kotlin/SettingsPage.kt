@@ -52,6 +52,7 @@ private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
 private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
+private val BlurStyleOptions = listOf("Gaussian", "Progressive")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
@@ -69,7 +70,7 @@ fun SettingsPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
+            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
                 AdaptiveTopAppBar(
                     title = "Settings",
                     showTopAppBar = appState.showTopAppBar,
@@ -183,6 +184,14 @@ private fun SettingsContent(
                         checked = appState.showTopAppBar,
                         onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
                     )
+                    AnimatedVisibility(visible = appState.showTopAppBar && appState.enableBlur && isRuntimeShaderSupported()) {
+                        OverlayDropdownPreference(
+                            title = "TopAppBar Blur Style",
+                            items = BlurStyleOptions,
+                            selectedIndex = appState.blurStyle,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(blurStyle = it) } },
+                        )
+                    }
                     SwitchPreference(
                         title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",
                         checked = appState.showNavigationBar,

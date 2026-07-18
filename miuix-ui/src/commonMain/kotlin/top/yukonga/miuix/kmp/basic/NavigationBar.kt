@@ -278,6 +278,7 @@ fun RowScope.NavigationBarItem(
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [FloatingNavigationBar].
  * @param content The content of the [FloatingNavigationBar], usually [FloatingNavigationBarItem]s.
  */
+@Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 fun FloatingNavigationBar(
     modifier: Modifier = Modifier,

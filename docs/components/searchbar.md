@@ -68,6 +68,7 @@ SearchBar(
 | label             | String                    | Placeholder text when empty          | ""                   | No       |
 | enabled           | Boolean                   | Whether search field is enabled      | true                 | No       |
 | textStyle         | TextStyle?                | Style of text in search box          | null                 | No       |
+| color             | Color                     | Background color of the capsule; pass Color.Transparent when drawing your own background (e.g. a backdrop blur) | surfaceContainerHigh | No       |
 | leadingIcon       | @Composable (() -> Unit)? | Leading icon                         | default search icon  | No       |
 | trailingIcon      | @Composable (() -> Unit)? | Trailing icon                        | default clear button | No       |
 | interactionSource | MutableInteractionSource? | Interaction source                   | null                 | No       |

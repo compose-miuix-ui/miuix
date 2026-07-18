@@ -3,10 +3,20 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.buildRampBlendColorsEffect
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.asin
+import kotlin.math.cos
 import kotlin.math.exp
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /** Conversion factor from blur radius in pixels to Blur sigma. */
 internal const val BLUR_RADIUS_TO_SIGMA = 0.45f
@@ -112,6 +122,357 @@ internal fun createBlurEffect(
     }
 
     return effect
+}
+
+/**
+ * Builds the separable **progressive** Blur [RenderEffect] (H then V): a variable-radius Gaussian
+ * whose radius ramps from full to zero along [angleDeg], at the same adaptive [downScale] as
+ * [createBlurEffect]. The gradient axis/band ([startFraction]/[endFraction] of the component's
+ * projected extent) are converted here into the downscaled, padded layer's coordinate space;
+ * [size] is the padded layer size, [compW]/[compH] the unpadded component in full-resolution px.
+ */
+internal fun createProgressiveBlurEffect(
+    radiusX: Float,
+    radiusY: Float,
+    downScale: Int,
+    adjustedVarianceX: Float,
+    adjustedVarianceY: Float,
+    size: Size,
+    padding: Float,
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect? {
+    if (radiusX <= 0f && radiusY <= 0f) return null
+
+    val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
+    val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
+
+    // Gradient axis + band in the downscaled, padded layer's coordinate space.
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFullComp = projMin + startFraction * span
+    val projZeroComp = projMin + endFraction * span
+    val padProj = padding * (ax + ay)
+    val projFull = (projFullComp + padProj) / downScale
+    var projZero = (projZeroComp + padProj) / downScale
+    // Degenerate band (start == end, or a zero-extent axis) would divide by zero in the shader.
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
+    val maxCap = PROGRESSIVE_BLUR_MAX_TAP.toFloat()
+    val maxRadiusX = (2f * sqrt(adjustedVarianceX) - 1f).coerceIn(0f, maxCap)
+    val maxRadiusY = (2f * sqrt(adjustedVarianceY) - 1f).coerceIn(0f, maxCap)
+
+    var effect: RenderEffect? = null
+
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+
+    if (radiusX > 0f && maxRadiusX >= 0.5f) {
+        val tap = progressiveLoopTapBound(maxRadiusX)
+        val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
+            setFloatUniform("in_step", 1f, 0f)
+            setFloatUniform("in_maxRadius", maxRadiusX)
+            setFloatUniform("in_gradAxis", ax, ay)
+            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_curve", clampedCurve)
+            setFloatUniform("in_noise", 0f)
+        }
+        effect = runtimeShaderEffect(hShader, "child")
+    }
+
+    if (radiusY > 0f && maxRadiusY >= 0.5f) {
+        val tap = progressiveLoopTapBound(maxRadiusY)
+        val vShader = scope.obtainRuntimeShader("LMPGaussLoop_V_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
+            setFloatUniform("in_step", 0f, 1f)
+            setFloatUniform("in_maxRadius", maxRadiusY)
+            setFloatUniform("in_gradAxis", ax, ay)
+            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_curve", clampedCurve)
+            setFloatUniform("in_noise", 0f)
+        }
+        effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
+            ?: runtimeShaderEffect(vShader, "child")
+    }
+
+    return effect
+}
+
+/**
+ * Converts radii + gradient into the [progressiveStackEffect] inputs: per-level box-compensated
+ * sigmas in the downscaled layer's space and the band in downscaled, padded px. Zero radii are
+ * valid — the levels collapse to identity while the pre/post chains keep riding the ramp;
+ * returning null instead would poison the caller's supported flag.
+ *
+ * At `exp == 0` the levels run at full resolution and the stack binds its clear end to the
+ * native source (`nativeSharpEnd`, see [progressiveStackEffect]) — the caller skips the sharp
+ * overlay entirely.
+ *
+ * [postBlend] is the recorded blend-only post chain, folded in as a single ramp-mixing pass
+ * chained after the stack ([buildRampBlendColorsEffect]) so the stack is evaluated exactly once;
+ * [postEffect] is the general branch form and at most one of the two is non-null.
+ */
+internal fun createProgressiveStackEffect(
+    radiusX: Float,
+    radiusY: Float,
+    exp: Int,
+    padding: Float,
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    preEffect: RenderEffect?,
+    postEffect: RenderEffect?,
+    postBlend: BlurColors?,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect? {
+    val downScale = 1 shl exp
+    val sigmaX = radiusX.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
+
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val padProj = padding * (ax + ay)
+    val projFull = (projMin + startFraction * span + padProj) / downScale
+    var projZero = (projMin + endFraction * span + padProj) / downScale
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // Downscaled-space sigma supplying the variance the downscale cascade's box prefilter doesn't
+    // already cover; 0 (skip the blur) when the prefilter alone reaches the level's target.
+    fun levelSigma(sigma: Float, fraction: Float): Float {
+        val target = sigma * fraction
+        if (target <= 0f) return 0f
+        val residual = (target * target - IMPLIED_BOX_VARIANCE[exp]) / (downScale * downScale)
+        return if (residual > 0.01f) sqrt(residual) else 0f
+    }
+
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+    val stack = progressiveStackEffect(
+        scope,
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_0),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_0),
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_1),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_1),
+        levelSigma(sigmaX, PROGRESSIVE_LEVEL_FRACTION_2),
+        levelSigma(sigmaY, PROGRESSIVE_LEVEL_FRACTION_2),
+        ax,
+        ay,
+        projFull,
+        projZero,
+        clampedCurve,
+        preEffect,
+        postEffect,
+        nativeSharpEnd = exp == 0,
+    ) ?: return null
+    return if (postBlend != null) {
+        stack.chain(buildRampBlendColorsEffect(scope, postBlend, ax, ay, projFull, projZero, clampedCurve))
+    } else {
+        stack
+    }
+}
+
+/**
+ * Blur radius (loop-shader convention, `radius = 2σ − 1`) matching `blur2`'s total effective
+ * Gaussian at downscale [exp] — the larger of its target sigma ([PROGRESSIVE_LEVEL_FRACTION_2])
+ * and the downscale cascade's box-prefilter floor, which the downscaled layer can never render below.
+ * Capped at the loop shader's constant tap bound. This is what the sharp overlay's variable blur
+ * must start from for a seamless handoff (see [createProgressiveSharpOverlayEffect]).
+ */
+internal fun progressiveSharpLoopRadius(radius: Float, exp: Int): Float {
+    val sigma = radius.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_2
+    val effSigma = sqrt(maxOf(sigma * sigma, IMPLIED_BOX_VARIANCE[exp]))
+    return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+}
+
+/** Linear-raw position of the sharp band's onset (`pow(smoothstep(raw), curve) = 2/3`). */
+private fun progressiveSharpRawThreshold(curve: Float): Float {
+    val ssThr = (2.0 / 3.0).pow(1.0 / curve.coerceIn(0.05f, 20f))
+    // Analytic smoothstep inverse: t = 0.5 − sin(asin(1 − 2y) / 3).
+    return (0.5 - sin(asin(1.0 - 2.0 * ssThr) / 3.0)).toFloat()
+}
+
+/**
+ * Full effect for the full-resolution sharp overlay: an optional variable-radius loop blur
+ * (H then V) with the ramp's clear-end cross-fade mask (`clamp(3·raw − 2, 0, 1)`) folded into
+ * the last pass ([PROGRESSIVE_LEVEL_MASK_SHADER] runs standalone only when no axis blurs).
+ *
+ * The loop blur makes the handoff read as one continuous blur instead of a double exposure:
+ * alpha-fading pixel-sharp content over the stack's `blur2` would superimpose crisp edges on a
+ * still-blurred base. The overlay's own radius instead ramps from [progressiveSharpLoopRadius]
+ * (matching `blur2`, downscale floor included) at the band's onset down to zero at the clear
+ * end — at the cross-fade the two images are equally blurred, and the visible sharpening comes
+ * from the continuous ramp alone.
+ *
+ * Band in unpadded component px; [originX]/[originY] — the overlay layer's top-left in component
+ * space (it records only the band's bbox, see [progressiveSharpBandBounds]) — is folded into the
+ * band so layer-local coords line up; [bandW]/[bandH] is that layer's size, for the sampling
+ * clamp. [exp] is the level stack's downscale exponent.
+ */
+internal fun createProgressiveSharpOverlayEffect(
+    radiusX: Float,
+    radiusY: Float,
+    exp: Int,
+    compW: Float,
+    compH: Float,
+    originX: Float,
+    originY: Float,
+    bandW: Float,
+    bandH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    scope: BackdropEffectScopeImpl,
+): RenderEffect {
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFull = projMin + startFraction * span
+    var projZero = projMin + endFraction * span
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+    val originProj = originX * ax + originY * ay
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+
+    // The loop blur ramps across the sharp band only: full strength at the band's onset
+    // (`pThr`, where the stack below is pure blur2), zero at the ramp's clear end.
+    val pThr = projFull + progressiveSharpRawThreshold(curve) * (projZero - projFull)
+    val loopFull = pThr - originProj
+    var loopZero = projZero - originProj
+    if (abs(loopZero - loopFull) < 1e-3f) loopZero = loopFull + 1e-3f
+
+    val maxRadiusX = progressiveSharpLoopRadius(radiusX, exp)
+    val maxRadiusY = progressiveSharpLoopRadius(radiusY, exp)
+
+    val hasH = maxRadiusX >= 0.5f
+    val hasV = maxRadiusY >= 0.5f
+
+    fun loopPass(axis: String, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean): RenderEffect {
+        val tap = progressiveLoopTapBound(maxRadius)
+        val variant = if (masked) "_m" else ""
+        val shader = scope.obtainRuntimeShader(
+            "ProgSharpLoop_${axis}_t$tap$variant",
+            progressiveBlurShaderForTap(tap, masked),
+        ).apply {
+            setFloatUniform("in_maxCoord", bandW - 0.5f, bandH - 0.5f)
+            setFloatUniform("in_step", stepX, stepY)
+            setFloatUniform("in_maxRadius", maxRadius)
+            setFloatUniform("in_gradAxis", ax, ay)
+            setFloatUniform("in_gradBand", loopFull, loopZero)
+            setFloatUniform("in_curve", 1f)
+            setFloatUniform("in_noise", 0f)
+            if (masked) {
+                setFloatUniform("in_maskBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_maskCurve", clampedCurve)
+            }
+        }
+        return runtimeShaderEffect(shader, "child")
+    }
+
+    // The ramp mask is folded into the last loop pass (one fewer full-resolution band pass);
+    // only the no-blur case runs it standalone.
+    return when {
+        hasH && hasV -> loopPass("H", maxRadiusX, 1f, 0f, masked = false)
+            .chain(loopPass("V", maxRadiusY, 0f, 1f, masked = true))
+
+        hasH -> loopPass("H", maxRadiusX, 1f, 0f, masked = true)
+
+        hasV -> loopPass("V", maxRadiusY, 0f, 1f, masked = true)
+
+        else -> {
+            val mask = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
+                setFloatUniform("in_gradAxis", ax, ay)
+                setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_curve", clampedCurve)
+                setFloatUniform("in_level", -2f)
+                setFloatUniform("in_slope", -3f)
+            }
+            runtimeShaderEffect(mask, "child")
+        }
+    }
+}
+
+/**
+ * Component-space bounding box of the region where [createProgressiveSharpOverlayEffect]'s mask is
+ * non-zero (`pow(smoothstep(raw), curve) > 2/3`, inverted analytically to a threshold line on the
+ * gradient projection, clipped to the component rect with a [margin] against rounding and the
+ * overlay loop blur's tap reach). The sharp overlay records and draws only this sub-rect instead
+ * of the whole component. Null = the band lies entirely outside the component and the overlay
+ * can be skipped outright.
+ */
+internal fun progressiveSharpBandBounds(
+    compW: Float,
+    compH: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    margin: Float,
+): Rect? {
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFull = projMin + startFraction * span
+    var projZero = projMin + endFraction * span
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+
+    // Mask > 0 ⟺ raw > rawThr; the mask's weight smoothstep keeps the zero crossing at the same
+    // threshold (s(0) = 0), so only [margin] widens the box.
+    val pThr = projFull + progressiveSharpRawThreshold(curve) * (projZero - projFull)
+    val sign = if (projZero >= projFull) 1f else -1f
+
+    var minX = Float.POSITIVE_INFINITY
+    var minY = Float.POSITIVE_INFINITY
+    var maxX = Float.NEGATIVE_INFINITY
+    var maxY = Float.NEGATIVE_INFINITY
+    fun include(x: Float, y: Float) {
+        if (x < minX) minX = x
+        if (y < minY) minY = y
+        if (x > maxX) maxX = x
+        if (y > maxY) maxY = y
+    }
+
+    val xs = floatArrayOf(0f, compW, compW, 0f)
+    val ys = floatArrayOf(0f, 0f, compH, compH)
+    for (i in 0..3) {
+        val j = (i + 1) and 3
+        val di = (xs[i] * ax + ys[i] * ay - pThr) * sign
+        val dj = (xs[j] * ax + ys[j] * ay - pThr) * sign
+        if (di >= 0f) include(xs[i], ys[i])
+        if ((di < 0f) != (dj < 0f)) {
+            val t = di / (di - dj)
+            include(xs[i] + (xs[j] - xs[i]) * t, ys[i] + (ys[j] - ys[i]) * t)
+        }
+    }
+    if (minX > maxX || minY > maxY) return null
+
+    return Rect(
+        (minX - margin).coerceAtLeast(0f),
+        (minY - margin).coerceAtLeast(0f),
+        (maxX + margin).coerceAtMost(compW),
+        (maxY + margin).coerceAtMost(compH),
+    )
 }
 
 /**

@@ -247,7 +247,7 @@ fun MainPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
+            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
                 AdaptiveTopAppBar(
                     title = "Home",
                     showTopAppBar = appState.showTopAppBar,
