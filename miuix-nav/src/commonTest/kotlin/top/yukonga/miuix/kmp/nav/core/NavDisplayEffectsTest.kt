@@ -28,16 +28,16 @@ class NavDisplayEffectsTest {
 
     @Test
     fun blockInput_onlyOnNonTopMidTransition() {
-        assertFalse(effects.shouldBlockInputAt(0f))
-        assertFalse(effects.shouldBlockInputAt(1f))
-        assertTrue(effects.shouldBlockInputAt(0.5f))
-        assertTrue(effects.shouldBlockInputAt(1.5f))
+        val blocking = NavDisplayEffects(blockInputDuringTransition = true)
+        assertFalse(blocking.shouldBlockInputAt(0f))
+        assertFalse(blocking.shouldBlockInputAt(1f))
+        assertTrue(blocking.shouldBlockInputAt(0.5f))
+        assertTrue(blocking.shouldBlockInputAt(1.5f))
     }
 
     @Test
-    fun blockInput_disabledWhenSwitchOff() {
-        val noBlock = NavDisplayEffects(blockInputDuringTransition = false)
-        assertFalse(noBlock.shouldBlockInputAt(0.5f))
+    fun blockInput_disabledByDefault() {
+        assertFalse(effects.shouldBlockInputAt(0.5f))
     }
 
     @Test
