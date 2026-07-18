@@ -7,6 +7,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavRole
@@ -133,7 +134,8 @@ private val ClassicActivityOpen: NavTransition = navGraphicsTransition(
     val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
     if (d <= 0f) {
         val p = topProgress(d)
-        translationX = (1f - p) * driftPx
+        // Pixel-snapped so the corner-clipped edge does not shimmer at fractional X.
+        translationX = ((1f - p) * driftPx).fastRoundToInt().toFloat()
         // The alpha ramp belongs to the ANIMATING window only (the reference open_enter targets
         // the opening activity; the page about to be covered runs open_exit at alpha 1). The
         // wall-clock ramp is depth-blind, so without the role gate it would blank the resident
@@ -150,7 +152,7 @@ private val ClassicActivityOpen: NavTransition = navGraphicsTransition(
         }
     } else {
         // Covered page: slides 0 -> -96dp as it is covered (open_exit), never fading.
-        translationX = -coverProgress(d) * driftPx
+        translationX = (-coverProgress(d) * driftPx).fastRoundToInt().toFloat()
     }
 }
 
@@ -170,7 +172,8 @@ private val ClassicActivityClose: NavTransition = navGraphicsTransition(
     val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
     if (d <= 0f) {
         val p = topProgress(d)
-        translationX = (1f - p) * driftPx
+        // Pixel-snapped so the corner-clipped edge does not shimmer at fractional X.
+        translationX = ((1f - p) * driftPx).fastRoundToInt().toFloat()
         // Role-gated like the open ramp: only the LEAVING page fades (the reference
         // close_exit); the revealed page reaching the top at the end of the pop would
         // otherwise hit the exhausted wall-clock ramp (1 - (450-35)/83 < 0) and blank out.
@@ -187,7 +190,7 @@ private val ClassicActivityClose: NavTransition = navGraphicsTransition(
     } else {
         // Revealed page: parked at -96dp while covered, slides to rest as the top leaves
         // (close_enter), never fading.
-        translationX = -coverProgress(d) * driftPx
+        translationX = (-coverProgress(d) * driftPx).fastRoundToInt().toFloat()
     }
 }
 
@@ -246,6 +249,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
     val settle = scope.settle
     val committing = settle?.phase == NavSettlePhase.Commit
     val widthPx = scope.layoutSize.width.toFloat()
+    val heightPx = scope.layoutSize.height.toFloat()
     val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
     val bounce = bounceScale(settle, gesture)
     val hugMax = (
@@ -265,21 +269,21 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
             val releasePE = shapedTopProgress(releaseP, gesture)
             val committedScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * releasePE
             val grown = committedScale + (1f - committedScale) * post
-            scaleX = grown * bounce
+            scaleX = snapScaleToPixelWidth(grown * bounce, widthPx)
             scaleY = scaleX
             var tx = if (hugs) (1f - releasePE) * hugMax else 0f
             tx += post * driftPx
             // The reference card is fully transparent after exactly 90ms of wall time.
             alpha = (1f - 5f * (settle.elapsedMillis / 450f)).coerceAtLeast(0f)
-            translationX = tx
-            translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
+            translationX = snapEdgeTranslation(tx, scaleX, widthPx)
+            translationY = snapEdgeTranslation(crossActivityYShift(gesture, heightPx, scaleX, scope.density), scaleX, heightPx)
         } else {
             // Finger driving (or cancel settling back, or a gesture-less standalone use):
             // geometry runs on the EASED travel axis, fully opaque while a gesture drives.
             val pE = shapedTopProgress(p, gesture)
-            scaleX = (CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * pE) * bounce
+            scaleX = snapScaleToPixelWidth((CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * pE) * bounce, widthPx)
             scaleY = scaleX
-            translationX = if (hugs) (1f - pE) * hugMax else 0f
+            translationX = snapEdgeTranslation(if (hugs) (1f - pE) * hugMax else 0f, scaleX, widthPx)
             alpha = when {
                 scope.role == NavRole.Outgoing && gesture != null -> {
                     // Interrupted-commit fallback (no settle context): keep the depth-axis fade
@@ -292,7 +296,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
 
                 else -> (p / 0.2f).coerceIn(0f, 1f)
             }
-            translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
+            translationY = snapEdgeTranslation(crossActivityYShift(gesture, heightPx, scaleX, scope.density), scaleX, heightPx)
         }
     } else {
         val dc = coverProgress(d) // raw: 0 at top, 1 covered
@@ -304,19 +308,19 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
         } else {
             1f - dc
         }
-        translationX = -(1f - post) * driftPx
         if (gesture != null) {
             // Scales in sync with the card on the eased travel axis while the finger drives;
             // grows back to full size across the post-commit sweep from its EASED commit pose.
             val travel = if (committing) gesture.progress else (1f - dc)
             val eased = BackGestureEasing.transform(travel.coerceIn(0f, 1f))
             val liveScale = CROSS_ACTIVITY_MIN_SCALE + (1f - CROSS_ACTIVITY_MIN_SCALE) * (1f - eased)
-            scaleX = (liveScale + (1f - liveScale) * post) * bounce
+            scaleX = snapScaleToPixelWidth((liveScale + (1f - liveScale) * post) * bounce, widthPx)
             scaleY = scaleX
         }
+        translationX = snapEdgeTranslation(-(1f - post) * driftPx, scaleX, widthPx)
         // The revealed layer rides with the finger too (reference allowEnteringYShift); the
         // shift collapses with its scale returning to full, so it lands at rest untranslated.
-        translationY = crossActivityYShift(gesture, scope.layoutSize.height.toFloat(), scaleX, scope.density)
+        translationY = snapEdgeTranslation(crossActivityYShift(gesture, heightPx, scaleX, scope.density), scaleX, heightPx)
     }
 }
 
@@ -370,6 +374,21 @@ private fun crossActivityYShift(
     val marginPx = with(density) { CrossActivityEdgeMargin.toPx() }
     val maxShift = ((height - height * scale) / 2f - marginPx).coerceAtLeast(0f)
     return maxShift * damped * (if (rawDelta < 0f) -1f else 1f)
+}
+
+/**
+ * Quantizes a center-pivot scale so the scaled width spans a whole pixel count, letting
+ * [snapEdgeTranslation] align both vertical edges at once.
+ */
+private fun snapScaleToPixelWidth(scale: Float, width: Float): Float = if (width <= 0f) scale else (scale * width).fastRoundToInt() / width
+
+/**
+ * Snaps a center-pivot translation so the layer's leading edge lands on a whole device pixel;
+ * the corner-clipped anti-aliased edge otherwise shimmers as a thin line while moving.
+ */
+private fun snapEdgeTranslation(translation: Float, scale: Float, extent: Float): Float {
+    val inset = extent * (1f - scale) / 2f
+    return (translation + inset).fastRoundToInt() - inset
 }
 
 /**
