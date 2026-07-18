@@ -27,11 +27,11 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
  * Payload emitted by the [PredictiveBackHandler] progress [Flow].
  *
  * Mirrors the fields of [top.yukonga.miuix.kmp.nav.transition.NavGesture] so the host can map a
- * back-gesture stream onto the single `animatedTop` driver, typically via Phase 3's
+ * back-gesture stream onto the single `animatedTop` driver, typically via
  * `animatedTop.snapToFinger(topIndex, event.progress, anchor)`.
  *
- * @property progress Gesture completion in the range `0f..1f`; `0f` at touch-down, approaching
- *   `1f` as the user commits the back gesture.
+ * @property progress Gesture completion; `0f` at touch-down, approaching `1f` as the user commits.
+ *   Saturates just under `1f` (the driver's finger cap), even on devices that misreport past 1.
  * @property swipeEdge The screen edge the gesture originated from. Non-gesture sources (Desktop
  *   ESC, Web triggers) report [NavSwipeEdge.None].
  * @property touchY The vertical touch position in pixels, used by transitions that pivot or

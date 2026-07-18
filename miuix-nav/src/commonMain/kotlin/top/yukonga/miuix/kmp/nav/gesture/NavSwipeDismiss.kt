@@ -64,7 +64,7 @@ import kotlin.math.abs
  * `fingerProgress` is the finger travel **in the dismiss direction since the claim point** over the
  * layout extent on that axis — linear, 1:1 with the finger (§7.1, no interpolation on this axis).
  *
- * On release the decision is delegated to Phase 3's [navBackCommitDecision] (**velocity-first,
+ * On release the decision is delegated to [navBackCommitDecision] (**velocity-first,
  * position-fallback**, §7.2), using the shared thresholds [NavDriverSpec.COMMIT_VELOCITY_THRESHOLD] /
  * [NavDriverSpec.COMMIT_POSITION_THRESHOLD]. Release velocity is sampled with a [VelocityTracker]
  * (instantaneous, not a per-event delta proxy) and expressed in **progress-units per second** (axis
@@ -229,7 +229,7 @@ internal fun Modifier.navSwipeDismissImpl(
                 val delta = change.positionChange()
                 drag += if (isHorizontal) delta.x else delta.y
                 change.consume()
-                // Unclamped here; anchoredProgress clamps the total to [min(anchor, 0), 1].
+                // Unclamped here; anchoredProgress clamps the total to [min(anchor, 0), MAX_FINGER_PROGRESS].
                 val fingerProgress = dismissSign * drag / extent
                 val touchY = change.position.y
                 scope.launch {

@@ -19,8 +19,8 @@ import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
  *   pop-settle is still reeling a leaving entry out above the new top).
  * - **During the gesture** each event maps to
  *   `animatedTop.snapToFinger(topIndex, event.progress, anchor)` — additive, strictly linear,
- *   1:1 with the finger (Phase 3 driver). The first event (`progress ≈ 0`) therefore lands
- *   exactly on the sampled value: zero jump when interrupting a running push/pop.
+ *   1:1 with the finger. The first event (`progress ≈ 0`) therefore lands exactly on the
+ *   sampled value: zero jump when interrupting a running push/pop.
  * - The function returns when the stream completes. Convergence (commit -> `topIndex - 1`,
  *   cancel -> `topIndex`) is **not** done here: the caller decides commit/cancel via
  *   [top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision] and settles with the single shared

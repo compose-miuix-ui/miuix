@@ -107,8 +107,8 @@ internal fun isVisibleAt(relativeDepth: Float, opaqueDepth: Float): Boolean = re
  * Core driver of the whole navigation stack (spec §4.1 / §7.1).
  *
  * Holds the single driving float [animatedTop] and the live presentation set ([presented] = the
- * current back-stack entries UNION the entries still leaving). Merges what earlier drafts split into
- * a separate "presentation store": there is exactly one owner of both the float and the set.
+ * current back-stack entries UNION the entries still leaving). There is exactly one owner of both
+ * the float and the set.
  *
  * @param initialTopIndex the initial value of [animatedTop] (the top index of the initial back stack).
  */
@@ -119,14 +119,17 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
      *
      * `snapToFinger` during a gesture (1:1, no interpolator); `settleTo` on settle/normal (the shared
      * spring). The renderer reads it lazily inside `graphicsLayer { }` blocks for zero-recomposition
-     * per-frame visuals; both extensions live in `runtime/NavDriver.kt` (Phase 3, see §0.3).
+     * per-frame visuals; both extensions live in `runtime/NavDriver.kt`.
      */
     val animatedTop: Animatable<Float, AnimationVector1D> = Animatable(initialTopIndex)
 
     // Presentation set = current back-stack entries UNION entries still leaving (relative depth > -1).
     private val _presented = mutableStateListOf<NavEntry<*>>()
 
-    /** Entries currently presented, ordered bottom (root) to top; includes leaving entries. */
+    /**
+     * Entries currently presented, in insertion (append-only) order — NOT stack order after a
+     * back-stack reorder; readers needing stack order sort by the index map. Includes leaving entries.
+     */
     val presented: List<NavEntry<*>> get() = _presented
 
     /** Last classified stack mutation; surfaced to the transition scope via `change`. */
@@ -172,8 +175,8 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
     /**
      * Merges the freshly-built [currentEntries] (one per current back-stack key) into the presentation
      * set, preserving leaving entries (flagged via [NavEntry.presentation]'s `isRemoving`) until they
-     * are unloaded at relative depth <= -1. [change] is the classification computed by `navReconcile`
-     * (Phase 2). Surviving instances are reused so `movableContentOf` identity is preserved, but they
+     * are unloaded at relative depth <= -1. [change] is the classification computed by
+     * `navReconcile`. Surviving instances are reused so `movableContentOf` identity is preserved, but they
      * adopt the fresh registration payload ([NavEntry.adoptFrom]) so a rebuilt entry provider
      * refreshes live entries instead of leaving them pinned to first-push captures.
      *

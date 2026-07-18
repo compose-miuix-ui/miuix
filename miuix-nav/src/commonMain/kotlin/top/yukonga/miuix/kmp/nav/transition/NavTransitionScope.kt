@@ -29,8 +29,9 @@ enum class NavSwipeEdge {
 /**
  * Predictive-back gesture context surfaced to a [NavTransition] while a back gesture is in progress.
  *
- * [progress] runs from 0 (gesture just started) to 1 (gesture fully committed). A transition can use
- * it together with [touchY] to bias its motion toward the finger (spec section 6.1);
+ * [progress] runs from 0 (gesture just started) toward 1 (fully committed), saturating just under
+ * 1 (the driver's finger cap) so `1 - progress` stays positive. A transition can use it together
+ * with [touchY] to bias its motion toward the finger (spec section 6.1);
  * [initialTouchY] is the vertical touch position at the gesture start, so a transition can follow
  * the finger's travel (`touchY - initialTouchY`) rather than its absolute position.
  */

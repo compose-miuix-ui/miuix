@@ -472,12 +472,12 @@ private fun NavDisplayLayout(
     Box(
         // The unified swipe recognizer lives on the DISPLAY CONTAINER, not on the top entry's host:
         // the host's hit-rect follows its graphicsLayer translation, so early in a push most of the
-        // screen belongs to the covered (input-blocked) layer below and an interrupting back-swipe
-        // could never engage. The container sees every pointer on the Initial pass parent-first —
-        // before any entry's nested scroll or input-blocking modifier — keeping the two-phase
-        // claiming contract (invariant 4) intact while making the whole screen grabbable at any
-        // point of an in-flight transition. At rest the behavior is unchanged (the settled top host
-        // was full-screen anyway).
+        // screen belongs to the covered layer below and an interrupting back-swipe could never
+        // engage. The container sees every pointer on the Initial pass parent-first — before any
+        // entry's nested scroll or input-blocking modifier — keeping the two-phase claiming
+        // contract (invariant 4) intact while making the whole screen grabbable at any point of an
+        // in-flight transition. At rest the behavior is unchanged (the settled top host was
+        // full-screen anyway).
         modifier = modifier
             .onSizeChanged { layoutSize = it }
             .navSwipeDismissImpl(
@@ -546,12 +546,10 @@ private fun NavDisplayLayout(
 
         visibleEntries.fastForEach { entry ->
             key(entry.contentKey) {
-                // Local non-null guard, NOT a non-local `return@key`. A non-local return out of an
-                // inline @Composable lambda makes the Kotlin compiler emit a synthetic
-                // `$$$$$NON_LOCAL_RETURN$$$$$."<anonymous>"()` marker; the Compose Hot Reload javaagent
-                // then materialises that into a method literally named "<anonymous>", which the JVM
-                // rejects at class load (ClassFormatError). Entries reaching here always have an index
-                // (they survived the visibleEntries filter over the same map), so the body always runs.
+                // Local non-null guard, NOT a non-local `return@key`: Compose Hot Reload turns the
+                // compiler's non-local-return marker into a method literally named "<anonymous>",
+                // which the JVM rejects at class load (ClassFormatError). The index always exists
+                // here (same map the visibleEntries filter ran over), so the body always runs.
                 indexByContentKey[entry.contentKey]?.let { entryIndex ->
                     // Boundary ownership (§4.3): the entry's own transition governs while it is at the
                     // top (d <= 0); the upper neighbour's transition governs the covered treatment
@@ -648,7 +646,7 @@ private const val DEPTH_BUCKET_BLOCK_INPUT = 1 shl 5
  *   (`shouldClipCornersAt` / `shouldBlockInputAt`; the dim scrim is a fullscreen sibling rendered
  *   by the layout, not a per-host overlay);
  * - scopes the content with the shared [stateHolder]'s `EntryStateContent`, a per-entry lifecycle
- *   owner, and a per-entry view-model store owner (Phase 5, real signatures);
+ *   owner, and a per-entry view-model store owner;
  * - keeps composition identity via the surrounding `key(contentKey)` + a cached `movableContentOf`.
  *
  * @param stateHolder the single saveable-state holder created once in [NavDisplayLayout] and shared
