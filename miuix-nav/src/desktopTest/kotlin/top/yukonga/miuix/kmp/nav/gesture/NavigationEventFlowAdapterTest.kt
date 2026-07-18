@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.nav.gesture
 import androidx.navigationevent.NavigationEvent
 import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
+import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -65,6 +66,21 @@ class NavigationEventFlowAdapterTest {
 
         assertTrue(committed)
         assertEquals(0, progressSessions)
+    }
+
+    @Test
+    fun overdrivenProgress_saturatesAtFingerCap() = runBlocking {
+        // Progress misreported past 1 saturates at the driver cap (see MAX_FINGER_PROGRESS).
+        val received = mutableListOf<Float>()
+        val adapter = NavigationEventFlowAdapter(this)
+        adapter.currentOnProgress = { events -> events.collect { received += it.progress } }
+
+        adapter.handleBackStarted(NavigationEvent(progress = 0f))
+        adapter.handleBackProgressed(NavigationEvent(progress = 1.3f))
+        adapter.handleBackCancelled()
+        coroutineContext.job.children.forEach { it.join() }
+
+        assertContentEquals(listOf(0f, NavDriverSpec.MAX_FINGER_PROGRESS), received)
     }
 
     @Test

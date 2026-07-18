@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.nav.runtime.NavDriverSpec
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 
 /**
@@ -193,8 +194,9 @@ internal class NavigationEventFlowAdapter(
 
 /** Maps a dispatcher [NavigationEvent] to the common [NavBackEvent]. */
 private fun NavigationEvent.toNavBackEvent(): NavBackEvent = NavBackEvent(
-    // Misconfigured devices can report progress past 1; enforce the documented 0..1 contract.
-    progress = progress.coerceIn(0f, 1f),
+    // Misconfigured devices report progress past 1; saturate at the driver's cap so
+    // `1 - progress` transition math stays consistent with the driven geometry.
+    progress = progress.coerceIn(0f, NavDriverSpec.MAX_FINGER_PROGRESS),
     swipeEdge = when (swipeEdge) {
         NavigationEvent.EDGE_LEFT -> NavSwipeEdge.Left
         NavigationEvent.EDGE_RIGHT -> NavSwipeEdge.Right
