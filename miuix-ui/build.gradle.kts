@@ -101,10 +101,10 @@ val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::clas
             ).asFile.absolutePath,
     )
     additionalOutputs.put(
-        "top/yukonga/miuix/kmp/navigation3/ui/",
+        "top/yukonga/miuix/kmp/nav/",
         rootProject.layout.projectDirectory
             .file(
-                "miuix-navigation3-ui/src/androidMain/baselineProfiles/baseline-prof.txt",
+                "miuix-nav/src/androidMain/baselineProfiles/baseline-prof.txt",
             ).asFile.absolutePath,
     )
     additionalOutputs.put(

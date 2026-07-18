@@ -12,7 +12,7 @@ on:
       - "miuix-blur/**"
       - "miuix-squircle/**"
       - "miuix-icons/**"
-      - "miuix-navigation3-ui/**"
+      - "miuix-nav/**"
       - "build-plugins/**"
       - "gradle/**"
       - "settings.gradle.kts"

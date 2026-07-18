@@ -4,6 +4,7 @@
 @file:OptIn(ExperimentalScrollBarApi::class)
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -15,51 +16,33 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import navigation3.Route
+import navigation.Route
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.DropdownImpl
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowListPopup
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.random.Random
-
-private val TopBarPopupItems = listOf("Window 1", "Window 2", "Window 3")
 
 @Composable
 fun NavTestPage(
@@ -97,9 +80,6 @@ fun NavTestPage(
                             onClick = { navigator.pop() },
                         )
                     },
-                    actions = {
-                        TopBarActions()
-                    },
                 )
             }
         },
@@ -109,7 +89,7 @@ fun NavTestPage(
             innerPadding,
             padding,
             true,
-            extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+            extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
             extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             extraBottom = 12.dp,
         )
@@ -123,19 +103,48 @@ fun NavTestPage(
                 ),
                 contentPadding = contentPadding,
             ) {
-                item(key = "nav_push") {
-                    Card(
-                        modifier = Modifier
-                            .padding(all = 12.dp),
-                    ) {
-                        val navigator = LocalNavigator.current
-                        ArrowPreference(
-                            title = "Push another Navigation Page",
-                            onClick = { navigator.push(Route.Navigation(Random.nextLong().toString())) },
-                        )
+                item(key = "nav_continuous") {
+                    val navigator = LocalNavigator.current
+                    Column {
+                        SmallTitle(text = "Continuous depth")
+                        Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                            ArrowPreference(
+                                title = "Push another Navigation page",
+                                summary = "Single push (animatedTop N -> N+1)",
+                                onClick = { navigator.push(Route.Navigation(Random.nextLong().toString())) },
+                            )
+                            ArrowPreference(
+                                title = "Push three pages at once",
+                                summary = "Continuous multi-push (N -> N+3, one shared spring)",
+                                onClick = {
+                                    navigator.push(Route.Navigation(Random.nextLong().toString()))
+                                    navigator.push(Route.Navigation(Random.nextLong().toString()))
+                                    navigator.push(Route.Navigation(Random.nextLong().toString()))
+                                },
+                            )
+                            ArrowPreference(
+                                title = "Pop all Navigation pages",
+                                summary = "Continuous multi-pop back to the entry",
+                                onClick = { navigator.popUntil { it !is Route.Navigation } },
+                            )
+                        }
+                    }
+                }
+                item(key = "nav_gesture") {
+                    Column {
+                        SmallTitle(text = "Gesture back")
+                        Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                            BasicComponent(
+                                title = "Swipe to go back",
+                                summary = "Turn on \"Enable Swipe Back\" in Settings, then swipe a pushed page to " +
+                                    "pop it. Stack several pages with continuous push above and drag back through " +
+                                    "them; the gesture drives the same animatedTop spring.",
+                            )
+                        }
                     }
                 }
                 item(key = "nav_layout") {
+                    SmallTitle(text = "Layout test")
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp),
@@ -238,56 +247,4 @@ fun NavTestPage(
             )
         }
     }
-}
-
-@Composable
-fun TopBarActions() {
-    val showTopPopup = remember { mutableStateOf(false) }
-    val topPopupHoldDown = remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val hapticFeedback = LocalHapticFeedback.current
-    IconButton(
-        onClick = {
-            showTopPopup.value = true
-            topPopupHoldDown.value = true
-        },
-        holdDownState = topPopupHoldDown.value,
-    ) {
-        Icon(
-            imageVector = MiuixIcons.Edit,
-            contentDescription = "WindowListPopup",
-            tint = MiuixTheme.colorScheme.onBackground,
-        )
-    }
-    WindowListPopup(
-        show = showTopPopup.value,
-        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopEnd,
-        onDismissRequest = {
-            showTopPopup.value = false
-        },
-        onDismissFinished = {
-            topPopupHoldDown.value = false
-        },
-        content = {
-            val state = LocalDismissState.current
-            ListPopupColumn {
-                TopBarPopupItems.forEachIndexed { index, string ->
-                    key(index) {
-                        DropdownImpl(
-                            text = string,
-                            optionSize = TopBarPopupItems.size,
-                            isSelected = selectedIndex == index,
-                            index = index,
-                            onSelectedIndexChange = { selectedIdx ->
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                                selectedIndex = selectedIdx
-                                state?.invoke()
-                            },
-                        )
-                    }
-                }
-            }
-        },
-    )
 }

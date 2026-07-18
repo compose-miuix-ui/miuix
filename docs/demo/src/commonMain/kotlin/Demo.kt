@@ -12,17 +12,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.ui.NavDisplay
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.nav.core.NavDisplay
+import top.yukonga.miuix.kmp.nav.core.NavKey
+import top.yukonga.miuix.kmp.nav.core.navBackStackOf
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -99,56 +97,44 @@ private val availableComponents = listOf(
 
 @Composable
 private fun DemoSelection() {
-    val backStack = remember { mutableStateListOf<NavKey>(DemoScreen.Home) }
-    val entryProvider = remember(backStack) {
-        entryProvider<NavKey> {
-            entry(DemoScreen.Home) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(demoBackground()),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(
-                        Modifier
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp)
-                            .widthIn(max = 600.dp)
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        availableComponents.forEach { demo ->
-                            TextButton(
-                                text = demo.name,
-                                onClick = { backStack.add(DemoScreen.Component(demo.id)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.textButtonColorsPrimary(),
-                            )
-                        }
-                    }
-                }
-            }
+    val backStack = remember { navBackStackOf(DemoScreen.Home) }
 
-            availableComponents.forEach { component ->
-                entry(DemoScreen.Component(component.id)) {
-                    Column {
-                        component.demo()
+    NavDisplay(
+        backStack = backStack,
+    ) {
+        entry<DemoScreen.Home> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(demoBackground()),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                        .widthIn(max = 600.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    availableComponents.forEach { demo ->
+                        TextButton(
+                            text = demo.name,
+                            onClick = { backStack.add(DemoScreen.Component(demo.id)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.textButtonColorsPrimary(),
+                        )
                     }
                 }
             }
         }
+        entry<DemoScreen.Component> { screen ->
+            Column {
+                availableComponents.first { it.id == screen.id }.demo()
+            }
+        }
     }
-
-    val entries = rememberDecoratedNavEntries(
-        backStack = backStack,
-        entryProvider = entryProvider,
-    )
-
-    NavDisplay(
-        entries = entries,
-        onBack = { backStack.removeLast() },
-    )
 }
 
 private sealed interface DemoScreen : NavKey {
