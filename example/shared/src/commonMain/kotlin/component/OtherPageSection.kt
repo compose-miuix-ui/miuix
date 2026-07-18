@@ -39,6 +39,11 @@ fun LazyListScope.otherPageSection() {
                 summary = "Navigate to a MultiScaffold Page",
                 onClick = { navigator.push(Route.MultiScaffold) },
             )
+            ArrowPreference(
+                title = "Nested Navigation Test",
+                summary = "A NavDisplay nested inside an entry",
+                onClick = { navigator.push(Route.NestedNav) },
+            )
         }
     }
 }

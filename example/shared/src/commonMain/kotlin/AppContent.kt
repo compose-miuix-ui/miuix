@@ -270,6 +270,9 @@ fun AppContent(
             entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
                 MultiScaffoldTestPage(padding = padding)
             }
+            entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
+                NestedNavTestPage(padding = padding)
+            }
         }
     }
 
