@@ -39,6 +39,11 @@ fun LazyListScope.otherPageSection() {
                 summary = "Navigate to a MultiScaffold Page",
                 onClick = { navigator.push(Route.MultiScaffold) },
             )
+            ArrowPreference(
+                title = "Overscroll + Load More Test",
+                summary = "Fling to the bottom, then fling again",
+                onClick = { navigator.push(Route.OverscrollLoadMore) },
+            )
         }
     }
 }
