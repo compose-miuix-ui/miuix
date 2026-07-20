@@ -160,6 +160,29 @@ class MiuixOverscrollEffect : OverscrollEffect {
         rawTouchAccumulationY = sign(offsetY) * SpringMath.obtainTouchDistance(offsetY, scrollRangeV)
     }
 
+    // Reclaims a stale offset once the child can scroll again in the accumulated direction (e.g. pagination); otherwise applyToFling swallows the next fling.
+    private fun unwindStaleOffsetX(consumedDelta: Float) {
+        if (abs(offsetX) <= offsetThreshold || consumedDelta == 0f) return
+        if (rawTouchAccumulationX == 0f) syncRawAccumulationFromOffsetX()
+        if (sign(consumedDelta) != sign(rawTouchAccumulationX)) return
+        if (abs(rawTouchAccumulationX) <= abs(consumedDelta)) {
+            resetStateX()
+        } else {
+            applyDragX(-consumedDelta)
+        }
+    }
+
+    private fun unwindStaleOffsetY(consumedDelta: Float) {
+        if (abs(offsetY) <= offsetThreshold || consumedDelta == 0f) return
+        if (rawTouchAccumulationY == 0f) syncRawAccumulationFromOffsetY()
+        if (sign(consumedDelta) != sign(rawTouchAccumulationY)) return
+        if (abs(rawTouchAccumulationY) <= abs(consumedDelta)) {
+            resetStateY()
+        } else {
+            applyDragY(-consumedDelta)
+        }
+    }
+
     private fun startSpringAnimationX(initialVelocity: Float = 0f) {
         if (abs(offsetX) <= offsetThreshold && initialVelocity == 0f) {
             resetStateX()
@@ -215,6 +238,9 @@ class MiuixOverscrollEffect : OverscrollEffect {
     ): Offset {
         if (source != NestedScrollSource.UserInput) {
             val consumed = performScroll(delta)
+            // A running spring settles to zero on its own; only reclaim when it was interrupted.
+            if (animationJobY?.isActive != true) unwindStaleOffsetY(consumed.y)
+            if (animationJobX?.isActive != true) unwindStaleOffsetX(consumed.x)
             updateOverScrollState()
             return consumed
         }
@@ -273,6 +299,9 @@ class MiuixOverscrollEffect : OverscrollEffect {
         val adjustedDelta = Offset(performScrollDeltaX, performScrollDeltaY)
         val scrollConsumed = performScroll(adjustedDelta)
         val scrollRemaining = adjustedDelta - scrollConsumed
+
+        if (!bypassY || animationJobY?.isActive != true) unwindStaleOffsetY(scrollConsumed.y)
+        unwindStaleOffsetX(scrollConsumed.x)
 
         if (scrollRemaining.y != 0f && !bypassY) applyDragY(scrollRemaining.y)
         if (scrollRemaining.x != 0f) applyDragX(scrollRemaining.x)
