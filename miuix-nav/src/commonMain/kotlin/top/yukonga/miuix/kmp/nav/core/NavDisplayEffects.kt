@@ -52,7 +52,7 @@ enum class NavCornerClipMode {
  *   ([top.yukonga.miuix.kmp.nav.transition.NavTransition.scrimFraction]); this knob only caps
  *   how dark it gets.
  * @property blockInputDuringTransition whether to swallow touch input on non-settled entries while a
- *   transition is in progress, so taps cannot reach a half-animated screen.
+ *   transition is in progress, so taps cannot reach a half-animated screen. Off by default.
  * @property backdropColor solid color drawn behind every entry layer. Card-style transitions scale
  *   layers below full size, revealing the area behind the navigation host; the reference shell
  *   animation fills it with a color layer in the entering page's background color, so the page
@@ -65,7 +65,7 @@ data class NavDisplayEffects(
     val cornerClipRadius: Dp = 0.dp,
     val cornerClipMode: NavCornerClipMode = NavCornerClipMode.Leading,
     val dimAmount: Float = 0.5f,
-    val blockInputDuringTransition: Boolean = true,
+    val blockInputDuringTransition: Boolean = false,
     val backdropColor: Color = Color.Unspecified,
 ) {
     /**
@@ -101,7 +101,7 @@ data class NavDisplayEffects(
     }
 
     companion object {
-        /** The default effects (corner clip on, 0.5 dim, input blocking on). */
+        /** The default effects (corner clip on, 0.5 dim, input blocking off). */
         val Default: NavDisplayEffects = NavDisplayEffects()
 
         /** All effects disabled: no corner clip, no dim, no input blocking. */

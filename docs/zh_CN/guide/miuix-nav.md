@@ -254,7 +254,7 @@ val platformLike = navDirectionalTransition(
 | `cornerClipRadius` | `0.dp` | 裁剪半径；传 `rememberNavSystemCornerRadius()` 可跟随设备屏幕圆角（平台报告为 0 时同样不裁圆角） |
 | `cornerClipMode` | `Leading` | 裁哪些角：`Leading` —— 与屏幕边缘相接的前缘角，适合滑动类转场；`All` —— 四角全裁，适合整页缩放的卡片类转场 |
 | `dimAmount` | `0.5f` | 最顶层之下全屏调暗遮罩的最大 alpha；随运动的曲线归转场所有（`scrimFraction`），此处只封顶暗度。`0f` 关闭 |
-| `blockInputDuringTransition` | `true` | 拦截转场中途 entry 上的触摸输入，点击不会落到半动画状态的页面 |
+| `blockInputDuringTransition` | `false` | 拦截转场中途 entry 上的触摸输入，点击不会落到半动画状态的页面 |
 | `backdropColor` | `Unspecified` | 所有 entry 图层背后的纯色底——卡片类转场把下层页面缩到不足全尺寸、露出宿主背后的区域；传主题背景色使其读作页面向外延伸 |
 
 `NavDisplayEffects.Default` 即上表默认值；`NavDisplayEffects.None` 全部关闭。卡片式配置示例：
