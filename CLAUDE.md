@@ -221,5 +221,6 @@ Format: `<scope>: <summary>`
 - Scopes: `library`, `docs`, `example`, `build`, `fix`, `fix(deps)`, `chore(deps)`
 - Keep subject line ≤ 72 characters, sentence case, no trailing period
 - Reference PRs as `(#1234)` at subject end; issues as `* Fix #1234` in the body
+- Keep the body terse — omit it when the subject says everything; never restate the diff file by file
 - Check recent `git log --oneline` to stay consistent with current conventions
 - **Run `./gradlew spotlessCheck` before every commit; only run `./gradlew spotlessApply` if it reports violations — CI rejects formatting violations**
