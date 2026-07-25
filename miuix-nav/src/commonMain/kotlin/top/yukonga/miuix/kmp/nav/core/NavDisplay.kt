@@ -689,6 +689,13 @@ private const val DEPTH_BUCKET_GOVERNS_OWN = 1 shl 3
 private const val DEPTH_BUCKET_CLIP_CORNERS = 1 shl 4
 private const val DEPTH_BUCKET_BLOCK_INPUT = 1 shl 5
 
+// The entry host's two pointer filters MUST NOT share a pointerInput key. Dropping the conditional
+// blocker at settle makes the node chain update the surviving node in place, and that only restarts
+// the handler when a key changed or the two lambdas have different classes — R8 merges them in
+// release builds, so the blocking coroutine would outlive its own modifier and eat every event.
+private const val BLOCK_INPUT_KEY = "top.yukonga.miuix.kmp.nav.blockInput"
+private const val OPAQUE_INPUT_KEY = "top.yukonga.miuix.kmp.nav.opaqueInput"
+
 /**
  * Renders one presented entry as a pure function of [NavPresentation.animatedTop].
  *
@@ -813,7 +820,7 @@ private fun NavEntryHost(
     }
 
     val blockInputModifier = if ((depthBuckets and DEPTH_BUCKET_BLOCK_INPUT) != 0) {
-        Modifier.pointerInput(Unit) {
+        Modifier.pointerInput(BLOCK_INPUT_KEY) {
             awaitPointerEventScope {
                 while (true) {
                     val event = awaitPointerEvent(pass = PointerEventPass.Initial)
@@ -829,7 +836,7 @@ private fun NavEntryHost(
     // touch on a blank region of this entry from falling through to the covered (invisible but
     // still composed) entry below. In-page consumers and the container swipe are unaffected —
     // this only removes lower SIBLINGS from the hit path.
-    val opaqueInputModifier = Modifier.pointerInput(Unit) {
+    val opaqueInputModifier = Modifier.pointerInput(OPAQUE_INPUT_KEY) {
         awaitPointerEventScope {
             while (true) awaitPointerEvent()
         }
