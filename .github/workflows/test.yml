@@ -6,12 +6,14 @@ on:
     paths-ignore:
       - "README.md"
       - "CLAUDE.md"
+      - "AGENTS.md"
       - "docs/**"
   pull_request:
     branches: ["main"]
     paths-ignore:
       - "README.md"
       - "CLAUDE.md"
+      - "AGENTS.md"
       - "docs/**"
 
 permissions:

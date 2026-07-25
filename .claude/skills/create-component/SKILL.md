@@ -7,7 +7,7 @@ description: Create a new Compose Multiplatform UI component for the miuix libra
 
 Add a new component to the miuix library and complete every companion change beyond the component file itself — example registration, docs, sidebar, and so on: 8 touch points in total (see the checklist at the end).
 
-The authoritative sources for conventions are `CLAUDE.md` at the repo root (API Conventions, Key Patterns, Critical Constraints) and the reference source files listed below. This skill only describes the workflow and where the changes go; wherever it conflicts with CLAUDE.md or existing source, they win — source code does not go stale, details copied into a skill do.
+The authoritative sources for conventions are `AGENTS.md` at the repo root (API Conventions, Key Patterns, Critical Constraints) and the reference source files listed below. This skill only describes the workflow and where the changes go; wherever it conflicts with AGENTS.md or existing source, they win — source code does not go stale, details copied into a skill do.
 
 ## Step 1: Gather requirements
 
@@ -24,7 +24,7 @@ Ask the user for whatever is not yet provided:
 
 ## Step 2: Read reference files by component type
 
-Before generating code, read the API Conventions section of `CLAUDE.md`, pick the closest type from the table below, and read its reference source in full. Match coding style, indentation, and idioms exactly:
+Before generating code, read the API Conventions section of `AGENTS.md`, pick the closest type from the table below, and read its reference source in full. Match coding style, indentation, and idioms exactly:
 
 | Component type | Reference (under `miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/` unless noted) | Key points |
 | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ Before generating code, read the API Conventions section of `CLAUDE.md`, pick th
 | Minimal drawn | `basic/Divider.kt` | `Canvas` drawing; plain `Color` parameters, no Colors class; theme colors in Defaults via `@Composable get()` |
 | Animated / custom-drawn | `basic/ProgressIndicator.kt`, `basic/Switch.kt` | looping animation, drag gestures, haptics, semantics such as `progressBarRangeInfo` |
 | Settings item | `miuix-preference/.../preference/SwitchPreference.kt` | delegates to `BasicComponent`, control placed in `endActions`, whole-row click callback + correct `Role` |
-| BasicComponent API | `basic/Component.kt` | see CLAUDE.md Critical Constraints: its custom `Layout` must not be replaced with `Row + weight(1f)` |
+| BasicComponent API | `basic/Component.kt` | see AGENTS.md Critical Constraints: its custom `Layout` must not be replaced with `Row + weight(1f)` |
 | Grouped Colors (selected-state aware) | `miuix-preference/.../preference/RadioButtonPreference.kt` | `@Immutable` data class holding several `BasicComponentColors` + `@Stable internal fun xxx(selected)` accessors |
 
 ## Step 3: Write the component source file
@@ -43,7 +43,7 @@ Locations:
 - basic: `miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/basic/{Name}.kt`
 - preference: `miuix-preference/src/commonMain/kotlin/top/yukonga/miuix/kmp/preference/{Name}Preference.kt`
 
-Structure and conventions follow CLAUDE.md (license header, parameter order, Defaults object, `@Immutable` Colors class, when `@NonRestartableComposable` applies, where `rememberUpdatedState` applies, `@Immutable`/`@Stable` and collection-stability rules). Below are only the pitfalls CLAUDE.md does not spell out:
+Structure and conventions follow AGENTS.md (license header, parameter order, Defaults object, `@Immutable` Colors class, when `@NonRestartableComposable` applies, where `rememberUpdatedState` applies, `@Immutable`/`@Stable` and collection-stability rules). Below are only the pitfalls AGENTS.md does not spell out:
 
 - **Backgrounds and shapes**: filled backgrounds (including those of clickable components) use `Modifier.squircleSurface(color = …, cornerRadius = …)`; borders use `Modifier.squircleBorder(…)`; squircle-radius clipping uses `Modifier.squircleClip(…)` (all from `miuix-squircle`; they fall back to rounded rectangles when `LocalSquircleEnabled` is off, and their outlines align at equal radii). Where an actual `Shape` value is required (e.g. `dropShadow`, the `shape` parameter of `Surface`), use `RoundedCornerShape(cornerRadius)` / `CircleShape`
 - **Theming**: colors always come from `MiuixTheme.colorScheme.*` (full list in `theme/Colors.kt`) and text styles from `MiuixTheme.textStyles.*` (`theme/TextStyles.kt`); never hardcode
@@ -51,7 +51,7 @@ Structure and conventions follow CLAUDE.md (license header, parameter order, Def
 - **Haptics**: toggle-like components fire haptics inside the click callback (`HapticFeedbackType.ToggleOn`/`ToggleOff`, following the `rememberUpdatedState(hapticFeedback)` pattern in `Switch.kt`/`Checkbox.kt`/`RadioButton.kt`); never fire on state change — programmatic state writes would trigger it
 - **Semantics**: set the correct `Role` (Button/Switch/Checkbox/RadioButton…); the non-interactive form (`onClick = null`) still needs a `semantics` block declaring role and state
 - **RTL**: for directional icons, capture `val layoutDirection = LocalLayoutDirection.current` first, then `graphicsLayer { scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f }` (`GraphicsLayerScope` does not expose layoutDirection; see `miuix-preference/.../preference/ArrowPreference.kt`)
-- **Platforms**: implement in `commonMain` first; use expect/actual only for genuine platform differences (see Platform Source Sets in CLAUDE.md)
+- **Platforms**: implement in `commonMain` first; use expect/actual only for genuine platform differences (see Platform Source Sets in AGENTS.md)
 - **Naming and wording**: no Material components or dependencies; code, comments, and KDoc must not reference external design systems or vendor names
 - **Single-file layout**: the main composable, private helper composables, the Defaults object, and the Colors class live in one file; extract complex `startAction`/`endActions` content into private helper composables
 
@@ -114,9 +114,9 @@ Structure and conventions follow CLAUDE.md (license header, parameter order, Def
 
 - `./gradlew compileKotlinDesktop` (fast compile of library + example); also run `./gradlew :docs:demo:compileKotlinJs` if the docs demo changed
 - `./gradlew spotlessCheck`; run `spotlessApply` only if it reports violations
-- Run the example app on at least Android and Desktop to confirm visuals and interaction (commands in CLAUDE.md Key Commands)
+- Run the example app on at least Android and Desktop to confirm visuals and interaction (commands in AGENTS.md Key Commands)
 
-Commits follow the CLAUDE.md Git Commit Style (the component and its example/docs companion changes go in one `library:` commit).
+Commits follow the AGENTS.md Git Commit Style (the component and its example/docs companion changes go in one `library:` commit).
 
 ## Checklist (self-check)
 
