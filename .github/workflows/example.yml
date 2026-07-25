@@ -13,9 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
+        os: [macos-26, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
         include:
-          - os: macos-latest
+          - os: macos-26
             platform: macos arm64
             build-command: ./gradlew packageDmgNativeReleaseMacosArm64
             artifact-path: example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg

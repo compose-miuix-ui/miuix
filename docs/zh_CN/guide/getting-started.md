@@ -35,7 +35,7 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-blur` | 模糊效果库，可独立使用 |
 | `miuix-squircle` | 平滑圆角形状，可独立使用（已由 `miuix-ui` 传递包含） |
 | `miuix-shader` | 底层运行时着色器 / 渲染效果抽象，已由 `miuix-blur` / `miuix-squircle` 传递包含 |
-| `miuix-navigation3-ui` | Navigation3 UI 库，可独立使用 |
+| `miuix-nav` | 自包含导航库，可独立使用 |
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
@@ -52,8 +52,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // 可选：添加 miuix-squircle 以获取平滑圆角形状
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
-            implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
+            // 可选：添加 miuix-nav 以获取导航支持
+            implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
         }
     }
 }
@@ -72,8 +72,8 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // 可选：添加 miuix-squircle 以获取平滑圆角形状
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
-    implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
+    // 可选：添加 miuix-nav 以获取导航支持
+    implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")
 }
 ```
 
@@ -100,13 +100,13 @@ implementation("top.yukonga.miuix.kmp:miuix-blur-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-js:<version>")
-// 可选：添加 miuix-navigation3-ui
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-js:<version>")
+// 可选：添加 miuix-nav
+implementation("top.yukonga.miuix.kmp:miuix-nav-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-js:<version>")
 // 可选：添加 miuix-icons
 implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")

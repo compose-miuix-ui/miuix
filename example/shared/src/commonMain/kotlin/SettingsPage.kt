@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import misc.VersionInfo
-import navigation3.Route
+import navigation.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -51,6 +51,7 @@ private val FloatingToolbarPositionOptions =
 private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
+private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
 private val BlurStyleOptions = listOf("Gaussian", "Progressive")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
@@ -277,10 +278,16 @@ private fun SettingsContent(
                 }
             }
             item(key = "settingsTransition") {
-                SmallTitle("Navigation3")
+                SmallTitle("Navigation")
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                 ) {
+                    OverlayDropdownPreference(
+                        title = "Transition Style",
+                        items = NavTransitionStyleOptions,
+                        selectedIndex = appState.navTransitionStyle,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(navTransitionStyle = it) } },
+                    )
                     SwitchPreference(
                         title = "Enable Corner Clip",
                         summary = "Clip the top scene with rounded corners during transitions",
@@ -300,10 +307,10 @@ private fun SettingsContent(
                         onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
                     )
                     SwitchPreference(
-                        title = "Pop Follows Swipe Edge",
-                        summary = "Pop animation direction follows the finger swipe edge",
-                        checked = appState.popDirectionFollowsSwipeEdge,
-                        onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
+                        title = "Enable Swipe Back",
+                        summary = "Swipe a pushed page to pop it; direction follows layout",
+                        checked = appState.enableSwipeBack,
+                        onCheckedChange = { updateAppState { state -> state.copy(enableSwipeBack = it) } },
                     )
                 }
             }

@@ -26,15 +26,15 @@ A UI library for Compose Multiplatform.
 
 ### Modules
 
-| Module                 | Description                                          |
-| ---------------------- | ---------------------------------------------------- |
-| `miuix-ui`             | Core UI component library                            |
-| `miuix-preference`     | Preference components library, depends on `miuix-ui` |
-| `miuix-icons`          | Extended icon library, can be used independently     |
-| `miuix-blur`           | Blur effect library, can be used independently       |
-| `miuix-squircle`       | Squircle shapes library, can be used independently   |
-| `miuix-navigation3-ui` | Navigation3 UI library, can be used independently    |
-| `miuix-shader`         | Low-level runtime shader / render effect abstraction |
+| Module             | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| `miuix-ui`         | Core UI component library                            |
+| `miuix-preference` | Preference components library, depends on `miuix-ui` |
+| `miuix-icons`      | Extended icon library, can be used independently     |
+| `miuix-blur`       | Blur effect library, can be used independently       |
+| `miuix-squircle`   | Squircle shapes library, can be used independently   |
+| `miuix-nav`        | Navigation library, can be used independently        |
+| `miuix-shader`     | Low-level runtime shader / render effect abstraction |
 
 ### Getting Started
 
@@ -51,8 +51,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-navigation3-ui for navigation3 support
-            implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
+            // Optional: Add miuix-nav for navigation
+            implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
             // Other dependencies...
         }
         // Other sourceSets...

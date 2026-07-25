@@ -35,7 +35,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-blur/`           | Blur effects (Android minSdk=33; depends on `miuix-shader`)                |
 | `miuix-squircle/`       | Squircle corner shapes (depends on `miuix-shader`)                         |
 | `miuix-icons/`          | Extended icon resources                                                    |
-| `miuix-navigation3-ui/` | Navigation 3 UI (depends on `miuix-squircle` for transition clip)          |
+| `miuix-nav/`            | Navigation runtime (depends on `miuix-squircle`)                           |
 | `example/`              | Demo app                                                                   |
 | `baselineprofile/`      | Android baseline profile generation                                        |
 | `docs/`                 | VitePress documentation site                                               |
@@ -94,7 +94,9 @@ commonMain
   // SPDX-License-Identifier: Apache-2.0
   ```
 
-- **Spotless exclusions**: icon files (`**/icon/**/*.kt`) and a subset of navigation3 sources (`**/navigation3/ListUtils.kt`, `**/navigation3/scene/*.kt`, `**/navigation3/ui/*.kt`)
+  Spotless auto-fills `$YEAR` with the current year. Do not manually change years in existing file headers.
+
+- **Spotless exclusions**: Icon files (`**/icon/**/*.kt`) are excluded from formatting.
 - Line endings: platform-native
 - Composable function names may use PascalCase (ktlint rule disabled for `@Composable`)
 

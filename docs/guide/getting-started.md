@@ -27,15 +27,15 @@ repositories {
 
 Miuix is composed of several modules that can be used independently:
 
-| Module | Description |
-|---|---|
-| `miuix-ui` | Core UI component library (automatically includes `miuix-core`) |
-| `miuix-preference` | Preference components (SwitchPreference, CheckboxPreference, etc.), depends on `miuix-ui` |
-| `miuix-icons` | Extended icon library, can be used independently or together with `miuix-ui` (automatically includes `miuix-core`) |
-| `miuix-blur` | Blur effect library, can be used independently |
-| `miuix-squircle` | Squircle (smooth rounded corner) shapes, can be used independently (transitively included by `miuix-ui`) |
-| `miuix-shader` | Low-level runtime shader / render effect abstraction, transitively included by `miuix-blur` / `miuix-squircle` |
-| `miuix-navigation3-ui` | Navigation3 UI library, can be used independently |
+| Module             | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| `miuix-ui`         | Core UI component library                            |
+| `miuix-preference` | Preference components library, depends on `miuix-ui` |
+| `miuix-icons`      | Extended icon library, can be used independently     |
+| `miuix-blur`       | Blur effect library, can be used independently       |
+| `miuix-squircle`   | Squircle shapes library, can be used independently   |
+| `miuix-nav`        | Navigation library, can be used independently        |
+| `miuix-shader`     | Low-level runtime shader / render effect abstraction |
 
 - For Compose Multiplatform projects:
 
@@ -52,8 +52,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-navigation3-ui for Navigation3 support
-            implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
+            // Optional: Add miuix-nav for navigation
+            implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
         }
     }
 }
@@ -72,8 +72,8 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // Optional: Add miuix-navigation3-ui for Navigation3 support
-    implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-android:<version>")
+    // Optional: Add miuix-nav for navigation
+    implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")
 }
 ```
 
@@ -100,13 +100,13 @@ implementation("top.yukonga.miuix.kmp:miuix-blur-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-wasmjs:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-js:<version>")
-// Optional: Add miuix-navigation3-ui
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui-js:<version>")
+// Optional: Add miuix-nav
+implementation("top.yukonga.miuix.kmp:miuix-nav-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-js:<version>")
 // Optional: Add miuix-icons
 implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
@@ -170,5 +170,5 @@ all implemented based on this and therefore need to be wrapped by this component
 
 ## API Documentation
 
-- View the [API Documentation](/miuix/dokka/index.html){target="_blank"},
+- View the [API Documentation](/miuix/dokka/index.html){target="\_blank"},
   generated using Dokka, which contains detailed information about all APIs.
