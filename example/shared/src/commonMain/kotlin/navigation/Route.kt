@@ -32,4 +32,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object NestedNav : Route
+
+    @Serializable
+    data object OverscrollLoadMore : Route
 }

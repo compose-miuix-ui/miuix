@@ -343,6 +343,9 @@ private fun AppNavHost(
         entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
             NestedNavTestPage(padding = padding)
         }
+        entry<Route.OverscrollLoadMore>(swipeDismiss = swipeBackDirection) {
+            OverscrollLoadMorePage(padding = padding)
+        }
     }
 }
 

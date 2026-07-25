@@ -251,6 +251,18 @@ private class OverscrollNode(
         rawTouchAccumulation = sign(offset) * SpringMath.obtainTouchDistance(offset, scrollRange)
     }
 
+    /** Reclaims a stale offset once the child can scroll again in the accumulated direction (e.g. pagination); otherwise [onPreFling] swallows the next fling. */
+    private fun unwindStaleOffset(consumedDelta: Float) {
+        if (abs(offset) <= offsetThreshold || consumedDelta == 0f) return
+        if (rawTouchAccumulation == 0f) syncRawAccumulationFromOffset()
+        if (sign(consumedDelta) != sign(rawTouchAccumulation)) return
+        if (abs(rawTouchAccumulation) <= abs(consumedDelta)) {
+            resetState()
+        } else {
+            applyDrag(-consumedDelta)
+        }
+    }
+
     override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
         updateScrollRange()
         val placeable = measurable.measure(constraints)
@@ -326,10 +338,15 @@ private class OverscrollNode(
         }
 
         if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
+            // A running spring settles to zero on its own; only reclaim when it was interrupted.
+            if (animationJob?.isActive != true) {
+                unwindStaleOffset(if (isVertical) consumed.y else consumed.x)
+            }
             return dispatcher.dispatchPostScroll(consumed, available, source)
         }
 
         animationJob?.cancel()
+        unwindStaleOffset(if (isVertical) consumed.y else consumed.x)
 
         val parentConsumed = if (nestedScrollToParent) {
             dispatcher.dispatchPostScroll(consumed, available, source)

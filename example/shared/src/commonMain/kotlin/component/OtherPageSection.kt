@@ -44,6 +44,11 @@ fun LazyListScope.otherPageSection() {
                 summary = "A NavDisplay nested inside an entry",
                 onClick = { navigator.push(Route.NestedNav) },
             )
+            ArrowPreference(
+                title = "Overscroll + Load More Test",
+                summary = "Fling to the bottom, then fling again",
+                onClick = { navigator.push(Route.OverscrollLoadMore) },
+            )
         }
     }
 }
