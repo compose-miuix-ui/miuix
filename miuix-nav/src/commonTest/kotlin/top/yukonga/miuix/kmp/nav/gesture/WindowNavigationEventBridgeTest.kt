@@ -16,7 +16,7 @@ class WindowNavigationEventBridgeTest {
     fun forwardsCompleteAndCancelledBackSequences() {
         val targetDispatcher = NavigationEventDispatcher()
         val targetInput = DirectNavigationEventInput().also(targetDispatcher::addInput)
-        val received = mutableListOf<String>()
+        val received = mutableListOf<Pair<String, Float?>>()
         val targetHandler =
             object : NavigationEventHandler<NavigationEventInfo>(
                 initialInfo = NavigationEventInfo.None,
@@ -24,19 +24,19 @@ class WindowNavigationEventBridgeTest {
                 isForwardEnabled = false,
             ) {
                 override fun onBackStarted(event: NavigationEvent) {
-                    received += "start:${event.progress}"
+                    received += "start" to event.progress
                 }
 
                 override fun onBackProgressed(event: NavigationEvent) {
-                    received += "progress:${event.progress}"
+                    received += "progress" to event.progress
                 }
 
                 override fun onBackCancelled() {
-                    received += "cancel"
+                    received += "cancel" to null
                 }
 
                 override fun onBackCompleted() {
-                    received += "complete"
+                    received += "complete" to null
                 }
             }.also(targetDispatcher::addHandler)
 
@@ -53,7 +53,14 @@ class WindowNavigationEventBridgeTest {
         sourceInput.backCompleted()
 
         assertEquals(
-            listOf("start:0.0", "progress:0.4", "cancel", "start:0.0", "progress:0.8", "complete"),
+            listOf(
+                "start" to 0f,
+                "progress" to 0.4f,
+                "cancel" to null,
+                "start" to 0f,
+                "progress" to 0.8f,
+                "complete" to null,
+            ),
             received,
         )
 
