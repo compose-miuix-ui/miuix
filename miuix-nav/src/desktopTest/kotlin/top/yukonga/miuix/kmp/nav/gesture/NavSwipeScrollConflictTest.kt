@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.nav.gesture
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -28,6 +30,7 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.core.navBackStackOf
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,6 +54,35 @@ private data object HorizontalPage : NavKey
  */
 @OptIn(ExperimentalTestApi::class)
 class NavSwipeScrollConflictTest {
+
+    @Test
+    fun predictiveBackOwnershipBlocksPointerDismissCommit() = runComposeUiTest {
+        var commits = 0
+        setContent {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = remember { Animatable(1f) },
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        blockGesture = { true },
+                        onCommit = { commits++ },
+                        onCancel = {},
+                        onGesture = {},
+                    ),
+            )
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput { swipeRight(startX = width * 0.05f, endX = width * 0.95f) }
+        waitForIdle()
+
+        assertEquals(0, commits, "system predictive back ownership must suppress the pointer recognizer")
+    }
 
     @Test
     fun crossAxisDragScrollsThePageWithoutEngagingDismiss() = runComposeUiTest {

@@ -49,6 +49,7 @@ import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
+import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
 import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
@@ -419,9 +420,25 @@ private fun NavDisplayLayout(
     // on commit onBack() pops and the renderer's animateTopTo converges to the new top; on cancel
     // the shared spring settles back to topIndex. Modifier.navSwipeDismiss on the display
     // container drives the same animatedTop for the interactive edge swipe.
+    var predictiveBackInProgress by remember { mutableStateOf(false) }
+    val cancelPredictiveBack: () -> Unit = {
+        predictiveBackInProgress = false
+        presentation.pendingSettleVelocity = 0f
+        backScope.launch {
+            presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
+                presentation.animatedTop.settleCancel(
+                    target = topIndex.toFloat(),
+                    spec = topMotion.cancel,
+                    onFrame = onFrame,
+                )
+            }
+            presentation.gesture = null
+        }
+    }
     PredictiveBackHandler(
         enabled = backStack.size > 1,
         onProgress = { events ->
+            predictiveBackInProgress = true
             // Per-gesture trackers: the initial touch anchors vertical-follow transitions, the
             // last two timestamped events estimate the release velocity (depth-units/sec).
             var initialTouchY = Float.NaN
@@ -452,22 +469,28 @@ private fun NavDisplayLayout(
             )
         },
         onCommit = {
-            // Pop synchronously; convergence is owned by the renderer. The pop retargets
-            // animateTopTo, which picks the programmatic curve for a from-rest discrete back
-            // (identical to a programmatic pop) and the velocity-continuous spring when the
-            // gesture left the float mid-flight. The gesture context stays frozen through the
-            // settle and is cleared when the leaving entry unloads.
-            currentOnBack.value()
-        },
-        onCancel = {
-            presentation.pendingSettleVelocity = 0f
-            backScope.launch {
-                presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
-                    presentation.animatedTop.settleCancel(target = topIndex.toFloat(), spec = topMotion.cancel, onFrame = onFrame)
+            val gesture = presentation.gesture
+            val progressVelocity = -presentation.pendingSettleVelocity
+            val shouldCommit = gesture == null || navBackCommitDecision(
+                progress = gesture.progress,
+                velocity = progressVelocity,
+            )
+            if (shouldCommit) {
+                // Pop synchronously; convergence is owned by the renderer. The pop retargets
+                // animateTopTo, which picks the programmatic curve for a from-rest discrete back
+                // (identical to a programmatic pop) and the velocity-continuous spring when the
+                // gesture left the float mid-flight. The gesture context stays frozen through the
+                // settle and is cleared when the leaving entry unloads.
+                try {
+                    currentOnBack.value()
+                } finally {
+                    predictiveBackInProgress = false
                 }
-                presentation.gesture = null
+            } else {
+                cancelPredictiveBack()
             }
         },
+        onCancel = cancelPredictiveBack,
     )
 
     // Unload entries that have finished leaving — either they slid fully off the front edge
@@ -547,6 +570,7 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 motion = topMotion,
                 settleSink = presentation,
+                blockGesture = { predictiveBackInProgress },
                 onCommit = currentOnBack.value,
                 onCancel = {},
                 onGesture = { presentation.gesture = it },

@@ -120,7 +120,8 @@ fun Modifier.navSwipeDismiss(
  * Implementation body shared by the public [navSwipeDismiss] and NavDisplay's internal wiring:
  * [settleSink], when present, publishes the release settle as a
  * [top.yukonga.miuix.kmp.nav.transition.NavSettle] context (the bare public modifier drives and
- * settles but publishes no context).
+ * settles but publishes no context). [blockGesture] reports whether another source, such as system
+ * predictive back, owns the pointer sequence; ownership is latched until that sequence ends.
  */
 @Suppress("ktlint:compose:modifier-composed-check")
 internal fun Modifier.navSwipeDismissImpl(
@@ -130,6 +131,7 @@ internal fun Modifier.navSwipeDismissImpl(
     topIndex: Int,
     motion: NavMotion,
     settleSink: NavSettleSink?,
+    blockGesture: () -> Boolean = { false },
     onCommit: () -> Unit,
     onCancel: () -> Unit,
     onGesture: (NavGesture?) -> Unit,
@@ -138,6 +140,7 @@ internal fun Modifier.navSwipeDismissImpl(
 
     val scope = rememberCoroutineScope()
     val currentMotion = rememberUpdatedState(motion)
+    val currentBlockGesture = rememberUpdatedState(blockGesture)
     val currentOnCommit = rememberUpdatedState(onCommit)
     val currentOnCancel = rememberUpdatedState(onCancel)
     val currentOnGesture = rememberUpdatedState(onGesture)
@@ -167,6 +170,7 @@ internal fun Modifier.navSwipeDismissImpl(
             val slop = viewConfiguration.touchSlop
 
             val down = awaitFirstDown(requireUnconsumed = false)
+            var blockedByExternalGesture = currentBlockGesture.value()
             // Tracks pointer position over time for an accurate instantaneous release velocity. Sampled
             // from the down so the velocity window is populated even before the gesture engages.
             val velocityTracker = VelocityTracker()
@@ -179,6 +183,8 @@ internal fun Modifier.navSwipeDismissImpl(
             while (!claimed) {
                 val event = awaitPointerEvent(PointerEventPass.Initial)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
+                blockedByExternalGesture = blockedByExternalGesture || currentBlockGesture.value()
+                if (blockedByExternalGesture) return@awaitEachGesture
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
                 if (!change.pressed) return@awaitEachGesture // lifted before engaging: a tap / short press
                 val delta = change.positionChange()
@@ -221,6 +227,8 @@ internal fun Modifier.navSwipeDismissImpl(
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Initial)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                blockedByExternalGesture = blockedByExternalGesture || currentBlockGesture.value()
+                if (blockedByExternalGesture) return@awaitEachGesture
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
                 if (!change.pressed) {
                     change.consume()
@@ -249,6 +257,9 @@ internal fun Modifier.navSwipeDismissImpl(
                     )
                 }
             }
+
+            blockedByExternalGesture = blockedByExternalGesture || currentBlockGesture.value()
+            if (blockedByExternalGesture) return@awaitEachGesture
 
             // --- Release: velocity-first / position-fallback, velocity-continuous spring handoff. ---
             // If the finger lifted before the anchor coroutine ran (claim -> immediate lift), fall

@@ -101,4 +101,24 @@ class NavigationEventFlowAdapterTest {
         assertContentEquals(listOf(0f, 0f, 0.75f), received)
         assertEquals(2, commits)
     }
+
+    @Test
+    fun rapidCancelledGestures_neverCommitAndEachCancelResolves() = runBlocking {
+        var commits = 0
+        var cancels = 0
+        val adapter = NavigationEventFlowAdapter(this)
+        adapter.currentOnProgress = { events -> events.collect { } }
+        adapter.currentOnCommit = { commits++ }
+        adapter.currentOnCancel = { cancels++ }
+
+        repeat(50) { index ->
+            adapter.handleBackStarted(NavigationEvent(progress = 0f))
+            adapter.handleBackProgressed(NavigationEvent(progress = (index % 9 + 1) / 10f))
+            adapter.handleBackCancelled()
+        }
+        coroutineContext.job.children.forEach { it.join() }
+
+        assertEquals(0, commits)
+        assertEquals(50, cancels)
+    }
 }
