@@ -16,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -420,9 +421,15 @@ private fun NavDisplayLayout(
     // on commit onBack() pops and the renderer's animateTopTo converges to the new top; on cancel
     // the shared spring settles back to topIndex. Modifier.navSwipeDismiss on the display
     // container drives the same animatedTop for the interactive edge swipe.
-    var predictiveBackInProgress by remember { mutableStateOf(false) }
+    // Even values are idle; every predictive-back start advances to a new odd ownership
+    // generation, and its terminal callback advances to the next even value. Pointer work can
+    // therefore detect a start+finish that occurred entirely while it was suspended.
+    var predictiveBackOwnership by remember { mutableLongStateOf(0L) }
+    val releasePredictiveBackOwnership: () -> Unit = {
+        if (predictiveBackOwnership and 1L != 0L) predictiveBackOwnership++
+    }
     val cancelPredictiveBack: () -> Unit = {
-        predictiveBackInProgress = false
+        releasePredictiveBackOwnership()
         presentation.pendingSettleVelocity = 0f
         backScope.launch {
             presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
@@ -438,7 +445,11 @@ private fun NavDisplayLayout(
     PredictiveBackHandler(
         enabled = backStack.size > 1,
         onProgress = { events ->
-            predictiveBackInProgress = true
+            predictiveBackOwnership = if (predictiveBackOwnership and 1L == 0L) {
+                predictiveBackOwnership + 1L
+            } else {
+                predictiveBackOwnership + 2L
+            }
             // Per-gesture trackers: the initial touch anchors vertical-follow transitions, the
             // last two timestamped events estimate the release velocity (depth-units/sec).
             var initialTouchY = Float.NaN
@@ -484,7 +495,7 @@ private fun NavDisplayLayout(
                 try {
                     currentOnBack.value()
                 } finally {
-                    predictiveBackInProgress = false
+                    releasePredictiveBackOwnership()
                 }
             } else {
                 cancelPredictiveBack()
@@ -570,7 +581,7 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 motion = topMotion,
                 settleSink = presentation,
-                blockGesture = { predictiveBackInProgress },
+                externalGestureOwnership = { predictiveBackOwnership },
                 onCommit = currentOnBack.value,
                 onCancel = {},
                 onGesture = { presentation.gesture = it },
