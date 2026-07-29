@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.DirectNavigationEventInput
@@ -26,6 +28,7 @@ import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -250,6 +253,118 @@ class NavNestedStressTest {
         settleFully()
         assertEquals(2, inner.size, "committed back session mid-settle must pop")
         probe("back session committed mid-settle")
+    }
+
+    @Test
+    fun completedPredictiveBackReturningTowardRest_isReclassifiedAsCancel() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val owner = TestOwner()
+        val stack = navBackStackOf(FzRoot, FzTop)
+        setContent {
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner) {
+                NavDisplay(stack, effects = NavDisplayEffects(blockInputDuringTransition = false)) {
+                    entry<FzRoot> { Box(Modifier.fillMaxSize().background(Color.Gray)) }
+                    entry<FzTop> { Box(Modifier.fillMaxSize().background(Color.Black)) }
+                }
+            }
+        }
+        mainClock.advanceTimeBy(100)
+        waitForIdle()
+
+        runOnIdle {
+            owner.input.backStarted(NavigationEvent(progress = 0f, frameTimeMillis = 1_000L))
+            owner.input.backProgressed(NavigationEvent(progress = 0.7f, frameTimeMillis = 1_100L))
+            owner.input.backProgressed(NavigationEvent(progress = 0.45f, frameTimeMillis = 1_150L))
+            owner.input.backProgressed(NavigationEvent(progress = 0.2f, frameTimeMillis = 1_200L))
+            // Mirrors Samsung: the terminal callback says complete even though the final velocity
+            // is strongly back toward rest. The shared velocity-first rule must win.
+            owner.input.backCompleted()
+        }
+        repeat(3) {
+            mainClock.advanceTimeBy(600)
+            waitForIdle()
+        }
+
+        assertEquals(
+            listOf<NavKey>(FzRoot, FzTop),
+            stack.toList(),
+            "a completed callback received during strong return motion must restore the top entry",
+        )
+    }
+
+    @Test
+    fun discreteBackDuringPointerPreview_commitsUnconditionally() = runComposeUiTest {
+        val owner = TestOwner()
+        val stack = navBackStackOf(FzRoot, FzTop)
+        setContent {
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner) {
+                NavDisplay(stack, effects = NavDisplayEffects(blockInputDuringTransition = false)) {
+                    entry<FzRoot> { Box(Modifier.fillMaxSize().background(Color.Gray)) }
+                    entry<FzTop>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                        Box(Modifier.fillMaxSize().background(Color.Black))
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        // Hold a low-progress pointer preview whose shared gesture would classify as cancel.
+        onRoot().performTouchInput {
+            down(Offset(width * 0.05f, centerY))
+            moveTo(Offset(width * 0.2f, centerY))
+            repeat(4) { moveTo(Offset(width * 0.2f, centerY), delayMillis = 100) }
+        }
+        waitForIdle()
+
+        // A bare completed callback is Desktop ESC/programmatic back, not completion of the
+        // pointer preview, and must therefore pop without consulting that preview's progress.
+        runOnIdle { owner.input.backCompleted() }
+        onRoot().performTouchInput { up() }
+        waitForIdle()
+
+        assertEquals(listOf<NavKey>(FzRoot), stack.toList())
+    }
+
+    @Test
+    fun rapidCancelledPredictiveBack_doesNotPopOrSkipUnderlyingEntry() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val owner = TestOwner()
+        val stack = navBackStackOf(FzRoot, FzNested, FzTop)
+        setContent {
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner) {
+                NavDisplay(stack, effects = NavDisplayEffects(blockInputDuringTransition = false)) {
+                    entry<FzRoot> { Box(Modifier.fillMaxSize().background(Color.Gray)) }
+                    entry<FzNested> { Box(Modifier.fillMaxSize().background(Color.White)) }
+                    entry<FzTop> { Box(Modifier.fillMaxSize().background(Color.Black)) }
+                }
+            }
+        }
+        mainClock.advanceTimeBy(100)
+        waitForIdle()
+
+        repeat(50) { index ->
+            runOnIdle {
+                owner.input.backStarted(NavigationEvent(progress = 0f))
+                owner.input.backProgressed(
+                    NavigationEvent(progress = (index % 8 + 1) / 10f),
+                )
+                owner.input.backCancelled()
+            }
+            // Start the next gesture while the previous cancellation spring is still restoring.
+            mainClock.advanceTimeBy(16)
+            waitForIdle()
+            assertEquals(
+                listOf<NavKey>(FzRoot, FzNested, FzTop),
+                stack.toList(),
+                "cancelled gesture $index must not mutate the back stack",
+            )
+        }
+
+        repeat(4) {
+            mainClock.advanceTimeBy(600)
+            waitForIdle()
+        }
+        assertEquals(listOf<NavKey>(FzRoot, FzNested, FzTop), stack.toList())
     }
 }
 

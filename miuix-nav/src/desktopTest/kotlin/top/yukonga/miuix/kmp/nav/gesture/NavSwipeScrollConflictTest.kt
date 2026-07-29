@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.nav.gesture
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -28,6 +33,7 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.core.navBackStackOf
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,6 +57,87 @@ private data object HorizontalPage : NavKey
  */
 @OptIn(ExperimentalTestApi::class)
 class NavSwipeScrollConflictTest {
+
+    @Test
+    fun predictiveBackOwnershipBlocksPointerDismissCommit() = runComposeUiTest {
+        var commits = 0
+        setContent {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = remember { Animatable(1f) },
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        externalGestureOwnership = { 1L },
+                        onCommit = { commits++ },
+                        onCancel = {},
+                        onGesture = {},
+                    ),
+            )
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput { swipeRight(startX = width * 0.05f, endX = width * 0.95f) }
+        waitForIdle()
+
+        assertEquals(0, commits, "system predictive back ownership must suppress the pointer recognizer")
+    }
+
+    @Test
+    fun completedPredictiveBackOwnershipCycleCancelsClaimedPointerWork() = runComposeUiTest {
+        var ownership by mutableLongStateOf(0L)
+        var commits = 0
+        var pointerGestureUpdates = 0
+        setContent {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = remember { Animatable(1f) },
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        externalGestureOwnership = { ownership },
+                        onCommit = { commits++ },
+                        onCancel = {},
+                        onGesture = { if (it != null) pointerGestureUpdates++ },
+                    ),
+            )
+        }
+        waitForIdle()
+
+        // Claim the pointer recognizer and allow its first update to run.
+        onRoot().performTouchInput {
+            down(Offset(width * 0.05f, centerY))
+            moveTo(Offset(width * 0.25f, centerY))
+            moveTo(Offset(width * 0.35f, centerY))
+        }
+        waitForIdle()
+        val updatesBeforeOwnershipChange = pointerGestureUpdates
+        assertTrue(updatesBeforeOwnershipChange > 0, "the pointer sequence must be claimed before takeover")
+
+        // An even generation means predictive back has already started and finished. The pointer
+        // sequence must still observe that ownership changed while it was suspended.
+        runOnIdle { ownership = 2L }
+        onRoot().performTouchInput {
+            moveTo(Offset(width * 0.8f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(0, commits, "a stale claimed pointer sequence must not commit")
+        assertEquals(
+            updatesBeforeOwnershipChange,
+            pointerGestureUpdates,
+            "queued pointer work must not publish after predictive-back ownership changes",
+        )
+    }
 
     @Test
     fun crossAxisDragScrollsThePageWithoutEngagingDismiss() = runComposeUiTest {

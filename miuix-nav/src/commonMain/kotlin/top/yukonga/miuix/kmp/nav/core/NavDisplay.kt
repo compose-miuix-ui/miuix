@@ -16,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,13 +43,14 @@ import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
+import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandlerWithSessions
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
 import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismissImpl
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
+import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
 import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
@@ -284,6 +286,29 @@ private fun NavEntry<*>.transitionOrNull(): NavTransition? = metadata[NAV_TRANSI
 /** Reads the per-route [NavSwipeDirection] override from an entry's metadata, or null to inherit. */
 private fun NavEntry<*>.swipeDismissOrNull(): NavSwipeDirection? = metadata[NAV_SWIPE_DISMISS_METADATA_KEY] as? NavSwipeDirection
 
+/** Monotonic even/odd ownership token with generation-scoped release semantics. */
+internal class PredictiveBackOwnership {
+    var generation by mutableLongStateOf(0L)
+        private set
+
+    fun acquire(): Long {
+        generation = if (generation and 1L == 0L) generation + 1L else generation + 2L
+        return generation
+    }
+
+    fun release(lease: Long): Boolean {
+        if (generation != lease) return false
+        generation = lease + 1L
+        return true
+    }
+}
+
+private class PredictiveBackSession(
+    val ownershipLease: Long,
+    var gesture: NavGesture? = null,
+    var progressVelocity: Float = 0f,
+)
+
 /**
  * Private rendering core shared by all [NavDisplay] overloads.
  *
@@ -419,9 +444,35 @@ private fun NavDisplayLayout(
     // on commit onBack() pops and the renderer's animateTopTo converges to the new top; on cancel
     // the shared spring settles back to topIndex. Modifier.navSwipeDismiss on the display
     // container drives the same animatedTop for the interactive edge swipe.
-    PredictiveBackHandler(
+    // Even values are idle; every predictive-back start advances to a new odd ownership
+    // generation, and only that session's terminal callback may advance its lease to the next
+    // even value. Pointer work can still detect a complete start+finish while suspended, without
+    // an older delayed terminal callback making a newer active session appear idle.
+    val predictiveBackOwnership = remember { PredictiveBackOwnership() }
+    val predictiveBackSessions = remember { mutableMapOf<Long, PredictiveBackSession>() }
+    val cancelPredictiveBack: (Long) -> Unit = cancel@{ sessionId ->
+        val session = predictiveBackSessions.remove(sessionId) ?: return@cancel
+        // A delayed terminal callback from an older session must not settle or release the
+        // newer predictive gesture that currently owns the shared driver.
+        if (!predictiveBackOwnership.release(session.ownershipLease)) return@cancel
+        presentation.pendingSettleVelocity = 0f
+        backScope.launch {
+            presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
+                presentation.animatedTop.settleCancel(
+                    target = topIndex.toFloat(),
+                    spec = topMotion.cancel,
+                    onFrame = onFrame,
+                )
+            }
+            presentation.gesture = null
+        }
+    }
+    PredictiveBackHandlerWithSessions(
         enabled = backStack.size > 1,
-        onProgress = { events ->
+        onProgress = { sessionId, events ->
+            val session = PredictiveBackSession(ownershipLease = predictiveBackOwnership.acquire())
+            predictiveBackSessions[sessionId] = session
+            presentation.pendingSettleVelocity = 0f
             // Per-gesture trackers: the initial touch anchors vertical-follow transitions, the
             // last two timestamped events estimate the release velocity (depth-units/sec).
             var initialTouchY = Float.NaN
@@ -434,40 +485,64 @@ private fun NavDisplayLayout(
                     if (initialTouchY.isNaN()) initialTouchY = event.touchY
                     if (event.frameTimeMillis > lastTimeMillis && lastTimeMillis != 0L) {
                         val progressVelocity = (event.progress - lastProgress) * 1000f / (event.frameTimeMillis - lastTimeMillis)
-                        presentation.pendingSettleVelocity = -progressVelocity
+                        session.progressVelocity = progressVelocity
+                        if (predictiveBackOwnership.generation == session.ownershipLease) {
+                            presentation.pendingSettleVelocity = -progressVelocity
+                        }
                     }
                     if (event.frameTimeMillis != 0L) {
                         lastProgress = event.progress
                         lastTimeMillis = event.frameTimeMillis
                     }
-                    presentation.gesture = NavGesture(
+                    val gesture = NavGesture(
                         progress = event.progress,
                         swipeEdge = event.swipeEdge,
                         touchY = event.touchY,
                         initialTouchY = initialTouchY,
                     )
+                    session.gesture = gesture
+                    if (predictiveBackOwnership.generation == session.ownershipLease) {
+                        presentation.gesture = gesture
+                    }
                 },
                 animatedTop = presentation.animatedTop,
                 topIndex = topIndex,
             )
         },
-        onCommit = {
-            // Pop synchronously; convergence is owned by the renderer. The pop retargets
-            // animateTopTo, which picks the programmatic curve for a from-rest discrete back
-            // (identical to a programmatic pop) and the velocity-continuous spring when the
-            // gesture left the float mid-flight. The gesture context stays frozen through the
-            // settle and is cleared when the leaving entry unloads.
-            currentOnBack.value()
-        },
-        onCancel = {
-            presentation.pendingSettleVelocity = 0f
-            backScope.launch {
-                presentation.trackSettle(phase = NavSettlePhase.Cancel, releaseVelocity = 0f) { onFrame ->
-                    presentation.animatedTop.settleCancel(target = topIndex.toFloat(), spec = topMotion.cancel, onFrame = onFrame)
+        onCommit = commit@{ sessionId ->
+            if (sessionId == null) {
+                // A bare completion (Desktop ESC / programmatic back) is discrete and must commit
+                // regardless of any pointer-dismiss gesture currently stored in presentation.
+                currentOnBack.value()
+                return@commit
+            }
+            val session = predictiveBackSessions[sessionId] ?: return@commit
+            val gesture = session.gesture
+            val progressVelocity = session.progressVelocity
+            val shouldCommit = gesture == null || navBackCommitDecision(
+                progress = gesture.progress,
+                velocity = progressVelocity,
+            )
+            if (shouldCommit) {
+                predictiveBackSessions.remove(sessionId)
+                if (predictiveBackOwnership.generation == session.ownershipLease) {
+                    presentation.pendingSettleVelocity = -progressVelocity
                 }
-                presentation.gesture = null
+                // Pop synchronously; convergence is owned by the renderer. The pop retargets
+                // animateTopTo, which picks the programmatic curve for a from-rest discrete back
+                // (identical to a programmatic pop) and the velocity-continuous spring when the
+                // gesture left the float mid-flight. The gesture context stays frozen through the
+                // settle and is cleared when the leaving entry unloads.
+                try {
+                    currentOnBack.value()
+                } finally {
+                    predictiveBackOwnership.release(session.ownershipLease)
+                }
+            } else {
+                cancelPredictiveBack(sessionId)
             }
         },
+        onCancel = cancelPredictiveBack,
     )
 
     // Unload entries that have finished leaving — either they slid fully off the front edge
@@ -547,6 +622,7 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 motion = topMotion,
                 settleSink = presentation,
+                externalGestureOwnership = { predictiveBackOwnership.generation },
                 onCommit = currentOnBack.value,
                 onCancel = {},
                 onGesture = { presentation.gesture = it },
