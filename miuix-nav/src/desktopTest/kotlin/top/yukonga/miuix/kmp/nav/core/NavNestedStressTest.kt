@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.DirectNavigationEventInput
@@ -26,6 +28,7 @@ import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -287,6 +290,39 @@ class NavNestedStressTest {
             stack.toList(),
             "a completed callback received during strong return motion must restore the top entry",
         )
+    }
+
+    @Test
+    fun discreteBackDuringPointerPreview_commitsUnconditionally() = runComposeUiTest {
+        val owner = TestOwner()
+        val stack = navBackStackOf(FzRoot, FzTop)
+        setContent {
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner) {
+                NavDisplay(stack, effects = NavDisplayEffects(blockInputDuringTransition = false)) {
+                    entry<FzRoot> { Box(Modifier.fillMaxSize().background(Color.Gray)) }
+                    entry<FzTop>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                        Box(Modifier.fillMaxSize().background(Color.Black))
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        // Hold a low-progress pointer preview whose shared gesture would classify as cancel.
+        onRoot().performTouchInput {
+            down(Offset(width * 0.05f, centerY))
+            moveTo(Offset(width * 0.2f, centerY))
+            repeat(4) { moveTo(Offset(width * 0.2f, centerY), delayMillis = 100) }
+        }
+        waitForIdle()
+
+        // A bare completed callback is Desktop ESC/programmatic back, not completion of the
+        // pointer preview, and must therefore pop without consulting that preview's progress.
+        runOnIdle { owner.input.backCompleted() }
+        onRoot().performTouchInput { up() }
+        waitForIdle()
+
+        assertEquals(listOf<NavKey>(FzRoot), stack.toList())
     }
 
     @Test

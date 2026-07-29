@@ -84,6 +84,20 @@ fun PredictiveBackHandler(
     onProgress: suspend (Flow<NavBackEvent>) -> Unit,
     onCommit: () -> Unit,
     onCancel: () -> Unit,
+) = PredictiveBackHandlerWithSessions(
+    enabled = enabled,
+    onProgress = { _, events -> onProgress(events) },
+    onCommit = { onCommit() },
+    onCancel = { onCancel() },
+)
+
+/** Session-aware wiring used internally when terminal work must be tied to its originating gesture. */
+@Composable
+internal fun PredictiveBackHandlerWithSessions(
+    enabled: Boolean,
+    onProgress: suspend (sessionId: Long, events: Flow<NavBackEvent>) -> Unit,
+    onCommit: (sessionId: Long?) -> Unit,
+    onCancel: (sessionId: Long) -> Unit,
 ) {
     // No dispatcher owner means the host has no back-event source at all (never the case on
     // Android or under the multiplatform window hosts); the handler is simply inert then.
@@ -116,8 +130,9 @@ fun PredictiveBackHandler(
  * Per gesture: [onBackStarted] opens an unbounded channel and launches the collector
  * ([currentOnProgress]); [onBackProgressed] enqueues; [onBackCompleted] closes the stream, waits
  * for the collector to drain the tail, then fires [currentOnCommit]; [onBackCancelled] cancels
- * the collector and fires [currentOnCancel]. A terminal callback with no open session (a
- * discrete trigger such as a Desktop ESC press) commits directly.
+ * the collector and fires [currentOnCancel]. Progress and terminal callbacks carry the originating
+ * session ID so delayed work cannot resolve a newer gesture. A completed callback with no open
+ * session (a discrete trigger such as a Desktop ESC press) reports a null ID and commits directly.
  */
 internal class NavigationEventFlowAdapter(
     private val scope: CoroutineScope,
@@ -126,12 +141,14 @@ internal class NavigationEventFlowAdapter(
     isBackEnabled = false,
     isForwardEnabled = false,
 ) {
-    var currentOnProgress: suspend (Flow<NavBackEvent>) -> Unit = {}
-    var currentOnCommit: () -> Unit = {}
-    var currentOnCancel: () -> Unit = {}
+    var currentOnProgress: suspend (sessionId: Long, events: Flow<NavBackEvent>) -> Unit = { _, _ -> }
+    var currentOnCommit: (sessionId: Long?) -> Unit = {}
+    var currentOnCancel: (sessionId: Long) -> Unit = {}
 
     private var channel: Channel<NavBackEvent>? = null
     private var collector: Job? = null
+    private var activeSessionId: Long? = null
+    private var nextSessionId = 0L
 
     // The base-class callbacks are protected; the bodies live in internal handle* twins so the
     // ordering semantics stay unit-testable without a dispatcher.
@@ -144,10 +161,12 @@ internal class NavigationEventFlowAdapter(
     override fun onBackCancelled() = handleBackCancelled()
 
     internal fun handleBackStarted(event: NavigationEvent) {
+        val sessionId = ++nextSessionId
         val ch = Channel<NavBackEvent>(capacity = Channel.UNLIMITED)
         channel = ch
+        activeSessionId = sessionId
         val onProgress = currentOnProgress
-        collector = scope.launch { onProgress(ch.receiveAsFlow()) }
+        collector = scope.launch { onProgress(sessionId, ch.receiveAsFlow()) }
         ch.trySend(event.toNavBackEvent())
     }
 
@@ -158,13 +177,15 @@ internal class NavigationEventFlowAdapter(
     internal fun handleBackCompleted() {
         val ch = channel
         val job = collector
+        val sessionId = activeSessionId
         channel = null
         collector = null
-        if (ch == null || job == null) {
+        activeSessionId = null
+        if (ch == null || job == null || sessionId == null) {
             // Discrete trigger: no gesture session was ever started. Commit directly; the
             // commit settle animates the pop through the shared spring from wherever an
             // in-flight transition currently sits.
-            currentOnCommit()
+            currentOnCommit(null)
             return
         }
         ch.close()
@@ -173,21 +194,23 @@ internal class NavigationEventFlowAdapter(
             // Let the collector drain trailing progress events and return before committing,
             // so no stale snap can land after the commit settle has taken over the driver.
             job.join()
-            onCommit()
+            onCommit(sessionId)
         }
     }
 
     internal fun handleBackCancelled() {
         val ch = channel
         val job = collector
+        val sessionId = activeSessionId
         channel = null
         collector = null
-        if (ch == null || job == null) return
+        activeSessionId = null
+        if (ch == null || job == null || sessionId == null) return
         ch.close()
         val onCancel = currentOnCancel
         scope.launch {
             job.cancelAndJoin()
-            onCancel()
+            onCancel(sessionId)
         }
     }
 }
