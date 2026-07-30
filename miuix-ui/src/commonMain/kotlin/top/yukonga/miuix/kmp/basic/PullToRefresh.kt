@@ -51,6 +51,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -61,6 +63,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastAny
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -180,18 +183,30 @@ fun PullToRefresh(
             )
         }
 
-    // A modifier to detect when the user releases their finger and trigger the refresh logic.
+    // Press/pan gesture session: the pull engages and resolves only inside one. Scroll events
+    // never alter it (wheel has no release signal); mouse presses never open it (a mouse press
+    // cannot drag a scrollable).
     val pointerModifier = remember(pullToRefreshState) {
-        Modifier.pointerInput(Unit) {
+        pullToRefreshState.isGestureActive = false
+        Modifier.pointerInput(pullToRefreshState) {
             awaitPointerEventScope {
                 while (true) {
                     val event = awaitPointerEvent()
-                    if (
-                        (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached) &&
-                        event.changes.all { !it.pressed }
-                    ) {
-                        coroutineScope.launch {
-                            pullToRefreshState.handlePointerRelease(currentOnRefresh, isRefreshingNow)
+                    val active = when (event.type) {
+                        PointerEventType.PanStart, PointerEventType.PanMove -> true
+                        PointerEventType.PanEnd -> false
+                        PointerEventType.Scroll -> pullToRefreshState.isGestureActive
+                        else -> event.changes.fastAny { it.pressed && it.type != PointerType.Mouse }
+                    }
+                    if (pullToRefreshState.isGestureActive != active) {
+                        pullToRefreshState.isGestureActive = active
+                        if (
+                            !active &&
+                            (pullToRefreshState.refreshState == RefreshState.Pulling || pullToRefreshState.refreshState == RefreshState.ThresholdReached)
+                        ) {
+                            coroutineScope.launch {
+                                pullToRefreshState.handlePointerRelease(currentOnRefresh, isRefreshingNow)
+                            }
                         }
                     }
                 }
@@ -362,6 +377,9 @@ class PullToRefreshState(
 
     internal var isRefreshing by mutableStateOf(false)
     internal var isTouching by mutableStateOf(false)
+
+    /** True while a press or pan gesture session is in flight; wheel events never set it. */
+    internal var isGestureActive = false
     internal var isRebounding by mutableStateOf(false)
     private var isProcessingRelease = false
     private val refreshCompleteAnimProgressState = mutableFloatStateOf(1f)
@@ -485,8 +503,8 @@ class PullToRefreshState(
     /** Handles the pointer release event to either trigger a refresh or rebound the indicator. */
     internal suspend fun handlePointerRelease(onRefresh: () -> Unit, isRefreshingNow: () -> Boolean) {
         if (isProcessingRelease || isRefreshing || isRebounding) return
-        // Cleared only by the launch that owns the release: desktop hover moves also launch this
-        // handler, and a pre-guard clear would erase a catch's isTouching and fire onRefresh.
+        // Cleared only by the launch that owns the release: a release racing an in-flight rebound
+        // early-returns above, and a pre-guard clear would erase a catch's isTouching and fire onRefresh.
         isTouching = false
         isProcessingRelease = true
         try {
@@ -577,7 +595,7 @@ class PullToRefreshState(
                     }
 
                     // When pulling up while the indicator is visible, consume the scroll to hide it.
-                    if (source == NestedScrollSource.UserInput && available.y < 0 && (dragOffset > 0f || currentTouch > 0f)) {
+                    if (source == NestedScrollSource.UserInput && isGestureActive && available.y < 0 && (dragOffset > 0f || currentTouch > 0f)) {
                         isTouching = true
                         animationJob?.cancel()
                         applyDrag(available.y)
@@ -593,7 +611,7 @@ class PullToRefreshState(
                     }
 
                     // When pulling down after the content is at its top, consume the scroll to show the indicator.
-                    if (source == NestedScrollSource.UserInput && available.y > 0f) {
+                    if (source == NestedScrollSource.UserInput && isGestureActive && available.y > 0f) {
                         isTouching = true
                         animationJob?.cancel()
                         applyDrag(available.y)

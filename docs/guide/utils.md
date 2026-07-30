@@ -57,6 +57,8 @@ Normally, you don't need to use it actively. See the [OverlayListPopup](../compo
 
 Miuix provides easy-to-use overscroll effect modifiers for smoother and more natural scrolling experiences.
 
+The overscroll effect engages only during press or pan gestures (touch drag; trackpad pan on Android). Mouse wheel and keyboard scrolling pass through unchanged, as does desktop/macOS trackpad scrolling (delivered as wheel events) — none of them provide a release signal to settle the bounce. With a snap- or pager-style fling behavior, leftover wheel velocity can still produce a small edge bounce.
+
 ### Vertical Overscroll
 
 ```kotlin
@@ -89,12 +91,7 @@ You can customize the overscroll effect parameters as needed:
 LazyColumn(
     modifier = Modifier.overScrollVertical(
         nestedScrollToParent = true, // Dispatch nested scroll events to parent, default true
-        scrollEasing = { distance, range -> // Custom easing, default effect is similar to HyperOS feel
-            // Example: DefaultParabolaScrollEasing(distance, range)
-        },
-        springStiff = 280f, // Spring stiffness, default 280f
-        springDamp = 1f,    // Spring damping, default 1f
-        isEnabled = { platform() == Platform.Android || platform() == Platform.IOS } // Enable only on Android/iOS by default
+        isEnabled = { true },        // Whether the effect is enabled, default true on all platforms
     ),
     overscrollEffect = null // It is recommended to set this parameter to null to disable the default effect
 ) {
@@ -105,10 +102,7 @@ LazyColumn(
 **Parameter Explanations:**
 
 * `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
-* `scrollEasing`: Function `(distance: Float, range: Int) -> Float`, custom easing， default effect is similar to HyperOS feel.
-* `springStiff`: Float, spring stiffness for rebound. Default: `280f`.
-* `springDamp`: Float, spring damping for rebound. Default: `1f`.
-* `isEnabled`: Lambda, whether to enable overscroll. Default: only Android/iOS.
+* `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
 
 ### Via OverscrollFactory (Theme-Level Integration)
 
@@ -156,7 +150,7 @@ LazyColumn(
 | :--- | :---: | :---: |
 | How it's applied | `Modifier` per component | Theme-level, automatic |
 | Spring physics | Identical | Identical |
-| Platforms enabled by default | Android, iOS | All platforms (via theme) |
+| Platforms enabled by default | All platforms | All platforms (via theme) |
 | Triggers when content does not overflow container | ✅ | ❌ |
 | Requires a modifier on each component | ✅ | ❌ |
 

@@ -15,6 +15,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -31,6 +34,7 @@ import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.util.fastAny
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
@@ -47,7 +51,7 @@ import kotlin.math.sign
 @Stable
 fun Modifier.overScrollVertical(
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
+    isEnabled: () -> Boolean = { true },
 ): Modifier = overScrollOutOfBound(
     isVertical = true,
     nestedScrollToParent = nestedScrollToParent,
@@ -60,7 +64,7 @@ fun Modifier.overScrollVertical(
 @Stable
 fun Modifier.overScrollHorizontal(
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
+    isEnabled: () -> Boolean = { true },
 ): Modifier = overScrollOutOfBound(
     isVertical = false,
     nestedScrollToParent = nestedScrollToParent,
@@ -70,15 +74,21 @@ fun Modifier.overScrollHorizontal(
 /**
  * Overscroll effect when scrolling to the boundary.
  *
+ * The effect engages only during a press or pan gesture session (touch drag; trackpad pan on
+ * Android). Mouse wheel and keyboard scrolling pass through untouched, as does desktop/macOS
+ * trackpad scrolling (delivered as wheel events).
+ *
  * @param isVertical Whether the overscroll effect is vertical or horizontal.
- * @param nestedScrollToParent Whether to dispatch nested scroll events to parent.
- * @param isEnabled Whether the overscroll effect is enabled. Default is enabled on Android and iOS only.
+ * @param nestedScrollToParent Whether to dispatch nested scroll events to parent. Pass-through
+ * deltas (non-gesture sources such as mouse wheel, and while pull-to-refresh is active) are
+ * forwarded to ancestors regardless of this flag.
+ * @param isEnabled Whether the overscroll effect is enabled.
  */
 @Stable
 fun Modifier.overScrollOutOfBound(
     isVertical: Boolean = true,
     nestedScrollToParent: Boolean = true,
-    isEnabled: () -> Boolean = { platform() == Platform.Android || platform() == Platform.IOS },
+    isEnabled: () -> Boolean = { true },
 ): Modifier {
     if (!isEnabled()) return this
 
@@ -140,6 +150,36 @@ private class OverscrollNode(
     private var animationJob: Job? = null
     private val offsetThreshold = 1f
 
+    // Drag accumulation engages only inside a press/pan session. Scroll events never alter it
+    // (with the default FlingBehavior a wheel produces no fling callbacks, so a wheel-driven
+    // offset would latch unsettled); mouse presses never open it (a mouse press cannot drag a
+    // scrollable).
+    private var gestureActive = false
+
+    init {
+        delegate(
+            SuspendingPointerInputModifierNode {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val active = when (event.type) {
+                            PointerEventType.PanStart, PointerEventType.PanMove -> true
+                            PointerEventType.PanEnd -> false
+                            PointerEventType.Scroll -> gestureActive
+                            else -> event.changes.fastAny { it.pressed && it.type != PointerType.Mouse }
+                        }
+                        if (gestureActive && !active && animationJob?.isActive != true && abs(offset) > offsetThreshold) {
+                            // Settle a session that ends without a fling; a real gesture's fling
+                            // supersedes this spring via onPreFling.
+                            startSpringAnimation()
+                        }
+                        gestureActive = active
+                    }
+                }
+            },
+        )
+    }
+
     private var lastPlacedOffset = 0f
     var offset = 0f
         private set(value) {
@@ -167,6 +207,7 @@ private class OverscrollNode(
 
     override fun onDetach() {
         super.onDetach()
+        gestureActive = false
         resetState()
     }
 
@@ -285,7 +326,7 @@ private class OverscrollNode(
             overScrollState.isOverScrollActive = isActive
         }
 
-        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
+        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput || !gestureActive) {
             return dispatcher.dispatchPreScroll(available, source)
         }
 
@@ -337,7 +378,7 @@ private class OverscrollNode(
             overScrollState.isOverScrollActive = isActive
         }
 
-        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput) {
+        if (shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput || !gestureActive) {
             // A running spring settles to zero on its own; only reclaim when it was interrupted.
             if (animationJob?.isActive != true) {
                 unwindStaleOffset(if (isVertical) consumed.y else consumed.x)

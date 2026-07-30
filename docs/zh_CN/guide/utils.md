@@ -57,6 +57,8 @@ PopupLayout(
 
 Miuix 提供了易于使用的越界回弹效果修饰符，让滚动体验更加流畅自然。
 
+越界回弹仅在按压或平移手势（触摸拖拽；Android 上的触控板平移）期间生效。鼠标滚轮与键盘滚动原样透传，桌面/macOS 的触控板滚动以滚轮事件送达，同样透传——它们没有“松手”信号，无法正确收束回弹。若使用 snap/pager 类自定义 fling 行为，滚轮的剩余速度仍可能在边缘产生一次轻微回弹。
+
 ### 垂直越界回弹
 
 ```kotlin
@@ -89,12 +91,7 @@ LazyRow(
 LazyColumn(
     modifier = Modifier.overScrollVertical(
         nestedScrollToParent = true, // 是否分发嵌套滚动事件到父级，默认 true
-        scrollEasing = { distance, range -> // 自定义回弹阻尼，默认效果类似 HyperOS 手感
-            // 示例：DefaultParabolaScrollEasing(distance, range)
-        },
-        springStiff = 280f, // 回弹弹性系数，默认 280f
-        springDamp = 1f,    // 回弹阻尼系数，默认 1f
-        isEnabled = { platform() == Platform.Android || platform() == Platform.IOS } // 默认仅在 Android/iOS 启用
+        isEnabled = { true },        // 是否启用效果，默认全平台启用
     ),
     overscrollEffect = null // 建议将此参数设置为 null，禁用默认效果
 ) {
@@ -105,10 +102,7 @@ LazyColumn(
 **参数说明:**
 
 * `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
-* `scrollEasing`：函数 `(distance: Float, range: Int) -> Float`，自定义回弹阻尼，默认效果类似 HyperOS 手感。
-* `springStiff`：浮点数，回弹弹性系数。默认：`280f`。
-* `springDamp`：浮点数，回弹阻尼系数。默认：`1f`。
-* `isEnabled`：Lambda，是否启用越界回弹。默认仅 Android/iOS。
+* `isEnabled`：Lambda，是否启用越界回弹。默认：全平台启用。
 
 ### 通过 OverscrollFactory（主题级集成）
 
@@ -156,7 +150,7 @@ LazyColumn(
 | :--- | :---: | :---: |
 | 使用方式 | 每个组件手动添加 `Modifier` | 主题级别，自动生效 |
 | 物理效果 | 相同弹簧物理 | 相同弹簧物理 |
-| 默认启用平台 | Android、iOS | 全平台（通过主题） |
+| 默认启用平台 | 全平台 | 全平台（通过主题） |
 | 内容未超出容器时仍可触发 | ✅ | ❌ |
 | 需要逐个组件手动添加修饰符 | ✅ | ❌ |
 
