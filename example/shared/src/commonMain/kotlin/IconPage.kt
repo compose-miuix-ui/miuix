@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +37,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import component.SearchBarFake
 import component.SearchPager
@@ -76,14 +76,11 @@ fun IconsPage(
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val density = LocalDensity.current
-    // Quantized to whole pixels to avoid sub-pixel jitter; always 0 on wide screens (pinned SmallTopAppBar).
-    val dynamicTopPadding by remember(topAppBarScrollBehavior, density, isWideScreen) {
-        derivedStateOf {
-            if (isWideScreen) {
-                0.dp
-            } else {
-                with(density) { (12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction)).roundToPx().toDp() }
-            }
+
+    // A lambda keeps the collapse fraction out of composition; always 0 on wide screens (pinned bar).
+    val dynamicTopPadding: () -> Dp = remember(topAppBarScrollBehavior, isWideScreen) {
+        {
+            if (isWideScreen) 0.dp else 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction)
         }
     }
 

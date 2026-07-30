@@ -76,10 +76,10 @@ fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
     offsetY: Dp,
     defaultResult: @Composable () -> Unit,
-    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp, Color) -> Unit = { searchStatus, onStatusChange, padding, color ->
+    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, () -> Dp, Color) -> Unit = { searchStatus, onStatusChange, padding, color ->
         SearchBar(searchStatus, onStatusChange, padding, color)
     },
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     collapsedCapsuleColor: Color? = null,
     result: LazyListScope.() -> Unit,
 ) {
@@ -128,13 +128,7 @@ fun SearchStatus.SearchPager(
         Row(
             Modifier
                 .fillMaxWidth()
-                .layout { measurable, constraints ->
-                    val topPaddingPx = topPadding.roundToPx()
-                    val placeable = measurable.measure(constraints.offset(vertical = -topPaddingPx))
-                    layout(placeable.width, placeable.height + topPaddingPx) {
-                        placeable.placeRelative(0, topPaddingPx)
-                    }
-                }
+                .topInset { topPadding }
                 .then(
                     if (!searchStatus.isCollapsed()) {
                         if (collapsedCapsuleColor != null) {
@@ -177,7 +171,8 @@ fun SearchStatus.SearchPager(
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(start = 4.dp, end = 16.dp, top = searchBarTopPadding, bottom = 6.dp)
+                        .padding(start = 4.dp, end = 16.dp, bottom = 6.dp)
+                        .topInset(searchBarTopPadding)
                         .clickable(
                             interactionSource = null,
                             enabled = searchStatus.isExpand(),
@@ -231,7 +226,7 @@ fun SearchStatus.SearchPager(
 fun SearchBar(
     searchStatus: SearchStatus,
     onSearchStatusChange: (SearchStatus) -> Unit,
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     color: Color = MiuixTheme.colorScheme.surfaceContainerHigh,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -280,7 +275,8 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .padding(top = searchBarTopPadding, bottom = 6.dp)
+            .padding(bottom = 6.dp)
+            .topInset(searchBarTopPadding)
             .focusRequester(focusRequester),
         color = color,
         onSearch = {},
@@ -304,7 +300,7 @@ fun SearchBar(
 @Composable
 fun SearchBarFake(
     label: String,
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     capsuleColor: Color? = null,
 ) {
     InputField(
@@ -324,11 +320,21 @@ fun SearchBarFake(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .padding(top = searchBarTopPadding, bottom = 6.dp),
+            .padding(bottom = 6.dp)
+            .topInset(searchBarTopPadding),
         color = capsuleColor ?: MiuixTheme.colorScheme.surfaceContainerHigh,
         onSearch = { },
         enabled = false,
         expanded = false,
         onExpandedChange = { },
     )
+}
+
+/** Reserves [inset] above the content, read during layout so a changing value never recomposes the caller. */
+private fun Modifier.topInset(inset: () -> Dp): Modifier = layout { measurable, constraints ->
+    val insetPx = inset().roundToPx()
+    val placeable = measurable.measure(constraints.offset(vertical = -insetPx))
+    layout(placeable.width, placeable.height + insetPx) {
+        placeable.placeRelative(0, insetPx)
+    }
 }
