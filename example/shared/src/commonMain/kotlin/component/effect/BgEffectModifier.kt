@@ -162,6 +162,12 @@ private class BgEffectNode(
         drawRect(surface)
         if (effectBackground) {
             val alphaValue = alpha()
+            if (alphaValue <= 0f) {
+                animationJob?.cancel()
+                animationJob = null
+            } else if (playing && animationJob == null) {
+                startAnimation()
+            }
             if (alphaValue > 0f) {
                 val drawHeight = if (isFullSize) size.height * 0.8f else size.height * 0.5f
 
