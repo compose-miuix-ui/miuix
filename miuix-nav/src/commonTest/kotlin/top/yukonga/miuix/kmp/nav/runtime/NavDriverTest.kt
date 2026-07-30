@@ -239,4 +239,24 @@ class NavDriverTest {
             ),
         )
     }
+
+    // ---- navBackCompletionDecision ----
+
+    @Test
+    fun completion_commitsWithNeutralVelocity() {
+        assertEquals(true, navBackCompletionDecision(velocity = 0f))
+    }
+
+    @Test
+    fun completion_commitsWithVelocityTowardPop() {
+        assertEquals(true, navBackCompletionDecision(velocity = 5f))
+    }
+
+    @Test
+    fun completion_cancelsAtStrongReturnVelocityThreshold() {
+        assertEquals(
+            false,
+            navBackCompletionDecision(velocity = -NavDriverSpec.COMMIT_VELOCITY_THRESHOLD),
+        )
+    }
 }

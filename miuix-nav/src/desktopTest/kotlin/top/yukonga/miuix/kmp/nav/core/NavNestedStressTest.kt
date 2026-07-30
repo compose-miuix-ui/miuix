@@ -293,6 +293,33 @@ class NavNestedStressTest {
     }
 
     @Test
+    fun completedPredictiveBackBeforeHalfWithNeutralVelocity_commits() = runComposeUiTest {
+        val owner = TestOwner()
+        val stack = navBackStackOf(FzRoot, FzTop)
+        setContent {
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides owner) {
+                NavDisplay(stack, effects = NavDisplayEffects(blockInputDuringTransition = false)) {
+                    entry<FzRoot> { Box(Modifier.fillMaxSize().background(Color.Gray)) }
+                    entry<FzTop> { Box(Modifier.fillMaxSize().background(Color.Black)) }
+                }
+            }
+        }
+        waitForIdle()
+
+        runOnIdle {
+            owner.input.backStarted(NavigationEvent(progress = 0f, frameTimeMillis = 1_000L))
+            owner.input.backProgressed(NavigationEvent(progress = 0.4f, frameTimeMillis = 1_100L))
+            // A vertical lift contributes no horizontal progress velocity. The platform's
+            // completion remains authoritative even though progress is below the edge-swipe half.
+            owner.input.backProgressed(NavigationEvent(progress = 0.4f, frameTimeMillis = 1_150L))
+            owner.input.backCompleted()
+        }
+        waitForIdle()
+
+        assertEquals(listOf<NavKey>(FzRoot), stack.toList())
+    }
+
+    @Test
     fun discreteBackDuringPointerPreview_commitsUnconditionally() = runComposeUiTest {
         val owner = TestOwner()
         val stack = navBackStackOf(FzRoot, FzTop)

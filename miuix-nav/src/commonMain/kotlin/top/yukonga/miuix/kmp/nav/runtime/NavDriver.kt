@@ -158,8 +158,8 @@ internal fun NavSettleSpec.commitVelocityFloor(remainingDistance: Float): Float 
 }
 
 /**
- * Decides whether a released predictive-back / edge-swipe gesture should commit
- * (pop the top entry) or cancel (spring back), per spec §7.2 "velocity-first,
+ * Decides whether a released edge-swipe gesture should commit (pop the top entry)
+ * or cancel (spring back), per spec §7.2 "velocity-first,
  * position-fallback".
  *
  * Velocity takes priority: a release flung hard enough in either direction wins
@@ -182,6 +182,21 @@ internal fun navBackCommitDecision(
     velocity <= -velocityThreshold -> false
     else -> progress >= positionThreshold
 }
+
+/**
+ * Decides whether a system predictive-back completion should be accepted.
+ *
+ * The platform completion callback is already a commit decision, so a low-velocity release must
+ * not be reclassified from position. The only override is a strong velocity back toward rest,
+ * which guards against OEMs that report completion while the user is visibly cancelling.
+ *
+ * @param velocity release velocity in progress-units per second; positive points toward pop.
+ * @param velocityThreshold magnitude at/above which return velocity overrides completion.
+ */
+internal fun navBackCompletionDecision(
+    velocity: Float,
+    velocityThreshold: Float = NavDriverSpec.COMMIT_VELOCITY_THRESHOLD,
+): Boolean = velocity > -velocityThreshold
 
 /**
  * Drives [this] `animatedTop` to follow a gesture finger 1:1, with no spring or easing on the

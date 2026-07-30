@@ -22,10 +22,11 @@ import top.yukonga.miuix.kmp.nav.runtime.snapToFinger
  *   1:1 with the finger. The first event (`progress ≈ 0`) therefore lands exactly on the
  *   sampled value: zero jump when interrupting a running push/pop.
  * - The function returns when the stream completes. Convergence (commit -> `topIndex - 1`,
- *   cancel -> `topIndex`) is **not** done here: the caller decides commit/cancel via
- *   [top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision] and settles with the single shared
- *   spring via [top.yukonga.miuix.kmp.nav.runtime.settleTo], handing off the release velocity so
- *   the snap -> spring boundary is velocity-continuous.
+ *   cancel -> `topIndex`) is **not** done here: the caller handles the platform terminal signal,
+ *   optionally rejecting an anomalous completion via
+ *   [top.yukonga.miuix.kmp.nav.runtime.navBackCompletionDecision], and settles with the single
+ *   shared spring via [top.yukonga.miuix.kmp.nav.runtime.settleTo], handing off the release
+ *   velocity so the snap -> spring boundary is velocity-continuous.
  *
  * Keeping settle/decision out of this function is deliberate: `PredictiveBackHandler`'s
  * commit/cancel signal comes from the outer try/catch around the stream, not from inside it.

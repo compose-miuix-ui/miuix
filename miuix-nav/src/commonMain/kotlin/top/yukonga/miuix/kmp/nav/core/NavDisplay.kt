@@ -50,7 +50,7 @@ import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
 import top.yukonga.miuix.kmp.nav.runtime.commitVelocityFloor
 import top.yukonga.miuix.kmp.nav.runtime.isVisibleAt
-import top.yukonga.miuix.kmp.nav.runtime.navBackCommitDecision
+import top.yukonga.miuix.kmp.nav.runtime.navBackCompletionDecision
 import top.yukonga.miuix.kmp.nav.runtime.navReconcile
 import top.yukonga.miuix.kmp.nav.runtime.relativeDepth
 import top.yukonga.miuix.kmp.nav.runtime.rememberNavPresentation
@@ -517,12 +517,11 @@ private fun NavDisplayLayout(
                 return@commit
             }
             val session = predictiveBackSessions[sessionId] ?: return@commit
-            val gesture = session.gesture
             val progressVelocity = session.progressVelocity
-            val shouldCommit = gesture == null || navBackCommitDecision(
-                progress = gesture.progress,
-                velocity = progressVelocity,
-            )
+            // The platform has already classified this terminal callback as completion. Accept it
+            // regardless of progress when horizontal velocity is neutral (for example, when the
+            // finger lifts vertically); only strong return motion may override an OEM completion.
+            val shouldCommit = navBackCompletionDecision(velocity = progressVelocity)
             if (shouldCommit) {
                 predictiveBackSessions.remove(sessionId)
                 if (predictiveBackOwnership.generation == session.ownershipLease) {
