@@ -19,13 +19,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     strategy:
       matrix:
         include:
-          - target: "iosSimulatorArm64Test"
-            os: macos-26
+          - target: "spotlessCheck macosArm64Test iosSimulatorArm64Test"
+            os: macos-latest
           - target: "desktopTest"
             os: ubuntu-latest
           - target: "assembleAndroidTest"
@@ -43,9 +47,15 @@ jobs:
           java-version: "21"
       - name: Build with Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Run check
-        if: matrix.os == 'macos-26'
-        run: ./gradlew check
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Cache Kotlin/Native toolchain
+        if: matrix.os == 'macos-latest'
+        uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: ${{ runner.os }}-konan-
       - name: Run test
         run: ./gradlew ${{ matrix.target }}
       - name: Upload reports
