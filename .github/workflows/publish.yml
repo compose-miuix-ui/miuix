@@ -43,7 +43,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Publish SNAPSHOT to GitHub Packages
-        run: ./gradlew --no-daemon --stacktrace publishAllPublicationsToGithubRepository --no-configuration-cache
+        run: ./gradlew --no-daemon --no-parallel --stacktrace publishAllPublicationsToGithubRepository --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
