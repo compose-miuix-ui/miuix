@@ -36,6 +36,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -186,10 +187,12 @@ fun SmallTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     SideEffect {
-        // Pin the bar: clamp scroll range to 0 so nested content still scrolls even when this bar
-        // shares a ScrollBehavior with a collapsible one. Guard against redundant writes.
+        // Pin the bar: clamp both the range and any offset left by a collapsible bar so nested
+        // content still scrolls when they share a ScrollBehavior. Guard against redundant writes.
         scrollBehavior?.state?.let { state ->
+            if (!state.pinnedBySmallTopAppBar) state.pinnedBySmallTopAppBar = true
             if (state.heightOffsetLimit != 0f) state.heightOffsetLimit = 0f
+            if (state.heightOffset != 0f) state.heightOffset = 0f
         }
     }
 
@@ -327,6 +330,8 @@ class TopAppBarState(
      */
     var contentOffset by mutableFloatStateOf(initialContentOffset)
 
+    internal var pinnedBySmallTopAppBar by mutableStateOf(false)
+
     /**
      * A value that represents the collapsed height percentage of the app bar.
      *
@@ -366,13 +371,22 @@ class TopAppBarState(
         /** The default [Saver] implementation for [TopAppBarState]. */
         val Saver: Saver<TopAppBarState, *> =
             listSaver(
-                save = { listOf(it.heightOffsetLimit, it.heightOffset, it.contentOffset) },
+                save = {
+                    listOf(
+                        it.heightOffsetLimit,
+                        it.heightOffset,
+                        it.contentOffset,
+                        it.pinnedBySmallTopAppBar,
+                    )
+                },
                 restore = {
                     TopAppBarState(
-                        initialHeightOffsetLimit = it[0],
-                        initialHeightOffset = it[1],
-                        initialContentOffset = it[2],
-                    )
+                        initialHeightOffsetLimit = it[0] as Float,
+                        initialHeightOffset = it[1] as Float,
+                        initialContentOffset = it[2] as Float,
+                    ).apply {
+                        pinnedBySmallTopAppBar = it.getOrNull(3) as? Boolean ?: false
+                    }
                 },
             )
     }
@@ -640,7 +654,15 @@ private fun TopAppBarLayout(
         { height: Int ->
             scrollBehavior?.state?.let { state ->
                 val limit = -height.toFloat()
-                if (state.heightOffsetLimit != limit) state.heightOffsetLimit = limit
+                if (state.heightOffsetLimit != limit) {
+                    val restoringFromSmallTopAppBar = state.pinnedBySmallTopAppBar
+                    state.heightOffsetLimit = limit
+                    // A pinned small bar retains contentOffset while its own height stays fixed.
+                    if (restoringFromSmallTopAppBar) {
+                        state.heightOffset = if (state.contentOffset < 0f) limit else 0f
+                        state.pinnedBySmallTopAppBar = false
+                    }
+                }
             }
             Unit
         }
@@ -649,7 +671,13 @@ private fun TopAppBarLayout(
     // Boolean derivedStateOf invalidates only on flip → the spring fires once per crossing, not per frame.
     val smallTitleVisible by remember(scrollBehavior) {
         derivedStateOf {
-            (scrollBehavior?.state?.collapsedFraction ?: 0f) * 3f >= 1f
+            scrollBehavior?.state?.let { state ->
+                if (state.pinnedBySmallTopAppBar) {
+                    state.contentOffset < 0f
+                } else {
+                    state.collapsedFraction * 3f >= 1f
+                }
+            } ?: false
         }
     }
     val smallTitleAlpha = remember { Animatable(if (smallTitleVisible) 1f else 0f) }
@@ -1091,4 +1119,4 @@ private fun SmallTopAppBarLayout(
 }
 
 // Slack so the centred title isn't butted against nav/actions.
-private val TitleWidthFraction = 0.9
+private const val TitleWidthFraction = 0.9
