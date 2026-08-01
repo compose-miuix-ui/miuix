@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -243,43 +244,33 @@ fun AppContent(
         // expression itself is stable across recompositions.
         val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
 
-        if (isWideScreen) {
-            // Two-pane layout: the rail is app chrome, not a navigation layer — every route
-            // animates inside the right pane, whose NavDisplay measures its own container
-            // (pane-relative transitions and gestures).
-            Row(modifier = Modifier.fillMaxSize()) {
-                if (appState.showNavigationBar) {
-                    PersistentNavigationRail(
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                    )
-                }
-                // clipToBounds: transition layers translate outside the pane (covered-page
-                // parallax); without the clip they would draw over the rail.
-                Box(modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
-                    AppNavHost(
-                        backStack = backStack,
-                        navigator = navigator,
-                        transition = navTransition,
-                        effects = effects,
-                        swipeBackDirection = swipeBackDirection,
-                        padding = padding,
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                    )
-                }
+        // Keep NavDisplay at one composition location while adaptive chrome changes around it.
+        // Otherwise switching between the compact and wide branches recreates the current route.
+        Row(modifier = Modifier.fillMaxSize()) {
+            if (isWideScreen && appState.showNavigationBar) {
+                PersistentNavigationRail(
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
             }
-        } else {
-            AppNavHost(
-                backStack = backStack,
-                navigator = navigator,
-                transition = navTransition,
-                effects = effects,
-                swipeBackDirection = swipeBackDirection,
-                padding = padding,
-                navigationItems = navigationItems,
-                mainPagerState = mainPagerState,
-            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    // Wide-screen transition layers must not draw over the navigation rail.
+                    .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
+            ) {
+                AppNavHost(
+                    backStack = backStack,
+                    navigator = navigator,
+                    transition = navTransition,
+                    effects = effects,
+                    swipeBackDirection = swipeBackDirection,
+                    padding = padding,
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
+            }
         }
     }
 
@@ -395,6 +386,16 @@ private fun Home(
     val isWideScreen = LocalIsWideScreen.current
     val layoutDirection = LocalLayoutDirection.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val pagerContent = remember(snackbarHostState, mainPagerState.pagerState) {
+        movableContentOf<PaddingValues, Modifier> { pagerPadding, pagerModifier ->
+            AppPager(
+                snackbarHostState = snackbarHostState,
+                padding = pagerPadding,
+                pagerState = mainPagerState.pagerState,
+                modifier = pagerModifier,
+            )
+        }
+    }
     Scaffold(
         snackbarHost = {
             if (isWideScreen) {
@@ -404,9 +405,8 @@ private fun Home(
     ) {
         if (isWideScreen) {
             WideScreenContent(
-                snackbarHostState = snackbarHostState,
                 layoutDirection = layoutDirection,
-                mainPagerState = mainPagerState,
+                pagerContent = pagerContent,
             )
         } else {
             CompactScreenLayout(
@@ -414,6 +414,7 @@ private fun Home(
                 snackbarHostState = snackbarHostState,
                 padding = padding,
                 mainPagerState = mainPagerState,
+                pagerContent = pagerContent,
             )
         }
     }
@@ -421,9 +422,8 @@ private fun Home(
 
 @Composable
 private fun WideScreenContent(
-    snackbarHostState: SnackbarHostState,
     layoutDirection: LayoutDirection,
-    mainPagerState: MainPagerState,
+    pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val appState = LocalAppState.current
     Scaffold(
@@ -447,11 +447,9 @@ private fun WideScreenContent(
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
     ) { padding ->
-        AppPager(
-            snackbarHostState = snackbarHostState,
-            padding = PaddingValues(top = padding.calculateTopPadding()),
-            pagerState = mainPagerState.pagerState,
-            modifier = Modifier
+        pagerContent(
+            PaddingValues(top = padding.calculateTopPadding()),
+            Modifier
                 .imePadding()
                 .padding(end = padding.calculateEndPadding(layoutDirection)),
         )
@@ -464,6 +462,7 @@ private fun CompactScreenLayout(
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
     mainPagerState: MainPagerState,
+    pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val surfaceColor = MiuixTheme.colorScheme.surface
     val appState = LocalAppState.current
@@ -497,11 +496,9 @@ private fun CompactScreenLayout(
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
-            AppPager(
-                snackbarHostState = snackbarHostState,
-                padding = innerPadding,
-                pagerState = mainPagerState.pagerState,
-                modifier = Modifier
+            pagerContent(
+                innerPadding,
+                Modifier
                     .padding(
                         top = padding.calculateTopPadding(),
                         start = padding.calculateStartPadding(LocalLayoutDirection.current),

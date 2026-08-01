@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,16 +40,16 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 
 fun LazyListScope.dialogSection() {
     item(key = "dialog") {
-        var showOverlayDialog by remember { mutableStateOf(false) }
-        var showWindowDialog by remember { mutableStateOf(false) }
-        var overlayDialogHoldDown by remember { mutableStateOf(false) }
-        var windowDialogHoldDown by remember { mutableStateOf(false) }
-        var showWideSuperDialog by remember { mutableStateOf(false) }
-        var showWideWindowDialog by remember { mutableStateOf(false) }
-        var wideSuperDialogHoldDown by remember { mutableStateOf(false) }
-        var wideWindowDialogHoldDown by remember { mutableStateOf(false) }
-        var showCenteredDialog by remember { mutableStateOf(false) }
-        var centeredDialogHoldDown by remember { mutableStateOf(false) }
+        var showOverlayDialog by rememberSaveable { mutableStateOf(false) }
+        var showWindowDialog by rememberSaveable { mutableStateOf(false) }
+        var overlayDialogHoldDown by rememberSaveable { mutableStateOf(false) }
+        var windowDialogHoldDown by rememberSaveable { mutableStateOf(false) }
+        var showWideSuperDialog by rememberSaveable { mutableStateOf(false) }
+        var showWideWindowDialog by rememberSaveable { mutableStateOf(false) }
+        var wideSuperDialogHoldDown by rememberSaveable { mutableStateOf(false) }
+        var wideWindowDialogHoldDown by rememberSaveable { mutableStateOf(false) }
+        var showCenteredDialog by rememberSaveable { mutableStateOf(false) }
+        var centeredDialogHoldDown by rememberSaveable { mutableStateOf(false) }
 
         SmallTitle(text = "Dialog")
         Card(

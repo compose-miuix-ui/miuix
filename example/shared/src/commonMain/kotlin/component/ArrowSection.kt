@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,8 +37,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun LazyListScope.arrowSection() {
     item(key = "arrow") {
         var volume by remember { mutableFloatStateOf(0.5f) }
-        val showVolumeDialog = remember { mutableStateOf(false) }
-        val volumeDialogHoldDown = remember { mutableStateOf(false) }
+        val showVolumeDialog = rememberSaveable { mutableStateOf(false) }
+        val volumeDialogHoldDown = rememberSaveable { mutableStateOf(false) }
 
         SmallTitle(text = "Arrow")
         Card(
