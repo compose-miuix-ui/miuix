@@ -830,7 +830,7 @@ private fun TopAppBarLayout(
             if (maxTitleWidth == Constraints.Infinity) {
                 maxTitleWidth
             } else {
-                (maxTitleWidth * TitleWidthFraction).fastRoundToInt()
+                (maxTitleWidth * TITLE_WIDTH_FRACTION).fastRoundToInt()
             }
 
         val titlePlaceable =
@@ -1055,7 +1055,7 @@ private fun SmallTopAppBarLayout(
             if (maxTitleWidth == Constraints.Infinity) {
                 maxTitleWidth
             } else {
-                (maxTitleWidth * TitleWidthFraction).fastRoundToInt()
+                (maxTitleWidth * TITLE_WIDTH_FRACTION).fastRoundToInt()
             }
 
         val titlePlaceable =
@@ -1119,4 +1119,4 @@ private fun SmallTopAppBarLayout(
 }
 
 // Slack so the centred title isn't butted against nav/actions.
-private const val TitleWidthFraction = 0.9
+private const val TITLE_WIDTH_FRACTION = 0.9
