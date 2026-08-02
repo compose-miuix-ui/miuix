@@ -25,7 +25,8 @@ import top.yukonga.miuix.kmp.overlay.OverlayCascadingListPopup
  * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for a single [DropdownEntry].
  *
  * Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu
- * triggers; cascading depth is limited to 2.
+ * triggers; cascading depth is limited to 2. Keep the entry and item order stable while the menu is
+ * shown; item state such as [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
  */
 @Composable
 fun OverlayIconCascadingDropdownMenu(
@@ -64,7 +65,9 @@ fun OverlayIconCascadingDropdownMenu(
 /**
  * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for one or more
  * [DropdownEntry] groups. Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is
- * non-empty become submenu triggers; cascading depth is limited to 2.
+ * non-empty become submenu triggers; cascading depth is limited to 2. Keep the entry and item order
+ * stable while the menu is shown; item state such as
+ * [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
  */
 @Composable
 fun OverlayIconCascadingDropdownMenu(

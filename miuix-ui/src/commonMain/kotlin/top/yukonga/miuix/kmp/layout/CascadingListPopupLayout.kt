@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +68,21 @@ private const val PRIMARY_SHRUNK_SCALE = 0.95f
 internal const val ENTER_SCALE_FROM = 0.15f
 internal const val ENTER_SCALE_RANGE = 1f - ENTER_SCALE_FROM
 
+private data class CascadingItemPosition(
+    val entryIndex: Int,
+    val itemIndex: Int,
+)
+
+private fun List<DropdownEntry>.positionOf(item: DropdownItem): CascadingItemPosition? {
+    forEachIndexed { entryIndex, entry ->
+        val itemIndex = entry.items.indexOfFirst { it === item }
+        if (itemIndex >= 0) return CascadingItemPosition(entryIndex, itemIndex)
+    }
+    return null
+}
+
+private fun List<DropdownEntry>.itemAt(position: CascadingItemPosition): DropdownItem? = getOrNull(position.entryIndex)?.items?.getOrNull(position.itemIndex)
+
 /** Internal shared layout for cascading list popups. Cascading depth is limited to 2. */
 @Composable
 internal fun CascadingListPopupLayout(
@@ -92,9 +108,20 @@ internal fun CascadingListPopupLayout(
     val backEnterProgress = remember { Animatable(0f) }
     val backExpandProgress = remember { Animatable(0f) }
 
-    var expandedItem by remember { mutableStateOf<DropdownItem?>(null) }
-    // Outlives [expandedItem] until the collapse spring settles so the secondary stays subcomposed.
-    var displayedItem by remember { mutableStateOf<DropdownItem?>(null) }
+    // Cascading menus assume entry/item structure stays stable while shown. Retaining positions
+    // lets rebuilt item values, such as selected state, refresh without closing the submenu.
+    var expandedItemPosition by remember { mutableStateOf<CascadingItemPosition?>(null) }
+    // Outlives [expandedItemPosition] until the collapse spring settles so the secondary stays
+    // subcomposed.
+    var displayedItemPosition by remember { mutableStateOf<CascadingItemPosition?>(null) }
+    val expandedItem = expandedItemPosition?.let(entries::itemAt)
+        ?.takeIf { !it.children.isNullOrEmpty() }
+    val displayedItem = displayedItemPosition?.let(entries::itemAt)
+        ?.takeIf { !it.children.isNullOrEmpty() }
+    SideEffect {
+        if (expandedItemPosition != null && expandedItem == null) expandedItemPosition = null
+        if (displayedItemPosition != null && displayedItem == null) displayedItemPosition = null
+    }
     val expandFraction = remember { Animatable(0f) }
     val primaryScale = remember { Animatable(1f) }
     val maskAlpha = remember { Animatable(0f) }
@@ -125,7 +152,7 @@ internal fun CascadingListPopupLayout(
             launch { enterAlpha.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
         } else {
             if (!internalVisible.value) return@LaunchedEffect
-            expandedItem = null
+            expandedItemPosition = null
             launch { enterFraction.animateTo(0f, ListPopupDefaults.FractionAnimationSpec) }
             launch { dimProgress.animateTo(0f, ListPopupDefaults.DimExitAnimationSpec) }
             enterAlpha.animateTo(0f, ListPopupDefaults.AlphaExitAnimationSpec)
@@ -138,13 +165,13 @@ internal fun CascadingListPopupLayout(
         }
     }
 
-    LaunchedEffect(expandedItem) {
-        val item = expandedItem
-        if (item != null) {
-            displayedItem = item
+    LaunchedEffect(expandedItemPosition) {
+        val itemPosition = expandedItemPosition
+        if (itemPosition != null) {
+            displayedItemPosition = itemPosition
             backExpandProgress.snapTo(0f)
         }
-        val target = if (item != null) 1f else 0f
+        val target = if (itemPosition != null) 1f else 0f
         val mainSpec = if (target == 1f) {
             folmeSpring(EXPAND_SPRING_DAMPING, EXPAND_SPRING_RESPONSE)
         } else {
@@ -155,7 +182,7 @@ internal fun CascadingListPopupLayout(
             // Settle on the main spring — the slower arrowRotation would otherwise hold the
             // secondary subcomposed past visibility.
             if (target == 0f) {
-                displayedItem = null
+                displayedItemPosition = null
                 // Only after the collapse settles — clearing earlier jumps the effective values.
                 backExpandProgress.snapTo(0f)
             }
@@ -205,7 +232,7 @@ internal fun CascadingListPopupLayout(
         popupContentSize = primarySize,
     )
 
-    val anchorBoundsByItem = remember { mutableStateMapOf<DropdownItem, IntRect>() }
+    val anchorBoundsByPosition = remember { mutableStateMapOf<CascadingItemPosition, IntRect>() }
 
     popupHost(internalVisible.value) {
         val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
@@ -215,7 +242,7 @@ internal fun CascadingListPopupLayout(
             onBackCancelled = {
                 // Reset whichever track the gesture drove; depth cannot change mid-gesture.
                 coroutineScope.launch {
-                    if (expandedItem != null) {
+                    if (expandedItemPosition != null) {
                         backExpandProgress.animateTo(
                             0f,
                             folmeSpring(EXPAND_SPRING_DAMPING, EXPAND_SPRING_RESPONSE),
@@ -227,8 +254,8 @@ internal fun CascadingListPopupLayout(
             },
             // Mirror outside-tap: depth > 0 collapses the secondary, depth 0 dismisses the popup.
             onBackCompleted = {
-                if (expandedItem != null) {
-                    expandedItem = null
+                if (expandedItemPosition != null) {
+                    expandedItemPosition = null
                 } else {
                     currentOnDismiss()
                 }
@@ -244,7 +271,7 @@ internal fun CascadingListPopupLayout(
                         transitionState.direction == NavigationEventTransitionState.TRANSITIONING_BACK
                     ) {
                         val progress = transitionState.latestEvent.progress
-                        if (expandedItem != null) {
+                        if (expandedItemPosition != null) {
                             // Preview secondary → primary collapse along the expand-tree.
                             backExpandProgress.snapTo(progress)
                         } else {
@@ -281,8 +308,8 @@ internal fun CascadingListPopupLayout(
                         }
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = {
-                                if (expandedItem != null) {
-                                    expandedItem = null
+                                if (expandedItemPosition != null) {
+                                    expandedItemPosition = null
                                 } else {
                                     currentOnDismiss()
                                 }
@@ -293,21 +320,25 @@ internal fun CascadingListPopupLayout(
                         entries = entries,
                         expandedItem = expandedItem,
                         displayedItem = displayedItem,
-                        onExpand = { expandedItem = it },
-                        onCollapseSecondary = { expandedItem = null },
+                        onExpand = { item -> expandedItemPosition = entries.positionOf(item) },
+                        onCollapseSecondary = { expandedItemPosition = null },
                         onLeafSelected = { item ->
                             item.onClick?.invoke()
                             if (collapseOnSelection) {
-                                expandedItem = null
+                                expandedItemPosition = null
                                 currentOnDismiss()
                             }
                         },
-                        getAnchorBounds = { anchorBoundsByItem[it] },
+                        getAnchorBounds = { item ->
+                            entries.positionOf(item)?.let(anchorBoundsByPosition::get)
+                        },
                         setAnchorBounds = { item, bounds ->
                             // Freeze the anchor once secondary is shown so primary's scale
                             // animation can't drift it via onGloballyPositioned.
                             if (displayedItem == null) {
-                                anchorBoundsByItem[item] = bounds
+                                entries.positionOf(item)?.let { position ->
+                                    anchorBoundsByPosition[position] = bounds
+                                }
                             }
                         },
                         onPrimarySizeChange = { primarySize = it },

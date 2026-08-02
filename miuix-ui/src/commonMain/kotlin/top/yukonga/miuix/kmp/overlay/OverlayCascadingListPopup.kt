@@ -25,7 +25,8 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
  *
  * @param show Whether the popup is shown.
  * @param entries Grouped dropdown entries; top-level [DropdownItem]s with non-empty
- *   [DropdownItem.children] become submenu triggers.
+ *   [DropdownItem.children] become submenu triggers. Keep the entry and item order stable while the
+ *   popup is shown; item state such as [DropdownItem.selected] may change.
  * @param onDismissRequest Invoked when the popup wants to be dismissed.
  * @param onDismissFinished Invoked after the exit animation finishes.
  * @param popupModifier Modifier applied to the popup body.
