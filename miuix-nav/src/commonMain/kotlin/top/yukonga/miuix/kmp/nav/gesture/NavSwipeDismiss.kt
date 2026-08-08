@@ -39,18 +39,19 @@ import kotlin.math.abs
  * and direction the current transition declares ([NavSwipeDirection]).
  *
  * Attached by NavDisplay to the display container (so an in-flight transition can be grabbed from
- * anywhere on screen, not just the moving top entry's translated bounds — the container sees every
- * pointer on the Initial pass parent-first). A single unified pointer handler replaces the orientation-locked
+ * anywhere on screen, not just the moving top entry's translated bounds). A single unified pointer
+ * handler replaces the orientation-locked
  * `detectHorizontalDragGestures` / `detectVerticalDragGestures` detectors, which only owned one axis
  * and yielded the pointer to any other consumer — the source of two defects: an in-progress dismiss
  * cancelled the instant the finger drifted onto the cross axis (a nested scroll claimed the pointer),
  * and in-page taps/scrolls fired while the gesture was driving the transition. The unified handler
  * instead works in two phases:
  *
- * 1. **Engagement** — movement is watched on [PointerEventPass.Initial] (parent-first), so the moment
- *    travel **in the dismiss direction** crosses the [androidx.compose.ui.platform.ViewConfiguration]
- *    touch slop **and** dominates the cross axis, the pointer is claimed (consumed) before any nested
- *    scrollable can take it. A drag that is clearly cross-axis dominant is left untouched, so the
+ * 1. **Engagement** — movement is watched on [PointerEventPass.Final], after descendants had a chance
+ *    to consume it on the Main pass. A consuming child such as a same-axis slider or scrollable owns
+ *    the sequence. Otherwise, when travel **in the dismiss direction** crosses the
+ *    [androidx.compose.ui.platform.ViewConfiguration] touch slop **and** dominates the cross axis,
+ *    the pointer is claimed. A drag that is clearly cross-axis dominant is left untouched, so the
  *    page's own scrolling and taps still work when there is no dismiss intent. Travel opposite the
  *    dismiss direction never engages (there is nothing to drag the entry "forward" toward).
  * 2. **Follow** — once claimed, **every** pointer change is consumed on **both** axes, so neither a
@@ -196,22 +197,25 @@ internal fun Modifier.navSwipeDismissImpl(
             val velocityTracker = VelocityTracker()
             velocityTracker.addPosition(down.uptimeMillis, down.position)
 
-            // --- Engagement phase: decide whether this is our dismiss swipe, watching Initial pass. ---
+            // --- Engagement phase: decide whether this is our dismiss swipe after descendants have
+            // had the Main pass. Same-axis interactive content (slider, scrollable, etc.) gets first
+            // refusal; once it consumes movement, navigation leaves the entire sequence untouched. ---
             var preClaimDrag = 0f // accumulated travel on the gesture axis (raw signed pixels)
             var crossTravel = 0f // accumulated travel on the cross axis (raw signed pixels)
             var claimed = false
             while (!claimed) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
                 if (externalGestureOwnsSequence()) return@awaitEachGesture
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
                 if (!change.pressed) return@awaitEachGesture // lifted before engaging: a tap / short press
+                if (change.isConsumed) return@awaitEachGesture
                 val delta = change.positionChange()
                 preClaimDrag += if (isHorizontal) delta.x else delta.y
                 crossTravel += if (isHorizontal) delta.y else delta.x
                 val toward = dismissSign * preClaimDrag // > 0 means moving toward the dismiss direction
                 if (toward > slop && toward >= abs(crossTravel)) {
-                    // Dismiss-direction travel crossed slop and dominates: claim before nested scroll can.
+                    // Unclaimed dismiss-direction travel crossed slop and dominates: navigation owns it.
                     claimed = true
                     change.consume()
                 } else if (abs(crossTravel) > slop && abs(crossTravel) > abs(toward)) {

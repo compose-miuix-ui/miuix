@@ -101,7 +101,7 @@ The interactive swipe that pops the top entry runs along the **same axis as the 
 | `BottomToTop` | Upward |
 | `None` (default) | Disabled — pop via back button / system back only |
 
-Once a swipe engages it owns the pointer for the rest of the gesture (consuming both axes), so a cross-axis wiggle cannot steal it or cancel mid-swipe, and in-page taps / scrolls are suppressed until the finger lifts. Set or override it per route — including `NavSwipeDirection.None` to keep a route button-only:
+Interactive children get first refusal while a swipe is being recognized: if a slider, same-axis scrollable, or another child consumes the movement, navigation leaves that pointer sequence alone. Otherwise navigation engages once dismiss-direction movement crosses touch slop. Once engaged it owns the pointer for the rest of the gesture (consuming both axes), so a cross-axis wiggle cannot steal it or cancel mid-swipe, and in-page taps / scrolls are suppressed until the finger lifts. Set or override it per route — including `NavSwipeDirection.None` to keep a route button-only:
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
@@ -319,7 +319,7 @@ A `NavDisplay` can be nested inside an entry (tabs hosting their own stacks, a f
 - **State**: the inner display's back stack, saveable state and ViewModels are all namespaced under the hosting entry — popping the hosting entry disposes the whole nested scope, including inner ViewModels (they live inside the hosting entry's `ViewModelStore`).
 - **Lifecycle**: inner entries cap at the hosting entry's ceiling — a covered host holds everything inside it at or below `STARTED`.
 
-One rule to know: the **swipe** gesture is claimed by the outer display first (the recognizer is deliberately parent-first). Host an interactive inner stack in the outer **root** entry (where the outer swipe is disabled anyway), or disable the outer gesture on the hosting route with `entry(swipeDismiss = NavSwipeDirection.None)`.
+One rule to know: for nested displays, the **swipe** gesture is still claimed by the outer display first when neither display's content consumes the movement. Host an interactive inner stack in the outer **root** entry (where the outer swipe is disabled anyway), or disable the outer gesture on the hosting route with `entry(swipeDismiss = NavSwipeDirection.None)`.
 
 ## Multi-pane layouts (a pattern, not an API)
 

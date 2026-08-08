@@ -5,6 +5,9 @@ package top.yukonga.miuix.kmp.nav.gesture
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,9 +52,9 @@ private data object HorizontalPage : NavKey
  * Pins the documented arbitration contract between the swipe-dismiss recognizer and scrollable
  * entry content (the two-phase engagement in `Modifier.navSwipeDismiss`):
  * - a clearly cross-axis-dominant drag is never claimed, so the page's own scrolling keeps working;
- * - a dismiss-direction drag past slop is claimed parent-first on the Initial pass, so the nav
- *   gesture wins over a same-axis scrollable unconditionally (full-width engagement, no edge
- *   region) — by design, mitigated by swipe being per-route opt-in;
+ * - a child that consumes dismiss-axis movement on the Main pass owns the sequence, so sliders and
+ *   same-axis scrollables are not stolen by navigation;
+ * - otherwise, a dismiss-direction drag past slop is claimed across the full display;
  * - travel opposite the dismiss direction never engages, so a same-axis scrollable still receives
  *   reverse scrolling.
  */
@@ -206,7 +209,7 @@ class NavSwipeScrollConflictTest {
     }
 
     @Test
-    fun dismissDirectionDragWinsOverSameAxisScrollable() = runComposeUiTest {
+    fun sameAxisScrollableClaimsDismissDirectionDrag() = runComposeUiTest {
         val backStack = navBackStackOf(ConflictBase, HorizontalPage)
         var scroll: ScrollState? = null
         setContent {
@@ -233,9 +236,40 @@ class NavSwipeScrollConflictTest {
         onRoot().performTouchInput { swipeRight(startX = width * 0.1f, endX = width * 0.9f) }
         waitForIdle()
 
-        assertEquals(1, backStack.size, "same-axis dismiss-direction fling must commit the pop")
-        assertEquals(200, checkNotNull(scroll).value, "nav-wins precedence: the scrollable must not move")
-        onNodeWithText("base").assertExists()
+        assertEquals(2, backStack.size, "a consuming same-axis child must prevent the pop")
+        assertTrue(checkNotNull(scroll).value < 200, "the same-axis scrollable must receive the drag")
+        onNodeWithText("horizontal-page").assertExists()
+    }
+
+    @Test
+    fun sameAxisDraggableClaimsDismissDirectionDrag() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var dragDistance = 0f
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .draggable(
+                                state = rememberDraggableState { dragDistance += it },
+                                orientation = Orientation.Horizontal,
+                            ),
+                    ) {
+                        BasicText("draggable-page")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput { swipeRight(startX = width * 0.1f, endX = width * 0.9f) }
+        waitForIdle()
+
+        assertEquals(2, backStack.size, "a same-axis draggable such as Slider must prevent the pop")
+        assertTrue(dragDistance > 0f, "the same-axis draggable must receive the drag")
+        onNodeWithText("draggable-page").assertExists()
     }
 
     @Test

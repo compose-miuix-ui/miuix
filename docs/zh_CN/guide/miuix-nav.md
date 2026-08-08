@@ -101,7 +101,7 @@ NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
 | `BottomToTop` | 向上 |
 | `None`（默认） | 禁用 —— 仅经返回按钮 / 系统返回 pop |
 
-一旦手势认领成功，它会在本次手势余下过程中独占指针（消费两个轴向），因此跨轴的轻微滑动既不会抢走它、也不会中途取消；在手指抬起前，页面内的点击 / 滚动都被屏蔽。可按路由设置或覆盖——包括用 `NavSwipeDirection.None` 让某路由仅按钮关闭：
+导航开始识别滑动时，交互子组件拥有优先权：如果 Slider、同轴滚动容器或其他子组件消费了位移，导航会放弃本次指针序列；否则，沿关闭方向的位移超过 touch slop 后导航才会认领手势。一旦手势认领成功，它会在本次手势余下过程中独占指针（消费两个轴向），因此跨轴的轻微滑动既不会抢走它、也不会中途取消；在手指抬起前，页面内的点击 / 滚动都被屏蔽。可按路由设置或覆盖——包括用 `NavSwipeDirection.None` 让某路由仅按钮关闭：
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
@@ -319,7 +319,7 @@ ViewModel store 由 display 持有，而非 entry 的组合：被覆盖的 entry
 - **状态**：内层 display 的返回栈、可保存状态与 ViewModel 全部归属宿主 entry 的命名空间——pop 宿主 entry 会销毁整个嵌套作用域，内层 ViewModel（存放在宿主 entry 的 `ViewModelStore` 内）随之清理。
 - **生命周期**：内层 entry 以宿主 entry 的上限封顶——宿主被覆盖时其内部所有内容不超过 `STARTED`。
 
-一条须知规则：**滑动**手势由外层 display 优先认领（识别器有意为 parent-first）。请把可交互的内层栈放在外层**根** entry 上（那里外层滑动本就禁用），或在宿主路由上用 `entry(swipeDismiss = NavSwipeDirection.None)` 关闭外层手势。
+一条须知规则：对于嵌套 display，当两个 display 的内容都没有消费位移时，**滑动**手势仍由外层 display 优先认领。请把可交互的内层栈放在外层**根** entry 上（那里外层滑动本就禁用），或在宿主路由上用 `entry(swipeDismiss = NavSwipeDirection.None)` 关闭外层手势。
 
 ## 多窗格布局（模式，而非 API）
 
