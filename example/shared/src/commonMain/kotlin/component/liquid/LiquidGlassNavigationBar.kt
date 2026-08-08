@@ -261,9 +261,8 @@ internal fun IosLiquidGlassNavigationBar(
                 if (currentIndex != targetIndex) {
                     currentIndex = targetIndex
                     onItemClickUpdated(targetIndex)
-                } else {
-                    updateValue(targetIndex.toFloat())
                 }
+                updateValue(targetIndex.toFloat())
                 animationScope.launch {
                     offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
                 }
