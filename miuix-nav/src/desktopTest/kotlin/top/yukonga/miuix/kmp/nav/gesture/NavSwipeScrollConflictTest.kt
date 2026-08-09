@@ -4,8 +4,18 @@
 package top.yukonga.miuix.kmp.nav.gesture
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +26,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -45,13 +59,36 @@ private data object VerticalPage : NavKey
 
 private data object HorizontalPage : NavKey
 
+private fun Modifier.consumeFirstPositionMoves(
+    count: Int,
+    onConsumed: () -> Unit = {},
+): Modifier = pointerInput(count, onConsumed) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var consumedMoves = 0
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Main)
+            val change = event.changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
+            if (!change.pressed) break
+            val delta = change.positionChangeIgnoreConsumed()
+            if ((delta.x != 0f || delta.y != 0f) && consumedMoves < count) {
+                consumedMoves++
+                onConsumed()
+                change.consume()
+            }
+        }
+    }
+}
+
 /**
  * Pins the documented arbitration contract between the swipe-dismiss recognizer and scrollable
  * entry content (the two-phase engagement in `Modifier.navSwipeDismiss`):
  * - a clearly cross-axis-dominant drag is never claimed, so the page's own scrolling keeps working;
- * - a dismiss-direction drag past slop is claimed parent-first on the Initial pass, so the nav
- *   gesture wins over a same-axis scrollable unconditionally (full-width engagement, no edge
- *   region) — by design, mitigated by swipe being per-route opt-in;
+ * - two consecutive consumed position moves confirm that a child owns the whole sequence even
+ *   below navigation touch slop, so lower-slop drags are not stolen if they later stop consuming;
+ * - a clickable's one-time consumption while cancelling its press enters a one-move confirmation
+ *   window but does not reserve the sequence;
+ * - otherwise, a dismiss-direction drag past slop is claimed across the full display;
  * - travel opposite the dismiss direction never engages, so a same-axis scrollable still receives
  *   reverse scrolling.
  */
@@ -140,6 +177,122 @@ class NavSwipeScrollConflictTest {
     }
 
     @Test
+    fun transientConsumptionPreservesPreClaimDistance() = runComposeUiTest {
+        var animatedTop: Animatable<Float, AnimationVector1D>? = null
+        setContent {
+            val animation = remember { Animatable(1f) }
+            animatedTop = animation
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = animation,
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        externalGestureOwnership = { 0L },
+                        onCommit = {},
+                        onCancel = {},
+                        onGesture = {},
+                    ),
+            ) {
+                Box(Modifier.fillMaxSize().consumeFirstPositionMoves(1))
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(Offset(width * 0.1f, centerY))
+            moveTo(Offset(width * 0.3f, centerY))
+            moveTo(Offset(width * 0.6f, centerY))
+        }
+        waitForIdle()
+
+        assertTrue(
+            checkNotNull(animatedTop).value < 0.8f,
+            "navigation must catch up to the full recognized drag instead of restarting at claim",
+        )
+
+        onRoot().performTouchInput { up() }
+        waitForIdle()
+    }
+
+    @Test
+    fun secondPointerBeforeClaimLeavesSequenceToContent() = runComposeUiTest {
+        var commits = 0
+        setContent {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = remember { Animatable(1f) },
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        externalGestureOwnership = { 0L },
+                        onCommit = { commits++ },
+                        onCancel = {},
+                        onGesture = {},
+                    ),
+            )
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(pointerId = 0, position = Offset(width * 0.1f, centerY))
+            down(pointerId = 1, position = Offset(width * 0.7f, centerY))
+            moveTo(pointerId = 0, position = Offset(width * 0.9f, centerY))
+            up(pointerId = 1)
+            up(pointerId = 0)
+        }
+        waitForIdle()
+
+        assertEquals(0, commits, "navigation must not claim a sequence that became multi-touch")
+    }
+
+    @Test
+    fun secondPointerAfterClaimCancelsInsteadOfCommitting() = runComposeUiTest {
+        var commits = 0
+        var cancels = 0
+        setContent {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .navSwipeDismissImpl(
+                        enabled = true,
+                        direction = NavSwipeDirection.LeftToRight,
+                        animatedTop = remember { Animatable(1f) },
+                        topIndex = 1,
+                        motion = NavMotion.Default,
+                        settleSink = null,
+                        externalGestureOwnership = { 0L },
+                        onCommit = { commits++ },
+                        onCancel = { cancels++ },
+                        onGesture = {},
+                    ),
+            )
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(pointerId = 0, position = Offset(width * 0.05f, centerY))
+            moveTo(pointerId = 0, position = Offset(width * 0.4f, centerY))
+            down(pointerId = 1, position = Offset(width * 0.7f, centerY))
+            moveTo(pointerId = 0, position = Offset(width * 0.95f, centerY))
+            up(pointerId = 1)
+            up(pointerId = 0)
+        }
+        waitForIdle()
+
+        assertEquals(0, commits, "a multi-touch interruption must never commit the pop")
+        assertEquals(1, cancels, "a claimed sequence must settle back after multi-touch interruption")
+    }
+
+    @Test
     fun crossAxisDragScrollsThePageWithoutEngagingDismiss() = runComposeUiTest {
         val backStack = navBackStackOf(ConflictBase, VerticalPage)
         var scroll: ScrollState? = null
@@ -206,7 +359,195 @@ class NavSwipeScrollConflictTest {
     }
 
     @Test
-    fun dismissDirectionDragWinsOverSameAxisScrollable() = runComposeUiTest {
+    fun clickableContentDoesNotBlockDismissDirectionDrag() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var clicks = 0
+        val interactions = mutableListOf<PressInteraction>()
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val indication = LocalIndication.current
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect { interaction ->
+                            if (interaction is PressInteraction) interactions += interaction
+                        }
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = indication,
+                            ) { clicks++ },
+                    ) {
+                        BasicText("clickable-page")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput { down(Offset(width * 0.1f, centerY)) }
+        waitForIdle()
+
+        assertTrue(
+            interactions.any { it is PressInteraction.Press },
+            "clickable must receive press first so its indication can show before navigation claims",
+        )
+
+        onRoot().performTouchInput {
+            moveTo(Offset(width * 0.4f, centerY))
+            moveTo(Offset(width * 0.9f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(1, backStack.size, "click cancellation must not reserve the sequence from navigation")
+        assertEquals(0, clicks, "the dismiss drag must cancel the click")
+        assertTrue(
+            interactions.any { it is PressInteraction.Cancel },
+            "navigation takeover must cancel the clickable press and its indication",
+        )
+        onNodeWithText("base").assertExists()
+    }
+
+    @Test
+    fun oneConsumedMoveThenUnconsumedMoveLetsNavigationClaim() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var consumedMoves = 0
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .consumeFirstPositionMoves(1) { consumedMoves++ },
+                    ) {
+                        BasicText("transient-consumer")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(Offset(width * 0.1f, centerY))
+            moveTo(Offset(width * 0.3f, centerY))
+            moveTo(Offset(width * 0.6f, centerY))
+            moveTo(Offset(width * 0.9f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(1, consumedMoves, "the child must consume only the ambiguous first move")
+        assertEquals(1, backStack.size, "an unconsumed confirmation move must let navigation pop")
+        onNodeWithText("base").assertExists()
+    }
+
+    @Test
+    fun twoConsumedMovesLockOwnershipToChild() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var consumedMoves = 0
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .consumeFirstPositionMoves(2) { consumedMoves++ },
+                    ) {
+                        BasicText("confirmed-consumer")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(Offset(width * 0.1f, centerY))
+            moveTo(Offset(width * 0.3f, centerY))
+            moveTo(Offset(width * 0.5f, centerY))
+            moveTo(Offset(width * 0.9f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(2, consumedMoves, "two consumed moves must confirm child ownership")
+        assertEquals(2, backStack.size, "navigation must not steal after child ownership is confirmed")
+        onNodeWithText("confirmed-consumer").assertExists()
+    }
+
+    @Test
+    fun consumedMovesBelowNavigationSlopLockOwnershipToChild() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var consumedMoves = 0
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .consumeFirstPositionMoves(2) { consumedMoves++ },
+                    ) {
+                        BasicText("lower-slop-consumer")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            val start = Offset(width * 0.1f, centerY)
+            down(start)
+            moveTo(start + Offset(1f, 0f))
+            moveTo(start + Offset(2f, 0f))
+            moveTo(Offset(width * 0.9f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(2, consumedMoves, "the child must establish ownership before navigation touch slop")
+        assertEquals(2, backStack.size, "navigation must not steal a lower-slop child drag")
+        onNodeWithText("lower-slop-consumer").assertExists()
+    }
+
+    @Test
+    fun oneConsumedMoveThenUpDoesNotNavigate() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .consumeFirstPositionMoves(1),
+                    ) {
+                        BasicText("single-move-consumer")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            down(Offset(width * 0.1f, centerY))
+            moveTo(Offset(width * 0.8f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(2, backStack.size, "an unresolved consumed move followed by up must not pop")
+        onNodeWithText("single-move-consumer").assertExists()
+    }
+
+    @Test
+    fun sameAxisScrollableClaimsDismissDirectionDrag() = runComposeUiTest {
         val backStack = navBackStackOf(ConflictBase, HorizontalPage)
         var scroll: ScrollState? = null
         setContent {
@@ -233,9 +574,40 @@ class NavSwipeScrollConflictTest {
         onRoot().performTouchInput { swipeRight(startX = width * 0.1f, endX = width * 0.9f) }
         waitForIdle()
 
-        assertEquals(1, backStack.size, "same-axis dismiss-direction fling must commit the pop")
-        assertEquals(200, checkNotNull(scroll).value, "nav-wins precedence: the scrollable must not move")
-        onNodeWithText("base").assertExists()
+        assertEquals(2, backStack.size, "a consuming same-axis child must prevent the pop")
+        assertTrue(checkNotNull(scroll).value < 200, "the same-axis scrollable must receive the drag")
+        onNodeWithText("horizontal-page").assertExists()
+    }
+
+    @Test
+    fun sameAxisDraggableClaimsDismissDirectionDrag() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var dragDistance = 0f
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .draggable(
+                                state = rememberDraggableState { dragDistance += it },
+                                orientation = Orientation.Horizontal,
+                            ),
+                    ) {
+                        BasicText("draggable-page")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput { swipeRight(startX = width * 0.1f, endX = width * 0.9f) }
+        waitForIdle()
+
+        assertEquals(2, backStack.size, "a same-axis draggable such as Slider must prevent the pop")
+        assertTrue(dragDistance > 0f, "the same-axis draggable must receive the drag")
+        onNodeWithText("draggable-page").assertExists()
     }
 
     @Test

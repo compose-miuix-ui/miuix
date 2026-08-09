@@ -606,11 +606,11 @@ private fun NavDisplayLayout(
         // The unified swipe recognizer lives on the DISPLAY CONTAINER, not on the top entry's host:
         // the host's hit-rect follows its graphicsLayer translation, so early in a push most of the
         // screen belongs to the covered layer below and an interrupting back-swipe could never
-        // engage. The container sees every pointer on the Initial pass parent-first — before any
-        // entry's nested scroll or input-blocking modifier — keeping the two-phase claiming
-        // contract (invariant 4) intact while making the whole screen grabbable at any point of an
-        // in-flight transition. At rest the behavior is unchanged (the settled top host was
-        // full-screen anyway).
+        // engage. The container sees every pointer, while the recognizer's engagement phase waits
+        // until descendants have had the Main pass so same-axis interactive content gets first
+        // refusal. Once navigation claims a sequence it still consumes from the Initial pass. This
+        // keeps the whole screen grabbable at any point of an in-flight transition without stealing
+        // slider or scroll gestures. At rest the settled top host was full-screen anyway.
         modifier = modifier
             .onSizeChanged { layoutSize = it }
             .navSwipeDismissImpl(

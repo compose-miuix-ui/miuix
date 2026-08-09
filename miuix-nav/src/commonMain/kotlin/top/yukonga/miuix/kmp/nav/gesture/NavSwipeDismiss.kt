@@ -14,6 +14,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -32,27 +33,27 @@ import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import kotlin.coroutines.coroutineContext
-import kotlin.math.abs
 
 /**
  * Interactive swipe-to-dismiss that drives `animatedTop` directly, finger-following, along the axis
  * and direction the current transition declares ([NavSwipeDirection]).
  *
  * Attached by NavDisplay to the display container (so an in-flight transition can be grabbed from
- * anywhere on screen, not just the moving top entry's translated bounds — the container sees every
- * pointer on the Initial pass parent-first). A single unified pointer handler replaces the orientation-locked
+ * anywhere on screen, not just the moving top entry's translated bounds). A single unified pointer
+ * handler replaces the orientation-locked
  * `detectHorizontalDragGestures` / `detectVerticalDragGestures` detectors, which only owned one axis
  * and yielded the pointer to any other consumer — the source of two defects: an in-progress dismiss
  * cancelled the instant the finger drifted onto the cross axis (a nested scroll claimed the pointer),
  * and in-page taps/scrolls fired while the gesture was driving the transition. The unified handler
  * instead works in two phases:
  *
- * 1. **Engagement** — movement is watched on [PointerEventPass.Initial] (parent-first), so the moment
- *    travel **in the dismiss direction** crosses the [androidx.compose.ui.platform.ViewConfiguration]
- *    touch slop **and** dominates the cross axis, the pointer is claimed (consumed) before any nested
- *    scrollable can take it. A drag that is clearly cross-axis dominant is left untouched, so the
- *    page's own scrolling and taps still work when there is no dismiss intent. Travel opposite the
- *    dismiss direction never engages (there is nothing to drag the entry "forward" toward).
+ * 1. **Engagement** — movement is watched on [PointerEventPass.Final], after descendants had a chance
+ *    to consume it on the Main pass. The first consumed non-zero position change starts a one-move
+ *    confirmation window independent of navigation touch slop: another consumed position change
+ *    confirms that child content owns the whole sequence, while an unconsumed change means the first
+ *    consumption was only a clickable cancelling its press and navigation may claim. Either owner is
+ *    then permanent until all pointers lift. A clearly cross-axis or opposite-direction drag is left
+ *    to content.
  * 2. **Follow** — once claimed, **every** pointer change is consumed on **both** axes, so neither a
  *    nested scroll nor any in-page handler can act on the finger that is driving the dismiss, and a
  *    cross-axis wiggle can no longer steal or cancel the gesture. The dismiss ends **only** on finger
@@ -64,8 +65,10 @@ import kotlin.math.abs
  * `topIndex - anchoredProgress(anchor, fingerProgress)`, where `anchor` is the progress already
  * travelled toward pop at the claim instant (sampled atomically with halting any in-flight settle —
  * grab-anchor invariant 6, so interrupting a running push/pop transition is jump-free), and
- * `fingerProgress` is the finger travel **in the dismiss direction since the claim point** over the
- * layout extent on that axis — linear, 1:1 with the finger (§7.1, no interpolation on this axis).
+ * `fingerProgress` is the recognized finger travel **in the dismiss direction beyond touch slop**
+ * over the layout extent on that axis. It includes travel observed before ownership was confirmed,
+ * so the page catches up without restarting at the claim event; after that it remains linear and
+ * 1:1 with the finger (§7.1, no interpolation on this axis).
  *
  * On release the decision is delegated to [navBackCommitDecision] (**velocity-first,
  * position-fallback**, §7.2), using the shared thresholds [NavDriverSpec.COMMIT_VELOCITY_THRESHOLD] /
@@ -196,27 +199,49 @@ internal fun Modifier.navSwipeDismissImpl(
             val velocityTracker = VelocityTracker()
             velocityTracker.addPosition(down.uptimeMillis, down.position)
 
-            // --- Engagement phase: decide whether this is our dismiss swipe, watching Initial pass. ---
-            var preClaimDrag = 0f // accumulated travel on the gesture axis (raw signed pixels)
-            var crossTravel = 0f // accumulated travel on the cross axis (raw signed pixels)
-            var claimed = false
-            while (!claimed) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
+            // --- Engagement phase: descendants see Main first. The pure arbiter keeps child
+            // consumption evidence independent from navigation's touch-slop eligibility, so a
+            // lower-slop child can establish permanent ownership before navigation may engage. ---
+            val arbitrator = NavSwipeArbitrator(touchSlop = slop)
+            var initialDismissTravelPx = 0f
+            var claimTouchY = down.position.y
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
                 if (externalGestureOwnsSequence()) return@awaitEachGesture
-                velocityTracker.addPosition(change.uptimeMillis, change.position)
-                if (!change.pressed) return@awaitEachGesture // lifted before engaging: a tap / short press
-                val delta = change.positionChange()
-                preClaimDrag += if (isHorizontal) delta.x else delta.y
-                crossTravel += if (isHorizontal) delta.y else delta.x
-                val toward = dismissSign * preClaimDrag // > 0 means moving toward the dismiss direction
-                if (toward > slop && toward >= abs(crossTravel)) {
-                    // Dismiss-direction travel crossed slop and dominates: claim before nested scroll can.
-                    claimed = true
-                    change.consume()
-                } else if (abs(crossTravel) > slop && abs(crossTravel) > abs(toward)) {
-                    // Clearly a cross-axis gesture (e.g. the page's vertical scroll): never our swipe.
+                if (event.changes.count { it.pressed } > 1) {
+                    arbitrator.cancel()
                     return@awaitEachGesture
+                }
+                velocityTracker.addPosition(change.uptimeMillis, change.position)
+                if (!change.pressed) {
+                    arbitrator.onEnd()
+                    return@awaitEachGesture // lifted before engaging: a tap / short press
+                }
+                val delta = change.positionChangeIgnoreConsumed()
+                if (delta.x == 0f && delta.y == 0f) continue
+                val axisDelta = if (isHorizontal) delta.x else delta.y
+                val crossDelta = if (isHorizontal) delta.y else delta.x
+                when (
+                    arbitrator.onPositionChange(
+                        towardDeltaPx = dismissSign * axisDelta,
+                        crossDeltaPx = crossDelta,
+                        consumed = change.isConsumed,
+                    )
+                ) {
+                    NavSwipeArbitrationOutcome.Continue -> Unit
+
+                    NavSwipeArbitrationOutcome.YieldToChild,
+                    NavSwipeArbitrationOutcome.Cancelled,
+                    -> return@awaitEachGesture
+
+                    NavSwipeArbitrationOutcome.ClaimNavigation -> {
+                        // Keep touch slop as a dead zone, then catch up to the recognized drag.
+                        initialDismissTravelPx = arbitrator.initialDismissTravelPx
+                        claimTouchY = change.position.y
+                        change.consume()
+                        break
+                    }
                 }
             }
 
@@ -246,26 +271,47 @@ internal fun Modifier.navSwipeDismissImpl(
                 animatedTop.stop()
                 if (externalGestureOwnsSequence()) return@launch
                 anchor = topIndex - animatedTop.value
+                val initialFingerProgress = initialDismissTravelPx / extent
+                if (initialFingerProgress > 0f) {
+                    animatedTop.snapToFinger(topIndex = topIndex, progress = initialFingerProgress, anchor = anchor)
+                    if (externalGestureOwnsSequence()) return@launch
+                    currentOnGesture.value(
+                        NavGesture(
+                            progress = anchoredProgress(anchor = anchor, fingerProgress = initialFingerProgress).coerceAtLeast(0f),
+                            swipeEdge = swipeEdge,
+                            touchY = claimTouchY,
+                            initialTouchY = down.position.y,
+                        ),
+                    )
+                }
             }
 
             // --- Follow phase: we own the pointer. Consume every change on both axes (so neither a nested
             // scroll nor any in-page handler sees the finger, and no cross-axis movement can cancel). The
-            // dismiss follows the finger 1:1 from the claim point and ends only on lift. ---
-            var drag = 0f
+            // dismiss catches up to the recognized pre-claim travel, then follows 1:1 and ends only on lift. ---
+            var dismissTravelPx = initialDismissTravelPx
+            var forceCancel = false
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Initial)
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
                 if (externalGestureOwnsSequence()) return@awaitEachGesture
+                val change = event.changes.firstOrNull { it.id == down.id }
+                if (forceCancel || event.changes.any { it.id != down.id && it.pressed } || change == null) {
+                    forceCancel = true
+                    event.changes.forEach { it.consume() }
+                    if (event.changes.none { it.pressed }) break
+                    continue
+                }
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
                 if (!change.pressed) {
-                    change.consume()
+                    event.changes.forEach { it.consume() }
                     break
                 }
                 val delta = change.positionChange()
-                drag += if (isHorizontal) delta.x else delta.y
+                val axisDelta = if (isHorizontal) delta.x else delta.y
+                dismissTravelPx += dismissSign * axisDelta
                 change.consume()
                 // Unclamped here; anchoredProgress clamps the total to [min(anchor, 0), MAX_FINGER_PROGRESS].
-                val fingerProgress = dismissSign * drag / extent
+                val fingerProgress = dismissTravelPx / extent
                 val touchY = change.position.y
                 sequenceScope.launch {
                     // Pre-anchor event (stop() above still unwinding a mid-flight settle): drop it.
@@ -295,15 +341,15 @@ internal fun Modifier.navSwipeDismissImpl(
             val releaseAnchor = if (anchor.isNaN()) topIndex - animatedTop.value else anchor
             // Total progress on the pop axis; negative totals (leaving entry frozen above the grab
             // point) count as 0 for the commit decision — cancel-biased by construction.
-            val progress = anchoredProgress(anchor = releaseAnchor, fingerProgress = dismissSign * drag / extent).coerceAtLeast(0f)
+            val progress = anchoredProgress(anchor = releaseAnchor, fingerProgress = dismissTravelPx / extent).coerceAtLeast(0f)
             // Instantaneous release velocity along the axis, in pixels/sec, projected onto the dismiss
             // direction and normalised to progress-units/sec (positive points toward pop).
             val velocity = velocityTracker.calculateVelocity()
             val axisVelocity = if (isHorizontal) velocity.x else velocity.y
-            val progressVelocity = dismissSign * axisVelocity / extent
+            val progressVelocity = if (forceCancel) 0f else dismissSign * axisVelocity / extent
             // Depth axis is the inverse of the progress axis, so negate for the spring handoff.
             val depthVelocity = -progressVelocity
-            if (navBackCommitDecision(progress = progress, velocity = progressVelocity)) {
+            if (!forceCancel && navBackCommitDecision(progress = progress, velocity = progressVelocity)) {
                 // Commit the back-stack change SYNCHRONOUSLY, never gated behind the settle. `scope` is
                 // this entry's composition scope; the commit settle drives `animatedTop` to `topIndex - 1`,
                 // at which point this (top) entry reaches relativeDepth -1, leaves the visible window, and
