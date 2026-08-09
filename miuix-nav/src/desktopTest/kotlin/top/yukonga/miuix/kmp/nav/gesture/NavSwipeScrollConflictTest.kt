@@ -84,8 +84,8 @@ private fun Modifier.consumeFirstPositionMoves(
  * Pins the documented arbitration contract between the swipe-dismiss recognizer and scrollable
  * entry content (the two-phase engagement in `Modifier.navSwipeDismiss`):
  * - a clearly cross-axis-dominant drag is never claimed, so the page's own scrolling keeps working;
- * - two consecutive consumed dismiss-axis moves confirm that a child owns the whole sequence, so
- *   sliders and same-axis scrollables are not stolen even if they later stop consuming;
+ * - two consecutive consumed position moves confirm that a child owns the whole sequence even
+ *   below navigation touch slop, so lower-slop drags are not stolen if they later stop consuming;
  * - a clickable's one-time consumption while cancelling its press enters a one-move confirmation
  *   window but does not reserve the sequence;
  * - otherwise, a dismiss-direction drag past slop is claimed across the full display;
@@ -479,6 +479,41 @@ class NavSwipeScrollConflictTest {
         assertEquals(2, consumedMoves, "two consumed moves must confirm child ownership")
         assertEquals(2, backStack.size, "navigation must not steal after child ownership is confirmed")
         onNodeWithText("confirmed-consumer").assertExists()
+    }
+
+    @Test
+    fun consumedMovesBelowNavigationSlopLockOwnershipToChild() = runComposeUiTest {
+        val backStack = navBackStackOf(ConflictBase, HorizontalPage)
+        var consumedMoves = 0
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<ConflictBase> { Box(Modifier.fillMaxSize()) { BasicText("base") } }
+                entry<HorizontalPage>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .consumeFirstPositionMoves(2) { consumedMoves++ },
+                    ) {
+                        BasicText("lower-slop-consumer")
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onRoot().performTouchInput {
+            val start = Offset(width * 0.1f, centerY)
+            down(start)
+            moveTo(start + Offset(1f, 0f))
+            moveTo(start + Offset(2f, 0f))
+            moveTo(Offset(width * 0.9f, centerY))
+            up()
+        }
+        waitForIdle()
+
+        assertEquals(2, consumedMoves, "the child must establish ownership before navigation touch slop")
+        assertEquals(2, backStack.size, "navigation must not steal a lower-slop child drag")
+        onNodeWithText("lower-slop-consumer").assertExists()
     }
 
     @Test
