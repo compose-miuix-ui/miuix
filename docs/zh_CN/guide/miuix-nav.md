@@ -101,7 +101,7 @@ NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
 | `BottomToTop` | 向上 |
 | `None`（默认） | 禁用 —— 仅经返回按钮 / 系统返回 pop |
 
-导航开始识别滑动时，交互子组件拥有优先权：如果 Slider、同轴滚动容器或其他子组件消费了位移，导航会放弃本次指针序列；否则，沿关闭方向的位移超过 touch slop 后导航才会认领手势。一旦手势认领成功，它会在本次手势余下过程中独占指针（消费两个轴向），因此跨轴的轻微滑动既不会抢走它、也不会中途取消；在手指抬起前，页面内的点击 / 滚动都被屏蔽。可按路由设置或覆盖——包括用 `NavSwipeDirection.None` 让某路由仅按钮关闭：
+导航开始识别滑动时，交互子组件拥有优先权。沿关闭轴的第一次位移被消费后，会进入仅持续一次位移事件的确认窗口：下一次位移仍被消费，表示 Slider、同轴滚动容器或其他可拖动组件拥有整个指针序列；下一次位移未被消费，则说明第一次消费只是 clickable 在取消按压，导航可在沿关闭方向的累计位移超过 touch slop 后接管。一旦子组件或导航取得所有权，在所有指针抬起前都不会再转移。导航接管后会消费两个轴向，因此跨轴的轻微滑动既不会抢走它、也不会中途取消；在释放前，页面内的点击 / 滚动都被屏蔽。可按路由设置或覆盖——包括用 `NavSwipeDirection.None` 让某路由仅按钮关闭：
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection

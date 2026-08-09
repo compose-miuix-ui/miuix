@@ -101,7 +101,7 @@ The interactive swipe that pops the top entry runs along the **same axis as the 
 | `BottomToTop` | Upward |
 | `None` (default) | Disabled — pop via back button / system back only |
 
-Interactive children get first refusal while a swipe is being recognized: if a slider, same-axis scrollable, or another child consumes the movement, navigation leaves that pointer sequence alone. Otherwise navigation engages once dismiss-direction movement crosses touch slop. Once engaged it owns the pointer for the rest of the gesture (consuming both axes), so a cross-axis wiggle cannot steal it or cancel mid-swipe, and in-page taps / scrolls are suppressed until the finger lifts. Set or override it per route — including `NavSwipeDirection.None` to keep a route button-only:
+Interactive children get first refusal while a swipe is being recognized. The first consumed dismiss-axis move opens a one-move confirmation window: another consumed position change confirms that a slider, same-axis scrollable, or other draggable owns the entire pointer sequence; an unconsumed position change means the first consumption only cancelled a clickable press, so navigation may engage once dismiss-direction travel has crossed touch slop. Once either child content or navigation wins, ownership cannot transfer before every pointer lifts. An engaged navigation swipe consumes both axes, so a cross-axis wiggle cannot steal it or cancel mid-swipe, and in-page taps / scrolls are suppressed until release. Set or override it per route — including `NavSwipeDirection.None` to keep a route button-only:
 
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
