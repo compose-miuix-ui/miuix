@@ -36,3 +36,7 @@ The example application of this project itself demonstrates how to build interfa
 ### InstallerX Revived
 
 [InstallerX Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) is a modern Android package installer featuring switchable Material 3/Miuix aesthetics, universal support for file formats, and advanced installation capabilities via Shizuku or Root.
+
+### HyperLyric
+
+[HyperLyric](https://github.com/limczhh/HyperLyric) is an Xposed module that brings lyrics to the Super Island on Xiaomi HyperOS 3.

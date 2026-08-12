@@ -36,3 +36,7 @@
 ### InstallerX Revived
 
 [InstallerX Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) 是一款现代化的 Android 包安装器，支持切换 Material 3/Miuix 设计风格，全面兼容各类文件格式，并可通过 Shizuku 或 Root 实现高级安装功能。
+
+### HyperLyric
+
+[HyperLyric](https://github.com/limczhh/HyperLyric) 是一个专为小米 HyperOS 3 带来超级岛歌词的 Xposed 模块。
