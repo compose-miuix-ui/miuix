@@ -263,17 +263,6 @@ private fun ScaffoldLayout(
         }
 
         val snackbarHeight = snackbarPlaceable.height
-        val snackbarOffsetFromBottom =
-            if (snackbarHeight != 0) {
-                snackbarHeight +
-                    (
-                        fabOffsetFromBottom
-                            ?: bottomBarPlaceable.height.takeIf { !isBottomBarEmpty }
-                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout)
-                        )
-            } else {
-                0
-            }
 
         // Measure FloatingToolbar
         val floatingToolbarPlaceable =
@@ -282,6 +271,50 @@ private fun ScaffoldLayout(
                 .measure(looseConstraints.offset(-leftInset - rightInset, -bottomInset))
 
         val isFloatingToolbarEmpty = floatingToolbarPlaceable.width == 0 && floatingToolbarPlaceable.height == 0
+
+        // Top edge of the floating toolbar. The snackbar is kept below it when the
+        // toolbar is docked at the bottom so the floating nav bar never covers it
+        // (FAB and bottomBar are already taken into account above).
+        val floatingToolbarTop = if (!isFloatingToolbarEmpty) {
+            val alignment = floatingToolbarPosition.toAlignment()
+            val availableWidth = layoutWidth - leftInset - rightInset
+            val availableHeight = layoutHeight - topBarPlaceable.height - topInset - bottomInset
+            val position = alignment.align(
+                IntSize(floatingToolbarPlaceable.width, floatingToolbarPlaceable.height),
+                IntSize(availableWidth, availableHeight),
+                layoutDirection,
+            )
+            topBarPlaceable.height + topInset + position.y - FloatingToolbarSpacing.roundToPx()
+        } else {
+            0
+        }
+
+        val isFloatingToolbarAtBottom =
+            !isFloatingToolbarEmpty &&
+                (
+                    floatingToolbarPosition == ToolbarPosition.BottomStart ||
+                        floatingToolbarPosition == ToolbarPosition.BottomCenter ||
+                        floatingToolbarPosition == ToolbarPosition.BottomEnd
+                    )
+
+        val snackbarOffsetFromBottom =
+            if (snackbarHeight != 0) {
+                val toolbarOffsetFromBottom =
+                    if (isFloatingToolbarAtBottom) {
+                        (layoutHeight - floatingToolbarTop + FloatingToolbarSpacing.roundToPx())
+                            .coerceAtLeast(0)
+                    } else {
+                        0
+                    }
+                snackbarHeight +
+                    (
+                        fabOffsetFromBottom
+                            ?: bottomBarPlaceable.height.takeIf { !isBottomBarEmpty }
+                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout)
+                        ).coerceAtLeast(toolbarOffsetFromBottom)
+            } else {
+                0
+            }
 
         // Update the backing state for the content padding before subcomposing the body
         val insets = contentWindowInsets.asPaddingValues(this)
