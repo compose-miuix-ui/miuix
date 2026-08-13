@@ -272,7 +272,7 @@ private fun ScaffoldLayout(
 
         val isFloatingToolbarEmpty = floatingToolbarPlaceable.width == 0 && floatingToolbarPlaceable.height == 0
 
-        // Top edge of the floating toolbar. The snackbar is kept below it when the
+        // Top edge of the floating toolbar. The snackbar is kept above it when the
         // toolbar is docked at the bottom so the floating nav bar never covers it
         // (FAB and bottomBar are already taken into account above).
         val floatingToolbarTop = if (!isFloatingToolbarEmpty) {
