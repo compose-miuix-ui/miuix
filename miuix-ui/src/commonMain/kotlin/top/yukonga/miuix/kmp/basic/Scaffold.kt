@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -263,17 +264,6 @@ private fun ScaffoldLayout(
         }
 
         val snackbarHeight = snackbarPlaceable.height
-        val snackbarOffsetFromBottom =
-            if (snackbarHeight != 0) {
-                snackbarHeight +
-                    (
-                        fabOffsetFromBottom
-                            ?: bottomBarPlaceable.height.takeIf { !isBottomBarEmpty }
-                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout)
-                        )
-            } else {
-                0
-            }
 
         // Measure FloatingToolbar
         val floatingToolbarPlaceable =
@@ -282,6 +272,53 @@ private fun ScaffoldLayout(
                 .measure(looseConstraints.offset(-leftInset - rightInset, -bottomInset))
 
         val isFloatingToolbarEmpty = floatingToolbarPlaceable.width == 0 && floatingToolbarPlaceable.height == 0
+
+        // Placement of the floating toolbar. The snackbar is kept above it when the
+        // toolbar is docked at the bottom so the floating nav bar never covers it
+        // (FAB and bottomBar are already taken into account above).
+        val floatingToolbarOffset = if (!isFloatingToolbarEmpty) {
+            val alignment = floatingToolbarPosition.toAlignment()
+            val availableWidth = layoutWidth - leftInset - rightInset
+            val availableHeight = layoutHeight - topBarPlaceable.height - topInset - bottomInset
+            val position = alignment.align(
+                IntSize(floatingToolbarPlaceable.width, floatingToolbarPlaceable.height),
+                IntSize(availableWidth, availableHeight),
+                layoutDirection,
+            )
+            IntOffset(
+                x = leftInset + position.x,
+                y = topBarPlaceable.height + topInset + position.y - FloatingToolbarSpacing.roundToPx(),
+            )
+        } else {
+            null
+        }
+
+        val isFloatingToolbarAtBottom =
+            floatingToolbarOffset != null &&
+                (
+                    floatingToolbarPosition == ToolbarPosition.BottomStart ||
+                        floatingToolbarPosition == ToolbarPosition.BottomCenter ||
+                        floatingToolbarPosition == ToolbarPosition.BottomEnd
+                    )
+
+        val snackbarOffsetFromBottom =
+            if (snackbarHeight != 0) {
+                val toolbarOffsetFromBottom =
+                    if (isFloatingToolbarAtBottom) {
+                        (layoutHeight - (floatingToolbarOffset?.y ?: 0) + FloatingToolbarSpacing.roundToPx())
+                            .coerceAtLeast(0)
+                    } else {
+                        0
+                    }
+                snackbarHeight +
+                    (
+                        fabOffsetFromBottom
+                            ?: bottomBarPlaceable.height.takeIf { !isBottomBarEmpty }
+                            ?: contentWindowInsets.getBottom(this@SubcomposeLayout)
+                        ).coerceAtLeast(toolbarOffsetFromBottom)
+            } else {
+                0
+            }
 
         // Update the backing state for the content padding before subcomposing the body
         val insets = contentWindowInsets.asPaddingValues(this)
@@ -326,25 +363,8 @@ private fun ScaffoldLayout(
             // Place BottomBar
             bottomBarPlaceable.place(0, layoutHeight - bottomBarPlaceable.height)
             // Place FloatingToolbar
-            if (!isFloatingToolbarEmpty) {
-                val floatingToolbarWidth = floatingToolbarPlaceable.width
-                val floatingToolbarHeight = floatingToolbarPlaceable.height
-
-                val alignment = floatingToolbarPosition.toAlignment()
-
-                val availableWidth = layoutWidth - leftInset - rightInset
-                val availableHeight = layoutHeight - topBarPlaceable.height - topInset - bottomInset
-
-                val position = alignment.align(
-                    IntSize(floatingToolbarWidth, floatingToolbarHeight),
-                    IntSize(availableWidth, availableHeight),
-                    layoutDirection,
-                )
-
-                val x = leftInset + position.x
-                val y = topBarPlaceable.height + topInset + position.y - FloatingToolbarSpacing.roundToPx()
-
-                floatingToolbarPlaceable.place(x, y)
+            floatingToolbarOffset?.let { offset ->
+                floatingToolbarPlaceable.place(offset.x, offset.y)
             }
             // Place FAB
             fabPlacement?.let { placement ->
