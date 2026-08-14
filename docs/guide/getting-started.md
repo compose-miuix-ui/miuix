@@ -170,5 +170,5 @@ all implemented based on this and therefore need to be wrapped by this component
 
 ## API Documentation
 
-- View the [API Documentation](/miuix/dokka/index.html){target="\_blank"},
+- View the [API Documentation](/miuix/dokka/index.html){target="_blank"},
   generated using Dokka, which contains detailed information about all APIs.
