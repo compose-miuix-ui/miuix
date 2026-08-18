@@ -41,15 +41,10 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
-        binaries.executable()
     }
 
     js {
         browser()
-    }
-
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
     }
 
     applyMiuixSourceSetHierarchy()

@@ -305,7 +305,7 @@ private fun ScaffoldLayout(
             if (snackbarHeight != 0) {
                 val toolbarOffsetFromBottom =
                     if (isFloatingToolbarAtBottom) {
-                        (layoutHeight - (floatingToolbarOffset?.y ?: 0) + FloatingToolbarSpacing.roundToPx())
+                        (layoutHeight - floatingToolbarOffset.y + FloatingToolbarSpacing.roundToPx())
                             .coerceAtLeast(0)
                     } else {
                         0
