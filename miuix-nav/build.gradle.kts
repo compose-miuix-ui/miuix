@@ -73,9 +73,3 @@ kotlin {
         }
     }
 }
-
-// CMP 1.12.0's checkComposeUiTestConfigurationFor* false-positives on any Skiko
-// dependency; miuix-nav's web tests are plain kotlin.test and pass without it (CMP-4906).
-tasks.matching { it.name.startsWith("checkComposeUiTestConfigurationFor") }.configureEach {
-    enabled = false
-}
