@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -146,6 +147,7 @@ fun RowScope.NavigationBarItem(
     icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     enabled: Boolean = true,
     badge: (@Composable () -> Unit)? = null,
 ) {
@@ -153,18 +155,7 @@ fun RowScope.NavigationBarItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(NavigationBarDefaults.UnselectedAlpha)
-    }
+    val tint = colors.contentColor(selected, isPressed)
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationBarDisplayMode.current
 
@@ -387,24 +378,14 @@ fun FloatingNavigationBarItem(
     icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     enabled: Boolean = true,
     badge: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(FloatingNavigationBarDefaults.UnselectedAlpha)
-    }
+    val tint = colors.contentColor(selected, isPressed)
 
     Column(
         modifier = modifier
@@ -478,6 +459,39 @@ object NavigationBarDefaults {
 
     /** The alpha value for an unselected item. */
     val UnselectedAlpha = 0.4f
+
+    /**
+     * The default colors for the [NavigationBarItem].
+     */
+    @Composable
+    fun navigationBarItemColors(
+        unselectedContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+    ): NavigationBarItemColors = remember(unselectedContentColor, selectedContentColor) {
+        NavigationBarItemColors(
+            unselectedContentColor = unselectedContentColor,
+            selectedContentColor = selectedContentColor,
+        )
+    }
+}
+
+@Immutable
+data class NavigationBarItemColors(
+    private val unselectedContentColor: Color,
+    private val selectedContentColor: Color,
+) {
+    @Stable
+    internal fun contentColor(selected: Boolean, isPressed: Boolean): Color = when {
+        isPressed -> if (selected) {
+            selectedContentColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
+        } else {
+            unselectedContentColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
+        }
+
+        selected -> selectedContentColor
+
+        else -> unselectedContentColor.copy(NavigationBarDefaults.UnselectedAlpha)
+    }
 }
 
 /** Contains default values used by [FloatingNavigationBar] and [FloatingNavigationBarItem]. */
