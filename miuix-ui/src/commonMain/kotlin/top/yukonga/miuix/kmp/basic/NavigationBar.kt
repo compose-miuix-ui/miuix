@@ -147,8 +147,8 @@ fun RowScope.NavigationBarItem(
     icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
-    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     enabled: Boolean = true,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     badge: (@Composable () -> Unit)? = null,
 ) {
     val itemHeight = NavigationBarDefaults.ItemHeight
@@ -378,8 +378,8 @@ fun FloatingNavigationBarItem(
     icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
-    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     enabled: Boolean = true,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     badge: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
