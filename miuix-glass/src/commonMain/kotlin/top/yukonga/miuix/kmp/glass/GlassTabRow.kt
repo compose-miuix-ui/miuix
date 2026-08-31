@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.lerp
@@ -43,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
+import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -59,6 +63,10 @@ import kotlin.math.roundToInt
  * @property contentColor Their labels.
  * @property pressedOverlayColor Painted over whichever tab is under a finger, whether or not it is
  *   the selected one.
+ * @property restingStrokeAlpha How much of the rim an unselected tab wears before the material
+ *   comes up. The two sets differ here and it is not a detail: the accented control traces a rim
+ *   around its unselected tabs at rest, and the neutral one leaves them as flat shapes. The
+ *   selected tab never wears one either way — its fill is a solid pill.
  */
 @Immutable
 data class GlassTabColors(
@@ -68,6 +76,7 @@ data class GlassTabColors(
     val containerColor: Color,
     val contentColor: Color,
     val pressedOverlayColor: Color,
+    val restingStrokeAlpha: Float,
 )
 
 /** Default values for [GlassTabRow]. */
@@ -92,6 +101,15 @@ object GlassTabRowDefaults {
 
     /** Vertical padding inside a tab: `filter_sort_tab_view2_padding_vertical`. */
     val TabPaddingVertical: Dp = 6.dp
+
+    /**
+     * How much white an unselected tab carries over a dark page, before the material comes up.
+     *
+     * Read off the source control: a page of 17 carries a tab of 33. The joined control in
+     * [GlassSegmentedTabRowDefaults] uses more than twice this, and the two are not interchangeable
+     * — they are different controls with different materials, not one control at two sizes.
+     */
+    private val RestingAlpha: Float = 0.067f
 
     /** Each tab is a pill. The source asks for a 999dp radius, which is a true semicircular cap. */
     @Composable
@@ -125,7 +143,14 @@ object GlassTabRowDefaults {
         return GlassTabColors(
             selectedContainerColor = selectedContainerColor,
             selectedContentColor = if (isDark) Color.White.copy(alpha = 0.8f) else Color.White,
-            restingContainerColor = if (isDark) Color(0xFF4A4A4A) else Color.White,
+            // Composited onto the page rather than left translucent, so nothing reads through a
+            // tab before the material takes over. On a dark page of 17 the source control's
+            // unselected tab measures 33, which is this one layer and no more.
+            restingContainerColor = if (isDark) {
+                Color.White.copy(alpha = RestingAlpha).compositeOver(MiuixTheme.colorScheme.surface)
+            } else {
+                Color.White
+            },
             containerColor = containerColor,
             contentColor = if (isDark) {
                 Color.White.copy(alpha = 0.5f)
@@ -137,6 +162,7 @@ object GlassTabRowDefaults {
             } else {
                 Color.Black.copy(alpha = 0.05f)
             },
+            restingStrokeAlpha = 1f,
         )
     }
 
@@ -171,6 +197,7 @@ object GlassTabRowDefaults {
             } else {
                 Color.Black.copy(alpha = 0.05f)
             },
+            restingStrokeAlpha = 0f,
         )
     }
 }
@@ -256,6 +283,15 @@ fun GlassTabRow(
                 animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
                 label = "glassTabOverlay",
             )
+            // The rim an unselected tab wears at rest. It hands over to the material's own rim as
+            // the glass comes up, and it leaves on selection at the same rate the fill arrives, so
+            // the tab never shows a rim over a solid pill.
+            val rim by animateFloatAsState(
+                targetValue = if (selected) 0f else colors.restingStrokeAlpha,
+                animationSpec = GlassMotion.navContentFloat(),
+                label = "glassTabRim",
+            )
+            val restingRim = alpha * (1f - ramp) * rim
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -282,6 +318,23 @@ fun GlassTabRow(
                     // and a press reads on the selected tab as well as on the others.
                     .background(container)
                     .background(overlay)
+                    .then(
+                        if (restingRim > 0.001f) {
+                            Modifier.drawWithContent {
+                                drawContent()
+                                // Both passes, the way a glass surface with no backdrop under it is
+                                // built everywhere else in the module. The stroke on its own is
+                                // sub-pixel at this token's width and adds under one level of
+                                // brightness; what the eye reads as the rim is the rim pass.
+                                if (stroke != null) {
+                                    drawGlassStroke(shape, layoutDirection, stroke, restingRim)
+                                }
+                                drawGlassRim(shape, layoutDirection, style, container, restingRim)
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .clickable(interactionSource = interactionSource, indication = null) {
                         onSelect(position)
                     }
@@ -344,12 +397,14 @@ object GlassSegmentedTabRowDefaults {
     /**
      * Fill the track wears before the material comes up.
      *
-     * Opaque, so that at rest nothing shows through the control at all. It is the same colour the
-     * source gives a tab of the newer control in its non-blurred state.
+     * Opaque, so that at rest nothing shows through the control at all. It stands for what the
+     * material settles at over a page of that tone: the source control's track is one layer of
+     * [IndicatorAlpha] over its page, which on a dark page of 11 lands on 43, and on a light page
+     * is white already.
      */
     @Composable
     fun restingTrackColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color(0xFF4A4A4A)
+        Color.White.copy(alpha = IndicatorAlpha).compositeOver(MiuixTheme.colorScheme.surface)
     } else {
         Color.White
     }
@@ -357,15 +412,26 @@ object GlassSegmentedTabRowDefaults {
     /**
      * Fill of the indicator behind the current tab.
      *
-     * Six percent of the opposite tone, the same figure the bottom bar's capsule rests at. Over a
-     * white track that lands on 240, which is what the source control measures.
+     * The same layer again, over the track this time. The source control stacks one figure twice:
+     * a dark page of 11 carries a track at 43, and the track carries an indicator at 71. That is
+     * where the control's whole read comes from, and the two must be the one figure or the
+     * indicator stops separating from the track.
      */
     @Composable
     fun indicatorColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = 0.06f)
+        Color.White.copy(alpha = IndicatorAlpha)
     } else {
         Color.Black.copy(alpha = 0.06f)
     }
+
+    /**
+     * How much of the opposite tone one layer of the track carries, on a dark page.
+     *
+     * A byte alpha of `0x22`. The light side is `0x0F` instead, and the two are not each other's
+     * mirror: the same asymmetry the bottom bar's capsule has, where white reads weaker than black
+     * at equal opacity.
+     */
+    private val IndicatorAlpha: Float = 0.133f
 }
 
 /**
