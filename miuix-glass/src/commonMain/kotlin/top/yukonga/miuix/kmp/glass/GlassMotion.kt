@@ -20,10 +20,13 @@ object GlassMotion {
      * Converts one of the source system's spring definitions into a Compose [SpringSpec].
      *
      * @param damping The damping ratio. 1 settles without overshoot; below 1 overshoots once.
-     * @param response The period of the undamped oscillation, in seconds. Smaller is faster.
+     * @param response The period of the undamped oscillation, in seconds. Smaller is faster. Must
+     *   be greater than zero — the stiffness is derived by dividing by it, and zero would hand the
+     *   animation an infinite or undefined stiffness rather than failing where the mistake is.
      */
     @Stable
     fun <T> springOf(damping: Float, response: Float): SpringSpec<T> {
+        require(response > 0f) { "A spring's response must be greater than zero, was $response" }
         val omega = (2.0 * PI / response).toFloat()
         return spring(dampingRatio = damping, stiffness = omega * omega)
     }

@@ -217,7 +217,7 @@ object GlassTabRowDefaults {
  * @param tabs The tab labels, in order. Every tab takes an equal share of the row.
  * @param selectedIndex The index of the current tab.
  * @param onSelect Called with the index of a tapped tab.
- *  * @param backdrop The [Backdrop] supplying the content behind the glass. `null` makes the row a
+ * @param backdrop The [Backdrop] supplying the content behind the glass. `null` makes the row a
  *   plain surface: no blur, no refraction, no rim. The neutral colours want that — the control they
  *   come from is not a glass one, and a material under a six-percent fill washes it out.
  * @param modifier The modifier applied to the row.
@@ -258,7 +258,7 @@ fun GlassTabRow(
     val ramp = surfaceAlpha.coerceIn(0f, 1f)
 
     Row(
-        modifier = modifier.height(height),
+        modifier = modifier.height(height).selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(tabGap),
     ) {
         tabs.forEachIndexed { position, label ->
@@ -335,9 +335,12 @@ fun GlassTabRow(
                             Modifier
                         },
                     )
-                    .clickable(interactionSource = interactionSource, indication = null) {
-                        onSelect(position)
-                    }
+                    .selectable(
+                        selected = selected,
+                        role = Role.Tab,
+                        interactionSource = interactionSource,
+                        indication = null,
+                    ) { onSelect(position) }
                     .padding(
                         horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
                         vertical = GlassTabRowDefaults.TabPaddingVertical,

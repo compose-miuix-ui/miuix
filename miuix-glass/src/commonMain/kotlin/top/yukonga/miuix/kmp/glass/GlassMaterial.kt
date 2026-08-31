@@ -65,4 +65,10 @@ data class GlassMaterial(
     val first: GlassColorLayer,
     val second: GlassColorLayer? = null,
     val third: GlassColorLayer? = null,
-)
+) {
+    init {
+        require(second != null || third == null) {
+            "A GlassMaterial cannot carry a third colour layer without a second"
+        }
+    }
+}

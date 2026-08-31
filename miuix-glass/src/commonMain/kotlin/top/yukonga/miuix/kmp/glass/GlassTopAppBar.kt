@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
@@ -28,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
 import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
 import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -274,13 +277,22 @@ private fun GlassButtonSurface(
                     )
                 } else {
                     Modifier
-                        .clip(shape)
+                        // `clip` would cut a rounded rectangle while the stroke and the rim trace
+                        // the shader's supercircle, so the corners would disagree.
+                        .then(
+                            if (isRuntimeShaderSupported()) {
+                                Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                            } else {
+                                Modifier.clip(shape)
+                            },
+                        )
                         .background(fill.copy(alpha = surfaceAlpha.coerceIn(0f, 1f)))
                         .drawWithContent {
                             drawContent()
                             if (stroke != null) {
                                 drawGlassStroke(shape, layoutDirection, stroke, surfaceAlpha)
                             }
+                            drawGlassMask(shape, layoutDirection)
                             drawGlassRim(shape, layoutDirection, style, fill, surfaceAlpha)
                         }
                 },
