@@ -193,13 +193,8 @@ fun GlassNavigationBar(
 
     var barWidth by remember { mutableIntStateOf(0) }
     var pressedIndex by remember { mutableIntStateOf(-1) }
-    // Written by the pointer handler, read only from inside coroutines — never from the composable
-    // body. A drag writes it on every touch event, and a read up here would recompose the whole bar
-    // at touch rate, which is exactly the stutter a drag must not have.
     val dragging = remember { mutableStateOf(false) }
 
-    // Leaving and arriving: the bar scales, and its opacity and its own blur are both read off that
-    // scale, so the surface goes soft exactly as it shrinks. Coming back waits a moment first.
     val showScale = remember { Animatable(if (visible) 1f else GlassMotion.NAV_HIDE_SCALE) }
     LaunchedEffect(visible) {
         if (visible) {
@@ -210,8 +205,6 @@ fun GlassNavigationBar(
         }
     }
 
-    // Written per touch event and read in the layout phase only — never in composition. NaN means
-    // no drag is in progress and the springs own the capsule.
     var dragLeft by remember { mutableFloatStateOf(Float.NaN) }
     var dragWidth by remember { mutableFloatStateOf(0f) }
 
@@ -225,44 +218,26 @@ fun GlassNavigationBar(
 
     LaunchedEffect(targetLeft, targetRight) {
         if (slot <= 0f) return@LaunchedEffect
-        // A drag drives the capsule itself, from the pointer handler. Letting this run as well
-        // would restart both springs on every touch event and fight it.
         if (dragging.value) return@LaunchedEffect
         if (right.value <= left.value) {
             left.snapTo(targetLeft)
             right.snapTo(targetRight)
             return@LaunchedEffect
         }
-        // Both edges on one spring, as the source does: the capsule travels rigidly. Giving the
-        // leading edge a livelier spring than the trailing one stretches it on the way, which looks
-        // good and is not what the system does.
-        // Which edge leads depends on which way the capsule goes, and the trailing one is always
-        // the slower spring. That is what stretches the capsule along its travel.
         val goingRight = targetLeft > left.value
         launch { left.animateTo(targetLeft, GlassMotion.edgeSpring(leading = !goingRight)) }
         launch { right.animateTo(targetRight, GlassMotion.edgeSpring(leading = goingRight)) }
     }
 
-    // The capsule shrinks under a finger, the same fixed sliver every other glass surface loses —
-    // and it is the *capsule* that shrinks, not the destination inside it, which only dims.
     val chipHeldPx = with(density) {
         (height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2).toPx()
     }
     val chipPressed = pressedIndex >= 0
     val chipScale by animateFloatAsState(
-        targetValue = if (!chipPressed || chipHeldPx <= 0f) {
-            1f
-        } else {
-            maxOf(
-                (chipHeldPx - GlassMotion.PRESS_INSET_DP * density.density) / chipHeldPx,
-                GlassMotion.PRESS_SCALE_MIN,
-            )
-        },
+        targetValue = if (chipPressed) glassPressScale(chipHeldPx, density.density) else 1f,
         animationSpec = if (chipPressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
         label = "glassNavigationIndicatorPress",
     )
-    // The fill is sprung, not timed: the press arrives on a fast critically damped spring and
-    // leaves on a slower one, so a tap reads as a press and a release reads as a lift.
     val chipFill by animateColorAsState(
         targetValue = if (chipPressed) indicatorPressedColor else indicatorColor,
         animationSpec = if (chipPressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
@@ -288,14 +263,14 @@ fun GlassNavigationBar(
                     ).dp,
                 edgeTreatment = BlurredEdgeTreatment.Unbounded,
             )
-            .glassShadow(shape, shadow, alpha)
-            .glass(
+            .glassPanel(
                 backdrop = backdrop,
                 shape = shape,
                 style = style,
                 alpha = alpha,
                 material = material,
                 stroke = stroke,
+                shadow = shadow,
             )
             .onSizeChanged { barWidth = it.width }
             .pointerInput(items.size) {
@@ -329,8 +304,6 @@ fun GlassNavigationBar(
                     var current = indexAt(down.position.x)
                     pressedIndex = current
                     onSelectState(current)
-                    // A press is not a drag: the capsule stays on its spring until the finger moves,
-                    // and the grab then keeps its offset rather than centring under the thumb.
                     var grabOffset = Float.NaN
                     while (true) {
                         val event = awaitPointerEvent()
@@ -346,8 +319,6 @@ fun GlassNavigationBar(
                             dragging.value = true
                         }
                         val chipLeft = (change.position.x - grabOffset).coerceIn(minLeft, maxLeft)
-                        // While the capsule is attached the selection follows the *capsule*, not
-                        // the finger. The capsule is what says where the page will land.
                         val next = indexAt(chipLeft + chipW * 0.5f)
                         if (next != current) {
                             current = next
@@ -357,7 +328,6 @@ fun GlassNavigationBar(
                         follow(chipLeft, change.uptimeMillis)
                     }
                     pressedIndex = -1
-                    // A press that never became a drag. The effect above still owns the springs.
                     if (grabOffset.isNaN()) {
                         return@awaitEachGesture
                     }
@@ -429,10 +399,6 @@ fun GlassNavigationBar(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        // Semantics only, never a gesture: the whole bar reads the pointer itself,
-                        // because a destination that consumed its own taps could not be dragged
-                        // through. A screen reader still needs each one to announce as a tab, to
-                        // say which is current, and to be activatable on its own.
                         .semantics(mergeDescendants = true) {
                             this.role = Role.Tab
                             this.selected = selected

@@ -7,7 +7,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -143,9 +142,6 @@ object GlassTabRowDefaults {
         return GlassTabColors(
             selectedContainerColor = selectedContainerColor,
             selectedContentColor = if (isDark) Color.White.copy(alpha = 0.8f) else Color.White,
-            // Composited onto the page rather than left translucent, so nothing reads through a
-            // tab before the material takes over. On a dark page of 17 the source control's
-            // unselected tab measures 33, which is this one layer and no more.
             restingContainerColor = if (isDark) {
                 Color.White.copy(alpha = RestingAlpha).compositeOver(MiuixTheme.colorScheme.surface)
             } else {
@@ -181,9 +177,6 @@ object GlassTabRowDefaults {
     @Composable
     fun neutralColors(): GlassTabColors {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
-        // The resting fill is composited onto the page rather than left translucent. At rest the
-        // row has content passing under it and a six-percent wash would let that read through;
-        // once the material is up the glass takes the job and the fill goes out altogether.
         val page = MiuixTheme.colorScheme.surface
         val fill = (if (isDark) Color.White else Color.Black).copy(alpha = 0.06f).compositeOver(page)
         return GlassTabColors(
@@ -253,8 +246,6 @@ fun GlassTabRow(
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val shape = GlassTabRowDefaults.shape(height)
-    // The material and the resting fill are two ends of one ramp: as the glass comes up the fill
-    // goes out from under it, so the tab never carries both at once.
     val ramp = surfaceAlpha.coerceIn(0f, 1f)
 
     Row(
@@ -270,8 +261,6 @@ fun GlassTabRow(
                 animationSpec = GlassMotion.navContent(),
                 label = "glassTabContainer",
             )
-            // The selected tab keeps its fill through the whole ramp — the source never lets the
-            // current tab go glass. Only the others hand their body over to the material.
             val container = if (selected) target else lerp(colors.restingContainerColor, target, ramp)
             val content by animateColorAsState(
                 targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
@@ -283,9 +272,6 @@ fun GlassTabRow(
                 animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
                 label = "glassTabOverlay",
             )
-            // The rim an unselected tab wears at rest. It hands over to the material's own rim as
-            // the glass comes up, and it leaves on selection at the same rate the fill arrives, so
-            // the tab never shows a rim over a solid pill.
             val rim by animateFloatAsState(
                 targetValue = if (selected) 0f else colors.restingStrokeAlpha,
                 animationSpec = GlassMotion.navContentFloat(),
@@ -295,37 +281,22 @@ fun GlassTabRow(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    // A Row lets its children keep their own height. Without this the tab is only
-                    // as tall as its label plus the padding, and the row height goes unused.
                     .fillMaxHeight()
-                    .then(
-                        if (backdrop == null) {
-                            Modifier.clip(shape)
-                        } else {
-                            Modifier
-                                .glassShadow(shape, shadow, alpha * ramp)
-                                .glass(
-                                    backdrop = backdrop,
-                                    shape = shape,
-                                    style = style,
-                                    alpha = alpha * ramp,
-                                    material = material,
-                                    stroke = stroke,
-                                )
-                        },
+                    .glassPanel(
+                        backdrop = backdrop,
+                        shape = shape,
+                        style = style,
+                        alpha = alpha * ramp,
+                        material = material,
+                        stroke = stroke,
+                        shadow = shadow,
                     )
-                    // Both fills go on inside the material's own clip, so a pill keeps its shape
-                    // and a press reads on the selected tab as well as on the others.
                     .background(container)
                     .background(overlay)
                     .then(
                         if (restingRim > 0.001f) {
                             Modifier.drawWithContent {
                                 drawContent()
-                                // Both passes, the way a glass surface with no backdrop under it is
-                                // built everywhere else in the module. The stroke on its own is
-                                // sub-pixel at this token's width and adds under one level of
-                                // brightness; what the eye reads as the rim is the rim pass.
                                 if (stroke != null) {
                                     drawGlassStroke(shape, layoutDirection, stroke, restingRim)
                                 }
@@ -349,8 +320,6 @@ fun GlassTabRow(
             ) {
                 Text(
                     text = label,
-                    // 14sp, as `filter_sort_tab_view2_text_size` asks. The current tab is set in
-                    // the bold cut of the same size, not in a larger one.
                     style = if (selected) {
                         MiuixTheme.textStyles.subtitle
                     } else {
@@ -492,7 +461,6 @@ fun GlassSegmentedTabRow(
     var trackWidth by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
     val gap = with(density) { GlassSegmentedTabRowDefaults.TabGap.toPx() }
-    // The source animates the indicator's X and its width together, on the default spring.
     val slot = if (trackWidth <= 0) 0f else (trackWidth - gap * (tabs.size - 1)) / tabs.size
     val targetLeft = index * (slot + gap)
     val offset = remember { Animatable(0f) }
@@ -514,8 +482,6 @@ fun GlassSegmentedTabRow(
             .height(height)
             .glassShadow(trackShape, shadow, alpha * ramp)
             .clip(trackShape)
-            // Under the material, not over it: the track hands its body to the glass as the ramp
-            // comes up, the same way each tab of a [GlassTabRow] does.
             .background(trackColor.copy(alpha = trackColor.alpha * (1f - ramp)))
             .glass(
                 backdrop = backdrop,

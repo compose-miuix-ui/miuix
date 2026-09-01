@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +18,22 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.max
 import kotlin.math.min
+
+/**
+ * How far a pressed surface shrinks.
+ *
+ * The source takes a fixed number of pixels off the surface rather than a fixed proportion, so a
+ * small control shrinks proportionally more than a large one, down to a floor.
+ *
+ * @param shorterSidePx The shorter of the surface's two sides, in pixels.
+ * @param density Pixels per dp.
+ */
+@Stable
+fun glassPressScale(shorterSidePx: Float, density: Float): Float = if (shorterSidePx <= 0f) {
+    1f
+} else {
+    max((shorterSidePx - GlassMotion.PRESS_INSET_DP * density) / shorterSidePx, GlassMotion.PRESS_SCALE_MIN)
+}
 
 /**
  * The press feedback the source system gives every tappable surface.
@@ -34,16 +51,8 @@ fun Modifier.glassPress(
     val density = LocalDensity.current.density
     var shorterSide by remember { mutableFloatStateOf(0f) }
 
-    val target = if (!pressed || shorterSide <= 0f) {
-        1f
-    } else {
-        max(
-            (shorterSide - GlassMotion.PRESS_INSET_DP * density) / shorterSide,
-            GlassMotion.PRESS_SCALE_MIN,
-        )
-    }
     val scale by animateFloatAsState(
-        targetValue = target,
+        targetValue = if (pressed) glassPressScale(shorterSide, density) else 1f,
         animationSpec = if (pressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
         label = "glassPress",
     )
