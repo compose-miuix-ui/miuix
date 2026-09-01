@@ -24,8 +24,6 @@ import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.sqrt
 
-// A stroke light's position is relative to this point on the surface; the direction is the vector
-// from here to the light.
 private const val LIGHT_REF_X = 0.5f
 private const val LIGHT_REF_Y = 0.7f
 
@@ -63,7 +61,6 @@ internal fun DrawScope.drawGlassRim(
 ) {
     val shader = rimShader ?: return
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
-    // A fully unshaded style is a flat tinted shape, with no surface for a light to catch.
     if (style.background.unShade >= 0.999f) return
 
     val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
@@ -101,7 +98,6 @@ internal fun DrawScope.drawGlassStroke(
     val shader = strokeShader ?: return
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
 
-    // The stroke's two sizes are pixels at the density the tokens were authored at.
     val sourceScale = density / GlassDefaults.SourceDensity
     val width = (stroke.width * sourceScale).coerceIn(0.5f, size.minDimension * 0.5f)
     val bevel = (stroke.bevel * sourceScale).coerceAtLeast(0.5f)
@@ -224,7 +220,6 @@ internal fun DrawScope.drawGlassShadow(
         color.alpha * alpha,
     )
 
-    // Paint the whole area the shadow can reach, which is well outside the component.
     drawRect(
         brush = shader.asBrush(),
         topLeft = Offset(-reach + offsetX, -reach + offsetY),

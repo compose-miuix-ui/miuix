@@ -53,21 +53,14 @@ internal fun BackdropEffectScope.glassEffect(
     val bottomRight = (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin) / scale
     val bottomLeft = (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin) / scale
 
-    // Source tokens are pixels at GlassDefaults.SourceDensity; rescale them to this display.
     val sourceScale = density / GlassDefaults.SourceDensity
     val edgeFullPx = (style.edge.width * sourceScale).coerceAtLeast(1f)
     val tintColor = if (tint.isSpecified) tint else style.inner.tint
     val tintStrength = if (tint.isSpecified) tint.alpha else style.inner.tintStrength
 
-    // The wide sample stands in for a second, far wider blur. Its reach is the token's radius,
-    // trimmed to what the recorded layer actually holds — one axis at a time, because a bar is
-    // wide and shallow and a disc trimmed to its shorter side would read almost nothing.
     val wideReach = style.blur.big * sourceScale / scale
     val wideRadiusX = min(wideReach, textureWidth * 0.5f)
     val wideRadiusY = min(wideReach, textureHeight * 0.5f)
-    // How far the sample collapses onto the surface's centre. At the source's radii the second
-    // blur is wider than any ordinary surface, so it delivers one colour to the whole of it; only
-    // a surface larger than the reach sees that colour vary across it.
     val wideCollapse = (wideReach / (max(width, height) * 0.5f / scale).coerceAtLeast(1f))
         .coerceIn(0f, 1f)
 
@@ -156,14 +149,9 @@ internal fun BackdropEffectScope.colorBlendEffect(material: GlassMaterial) {
             val color = layer.color
             setFloatUniform("in_blend$index", color.red, color.green, color.blue, color.alpha)
         }
-        // Slots past the end are never read — in_blendMode.w stops the shader short — but a
-        // uniform left unset is a link error, so every slot still gets a value.
         for (index in layers.size until 3) {
             setFloatUniform("in_blend$index", 0f, 0f, 0f, 0f)
         }
-        // Read off the compacted list, not off the slots. A material with a gap in it —
-        // `second = null` and a `third` — is legal to construct, and taking the modes from the
-        // slots would then pair the third layer's colour with the first layer's blend mode.
         setFloatUniform(
             "in_blendMode",
             layers[0].mode.id,

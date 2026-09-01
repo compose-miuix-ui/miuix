@@ -11,7 +11,6 @@ import kotlin.math.sqrt
  */
 internal const val TILE_SCALE = 1.5286649465560913f
 
-// Coefficients of the quartic that fits the continuous corner, read by GLASS_SHADER.
 internal const val FIT_4 = -0.7391197269f
 internal const val FIT_3 = 2.4034927648f
 internal const val FIT_2 = -2.4907319173f
