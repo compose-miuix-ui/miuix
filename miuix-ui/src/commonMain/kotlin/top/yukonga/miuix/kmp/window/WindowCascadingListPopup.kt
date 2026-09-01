@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.window
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -38,6 +39,9 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param minWidth Minimum width of the popup.
  * @param dropdownColors Colors used by every row.
  * @param collapseOnSelection When true, selecting any leaf dismisses the popup.
+ * @param surface Paints the panel's body, given the silhouette it must fill. `null` uses the plain
+ *   shadow and fill. A material library hands its own surface in here rather than reimplementing
+ *   the popup.
  */
 @Composable
 fun WindowCascadingListPopup(
@@ -53,6 +57,7 @@ fun WindowCascadingListPopup(
     minWidth: Dp = 200.dp,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
 ) {
     val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
 
@@ -82,5 +87,6 @@ fun WindowCascadingListPopup(
         minWidth = minWidth,
         dropdownColors = dropdownColors,
         collapseOnSelection = collapseOnSelection,
+        surface = surface,
     )
 }

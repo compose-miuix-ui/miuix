@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.DropdownColors
@@ -38,6 +39,9 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
  * @param renderInRootScaffold Whether to render in the outermost Scaffold.
  * @param dropdownColors Colors used by every row.
  * @param collapseOnSelection When true, selecting any leaf dismisses the popup.
+ * @param surface Paints the panel's body, given the silhouette it must fill. `null` uses the plain
+ *   shadow and fill. A material library hands its own surface in here rather than reimplementing
+ *   the popup.
  */
 @Composable
 fun OverlayCascadingListPopup(
@@ -54,6 +58,7 @@ fun OverlayCascadingListPopup(
     renderInRootScaffold: Boolean = true,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
 ) {
     CascadingListPopupLayout(
         show = show,
@@ -82,5 +87,6 @@ fun OverlayCascadingListPopup(
         minWidth = minWidth,
         dropdownColors = dropdownColors,
         collapseOnSelection = collapseOnSelection,
+        surface = surface,
     )
 }

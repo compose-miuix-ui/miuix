@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
@@ -37,6 +38,7 @@ fun OverlayIconCascadingDropdownMenu(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
@@ -53,6 +55,7 @@ fun OverlayIconCascadingDropdownMenu(
         dropdownColors = dropdownColors,
         renderInRootScaffold = renderInRootScaffold,
         collapseOnSelection = collapseOnSelection,
+        surface = surface,
         onExpandedChange = onExpandedChange,
         backgroundColor = backgroundColor,
         cornerRadius = cornerRadius,
@@ -78,6 +81,7 @@ fun OverlayIconCascadingDropdownMenu(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
@@ -134,6 +138,7 @@ fun OverlayIconCascadingDropdownMenu(
                 dropdownColors = dropdownColors,
                 renderInRootScaffold = renderInRootScaffold,
                 collapseOnSelection = collapseOnSelection,
+                surface = surface,
             )
         }
     }

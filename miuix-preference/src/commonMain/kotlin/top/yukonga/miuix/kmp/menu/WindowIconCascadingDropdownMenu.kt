@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
@@ -36,6 +37,7 @@ fun WindowIconCascadingDropdownMenu(
     maxHeight: Dp? = null,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
@@ -51,6 +53,7 @@ fun WindowIconCascadingDropdownMenu(
         maxHeight = maxHeight,
         dropdownColors = dropdownColors,
         collapseOnSelection = collapseOnSelection,
+        surface = surface,
         onExpandedChange = onExpandedChange,
         backgroundColor = backgroundColor,
         cornerRadius = cornerRadius,
@@ -75,6 +78,7 @@ fun WindowIconCascadingDropdownMenu(
     maxHeight: Dp? = null,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
+    surface: (@Composable (Shape) -> Modifier)? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
@@ -130,6 +134,7 @@ fun WindowIconCascadingDropdownMenu(
                 maxHeight = maxHeight,
                 dropdownColors = dropdownColors,
                 collapseOnSelection = collapseOnSelection,
+                surface = surface,
             )
         }
     }
