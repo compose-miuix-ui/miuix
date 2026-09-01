@@ -55,5 +55,8 @@ kotlin {
             api(projects.miuixUi)
             implementation(libs.jetbrains.compose.foundation)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

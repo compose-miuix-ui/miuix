@@ -3,7 +3,9 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -69,7 +71,7 @@ class GlassPopupAnchor {
      * watched all the way home. A control that sits in the page instead has its panel fade with the
      * icon, and the panel is gone well before the spring has settled.
      */
-    internal var floating: Boolean by mutableStateOf(true)
+    internal var floating: Boolean by mutableStateOf(false)
 
     /**
      * Whether the control is standing aside for the menu.
@@ -114,14 +116,14 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
  *
  * @param anchor The anchor to report to.
  * @param cornerRadius The control's own corner radius. Half the control's height, for a pill.
- * @param floating Whether the control floats over its page. A glass pill in a bar does, and its
- *   panel is then drawn at full strength for the whole journey instead of fading with the icon.
+ * @param floating Whether the control floats over its page. A floating control keeps its panel at
+ *   full strength for the whole journey instead of fading it with the control's contents.
  */
 @Stable
 fun Modifier.glassPopupAnchor(
     anchor: GlassPopupAnchor,
     cornerRadius: Dp,
-    floating: Boolean = true,
+    floating: Boolean = false,
 ): Modifier = this
     .onGloballyPositioned {
         anchor.containerBounds = it.boundsInRoot()
@@ -189,6 +191,10 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  * @param anchorContent A copy of the control — its background as well as its icon, unless
  *   [glassPopupAnchorContent] named a smaller part.
  * @param modifier The modifier applied to the panel.
+ * @param simplified Whether the control's contents stay out of the opening transform. Overflow
+ *   buttons use this because their compact glyph should hand directly to the panel instead of
+ *   growing to the panel's width before it fades. The contents still join the reverse transform
+ *   so the glyph travels back into the control when the panel closes.
  * @param stacked Whether a second menu stands in front of this one. It shrinks and takes a wash,
  *   which is what the source does when a submenu opens over a menu.
  * @param maskColor The wash laid over it while [stacked].
@@ -211,6 +217,7 @@ fun BoxScope.GlassTransformPopup(
     backdrop: Backdrop?,
     anchorContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    simplified: Boolean = false,
     stacked: Boolean = false,
     sizing: GlassPopupSizing = GlassPopupSizing(),
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
@@ -222,33 +229,30 @@ fun BoxScope.GlassTransformPopup(
     onMeasured: ((Size) -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val bounds by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformBounds(show),
+    val transition = updateTransition(show, label = "glassTransformPopup")
+    val bounds by transition.animateFloat(
+        transitionSpec = { GlassMotion.transformBounds(targetState) },
         label = "glassTransformBounds",
-    )
-    val center by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformCenter(show),
+    ) { if (it) 1f else 0f }
+    val center by transition.animateFloat(
+        transitionSpec = { GlassMotion.transformCenter(targetState) },
         label = "glassTransformCenter",
-    )
-    val iconMaterial by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformIconMaterial(show),
+    ) { if (it) 1f else 0f }
+    val iconMaterial by transition.animateFloat(
+        transitionSpec = { GlassMotion.transformIconMaterial(targetState) },
         label = "glassTransformIcon",
-    )
-    val contentMaterial by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformContentMaterial(show),
+    ) { if (it) 1f else 0f }
+    val contentMaterial by transition.animateFloat(
+        transitionSpec = { GlassMotion.transformContentMaterial(targetState) },
         label = "glassTransformContent",
-    )
+    ) { if (it) 1f else 0f }
 
     val pushedBack by animateFloatAsState(
         targetValue = if (stacked) 1f else 0f,
         animationSpec = CascadingPopupDefaults.expandSpring(stacked),
         label = "glassTransformStacked",
     )
-    val active = show || bounds > 0.0001f
+    val active = show || transition.currentState || transition.isRunning
     DisposableEffect(active, anchor) {
         anchor.contentHidden = active
         onDispose { anchor.contentHidden = false }
@@ -258,11 +262,15 @@ fun BoxScope.GlassTransformPopup(
     val startRect = anchor.containerBounds
     val iconRect = anchor.contentBounds.takeUnless { it.isEmpty } ?: startRect
     val startRadius = anchor.cornerRadius
-    val surfaceAlpha = visuals.alpha * if (anchor.floating) {
-        lerp(anchorAlpha, 1f, bounds.coerceIn(0f, 1f))
-    } else {
-        iconMaterial
-    }
+    val geometryProgress = bounds
+    val centerProgress = center
+    val panelAlpha = transformPanelAlpha(
+        visualAlpha = visuals.alpha,
+        floating = anchor.floating,
+        anchorAlpha = anchorAlpha,
+        geometryProgress = geometryProgress,
+        iconMaterial = iconMaterial,
+    )
     val travel = remember { TransformTravel() }
 
     GlassPopupSurface(
@@ -270,10 +278,11 @@ fun BoxScope.GlassTransformPopup(
         backdrop = backdrop,
         modifier = modifier,
         sizing = sizing,
-        visuals = visuals.copy(alpha = surfaceAlpha),
+        visuals = visuals.copy(alpha = 1f),
         contentPadding = contentPadding,
         onMeasured = onMeasured,
         panelLayer = {
+            alpha = panelAlpha
             val s = 1f + (CascadingPopupDefaults.PrimaryShrunkScale - 1f) * pushedBack
             scaleX = s
             scaleY = s
@@ -288,8 +297,8 @@ fun BoxScope.GlassTransformPopup(
                 page = page,
                 margin = sizing.safeMargin.toPx(),
                 gap = gap.toPx(),
-                sizeFraction = bounds,
-                positionFraction = center,
+                sizeFraction = geometryProgress,
+                positionFraction = centerProgress,
                 startRadius = startRadius,
                 endRadius = cornerRadius,
             )
@@ -300,7 +309,7 @@ fun BoxScope.GlassTransformPopup(
             frame
         },
         contentLayer = { end, _ ->
-            val width = startRect.width + (end.width - startRect.width) * bounds
+            val width = startRect.width + (end.width - startRect.width) * geometryProgress
             val scale = if (end.width > 0f) (width / end.width).coerceAtMost(1f) else 1f
             scaleX = scale
             scaleY = scale
@@ -311,7 +320,7 @@ fun BoxScope.GlassTransformPopup(
         content = content,
     )
 
-    if (iconMaterial < 0.999f) {
+    if (shouldRenderAnchorContent(simplified, show) && iconMaterial < 0.999f) {
         Box(
             modifier = Modifier
                 .layout { measurable, constraints ->
@@ -326,9 +335,9 @@ fun BoxScope.GlassTransformPopup(
                     }
                 }
                 .graphicsLayer {
-                    translationX = (travel.endCenterX - startRect.center.x) * center
-                    translationY = (travel.endCenterY - startRect.center.y) * center
-                    val width = startRect.width + (travel.endWidth - startRect.width) * bounds
+                    translationX = (travel.endCenterX - startRect.center.x) * centerProgress
+                    translationY = (travel.endCenterY - startRect.center.y) * centerProgress
+                    val width = startRect.width + (travel.endWidth - startRect.width) * geometryProgress
                     val growth = if (startRect.width > 0f) width / startRect.width else 1f
                     scaleX = growth
                     scaleY = growth
@@ -340,6 +349,22 @@ fun BoxScope.GlassTransformPopup(
             content = { anchorContent() },
         )
     }
+}
+
+/** A simplified anchor skips the outgoing copy, but still receives it on the way home. */
+internal fun shouldRenderAnchorContent(simplified: Boolean, show: Boolean): Boolean = !simplified || !show
+
+/** Matches `TransformAnimation.updateFloatingAlpha()` on the popup's whole container view. */
+internal fun transformPanelAlpha(
+    visualAlpha: Float,
+    floating: Boolean,
+    anchorAlpha: Float,
+    geometryProgress: Float,
+    iconMaterial: Float,
+): Float = visualAlpha * if (floating) {
+    lerp(anchorAlpha, 1f, geometryProgress.coerceIn(0f, 1f))
+} else {
+    iconMaterial
 }
 
 /** The panel's rectangle partway from the control's own to the menu's. */

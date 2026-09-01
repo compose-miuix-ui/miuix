@@ -245,7 +245,11 @@ fun GlassPage(padding: PaddingValues) {
                     actions = {
                         GlassIconButton(
                             onClick = { overlayIndex = OVERLAY_POPUP },
-                            modifier = Modifier.glassPopupAnchor(menuAnchor, GlassTopAppBarDefaults.ButtonSize / 2),
+                            modifier = Modifier.glassPopupAnchor(
+                                anchor = menuAnchor,
+                                cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
+                                floating = collapseRamp > 0.01f,
+                            ),
                             surfaceAlpha = collapseRamp * alpha,
                             style = style,
                             stroke = stroke,

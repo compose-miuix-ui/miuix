@@ -142,7 +142,7 @@ fun GlassTopAppBar(
     buttonShape: GlassShape = GlassShape(buttonSize / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
     stroke: GlassStroke? = null,
-    buttonShadow: GlassShadow? = GlassShadows.Float,
+    buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -215,7 +215,7 @@ fun GlassIconButton(
     shape: GlassShape = GlassShape(size / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
     stroke: GlassStroke? = null,
-    shadow: GlassShadow? = GlassShadows.Float,
+    shadow: GlassShadow? = GlassShadows.Regular,
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }

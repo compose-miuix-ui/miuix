@@ -33,6 +33,14 @@ object GlassMotion {
         return folmeSpring(damping, response)
     }
 
+    /** A transform spring with Folme's `ValueTarget` settle threshold instead of Compose's. */
+    @Stable
+    private fun transformSpring(damping: Float, response: Float): SpringSpec<Float> = folmeSpring(
+        damping = damping,
+        response = response,
+        visibilityThreshold = TRANSFORM_VISIBILITY_THRESHOLD,
+    )
+
     /**
      * The spring the leading edge of the bottom bar's capsule travels on.
      *
@@ -196,7 +204,11 @@ object GlassMotion {
      * @param entering Whether the menu is opening.
      */
     @Stable
-    fun <T> transformBounds(entering: Boolean): SpringSpec<T> = if (entering) springOf(0.8f, 0.4f) else springOf(0.8f, 0.28f)
+    fun transformBounds(entering: Boolean): SpringSpec<Float> = if (entering) {
+        transformSpring(0.8f, 0.4f)
+    } else {
+        transformSpring(0.8f, 0.28f)
+    }
 
     /**
      * The spring the *centre* of that panel travels on.
@@ -207,7 +219,11 @@ object GlassMotion {
      * @param entering Whether the menu is opening.
      */
     @Stable
-    fun <T> transformCenter(entering: Boolean): SpringSpec<T> = if (entering) springOf(0.8f, 0.25f) else springOf(0.8f, 0.4f)
+    fun transformCenter(entering: Boolean): SpringSpec<Float> = if (entering) {
+        transformSpring(0.8f, 0.25f)
+    } else {
+        transformSpring(0.8f, 0.4f)
+    }
 
     /**
      * The ramp the control's own contents dissolve out on as the panel takes over.
@@ -247,6 +263,9 @@ object GlassMotion {
      * that is what the source looks like.
      */
     const val TRANSFORM_BLUR_PX: Float = 50f
+
+    /** Folme `ValueTarget`: `0.002` minimum visible change times its `0.75` multiplier. */
+    internal const val TRANSFORM_VISIBILITY_THRESHOLD: Float = 0.0015f
 
     /** Width a menu opens from, as a fraction of the width it settles at. */
     const val POPUP_START_WIDTH: Float = 0.15f
