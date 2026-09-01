@@ -834,8 +834,8 @@ private fun TopAppBarLayout(
                     Modifier
                 },
             )
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .clipToBounds()
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
             },
@@ -1059,8 +1059,8 @@ private fun SmallTopAppBarLayout(
                     Modifier
                 },
             )
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .clipToBounds()
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
             },
