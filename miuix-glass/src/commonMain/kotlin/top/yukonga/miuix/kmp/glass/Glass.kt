@@ -40,6 +40,11 @@ import top.yukonga.miuix.kmp.glass.internal.glassEffect
  * @param stroke Optional bloom stroke traced along the rim. `null` skips it.
  * @param contentBlendMode How this composable's content composites over the glass.
  * @param enabled Whether the material is active. When false the content draws on its own.
+ * @param shading Whether the surface is glass on top of its material. The source system declares a
+ *   surface one way or the other and never both: a bar or a menu is a material token — a blur, the
+ *   colour layers over it, a rim and a shadow — while a control is a glass token that refracts and
+ *   shades what it stands on. `false` leaves the colour layers as the whole body, which is what a
+ *   menu wants; the style's own tint is a shading value and would otherwise grey the panel.
  */
 fun Modifier.glass(
     backdrop: Backdrop,
@@ -52,28 +57,23 @@ fun Modifier.glass(
     stroke: GlassStroke? = null,
     contentBlendMode: BlendMode = BlendMode.SrcOver,
     enabled: Boolean = true,
+    shading: Boolean = true,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
     shape = { shape },
     effects = {
         noiseDither(noiseCoefficient)
-        // blur() sets the padding and the downscale factor that glassEffect divides its pixel
-        // uniforms by, so it has to run first.
         val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
         blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
-        // The tone goes on between the blur and the glass, not after it. The glass refracts
-        // whatever the pipeline hands it, and a rim that bends the raw page instead of the toned
-        // panel shows the page through its own edge.
         if (material != null) colorBlendEffect(material)
-        glassEffect(style, shape, alpha, tint)
+        if (shading) glassEffect(style, shape, alpha, tint)
     },
-    // The rim, the hairline and the silhouette are all drawn at full resolution, last. None of the
-    // three survives the backdrop layer's downscale: a rim a few pixels wide comes back as a dome,
-    // a hairline comes back as a smear, and a corner comes back as a staircase.
     onDrawFront = {
         if (stroke != null) drawGlassStroke(shape, layoutDirection, stroke, alpha)
         drawGlassMask(shape, layoutDirection)
-        drawGlassRim(shape, layoutDirection, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+        if (shading) {
+            drawGlassRim(shape, layoutDirection, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+        }
     },
     contentBlendMode = contentBlendMode,
     enabled = enabled,
