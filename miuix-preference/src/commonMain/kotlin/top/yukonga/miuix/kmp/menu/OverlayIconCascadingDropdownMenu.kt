@@ -23,11 +23,8 @@ import top.yukonga.miuix.kmp.basic.IconButtonDefaults
 import top.yukonga.miuix.kmp.overlay.OverlayCascadingListPopup
 
 /**
- * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for a single [DropdownEntry].
- *
- * Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu
- * triggers; cascading depth is limited to 2. Keep the entry and item order stable while the menu is
- * shown; item state such as [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
+ * An [IconButton] wrapper that opens a cascading popup for one [DropdownEntry], using the popup's
+ * default solid fill and shadow.
  */
 @Composable
 fun OverlayIconCascadingDropdownMenu(
@@ -38,7 +35,53 @@ fun OverlayIconCascadingDropdownMenu(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
-    surface: (@Composable (Shape) -> Modifier)? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    backgroundColor: Color = Color.Unspecified,
+    cornerRadius: Dp = IconButtonDefaults.CornerRadius,
+    minHeight: Dp = IconButtonDefaults.MinHeight,
+    minWidth: Dp = IconButtonDefaults.MinWidth,
+    content: @Composable () -> Unit,
+) {
+    OverlayIconCascadingDropdownMenu(
+        entry = entry,
+        modifier = modifier,
+        enabled = enabled,
+        maxHeight = maxHeight,
+        dropdownColors = dropdownColors,
+        renderInRootScaffold = renderInRootScaffold,
+        collapseOnSelection = collapseOnSelection,
+        surface = null,
+        onExpandedChange = onExpandedChange,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        minHeight = minHeight,
+        minWidth = minWidth,
+        content = content,
+    )
+}
+
+/**
+ * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for one [DropdownEntry], with a
+ * caller-provided panel surface. Pass `glassSurface(...)` from `miuix-glass` to give this popup the
+ * OS4 glass material.
+ *
+ * Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu
+ * triggers; cascading depth is limited to 2. Keep the entry and item order stable while the menu is
+ * shown; item state such as [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
+ *
+ * @param surface Paints the popup panel, given the silhouette it must fill. Pass `null` explicitly
+ *   to use the default shadow and fill.
+ */
+@Composable
+fun OverlayIconCascadingDropdownMenu(
+    entry: DropdownEntry,
+    surface: (@Composable (Shape) -> Modifier)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    maxHeight: Dp? = null,
+    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
+    renderInRootScaffold: Boolean = true,
+    collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
@@ -66,11 +109,8 @@ fun OverlayIconCascadingDropdownMenu(
 }
 
 /**
- * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for one or more
- * [DropdownEntry] groups. Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is
- * non-empty become submenu triggers; cascading depth is limited to 2. Keep the entry and item order
- * stable while the menu is shown; item state such as
- * [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
+ * An [IconButton] wrapper that opens a cascading popup for [DropdownEntry] groups, using the
+ * popup's default solid fill and shadow.
  */
 @Composable
 fun OverlayIconCascadingDropdownMenu(
@@ -81,7 +121,53 @@ fun OverlayIconCascadingDropdownMenu(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
-    surface: (@Composable (Shape) -> Modifier)? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    backgroundColor: Color = Color.Unspecified,
+    cornerRadius: Dp = IconButtonDefaults.CornerRadius,
+    minHeight: Dp = IconButtonDefaults.MinHeight,
+    minWidth: Dp = IconButtonDefaults.MinWidth,
+    content: @Composable () -> Unit,
+) {
+    OverlayIconCascadingDropdownMenu(
+        entries = entries,
+        modifier = modifier,
+        enabled = enabled,
+        maxHeight = maxHeight,
+        dropdownColors = dropdownColors,
+        renderInRootScaffold = renderInRootScaffold,
+        collapseOnSelection = collapseOnSelection,
+        surface = null,
+        onExpandedChange = onExpandedChange,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        minHeight = minHeight,
+        minWidth = minWidth,
+        content = content,
+    )
+}
+
+/**
+ * An [IconButton] wrapper that opens an [OverlayCascadingListPopup] for one or more
+ * [DropdownEntry] groups, with a caller-provided panel surface. Pass `glassSurface(...)` from
+ * `miuix-glass` to give this popup the OS4 glass material. Items whose
+ * [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu triggers;
+ * cascading depth is limited to 2. Keep the entry and item order stable while the menu is shown;
+ * item state such as
+ * [top.yukonga.miuix.kmp.basic.DropdownItem.selected] may change.
+ *
+ * @param surface Paints the popup panel, given the silhouette it must fill. Pass `null` explicitly
+ *   to use the default shadow and fill.
+ */
+@Composable
+fun OverlayIconCascadingDropdownMenu(
+    entries: List<DropdownEntry>,
+    surface: (@Composable (Shape) -> Modifier)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    maxHeight: Dp? = null,
+    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
+    renderInRootScaffold: Boolean = true,
+    collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
     cornerRadius: Dp = IconButtonDefaults.CornerRadius,
