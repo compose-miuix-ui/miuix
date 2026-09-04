@@ -26,8 +26,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
@@ -162,7 +162,7 @@ fun GlassTopAppBar(
                 }
                 .background(bandBrush),
         )
-        TopAppBar(
+        BlurTopAppBar(
             title = title,
             largeTitle = largeTitle,
             largeTitleBlurRadius = largeTitleBlurRadius,
