@@ -26,8 +26,8 @@ data class GlassStrokeLight(
 /**
  * The lit edge along a glass silhouette.
  *
- * @property width Width of the flat stroke band.
- * @property bevel Depth of the shaded bevel the lights ride. About a pixel.
+ * @property width Width of the flat stroke band, in dp.
+ * @property bevel Depth of the shaded bevel the lights ride, in dp.
  * @property color The flat stroke's colour. Its alpha is the strength.
  * @property primary The first light. Every stock stroke puts it up and to the left.
  * @property secondary The second light, opposite the first.

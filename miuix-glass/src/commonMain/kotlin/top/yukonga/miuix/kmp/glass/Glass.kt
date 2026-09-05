@@ -13,6 +13,7 @@ import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
 import top.yukonga.miuix.kmp.blur.noiseDither
+import top.yukonga.miuix.kmp.glass.internal.GLASS_COLOR_BLEND_SHADER_KEY
 import top.yukonga.miuix.kmp.glass.internal.colorBlendEffect
 import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
 import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
@@ -29,7 +30,9 @@ import top.yukonga.miuix.kmp.glass.internal.glassEffect
  * @param shape The silhouette. It drives the layer clip, the [stroke] and the shader, so all
  *   three agree.
  * @param style The material. Pick one from [GlassStyles] or start from [GlassDefaults.style].
- * @param alpha Opacity multiplier folded into the material's own opacity.
+ * @param alpha Opacity multiplier folded into the material's colour layers, shading and stroke.
+ *   The backdrop blur stays allocated while [enabled] is true so an animated alpha does not switch
+ *   render paths halfway through its transition.
  * @param tint Overrides [GlassInner.tint]. Its alpha replaces the style's tint strength.
  *   [Color.Unspecified], the default, keeps the style's own tint.
  * @param material The panel's own body: a blur radius and the colour layers that go over it. It
@@ -58,6 +61,59 @@ fun Modifier.glass(
     contentBlendMode: BlendMode = BlendMode.SrcOver,
     enabled: Boolean = true,
     shading: Boolean = true,
+): Modifier = glassImpl(
+    backdrop = backdrop,
+    shape = shape,
+    style = style,
+    alpha = alpha,
+    tint = tint,
+    material = material,
+    underlayMaterial = null,
+    noiseCoefficient = noiseCoefficient,
+    stroke = stroke,
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+    shading = shading,
+)
+
+/** Applies a child material over the OS4 action bar's already blurred and colour-treated surface. */
+internal fun Modifier.glassOnActionBar(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle,
+    alpha: Float,
+    material: GlassMaterial?,
+    underlayMaterial: GlassMaterial,
+    stroke: GlassStroke?,
+    enabled: Boolean = true,
+): Modifier = glassImpl(
+    backdrop = backdrop,
+    shape = shape,
+    style = style,
+    alpha = alpha,
+    tint = Color.Unspecified,
+    material = material,
+    underlayMaterial = underlayMaterial,
+    noiseCoefficient = GlassDefaults.NoiseCoefficient,
+    stroke = stroke,
+    contentBlendMode = BlendMode.SrcOver,
+    enabled = enabled,
+    shading = false,
+)
+
+private fun Modifier.glassImpl(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle,
+    alpha: Float,
+    tint: Color,
+    material: GlassMaterial?,
+    underlayMaterial: GlassMaterial?,
+    noiseCoefficient: Float,
+    stroke: GlassStroke?,
+    contentBlendMode: BlendMode,
+    enabled: Boolean,
+    shading: Boolean,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
     shape = { shape },
@@ -65,7 +121,10 @@ fun Modifier.glass(
         noiseDither(noiseCoefficient)
         val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
         blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
-        if (material != null) colorBlendEffect(material)
+        if (underlayMaterial != null) {
+            colorBlendEffect(underlayMaterial, 1f, "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar")
+        }
+        if (material != null) colorBlendEffect(material, alpha)
         if (shading) glassEffect(style, shape, alpha, tint)
     },
     onDrawFront = {

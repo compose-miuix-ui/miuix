@@ -55,6 +55,9 @@ import kotlin.math.roundToInt
 @Stable
 class GlassPopupAnchor {
 
+    /** Material supplied by an attached glass button, including its resolved backdrop. */
+    internal var surface: GlassAnchorSurface? by mutableStateOf(null)
+
     /** The control's outer bounds, in the root's coordinate space. */
     internal var containerBounds: Rect by mutableStateOf(Rect.Zero)
 
@@ -88,6 +91,19 @@ class GlassPopupAnchor {
     internal var valueAlpha: Float by mutableFloatStateOf(1f)
 }
 
+/** The sampling and colour treatment shared by a glass button and its transforming menu. */
+internal data class GlassAnchorSurface(
+    val backdrop: Backdrop?,
+    val style: GlassStyle,
+    val material: GlassMaterial,
+    val underlayMaterial: GlassMaterial?,
+    val stroke: GlassStroke?,
+    val fill: Color,
+)
+
+/** Marks the button's modifier so its renderer can publish the actual surface to this anchor. */
+internal data class GlassPopupAnchorElement(val anchor: GlassPopupAnchor) : Modifier.Element
+
 /**
  * Remembers a [GlassPopupAnchor].
  *
@@ -113,6 +129,8 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
  * Put this on the control's outermost node — the pill, not the icon inside it. The panel begins
  * life as exactly this rectangle, with this corner radius, so the control itself has to go: two of
  * it would be drawn otherwise. It comes back when the panel has shrunk into it again.
+ * On [GlassIconButton], this also shares the button's backdrop, blur and colour treatment with
+ * [GlassTransformPopup], including the action bar's parent material when present.
  *
  * @param anchor The anchor to report to.
  * @param cornerRadius The control's own corner radius. Half the control's height, for a pill.
@@ -125,6 +143,7 @@ fun Modifier.glassPopupAnchor(
     cornerRadius: Dp,
     floating: Boolean = false,
 ): Modifier = this
+    .then(GlassPopupAnchorElement(anchor))
     .onGloballyPositioned {
         anchor.containerBounds = it.boundsInRoot()
         anchor.cornerRadius = cornerRadius
@@ -187,7 +206,9 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  * @param show Whether the menu is open.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchor The control the menu grows out of.
- * @param backdrop The [Backdrop] behind the glass. `null` falls back to an opaque fill.
+ * @param backdrop The [Backdrop] behind the glass when the anchor has no shared button surface.
+ *   A [GlassIconButton] anchor supplies its own resolved backdrop, including a null fallback.
+ *   With no backdrop, the panel retains its configured bloom stroke and Compose shadow.
  * @param anchorContent A copy of the control — its background as well as its icon, unless
  *   [glassPopupAnchorContent] named a smaller part.
  * @param modifier The modifier applied to the panel.
@@ -199,7 +220,8 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  *   which is what the source does when a submenu opens over a menu.
  * @param maskColor The wash laid over it while [stacked].
  * @param sizing How wide and tall the panel may be.
- * @param visuals What its surface is made of.
+ * @param visuals The panel's appearance. A [GlassIconButton] anchor overrides the style, material,
+ *   stroke and fallback colour with its own; popup opacity and shadow still come from [visuals].
  * @param anchorAlpha Opacity the control's own background has right now, so a bar control whose bar
  *   has not collapsed does not have a pill appear under it out of nothing.
  * @param cornerRadius Corner radius the panel settles at.
@@ -259,6 +281,18 @@ fun BoxScope.GlassTransformPopup(
     }
     if (!active) return
 
+    val anchorSurface = anchor.surface
+    val resolvedVisuals = if (anchorSurface != null) {
+        visuals.copy(
+            style = anchorSurface.style,
+            material = anchorSurface.material,
+            stroke = anchorSurface.stroke,
+            containerColor = anchorSurface.fill,
+        )
+    } else {
+        visuals
+    }
+
     val startRect = anchor.containerBounds
     val iconRect = anchor.contentBounds.takeUnless { it.isEmpty } ?: startRect
     val startRadius = anchor.cornerRadius
@@ -275,10 +309,11 @@ fun BoxScope.GlassTransformPopup(
 
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
-        backdrop = backdrop,
+        backdrop = if (anchorSurface != null) anchorSurface.backdrop else backdrop,
         modifier = modifier,
         sizing = sizing,
-        visuals = visuals.copy(alpha = 1f),
+        visuals = resolvedVisuals.copy(alpha = 1f),
+        underlayMaterial = anchorSurface?.underlayMaterial,
         contentPadding = contentPadding,
         onMeasured = onMeasured,
         panelLayer = {

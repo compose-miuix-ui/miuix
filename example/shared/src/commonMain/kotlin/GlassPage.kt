@@ -235,10 +235,10 @@ fun GlassPage(padding: PaddingValues) {
             topBar = {
                 GlassTopAppBar(
                     title = "Glass",
+                    backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     style = style,
                     alpha = alpha,
-                    stroke = stroke,
                     navigationIcon = {
                         Icon(
                             imageVector = MiuixIcons.Back,
@@ -257,9 +257,6 @@ fun GlassPage(padding: PaddingValues) {
                                 cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
                                 floating = collapseRamp > 0.01f,
                             ),
-                            surfaceAlpha = collapseRamp * alpha,
-                            style = style,
-                            stroke = stroke,
                         ) {
                             Icon(
                                 imageVector = MiuixIcons.Settings,

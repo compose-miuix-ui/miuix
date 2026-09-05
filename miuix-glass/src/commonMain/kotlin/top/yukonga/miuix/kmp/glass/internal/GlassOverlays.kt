@@ -98,9 +98,10 @@ internal fun DrawScope.drawGlassStroke(
     val shader = strokeShader ?: return
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
 
-    val sourceScale = density / GlassDefaults.SourceDensity
-    val width = (stroke.width * sourceScale).coerceIn(0.5f, size.minDimension * 0.5f)
-    val bevel = (stroke.bevel * sourceScale).coerceAtLeast(0.5f)
+    // setBloomStrokeConfig uses the scalar setBloomStrokeWithDp overload, which retains
+    // the half-pixel bias instead of rounding to an integer like the array overload.
+    val width = (stroke.width * density + 0.5f).coerceIn(0.5f, size.minDimension * 0.5f)
+    val bevel = (stroke.bevel * density + 0.5f).coerceAtLeast(0.5f)
 
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
     shader.setFloatUniform("in_halfViewFloor", floor(size.width * 0.5f), floor(size.height * 0.5f))
@@ -110,9 +111,6 @@ internal fun DrawScope.drawGlassStroke(
     shader.setFloatUniform("in_strokeAlpha", alpha)
     shader.setLightUniforms("in_light1", "in_light1Color", stroke.primary)
     shader.setLightUniforms("in_light2", "in_light2Color", stroke.secondary)
-    val axis1 = lightAxis(stroke.primary, fallbackY = -1f)
-    val axis2 = lightAxis(stroke.secondary, fallbackY = 1f)
-    shader.setFloatUniform("in_axis", axis1.first, axis1.second, axis2.first, axis2.second)
 
     drawRect(brush = shader.asBrush(), blendMode = BlendMode.Plus)
 }
@@ -167,19 +165,6 @@ private fun RuntimeShader.setLightUniforms(
     val length = sqrt(dx * dx + dy * dy + dz * dz).coerceAtLeast(1e-6f)
     setFloatUniform(directionName, dx / length, dy / length, dz / length, light.color.alpha)
     setFloatUniform(colorName, light.color.red, light.color.green, light.color.blue, 0f)
-}
-
-/**
- * The axis a light is gated along: the horizontal part of its direction, normalised.
- *
- * @param light The light.
- * @param fallbackY Which half of the rim this light owns when its direction is purely in Z.
- */
-private fun lightAxis(light: GlassStrokeLight, fallbackY: Float): Pair<Float, Float> {
-    val dx = light.x - LIGHT_REF_X
-    val dy = light.y - LIGHT_REF_Y
-    val length = sqrt(dx * dx + dy * dy)
-    return if (length > 1e-3f) dx / length to dy / length else 0f to fallbackY
 }
 
 private val shadowShader: RuntimeShader? by lazy {

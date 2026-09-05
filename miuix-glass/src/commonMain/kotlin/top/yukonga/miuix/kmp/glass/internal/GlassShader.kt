@@ -446,7 +446,6 @@ uniform float4 in_light1;        // direction xyz, intensity
 uniform float4 in_light1Color;   // colour rgb, unused
 uniform float4 in_light2;        // direction xyz, intensity
 uniform float4 in_light2Color;   // colour rgb, unused
-uniform float4 in_axis;          // light 1 axis xy, light 2 axis xy
 
 // The bevel normal. Folded into one quadrant, built there, then unfolded by the sign of the
 // offset — the rim is symmetric, so only a quarter of it has to be reasoned about.
@@ -473,10 +472,10 @@ float3 rimNormal(float2 coord, float2 half2d, float sdf, float radius, float inn
     return normal;
 }
 
-// One light. `axis` restricts it to the side of the rim it belongs to; without that gate a single
-// light would ring the whole shape.
-float3 rimLight(float3 normal, float2 axis, float4 light, float3 color) {
-    float falloff = max(dot(float3(axis, 0.0), normal), 0.0);
+// MiBloomStrokeFilter uses fixed vertical falloff axes, independent of the light positions.
+// Keep the falloff signed: the native shader clamps the product, not either dot separately.
+float3 rimLight(float3 normal, float axisY, float4 light, float3 color) {
+    float falloff = axisY * normal.y;
     float lit = clamp(dot(normal, light.xyz) * falloff, 0.0, 1.0);
     return color * (lit * lit * light.w);
 }
@@ -498,8 +497,8 @@ half4 main(float2 coord) {
     float3 rgb = in_strokeColor.rgb * (in_strokeColor.a * band * band);
 
     float3 normal = rimNormal(coord, half2d, sdf, radius, inner);
-    rgb += rimLight(normal, in_axis.xy, in_light1, in_light1Color.rgb);
-    rgb += rimLight(normal, in_axis.zw, in_light2, in_light2Color.rgb);
+    rgb += rimLight(normal, -1.0, in_light1, in_light1Color.rgb);
+    rgb += rimLight(normal, 1.0, in_light2, in_light2Color.rgb);
 
     // Light only: alpha stays at zero so a transparent surface never gains opacity from the rim.
     float coverage = clamp(0.5 - sdf, 0.0, 1.0);

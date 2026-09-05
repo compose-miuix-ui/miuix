@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import kotlin.math.roundToInt
 
 /**
@@ -59,7 +60,7 @@ data class GlassPopupSizing(
  * @property stroke Optional bloom stroke along the rim.
  * @property shadow The shadow the panel casts. `null` removes it.
  * @property material The panel's own body.
- * @property containerColor Fill used when there is no backdrop.
+ * @property containerColor Opaque fill used when there is no backdrop; stroke and shadow remain.
  */
 @Immutable
 data class GlassPopupVisuals(
@@ -129,10 +130,12 @@ internal fun placeGlassPopup(
  * own geometry — [frame] for the panel and [contentLayer] for the rows inside it.
  *
  * @param onDismissRequest Called when a tap outside should close the menu.
- * @param backdrop The [Backdrop] behind the glass. `null` falls back to an opaque fill.
+ * @param backdrop The [Backdrop] behind the glass. `null` uses [GlassPopupVisuals.containerColor]
+ *   while retaining the configured bloom stroke and shadow.
  * @param modifier The modifier applied to the panel.
  * @param sizing How wide and tall the panel may be.
  * @param visuals What its surface is made of.
+ * @param underlayMaterial Parent colour treatment inherited from an action-bar button anchor.
  * @param contentPadding Padding around the rows.
  * @param panelLayer Applied to the panel as a whole: its opacity, its blur, its scale.
  * @param overlay Drawn over the panel and its rows, inside the silhouette.
@@ -157,6 +160,7 @@ internal fun BoxScope.GlassPopupSurface(
     contentLayer: GraphicsLayerScope.(end: Size, rect: Rect) -> Unit,
     modifier: Modifier = Modifier,
     reveal: Modifier = Modifier,
+    underlayMaterial: GlassMaterial? = null,
     onMeasured: ((Size) -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -186,7 +190,22 @@ internal fun BoxScope.GlassPopupSurface(
             .clip(shape)
             .then(
                 if (backdrop == null) {
-                    Modifier.background(visuals.containerColor)
+                    Modifier
+                        .background(visuals.containerColor)
+                        .drawWithContent {
+                            drawContent()
+                            visuals.stroke?.let { drawGlassStroke(shape, layoutDirection, it, visuals.alpha) }
+                        }
+                } else if (underlayMaterial != null) {
+                    Modifier.glassOnActionBar(
+                        backdrop = backdrop,
+                        shape = shape,
+                        style = visuals.style,
+                        alpha = visuals.alpha,
+                        material = visuals.material,
+                        underlayMaterial = underlayMaterial,
+                        stroke = visuals.stroke,
+                    )
                 } else {
                     Modifier.glass(
                         backdrop = backdrop,

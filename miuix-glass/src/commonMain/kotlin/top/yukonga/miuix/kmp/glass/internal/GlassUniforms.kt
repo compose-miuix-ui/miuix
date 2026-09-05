@@ -141,13 +141,19 @@ internal fun BackdropEffectScope.glassEffect(
  * Chains a colour treatment onto the effect pipeline.
  *
  * @param material The material whose layers to apply, nearest the backdrop first.
+ * @param alpha Opacity multiplier folded into every material layer.
  */
-internal fun BackdropEffectScope.colorBlendEffect(material: GlassMaterial) {
+internal fun BackdropEffectScope.colorBlendEffect(
+    material: GlassMaterial,
+    alpha: Float,
+    key: String = GLASS_COLOR_BLEND_SHADER_KEY,
+) {
     val layers = listOfNotNull(material.first, material.second, material.third)
-    runtimeShaderEffect(GLASS_COLOR_BLEND_SHADER_KEY, GLASS_COLOR_BLEND_SHADER, "child") {
+    val surfaceAlpha = alpha.coerceIn(0f, 1f)
+    runtimeShaderEffect(key, GLASS_COLOR_BLEND_SHADER, "child") {
         layers.forEachIndexed { index, layer ->
             val color = layer.color
-            setFloatUniform("in_blend$index", color.red, color.green, color.blue, color.alpha)
+            setFloatUniform("in_blend$index", color.red, color.green, color.blue, color.alpha * surfaceAlpha)
         }
         for (index in layers.size until 3) {
             setFloatUniform("in_blend$index", 0f, 0f, 0f, 0f)

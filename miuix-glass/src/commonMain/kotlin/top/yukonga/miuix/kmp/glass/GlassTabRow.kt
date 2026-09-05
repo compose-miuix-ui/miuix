@@ -62,10 +62,10 @@ import kotlin.math.roundToInt
  * @property contentColor Their labels.
  * @property pressedOverlayColor Painted over whichever tab is under a finger, whether or not it is
  *   the selected one.
- * @property restingStrokeAlpha How much of the rim an unselected tab wears before the material
- *   comes up. The two sets differ here and it is not a detail: the accented control traces a rim
- *   around its unselected tabs at rest, and the neutral one leaves them as flat shapes. The
- *   selected tab never wears one either way — its fill is a solid pill.
+ * @property restingStrokeAlpha How much extra rim an unselected tab wears before the material
+ *   comes up. The accented control traces one around its resting tabs and the neutral one leaves
+ *   them flat. Once material is active, selected and unselected tabs both receive its bloom stroke;
+ *   this value controls only the pre-material fallback.
  */
 @Immutable
 data class GlassTabColors(
@@ -105,8 +105,8 @@ object GlassTabRowDefaults {
      * How much white an unselected tab carries over a dark page, before the material comes up.
      *
      * Read off the source control: a page of 17 carries a tab of 33. The joined control in
-     * [GlassSegmentedTabRowDefaults] uses more than twice this, and the two are not interchangeable
-     * — they are different controls with different materials, not one control at two sizes.
+     * [GlassSegmentedTabRowDefaults] uses more than twice this. Both use pured-thin-glass when
+     * material is active, but their resting backgrounds and layout structures are different.
      */
     private val RestingAlpha: Float = 0.067f
 
@@ -114,13 +114,13 @@ object GlassTabRowDefaults {
     @Composable
     fun shape(height: Dp = Height): GlassShape = GlassShape(height / 2, smoothing = 0f)
 
-    /** The material each tab is made of. */
+    /** `filter-sort-view2-*-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
     fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The rim traced around a tab. */
+    /** The middle bloom stroke declared by both selected and unselected source tokens. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -129,9 +129,9 @@ object GlassTabRowDefaults {
     /**
      * The accented set: the selected tab carries the theme's own colour.
      *
-     * The source keeps the *same* accent in both themes rather than lightening it for the dark one,
-     * and leaves every other tab's fill transparent so the glass under it shows through. That is
-     * why this set needs a material — without one the unselected tabs have no body at all.
+     * The source keeps the *same* accent in both themes rather than lightening it for the dark one.
+     * Material is applied to every tab; the selected tab keeps this solid fill over it, while every
+     * unselected tab clears its own background so the material remains visible.
      */
     @Composable
     fun primaryColors(
@@ -165,9 +165,9 @@ object GlassTabRowDefaults {
     /**
      * The neutral set: the selected tab is a strong neutral rather than the theme's colour.
      *
-     * Measured off a content app rather than taken from a token: the segmented control the source
-     * system declares is the accented one, and its content apps restyle it. It leaves the accent
-     * free for the content below, which on a page of artwork or wallpaper is the whole point.
+     * Measured off a content app rather than taken from a token: the base control declares an
+     * accented selected background, and content apps replace that background with this neutral
+     * one. The underlying material token remains the same.
      *
      * It rides the same ramp as the accented set. At rest the unselected tabs are an opaque grey
      * composited onto the page, and once the material is up they hand that body over to the glass
@@ -210,18 +210,20 @@ object GlassTabRowDefaults {
  * @param tabs The tab labels, in order. Every tab takes an equal share of the row.
  * @param selectedIndex The index of the current tab.
  * @param onSelect Called with the index of a tapped tab.
- * @param backdrop The [Backdrop] supplying the content behind the glass. `null` makes the row a
- *   plain surface: no blur, no refraction, no rim. The neutral colours want that — the control they
- *   come from is not a glass one, and a material under a six-percent fill washes it out.
+ * @param backdrop The [Backdrop] supplying the material outside a top bar. Inside [GlassTopAppBar]
+ *   the bar's page backdrop and effective parent-plus-child blur take precedence: broad colours
+ *   remain visible, while text and hard edges are softened like a child of the native action bar.
+ *   `null` outside a bar uses the resting fills without backdrop material.
  * @param modifier The modifier applied to the row.
- * @param style The glass material.
- * @param alpha Opacity multiplier for the material.
- * @param surfaceAlpha How far the material has come up, 0 to 1. At 0 the tabs wear their resting
- *   fill and carry no glass at all; at 1 they are glass with the content passing under them. Drive
- *   it off the scroll, the same way a bar button's background comes in.
- * @param stroke Optional bloom stroke along each tab's rim.
+ * @param style Blur style used only when [material] is null. Material tabs disable bionic shading.
+ * @param alpha Opacity multiplier for the material colour layers, bloom stroke and shadow.
+ * @param surfaceAlpha How far the material has come up, 0 to 1. At 0 its colour layers, bloom and
+ *   shadow are transparent and the tabs wear their resting fills; at 1 the source token is at full
+ *   strength. Drive this from the page-overlap state rather than the title's expand state.
+ * @param stroke Optional bloom stroke along each tab's rim. The default is Middle.
  * @param shadow The shadow each tab casts. `null` removes it.
- * @param material Each tab's own body. `null` leaves the tabs at whatever the blurred backdrop is.
+ * @param material Each tab's own body. The default is the 20dp FilterSortView2 pured-thin token;
+ *   `null` leaves the tabs at the blur selected by [style].
  * @param height Height of a tab. [GlassTabRowDefaults.NeutralHeight] goes with the neutral colours.
  * @param tabGap Gap between two tabs.
  * @param colors The colours the tabs wear.
@@ -247,6 +249,12 @@ fun GlassTabRow(
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val shape = GlassTabRowDefaults.shape(height)
     val ramp = surfaceAlpha.coerceIn(0f, 1f)
+    val topBarContext = LocalGlassTopAppBarContext.current
+    val resolvedBackdrop = topBarContext?.backdrop ?: backdrop
+    val resolvedMaterial = material?.let {
+        topBarContext?.material?.blurRadius?.let { blurRadius -> it.copy(blurRadius = blurRadius) } ?: it
+    }
+    val underlayMaterial = topBarContext?.underlayMaterial
 
     Row(
         modifier = modifier.height(height).selectableGroup(),
@@ -278,19 +286,35 @@ fun GlassTabRow(
                 label = "glassTabRim",
             )
             val restingRim = alpha * (1f - ramp) * rim
+            val materialSurface = if (resolvedBackdrop != null && underlayMaterial != null) {
+                Modifier
+                    .glassShadow(shape, shadow, alpha * ramp)
+                    .glassOnActionBar(
+                        backdrop = resolvedBackdrop,
+                        shape = shape,
+                        style = style,
+                        alpha = alpha * ramp,
+                        material = resolvedMaterial,
+                        underlayMaterial = underlayMaterial,
+                        stroke = stroke,
+                    )
+            } else {
+                Modifier.glassPanel(
+                    backdrop = resolvedBackdrop,
+                    shape = shape,
+                    style = style,
+                    alpha = alpha * ramp,
+                    material = resolvedMaterial,
+                    stroke = stroke,
+                    shadow = shadow,
+                    shading = false,
+                )
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .glassPanel(
-                        backdrop = backdrop,
-                        shape = shape,
-                        style = style,
-                        alpha = alpha * ramp,
-                        material = material,
-                        stroke = stroke,
-                        shadow = shadow,
-                    )
+                    .then(materialSurface)
                     .background(container)
                     .background(overlay)
                     .then(
@@ -354,13 +378,13 @@ object GlassSegmentedTabRowDefaults {
     @Composable
     fun shape(height: Dp = Height): GlassShape = GlassShape(height / 2, smoothing = 0f)
 
-    /** The track's body: `filter-sort-view-glass`, the token this control declares for itself. */
+    /** `filter-sort-view-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
     fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The rim traced around the track. */
+    /** The middle bloom stroke declared by the source track token. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -417,15 +441,19 @@ object GlassSegmentedTabRowDefaults {
  * @param tabs The tab labels, in order. Every tab takes an equal share of the track.
  * @param selectedIndex The index of the current tab.
  * @param onSelect Called with the index of a tapped tab.
- * @param backdrop The [Backdrop] supplying the content behind the glass.
+ * @param backdrop The [Backdrop] supplying the material outside a top bar. Inside [GlassTopAppBar]
+ *   the bar's page backdrop and effective parent-plus-child blur take precedence, retaining broad
+ *   colour from the page without leaving its text or hard edges legible through the track.
  * @param modifier The modifier applied to the track.
- * @param style The glass material.
- * @param alpha Opacity multiplier for the material.
- * @param surfaceAlpha How far the material has come up, 0 to 1. At 0 the track wears [trackColor]
- *   and carries no glass; at 1 it is glass and the content passes under it.
- * @param stroke Optional bloom stroke along the track's rim.
+ * @param style Blur style used only when [material] is null. Material tracks disable bionic shading.
+ * @param alpha Opacity multiplier for the material colour layers, bloom stroke and shadow.
+ * @param surfaceAlpha Material strength from 0 to 1. At 0 backdrop drawing is disabled and the
+ *   track restores [trackColor]. During the transition that fill fades over the blurred material;
+ *   at 1 the material is fully visible. The indicator and labels remain visible throughout.
+ * @param stroke Optional bloom stroke along the track's rim. The default is Middle.
  * @param shadow The shadow the track casts. `null` removes it.
- * @param material The track's own body. `null` leaves it at whatever the blurred backdrop is.
+ * @param material The track's own body. The default is the 20dp FilterSortView pured-thin token;
+ *   `null` leaves it at the blur selected by [style].
  * @param height Height of the track.
  * @param trackColor Fill the track wears before the material comes up.
  * @param indicatorColor Fill of the indicator behind the current tab.
@@ -454,6 +482,12 @@ fun GlassSegmentedTabRow(
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val ramp = surfaceAlpha.coerceIn(0f, 1f)
+    val topBarContext = LocalGlassTopAppBarContext.current
+    val resolvedBackdrop = topBarContext?.backdrop ?: backdrop
+    val resolvedMaterial = material?.let {
+        topBarContext?.material?.blurRadius?.let { blurRadius -> it.copy(blurRadius = blurRadius) } ?: it
+    }
+    val underlayMaterial = topBarContext?.underlayMaterial
     val trackShape = GlassSegmentedTabRowDefaults.shape(height)
     val innerHeight = height - GlassSegmentedTabRowDefaults.TrackPadding * 2
     val indicatorShape = GlassSegmentedTabRowDefaults.shape(innerHeight)
@@ -477,20 +511,37 @@ fun GlassSegmentedTabRow(
         launch { span.animateTo(slot, GlassMotion.default()) }
     }
 
+    val materialSurface = if (underlayMaterial != null) {
+        Modifier.glassOnActionBar(
+            backdrop = resolvedBackdrop,
+            shape = trackShape,
+            style = style,
+            alpha = alpha * ramp,
+            material = resolvedMaterial,
+            underlayMaterial = underlayMaterial,
+            stroke = stroke,
+            enabled = ramp > 0f,
+        )
+    } else {
+        Modifier.glass(
+            backdrop = resolvedBackdrop,
+            shape = trackShape,
+            style = style,
+            alpha = alpha * ramp,
+            material = resolvedMaterial,
+            stroke = stroke,
+            enabled = ramp > 0f,
+            shading = false,
+        )
+    }
+
     Box(
         modifier = modifier
             .height(height)
             .glassShadow(trackShape, shadow, alpha * ramp)
             .clip(trackShape)
+            .then(materialSurface)
             .background(trackColor.copy(alpha = trackColor.alpha * (1f - ramp)))
-            .glass(
-                backdrop = backdrop,
-                shape = trackShape,
-                style = style,
-                alpha = alpha * ramp,
-                material = material,
-                stroke = stroke,
-            )
             .padding(GlassSegmentedTabRowDefaults.TrackPadding)
             .onSizeChanged { trackWidth = it.width },
     ) {

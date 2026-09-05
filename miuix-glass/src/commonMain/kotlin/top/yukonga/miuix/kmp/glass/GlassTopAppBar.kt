@@ -3,15 +3,23 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +28,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
@@ -31,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
-import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
 import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -53,6 +59,12 @@ object GlassTopAppBarDefaults {
     /** Diameter of the glass pill behind a bar button. */
     val ButtonSize: Dp = 44.dp
 
+    /** Icon opacity while an action-bar button is held. */
+    val PressedContentAlpha: Float = 0.6f
+
+    private val NESTED_BLUR_LIGHT: Dp = 44.72.dp
+    private val NESTED_BLUR_DARK: Dp = 63.25.dp
+
     /**
      * How far a bar has collapsed, in `[0, 1]`.
      *
@@ -69,12 +81,36 @@ object GlassTopAppBarDefaults {
         } ?: 1f
     }
 
-    /** The fill behind a bar button. */
+    /** The traditional fill used when backdrop material is unavailable. */
     @Composable
-    fun buttonFill(): Color {
-        val page = MiuixTheme.colorScheme.surface
-        val lift = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) 0.10f else 0.55f
-        return Color.White.copy(alpha = lift).compositeOver(page)
+    fun buttonFill(): Color = if (isDarkTheme()) Color(0xFF2C2C2C) else Color.White
+
+    /** The source system's `internal-pured-thin-glass` action-button material. */
+    @Composable
+    fun buttonMaterial(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
+
+    /** Effective blur of the action bar's parent mask and a child's own 20dp mask blur. */
+    @Composable
+    internal fun nestedMaterialBlurRadius(): Dp = if (isDarkTheme()) NESTED_BLUR_DARK else NESTED_BLUR_LIGHT
+
+    /** Parent `Mask.Pured_Regular` material applied before child button and tab materials. */
+    @Composable
+    internal fun actionBarUnderlayMaterial(): GlassMaterial = GlassMaterials.actionBarMask(isDarkTheme())
+
+    /** The small bloom stroke paired with [buttonMaterial]. */
+    @Composable
+    fun buttonStroke(): GlassStroke = GlassStrokes.forTheme(
+        isDark = isDarkTheme(),
+        light = GlassStrokes.SmallLight,
+        dark = GlassStrokes.SmallDark,
+    )
+
+    /** The state overlay painted behind a held action-bar icon. */
+    @Composable
+    fun buttonPressedOverlay(): Color = if (isDarkTheme()) {
+        Color.White.copy(alpha = 0.14f)
+    } else {
+        Color.Black.copy(alpha = 0.10f)
     }
 
     /**
@@ -95,14 +131,29 @@ object GlassTopAppBarDefaults {
 
     /** How far the band reaches past the bottom of the bar. */
     val BandOverhang: Dp = 28.dp
+
+    @Composable
+    private fun isDarkTheme(): Boolean = MiuixTheme.colorScheme.background.luminance() < 0.5f
 }
+
+internal data class GlassTopAppBarContext(
+    val backdrop: Backdrop?,
+    val material: GlassMaterial,
+    val underlayMaterial: GlassMaterial?,
+    val floating: Boolean,
+    val alpha: Float,
+    val shadowAlpha: Float,
+)
+
+internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBarContext?> { null }
 
 /**
  * A top bar the content scrolls *under*.
  *
  * @param title The compact title, centred once the bar has collapsed.
- * @param backdrop Optional [Backdrop] for the button pills. `null`, the default, gives them the
- *   bar's own fill instead, which is what the source system does.
+ * @param backdrop The page behind the action bar. Its details remain visible through the controls,
+ *   but their effective blur combines the bar's parent mask blur with their own 20dp mask blur so
+ *   text and hard edges do not pass through unchanged. `null` uses [fill].
  * @param modifier The modifier applied to the bar.
  * @param largeTitle The title shown large before the content scrolls. Defaults to [title].
  * @param subtitle Optional line under the title.
@@ -111,13 +162,16 @@ object GlassTopAppBarDefaults {
  *   strength, which is what a bar over non-scrolling content wants.
  * @param bandBrush The band that dims the content passing under the bar.
  * @param bandOverhang How far the band reaches past the bottom of the bar.
- * @param style The glass material of the button pills.
- * @param alpha Opacity multiplier for the button pills, on top of the collapse ramp.
+ * @param style Compatibility style forwarded to the renderer. The default source-style button
+ *   uses [GlassTopAppBarDefaults.buttonMaterial] with bionic shading disabled, so the style does
+ *   not recolour that material.
+ * @param alpha Opacity multiplier for the button pills, on top of their floating transition.
  * @param buttonShape Silhouette of the button pills. Defaults to a circle of [buttonSize].
  * @param buttonSize Diameter of the button pills.
  * @param buttonShadow The shadow under the button pills. `null` removes it.
- * @param fill Fill behind the button pills, used when [backdrop] is null.
- * @param stroke Optional bloom stroke on the button pills.
+ * @param fill Traditional fill behind the button pills when runtime shaders are unavailable.
+ * @param stroke Optional bloom stroke on the button pills. The default is the source system's
+ *   small action-button stroke.
  * @param defaultWindowInsetsPadding Whether to inset the bar for the status bar.
  * @param navigationIcon The leading control. The bar puts a glass pill behind it as it collapses;
  *   the icon keeps its own click handling.
@@ -141,7 +195,7 @@ fun GlassTopAppBar(
     buttonSize: Dp = GlassTopAppBarDefaults.ButtonSize,
     buttonShape: GlassShape = GlassShape(buttonSize / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = null,
+    stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
     buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
@@ -149,6 +203,15 @@ fun GlassTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     val ramp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior)
+    val floating = ramp > 0.01f
+    val baseMaterial = GlassTopAppBarDefaults.buttonMaterial()
+    val material = if (floating && backdrop != null) {
+        baseMaterial.copy(blurRadius = GlassTopAppBarDefaults.nestedMaterialBlurRadius())
+    } else {
+        baseMaterial
+    }
+    val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { floating && backdrop != null }
+    val buttonBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
 
     Box(modifier = modifier) {
         val overhangPx = with(LocalDensity.current) { bandOverhang.toPx() }
@@ -162,46 +225,65 @@ fun GlassTopAppBar(
                 }
                 .background(bandBrush),
         )
-        BlurTopAppBar(
-            title = title,
-            largeTitle = largeTitle,
-            largeTitleBlurRadius = largeTitleBlurRadius,
-            subtitle = subtitle,
-            color = Color.Transparent,
-            scrollBehavior = scrollBehavior,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            navigationIcon = {
-                GlassButtonSurface(
-                    backdrop = backdrop,
-                    surfaceAlpha = ramp * alpha,
-                    style = style,
-                    shape = buttonShape,
-                    size = buttonSize,
-                    fill = fill,
-                    stroke = stroke,
-                    shadow = buttonShadow,
-                    content = navigationIcon,
-                )
-            },
-            actions = actions,
-            bottomContent = bottomContent,
-        )
+        CompositionLocalProvider(
+            LocalGlassTopAppBarContext provides GlassTopAppBarContext(
+                backdrop = buttonBackdrop,
+                material = material,
+                underlayMaterial = underlayMaterial,
+                floating = floating,
+                alpha = alpha,
+                shadowAlpha = ramp * alpha,
+            ),
+        ) {
+            BlurTopAppBar(
+                title = title,
+                largeTitle = largeTitle,
+                largeTitleBlurRadius = largeTitleBlurRadius,
+                subtitle = subtitle,
+                color = Color.Transparent,
+                scrollBehavior = scrollBehavior,
+                defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+                navigationIcon = {
+                    GlassButtonSurface(
+                        backdrop = buttonBackdrop,
+                        floating = floating,
+                        surfaceAlpha = alpha,
+                        shadowAlpha = ramp * alpha,
+                        style = style,
+                        material = material,
+                        underlayMaterial = underlayMaterial,
+                        shape = buttonShape,
+                        size = buttonSize,
+                        fill = fill,
+                        stroke = stroke,
+                        shadow = buttonShadow,
+                        content = navigationIcon,
+                    )
+                },
+                actions = actions,
+                bottomContent = bottomContent,
+            )
+        }
     }
 }
 
 /**
  * A round glass button, the shape the source system gives a bar control once its bar has collapsed.
+ * When [glassPopupAnchor] is attached, the button shares its resolved backdrop and material with
+ * [GlassTransformPopup] so the panel retains the same blur and colour treatment as it grows.
  *
  * @param onClick Called when the button is tapped.
- * @param backdrop Optional [Backdrop] behind the glass. `null` gives a flat [fill] instead.
+ * @param backdrop Optional [Backdrop] behind the glass. Inside [GlassTopAppBar] the button inherits
+ *   its page backdrop and effective nested blur; elsewhere `null` gives the traditional [fill].
  * @param modifier The modifier applied to the button.
- * @param surfaceAlpha Opacity of the pill. Drive it from a bar's collapse so the pill arrives with
- *   the rest of the bar; below about 1% the material is skipped entirely.
- * @param style The glass material.
+ * @param surfaceAlpha Opacity of the pill. Inside [GlassTopAppBar], leave this at its default so
+ *   the bar can drive the source-style floating transition.
+ * @param style Compatibility style forwarded to the renderer. The source-style button body uses
+ *   [GlassTopAppBarDefaults.buttonMaterial] without bionic shading.
  * @param size Diameter of the button.
  * @param shape The button's silhouette. Defaults to a circle of [size].
  * @param shadow The shadow under the button. `null` removes it.
- * @param stroke Optional bloom stroke along the rim.
+ * @param stroke Optional bloom stroke along the rim. The default is the small action-button token.
  * @param content The icon inside.
  */
 @Composable
@@ -214,59 +296,124 @@ fun GlassIconButton(
     size: Dp = GlassTopAppBarDefaults.ButtonSize,
     shape: GlassShape = GlassShape(size / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = null,
+    stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
     shadow: GlassShadow? = GlassShadows.Regular,
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val topBarContext = LocalGlassTopAppBarContext.current
     GlassButtonSurface(
-        backdrop = backdrop,
-        surfaceAlpha = surfaceAlpha,
+        backdrop = topBarContext?.backdrop ?: backdrop,
+        floating = topBarContext?.floating ?: (surfaceAlpha > 0.01f),
+        surfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f),
+        shadowAlpha = surfaceAlpha * (topBarContext?.shadowAlpha ?: 1f),
         style = style,
+        material = topBarContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
+        underlayMaterial = topBarContext?.underlayMaterial,
         shape = shape,
         size = size,
         fill = fill,
         stroke = stroke,
         shadow = shadow,
+        pressed = pressed,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick,
-            )
-            .glassPress(interactionSource),
+            ),
         content = content,
     )
 }
 
 /** The pill itself, shared by [GlassTopAppBar]'s navigation icon and [GlassIconButton]. */
 @Composable
+// foldIn only reads the anchor marker; the modifier is still applied to exactly one root Box.
+@Suppress("ktlint:compose:modifier-reused-check")
 private fun GlassButtonSurface(
     backdrop: Backdrop?,
+    floating: Boolean,
     surfaceAlpha: Float,
+    shadowAlpha: Float,
     style: GlassStyle,
+    material: GlassMaterial,
+    underlayMaterial: GlassMaterial?,
     fill: Color,
     shape: GlassShape,
     size: Dp,
     stroke: GlassStroke?,
     shadow: GlassShadow?,
     modifier: Modifier = Modifier,
+    pressed: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val popupAnchor = modifier.foldIn<GlassPopupAnchor?>(null) { found, element ->
+        if (element is GlassPopupAnchorElement) element.anchor else found
+    }
+    DisposableEffect(popupAnchor) {
+        onDispose { popupAnchor?.surface = null }
+    }
+    SideEffect {
+        popupAnchor?.surface = GlassAnchorSurface(backdrop, style, material, underlayMaterial, stroke, fill)
+    }
+    val floatingTransition = updateTransition(targetState = floating, label = "glassTopBarButtonFloat")
+    val floatingProgress by floatingTransition.animateFloat(
+        transitionSpec = { GlassMotion.topBarButtonFloat() },
+        label = "glassTopBarButtonMaterial",
+    ) { active ->
+        if (active) 1f else 0f
+    }
+    val keepMaterial = floatingTransition.currentState || floatingTransition.targetState
+    val opacity = surfaceAlpha.coerceIn(0f, 1f)
+    val materialStrength = floatingProgress * opacity
+    val animatedMaterial = material.withAlphaMultiplier(floatingProgress)
+    val pressTransition = updateTransition(targetState = pressed, label = "glassTopBarButtonPress")
+    val contentAlpha by pressTransition.animateFloat(
+        transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
+        label = "glassTopBarButtonContentAlpha",
+    ) { down ->
+        if (down) GlassTopAppBarDefaults.PressedContentAlpha else 1f
+    }
+    val overlayAlpha by pressTransition.animateFloat(
+        transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
+        label = "glassTopBarButtonOverlayAlpha",
+    ) { down ->
+        if (down) 1f else 0f
+    }
+    val pressedOverlay = GlassTopAppBarDefaults.buttonPressedOverlay()
+
     Box(
         modifier = modifier
             .size(size)
-            .glassShadow(shape, shadow, surfaceAlpha)
+            .glassShadow(shape, shadow, shadowAlpha)
             .then(
                 if (backdrop != null) {
-                    Modifier.glass(
-                        backdrop = backdrop,
-                        shape = shape,
-                        style = style,
-                        alpha = surfaceAlpha,
-                        stroke = stroke,
-                        enabled = surfaceAlpha > 0.01f,
-                    )
+                    if (underlayMaterial != null) {
+                        Modifier.glassOnActionBar(
+                            backdrop = backdrop,
+                            shape = shape,
+                            style = style,
+                            alpha = opacity,
+                            material = animatedMaterial,
+                            underlayMaterial = underlayMaterial,
+                            stroke = stroke.takeIf { keepMaterial },
+                            enabled = keepMaterial,
+                        )
+                    } else {
+                        Modifier.glass(
+                            backdrop = backdrop,
+                            shape = shape,
+                            style = style,
+                            // The source installs the bloom stroke together with blur; only the
+                            // blend colours participate in the 350 ms transition.
+                            alpha = opacity,
+                            material = animatedMaterial,
+                            stroke = stroke.takeIf { keepMaterial },
+                            enabled = keepMaterial,
+                            shading = false,
+                        )
+                    }
                 } else {
                     Modifier
                         .then(
@@ -276,18 +423,43 @@ private fun GlassButtonSurface(
                                 Modifier.clip(shape)
                             },
                         )
-                        .background(fill.copy(alpha = surfaceAlpha.coerceIn(0f, 1f)))
+                        .background(fill.copy(alpha = fill.alpha * materialStrength))
                         .drawWithContent {
                             drawContent()
-                            if (stroke != null) {
-                                drawGlassStroke(shape, layoutDirection, stroke, surfaceAlpha)
+                            if (stroke != null && keepMaterial) {
+                                drawGlassStroke(shape, layoutDirection, stroke, opacity)
                             }
                             drawGlassMask(shape, layoutDirection)
-                            drawGlassRim(shape, layoutDirection, style, fill, surfaceAlpha)
                         }
                 },
             ),
         contentAlignment = Alignment.Center,
-        content = { content() },
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape)
+                .background(pressedOverlay.copy(alpha = pressedOverlay.alpha * overlayAlpha.coerceIn(0f, 1f))),
+        )
+        Box(
+            modifier = Modifier.graphicsLayer { alpha = contentAlpha.coerceIn(0f, 1f) },
+            contentAlignment = Alignment.Center,
+        ) {
+            content()
+        }
+    }
+}
+
+private fun GlassMaterial.withAlphaMultiplier(alpha: Float): GlassMaterial {
+    val multiplier = alpha.coerceIn(0f, 1f)
+    if (multiplier == 1f) return this
+    return copy(
+        first = first.withAlphaMultiplier(multiplier),
+        second = second?.withAlphaMultiplier(multiplier),
+        third = third?.withAlphaMultiplier(multiplier),
     )
 }
+
+private fun GlassColorLayer.withAlphaMultiplier(alpha: Float): GlassColorLayer = copy(
+    color = color.copy(alpha = color.alpha * alpha),
+)

@@ -178,16 +178,18 @@ object GlassPopupDefaults {
     @Composable
     fun shape(cornerRadius: Dp = CornerRadius): GlassShape = GlassShape(cornerRadius)
 
-    /** The popup's own body: `popupview-glass`, the token the source declares for it. */
+    /** The popup's own body: `popupview-glass`, with the source token's 60dp mask blur. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
+    fun material(): GlassMaterial = GlassMaterials.popupViewGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The rim traced around the popup. */
+    /** The small bloom stroke declared by `popupview-glass`. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        light = GlassStrokes.SmallLight,
+        dark = GlassStrokes.SmallDark,
     )
 
     /**
@@ -222,7 +224,8 @@ object GlassPopupDefaults {
  * @param anchorBounds The control's bounds, in this composable's own coordinate space. A second
  *   menu takes the resting bounds of the row it belongs to. Bounds read out of the first menu
  *   while it is shrunk behind this one drag this one off it.
- * @param backdrop The [Backdrop] behind the glass. `null` falls back to an opaque fill.
+ * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
+ *   configured bloom stroke and Compose shadow.
  * @param modifier The modifier applied to the panel.
  * @param sizing How wide and tall the panel may be.
  * @param visuals What its surface is made of.

@@ -98,6 +98,13 @@ object GlassMotion {
     @Stable
     fun <T> barTrack(): SpringSpec<T> = springOf(1f, 0.6f)
 
+    /** The linear material transition of a floating action-bar button. */
+    @Stable
+    fun topBarButtonFloat(): FiniteAnimationSpec<Float> = tween(
+        durationMillis = 350,
+        easing = LinearEasing,
+    )
+
     /** A popup opening from its anchor. The only under-damped spring in the set — it overshoots. */
     @Stable
     fun <T> popupEnter(): SpringSpec<T> = springOf(0.8f, 0.28f)

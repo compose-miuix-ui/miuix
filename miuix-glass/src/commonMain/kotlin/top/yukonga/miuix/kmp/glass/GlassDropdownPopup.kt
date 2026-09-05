@@ -42,7 +42,8 @@ object GlassDropdownDefaults {
  * @param show Whether the panel is open.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchorBounds The row's bounds, in this composable's own coordinate space.
- * @param backdrop The [Backdrop] behind the glass. `null` falls back to an opaque fill.
+ * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
+ *   configured bloom stroke and Compose shadow.
  * @param modifier The modifier applied to the panel.
  * @param anchor Optional handle for the row. Given one, the panel stands the row's displayed value
  *   down while it is open — see [glassPopupAnchorValue].
