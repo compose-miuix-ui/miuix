@@ -14,6 +14,7 @@ These components are typically used in conjunction with the `Scaffold` component
 
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
@@ -72,6 +73,33 @@ Scaffold(
 )
 ```
 
+### Custom Colors
+
+Both item components accept `colors` from `NavigationBarDefaults.navigationBarItemColors()`. For example, use the theme's primary color for the selected item:
+
+```kotlin
+val itemColors = NavigationBarDefaults.navigationBarItemColors(
+    unselectedContentColor = MiuixTheme.colorScheme.onSurfaceContainer,
+    selectedContentColor = MiuixTheme.colorScheme.primary,
+)
+
+NavigationBar {
+    items.forEachIndexed { index, label ->
+        NavigationBarItem(
+            selected = selectedIndex == index,
+            onClick = { selectedIndex = index },
+            icon = icons[index],
+            label = label,
+            colors = itemColors,
+        )
+    }
+}
+```
+
+Pass the same `colors = itemColors` to `FloatingNavigationBarItem` inside a `FloatingNavigationBar` to customize its icons.
+
+Colors are base colors: their alpha is multiplied by `0.4` when unselected, `0.6` when unselected and pressed, and `0.5` when selected and pressed. Selected, unpressed content uses the supplied color unchanged. `Color.Transparent` stays transparent in every state.
+
 ## Component States
 
 ### Selected State
@@ -101,6 +129,7 @@ Scaffold(
 | label         | String        | Label of the item                | -             | Yes      |
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
+| colors | NavigationBarItemColors | Icon and label base colors | NavigationBarDefaults.navigationBarItemColors() | No |
 | badge         | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
 
 ### FloatingNavigationBar Properties
@@ -127,6 +156,7 @@ Scaffold(
 | label         | String        | Label of the item                | -             | Yes      |
 | modifier      | Modifier      | Modifier applied to the item     | Modifier      | No       |
 | enabled       | Boolean       | Whether the item is enabled      | true          | No       |
+| colors | NavigationBarItemColors | Icon and label base colors | NavigationBarDefaults.navigationBarItemColors() | No |
 | badge         | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
 
 ### NavigationBarDefaults Object
@@ -145,6 +175,15 @@ The NavigationBarDefaults object provides default values for NavigationBar and N
 | SelectedPressedAlpha   | Float    | Alpha value for selected item when pressed   | 0.5f          |
 | UnselectedPressedAlpha | Float    | Alpha value for unselected item when pressed | 0.6f          |
 | UnselectedAlpha        | Float    | Alpha value for unselected item              | 0.4f          |
+
+#### navigationBarItemColors()
+
+A composable factory returning a remembered `NavigationBarItemColors`, shared by both navigation item components. Omitting `colors` preserves the default theme appearance.
+
+| Parameter | Type | Description | Default Value |
+| --------- | ---- | ----------- | ------------- |
+| unselectedContentColor | Color | Base color for unselected content | MiuixTheme.colorScheme.onSurfaceContainer |
+| selectedContentColor | Color | Base color for selected content | MiuixTheme.colorScheme.onSurfaceContainer |
 
 ### FloatingNavigationBarDefaults Object
 

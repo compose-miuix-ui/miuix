@@ -138,6 +138,7 @@ fun NavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [NavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param colors The icon and label colors, with state opacity applied to their alpha.
  * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
@@ -369,6 +370,7 @@ fun FloatingNavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [FloatingNavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param colors The icon and label colors, with state opacity applied to their alpha.
  * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
@@ -461,7 +463,11 @@ object NavigationBarDefaults {
     val UnselectedAlpha = 0.4f
 
     /**
-     * The default colors for the [NavigationBarItem].
+     * The default colors for [NavigationBarItem] and [FloatingNavigationBarItem].
+     * State opacity multiplies each color's alpha, preserving transparent colors.
+     *
+     * @param unselectedContentColor The base color for unselected content.
+     * @param selectedContentColor The base color for selected content.
      */
     @Composable
     fun navigationBarItemColors(
@@ -475,6 +481,12 @@ object NavigationBarDefaults {
     }
 }
 
+/**
+ * Base content colors shared by [NavigationBarItem] and [FloatingNavigationBarItem].
+ *
+ * @param unselectedContentColor The unselected icon and label color before state opacity.
+ * @param selectedContentColor The selected icon and label color before state opacity.
+ */
 @Immutable
 data class NavigationBarItemColors(
     private val unselectedContentColor: Color,
@@ -483,14 +495,14 @@ data class NavigationBarItemColors(
     @Stable
     internal fun contentColor(selected: Boolean, isPressed: Boolean): Color = when {
         isPressed -> if (selected) {
-            selectedContentColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
+            selectedContentColor.copy(alpha = selectedContentColor.alpha * NavigationBarDefaults.SelectedPressedAlpha)
         } else {
-            unselectedContentColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
+            unselectedContentColor.copy(alpha = unselectedContentColor.alpha * NavigationBarDefaults.UnselectedPressedAlpha)
         }
 
         selected -> selectedContentColor
 
-        else -> unselectedContentColor.copy(NavigationBarDefaults.UnselectedAlpha)
+        else -> unselectedContentColor.copy(alpha = unselectedContentColor.alpha * NavigationBarDefaults.UnselectedAlpha)
     }
 }
 

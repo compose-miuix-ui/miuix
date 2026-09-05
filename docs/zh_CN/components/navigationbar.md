@@ -14,6 +14,7 @@
 
 ```kotlin
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
@@ -72,6 +73,33 @@ Scaffold(
 )
 ```
 
+### 自定义颜色
+
+两种导航项都支持通过 `NavigationBarDefaults.navigationBarItemColors()` 创建的 `colors`。例如，使用主题主色显示选中项：
+
+```kotlin
+val itemColors = NavigationBarDefaults.navigationBarItemColors(
+    unselectedContentColor = MiuixTheme.colorScheme.onSurfaceContainer,
+    selectedContentColor = MiuixTheme.colorScheme.primary,
+)
+
+NavigationBar {
+    items.forEachIndexed { index, label ->
+        NavigationBarItem(
+            selected = selectedIndex == index,
+            onClick = { selectedIndex = index },
+            icon = icons[index],
+            label = label,
+            colors = itemColors,
+        )
+    }
+}
+```
+
+在 `FloatingNavigationBar` 内向 `FloatingNavigationBarItem` 传入同样的 `colors = itemColors`，即可自定义其图标颜色。
+
+传入的颜色是基础颜色：未选中时 alpha 乘以 `0.4`，未选中且按下时乘以 `0.6`，选中且按下时乘以 `0.5`。选中且未按下时直接使用传入的颜色。`Color.Transparent` 在所有状态下均保持透明。
+
 ## 组件状态
 
 ### 选中状态
@@ -101,6 +129,7 @@ Scaffold(
 | label    | String      | 文本标签         | -      | 是       |
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
+| colors | NavigationBarItemColors | 图标和文本的基础颜色 | NavigationBarDefaults.navigationBarItemColors() | 否 |
 | badge    | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
 
 ### FloatingNavigationBar 属性
@@ -127,6 +156,7 @@ Scaffold(
 | label    | String      | 文本标签         | -      | 是       |
 | modifier | Modifier    | 应用于导航项的修饰符 | Modifier | 否       |
 | enabled  | Boolean     | 是否启用         | true     | 否       |
+| colors | NavigationBarItemColors | 图标和文本的基础颜色 | NavigationBarDefaults.navigationBarItemColors() | 否 |
 | badge    | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
 
 ### NavigationBarDefaults 对象
@@ -145,6 +175,15 @@ NavigationBarDefaults 对象提供了 NavigationBar 和 NavigationBarItem 组件
 | SelectedPressedAlpha   | Float    | 选中项按压时的透明度       | 0.5f   |
 | UnselectedPressedAlpha | Float    | 未选中项按压时的透明度     | 0.6f   |
 | UnselectedAlpha        | Float    | 未选中项的透明度           | 0.4f   |
+
+#### navigationBarItemColors()
+
+此可组合工厂函数返回通过 `remember` 缓存的 `NavigationBarItemColors`，供两种导航项共用。不传入 `colors` 时保持默认主题效果。
+
+| 参数 | 类型 | 说明 | 默认值 |
+| ---- | ---- | ---- | ------ |
+| unselectedContentColor | Color | 未选中内容的基础颜色 | MiuixTheme.colorScheme.onSurfaceContainer |
+| selectedContentColor | Color | 选中内容的基础颜色 | MiuixTheme.colorScheme.onSurfaceContainer |
 
 ### FloatingNavigationBarDefaults 对象
 
