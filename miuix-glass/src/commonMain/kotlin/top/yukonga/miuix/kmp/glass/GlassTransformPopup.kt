@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,12 @@ class GlassPopupAnchor {
 
     /** Material supplied by an attached glass button, including its resolved backdrop. */
     internal var surface: GlassAnchorSurface? by mutableStateOf(null)
+
+    /** Current button surface opacity and target state, independent of the legacy shadow ramp. */
+    internal var surfaceProgress: State<Float>? by mutableStateOf(null)
+    internal var surfaceOpacity: Float by mutableFloatStateOf(1f)
+    internal val surfaceAlpha: Float get() = surfaceOpacity * (surfaceProgress?.value ?: 1f)
+    internal var surfaceFloating: Boolean by mutableStateOf(false)
 
     /** The control's outer bounds, in the root's coordinate space. */
     internal var containerBounds: Rect by mutableStateOf(Rect.Zero)
@@ -222,8 +229,8 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  * @param sizing How wide and tall the panel may be.
  * @param visuals The panel's appearance. A [GlassIconButton] anchor overrides the style, material,
  *   stroke and fallback colour with its own; popup opacity and shadow still come from [visuals].
- * @param anchorAlpha Opacity the control's own background has right now, so a bar control whose bar
- *   has not collapsed does not have a pill appear under it out of nothing.
+ * @param anchorAlpha Background opacity for anchors without a shared button surface. Glass button
+ *   anchors publish their actual animated opacity automatically, including during floating changes.
  * @param cornerRadius Corner radius the panel settles at.
  * @param gap Gap between the control and the panel.
  * @param contentPadding Padding around the items.
@@ -300,8 +307,14 @@ fun BoxScope.GlassTransformPopup(
     val centerProgress = center
     val panelAlpha = transformPanelAlpha(
         visualAlpha = visuals.alpha,
-        floating = anchor.floating,
-        anchorAlpha = anchorAlpha,
+        floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceAlpha > 0f else anchor.floating,
+        // transformPanelAlpha multiplies by visualAlpha; the published surface alpha already
+        // includes the button's opacity, so remove that outer factor at the anchor endpoint.
+        anchorAlpha = if (anchorSurface != null) {
+            if (visuals.alpha > 0f) anchor.surfaceAlpha / visuals.alpha else 0f
+        } else {
+            anchorAlpha
+        },
         geometryProgress = geometryProgress,
         iconMaterial = iconMaterial,
     )

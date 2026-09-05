@@ -105,6 +105,10 @@ object GlassMotion {
         easing = LinearEasing,
     )
 
+    /** ActionBarContainer's overlay mask follows a separate 100ms linear transition. */
+    @Stable
+    fun topBarMask(): FiniteAnimationSpec<Float> = tween(durationMillis = 100, easing = LinearEasing)
+
     /** A popup opening from its anchor. The only under-damped spring in the set — it overshoots. */
     @Stable
     fun <T> popupEnter(): SpringSpec<T> = springOf(0.8f, 0.28f)

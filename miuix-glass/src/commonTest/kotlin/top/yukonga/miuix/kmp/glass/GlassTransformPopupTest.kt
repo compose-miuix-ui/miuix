@@ -3,10 +3,37 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.runtime.mutableFloatStateOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GlassTransformPopupTest {
+
+    @Test
+    fun sharedAnchorOpacityTracksAnimationWithoutRepublishingSurface() {
+        val progress = mutableFloatStateOf(1f)
+        val anchor = GlassPopupAnchor().apply {
+            surfaceProgress = progress
+            surfaceOpacity = 0.5f
+        }
+        assertEquals(0.5f, anchor.surfaceAlpha)
+
+        // A frame updates the animation state without recomposing the button's surface publisher.
+        progress.floatValue = 0.25f
+        assertEquals(0.125f, anchor.surfaceAlpha)
+        assertEquals(
+            anchor.surfaceAlpha,
+            transformPanelAlpha(
+                visualAlpha = 0.5f,
+                floating = true,
+                anchorAlpha = anchor.surfaceAlpha / 0.5f,
+                geometryProgress = 0f,
+                iconMaterial = 0f,
+            ),
+        )
+        progress.floatValue = 0f
+        assertEquals(0f, anchor.surfaceAlpha)
+    }
 
     @Test
     fun transformSpringsUseFolmeValueTargetThreshold() {

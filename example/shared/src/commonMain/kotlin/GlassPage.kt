@@ -235,6 +235,7 @@ fun GlassPage(padding: PaddingValues) {
             topBar = {
                 GlassTopAppBar(
                     title = "Glass",
+                    isContentScrolled = contentUnderTopBar,
                     backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     style = style,
@@ -255,7 +256,7 @@ fun GlassPage(padding: PaddingValues) {
                             modifier = Modifier.glassPopupAnchor(
                                 anchor = menuAnchor,
                                 cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
-                                floating = collapseRamp > 0.01f,
+                                floating = contentUnderTopBar,
                             ),
                         ) {
                             Icon(
