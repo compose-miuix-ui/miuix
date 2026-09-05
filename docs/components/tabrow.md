@@ -170,25 +170,19 @@ TabRowWithContour(
 ```kotlin
 val tabs = listOf("Page 1", "Page 2", "Page 3")
 val pagerState = rememberPagerState { tabs.size }
-var selectedTabIndex by remember { mutableStateOf(0) }
-
-LaunchedEffect(pagerState.currentPage) {
-    selectedTabIndex = pagerState.currentPage
-}
-
-LaunchedEffect(selectedTabIndex) {
-    pagerState.animateScrollToPage(selectedTabIndex)
-}
+val scope = rememberCoroutineScope()
 
 Surface {
     Column {
         TabRow(
             tabs = tabs,
-            selectedTabIndex = selectedTabIndex,
-            onTabSelected = { selectedTabIndex = it }
+            selectedTabIndex = pagerState.currentPage,
+            onTabSelected = { index ->
+                scope.launch { pagerState.animateScrollToPage(index) }
+            }
         )
         HorizontalPager(
-            pagerState = pagerState,
+            state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
             Box(

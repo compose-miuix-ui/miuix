@@ -36,7 +36,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
@@ -48,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastRoundToInt
@@ -55,6 +60,7 @@ import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollHorizontal
 
 /**
  * A [TabRow] with Miuix style.
@@ -135,7 +141,15 @@ fun TabRow(
             }
         }
 
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(TabRowNestedScrollConnection)
+                .overScrollHorizontal(
+                    nestedScrollToParent = false,
+                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+                ),
+        ) {
             Box(
                 Modifier
                     .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).fastRoundToInt(), 0) }
@@ -268,7 +282,12 @@ fun TabRowWithContour(
             modifier = Modifier
                 .fillMaxSize()
                 .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
-                .padding(contourPadding),
+                .padding(contourPadding)
+                .nestedScroll(TabRowNestedScrollConnection)
+                .overScrollHorizontal(
+                    nestedScrollToParent = false,
+                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+                ),
         ) {
             Box(
                 Modifier
@@ -305,6 +324,19 @@ fun TabRowWithContour(
             }
         }
     }
+}
+
+private object TabRowNestedScrollConnection : NestedScrollConnection {
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset = Offset(available.x, 0f)
+
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity = Velocity(available.x, 0f)
 }
 
 @Composable
