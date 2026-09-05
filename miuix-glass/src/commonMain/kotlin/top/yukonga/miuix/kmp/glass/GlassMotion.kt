@@ -57,6 +57,10 @@ object GlassMotion {
     @Stable
     fun <T> navIndicatorTrail(): SpringSpec<T> = springOf(0.75f, 0.5f)
 
+    /** The bottom indicator follows drag targets with a critically damped spring. */
+    @Stable
+    fun <T> navDragFollow(): SpringSpec<T> = springOf(1f, 0.15f)
+
     /** [navIndicator] for the edge that leads the travel, [navIndicatorTrail] for the one behind. */
     @Stable
     fun <T> edgeSpring(leading: Boolean): SpringSpec<T> = if (leading) navIndicator() else navIndicatorTrail()

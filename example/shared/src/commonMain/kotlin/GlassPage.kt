@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,10 +34,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import component.basicComponentSection
 import component.buttonSection
@@ -179,6 +182,8 @@ private const val MATERIAL_DARK = 9
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
     val isInDark = isInDarkTheme()
+    val navigationBarInset = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
+    val bottomBarMargin = if (navigationBarInset < 24.dp) 24.dp else navigationBarInset + 8.dp
     val backdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
@@ -435,8 +440,7 @@ fun GlassPage(padding: PaddingValues) {
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(horizontal = 27.dp, vertical = 9.dp),
+                        .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -445,6 +449,18 @@ fun GlassPage(padding: PaddingValues) {
                         selectedIndex = navIndex,
                         onSelect = { navIndex = it },
                         backdrop = backdrop,
+                        modifier = Modifier.layout { measurable, constraints ->
+                            // BottomNavigator's four/five-item rule accounts for overlapping items
+                            // before deciding whether to use the compact 344dp wide-screen bar.
+                            val available = constraints.maxWidth + (10.dp * (NavItems.size - 1) - 6.dp).roundToPx()
+                            val width = if (constraints.hasBoundedWidth && available > 400.dp.roundToPx()) {
+                                constraints.constrainWidth(344.dp.roundToPx())
+                            } else {
+                                constraints.maxWidth
+                            }
+                            val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                            layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+                        },
                         style = style,
                         alpha = alpha,
                         stroke = stroke,
