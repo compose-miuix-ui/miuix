@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -26,7 +28,10 @@ import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -90,15 +95,9 @@ class GlassPopupPlacement internal constructor(
 /**
  * Works out where a menu belongs: two of its edges on the anchor's, clamped to the page.
  *
- * A menu puts its *end* edge on the anchor's, which is the source system's `TOP|END`. A second menu
- * opened from a row of the first is measured at least as wide as the first, so putting its end edge
- * on that row's puts both panels' edges in line. The vertical rule is the same either way: the top
- * edges meet, unless there is no room below and more above.
- *
- * The anchor a second menu is given has to be the row's resting bounds. A first menu shrinks while
- * a second stands in front of it, and bounds read back out of the shrunk panel drag the second menu
- * off the first by a few pixels — enough to leave the first menu's own shadow showing in the
- * corner the second one rounds away.
+ * An ordinary menu puts its end edge on the anchor's. The top edges meet unless there is no
+ * room below and more above. Secondary menus use [placeGlassSecondaryPopup] instead: start-edge
+ * alignment and upward shifting without flipping the opening direction.
  *
  * @param anchor The control or row the menu belongs to.
  * @param size The size the panel settles at.
@@ -145,6 +144,8 @@ internal fun placeGlassPopup(
  * @param reveal Clips the panel as it opens. A menu whose opening is the library's own passes
  *   [popupClipReveal] here; one that carries its own geometry leaves it empty.
  * @param onMeasured Called with the size the panel settles at, each time it is measured.
+ * @param interactive Whether the panel's rows can receive input and accessibility actions.
+ * @param scrollable Whether rows scroll within the safe-area-constrained secondary viewport.
  * @param content The rows.
  */
 @Composable
@@ -162,6 +163,8 @@ internal fun BoxScope.GlassPopupSurface(
     reveal: Modifier = Modifier,
     underlayMaterial: GlassMaterial? = null,
     onMeasured: ((Size) -> Unit)? = null,
+    interactive: Boolean = true,
+    scrollable: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Box(
@@ -222,10 +225,26 @@ internal fun BoxScope.GlassPopupSurface(
                 drawContent()
                 overlay()
             }
+            .then(
+                if (interactive) {
+                    Modifier
+                } else {
+                    Modifier
+                        .clearAndSetSemantics { }
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+                                }
+                            }
+                        }
+                },
+            )
             .layout { measurable, constraints ->
-                val widest = sizing.maxWidth.roundToPx().coerceAtMost(constraints.maxWidth)
+                val safeInset = if (scrollable) sizing.safeMargin.roundToPx() * 2 else 0
+                val widest = sizing.maxWidth.roundToPx().coerceAtMost((constraints.maxWidth - safeInset).coerceAtLeast(0))
                 val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
-                val tallest = sizing.maxHeight.roundToPx().coerceAtMost(constraints.maxHeight)
+                val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
                 val width = measurable.maxIntrinsicWidth(tallest).coerceIn(narrowest, widest)
                 val placeable = measurable.measure(
                     Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = tallest),
@@ -246,6 +265,7 @@ internal fun BoxScope.GlassPopupSurface(
     ) {
         Column(
             modifier = Modifier
+                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .graphicsLayer {
                     transformOrigin = TransformOrigin(0f, 0f)
                     contentLayer(measured.end, measured.rect)

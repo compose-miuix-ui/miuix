@@ -54,6 +54,7 @@ kotlin {
             api(projects.miuixBlur)
             api(projects.miuixUi)
             implementation(libs.jetbrains.compose.foundation)
+            implementation(libs.androidx.navigationevent)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

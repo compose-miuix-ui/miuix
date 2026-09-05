@@ -22,12 +22,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
@@ -41,15 +38,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.PopupLayoutPosition
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.popupClipReveal
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
-import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Default values for [GlassPopup]. */
@@ -230,9 +224,9 @@ object GlassPopupDefaults {
  * @param sizing How wide and tall the panel may be.
  * @param visuals What its surface is made of.
  * @param cornerRadius Corner radius the panel settles at.
- * @param secondary Whether this menu was opened from a row of another one. A second menu opens
- *   the way the library's own cascading menus do — the springs, the reveal and the chevron are
- *   [CascadingPopupDefaults] — rather than out of a control of its own.
+ * @param secondary Whether this menu was opened from a row of another one. Delegates to
+ *   [GlassSecondaryPopup]'s OS4 row-to-panel geometry. Use that component directly to inherit
+ *   the primary popup's button material through its `materialAnchor` parameter.
  * @param contentPadding Padding around the items.
  * @param content The items.
  */
@@ -250,9 +244,24 @@ fun BoxScope.GlassPopup(
     contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (secondary) {
+        GlassSecondaryPopup(
+            show = show,
+            onDismissRequest = onDismissRequest,
+            anchorBounds = anchorBounds,
+            backdrop = backdrop,
+            modifier = modifier,
+            sizing = sizing,
+            visuals = visuals,
+            cornerRadius = cornerRadius,
+            contentPadding = contentPadding,
+            content = content,
+        )
+        return
+    }
     val progress by animateFloatAsState(
         targetValue = if (show) 1f else 0f,
-        animationSpec = if (secondary) CascadingPopupDefaults.expandSpring(show) else GlassMotion.popupMorph(),
+        animationSpec = GlassMotion.popupMorph(),
         label = "glassPopupBounds",
     )
     val fade by animateFloatAsState(
@@ -268,8 +277,6 @@ fun BoxScope.GlassPopup(
     if (progress <= 0.001f && !show) return
 
     val startRadius = GlassMotion.POPUP_START_CORNER_DP.dp
-    var below by remember { mutableStateOf(true) }
-    val squircle = isSquircleEnabled()
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop,
@@ -281,15 +288,9 @@ fun BoxScope.GlassPopup(
         overlay = {},
         frame = { end, page ->
             val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), page)
-            below = settled.alignTop
-            if (secondary) {
-                GlassPopupFrame(settled.rect, cornerRadius)
-            } else {
-                directionFrame(settled, end, progress, startRadius, cornerRadius)
-            }
+            directionFrame(settled, end, progress, startRadius, cornerRadius)
         },
         contentLayer = { _, _ ->
-            if (secondary) return@GlassPopupSurface
             val t = progress.coerceIn(0f, 1f)
             val scale = GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t
             scaleX = scale
@@ -297,16 +298,6 @@ fun BoxScope.GlassPopup(
             val blur = (1f - sharpness) * GlassMotion.POPUP_MORPH_BLUR_PX
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
             alpha = fade
-        },
-        reveal = if (secondary) {
-            Modifier.popupClipReveal(
-                fractionProgress = { progress },
-                popupLayoutPosition = PopupLayoutPosition(below, !below, true),
-                cornerRadius = cornerRadius,
-                squircleEnabled = squircle,
-            )
-        } else {
-            Modifier
         },
         content = content,
     )

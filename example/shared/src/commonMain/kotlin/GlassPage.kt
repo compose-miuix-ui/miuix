@@ -69,10 +69,10 @@ import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassOverlayDefaults
-import top.yukonga.miuix.kmp.glass.GlassPopup
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
+import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassShape
 import top.yukonga.miuix.kmp.glass.GlassStroke
@@ -216,6 +216,7 @@ fun GlassPage(padding: PaddingValues) {
     val stroke = if (isInDark) StrokesDark[strokeIndex] else Strokes[strokeIndex].second
     val popupVisuals = GlassPopupDefaults.visuals(style = style, alpha = alpha, stroke = stroke)
     var submenu by remember { mutableStateOf(false) }
+    var submenuPresent by remember { mutableStateOf(false) }
     var submenuAnchor by remember { mutableStateOf(Rect.Zero) }
     var menuWidth by remember { mutableStateOf(0.dp) }
     var sortOrder by remember { mutableIntStateOf(0) }
@@ -257,7 +258,10 @@ fun GlassPage(padding: PaddingValues) {
                     },
                     actions = {
                         GlassIconButton(
-                            onClick = { overlayIndex = OVERLAY_POPUP },
+                            onClick = {
+                                submenu = false
+                                overlayIndex = OVERLAY_POPUP
+                            },
                             modifier = Modifier.glassPopupAnchor(
                                 anchor = menuAnchor,
                                 cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
@@ -514,8 +518,11 @@ fun GlassPage(padding: PaddingValues) {
         }
 
         GlassTransformPopup(
-            show = overlayIndex == OVERLAY_POPUP || submenu,
-            onDismissRequest = { overlayIndex = OVERLAY_NONE },
+            show = overlayIndex == OVERLAY_POPUP,
+            onDismissRequest = {
+                submenu = false
+                overlayIndex = OVERLAY_NONE
+            },
             anchor = menuAnchor,
             backdrop = backdrop,
             anchorContent = {
@@ -541,9 +548,14 @@ fun GlassPage(padding: PaddingValues) {
             )
             GlassPopupItem(
                 text = "Sort by",
-                onClick = { submenu = true },
+                onClick = {
+                    if (overlayIndex == OVERLAY_POPUP) {
+                        submenuPresent = true
+                        submenu = true
+                    }
+                },
                 modifier = Modifier.onGloballyPositioned {
-                    if (!submenu) submenuAnchor = it.boundsInRoot()
+                    if (!submenuPresent) submenuAnchor = it.boundsInRoot()
                 },
                 icon = MiuixIcons.Edit,
                 summary = SortOrders[sortOrder],
@@ -557,14 +569,15 @@ fun GlassPage(padding: PaddingValues) {
             )
         }
 
-        GlassPopup(
-            show = submenu,
+        GlassSecondaryPopup(
+            show = overlayIndex == OVERLAY_POPUP && submenu,
             onDismissRequest = { submenu = false },
             anchorBounds = submenuAnchor,
             backdrop = backdrop,
+            materialAnchor = menuAnchor,
+            onDismissFinished = { submenuPresent = false },
             sizing = GlassPopupSizing(minWidth = menuWidth),
             visuals = popupVisuals,
-            secondary = true,
         ) {
             GlassPopupItem(
                 text = "Sort by",

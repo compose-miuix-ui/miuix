@@ -10,6 +10,22 @@ import kotlin.test.assertEquals
 class GlassTransformPopupTest {
 
     @Test
+    fun closingRowsCannotReopenSubmenuBeforeOrDuringExit() {
+        assertEquals(false, isTransformPopupInteractive(show = false, stacked = false))
+        assertEquals(false, isTransformPopupInteractive(show = false, stacked = true))
+    }
+
+    @Test
+    fun openingRowsCanActivateSubmenuWithoutWaitingForAnimation() {
+        assertEquals(true, isTransformPopupInteractive(show = true, stacked = false))
+    }
+
+    @Test
+    fun stackedPrimaryRowsRemainNonInteractive() {
+        assertEquals(false, isTransformPopupInteractive(show = true, stacked = true))
+    }
+
+    @Test
     fun sharedAnchorOpacityTracksAnimationWithoutRepublishingSurface() {
         val progress = mutableFloatStateOf(1f)
         val anchor = GlassPopupAnchor().apply {

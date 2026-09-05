@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
 import kotlin.math.roundToInt
 
 /**
@@ -210,6 +209,9 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  * - The **panel's contents** scale with the panel's width, fade in and blur *down*, 50ms behind the
  *   control's. On the way out the two swap which of them waits.
  *
+ * Rows accept input during opening and while open, unless a secondary menu is stacked above them.
+ * During dismissal they remain drawn for the transform, but cannot activate a submenu.
+ *
  * @param show Whether the menu is open.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchor The control the menu grows out of.
@@ -278,7 +280,7 @@ fun BoxScope.GlassTransformPopup(
 
     val pushedBack by animateFloatAsState(
         targetValue = if (stacked) 1f else 0f,
-        animationSpec = CascadingPopupDefaults.expandSpring(stacked),
+        animationSpec = GlassMotion.secondaryPopup(stacked),
         label = "glassTransformStacked",
     )
     val active = show || transition.currentState || transition.isRunning
@@ -326,12 +328,17 @@ fun BoxScope.GlassTransformPopup(
         modifier = modifier,
         sizing = sizing,
         visuals = resolvedVisuals.copy(alpha = 1f),
+        interactive = isTransformPopupInteractive(show, stacked),
         underlayMaterial = anchorSurface?.underlayMaterial,
         contentPadding = contentPadding,
         onMeasured = onMeasured,
         panelLayer = {
             alpha = panelAlpha
-            val s = 1f + (CascadingPopupDefaults.PrimaryShrunkScale - 1f) * pushedBack
+            transformOrigin = TransformOrigin(
+                if (startRect.center.x < travel.endCenterX) 0f else 1f,
+                if (startRect.center.y < travel.endCenterY) 0f else 1f,
+            )
+            val s = 1f - 0.05f * pushedBack
             scaleX = s
             scaleY = s
         },
@@ -401,6 +408,9 @@ fun BoxScope.GlassTransformPopup(
 
 /** A simplified anchor skips the outgoing copy, but still receives it on the way home. */
 internal fun shouldRenderAnchorContent(simplified: Boolean, show: Boolean): Boolean = !simplified || !show
+
+/** Retained exit content is visual only, even before the transition starts its first exit frame. */
+internal fun isTransformPopupInteractive(show: Boolean, stacked: Boolean): Boolean = show && !stacked
 
 /** Matches `TransformAnimation.updateFloatingAlpha()` on the popup's whole container view. */
 internal fun transformPanelAlpha(

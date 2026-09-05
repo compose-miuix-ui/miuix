@@ -23,6 +23,49 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 
 ## Import
 
+### OS4 glass secondary menus
+
+The optional `miuix-glass` module provides `GlassSecondaryPopup` for a
+`GlassTransformPopup` in a shared root `Box`. This is a separate glass API, not a
+change to `OverlayCascadingListPopup` or its `surface` hook.
+
+It grows a panel from the trigger row plus vertical content padding without fading
+the panel or blurring its rows; the glass material retains its transparency.
+All four clip edges move; the rows stay full-size. Placement aligns the start edge
+(mirrored in RTL), shifting upward when space below is insufficient. Opening uses
+the native default spring (0.95 / 0.35s); collapse uses 0.95 / 0.2s. The primary
+popup's `stacked` state shrinks it to 0.95 with a mask using the same timing.
+
+```kotlin
+GlassSecondaryPopup(
+    show = submenuExpanded,
+    onDismissRequest = { submenuExpanded = false },
+    anchorBounds = frozenTriggerBounds,
+    backdrop = backdrop,
+    materialAnchor = menuAnchor, // same anchor as GlassTransformPopup
+    sizing = GlassPopupSizing(minWidth = primaryMenuWidth),
+    onDismissFinished = { submenuPresent = false },
+) {
+    GlassPopupItem(text = "Sort by", onClick = { submenuExpanded = false })
+    GlassPopupItem(text = "Name", onClick = { /* select */ })
+}
+```
+
+Keep the call composed during collapse. Freeze the trigger bounds before opening,
+and resume capturing them only after `onDismissFinished`, not as soon as `show`
+becomes false. Pass the primary button's `materialAnchor` to share backdrop, blur,
+colour treatment and bloom stroke; `visuals` still supplies opacity and shadow.
+Without an anchor, the supplied `backdrop` and `visuals` are used. Back and outside
+taps request collapse; choice callbacks decide whether to keep or dismiss menus.
+Rows accept clicks during opening, but become non-interactive as soon as dismissal
+is requested, including the primary `GlassTransformPopup` while it shrinks back
+into its button. Secondary visibility must depend on the primary being open,
+never reopen the primary in reverse. The existing
+`GlassPopup(secondary = true)` signature delegates to this geometry, but does not
+provide anchor material inheritance. See `GlassPage` for the paired example.
+
+### Overlay imports
+
 ```kotlin
 import top.yukonga.miuix.kmp.overlay.OverlayCascadingListPopup
 import top.yukonga.miuix.kmp.basic.DropdownEntry

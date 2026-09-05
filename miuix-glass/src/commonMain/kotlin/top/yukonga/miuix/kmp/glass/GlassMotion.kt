@@ -90,6 +90,14 @@ object GlassMotion {
     @Stable
     fun <T> default(): SpringSpec<T> = springOf(0.95f, 0.35f)
 
+    /** HyperPopupWindow's default opening spring and explicit secondary collapse spring. */
+    @Stable
+    fun secondaryPopup(expanding: Boolean): SpringSpec<Float> = if (expanding) {
+        transformSpring(0.95f, 0.35f)
+    } else {
+        transformSpring(0.95f, 0.2f)
+    }
+
     /** A top bar expanding back to its large title. */
     @Stable
     fun <T> barExpand(): SpringSpec<T> = springOf(1f, 0.3f)
