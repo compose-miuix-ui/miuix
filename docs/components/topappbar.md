@@ -19,6 +19,29 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 
 ## Basic Usage
 
+### Glass top bar material visibility
+
+`GlassTopAppBar` from the optional `miuix-glass` module accepts a required
+`isContentScrolled` parameter in a separate overload. Pass `listState.canScrollBackward`
+to start the material transition when content leaves the top and reverse it on return,
+even if the large title stays collapsed. The overlay mask uses a 100ms linear transition;
+navigation and action button surfaces share a 350ms linear transition. The existing
+Compose shadow appearance and scroll ramp are retained.
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    isContentScrolled = listState.canScrollBackward,
+    backdrop = backdrop,
+    scrollBehavior = scrollBehavior,
+)
+```
+
+The overload without `isContentScrolled` remains available and derives visibility from
+`scrollBehavior.state.contentOffset`. Use the explicit overload when the list's exact
+top position is available. A transforming popup anchored to a `GlassIconButton` inherits
+the button's material and current surface opacity automatically.
+
 ### Small TopAppBar
 
 ```kotlin

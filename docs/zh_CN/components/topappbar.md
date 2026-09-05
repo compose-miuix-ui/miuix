@@ -19,6 +19,27 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 
 ## 基本用法
 
+### 玻璃顶栏材质显示
+
+可选模块 `miuix-glass` 中的 `GlassTopAppBar` 提供带必填参数 `isContentScrolled`
+的独立重载。传入 `listState.canScrollBackward` 后，页面离开顶部时开始显示材质，
+回到顶部时反向退出，即使大标题仍处于收起状态也能正确恢复。顶栏遮罩使用 100ms
+线性过渡，导航按钮与操作按钮的表面共用 350ms 线性过渡；保留原有 Compose 阴影
+外观及随滚动变化的阴影进度。
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    isContentScrolled = listState.canScrollBackward,
+    backdrop = backdrop,
+    scrollBehavior = scrollBehavior,
+)
+```
+
+不带 `isContentScrolled` 的原重载仍然可用，通过 `scrollBehavior.state.contentOffset`
+推导显示状态。能够获取列表准确顶部位置时，建议使用显式重载。以 `GlassIconButton`
+为锚点的变换菜单会自动继承按钮材质及当前表面透明度。
+
 ### 小标题顶部栏
 
 ```kotlin
