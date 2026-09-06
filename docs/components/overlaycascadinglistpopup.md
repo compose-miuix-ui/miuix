@@ -80,6 +80,8 @@ follow the same progress using
 `arrowRotation = { rotation * (1f - menuAnchor.secondaryBackProgress) }`.
 The host must provide a navigation event dispatcher for Back gestures.
 
+The popup layer reserves space for the full shadow while its opacity changes, including predictive return to a button with no visible material at the top of the page.
+
 ### Overlay imports
 
 ```kotlin

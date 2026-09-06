@@ -25,12 +25,14 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.GraphicsLayerScope
+import androidx.compose.ui.graphics.LayerOutsets
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -173,6 +175,10 @@ internal fun BoxScope.GlassPopupSurface(
             .clickable(interactionSource = null, indication = null) { onDismissRequest() },
     )
 
+    val density = LocalDensity.current
+    val shadowOutsets = remember(visuals.shadow, density) {
+        with(density) { popupShadowOutsets(visuals.shadow) }
+    }
     val measured = remember { MeasuredPanel() }
     val shape = remember(measured) {
         val corner = MeasuredCorner(measured)
@@ -187,7 +193,12 @@ internal fun BoxScope.GlassPopupSurface(
                     placeable.place(measured.rect.left.roundToInt(), measured.rect.top.roundToInt())
                 }
             }
-            .graphicsLayer(panelLayer)
+            .graphicsLayer {
+                panelLayer()
+                // Alpha below one creates an offscreen buffer. Keep the shader shadow's
+                // external pixels inside it instead of clipping them to the panel rectangle.
+                outsets = shadowOutsets
+            }
             .then(reveal)
             .glassShadow(shape, visuals.shadow, visuals.alpha)
             .clip(shape)
@@ -274,6 +285,21 @@ internal fun BoxScope.GlassPopupSurface(
             content = content,
         )
     }
+}
+
+/** Match drawGlassShadow's bounds, including its source-density conversion and offset. */
+internal fun Density.popupShadowOutsets(shadow: GlassShadow?): LayerOutsets {
+    if (shadow == null) return LayerOutsets.Zero
+    val sourceScale = density / GlassDefaults.SourceDensity
+    val reach = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    val x = shadow.offsetX * sourceScale
+    val y = shadow.offsetY * sourceScale
+    return LayerOutsets(
+        left = (reach - x).coerceAtLeast(0f).toDp(),
+        top = (reach - y).coerceAtLeast(0f).toDp(),
+        right = (reach + x).coerceAtLeast(0f).toDp(),
+        bottom = (reach + y).coerceAtLeast(0f).toDp(),
+    )
 }
 
 /**

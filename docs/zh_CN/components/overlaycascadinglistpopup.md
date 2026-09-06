@@ -71,6 +71,8 @@ GlassSecondaryPopup(
 `arrowRotation = { rotation * (1f - menuAnchor.secondaryBackProgress) }`
 跟随相同进度。宿主需要提供导航事件分发器，才能接收返回手势。
 
+弹出层在透明度变化时会保留完整阴影所需的绘制范围，包括预测返回到页面顶部无可见材质的按钮时，避免阴影被面板矩形裁切。
+
 ### Overlay 引入
 
 ```kotlin
