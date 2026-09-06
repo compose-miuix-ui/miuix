@@ -27,6 +27,9 @@ import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 线性过渡，导航按钮与操作按钮的表面共用 350ms 线性过渡；保留原有 Compose 阴影
 外观及随滚动变化的阴影进度。
 
+顶部两侧按钮的边距均为 `GlassTopAppBarDefaults.HorizontalPadding`（12dp）。
+页面卡片和标签复用此值，即可对齐外边缘。
+
 ```kotlin
 GlassTopAppBar(
     title = "Glass",

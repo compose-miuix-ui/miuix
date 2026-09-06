@@ -45,6 +45,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 /** Default values for [GlassTopAppBar] and [GlassIconButton]. */
 object GlassTopAppBarDefaults {
 
+    /** Start/end inset of the glass controls, aligned with the page's cards and tabs. */
+    val HorizontalPadding: Dp = 12.dp
+
     /** Scroll threshold for the legacy shadow ramp. Material visibility is driven separately. */
     val RampStart: Dp = 0.dp
 
@@ -328,6 +331,8 @@ fun GlassTopAppBar(
                 color = Color.Transparent,
                 scrollBehavior = scrollBehavior,
                 defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+                navigationIconPadding = GlassTopAppBarDefaults.HorizontalPadding,
+                actionIconPadding = GlassTopAppBarDefaults.HorizontalPadding,
                 navigationIcon = navigationIcon,
                 actions = actions,
                 bottomContent = bottomContent,

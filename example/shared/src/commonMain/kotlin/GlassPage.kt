@@ -181,6 +181,7 @@ private const val MATERIAL_DARK = 9
 @Composable
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
+    val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
     val isInDark = isInDarkTheme()
     val navigationBarInset = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val bottomBarMargin = if (navigationBarInset < 24.dp) 24.dp else navigationBarInset + 8.dp
@@ -282,7 +283,7 @@ fun GlassPage(padding: PaddingValues) {
                         },
                         bottomContent = {
                             Column(
-                                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 6.dp),
+                                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 6.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 GlassTabRow(
@@ -344,7 +345,7 @@ fun GlassPage(padding: PaddingValues) {
                         ) {
                             item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
                             item(key = "glass-dropdown") {
-                                Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -387,7 +388,7 @@ fun GlassPage(padding: PaddingValues) {
                             textFieldSection()
                             item(key = "controls-title") { SmallTitle(text = "Material") }
                             item(key = "controls") {
-                                Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                                     OverlayDropdownPreference(
                                         title = "Material",
                                         items = Materials.map { it.first },

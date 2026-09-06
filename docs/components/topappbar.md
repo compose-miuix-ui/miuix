@@ -28,6 +28,9 @@ even if the large title stays collapsed. The overlay mask uses a 100ms linear tr
 navigation and action button surfaces share a 350ms linear transition. The existing
 Compose shadow appearance and scroll ramp are retained.
 
+`GlassTopAppBarDefaults.HorizontalPadding` is 12dp on both sides of the top controls.
+Use the same value for page cards and tabs to align their outer edges.
+
 ```kotlin
 GlassTopAppBar(
     title = "Glass",
