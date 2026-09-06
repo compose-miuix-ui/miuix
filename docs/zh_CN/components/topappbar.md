@@ -33,8 +33,22 @@ GlassTopAppBar(
     isContentScrolled = listState.canScrollBackward,
     backdrop = backdrop,
     scrollBehavior = scrollBehavior,
+    navigationIcon = {
+        GlassIconButton(onClick = { navigator.pop() }) {
+            Icon(
+                imageVector = MiuixIcons.Back,
+                contentDescription = "Back",
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    },
 )
 ```
+
+`navigationIcon` 和 `actions` 都直接绘制调用方内容。两侧均使用 `GlassIconButton`
+即可获得一致的按压反馈，导航栏不会再额外包裹玻璃背景。按钮继承导航栏的材质、
+尺寸、形状、填充、描边和阴影默认值。原有带 clickable 的导航图标应改为
+`GlassIconButton(onClick = { navigator.pop() }) { Icon(...) }`。
 
 不带 `isContentScrolled` 的原重载仍然可用，通过 `scrollBehavior.state.contentOffset`
 推导显示状态。能够获取列表准确顶部位置时，建议使用显式重载。以 `GlassIconButton`

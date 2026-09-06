@@ -146,6 +146,12 @@ internal data class GlassTopAppBarContext(
     val shadowAlpha: Float,
     val materialProgress: State<Float>,
     val keepMaterial: Boolean,
+    val style: GlassStyle,
+    val size: Dp,
+    val shape: GlassShape,
+    val fill: Color,
+    val stroke: GlassStroke?,
+    val shadow: GlassShadow?,
 )
 
 internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBarContext?> { null }
@@ -178,8 +184,8 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param stroke Optional bloom stroke on the button pills. The default is the source system's
  *   small action-button stroke.
  * @param defaultWindowInsetsPadding Whether to inset the bar for the status bar.
- * @param navigationIcon The leading control. The bar puts a glass pill behind it as it collapses;
- *   the icon keeps its own click handling.
+ * @param navigationIcon The leading control. Use [GlassIconButton] for the same glass surface
+ *   and press feedback as trailing controls. The slot is rendered without an extra surface.
  * @param actions Trailing controls. Wrap them in [GlassIconButton] to give them the same pill.
  * @param bottomContent Content pinned under the title, inside the bar. A tab row goes here: the
  *   band reaches over it, so the list passing underneath is dimmed before it meets the tabs.
@@ -306,6 +312,12 @@ fun GlassTopAppBar(
                 shadowAlpha = ramp * alpha,
                 materialProgress = materialProgress,
                 keepMaterial = keepMaterial,
+                style = style,
+                size = buttonSize,
+                shape = buttonShape,
+                fill = fill,
+                stroke = stroke,
+                shadow = buttonShadow,
             ),
         ) {
             BlurTopAppBar(
@@ -316,25 +328,7 @@ fun GlassTopAppBar(
                 color = Color.Transparent,
                 scrollBehavior = scrollBehavior,
                 defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-                navigationIcon = {
-                    GlassButtonSurface(
-                        backdrop = buttonBackdrop,
-                        floating = floating,
-                        surfaceAlpha = alpha,
-                        shadowAlpha = ramp * alpha,
-                        style = style,
-                        material = material,
-                        underlayMaterial = underlayMaterial,
-                        shape = buttonShape,
-                        size = buttonSize,
-                        fill = fill,
-                        stroke = stroke,
-                        shadow = buttonShadow,
-                        sharedProgress = materialProgress,
-                        sharedKeepMaterial = keepMaterial,
-                        content = navigationIcon,
-                    )
-                },
+                navigationIcon = navigationIcon,
                 actions = actions,
                 bottomContent = bottomContent,
             )
@@ -367,12 +361,12 @@ fun GlassIconButton(
     modifier: Modifier = Modifier,
     backdrop: Backdrop? = null,
     surfaceAlpha: Float = 1f,
-    style: GlassStyle = GlassDefaults.Style,
-    size: Dp = GlassTopAppBarDefaults.ButtonSize,
-    shape: GlassShape = GlassShape(size / 2),
-    fill: Color = GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
-    shadow: GlassShadow? = GlassShadows.Regular,
+    style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
+    size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
+    shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: GlassShape(size / 2),
+    fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
+    stroke: GlassStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
+    shadow: GlassShadow? = LocalGlassTopAppBarContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -404,7 +398,7 @@ fun GlassIconButton(
     )
 }
 
-/** The pill itself, shared by [GlassTopAppBar]'s navigation icon and [GlassIconButton]. */
+/** The surface and press feedback used by [GlassIconButton] in either top-bar slot. */
 @Composable
 // foldIn only reads the anchor marker; the modifier is still applied to exactly one root Box.
 @Suppress("ktlint:compose:modifier-reused-check", "ktlint:compose:state-param-check")

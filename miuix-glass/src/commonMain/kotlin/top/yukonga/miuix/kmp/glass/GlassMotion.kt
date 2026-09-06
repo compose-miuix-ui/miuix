@@ -98,6 +98,17 @@ object GlassMotion {
         transformSpring(0.95f, 0.2f)
     }
 
+    /** HyperPopupWindow's independent AUTO_ALPHA track, with ViewProperty's alpha threshold. */
+    @Stable
+    internal fun secondaryPopupMask(expanding: Boolean): SpringSpec<Float> = folmeSpring(
+        damping = 0.95f,
+        response = if (expanding) 0.35f else 0.2f,
+        visibilityThreshold = POPUP_MASK_MIN_VISIBLE_CHANGE * 0.75f,
+    )
+
+    /** ViewProperty.AUTO_ALPHA hides the mask below one 8-bit alpha step. */
+    internal const val POPUP_MASK_MIN_VISIBLE_CHANGE: Float = 1f / 256f
+
     /** A top bar expanding back to its large title. */
     @Stable
     fun <T> barExpand(): SpringSpec<T> = springOf(1f, 0.3f)

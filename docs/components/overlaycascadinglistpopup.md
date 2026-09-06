@@ -41,7 +41,7 @@ GlassSecondaryPopup(
     show = submenuExpanded,
     onDismissRequest = { submenuExpanded = false },
     anchorBounds = frozenTriggerBounds,
-    backdrop = backdrop,
+    backdrop = secondaryBackdrop,
     materialAnchor = menuAnchor, // same anchor as GlassTransformPopup
     sizing = GlassPopupSizing(minWidth = primaryMenuWidth),
     onDismissFinished = { submenuPresent = false },
@@ -53,9 +53,9 @@ GlassSecondaryPopup(
 
 Keep the call composed during collapse. Freeze the trigger bounds before opening,
 and resume capturing them only after `onDismissFinished`, not as soon as `show`
-becomes false. Pass the primary button's `materialAnchor` to share backdrop, blur,
+becomes false. Pass the primary button's `materialAnchor` to share blur,
 colour treatment and bloom stroke; `visuals` still supplies opacity and shadow.
-Without an anchor, the supplied `backdrop` and `visuals` are used. Back and outside
+An explicit `backdrop` takes precedence; null falls back to the anchor backdrop. Back and outside
 taps request collapse; choice callbacks decide whether to keep or dismiss menus.
 Rows accept clicks during opening, but become non-interactive as soon as dismissal
 is requested, including the primary `GlassTransformPopup` while it shrinks back
@@ -63,6 +63,22 @@ into its button. Secondary visibility must depend on the primary being open,
 never reopen the primary in reverse. The existing
 `GlassPopup(secondary = true)` signature delegates to this geometry, but does not
 provide anchor material inheritance. See `GlassPage` for the paired example.
+
+Apply `Modifier.layerBackdrop(secondaryBackdrop)` to a `Box` containing the page
+and primary menu, keep the secondary outside that `Box`, and pass
+`backdrop = secondaryBackdrop`. This includes the primary contents, scale and mask
+in the secondary blur without sampling the secondary itself. See `GlassPage` for
+the complete structure. The primary mask has its own alpha spring: 0.95 / 0.35s
+on expansion and 0.95 / 0.2s on collapse, settling at `(1 / 256) × 0.75` and hiding
+at alpha `1 / 256`, matching the source's AUTO_ALPHA behavior.
+
+Predictive Back previews the secondary collapse first; with no secondary open,
+it previews the primary transform back into its button. Cancellation springs back,
+and completion continues closing from the current gesture fraction. A shared
+`materialAnchor` synchronizes the primary scale and mask. Custom submenu arrows can
+follow the same progress using
+`arrowRotation = { rotation * (1f - menuAnchor.secondaryBackProgress) }`.
+The host must provide a navigation event dispatcher for Back gestures.
 
 ### Overlay imports
 

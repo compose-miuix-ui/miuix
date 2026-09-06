@@ -34,8 +34,22 @@ GlassTopAppBar(
     isContentScrolled = listState.canScrollBackward,
     backdrop = backdrop,
     scrollBehavior = scrollBehavior,
+    navigationIcon = {
+        GlassIconButton(onClick = { navigator.pop() }) {
+            Icon(
+                imageVector = MiuixIcons.Back,
+                contentDescription = "Back",
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    },
 )
 ```
+
+Both `navigationIcon` and `actions` render their content directly. Use `GlassIconButton`
+in either slot for matching press feedback; the bar does not add a second glass surface.
+Buttons inherit the bar's material, size, shape, fill, stroke and shadow defaults.
+Replace a bare clickable navigation icon with `GlassIconButton(onClick = { navigator.pop() }) { Icon(...) }`.
 
 The overload without `isContentScrolled` remains available and derives visibility from
 `scrollBehavior.state.contentOffset`. Use the explicit overload when the list's exact

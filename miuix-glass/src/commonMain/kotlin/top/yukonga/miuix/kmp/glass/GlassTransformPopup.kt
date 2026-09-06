@@ -16,6 +16,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,15 @@ import kotlin.math.roundToInt
  */
 @Stable
 class GlassPopupAnchor {
+
+    internal var secondaryBackProgressState: State<Float>? by mutableStateOf(null)
+
+    /**
+     * Secondary predictive-back progress, including cancellation recovery and the retained exit
+     * fraction. Read inside a draw/layer callback to make custom arrows follow the menu:
+     * `arrowRotation = { rotation * (1f - anchor.secondaryBackProgress) }`.
+     */
+    val secondaryBackProgress: Float get() = secondaryBackProgressState?.value ?: 0f
 
     /** Material supplied by an attached glass button, including its resolved backdrop. */
     internal var surface: GlassAnchorSurface? by mutableStateOf(null)
@@ -211,6 +221,8 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
  *
  * Rows accept input during opening and while open, unless a secondary menu is stacked above them.
  * During dismissal they remain drawn for the transform, but cannot activate a submenu.
+ * Predictive Back follows the transform toward the anchor and springs back on cancellation.
+ * While [stacked], the secondary menu handles Back instead.
  *
  * @param show Whether the menu is open.
  * @param onDismissRequest Called when a tap outside should close it.
@@ -261,29 +273,41 @@ fun BoxScope.GlassTransformPopup(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val transition = updateTransition(show, label = "glassTransformPopup")
-    val bounds by transition.animateFloat(
+    val bounds = transition.animateFloat(
         transitionSpec = { GlassMotion.transformBounds(targetState) },
         label = "glassTransformBounds",
     ) { if (it) 1f else 0f }
-    val center by transition.animateFloat(
+    val center = transition.animateFloat(
         transitionSpec = { GlassMotion.transformCenter(targetState) },
         label = "glassTransformCenter",
     ) { if (it) 1f else 0f }
-    val iconMaterial by transition.animateFloat(
+    val iconMaterial = transition.animateFloat(
         transitionSpec = { GlassMotion.transformIconMaterial(targetState) },
         label = "glassTransformIcon",
     ) { if (it) 1f else 0f }
-    val contentMaterial by transition.animateFloat(
+    val contentMaterial = transition.animateFloat(
         transitionSpec = { GlassMotion.transformContentMaterial(targetState) },
         label = "glassTransformContent",
     ) { if (it) 1f else 0f }
 
-    val pushedBack by animateFloatAsState(
+    val pushedBack = animateFloatAsState(
         targetValue = if (stacked) 1f else 0f,
         animationSpec = GlassMotion.secondaryPopup(stacked),
         label = "glassTransformStacked",
     )
+    val maskAlpha = animateFloatAsState(
+        targetValue = if (stacked) 1f else 0f,
+        animationSpec = GlassMotion.secondaryPopupMask(stacked),
+        label = "glassTransformMask",
+    )
     val active = show || transition.currentState || transition.isRunning
+    val backProgress = rememberGlassPopupBackProgress(
+        show = show,
+        active = active,
+        enabled = show && !stacked,
+        resetSpec = GlassMotion.transformBounds(true),
+        onDismissRequest = onDismissRequest,
+    )
     DisposableEffect(active, anchor) {
         anchor.contentHidden = active
         onDispose { anchor.contentHidden = false }
@@ -305,9 +329,11 @@ fun BoxScope.GlassTransformPopup(
     val startRect = anchor.containerBounds
     val iconRect = anchor.contentBounds.takeUnless { it.isEmpty } ?: startRect
     val startRadius = anchor.cornerRadius
-    val geometryProgress = bounds
-    val centerProgress = center
-    val panelAlpha = transformPanelAlpha(
+    fun geometryProgress() = popupFractionWithBack(bounds.value, backProgress.value)
+    fun centerProgress() = popupFractionWithBack(center.value, backProgress.value)
+    fun iconProgress() = popupFractionWithBack(iconMaterial.value, backProgress.value)
+    fun stackedProgress() = popupFractionWithBack(pushedBack.value, anchor.secondaryBackProgress)
+    fun panelAlpha() = transformPanelAlpha(
         visualAlpha = visuals.alpha,
         floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceAlpha > 0f else anchor.floating,
         // transformPanelAlpha multiplies by visualAlpha; the published surface alpha already
@@ -317,8 +343,8 @@ fun BoxScope.GlassTransformPopup(
         } else {
             anchorAlpha
         },
-        geometryProgress = geometryProgress,
-        iconMaterial = iconMaterial,
+        geometryProgress = geometryProgress(),
+        iconMaterial = iconProgress(),
     )
     val travel = remember { TransformTravel() }
 
@@ -333,17 +359,20 @@ fun BoxScope.GlassTransformPopup(
         contentPadding = contentPadding,
         onMeasured = onMeasured,
         panelLayer = {
-            alpha = panelAlpha
+            alpha = panelAlpha()
             transformOrigin = TransformOrigin(
                 if (startRect.center.x < travel.endCenterX) 0f else 1f,
                 if (startRect.center.y < travel.endCenterY) 0f else 1f,
             )
-            val s = 1f - 0.05f * pushedBack
+            val s = 1f - 0.05f * stackedProgress()
             scaleX = s
             scaleY = s
         },
         overlay = {
-            if (pushedBack > 0.001f) drawRect(maskColor.copy(alpha = maskColor.alpha * pushedBack))
+            val fraction = popupFractionWithBack(maskAlpha.value, anchor.secondaryBackProgress).coerceIn(0f, 1f)
+            if (fraction > GlassMotion.POPUP_MASK_MIN_VISIBLE_CHANGE) {
+                drawRect(maskColor.copy(alpha = maskColor.alpha * fraction))
+            }
         },
         frame = { end, page ->
             val frame = transformFrame(
@@ -352,8 +381,8 @@ fun BoxScope.GlassTransformPopup(
                 page = page,
                 margin = sizing.safeMargin.toPx(),
                 gap = gap.toPx(),
-                sizeFraction = geometryProgress,
-                positionFraction = centerProgress,
+                sizeFraction = geometryProgress(),
+                positionFraction = centerProgress(),
                 startRadius = startRadius,
                 endRadius = cornerRadius,
             )
@@ -364,18 +393,25 @@ fun BoxScope.GlassTransformPopup(
             frame
         },
         contentLayer = { end, _ ->
-            val width = startRect.width + (end.width - startRect.width) * geometryProgress
+            val width = startRect.width + (end.width - startRect.width) * geometryProgress()
             val scale = if (end.width > 0f) (width / end.width).coerceAtMost(1f) else 1f
             scaleX = scale
             scaleY = scale
-            alpha = contentMaterial
-            val blur = GlassMotion.TRANSFORM_BLUR_PX * (1f - contentMaterial)
+            val fraction = popupFractionWithBack(contentMaterial.value, backProgress.value)
+            alpha = fraction
+            val blur = GlassMotion.TRANSFORM_BLUR_PX * (1f - fraction)
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
         },
         content = content,
     )
 
-    if (shouldRenderAnchorContent(simplified, show) && iconMaterial < 0.999f) {
+    val renderAnchorContent by remember(simplified, show, iconMaterial, backProgress) {
+        derivedStateOf {
+            shouldRenderAnchorContent(simplified, show && backProgress.value == 0f) &&
+                popupFractionWithBack(iconMaterial.value, backProgress.value) < 0.999f
+        }
+    }
+    if (renderAnchorContent) {
         Box(
             modifier = Modifier
                 .layout { measurable, constraints ->
@@ -390,15 +426,16 @@ fun BoxScope.GlassTransformPopup(
                     }
                 }
                 .graphicsLayer {
-                    translationX = (travel.endCenterX - startRect.center.x) * centerProgress
-                    translationY = (travel.endCenterY - startRect.center.y) * centerProgress
-                    val width = startRect.width + (travel.endWidth - startRect.width) * geometryProgress
+                    translationX = (travel.endCenterX - startRect.center.x) * centerProgress()
+                    translationY = (travel.endCenterY - startRect.center.y) * centerProgress()
+                    val width = startRect.width + (travel.endWidth - startRect.width) * geometryProgress()
                     val growth = if (startRect.width > 0f) width / startRect.width else 1f
                     scaleX = growth
                     scaleY = growth
                     transformOrigin = TransformOrigin(0.5f, 0.5f)
-                    alpha = 1f - iconMaterial
-                    val blur = GlassMotion.TRANSFORM_BLUR_PX * iconMaterial
+                    val fraction = iconProgress()
+                    alpha = 1f - fraction
+                    val blur = GlassMotion.TRANSFORM_BLUR_PX * fraction
                     renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
                 },
             content = { anchorContent() },

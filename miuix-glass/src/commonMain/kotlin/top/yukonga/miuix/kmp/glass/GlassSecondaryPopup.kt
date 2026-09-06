@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +25,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.lerp
-import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.blur.Backdrop
 
@@ -39,15 +37,19 @@ import top.yukonga.miuix.kmp.blur.Backdrop
  * unchanged. Its start edge aligns to the row
  * (mirrored in RTL), and insufficient space below shifts it up rather than reversing the reveal.
  * Rows accept input during opening; requesting dismissal disables them immediately.
+ * Predictive Back previews collapse, restores the panel on cancellation, and requests dismissal
+ * on completion. A shared [materialAnchor] also drives the primary panel's scale and mask.
  *
  * @param show Whether the secondary menu is expanded. Keep this call composed during collapse.
  * @param onDismissRequest Called by a tap outside or Back to return to the primary menu.
  * @param anchorBounds Resting bounds of the trigger row, in the same root as this popup. Freeze
  *   these before setting the primary [GlassTransformPopup]'s `stacked` flag.
- * @param backdrop Background sampled when [materialAnchor] has no attached surface.
+ * @param backdrop Background sampled behind this menu. Include the primary popup in this layer
+ *   so its rendered content is blurred underneath the secondary. Null uses the anchor backdrop.
  * @param modifier Modifier applied to the panel.
  * @param materialAnchor The primary transform popup's button anchor. Passing the same anchor
- *   shares its backdrop, blur, colour treatment and bloom stroke across both menu levels.
+ *   shares its blur, colour treatment and bloom stroke across both menu levels; an explicit
+ *   [backdrop] takes precedence over the button backdrop.
  * @param sizing Panel limits. Set minWidth to the primary panel's measured width.
  * @param visuals Surface appearance, also used when no anchor surface is available.
  * @param cornerRadius Rounded clip radius throughout the transition.
@@ -77,6 +79,22 @@ fun BoxScope.GlassSecondaryPopup(
         transitionSpec = { GlassMotion.secondaryPopup(targetState) },
         label = "glassSecondaryBounds",
     ) { if (it) 1f else 0f }
+    val active = show || state.currentState || !state.isIdle
+    val backProgress = rememberGlassPopupBackProgress(
+        show = show,
+        active = active,
+        enabled = show,
+        resetSpec = GlassMotion.secondaryPopup(true),
+        onDismissRequest = onDismissRequest,
+    )
+    DisposableEffect(materialAnchor, backProgress) {
+        materialAnchor?.secondaryBackProgressState = backProgress
+        onDispose {
+            if (materialAnchor?.secondaryBackProgressState === backProgress) {
+                materialAnchor.secondaryBackProgressState = null
+            }
+        }
+    }
     val onFinished by rememberUpdatedState(onDismissFinished)
     var hasOpened by remember { mutableStateOf(false) }
     LaunchedEffect(show) {
@@ -88,13 +106,7 @@ fun BoxScope.GlassSecondaryPopup(
             onFinished?.invoke()
         }
     }
-    if (!show && !state.currentState && state.isIdle) return
-
-    NavigationBackHandler(
-        state = rememberNavigationEventState(currentInfo = NavigationEventInfo.None),
-        isBackEnabled = show,
-        onBackCompleted = onDismissRequest,
-    )
+    if (!active) return
     val direction = LocalLayoutDirection.current
     val source = materialAnchor?.surface
     val resolvedVisuals = if (source != null) {
@@ -104,7 +116,7 @@ fun BoxScope.GlassSecondaryPopup(
     }
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
-        backdrop = if (source != null) source.backdrop else backdrop,
+        backdrop = backdrop ?: source?.backdrop,
         modifier = modifier,
         sizing = sizing,
         visuals = resolvedVisuals,
@@ -122,7 +134,7 @@ fun BoxScope.GlassSecondaryPopup(
                     settled,
                     contentPadding.calculateTopPadding().toPx(),
                     contentPadding.calculateBottomPadding().toPx(),
-                    progress.value,
+                    popupFractionWithBack(progress.value, backProgress.value),
                 ),
                 cornerRadius,
             )
