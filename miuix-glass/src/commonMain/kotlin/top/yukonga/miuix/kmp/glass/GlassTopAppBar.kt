@@ -187,6 +187,8 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param stroke Optional bloom stroke on the button pills. The default is the source system's
  *   small action-button stroke.
  * @param defaultWindowInsetsPadding Whether to inset the bar for the status bar.
+ * @param contentModifier Applied to the foreground bar, leaving its background band stationary.
+ * @param titleAlpha Draw-phase opacity of the compact and large title containers.
  * @param navigationIcon The leading control. Use [GlassIconButton] for the same glass surface
  *   and press feedback as trailing controls. The slot is rendered without an extra surface.
  * @param actions Trailing controls. Wrap them in [GlassIconButton] to give them the same pill.
@@ -197,6 +199,7 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
 fun GlassTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
     backdrop: Backdrop? = null,
     largeTitle: String = title,
     subtitle: String = "",
@@ -212,6 +215,7 @@ fun GlassTopAppBar(
     stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
     buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
+    titleAlpha: () -> Float = { 1f },
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
@@ -234,6 +238,8 @@ fun GlassTopAppBar(
     stroke = stroke,
     buttonShadow = buttonShadow,
     defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+    contentModifier = contentModifier,
+    titleAlpha = titleAlpha,
     navigationIcon = navigationIcon,
     actions = actions,
     bottomContent = bottomContent,
@@ -253,6 +259,7 @@ fun GlassTopAppBar(
     title: String,
     isContentScrolled: Boolean,
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
     backdrop: Backdrop? = null,
     largeTitle: String = title,
     subtitle: String = "",
@@ -268,6 +275,7 @@ fun GlassTopAppBar(
     stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
     buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
+    titleAlpha: () -> Float = { 1f },
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
@@ -325,6 +333,8 @@ fun GlassTopAppBar(
         ) {
             BlurTopAppBar(
                 title = title,
+                modifier = contentModifier,
+                titleAlpha = titleAlpha,
                 largeTitle = largeTitle,
                 largeTitleBlurRadius = largeTitleBlurRadius,
                 subtitle = subtitle,

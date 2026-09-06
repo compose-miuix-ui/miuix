@@ -313,3 +313,22 @@ Box(modifier = Modifier.fillMaxSize()) {
     }
 }
 ```
+
+### Search transitions with glass top bars
+
+`GlassTopAppBar` provides `contentModifier: Modifier = Modifier` for transforming
+its foreground independently of the background band. Keep search-mode scale,
+alpha and blur on `contentModifier`; `modifier` transforms the entire bar,
+including the band that masks scrolling content.
+
+Both `GlassTopAppBar` and `BlurTopAppBar` accept `titleAlpha: () -> Float = { 1f }`.
+This is read during drawing and multiplies the existing collapse opacity of the
+compact and large title containers, including the subtitle.
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    contentModifier = Modifier.graphicsLayer { alpha = foregroundAlpha.value },
+    titleAlpha = { titleOpacity.value },
+)
+```

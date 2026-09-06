@@ -5,6 +5,9 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
@@ -28,13 +31,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.BlurEffect
@@ -47,6 +50,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -70,13 +74,21 @@ import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-// SearchActionModeView: 400ms animator using SpringInterpolator(0.98, 0.75).
-// The interpolator evaluates one second of spring time across the animator's duration.
-private val SearchModeEasing = Easing { fraction ->
-    val omega = 2.0 * PI / 0.75
-    val decay = -0.98 * omega
-    val frequency = omega * sqrt(1.0 - 0.98 * 0.98)
-    (1.0 + exp(decay * fraction) * (-cos(frequency * fraction) + decay / frequency * sin(frequency * fraction))).toFloat()
+// EaseManager.SpringInterpolator (the nested legacy class) evaluates one second
+// across the 400ms animator. The standalone SpringInterpolator is a different API.
+private val SearchModeEasing: Easing = run {
+    val omega = 2.0 * PI / 0.75f
+    val stiffness = (omega * omega).toFloat()
+    val damping = (0.98f * 2.0 * omega).toFloat()
+    val decay = -damping / 2f
+    val frequency = sqrt(-(damping.toDouble() * damping - stiffness.toDouble() * 4)).toFloat() / 2f
+    val sineCoefficient = decay / frequency
+    Easing { fraction ->
+        (
+            1.0 + exp((decay * fraction).toDouble()) *
+                (-cos((frequency * fraction).toDouble()) + sineCoefficient * sin((frequency * fraction).toDouble()))
+            ).toFloat()
+    }
 }
 
 /** Example search mode, kept composed through its exit so Cancel can reverse the entrance. */
@@ -100,6 +112,8 @@ internal fun GlassSearchOverlay(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
+    val density = LocalDensity.current
+    val statusBarHeight = WindowInsets.statusBars.getTop(density)
     val active = expanded || transition.currentState || transition.isRunning
     LaunchedEffect(expanded) {
         query = ""
@@ -129,16 +143,16 @@ internal fun GlassSearchOverlay(
                     false
                 }
             }
-            .drawBehind { drawRect(colors.surface.copy(alpha = progress.value.coerceIn(0f, 1f))) }
+            .graphicsLayer { alpha = if (expanded) 1f else 0f }
             .windowInsetsPadding(WindowInsets.statusBars)
             .imePadding(),
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
-                .graphicsLayer { translationY = 52.dp.toPx() * (1f - progress.value) },
-            verticalAlignment = Alignment.CenterVertically,
+                // Without a content anchor, native search animates only its top inset.
+                .graphicsLayer { translationY = -statusBarHeight * (1f - progress.value) },
         ) {
             BasicTextField(
                 value = query,
@@ -150,9 +164,16 @@ internal fun GlassSearchOverlay(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
+                    .layout { measurable, constraints ->
+                        val endSpace = (54.dp.toPx() * progress.value).toInt()
+                        val width = (constraints.maxWidth - endSpace).coerceAtLeast(0)
+                        val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                        layout(constraints.maxWidth, placeable.height) {
+                            placeable.placeRelative(0, 0)
+                        }
+                    }
                     .height(44.dp)
-                    .graphicsLayer { alpha = progress.value }
                     .focusRequester(focusRequester),
                 decorationBox = { field ->
                     Row(
@@ -181,22 +202,16 @@ internal fun GlassSearchOverlay(
             )
             Box(
                 modifier = Modifier
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints.copy(minWidth = 0))
-                        layout((placeable.width * progress.value).toInt().coerceAtLeast(0), placeable.height) {
-                            placeable.placeRelative(0, 0)
-                        }
-                    }
+                    .align(Alignment.CenterEnd)
                     .graphicsLayer {
                         val fraction = progress.value
-                        translationX = size.width * (1f - fraction) * if (direction == LayoutDirection.Ltr) 1f else -1f
+                        translationX = 66.dp.toPx() * (1f - fraction) * if (direction == LayoutDirection.Ltr) 1f else -1f
                         scaleX = fraction
                         scaleY = fraction
                         alpha = cancelAlpha.value
                         val blur = 50f * (1f - cancelAlpha.value)
                         renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
-                    }
-                    .padding(start = 10.dp),
+                    },
             ) {
                 IconButton(
                     onClick = onDismissRequest,
@@ -241,4 +256,26 @@ internal fun Modifier.glassSearchBarTransition(expanded: Boolean): Modifier {
         alpha = opacity.value
         renderEffect = if (blur.value > 0.5f) BlurEffect(blur.value, blur.value, TileMode.Decal) else null
     }
+}
+
+/** ActionBarView reveals the title container after exit progress crosses 0.8. */
+@Composable
+internal fun rememberGlassSearchTitleAlpha(expanded: Boolean, collapsed: Boolean): () -> Float {
+    val transition = updateTransition(expanded, label = "glassSearchTitlePhase")
+    val progress = transition.animateFloat(
+        transitionSpec = { tween(400, easing = SearchModeEasing) },
+        label = "glassSearchTitleExitProgress",
+    ) { if (it) 0f else 1f }
+    val reveal by remember(expanded, progress) { derivedStateOf { expanded || progress.value > 0.8f } }
+    val response = if (collapsed) 0.15f else 0.6f
+    val titleAlpha = animateFloatAsState(
+        targetValue = if (reveal) 1f else 0f,
+        animationSpec = if (reveal && !expanded) {
+            spring(dampingRatio = 1f, stiffness = (2 * PI / response).let { (it * it).toFloat() }, visibilityThreshold = 0.001f)
+        } else {
+            snap()
+        },
+        label = "glassSearchTitleAlpha",
+    )
+    return remember(titleAlpha) { { titleAlpha.value } }
 }

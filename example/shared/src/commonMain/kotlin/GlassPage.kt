@@ -251,7 +251,8 @@ fun GlassPage(padding: PaddingValues) {
                 topBar = {
                     GlassTopAppBar(
                         title = "Glass",
-                        modifier = Modifier.glassSearchBarTransition(searchExpanded),
+                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded),
+                        titleAlpha = rememberGlassSearchTitleAlpha(searchExpanded, scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit),
                         isContentScrolled = contentUnderTopBar,
                         backdrop = backdrop,
                         scrollBehavior = scrollBehavior,
@@ -305,7 +306,9 @@ fun GlassPage(padding: PaddingValues) {
                         },
                         bottomContent = {
                             Column(
-                                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 6.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = horizontalPadding).padding(bottom = 6.dp)
+                                    .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 GlassTabRow(
@@ -345,7 +348,7 @@ fun GlassPage(padding: PaddingValues) {
                     )
                 },
             ) { innerPadding ->
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
                     Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop).background(MiuixTheme.colorScheme.surface)) {
                         if (wallpaper) {
                             Image(

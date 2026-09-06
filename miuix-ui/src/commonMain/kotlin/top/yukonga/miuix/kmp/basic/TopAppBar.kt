@@ -167,6 +167,7 @@ fun TopAppBar(
  * @param titlePadding The horizontal padding of the title and large title.
  * @param navigationIconPadding The start padding of the navigation icon.
  * @param actionIconPadding The end padding of the action icons.
+ * @param titleAlpha Draw-phase opacity applied to both title containers.
  * @param bottomContent Content displayed below the title bar area.
  */
 @Composable
@@ -187,6 +188,7 @@ fun BlurTopAppBar(
     titlePadding: Dp = TopAppBarDefaults.TitlePadding,
     navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
+    titleAlpha: () -> Float = { 1f },
     bottomContent: @Composable () -> Unit = {},
 ) {
     // Wrap the given actions in a Row.
@@ -205,6 +207,7 @@ fun BlurTopAppBar(
     // app bar's defined constant height value (i.e. the ContainerHeight token).
     TopAppBarLayout(
         title = title,
+        titleAlpha = titleAlpha,
         color = color,
         titleColor = titleColor,
         largeTitle = largeTitle,
@@ -715,6 +718,7 @@ private fun TopAppBarLayout(
     largeTitle: String = title,
     largeTitleBlurRadius: Dp = 0.dp,
     defaultWindowInsetsPadding: Boolean = true,
+    titleAlpha: () -> Float = { 1f },
     bottomContent: @Composable () -> Unit = {},
 ) {
     // Producer lambdas — reads stay in layout/draw phases so scroll never recomposes this subtree.
@@ -807,7 +811,7 @@ private fun TopAppBarLayout(
                     .layoutId("title")
                     .padding(horizontal = titlePadding)
                     .graphicsLayer {
-                        alpha = smallTitleAlpha.value
+                        alpha = smallTitleAlpha.value * titleAlpha()
                         translationY = smallTitleTranslationY.value
                     },
             ) {
@@ -833,7 +837,7 @@ private fun TopAppBarLayout(
                     .padding(top = TopAppBarDefaults.CollapsedHeight)
                     .padding(horizontal = titlePadding)
                     .graphicsLayer {
-                        alpha = largeTitleAlpha()
+                        alpha = largeTitleAlpha() * titleAlpha()
                         // Assigned on every path, including the disabled one: the layer keeps
                         // whatever it was last given, so a radius that drops back to zero would
                         // otherwise leave the last blur on the title for good.
@@ -877,7 +881,7 @@ private fun TopAppBarLayout(
                     Modifier
                         .layoutId("smallSubtitle")
                         .graphicsLayer {
-                            alpha = smallTitleAlpha.value
+                            alpha = smallTitleAlpha.value * titleAlpha()
                             translationY = smallTitleTranslationY.value
                         },
                 ) {

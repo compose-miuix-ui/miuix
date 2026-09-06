@@ -311,3 +311,20 @@ Box(modifier = Modifier.fillMaxSize()) {
     }
 }
 ```
+
+### 玻璃顶栏的搜索过渡
+
+`GlassTopAppBar` 提供 `contentModifier: Modifier = Modifier`，用于独立变换前景，
+保持背景遮罩不动。搜索模式的缩放、透明度和模糊应放在 `contentModifier` 上；
+`modifier` 会变换整个顶栏，包括遮挡滚动内容的背景带。
+
+`GlassTopAppBar` 和 `BlurTopAppBar` 均支持 `titleAlpha: () -> Float = { 1f }`。
+该值在绘制阶段读取，与现有的折叠透明度相乘，作用于小标题、大标题及副标题容器。
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    contentModifier = Modifier.graphicsLayer { alpha = foregroundAlpha.value },
+    titleAlpha = { titleOpacity.value },
+)
+```
