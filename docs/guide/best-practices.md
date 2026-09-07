@@ -40,3 +40,8 @@ The example application of this project itself demonstrates how to build interfa
 ### HyperLyric
 
 [HyperLyric](https://github.com/limczhh/HyperLyric) is an Xposed module that brings lyrics to the Super Island on Xiaomi HyperOS 3.
+
+### HyperIsland
+
+[HyperIsland](https://github.com/1812z/HyperIsland) is an Xposed module that enhances Super Island on Xiaomi HyperOS.
+
