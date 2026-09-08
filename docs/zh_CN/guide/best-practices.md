@@ -40,3 +40,7 @@
 ### HyperLyric
 
 [HyperLyric](https://github.com/limczhh/HyperLyric) 是一个专为小米 HyperOS 3 带来超级岛歌词的 Xposed 模块。
+
+### HyperIsland
+
+[HyperIsland](https://github.com/1812z/HyperIsland) 是一个增强小米 HyperOS 超级岛的 Xposed 模块。
