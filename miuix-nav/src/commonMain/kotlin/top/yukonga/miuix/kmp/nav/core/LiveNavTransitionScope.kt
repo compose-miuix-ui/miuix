@@ -44,6 +44,11 @@ internal class LiveNavTransitionScope(
 
     override val gesture: NavGesture? get() = presentation.gesture
 
+    // gestureActive deliberately uses a derived Boolean: gesture is replaced on every pointer
+    // event, but consumers reading this from composition only need the start/end boundaries.
+    override val isRunning: Boolean
+        get() = presentation.gestureActive || presentation.settle != null || presentation.animatedTop.isRunning
+
     override val settle: NavSettle? get() = presentation.settle
 
     /** Coarse gesture flag for composition-time branch dispatch (see navDirectionalTransition). */
