@@ -134,7 +134,11 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`layoutSize`、`layoutDirection`、`density`。
+`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`isRunning`、`layoutSize`、`layoutDirection`、`density`。
+
+entry 内容需要 Miuix 的实时导航状态时，可读取 `LocalNavTransitionScope.current`。
+使用 `isRunning` 判断转场生命周期；实现 entry 局部效果时，`relativeDepth`、`gesture` 或
+`settle` 应在 `graphicsLayer` 等延迟读取区中使用。
 
 通用样式（淡入淡出、缩放、共享轴等）刻意不作为预设内置——在这个 builder 上每种只需几行。例如交叉淡入淡出：
 

@@ -134,7 +134,11 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `layoutSize`, `layoutDirection` and `density`.
+`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `layoutSize`, `layoutDirection` and `density`.
+
+Read `LocalNavTransitionScope.current` from entry content when it needs Miuix's live navigation
+state. Use `isRunning` for the coarse transition lifecycle, and read `relativeDepth`, `gesture` or
+`settle` in a deferred `graphicsLayer` block when implementing entry-local effects.
 
 Generic looks (fade, scale, shared-axis, …) are deliberately not shipped as presets — each is a few lines on this builder. A cross-fade, for instance:
 

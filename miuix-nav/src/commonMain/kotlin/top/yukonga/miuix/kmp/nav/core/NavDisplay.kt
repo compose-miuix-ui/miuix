@@ -857,18 +857,17 @@ private fun NavEntryHost(
     // the top (d <= 0), the upper neighbour's transition while covered (0 < d). The per-frame
     // visual is then a pure deferred read inside the transition's own graphicsLayer.
     val activeTransition = if ((depthBuckets and DEPTH_BUCKET_GOVERNS_OWN) != 0) ownTransition else upperTransition
+    val transitionScope = LiveNavTransitionScope(
+        presentation = presentation,
+        entryIndex = entryIndex,
+        isRemoving = entry.presentation.isRemoving,
+        change = change,
+        layoutSize = layoutSize,
+        layoutDirection = layoutDirection,
+        density = density,
+    )
     val entryModifier = with(activeTransition) {
-        Modifier.transformEntry(
-            LiveNavTransitionScope(
-                presentation = presentation,
-                entryIndex = entryIndex,
-                isRemoving = entry.presentation.isRemoving,
-                change = change,
-                layoutSize = layoutSize,
-                layoutDirection = layoutDirection,
-                density = density,
-            ),
-        )
+        Modifier.transformEntry(transitionScope)
     }
 
     val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0) {
@@ -922,7 +921,11 @@ private fun NavEntryHost(
             ProvideNavEntryViewModelStore(vmOwner) {
                 ProvideNavEntryLifecycle(lifecycleOwner) {
                     stateHolder.EntryStateContent(entry.contentKey) {
-                        movableContent { entry.Content() }
+                        movableContent {
+                            CompositionLocalProvider(LocalNavTransitionScope provides transitionScope) {
+                                entry.Content()
+                            }
+                        }
                     }
                 }
             }
