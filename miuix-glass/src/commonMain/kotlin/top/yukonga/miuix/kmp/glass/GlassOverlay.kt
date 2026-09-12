@@ -11,6 +11,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -76,7 +78,16 @@ fun GlassDialog(
         animationSpec = if (visible) GlassMotion.dialogEnter() else GlassMotion.dialogExit(),
         label = "glassDialogScrim",
     )
-    if (!visible && scrim <= 0.001f) return
+    val active = visible || scrim > 0.001f
+    rememberGlassPopupBackProgress(
+        show = visible,
+        active = active,
+        enabled = visible,
+        retainWhenInactive = false,
+        resetSpec = GlassMotion.dialogExit(),
+        onDismissRequest = onDismissRequest,
+    )
+    if (!active) return
 
     val interactionSource = remember { MutableInteractionSource() }
     Box(modifier = modifier.fillMaxSize()) {
@@ -108,6 +119,9 @@ fun GlassDialog(
                         stroke = stroke,
                         shadow = shadow,
                     )
+                    .pointerInput(Unit) {
+                        detectTapGestures { /* Consume taps inside the dialog. */ }
+                    }
                     .padding(horizontal = 22.dp, vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 content = content,

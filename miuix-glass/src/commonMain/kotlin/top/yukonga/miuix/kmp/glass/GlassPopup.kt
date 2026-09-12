@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -274,9 +275,19 @@ fun BoxScope.GlassPopup(
         animationSpec = GlassMotion.popupMorphBlur(),
         label = "glassPopupBlur",
     )
-    if (progress <= 0.001f && !show) return
+    val active = progress > 0.001f || show
+    rememberGlassPopupBackProgress(
+        show = show,
+        active = active,
+        enabled = show,
+        retainWhenInactive = false,
+        resetSpec = GlassMotion.popupMorph(),
+        onDismissRequest = onDismissRequest,
+    )
+    if (!active) return
 
     val startRadius = GlassMotion.POPUP_START_CORNER_DP.dp
+    val layoutDirection = LocalLayoutDirection.current
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop,
@@ -287,8 +298,8 @@ fun BoxScope.GlassPopup(
         panelLayer = {},
         overlay = {},
         frame = { end, page ->
-            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), page)
-            directionFrame(settled, end, progress, startRadius, cornerRadius)
+            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), page, layoutDirection)
+            directionFrame(settled, end, progress, startRadius, cornerRadius, layoutDirection)
         },
         contentLayer = { _, _ ->
             val t = progress.coerceIn(0f, 1f)
@@ -299,6 +310,7 @@ fun BoxScope.GlassPopup(
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
             alpha = fade
         },
+        scrollable = true,
         content = content,
     )
 }
@@ -310,13 +322,18 @@ private fun directionFrame(
     progress: Float,
     startRadius: Dp,
     endRadius: Dp,
+    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
 ): GlassPopupFrame {
     val t = progress.coerceIn(0f, 1f)
     val width = end.width * (GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t)
     val endRatio = if (end.width > 0f) end.height / end.width else 1f
     val ratio = GlassMotion.POPUP_START_RATIO + (endRatio - GlassMotion.POPUP_START_RATIO) * t
     val height = (width * ratio).coerceAtMost(end.height)
-    val left = placement.rect.right - width
+    val left = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr) {
+        placement.rect.right - width
+    } else {
+        placement.rect.left
+    }
     val top = if (placement.alignTop) placement.rect.top else placement.rect.bottom - height
     return GlassPopupFrame(
         rect = Rect(left, top, left + width, top + height),

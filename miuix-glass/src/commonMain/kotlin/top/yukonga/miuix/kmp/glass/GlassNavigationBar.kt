@@ -8,6 +8,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -39,12 +40,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -218,12 +226,15 @@ fun GlassNavigationBar(
     val dragging = remember { mutableStateOf(false) }
 
     val showScale = remember { Animatable(if (visible) 1f else GlassMotion.NAV_HIDE_SCALE) }
+    var interactionEnabled by remember { mutableStateOf(visible) }
     LaunchedEffect(visible) {
         if (visible) {
+            interactionEnabled = true
             delay(GlassMotion.NAV_SHOW_DELAY_MS)
             showScale.animateTo(1f, GlassMotion.navShowHide())
         } else {
             showScale.animateTo(GlassMotion.NAV_HIDE_SCALE, GlassMotion.navShowHide())
+            interactionEnabled = false
         }
     }
 
@@ -300,68 +311,75 @@ fun GlassNavigationBar(
                 material = material,
                 stroke = stroke,
                 shadow = shadow,
+                shading = false,
             )
             .onSizeChanged { barWidth = it.width }
-            .pointerInput(items.size, contentInset, overhang, layoutDirection) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val width = size.width.toFloat()
-                    if (width <= contentInset * 2f) return@awaitEachGesture
-                    fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
-                    val span = (width - contentInset * 2f) / items.size
-                    fun indexAt(x: Float) = if (span <= 0f) {
-                        0
-                    } else {
-                        ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
-                    }
+            .then(
+                if (interactionEnabled) {
+                    Modifier.pointerInput(items.size, contentInset, overhang, layoutDirection) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            val width = size.width.toFloat()
+                            if (width <= contentInset * 2f) return@awaitEachGesture
+                            fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
+                            val span = (width - contentInset * 2f) / items.size
+                            fun indexAt(x: Float) = if (span <= 0f) {
+                                0
+                            } else {
+                                ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
+                            }
 
-                    val chipW = span + overhang * 2f
-                    val minLeft = contentInset - overhang
-                    val maxLeft = (width - chipW).coerceAtLeast(0f)
-                    val downX = logicalX(down.position.x)
-                    var lastX = downX
-                    var current = indexAt(downX)
-                    pressedIndex = current
-                    onSelectState(current)
-                    var grabOffset = Float.NaN
-                    try {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                            if (!change.pressed || change.isConsumed) break
-                            val x = logicalX(change.position.x)
-                            if (grabOffset.isNaN()) {
-                                if (abs(x - downX) < viewConfiguration.touchSlop) {
-                                    pressedIndex = indexAt(x)
-                                    continue
+                            val chipW = span + overhang * 2f
+                            val minLeft = contentInset - overhang
+                            val maxLeft = (width - chipW).coerceAtLeast(0f)
+                            val downX = logicalX(down.position.x)
+                            var lastX = downX
+                            var current = indexAt(downX)
+                            pressedIndex = current
+                            onSelectState(current)
+                            var grabOffset = Float.NaN
+                            try {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed || change.isConsumed) break
+                                    val x = logicalX(change.position.x)
+                                    if (grabOffset.isNaN()) {
+                                        if (abs(x - downX) < viewConfiguration.touchSlop) {
+                                            pressedIndex = indexAt(x)
+                                            continue
+                                        }
+                                        val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
+                                        grabOffset = x - bounds.x
+                                        lastX = x
+                                        dragging.value = true
+                                    }
+                                    val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
+                                    val next = indexAt(x)
+                                    val target = navigationDragTarget(chipLeft, chipW, width, x - lastX, next != current)
+                                    animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
+                                    if (next != current) {
+                                        current = next
+                                        onSelectState(next)
+                                    }
+                                    pressedIndex = next
+                                    lastX = x
+                                    change.consume()
                                 }
-                                val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
-                                grabOffset = x - bounds.x
-                                lastX = x
-                                dragging.value = true
+                            } finally {
+                                pressedIndex = -1
+                                dragging.value = false
+                                if (!grabOffset.isNaN()) {
+                                    val homeLeft = minLeft + current * span
+                                    animateIndicator(homeLeft, homeLeft + chipW)
+                                }
                             }
-                            val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
-                            val next = indexAt(x)
-                            val target = navigationDragTarget(chipLeft, chipW, width, x - lastX, next != current)
-                            animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
-                            if (next != current) {
-                                current = next
-                                onSelectState(next)
-                            }
-                            pressedIndex = next
-                            lastX = x
-                            change.consume()
-                        }
-                    } finally {
-                        pressedIndex = -1
-                        dragging.value = false
-                        if (!grabOffset.isNaN()) {
-                            val homeLeft = minLeft + current * span
-                            animateIndicator(homeLeft, homeLeft + chipW)
                         }
                     }
-                }
-            },
+                } else {
+                    Modifier
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -424,14 +442,36 @@ fun GlassNavigationBar(
                             horizontal = GlassNavigationBarDefaults.IndicatorOverhang,
                             vertical = GlassNavigationBarDefaults.ContentPaddingVertical,
                         )
-                        .semantics(mergeDescendants = true) {
-                            this.role = Role.Tab
-                            this.selected = selected
-                            onClick {
-                                onSelectState(position)
-                                true
-                            }
-                        }
+                        .then(
+                            if (interactionEnabled) {
+                                Modifier
+                                    .semantics(mergeDescendants = true) {
+                                        this.role = Role.Tab
+                                        this.selected = selected
+                                        (item.contentDescription ?: item.label)?.let {
+                                            this.contentDescription = it
+                                        }
+                                        onClick {
+                                            onSelectState(position)
+                                            true
+                                        }
+                                    }
+                                    .onKeyEvent { event ->
+                                        val activationKey = event.key == Key.Enter ||
+                                            event.key == Key.NumPadEnter ||
+                                            event.key == Key.Spacebar
+                                        if (activationKey) {
+                                            if (event.type == KeyEventType.KeyUp) onSelectState(position)
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                    .focusable()
+                            } else {
+                                Modifier.clearAndSetSemantics { }
+                            },
+                        )
                         .graphicsLayer { this.alpha = pressAlpha },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -441,7 +481,7 @@ fun GlassNavigationBar(
                     ) {
                         Icon(
                             imageVector = item.icon,
-                            contentDescription = item.contentDescription ?: item.label,
+                            contentDescription = null,
                             modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
                             tint = tint,
                         )

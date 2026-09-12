@@ -5,7 +5,10 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 
 /**
  * Makes this composable a sheet of glass over [backdrop], with the shadow it casts.
@@ -37,7 +40,14 @@ fun Modifier.glassPanel(
     shading: Boolean = true,
     fallback: Modifier = Modifier.clip(shape),
 ): Modifier = if (backdrop == null) {
-    this.then(fallback)
+    this
+        .graphicsLayer { this.alpha = alpha }
+        .glassShadow(shape, shadow)
+        .then(fallback)
+        .drawWithContent {
+            drawContent()
+            stroke?.let { drawGlassStroke(shape, layoutDirection, it, 1f) }
+        }
 } else {
     this
         .glassShadow(shape, shadow, alpha)

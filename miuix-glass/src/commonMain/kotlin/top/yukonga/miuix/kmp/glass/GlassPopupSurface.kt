@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
@@ -105,14 +106,21 @@ class GlassPopupPlacement internal constructor(
  * @param size The size the panel settles at.
  * @param margin Gap the panel keeps from the edge of the page.
  * @param page The page the panel sits on.
+ * @param direction The ambient layout direction used to resolve the anchor's end edge.
  */
 internal fun placeGlassPopup(
     anchor: Rect,
     size: Size,
     margin: Float,
     page: Size,
+    direction: LayoutDirection,
 ): GlassPopupPlacement {
-    val left = (anchor.right - size.width)
+    val endAlignedLeft = if (direction == LayoutDirection.Ltr) {
+        anchor.right - size.width
+    } else {
+        anchor.left
+    }
+    val left = endAlignedLeft
         .coerceIn(margin, (page.width - size.width - margin).coerceAtLeast(margin))
     val below = page.height - margin - anchor.top
     val above = anchor.bottom - margin

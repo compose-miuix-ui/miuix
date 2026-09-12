@@ -21,6 +21,23 @@ class GlassTransformPopupTest {
     }
 
     @Test
+    fun predictiveBackScalesPopupProgressTowardItsAnchor() {
+        assertEquals(1f, popupFractionWithBack(1f, 0f))
+        assertEquals(0.5f, popupFractionWithBack(1f, 0.5f))
+        assertEquals(0f, popupFractionWithBack(1f, 1f))
+    }
+
+    @Test
+    fun dropdownAnchorValueReturnsWithPredictiveBackProgress() {
+        val progress = mutableFloatStateOf(0.4f)
+        val anchor = GlassPopupAnchor().apply { dropdownBackProgressState = progress }
+        assertEquals(0.4f, anchor.dropdownValueAlpha)
+
+        progress.floatValue = 1.2f
+        assertEquals(1f, anchor.dropdownValueAlpha)
+    }
+
+    @Test
     fun stackedPrimaryRowsRemainNonInteractive() {
         assertEquals(false, isTransformPopupInteractive(show = true, stacked = true))
     }

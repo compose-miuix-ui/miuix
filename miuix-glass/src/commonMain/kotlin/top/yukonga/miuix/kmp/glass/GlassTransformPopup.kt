@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -57,6 +58,9 @@ import kotlin.math.roundToInt
 class GlassPopupAnchor {
 
     internal var secondaryBackProgressState: State<Float>? by mutableStateOf(null)
+
+    /** Predictive-back progress published by an attached [GlassDropdownPopup]. */
+    internal var dropdownBackProgressState: State<Float>? by mutableStateOf(null)
 
     /**
      * Secondary predictive-back progress, including cancellation recovery and the retained exit
@@ -105,6 +109,10 @@ class GlassPopupAnchor {
 
     /** How far the row's displayed value has faded. [GlassDropdownPopup] drives it. */
     internal var valueAlpha: Float by mutableFloatStateOf(1f)
+
+    /** The displayed value reappears with the dropdown as it travels home. */
+    internal val dropdownValueAlpha: Float
+        get() = dropdownBackProgressState?.value?.coerceIn(0f, 1f) ?: 0f
 }
 
 /** The sampling and colour treatment shared by a glass button and its transforming menu. */
@@ -200,7 +208,7 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
  */
 @Stable
 fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.graphicsLayer {
-    alpha = anchor.valueAlpha
+    alpha = maxOf(anchor.valueAlpha, anchor.dropdownValueAlpha)
 }
 
 /**
@@ -305,6 +313,7 @@ fun BoxScope.GlassTransformPopup(
         show = show,
         active = active,
         enabled = show && !stacked,
+        retainWhenInactive = false,
         resetSpec = GlassMotion.transformBounds(true),
         onDismissRequest = onDismissRequest,
     )
@@ -327,6 +336,7 @@ fun BoxScope.GlassTransformPopup(
     }
 
     val startRect = anchor.containerBounds
+    val layoutDirection = LocalLayoutDirection.current
     val iconRect = anchor.contentBounds.takeUnless { it.isEmpty } ?: startRect
     val startRadius = anchor.cornerRadius
     fun geometryProgress() = popupFractionWithBack(bounds.value, backProgress.value)
@@ -385,8 +395,15 @@ fun BoxScope.GlassTransformPopup(
                 positionFraction = centerProgress(),
                 startRadius = startRadius,
                 endRadius = cornerRadius,
+                layoutDirection = layoutDirection,
             )
-            val settled = placeGlassPopup(startRect.translate(0f, gap.toPx()), end, sizing.safeMargin.toPx(), page)
+            val settled = placeGlassPopup(
+                startRect.translate(0f, gap.toPx()),
+                end,
+                sizing.safeMargin.toPx(),
+                page,
+                layoutDirection,
+            )
             travel.endCenterX = settled.rect.center.x
             travel.endCenterY = settled.rect.center.y
             travel.endWidth = end.width
@@ -402,6 +419,7 @@ fun BoxScope.GlassTransformPopup(
             val blur = GlassMotion.TRANSFORM_BLUR_PX * (1f - fraction)
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
         },
+        scrollable = true,
         content = content,
     )
 
@@ -473,8 +491,9 @@ private fun transformFrame(
     positionFraction: Float,
     startRadius: Dp,
     endRadius: Dp,
+    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
 ): GlassPopupFrame {
-    val placement = placeGlassPopup(anchor.translate(0f, gap), end, margin, page)
+    val placement = placeGlassPopup(anchor.translate(0f, gap), end, margin, page, layoutDirection)
     val width = anchor.width + (end.width - anchor.width) * sizeFraction
     val height = anchor.height + (end.height - anchor.height) * sizeFraction
     val centerX = anchor.center.x + (placement.rect.center.x - anchor.center.x) * positionFraction

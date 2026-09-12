@@ -84,6 +84,7 @@ fun BoxScope.GlassSecondaryPopup(
         show = show,
         active = active,
         enabled = show,
+        retainWhenInactive = false,
         resetSpec = GlassMotion.secondaryPopup(true),
         onDismissRequest = onDismissRequest,
     )

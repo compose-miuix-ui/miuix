@@ -20,20 +20,22 @@ import kotlinx.coroutines.launch
 
 /**
  * A separate return track leaves the popup's existing opening/closing springs intact.
- * Completion retains the last gesture fraction until exit settles, avoiding a jump back to open.
+ * Completion retains the last gesture fraction through exit, avoiding a jump back to open. A
+ * caller may keep it until the next opening when another element needs a seamless visual handoff.
  */
 @Composable
 internal fun rememberGlassPopupBackProgress(
     show: Boolean,
     active: Boolean,
     enabled: Boolean,
+    retainWhenInactive: Boolean,
     resetSpec: AnimationSpec<Float>,
     onDismissRequest: () -> Unit,
 ): State<Float> {
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-    LaunchedEffect(show, active) {
-        if (show || !active) progress.snapTo(0f)
+    LaunchedEffect(show, active, retainWhenInactive) {
+        if (show || (!active && !retainWhenInactive)) progress.snapTo(0f)
     }
 
     // Glass popups also work in standalone Box hosts without a navigation dispatcher.

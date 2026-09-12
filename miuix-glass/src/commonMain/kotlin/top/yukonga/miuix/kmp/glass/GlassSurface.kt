@@ -4,8 +4,10 @@
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -27,24 +29,37 @@ import top.yukonga.miuix.kmp.blur.Backdrop
  * @param backdrop The [Backdrop] supplying the content behind the glass. `null` falls back to the
  *   flat fill in [visuals], which is what a device without runtime shaders gets.
  * @param visuals What the surface is made of.
- * @param cornerRadius Corner radius of the panel. It has to match the silhouette the component
- *   clips itself to, which is why it is named here rather than read off the shape handed in: that
- *   shape is a plain outline and carries no smoothing.
+ * @param cornerRadius Corner radius used when the host supplies a [Shape] that cannot be safely
+ *   converted to a [GlassShape]. Rounded corner shapes retain all four of their supplied corners.
  */
 fun glassSurface(
     backdrop: Backdrop?,
     visuals: GlassPopupVisuals,
     cornerRadius: Dp = GlassPopupDefaults.CornerRadius,
-): @Composable (Shape) -> Modifier = {
+): @Composable (Shape) -> Modifier = { providedShape ->
     Modifier.glassPanel(
         backdrop = backdrop,
-        shape = GlassShape(cornerRadius),
+        shape = resolveGlassSurfaceShape(providedShape, cornerRadius),
         style = visuals.style,
         alpha = visuals.alpha,
         material = visuals.material,
         stroke = visuals.stroke,
         shadow = visuals.shadow,
         shading = false,
-        fallback = Modifier.background(visuals.containerColor),
+        fallback = Modifier.clip(providedShape).background(visuals.containerColor),
     )
+}
+
+/** Keeps the host's rounded silhouette in the shader, stroke and shadow passes. */
+internal fun resolveGlassSurfaceShape(providedShape: Shape, fallbackCornerRadius: Dp): GlassShape = when (providedShape) {
+    is GlassShape -> providedShape
+
+    is RoundedCornerShape -> GlassShape(
+        topStart = providedShape.topStart,
+        topEnd = providedShape.topEnd,
+        bottomEnd = providedShape.bottomEnd,
+        bottomStart = providedShape.bottomStart,
+    )
+
+    else -> GlassShape(fallbackCornerRadius)
 }

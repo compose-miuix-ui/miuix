@@ -8,14 +8,16 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
 
@@ -88,8 +90,33 @@ fun BoxScope.GlassDropdownPopup(
         label = "glassDropdownBlur",
     )
 
-    val standingDown = show || size > 0.0001f
-    if (anchor != null) SideEffect { anchor.contentHidden = standingDown }
+    val active = show || size > 0.0001f
+    val layoutDirection = LocalLayoutDirection.current
+    val backProgress = rememberGlassPopupBackProgress(
+        show = show,
+        active = active,
+        enabled = show,
+        retainWhenInactive = true,
+        resetSpec = GlassMotion.arcBounds(true),
+        onDismissRequest = onDismissRequest,
+    )
+    DisposableEffect(anchor, backProgress) {
+        anchor?.dropdownBackProgressState = backProgress
+        onDispose {
+            if (anchor?.dropdownBackProgressState === backProgress) {
+                anchor.dropdownBackProgressState = null
+            }
+        }
+    }
+    fun geometryProgress() = popupFractionWithBack(size, backProgress.value)
+    fun positionProgress() = popupFractionWithBack(position, backProgress.value)
+    fun fadeProgress() = fade * (1f - backProgress.value.coerceIn(0f, 1f))
+    fun sharpnessProgress() = sharpness * (1f - backProgress.value.coerceIn(0f, 1f))
+    val standingDown = active
+    DisposableEffect(anchor, standingDown) {
+        anchor?.contentHidden = standingDown
+        onDispose { anchor?.contentHidden = false }
+    }
     if (!standingDown) return
 
     val startRadius = GlassDropdownDefaults.StartCornerRadius
@@ -101,20 +128,31 @@ fun BoxScope.GlassDropdownPopup(
         visuals = visuals,
         contentPadding = contentPadding,
         panelLayer = {
-            alpha = if (show && size <= GlassMotion.ARC_VISIBLE_FRACTION) 0f else fade
-            val blur = (1f - sharpness) * GlassMotion.ARC_EXIT_BLUR_DP * this.density
+            alpha = if (show && geometryProgress() <= GlassMotion.ARC_VISIBLE_FRACTION) 0f else fadeProgress()
+            val blur = (1f - sharpnessProgress()) * GlassMotion.ARC_EXIT_BLUR_DP * this.density
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
         },
         overlay = {},
         frame = { end, page ->
-            arcFrame(anchorBounds, end, page, sizing.safeMargin.toPx(), size, position, startRadius, cornerRadius)
+            arcFrame(
+                anchorBounds,
+                end,
+                page,
+                sizing.safeMargin.toPx(),
+                geometryProgress(),
+                positionProgress(),
+                startRadius,
+                cornerRadius,
+                layoutDirection,
+            )
         },
         contentLayer = { _, _ ->
-            val fraction = GlassMotion.ARC_START_WIDTH + (1f - GlassMotion.ARC_START_WIDTH) * size
+            val fraction = GlassMotion.ARC_START_WIDTH + (1f - GlassMotion.ARC_START_WIDTH) * geometryProgress()
             val scale = fraction.coerceAtMost(1f)
             scaleX = scale
             scaleY = scale
         },
+        scrollable = true,
         content = content,
     )
 }
@@ -135,8 +173,9 @@ private fun arcFrame(
     positionFraction: Float,
     startRadius: Dp,
     endRadius: Dp,
+    layoutDirection: LayoutDirection,
 ): GlassPopupFrame {
-    val placement = placeGlassPopup(anchor, end, margin, page)
+    val placement = placeGlassPopup(anchor, end, margin, page, layoutDirection)
     val startWidth = end.width * GlassMotion.ARC_START_WIDTH
     val startHeight = startWidth * GlassMotion.ARC_START_RATIO
     val width = startWidth + (end.width - startWidth) * sizeFraction
@@ -144,7 +183,11 @@ private fun arcFrame(
     val ratio = GlassMotion.ARC_START_RATIO + (endRatio - GlassMotion.ARC_START_RATIO) * sizeFraction
     val height = ratio * width
 
-    val startCenterX = placement.rect.right - startWidth / 2f
+    val startCenterX = if (layoutDirection == LayoutDirection.Ltr) {
+        placement.rect.right - startWidth / 2f
+    } else {
+        placement.rect.left + startWidth / 2f
+    }
     val startCenterY = if (placement.alignTop) {
         placement.rect.top + startHeight / 2f
     } else {
