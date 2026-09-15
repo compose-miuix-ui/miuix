@@ -134,7 +134,7 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `layoutSize`, `layoutDirection` and `density`.
+`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `settle`, `layoutSize`, `layoutDirection` and `density`.
 
 Read `LocalNavTransitionScope.current` from entry content when it needs Miuix's live navigation
 state. Use `isRunning` for the coarse transition lifecycle, and read `relativeDepth`, `gesture` or
