@@ -1,6 +1,6 @@
 # NavigationRail
 
-`NavigationRail` 是 Miuix 中的侧边导航组件，适用于宽屏设备。项目以「图标在上、文字在下」的形式展示，并可通过 `NavigationRailState` 展开为「图标 + 文字」横排的宽布局。
+`NavigationRail` 是适用于宽屏设备的侧边导航组件，支持固定收起、固定展开和状态控制三种布局。
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=navigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -16,7 +16,7 @@ import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 
 ## 基本用法
 
-NavigationRail 组件可用于创建侧边导航菜单：
+默认使用固定收起布局：
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
@@ -38,49 +38,60 @@ Row {
 }
 ```
 
-## 可展开导航栏
+## 布局模式
 
-传入一个 `NavigationRailState`（通过 `rememberNavigationRailState` 创建）即可让导航栏支持展开/收起。导航栏左上角会显示一个内建的切换按钮，点击后导航栏会在收起宽度与 `expandedWidth` 之间做动画切换。展开后，每个项目会变为「图标 + 文字」横排布局，并在选中项后方绘制高亮药丸。
+使用固定布局重载，通过 `expanded` 选择布局：
 
 ```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val items = listOf("主页", "个人", "设置")
-val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Contacts, MiuixIcons.Settings)
-val railState = rememberNavigationRailState()
-
-Row {
-    NavigationRail(state = railState) {
-        items.forEachIndexed { index, label ->
-            NavigationRailItem(
-                selected = selectedIndex == index,
-                onClick = { selectedIndex = index },
-                icon = icons[index],
-                label = label
-            )
-        }
-    }
-    // 内容区域
+NavigationRail(expanded = true) {
+    // NavigationRailItem 内容
 }
 ```
 
-你也可以通过 `railState.expand()`、`railState.collapse()` 或 `railState.toggle()` 以编程方式控制状态。当 `state` 保持为 `null`（默认值）时，导航栏保持经典的不可展开布局，且不显示切换按钮。
+使用状态重载可显示切换按钮，并在两种布局间动画切换：
+
+```kotlin
+val railState = rememberNavigationRailState()
+
+NavigationRail(state = railState) {
+    // NavigationRailItem(...)
+}
+```
+
+可以通过 `railState.expand()`、`railState.collapse()` 或 `railState.toggle()` 控制布局。省略
+`state` 和 `expanded` 时使用固定收起布局。
 
 ## 属性
 
-### NavigationRail 属性
+### NavigationRail 重载
+
+`NavigationRail` 提供两个重载，二选一使用：
+
+#### 固定布局
+
+| 参数 | 类型 | 说明 | 默认值 | 是否必须 |
+| ---- | ---- | ---- | ------ | -------- |
+| expanded | Boolean | 是否使用展开布局 | false | 否 |
+
+#### 可切换布局
+
+| 参数 | 类型 | 说明 | 默认值 | 是否必须 |
+| ---- | ---- | ---- | ------ | -------- |
+| state | NavigationRailState | 控制布局并显示切换按钮 | - | 是 |
+| expandContentDescription | String | 收起时切换按钮的描述 | NavigationRailDefaults.ExpandContentDescription | 否 |
+| collapseContentDescription | String | 展开时切换按钮的描述 | NavigationRailDefaults.CollapseContentDescription | 否 |
+
+### NavigationRail 公共参数
 
 | 属性名                     | 类型                                   | 说明                                          | 默认值                            | 是否必须 |
 | -------------------------- | -------------------------------------- | --------------------------------------------- | --------------------------------- | -------- |
 | modifier                   | Modifier                               | 应用于 NavigationRail 的修饰符                | Modifier                          | 否       |
-| state                      | NavigationRailState?                   | 展开/收起状态；非空时导航栏可展开             | null                              | 否       |
 | header                     | @Composable (ColumnScope.() -> Unit)?  | 头部内容（通常是 FAB 或 Logo）                | null                              | 否       |
 | color                      | Color                                  | NavigationRail 的背景颜色                     | MiuixTheme.colorScheme.surface    | 否       |
 | showDivider                | Boolean                                | 是否在 NavigationRail 和内容之间显示分割线    | true                              | 否       |
 | defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
 | minWidth                   | Dp                                     | NavigationRail 收起时的最小宽度               | NavigationRailDefaults.MinWidth   | 否       |
 | expandedWidth              | Dp                                     | NavigationRail 展开时的宽度                   | NavigationRailDefaults.ExpandedWidth | 否    |
-| expandContentDescription   | String                                 | 收起状态下切换按钮的无障碍描述                | NavigationRailDefaults.ExpandContentDescription | 否 |
-| collapseContentDescription | String                                 | 展开状态下切换按钮的无障碍描述                | NavigationRailDefaults.CollapseContentDescription | 否 |
 | scrollState                | ScrollState                            | 内容列的滚动状态                              | rememberScrollState()             | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |
 
