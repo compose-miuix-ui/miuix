@@ -45,3 +45,6 @@ The example application of this project itself demonstrates how to build interfa
 
 [HyperIsland](https://github.com/1812z/HyperIsland) is an Xposed module that enhances Super Island on Xiaomi HyperOS.
 
+### YumeBox
+
+[YumeBox](https://github.com/YumeYucca/YumeBox) is an Android client based on the open-source Mihomo core.
