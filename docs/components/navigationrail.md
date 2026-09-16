@@ -1,6 +1,7 @@
 # NavigationRail
 
-`NavigationRail` is a side navigation component in Miuix, suitable for wide screens. It displays items as icon-above-label and can optionally expand to a wide icon-beside-label layout via `NavigationRailState`.
+`NavigationRail` is a side navigation component for wide screens. It supports fixed collapsed,
+fixed expanded, and state-controlled layouts.
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=navigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -16,7 +17,7 @@ import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 
 ## Basic Usage
 
-The NavigationRail component can be used to create side navigation menus:
+By default, `NavigationRail` uses the collapsed layout:
 
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
@@ -38,49 +39,60 @@ Row {
 }
 ```
 
-## Expandable Rail
+## Layout Modes
 
-Pass a `NavigationRailState` (created with `rememberNavigationRailState`) to make the rail expandable. A built-in toggle button appears at the top-left; tapping it animates the rail between its collapsed width and `expandedWidth`. When expanded, each item switches to a horizontal icon-and-label layout with a highlighted pill behind the selected item.
+Use the fixed-layout overload and set `expanded` to choose its layout:
 
 ```kotlin
-var selectedIndex by remember { mutableStateOf(0) }
-val items = listOf("Home", "Profile", "Settings")
-val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Contacts, MiuixIcons.Settings)
-val railState = rememberNavigationRailState()
-
-Row {
-    NavigationRail(state = railState) {
-        items.forEachIndexed { index, label ->
-            NavigationRailItem(
-                selected = selectedIndex == index,
-                onClick = { selectedIndex = index },
-                icon = icons[index],
-                label = label
-            )
-        }
-    }
-    // Content area
+NavigationRail(expanded = true) {
+    // NavigationRailItem content
 }
 ```
 
-You can also drive the state programmatically via `railState.expand()`, `railState.collapse()` or `railState.toggle()`. When `state` is left as `null` (the default), the rail keeps its classic non-expandable layout with no toggle button.
+Use the stateful overload to show a toggle and animate between layouts:
+
+```kotlin
+val railState = rememberNavigationRailState()
+
+NavigationRail(state = railState) {
+    // NavigationRailItem(...)
+}
+```
+
+Use `railState.expand()`, `railState.collapse()` or `railState.toggle()` to control the layout
+programmatically. Omit both `state` and `expanded` for a fixed collapsed rail.
 
 ## Properties
 
-### NavigationRail Properties
+### NavigationRail Overloads
+
+`NavigationRail` provides two overloads. Use one of them:
+
+#### Fixed Layout
+
+| Parameter | Type | Description | Default | Required |
+| --------- | ---- | ----------- | ------- | -------- |
+| expanded  | Boolean | Use the expanded layout | false | No |
+
+#### Expandable Layout
+
+| Parameter | Type | Description | Default | Required |
+| --------- | ---- | ----------- | ------- | -------- |
+| state | NavigationRailState | Controls the layout and displays the toggle | - | Yes |
+| expandContentDescription | String | Toggle description when collapsed | NavigationRailDefaults.ExpandContentDescription | No |
+| collapseContentDescription | String | Toggle description when expanded | NavigationRailDefaults.CollapseContentDescription | No |
+
+### Common NavigationRail Parameters
 
 | Property Name              | Type                                   | Description                                   | Default Value                     | Required |
 | -------------------------- | -------------------------------------- | --------------------------------------------- | --------------------------------- | -------- |
 | modifier                   | Modifier                               | Modifier applied to the rail                  | Modifier                          | No       |
-| state                      | NavigationRailState?                   | Expand/collapse state; non-null makes the rail expandable | null                  | No       |
 | header                     | @Composable (ColumnScope.() -> Unit)?  | Header content (e.g. FAB or Logo)             | null                              | No       |
 | color                      | Color                                  | Background color of the rail                  | MiuixTheme.colorScheme.surface    | No       |
 | showDivider                | Boolean                                | Show divider line between rail and content    | true                              | No       |
 | defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
 | minWidth                   | Dp                                     | Minimum (collapsed) width of the rail         | NavigationRailDefaults.MinWidth   | No       |
 | expandedWidth              | Dp                                     | Width of the rail when expanded               | NavigationRailDefaults.ExpandedWidth | No    |
-| expandContentDescription   | String                                 | Accessible description of the toggle while collapsed | NavigationRailDefaults.ExpandContentDescription | No |
-| collapseContentDescription | String                                 | Accessible description of the toggle while expanded  | NavigationRailDefaults.CollapseContentDescription | No |
 | scrollState                | ScrollState                            | Scroll state of the rail's content column    | rememberScrollState()             | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |
 
