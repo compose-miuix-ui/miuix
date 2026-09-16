@@ -65,8 +65,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.os4.Close
-import top.yukonga.miuix.kmp.icon.os4.Search
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
 import kotlin.math.cos
@@ -184,7 +184,7 @@ internal fun GlassSearchOverlay(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Icon(MiuixIcons.Os4.Search, contentDescription = null, modifier = Modifier.size(24.dp), tint = colors.disabledOnSurface)
+                        Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(24.dp), tint = colors.disabledOnSurface)
                         Box(Modifier.weight(1f)) {
                             if (query.isEmpty()) Text("Search", color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
                             field()
@@ -194,7 +194,7 @@ internal fun GlassSearchOverlay(
                                 query = ""
                                 focusRequester.requestFocus()
                             }, modifier = Modifier.size(24.dp)) {
-                                Icon(MiuixIcons.Os4.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = colors.disabledOnSurface)
+                                Icon(MiuixIcons.Glass.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = colors.disabledOnSurface)
                             }
                         }
                     }
@@ -218,7 +218,7 @@ internal fun GlassSearchOverlay(
                     enabled = expanded,
                     modifier = Modifier.size(44.dp).background(colors.surfaceContainerHigh, CircleShape),
                 ) {
-                    Icon(MiuixIcons.Os4.Close, contentDescription = "Cancel", modifier = Modifier.size(24.dp), tint = colors.onSurface)
+                    Icon(MiuixIcons.Glass.Close, contentDescription = "Cancel", modifier = Modifier.size(24.dp), tint = colors.onSurface)
                 }
             }
         }

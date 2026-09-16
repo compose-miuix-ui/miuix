@@ -93,12 +93,12 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.icon.extended.Home
-import top.yukonga.miuix.kmp.icon.os4.ChevronBackward
-import top.yukonga.miuix.kmp.icon.os4.Create
-import top.yukonga.miuix.kmp.icon.os4.Edit
-import top.yukonga.miuix.kmp.icon.os4.Image
-import top.yukonga.miuix.kmp.icon.os4.Search
-import top.yukonga.miuix.kmp.icon.os4.Settings
+import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.glass.Create
+import top.yukonga.miuix.kmp.icon.glass.Edit
+import top.yukonga.miuix.kmp.icon.glass.Image
+import top.yukonga.miuix.kmp.icon.glass.Search
+import top.yukonga.miuix.kmp.icon.glass.Settings
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
@@ -152,9 +152,9 @@ private val StrokesDark: List<GlassStroke?> = listOf(
 
 private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Home, "Home"),
-    GlassNavigationItem(MiuixIcons.Os4.Create, "Create"),
-    GlassNavigationItem(MiuixIcons.Os4.Image, "Gallery"),
-    GlassNavigationItem(MiuixIcons.Os4.Settings, "Settings"),
+    GlassNavigationItem(MiuixIcons.Glass.Create, "Create"),
+    GlassNavigationItem(MiuixIcons.Glass.Image, "Gallery"),
+    GlassNavigationItem(MiuixIcons.Glass.Settings, "Settings"),
 )
 
 private val OverlayNames = listOf("None", "Popup", "Dialog")
@@ -261,7 +261,7 @@ fun GlassPage(padding: PaddingValues) {
                         navigationIcon = {
                             GlassIconButton(onClick = { navigator.pop() }) {
                                 Icon(
-                                    imageVector = MiuixIcons.Os4.ChevronBackward,
+                                    imageVector = MiuixIcons.Glass.ChevronBackward,
                                     contentDescription = "Back",
                                     modifier = Modifier.size(24.dp),
                                     tint = MiuixTheme.colorScheme.onSurface,
@@ -278,7 +278,7 @@ fun GlassPage(padding: PaddingValues) {
                                     },
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Os4.Search,
+                                        imageVector = MiuixIcons.Glass.Search,
                                         contentDescription = "Search",
                                         modifier = Modifier.size(24.dp),
                                         tint = MiuixTheme.colorScheme.onSurface,
@@ -296,7 +296,7 @@ fun GlassPage(padding: PaddingValues) {
                                     ),
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Os4.Settings,
+                                        imageVector = MiuixIcons.Glass.Settings,
                                         contentDescription = "Sort",
                                         modifier = Modifier.size(24.dp).glassPopupAnchorContent(menuAnchor),
                                         tint = MiuixTheme.colorScheme.onSurface,
@@ -557,7 +557,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = backdrop,
                 anchorContent = {
                     Icon(
-                        imageVector = MiuixIcons.Os4.Settings,
+                        imageVector = MiuixIcons.Glass.Settings,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MiuixTheme.colorScheme.onSurface,
@@ -572,7 +572,7 @@ fun GlassPage(padding: PaddingValues) {
                 GlassPopupItem(
                     text = "View",
                     onClick = { overlayIndex = OVERLAY_NONE },
-                    icon = MiuixIcons.Os4.Image,
+                    icon = MiuixIcons.Glass.Image,
                     summary = "List view",
                     showArrow = true,
                 )
@@ -587,7 +587,7 @@ fun GlassPage(padding: PaddingValues) {
                     modifier = Modifier.onGloballyPositioned {
                         if (!submenuPresent) submenuAnchor = it.boundsInRoot()
                     },
-                    icon = MiuixIcons.Os4.Edit,
+                    icon = MiuixIcons.Glass.Edit,
                     summary = SortOrders[sortOrder],
                     showArrow = true,
                     arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },
@@ -595,7 +595,7 @@ fun GlassPage(padding: PaddingValues) {
                 GlassPopupItem(
                     text = "Settings",
                     onClick = { overlayIndex = OVERLAY_NONE },
-                    icon = MiuixIcons.Os4.Settings,
+                    icon = MiuixIcons.Glass.Settings,
                 )
             }
         }
@@ -613,7 +613,7 @@ fun GlassPage(padding: PaddingValues) {
             GlassPopupItem(
                 text = "Sort by",
                 onClick = { submenu = false },
-                icon = MiuixIcons.Os4.Edit,
+                icon = MiuixIcons.Glass.Edit,
                 summary = SortOrders[sortOrder],
                 showArrow = true,
                 arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },

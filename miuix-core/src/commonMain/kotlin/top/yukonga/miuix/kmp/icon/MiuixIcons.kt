@@ -4,8 +4,8 @@
 package top.yukonga.miuix.kmp.icon
 
 object MiuixIcons {
-    /** OS4 symbol font family, independent of the original extended icons. */
-    object Os4 {
+    /** Glass icon family, independent of the original extended icons. */
+    object Glass {
         object Light
         object Normal
         object Regular
