@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +26,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -72,8 +74,7 @@ suspend fun PagerState.springAnimateToPage(target: Int) {
             scrollToPage(target)
             return@scroll
         }
-        val distance =
-            (target - currentPage - currentPageOffsetFraction) * pageSize.toFloat()
+        val distance = (target - currentPage - currentPageOffsetFraction) * pageSize.toFloat()
         var previousValue = 0f
 
         updateTargetPage(target)
@@ -120,7 +121,7 @@ fun Modifier.horizontalPagerSwipeOverride(
 
             while (true) {
                 val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
 
                 val pageWidth = (pagerState.layoutInfo.pageSize + pagerState.layoutInfo.pageSpacing).coerceAtLeast(1)
 
@@ -250,46 +251,44 @@ fun Modifier.iosStyleMomentumHalt(
 ): Modifier = if (!enabled) {
     this
 } else {
-    this
-        .nestedScroll(flingTracker)
-        .pointerInput(mode, enabled, onHalted) {
-            val touchSlop = viewConfiguration.touchSlop
+    this.nestedScroll(flingTracker).pointerInput(mode, enabled, onHalted) {
+        val touchSlop = viewConfiguration.touchSlop
 
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                val downPos = down.position
-                val hadMomentum = flingTracker.isChildFlinging
-                if (!hadMomentum) {
-                    // List is already at rest: do not intercept; allow native HorizontalPager swipe
-                    return@awaitEachGesture
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+            val downPos = down.position
+            val hadMomentum = flingTracker.isChildFlinging
+            if (!hadMomentum) {
+                // List is already at rest: do not intercept; allow native HorizontalPager swipe
+                return@awaitEachGesture
+            }
+
+            // Momentum was active: actively halt the child fling animation
+            flingTracker.haltFling = true
+            flingTracker.isChildFlinging = false
+            onHalted?.invoke()
+            var isHalting = false
+
+            while (true) {
+                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+
+                val totalDx = abs(change.position.x - downPos.x)
+                val totalDy = abs(change.position.y - downPos.y)
+
+                if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
+                    isHalting = true
                 }
 
-                // Momentum was active: actively halt the child fling animation
-                flingTracker.haltFling = true
-                flingTracker.isChildFlinging = false
-                onHalted?.invoke()
-                var isHalting = false
-
-                while (true) {
-                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed) break
-
-                    val totalDx = abs(change.position.x - downPos.x)
-                    val totalDy = abs(change.position.y - downPos.y)
-
-                    if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
-                        isHalting = true
-                    }
-
-                    if (isHalting) {
-                        change.consume()
-                    } else if (totalDy > touchSlop && totalDy > totalDx) {
-                        break
-                    }
+                if (isHalting) {
+                    change.consume()
+                } else if (totalDy > touchSlop && totalDy > totalDx) {
+                    break
                 }
             }
         }
+    }
 }
 
 /**
