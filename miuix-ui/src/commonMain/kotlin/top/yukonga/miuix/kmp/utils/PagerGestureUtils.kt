@@ -11,11 +11,20 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -117,9 +126,10 @@ fun Modifier.horizontalPagerSwipeOverride(
                         velocityTracker.addPosition(change.uptimeMillis, change.position)
                         val velocityX = velocityTracker.calculateVelocity().x
                         val totalDx = change.position.x - downPos.x
-                        // Positive fraction means physical finger moved LEFT (forward to next page)
+                        // Physical displacement: negative totalDx means finger dragged LEFT (forward)
                         val dragDistanceFraction = -totalDx / pageWidth.toFloat()
 
+                        // Strictly clamp to at most 1 page from downPage
                         val targetPage = when {
                             velocityX < -400f -> (downPage + 1).coerceAtMost(pageCount - 1)
                             velocityX > 400f -> (downPage - 1).coerceAtLeast(0)
@@ -146,7 +156,6 @@ fun Modifier.horizontalPagerSwipeOverride(
                     val absTotalY = abs(totalDy)
 
                     // Strict directional threshold: must be predominantly horizontal (at least 2x greater than Y)
-                    // and exceed touchSlop to prevent vertical flicks from being accidentally intercepted
                     if (absTotalX > touchSlop * 1.5f && absTotalX > absTotalY * 2.0f) {
                         isDraggingPager = true
                         onIntercepted?.invoke()
@@ -182,56 +191,81 @@ fun Modifier.horizontalPagerSwipeOverride(
 }
 
 /**
+ * Tracks nested vertical fling momentum from child scrollables via [NestedScrollConnection].
+ */
+class PagerFlingTrackerConnection : NestedScrollConnection {
+    var isChildFlinging by mutableStateOf(false)
+        internal set
+
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        @Suppress("DEPRECATION")
+        val isFlingSource = source == NestedScrollSource.SideEffect || source == NestedScrollSource.Fling
+        if (isFlingSource && abs(available.y) > 0.5f) {
+            isChildFlinging = true
+        }
+        return Offset.Zero
+    }
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        isChildFlinging = false
+        return Velocity.Zero
+    }
+}
+
+/**
  * Tap to Halt (iOS-like behavior applied at HorizontalPager level):
  *
- * When vertical momentum is active on touch down (detected via child consuming down in Main pass),
- * halts the motion and consumes the horizontal drag of that initial gesture.
- * Once the list is at rest, subsequent horizontal swipes pass through untouched for native
- * HorizontalPager page transitions.
+ * When vertical momentum is active on touch down, halts the motion and consumes the
+ * horizontal drag of that initial gesture. Once the list is at rest, subsequent
+ * horizontal swipes pass through untouched for native HorizontalPager page transitions.
  */
 fun Modifier.iosStyleMomentumHalt(
+    flingTracker: PagerFlingTrackerConnection,
     mode: Int = 2,
     enabled: Boolean = true,
     onHalted: (() -> Unit)? = null,
 ): Modifier = if (!enabled) {
     this
 } else {
-    this.pointerInput(mode, enabled) {
-        val touchSlop = viewConfiguration.touchSlop
+    this
+        .nestedScroll(flingTracker)
+        .pointerInput(mode, enabled) {
+            val touchSlop = viewConfiguration.touchSlop
 
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
-            val downPos = down.position
-            // In Main pass, a flinging child list will have consumed `down` due to shouldScrollImmediately()
-            val hadMomentum = down.isConsumed
-            if (!hadMomentum) {
-                // If list is already at rest, do not intercept; allow native HorizontalPager swipe
-                return@awaitEachGesture
-            }
-
-            var isHalting = false
-
-            while (true) {
-                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                if (!change.pressed) break
-
-                val totalDx = abs(change.position.x - downPos.x)
-                val totalDy = abs(change.position.y - downPos.y)
-
-                if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
-                    isHalting = true
-                    onHalted?.invoke()
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                val downPos = down.position
+                val hadMomentum = flingTracker.isChildFlinging
+                if (!hadMomentum) {
+                    // List is already at rest: do not intercept; allow native HorizontalPager swipe
+                    return@awaitEachGesture
                 }
 
-                if (isHalting) {
-                    change.consume()
-                } else if (totalDy > touchSlop && totalDy > totalDx) {
-                    break
+                // Momentum was active: this gesture halts the list
+                flingTracker.isChildFlinging = false
+                var isHalting = false
+
+                while (true) {
+                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+
+                    val totalDx = abs(change.position.x - downPos.x)
+                    val totalDy = abs(change.position.y - downPos.y)
+
+                    if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
+                        isHalting = true
+                        onHalted?.invoke()
+                    }
+
+                    if (isHalting) {
+                        change.consume()
+                    } else if (totalDy > touchSlop && totalDy > totalDx) {
+                        break
+                    }
                 }
             }
         }
-    }
 }
 
 /**
@@ -242,6 +276,7 @@ fun Modifier.pagerGestureOverride(
     coroutineScope: CoroutineScope,
     mode: Int,
     enabled: Boolean = true,
+    flingTracker: PagerFlingTrackerConnection? = null,
     onTriggered: (() -> Unit)? = null,
 ): Modifier = when (mode) {
     1 -> horizontalPagerSwipeOverride(
@@ -252,11 +287,16 @@ fun Modifier.pagerGestureOverride(
         onIntercepted = onTriggered,
     )
 
-    2 -> iosStyleMomentumHalt(
-        mode = mode,
-        enabled = enabled,
-        onHalted = onTriggered,
-    )
+    2 -> if (flingTracker != null) {
+        iosStyleMomentumHalt(
+            flingTracker = flingTracker,
+            mode = mode,
+            enabled = enabled,
+            onHalted = onTriggered,
+        )
+    } else {
+        this
+    }
 
     else -> this
 }
@@ -272,11 +312,13 @@ fun Modifier.pagerGestureOverride(
     onTriggered: (() -> Unit)? = null,
 ): Modifier {
     val coroutineScope = rememberCoroutineScope()
+    val flingTracker = remember { PagerFlingTrackerConnection() }
     return pagerGestureOverride(
         pagerState = pagerState,
         coroutineScope = coroutineScope,
         mode = mode,
         enabled = enabled,
+        flingTracker = flingTracker,
         onTriggered = onTriggered,
     )
 }

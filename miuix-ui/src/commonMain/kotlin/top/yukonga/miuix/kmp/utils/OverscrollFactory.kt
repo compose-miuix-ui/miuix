@@ -106,8 +106,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
     internal var getOverScrollState: (() -> OverScrollState?)? = null
 
     override val isInProgress: Boolean
-        get() = (animationJobX?.isActive != true && animationJobY?.isActive != true) &&
-            (abs(offsetX) > offsetThreshold || abs(offsetY) > offsetThreshold)
+        get() = abs(offsetX) > offsetThreshold || abs(offsetY) > offsetThreshold
 
     override val node: DelegatableNode = MiuixOverscrollEffectNode(this)
 

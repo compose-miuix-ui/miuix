@@ -3,14 +3,10 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -128,7 +124,6 @@ import ui.isInDarkTheme
 import utils.FPSMonitor
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
-import kotlin.math.abs
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -753,22 +748,18 @@ fun AppPager(
     modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
-    val coroutineScope = rememberCoroutineScope()
-    val isCrossAxisActive = appState.pagerInterceptionMode == 1 && appState.enablePageUserScroll
-    val pagerGestureModifier = modifier.pagerGestureOverride(
-        pagerState = pagerState,
-        coroutineScope = coroutineScope,
-        mode = appState.pagerInterceptionMode,
-        enabled = appState.enablePageUserScroll,
-    )
     val flingBehavior = PagerDefaults.flingBehavior(
         state = pagerState,
         snapAnimationSpec = PagerNavigationSpringSpec,
     )
     HorizontalPager(
         state = pagerState,
-        modifier = pagerGestureModifier,
-        userScrollEnabled = appState.enablePageUserScroll && !isCrossAxisActive,
+        modifier = modifier.pagerGestureOverride(
+            pagerState = pagerState,
+            mode = appState.pagerInterceptionMode,
+            enabled = appState.enablePageUserScroll,
+        ),
+        userScrollEnabled = appState.enablePageUserScroll,
         verticalAlignment = Alignment.Top,
         flingBehavior = flingBehavior,
         pageContent = { page ->

@@ -245,7 +245,6 @@ In Compose, when a vertical scrollable list (such as `LazyColumn`) is placed ins
 Miuix provides utilities in `top.yukonga.miuix.kmp.utils` to resolve this conflict and deliver smooth, natural pager gesture physics:
 
 ```kotlin
-val coroutineScope = rememberCoroutineScope()
 val flingBehavior = PagerDefaults.flingBehavior(
     state = pagerState,
     snapAnimationSpec = PagerNavigationSpringSpec,
@@ -259,7 +258,6 @@ HorizontalPager(
             pagerState = pagerState,
             mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
         ),
-    userScrollEnabled = isNotCrossAxisMode,
     flingBehavior = flingBehavior,
 ) { page ->
     // Page content with LazyColumn

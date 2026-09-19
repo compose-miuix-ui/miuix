@@ -245,7 +245,6 @@ Box(
 Miuix 在 `top.yukonga.miuix.kmp.utils` 中提供了开箱即用的解决方案：
 
 ```kotlin
-val coroutineScope = rememberCoroutineScope()
 val flingBehavior = PagerDefaults.flingBehavior(
     state = pagerState,
     snapAnimationSpec = PagerNavigationSpringSpec,
@@ -259,7 +258,6 @@ HorizontalPager(
             pagerState = pagerState,
             mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal, // 或 1
         ),
-    userScrollEnabled = isNotCrossAxisMode,
     flingBehavior = flingBehavior,
 ) { page ->
     // 包含 LazyColumn 的页面内容
