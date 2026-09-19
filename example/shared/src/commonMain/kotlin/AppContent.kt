@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -117,6 +118,8 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
 import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
@@ -752,6 +755,8 @@ fun AppPager(
         state = pagerState,
         snapAnimationSpec = PagerNavigationSpringSpec,
     )
+    val intercept = appState.pagerInterceptionMode == PagerInterceptionMode.CrossAxisInterceptor.ordinal
+    val nativeConnection = PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
     HorizontalPager(
         state = pagerState,
         modifier = modifier.pagerGestureOverride(
@@ -759,7 +764,8 @@ fun AppPager(
             mode = appState.pagerInterceptionMode,
             enabled = appState.enablePageUserScroll,
         ),
-        userScrollEnabled = appState.enablePageUserScroll,
+        userScrollEnabled = appState.enablePageUserScroll && !intercept,
+        pageNestedScrollConnection = if (intercept) PagerGestureNestedScrollConnection else nativeConnection,
         verticalAlignment = Alignment.Top,
         flingBehavior = flingBehavior,
         pageContent = { page ->

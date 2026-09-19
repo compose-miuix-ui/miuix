@@ -245,11 +245,6 @@ Box(
 Miuix 在 `top.yukonga.miuix.kmp.utils` 中提供了开箱即用的解决方案：
 
 ```kotlin
-val flingBehavior = PagerDefaults.flingBehavior(
-    state = pagerState,
-    snapAnimationSpec = PagerNavigationSpringSpec,
-)
-
 HorizontalPager(
     state = pagerState,
     modifier = Modifier
@@ -258,18 +253,23 @@ HorizontalPager(
             pagerState = pagerState,
             mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal, // 或 1
         ),
-    flingBehavior = flingBehavior,
+    userScrollEnabled = false,
+    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
 ) { page ->
     // 包含 LazyColumn 的页面内容
 }
 ```
+
+Cross-Axis 模式必须同时设置 `userScrollEnabled = false` 和 `pageNestedScrollConnection = PagerGestureNestedScrollConnection`：前者关闭 Pager 自带的触摸识别器，避免它在动画中抢占按下事件；后者确保半页位置上的斜向竖滑不会丢失竖向位移。切回 Native 或 TapToHalt 时，恢复原生 `userScrollEnabled` 和 `PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)`。禁用切页时，也要给修饰符传入 `enabled = false`。
+
+拖拽超过系统 Touch Slop 后逐像素跟手，松手速度传入弹簧。再次触摸会暂停当前动画；若随后竖滑或点击松手，Pager 吸附到最近页，子列表继续处理竖向滚动及越界效果。一次按下到松手之间保持已确定的轴向，换轴需要抬手后重新触摸。
 
 ### 拦截模式 (`PagerInterceptionMode`)
 
 | 模式 | 名称 | 描述 |
 | :--- | :--- | :--- |
 | `0` (`Native`) | Default | Compose 原生默认行为，不做干预。 |
-| `1` (`CrossAxisInterceptor`) | Cross-Axis | 在 `HorizontalPager` 顶层的 `Initial` pass 优先判定横滑，独占驱动 Pager 平滑翻页，且严格限制单次手势至多翻 1 页。 |
+| `1` (`CrossAxisInterceptor`) | Cross-Axis | 在 `HorizontalPager` 顶层的 `Initial` pass 优先判定横滑，独占驱动 Pager 平滑翻页，按实际位置和松手速度吸附到相邻页；新触摸可从当前位置接管。 |
 | `2` (`TapToHalt`) | iOS-like | 对齐 iOS 原生体验：列表高速运动时首次横滑先急停竖向动量；停下后的下一次横滑正常切页。 |
 
 ### 统一弹簧切页 (`springAnimateToPage()`)

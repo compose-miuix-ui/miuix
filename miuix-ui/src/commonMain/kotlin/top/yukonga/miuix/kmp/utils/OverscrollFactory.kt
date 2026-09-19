@@ -248,12 +248,14 @@ class MiuixOverscrollEffect : OverscrollEffect {
         val bypassY = shouldBypassForPullToRefreshY()
 
         // Resync raw accumulation, then cancel running springs the drag is taking over.
-        if (!bypassY) {
+        if (!bypassY && delta.y != 0f) {
             if (animationJobY?.isActive == true) syncRawAccumulationFromOffsetY()
             animationJobY?.cancel()
         }
-        if (animationJobX?.isActive == true) syncRawAccumulationFromOffsetX()
-        animationJobX?.cancel()
+        if (delta.x != 0f) {
+            if (animationJobX?.isActive == true) syncRawAccumulationFromOffsetX()
+            animationJobX?.cancel()
+        }
 
         // Y-axis pre-scroll: consume from overscroll first when scrolling back toward center
         var performScrollDeltaY = delta.y

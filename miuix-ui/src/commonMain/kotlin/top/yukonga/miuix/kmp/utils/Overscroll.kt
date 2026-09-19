@@ -16,7 +16,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -152,8 +151,7 @@ private class OverscrollNode(
 
     // Drag accumulation engages only inside a press/pan session. Scroll events never alter it
     // (with the default FlingBehavior a wheel produces no fling callbacks, so a wheel-driven
-    // offset would latch unsettled); mouse presses never open it (a mouse press cannot drag a
-    // scrollable).
+    // offset would latch unsettled). Presses also cover custom mouse-driven scrollables.
     private var gestureActive = false
 
     init {
@@ -166,7 +164,7 @@ private class OverscrollNode(
                             PointerEventType.PanStart, PointerEventType.PanMove -> true
                             PointerEventType.PanEnd -> false
                             PointerEventType.Scroll -> gestureActive
-                            else -> event.changes.fastAny { it.pressed && it.type != PointerType.Mouse }
+                            else -> event.changes.fastAny { it.pressed }
                         }
                         if (gestureActive && !active && animationJob?.isActive != true && abs(offset) > offsetThreshold) {
                             // Settle a session that ends without a fling; a real gesture's fling
@@ -281,7 +279,6 @@ private class OverscrollNode(
         if (delta == 0f) return
         rawTouchAccumulation += delta
         rawTouchAccumulation = rawTouchAccumulation.coerceIn(-scrollRange, scrollRange)
-
         val normalized = min(abs(rawTouchAccumulation) / scrollRange, 1.0f)
         val dampedDist = SpringMath.obtainDampingDistance(normalized, scrollRange)
         offset = sign(rawTouchAccumulation) * dampedDist
@@ -330,10 +327,6 @@ private class OverscrollNode(
             return dispatcher.dispatchPreScroll(available, source)
         }
 
-        // Resync raw accumulation when a drag takes over a running spring.
-        if (animationJob?.isActive == true) syncRawAccumulationFromOffset()
-        animationJob?.cancel()
-
         val parentConsumed = if (nestedScrollToParent) {
             dispatcher.dispatchPreScroll(available, source)
         } else {
@@ -342,6 +335,11 @@ private class OverscrollNode(
 
         val realAvailable = available - parentConsumed
         val delta = if (isVertical) realAvailable.y else realAvailable.x
+        if (delta == 0f) return parentConsumed
+
+        // Resync raw accumulation when a drag takes over a running spring.
+        if (animationJob?.isActive == true) syncRawAccumulationFromOffset()
+        animationJob?.cancel()
 
         if (abs(offset) <= offsetThreshold || sign(delta) == sign(rawTouchAccumulation)) {
             return parentConsumed
@@ -386,9 +384,6 @@ private class OverscrollNode(
             return dispatcher.dispatchPostScroll(consumed, available, source)
         }
 
-        animationJob?.cancel()
-        unwindStaleOffset(if (isVertical) consumed.y else consumed.x)
-
         val parentConsumed = if (nestedScrollToParent) {
             dispatcher.dispatchPostScroll(consumed, available, source)
         } else {
@@ -397,6 +392,11 @@ private class OverscrollNode(
 
         val realAvailable = available - parentConsumed
         val delta = if (isVertical) realAvailable.y else realAvailable.x
+        val consumedDelta = if (isVertical) consumed.y else consumed.x
+        if (delta == 0f && consumedDelta == 0f) return parentConsumed
+        if (animationJob?.isActive == true) syncRawAccumulationFromOffset()
+        animationJob?.cancel()
+        unwindStaleOffset(consumedDelta)
 
         applyDrag(delta)
         return if (isVertical) Offset(parentConsumed.x, available.y) else Offset(available.x, parentConsumed.y)
