@@ -68,12 +68,12 @@ val PagerNavigationSpringSpec: SpringSpec<Float> = spring(
  */
 suspend fun PagerState.springAnimateToPage(target: Int) {
     if (target !in 0 until pageCount) return
+    val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing
+    if (pageSize <= 0) {
+        scrollToPage(target)
+        return
+    }
     scroll(MutatePriority.UserInput) {
-        val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing
-        if (pageSize <= 0) {
-            scrollToPage(target)
-            return@scroll
-        }
         val distance = (target - currentPage - currentPageOffsetFraction) * pageSize.toFloat()
         var previousValue = 0f
 
@@ -107,9 +107,30 @@ fun Modifier.horizontalPagerSwipeOverride(
     this.pointerInput(mode, enabled, pagerState, onIntercepted) {
         val touchSlop = viewConfiguration.touchSlop
         val velocityTracker = VelocityTracker()
+        var animationJob: kotlinx.coroutines.Job? = null
 
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+
+            // Cancel in-flight animation on touch down and settle pager offset to prevent
+            // DefaultPagerNestedScrollConnection from pulling the pager backwards during child scrolling
+            if (animationJob?.isActive == true || pagerState.isScrollInProgress) {
+                animationJob?.cancel()
+                val offsetFraction = pagerState.currentPageOffsetFraction
+                if (abs(offsetFraction) > 1e-3f) {
+                    val settled = if (offsetFraction > 0.5f) {
+                        (pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1)
+                    } else if (offsetFraction < -0.5f) {
+                        (pagerState.currentPage - 1).coerceAtLeast(0)
+                    } else {
+                        pagerState.currentPage
+                    }
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(settled)
+                    }
+                }
+            }
+
             velocityTracker.resetTracking()
             velocityTracker.addPosition(down.uptimeMillis, down.position)
 
@@ -144,7 +165,7 @@ fun Modifier.horizontalPagerSwipeOverride(
                             isFlingBackward || isDragBackward -> (downPage - 1).coerceAtLeast(0)
                             else -> downPage
                         }
-                        coroutineScope.launch {
+                        animationJob = coroutineScope.launch {
                             pagerState.springAnimateToPage(targetPage)
                         }
                     }
