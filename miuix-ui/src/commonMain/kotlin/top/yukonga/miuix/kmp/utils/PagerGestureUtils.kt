@@ -62,12 +62,16 @@ val PagerNavigationSpringSpec: SpringSpec<Float> = spring(
 /**
  * Smoothly animates [PagerState] to the specified [target] page using [PagerNavigationSpringSpec].
  * Focus requests will not interrupt tab navigation before the page settles.
+ * If called before the pager layout has been measured, falls back to [PagerState.scrollToPage].
  */
 suspend fun PagerState.springAnimateToPage(target: Int) {
     if (target !in 0 until pageCount) return
     scroll(MutatePriority.UserInput) {
         val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing
-        if (pageSize <= 0) return@scroll
+        if (pageSize <= 0) {
+            scrollToPage(target)
+            return@scroll
+        }
         val distance =
             (target - currentPage - currentPageOffsetFraction) * pageSize.toFloat()
         var previousValue = 0f
@@ -93,13 +97,13 @@ suspend fun PagerState.springAnimateToPage(target: Int) {
 fun Modifier.horizontalPagerSwipeOverride(
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
-    mode: Int = 1,
+    mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxisInterceptor,
     enabled: Boolean = true,
     onIntercepted: (() -> Unit)? = null,
 ): Modifier = if (!enabled) {
     this
 } else {
-    this.pointerInput(mode, enabled, pagerState) {
+    this.pointerInput(mode, enabled, pagerState, onIntercepted) {
         val touchSlop = viewConfiguration.touchSlop
         val velocityTracker = VelocityTracker()
 
@@ -123,21 +127,22 @@ fun Modifier.horizontalPagerSwipeOverride(
                 if (!change.pressed) {
                     if (isDraggingPager) {
                         change.consume()
-                        velocityTracker.addPosition(change.uptimeMillis, change.position)
                         val velocityX = velocityTracker.calculateVelocity().x
                         val totalDx = change.position.x - downPos.x
                         // Physical displacement: negative totalDx means finger dragged LEFT (forward)
                         val dragDistanceFraction = -totalDx / pageWidth.toFloat()
 
-                        // Strictly clamp to at most 1 page from downPage
+                        // A fling must strictly agree with the physical drag direction to prevent opposite-direction flips!
+                        val isFlingForward = velocityX < -800f && totalDx < -touchSlop
+                        val isFlingBackward = velocityX > 800f && totalDx > touchSlop
+                        val isDragForward = dragDistanceFraction > 0.35f
+                        val isDragBackward = dragDistanceFraction < -0.35f
+
                         val targetPage = when {
-                            velocityX < -400f -> (downPage + 1).coerceAtMost(pageCount - 1)
-                            velocityX > 400f -> (downPage - 1).coerceAtLeast(0)
-                            dragDistanceFraction > 0.3f -> (downPage + 1).coerceAtMost(pageCount - 1)
-                            dragDistanceFraction < -0.3f -> (downPage - 1).coerceAtLeast(0)
+                            isFlingForward || isDragForward -> (downPage + 1).coerceAtMost(pageCount - 1)
+                            isFlingBackward || isDragBackward -> (downPage - 1).coerceAtLeast(0)
                             else -> downPage
                         }
-
                         coroutineScope.launch {
                             pagerState.springAnimateToPage(targetPage)
                         }
@@ -197,17 +202,35 @@ class PagerFlingTrackerConnection : NestedScrollConnection {
     var isChildFlinging by mutableStateOf(false)
         internal set
 
+    var haltFling by mutableStateOf(false)
+        internal set
+
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         @Suppress("DEPRECATION")
         val isFlingSource = source == NestedScrollSource.SideEffect || source == NestedScrollSource.Fling
         if (isFlingSource && abs(available.y) > 0.5f) {
             isChildFlinging = true
+            if (haltFling) {
+                // Consume all vertical scroll to force child fling animation to cancel immediately
+                return available
+            }
         }
         return Offset.Zero
     }
 
+    override suspend fun onPreFling(available: Velocity): Velocity {
+        if (haltFling) {
+            haltFling = false
+            isChildFlinging = false
+            // Consume all fling velocity
+            return available
+        }
+        return Velocity.Zero
+    }
+
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         isChildFlinging = false
+        haltFling = false
         return Velocity.Zero
     }
 }
@@ -221,7 +244,7 @@ class PagerFlingTrackerConnection : NestedScrollConnection {
  */
 fun Modifier.iosStyleMomentumHalt(
     flingTracker: PagerFlingTrackerConnection,
-    mode: Int = 2,
+    mode: PagerInterceptionMode = PagerInterceptionMode.TapToHalt,
     enabled: Boolean = true,
     onHalted: (() -> Unit)? = null,
 ): Modifier = if (!enabled) {
@@ -229,7 +252,7 @@ fun Modifier.iosStyleMomentumHalt(
 } else {
     this
         .nestedScroll(flingTracker)
-        .pointerInput(mode, enabled) {
+        .pointerInput(mode, enabled, onHalted) {
             val touchSlop = viewConfiguration.touchSlop
 
             awaitEachGesture {
@@ -241,8 +264,10 @@ fun Modifier.iosStyleMomentumHalt(
                     return@awaitEachGesture
                 }
 
-                // Momentum was active: this gesture halts the list
+                // Momentum was active: actively halt the child fling animation
+                flingTracker.haltFling = true
                 flingTracker.isChildFlinging = false
+                onHalted?.invoke()
                 var isHalting = false
 
                 while (true) {
@@ -255,7 +280,6 @@ fun Modifier.iosStyleMomentumHalt(
 
                     if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
                         isHalting = true
-                        onHalted?.invoke()
                     }
 
                     if (isHalting) {
@@ -274,12 +298,12 @@ fun Modifier.iosStyleMomentumHalt(
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
-    mode: Int,
+    mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxisInterceptor,
     enabled: Boolean = true,
     flingTracker: PagerFlingTrackerConnection? = null,
     onTriggered: (() -> Unit)? = null,
 ): Modifier = when (mode) {
-    1 -> horizontalPagerSwipeOverride(
+    PagerInterceptionMode.CrossAxisInterceptor -> horizontalPagerSwipeOverride(
         pagerState = pagerState,
         coroutineScope = coroutineScope,
         mode = mode,
@@ -287,7 +311,7 @@ fun Modifier.pagerGestureOverride(
         onIntercepted = onTriggered,
     )
 
-    2 -> if (flingTracker != null) {
+    PagerInterceptionMode.TapToHalt -> if (flingTracker != null) {
         iosStyleMomentumHalt(
             flingTracker = flingTracker,
             mode = mode,
@@ -298,8 +322,27 @@ fun Modifier.pagerGestureOverride(
         this
     }
 
-    else -> this
+    PagerInterceptionMode.Native -> this
 }
+
+/**
+ * Convenient modifier overload that accepts raw integer [mode] for settings storage.
+ */
+fun Modifier.pagerGestureOverride(
+    pagerState: PagerState,
+    coroutineScope: CoroutineScope,
+    mode: Int,
+    enabled: Boolean = true,
+    flingTracker: PagerFlingTrackerConnection? = null,
+    onTriggered: (() -> Unit)? = null,
+): Modifier = pagerGestureOverride(
+    pagerState = pagerState,
+    coroutineScope = coroutineScope,
+    mode = PagerInterceptionMode.entries.getOrElse(mode) { PagerInterceptionMode.Native },
+    enabled = enabled,
+    flingTracker = flingTracker,
+    onTriggered = onTriggered,
+)
 
 /**
  * Convenient composable modifier that applies the selected [mode] resolution to [HorizontalPager].
@@ -307,7 +350,7 @@ fun Modifier.pagerGestureOverride(
 @Composable
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
-    mode: Int,
+    mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxisInterceptor,
     enabled: Boolean = true,
     onTriggered: (() -> Unit)? = null,
 ): Modifier {
@@ -322,3 +365,19 @@ fun Modifier.pagerGestureOverride(
         onTriggered = onTriggered,
     )
 }
+
+/**
+ * Convenient composable modifier overload that accepts raw integer [mode] for settings storage.
+ */
+@Composable
+fun Modifier.pagerGestureOverride(
+    pagerState: PagerState,
+    mode: Int,
+    enabled: Boolean = true,
+    onTriggered: (() -> Unit)? = null,
+): Modifier = pagerGestureOverride(
+    pagerState = pagerState,
+    mode = PagerInterceptionMode.entries.getOrElse(mode) { PagerInterceptionMode.Native },
+    enabled = enabled,
+    onTriggered = onTriggered,
+)
