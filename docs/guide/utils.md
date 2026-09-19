@@ -237,3 +237,49 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 | None | No visual feedback                                                                    |
 | Sink | Applies a sink effect, where the component scales down slightly when pressed          |
 | Tilt | Applies a tilt effect, where the component tilts slightly based on the touch position |
+
+## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
+
+In Compose, when a vertical scrollable list (such as `LazyColumn`) is placed inside a `HorizontalPager`, touching the screen during vertical momentum (fling) or overscroll causes Compose's default `scrollable` to immediately enter vertical dragging and bypass touch slop. As a result, horizontal swipes are hijacked by the vertical list and page switching is blocked.
+
+Miuix provides utilities in `top.yukonga.miuix.kmp.utils` to resolve this conflict and deliver smooth, natural pager gesture physics:
+
+```kotlin
+val coroutineScope = rememberCoroutineScope()
+val flingBehavior = PagerDefaults.flingBehavior(
+    state = pagerState,
+    snapAnimationSpec = PagerNavigationSpringSpec,
+)
+
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier
+        .fillMaxSize()
+        .pagerGestureOverride(
+            pagerState = pagerState,
+            mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
+        ),
+    userScrollEnabled = isNotCrossAxisMode,
+    flingBehavior = flingBehavior,
+) { page ->
+    // Page content with LazyColumn
+}
+```
+
+### Pager Interception Modes (`PagerInterceptionMode`)
+
+| Mode | Title | Description |
+| :--- | :--- | :--- |
+| `0` (`Native`) | Default | Standard Compose Foundation behavior without intervention. |
+| `1` (`CrossAxisInterceptor`) | Cross-Axis | Prioritizes horizontal swipes at the `HorizontalPager` level in `PointerEventPass.Initial`, exclusively driving page transitions and clamping to at most 1 page per swipe. |
+| `2` (`TapToHalt`) | iOS-like | First horizontal swipe halts vertical list inertia without paging; subsequent swipe pages natively. |
+
+### Spring Page Navigation (`springAnimateToPage()`)
+
+Use `PagerState.springAnimateToPage(target)` to smoothly animate between pages using `PagerNavigationSpringSpec`. It runs with `MutatePriority.UserInput` so external focus events do not interrupt the animation before the page settles:
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```

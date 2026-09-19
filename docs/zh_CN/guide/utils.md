@@ -237,3 +237,49 @@ Box(
 | None | 无视觉反馈                             |
 | Sink | 应用下沉效果，组件在按下时轻微缩小     |
 | Tilt | 应用倾斜效果，组件根据触摸位置轻微倾斜 |
+
+## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
+
+在 Compose 中，当 `HorizontalPager` 内部嵌套竖向可滚动列表（如 `LazyColumn`）时，若列表正处于惯性滚动（Fling）或越界回弹态，Compose 默认的 `scrollable` 会在触摸落手时跳过 Touch Slop 判定，将横向划动强行转为竖滑，导致切页被卡死。
+
+Miuix 在 `top.yukonga.miuix.kmp.utils` 中提供了开箱即用的解决方案：
+
+```kotlin
+val coroutineScope = rememberCoroutineScope()
+val flingBehavior = PagerDefaults.flingBehavior(
+    state = pagerState,
+    snapAnimationSpec = PagerNavigationSpringSpec,
+)
+
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier
+        .fillMaxSize()
+        .pagerGestureOverride(
+            pagerState = pagerState,
+            mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal, // 或 1
+        ),
+    userScrollEnabled = isNotCrossAxisMode,
+    flingBehavior = flingBehavior,
+) { page ->
+    // 包含 LazyColumn 的页面内容
+}
+```
+
+### 拦截模式 (`PagerInterceptionMode`)
+
+| 模式 | 名称 | 描述 |
+| :--- | :--- | :--- |
+| `0` (`Native`) | Default | Compose 原生默认行为，不做干预。 |
+| `1` (`CrossAxisInterceptor`) | Cross-Axis | 在 `HorizontalPager` 顶层的 `Initial` pass 优先判定横滑，独占驱动 Pager 平滑翻页，且严格限制单次手势至多翻 1 页。 |
+| `2` (`TapToHalt`) | iOS-like | 对齐 iOS 原生体验：列表高速运动时首次横滑先急停竖向动量；停下后的下一次横滑正常切页。 |
+
+### 统一弹簧切页 (`springAnimateToPage()`)
+
+通过 `PagerState.springAnimateToPage(target)` 配合统一的 `PagerNavigationSpringSpec` 执行弹簧切页动画，以 `MutatePriority.UserInput` 运行，防止外部焦点变更在中途打断页面过渡：
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```
