@@ -237,3 +237,47 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 | None | No visual feedback                                                                    |
 | Sink | Applies a sink effect, where the component scales down slightly when pressed          |
 | Tilt | Applies a tilt effect, where the component tilts slightly based on the touch position |
+
+## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
+
+In Compose, when a vertical scrollable list (such as `LazyColumn`) is placed inside a `HorizontalPager`, touching the screen during vertical momentum (fling) or overscroll causes Compose's default `scrollable` to immediately enter vertical dragging and bypass touch slop. As a result, horizontal swipes are hijacked by the vertical list and page switching is blocked.
+
+Miuix provides utilities in `top.yukonga.miuix.kmp.utils` to resolve this conflict and deliver smooth, natural pager gesture physics:
+
+```kotlin
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier
+        .fillMaxSize()
+        .pagerGestureOverride(
+            pagerState = pagerState,
+            mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
+        ),
+    userScrollEnabled = false,
+    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+) { page ->
+    // Page content with LazyColumn
+}
+```
+
+Cross-Axis mode requires both `userScrollEnabled = false` and `pageNestedScrollConnection = PagerGestureNestedScrollConnection`. The former disables the built-in touch recognizer so it cannot claim a down during settling; the latter preserves vertical deltas during diagonal vertical drags when the pager is between pages. For Native or TapToHalt, restore native `userScrollEnabled` and `PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)`. To disable paging, also pass `enabled = false` to the modifier.
+
+After system touch slop, dragging tracks each pixel and passes release velocity into the spring. A new touch pauses the current animation. If it becomes a vertical drag or ends as a tap, the pager settles to the nearest page while the child handles vertical scrolling and overscroll. Direction stays locked for each press; changing axes requires lifting and touching again.
+
+### Pager Interception Modes (`PagerInterceptionMode`)
+
+| Mode | Title | Description |
+| :--- | :--- | :--- |
+| `0` (`Native`) | Default | Standard Compose Foundation behavior without intervention. |
+| `1` (`CrossAxisInterceptor`) | Cross-Axis | Prioritizes horizontal swipes at the `HorizontalPager` level in `PointerEventPass.Initial`, driving drag and spring settling in one scroll mutation. New touches take over at the displayed position. |
+| `2` (`TapToHalt`) | iOS-like | First horizontal swipe halts vertical list inertia without paging; subsequent swipe pages natively. |
+
+### Spring Page Navigation (`springAnimateToPage()`)
+
+Use `PagerState.springAnimateToPage(target)` to smoothly animate between pages using `PagerNavigationSpringSpec`. It runs with `MutatePriority.UserInput` so external focus events do not interrupt the animation before the page settles:
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```
