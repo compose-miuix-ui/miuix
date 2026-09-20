@@ -309,7 +309,7 @@ Uniqueness also makes **double taps** an app-level concern: a navigation button 
 
 ## Entry lifecycle and ViewModels
 
-Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`, so `collectAsStateWithLifecycle`, `viewModel()` and store-based DI scope per screen with no extra setup.
+Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`. Conforming to AndroidX Navigation 3, `collectAsStateWithLifecycle`, `viewModel()`, and Hilt (`hiltViewModel()` with `SavedStateHandle`) scope per screen out of the box with no extra setup.
 
 Lifecycle is a pure function of depth: the settled top is `RESUMED`; covered, incoming and leaving layers are `STARTED`; an entry being removed drops to `CREATED` until it unloads. While a **gesture** drives the stack, everyone is capped at `STARTED` — `RESUMED` means "settled, sole top", so work keyed on it does not flap while a finger hovers around the transition thresholds.
 
