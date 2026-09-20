@@ -240,41 +240,43 @@ Box(
 
 ## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
 
-在 Compose 中，当 `HorizontalPager` 内部嵌套竖向可滚动列表（如 `LazyColumn`）时，若列表正处于惯性滚动（Fling）或越界回弹态，Compose 默认的 `scrollable` 会在触摸落手时跳过 Touch Slop 判定，将横向划动强行转为竖滑，导致切页被卡死。
-
-Miuix 在 `top.yukonga.miuix.kmp.utils` 中提供了开箱即用的解决方案：
+`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在列表惯性滚动或回弹期间横滑切页。
 
 ```kotlin
 HorizontalPager(
     state = pagerState,
-    modifier = Modifier
-        .fillMaxSize()
-        .pagerGestureOverride(
-            pagerState = pagerState,
-            mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal, // 或 1
-        ),
+    modifier = Modifier.pagerGestureOverride(pagerState),
     userScrollEnabled = false,
     pageNestedScrollConnection = PagerGestureNestedScrollConnection,
 ) { page ->
-    // 包含 LazyColumn 的页面内容
+    // 页面内容，例如 LazyColumn
 }
 ```
 
-Cross-Axis 模式必须同时设置 `userScrollEnabled = false` 和 `pageNestedScrollConnection = PagerGestureNestedScrollConnection`：前者关闭 Pager 自带的触摸识别器，避免它在动画中抢占按下事件；后者确保半页位置上的斜向竖滑不会丢失竖向位移。切回 Native 或 TapToHalt 时，恢复原生 `userScrollEnabled` 和 `PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)`。禁用切页时，也要给修饰符传入 `enabled = false`。
+::: warning Cross-Axis 模式必需配置
+使用默认的 `CrossAxisInterceptor` 模式时，**必须同时设置**：
 
-拖拽超过系统 Touch Slop 后逐像素跟手，松手速度传入弹簧。再次触摸会暂停当前动画；若随后竖滑或点击松手，Pager 吸附到最近页，子列表继续处理竖向滚动及越界效果。一次按下到松手之间保持已确定的轴向，换轴需要抬手后重新触摸。
+- `userScrollEnabled = false`
+- `pageNestedScrollConnection = PagerGestureNestedScrollConnection`
+
+缺少任意一项都可能导致手势冲突或越界效果异常。切换到 `Native` 或 `TapToHalt` 时，请恢复这两项的 Pager 默认配置。
+:::
 
 ### 拦截模式 (`PagerInterceptionMode`)
 
-| 模式 | 名称 | 描述 |
-| :--- | :--- | :--- |
-| `0` (`Native`) | Default | Compose 原生默认行为，不做干预。 |
-| `1` (`CrossAxisInterceptor`) | Cross-Axis | 在 `HorizontalPager` 顶层的 `Initial` pass 优先判定横滑，独占驱动 Pager 平滑翻页，按实际位置和松手速度吸附到相邻页；新触摸可从当前位置接管。 |
-| `2` (`TapToHalt`) | iOS-like | 对齐 iOS 原生体验：列表高速运动时首次横滑先急停竖向动量；停下后的下一次横滑正常切页。 |
+通过修饰符的 `mode` 参数选择交互方式：
+
+| 模式 | 行为 |
+| :--- | :--- |
+| `CrossAxisInterceptor`（默认） | 列表滚动或回弹时，仍可横滑切页。 |
+| `Native` | 使用 Compose 原生 Pager 手势。 |
+| `TapToHalt` | 列表惯性滚动时，首次横滑停止列表，再次横滑切页。 |
+
+禁用滑动切页时，将修饰符的 `enabled` 和 Pager 的 `userScrollEnabled` 都设为 `false`。
 
 ### 统一弹簧切页 (`springAnimateToPage()`)
 
-通过 `PagerState.springAnimateToPage(target)` 配合统一的 `PagerNavigationSpringSpec` 执行弹簧切页动画，以 `MutatePriority.UserInput` 运行，防止外部焦点变更在中途打断页面过渡：
+点击标签或导航项时，可用 `springAnimateToPage` 动画切换到指定页：
 
 ```kotlin
 coroutineScope.launch {

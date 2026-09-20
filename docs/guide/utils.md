@@ -240,41 +240,43 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 
 ## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
 
-In Compose, when a vertical scrollable list (such as `LazyColumn`) is placed inside a `HorizontalPager`, touching the screen during vertical momentum (fling) or overscroll causes Compose's default `scrollable` to immediately enter vertical dragging and bypass touch slop. As a result, horizontal swipes are hijacked by the vertical list and page switching is blocked.
-
-Miuix provides utilities in `top.yukonga.miuix.kmp.utils` to resolve this conflict and deliver smooth, natural pager gesture physics:
+Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
 
 ```kotlin
 HorizontalPager(
     state = pagerState,
-    modifier = Modifier
-        .fillMaxSize()
-        .pagerGestureOverride(
-            pagerState = pagerState,
-            mode = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
-        ),
+    modifier = Modifier.pagerGestureOverride(pagerState),
     userScrollEnabled = false,
     pageNestedScrollConnection = PagerGestureNestedScrollConnection,
 ) { page ->
-    // Page content with LazyColumn
+    // Page content, such as a LazyColumn
 }
 ```
 
-Cross-Axis mode requires both `userScrollEnabled = false` and `pageNestedScrollConnection = PagerGestureNestedScrollConnection`. The former disables the built-in touch recognizer so it cannot claim a down during settling; the latter preserves vertical deltas during diagonal vertical drags when the pager is between pages. For Native or TapToHalt, restore native `userScrollEnabled` and `PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)`. To disable paging, also pass `enabled = false` to the modifier.
+::: warning Required Cross-Axis configuration
+The default `CrossAxisInterceptor` mode **requires both settings**:
 
-After system touch slop, dragging tracks each pixel and passes release velocity into the spring. A new touch pauses the current animation. If it becomes a vertical drag or ends as a tap, the pager settles to the nearest page while the child handles vertical scrolling and overscroll. Direction stays locked for each press; changing axes requires lifting and touching again.
+- `userScrollEnabled = false`
+- `pageNestedScrollConnection = PagerGestureNestedScrollConnection`
+
+Missing either can cause gesture conflicts or incorrect overscroll. When switching to `Native` or `TapToHalt`, restore the pager's defaults for both settings.
+:::
 
 ### Pager Interception Modes (`PagerInterceptionMode`)
 
-| Mode | Title | Description |
-| :--- | :--- | :--- |
-| `0` (`Native`) | Default | Standard Compose Foundation behavior without intervention. |
-| `1` (`CrossAxisInterceptor`) | Cross-Axis | Prioritizes horizontal swipes at the `HorizontalPager` level in `PointerEventPass.Initial`, driving drag and spring settling in one scroll mutation. New touches take over at the displayed position. |
-| `2` (`TapToHalt`) | iOS-like | First horizontal swipe halts vertical list inertia without paging; subsequent swipe pages natively. |
+Choose an interaction with the modifier's `mode` parameter:
+
+| Mode | Behavior |
+| :--- | :--- |
+| `CrossAxisInterceptor` (default) | Switch pages while a list is scrolling or bouncing back. |
+| `Native` | Use Compose's native pager gestures. |
+| `TapToHalt` | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
+
+To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
 
 ### Spring Page Navigation (`springAnimateToPage()`)
 
-Use `PagerState.springAnimateToPage(target)` to smoothly animate between pages using `PagerNavigationSpringSpec`. It runs with `MutatePriority.UserInput` so external focus events do not interrupt the animation before the page settles:
+Use `springAnimateToPage` to animate to a page when a tab or navigation item is clicked:
 
 ```kotlin
 coroutineScope.launch {

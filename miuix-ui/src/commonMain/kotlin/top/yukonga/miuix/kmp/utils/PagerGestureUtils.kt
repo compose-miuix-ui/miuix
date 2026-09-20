@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -60,22 +61,19 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 /**
- * Pager gesture conflict resolution modes when nested scrollables (such as LazyColumn)
- * have vertical momentum or overscroll.
+ * Horizontal pager behavior when a child scrollable is flinging or overscrolling.
  */
 enum class PagerInterceptionMode(val title: String) {
-    /** Native Compose behavior without intervention. */
+    /** Uses Compose's native gestures. */
     Native("Default"),
 
     /**
-     * Cross-Axis Interceptor: Prioritizes horizontal swipe on the HorizontalPager level,
-     * cleanly driving page transitions without interference from child list fling/overscroll.
+     * Lets horizontal swipes interrupt page transitions and child scrolling.
      */
     CrossAxisInterceptor("Cross-Axis"),
 
     /**
-     * Tap to Halt (iOS-like): The initial horizontal gesture halts vertical list inertia;
-     * subsequent horizontal swipe flips pages natively.
+     * While a child is flinging, the first horizontal swipe stops it without paging.
      */
     TapToHalt("iOS-like"),
 }
@@ -90,9 +88,8 @@ val PagerNavigationSpringSpec: SpringSpec<Float> = spring(
 )
 
 /**
- * Smoothly animates [PagerState] to the specified [target] page using [PagerNavigationSpringSpec].
- * Focus requests will not interrupt tab navigation before the page settles.
- * Waits for the first layout before acquiring the scroll mutation.
+ * Animates to [target] using [PagerNavigationSpringSpec] after the first layout.
+ * Uses [MutatePriority.UserInput] so focus scrolling cannot interrupt the animation.
  */
 suspend fun PagerState.springAnimateToPage(target: Int) {
     if (target !in 0 until pageCount) return
@@ -122,29 +119,26 @@ private suspend fun PagerState.animateToPage(
             previousValue += scrollBy(currentValue - previousValue)
         }
     }
-    // Finish inside the same mutation. Cancellation must never snap a newer gesture to an old target.
+    // Complete within this mutation so cancellation cannot snap a newer gesture to an old target.
     if (pageCount > 0) updateCurrentPage(destination.coerceAtMost(pageCount - 1))
 }
 
 /**
- * Page connection for a pager driven by [horizontalPagerSwipeOverride]. Vertical displacement and
- * velocity are left to the page content, including when the pager is between pages.
+ * Leaves vertical scroll and velocity to page content, including between pages.
  *
- * Pass this as [HorizontalPager]'s pageNestedScrollConnection and set userScrollEnabled to false
- * in [PagerInterceptionMode.CrossAxisInterceptor]. The modifier owns touch input in that mode.
+ * Use as [HorizontalPager]'s pageNestedScrollConnection with [horizontalPagerSwipeOverride].
  */
 object PagerGestureNestedScrollConnection : NestedScrollConnection {
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = Velocity(available.x, 0f)
 }
 
 /**
- * Drives horizontal touch gestures in a single [PagerState.scroll] mutation from down through
- * settling. New touches interrupt at the current position; vertical gestures remain with children.
+ * Drives horizontal drag and settling in one [PagerState.scroll] mutation.
+ * New touches take over at the displayed position; vertical gestures stay with children.
  *
  * Set [HorizontalPager]'s userScrollEnabled to false and its pageNestedScrollConnection to
- * [PagerGestureNestedScrollConnection] while this modifier is enabled. Otherwise its built-in
- * recognizer can claim a down during settling before the gesture's direction is known.
- * [coroutineScope] is retained for source compatibility; motion is scoped to the modifier node.
+ * [PagerGestureNestedScrollConnection] while enabled to prevent competing gesture recognition.
+ * Animations use the modifier node's scope; [coroutineScope] is unused.
  */
 @Suppress("UNUSED_PARAMETER")
 fun Modifier.horizontalPagerSwipeOverride(
@@ -239,11 +233,11 @@ private class PagerSwipeNode(
                                 dragging = true
                                 onIntercepted?.invoke()
                                 change.consume()
-                                // Keep all movement beyond slop, including the recognition frame.
+                                // Keep the first drag frame's movement beyond slop.
                                 val overSlop = accumulated.x - sign(accumulated.x) * viewConfiguration.touchSlop
                                 events.trySend(PagerDragEvent.Delta(overSlop * scrollSign))
                             } else if (y > viewConfiguration.touchSlop) {
-                                // Resume a short settle without consuming any part of the vertical gesture.
+                                // Yield to the child; finally settles the pager.
                                 break
                             }
                         } else {
@@ -274,7 +268,7 @@ private class PagerSwipeNode(
         motionJob = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             try {
                 state.scroll(MutatePriority.UserInput) {
-                    // Hold the mutation from the first input through settling. Never write raw deltas.
+                    // Keep drag and settling under one mutation so new input cancels them together.
                     for (event in events) {
                         when (event) {
                             is PagerDragEvent.Delta -> scrollBy(event.value)
@@ -302,8 +296,7 @@ private class PagerSwipeNode(
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
         pointerNode.onPointerEvent(pointerEvent, pass, bounds)
         if (pass != PointerEventPass.Main) return
-        // The native pager recognizer is disabled, so keep wheel and trackpad input available.
-        // Children see Main first and retain their vertical scrolling.
+        // Handle wheel/trackpad input after children, since native pager input is disabled.
         val isWheel = pointerEvent.type == PointerEventType.Scroll
         val isPan = pointerEvent.type == PointerEventType.PanMove
         if (pointerEvent.type == PointerEventType.PanEnd) {
@@ -353,8 +346,8 @@ private class PagerSwipeNode(
     }
 
     override fun SemanticsPropertyReceiver.applySemantics() {
-        pageLeft { navigateBy(-1) }
-        pageRight { navigateBy(1) }
+        pageLeft { navigateBy(scrollSign().toInt()) }
+        pageRight { navigateBy(-scrollSign().toInt()) }
     }
 
     private fun navigateBy(pages: Int): Boolean {
@@ -378,7 +371,7 @@ private class PagerSwipeNode(
 }
 
 /**
- * Tracks nested vertical fling momentum from child scrollables via [NestedScrollConnection].
+ * Tracks child vertical flings and coordinates [PagerInterceptionMode.TapToHalt] requests.
  */
 class PagerFlingTrackerConnection : NestedScrollConnection {
     var isChildFlinging by mutableStateOf(false)
@@ -388,42 +381,37 @@ class PagerFlingTrackerConnection : NestedScrollConnection {
         internal set
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        @Suppress("DEPRECATION")
-        val isFlingSource = source == NestedScrollSource.SideEffect || source == NestedScrollSource.Fling
-        if (isFlingSource && abs(available.y) > 0.5f) {
-            isChildFlinging = true
-            if (haltFling) {
-                haltFling = false
-                isChildFlinging = false
-                return available
-            }
+        if (source == NestedScrollSource.UserInput && available.y != 0f) {
+            // A new drag supersedes the pending halt.
+            haltFling = false
+            isChildFlinging = false
+        } else if (source == NestedScrollSource.SideEffect && available.y != 0f && isChildFlinging && haltFling) {
+            isChildFlinging = false
+            // Cancel the fling; consuming its delta would only hide a frame.
+            throw CancellationException("Child fling halted by pager gesture")
         }
         return Offset.Zero
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
-        if (haltFling) {
-            haltFling = false
-            isChildFlinging = false
-            // Consume all fling velocity
-            return available
-        }
+        // The pending halt applies only to the previous fling.
+        haltFling = false
+        isChildFlinging = available.y != 0f
         return Velocity.Zero
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        // Keep halted momentum from reaching an ancestor.
+        val haltedVelocity = if (haltFling) Velocity(0f, available.y) else Velocity.Zero
         isChildFlinging = false
         haltFling = false
-        return Velocity.Zero
+        return haltedVelocity
     }
 }
 
 /**
- * Tap to Halt (iOS-like behavior applied at HorizontalPager level):
- *
- * When vertical momentum is active on touch down, halts the motion and consumes the
- * horizontal drag of that initial gesture. Once the list is at rest, subsequent
- * horizontal swipes pass through untouched for native HorizontalPager page transitions.
+ * Requests a child fling halt on touch down and consumes that gesture's horizontal drag.
+ * When no child fling is active, leaves horizontal swipes to the native pager.
  */
 fun Modifier.iosStyleMomentumHalt(
     flingTracker: PagerFlingTrackerConnection,
@@ -433,7 +421,7 @@ fun Modifier.iosStyleMomentumHalt(
 ): Modifier = if (!enabled) {
     this
 } else {
-    this.nestedScroll(flingTracker).pointerInput(mode, enabled, onHalted) {
+    this.nestedScroll(flingTracker).pointerInput(flingTracker, mode, enabled, onHalted) {
         val touchSlop = viewConfiguration.touchSlop
 
         awaitEachGesture {
@@ -441,13 +429,10 @@ fun Modifier.iosStyleMomentumHalt(
             val downPos = down.position
             val hadMomentum = flingTracker.isChildFlinging
             if (!hadMomentum) {
-                // List is already at rest: do not intercept; allow native HorizontalPager swipe
                 return@awaitEachGesture
             }
 
-            // Momentum was active: actively halt the child fling animation
             flingTracker.haltFling = true
-            flingTracker.isChildFlinging = false
             onHalted?.invoke()
             var isHalting = false
 
@@ -466,6 +451,7 @@ fun Modifier.iosStyleMomentumHalt(
                 if (isHalting) {
                     change.consume()
                 } else if (totalDy > touchSlop && totalDy > totalDx) {
+                    flingTracker.haltFling = false
                     break
                 }
             }
@@ -474,7 +460,10 @@ fun Modifier.iosStyleMomentumHalt(
 }
 
 /**
- * Convenient modifier that applies the selected [mode] resolution to [HorizontalPager].
+ * Applies [mode] to a [HorizontalPager].
+ *
+ * For Cross-Axis mode, configure the pager as documented in [horizontalPagerSwipeOverride].
+ * [flingTracker] is required for [PagerInterceptionMode.TapToHalt].
  */
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
@@ -507,7 +496,7 @@ fun Modifier.pagerGestureOverride(
 }
 
 /**
- * Convenient modifier overload that accepts raw integer [mode] for settings storage.
+ * Accepts a stored mode ordinal; invalid values select [PagerInterceptionMode.Native].
  */
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
@@ -526,7 +515,8 @@ fun Modifier.pagerGestureOverride(
 )
 
 /**
- * Convenient composable modifier that applies the selected [mode] resolution to [HorizontalPager].
+ * Applies [mode] with a remembered [PagerFlingTrackerConnection].
+ * See [horizontalPagerSwipeOverride] for Cross-Axis pager configuration.
  */
 @Composable
 fun Modifier.pagerGestureOverride(
@@ -548,7 +538,7 @@ fun Modifier.pagerGestureOverride(
 }
 
 /**
- * Convenient composable modifier overload that accepts raw integer [mode] for settings storage.
+ * Accepts a stored mode ordinal; invalid values select [PagerInterceptionMode.Native].
  */
 @Composable
 fun Modifier.pagerGestureOverride(

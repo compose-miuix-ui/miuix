@@ -149,9 +149,8 @@ private class OverscrollNode(
     private var animationJob: Job? = null
     private val offsetThreshold = 1f
 
-    // Drag accumulation engages only inside a press/pan session. Scroll events never alter it
-    // (with the default FlingBehavior a wheel produces no fling callbacks, so a wheel-driven
-    // offset would latch unsettled). Presses also cover custom mouse-driven scrollables.
+    // Track press/pan sessions, including custom mouse drags. Wheel-only input must not
+    // accumulate overscroll because it may never dispatch a fling to settle the offset.
     private var gestureActive = false
 
     init {
@@ -167,8 +166,7 @@ private class OverscrollNode(
                             else -> event.changes.fastAny { it.pressed }
                         }
                         if (gestureActive && !active && animationJob?.isActive != true && abs(offset) > offsetThreshold) {
-                            // Settle a session that ends without a fling; a real gesture's fling
-                            // supersedes this spring via onPreFling.
+                            // Settle gestures without a fling; onPreFling replaces this fallback when needed.
                             startSpringAnimation()
                         }
                         gestureActive = active
@@ -183,7 +181,7 @@ private class OverscrollNode(
         private set(value) {
             if (field != value) {
                 field = value
-                // Placement pixel-snaps via round(), so only re-place when the whole-pixel value changes.
+                // Placement rounds to pixels, so invalidate only when the rounded offset changes.
                 val rounded = round(value)
                 if (rounded != lastPlacedOffset) {
                     lastPlacedOffset = rounded
@@ -270,10 +268,7 @@ private class OverscrollNode(
         }
     }
 
-    private fun shouldBypassForPullToRefresh(): Boolean {
-        // When pull-to-refresh is active (not Idle), always bypass.
-        return pullToRefreshState != null && pullToRefreshState?.refreshState != RefreshState.Idle && isVertical
-    }
+    private fun shouldBypassForPullToRefresh(): Boolean = pullToRefreshState != null && pullToRefreshState?.refreshState != RefreshState.Idle && isVertical
 
     private fun applyDrag(delta: Float) {
         if (delta == 0f) return
@@ -284,12 +279,12 @@ private class OverscrollNode(
         offset = sign(rawTouchAccumulation) * dampedDist
     }
 
-    /** Inverse of the damping curve: re-derive [rawTouchAccumulation] from [offset] when a drag takes over a spring. */
+    /** Invert the damping curve when a drag takes over a spring. */
     private fun syncRawAccumulationFromOffset() {
         rawTouchAccumulation = sign(offset) * SpringMath.obtainTouchDistance(offset, scrollRange)
     }
 
-    /** Reclaims a stale offset once the child can scroll again in the accumulated direction (e.g. pagination); otherwise [onPreFling] swallows the next fling. */
+    /** Release stale overscroll once the child can scroll again, preserving the next fling. */
     private fun unwindStaleOffset(consumedDelta: Float) {
         if (abs(offset) <= offsetThreshold || consumedDelta == 0f) return
         if (rawTouchAccumulation == 0f) syncRawAccumulationFromOffset()
@@ -345,15 +340,15 @@ private class OverscrollNode(
             return parentConsumed
         }
 
-        if (sign(delta) != sign(rawTouchAccumulation)) { // opposite direction
+        if (sign(delta) != sign(rawTouchAccumulation)) {
             val actualConsumed = if (abs(rawTouchAccumulation) <= abs(delta)) {
-                -rawTouchAccumulation // can be fully consumed
+                -rawTouchAccumulation
             } else {
                 delta
             }
 
             if (abs(rawTouchAccumulation) <= abs(delta)) {
-                resetState() // reset directly after complete consumption
+                resetState()
             } else {
                 applyDrag(actualConsumed)
             }
@@ -427,7 +422,7 @@ private class OverscrollNode(
         if (abs(offset) > offsetThreshold) {
             if (sign(velocity) != sign(offset)) {
                 startSpringAnimation(velocity)
-                // Optimize speed and feel to prevent violent throwing
+                // Attenuate velocity when flinging back toward the scrollable content.
                 return parentConsumed + if (isVertical) {
                     Velocity(
                         0f,
@@ -465,7 +460,8 @@ private class OverscrollNode(
         }
 
         val realAvailable = available - parentConsumed
-        val velocity = (if (isVertical) realAvailable.y else realAvailable.x) / 1.53333f // attenuation speed
+        // Dampen the velocity transferred to the overscroll spring.
+        val velocity = (if (isVertical) realAvailable.y else realAvailable.x) / 1.53333f
         startSpringAnimation(velocity)
 
         return parentConsumed + if (isVertical) Velocity(0f, velocity) else Velocity(velocity, 0f)
@@ -473,9 +469,7 @@ private class OverscrollNode(
 }
 
 /**
- * OverScrollState is used to control the overscroll effect.
- *
- * @param isOverScrollActive Whether the overscroll effect is active.
+ * Tracks whether overscroll is active.
  */
 class OverScrollState {
     var isOverScrollActive by mutableStateOf(false)
@@ -483,8 +477,6 @@ class OverScrollState {
 }
 
 /**
- * [LocalOverScrollState] is used to provide the [OverScrollState] instance to the composition.
- *
- * @see OverScrollState
+ * Shared overscroll state for scroll and pull-to-refresh coordination.
  */
 val LocalOverScrollState = compositionLocalOf { OverScrollState() }
