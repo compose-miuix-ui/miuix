@@ -237,3 +237,49 @@ Box(
 | None | 无视觉反馈                             |
 | Sink | 应用下沉效果，组件在按下时轻微缩小     |
 | Tilt | 应用倾斜效果，组件根据触摸位置轻微倾斜 |
+
+## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
+
+`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在列表惯性滚动或回弹期间横滑切页。
+
+```kotlin
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier.pagerGestureOverride(pagerState),
+    userScrollEnabled = false,
+    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+) { page ->
+    // 页面内容，例如 LazyColumn
+}
+```
+
+::: warning Cross-Axis 模式必需配置
+使用默认的 `CrossAxisInterceptor` 模式时，**必须同时设置**：
+
+- `userScrollEnabled = false`
+- `pageNestedScrollConnection = PagerGestureNestedScrollConnection`
+
+缺少任意一项都可能导致手势冲突或越界效果异常。切换到 `Native` 或 `TapToHalt` 时，请恢复这两项的 Pager 默认配置。
+:::
+
+### 拦截模式 (`PagerInterceptionMode`)
+
+通过修饰符的 `mode` 参数选择交互方式：
+
+| 模式 | 行为 |
+| :--- | :--- |
+| `CrossAxisInterceptor`（默认） | 列表滚动或回弹时，仍可横滑切页。 |
+| `Native` | 使用 Compose 原生 Pager 手势。 |
+| `TapToHalt` | 列表惯性滚动时，首次横滑停止列表，再次横滑切页。 |
+
+禁用滑动切页时，将修饰符的 `enabled` 和 Pager 的 `userScrollEnabled` 都设为 `false`。
+
+### 统一弹簧切页 (`springAnimateToPage()`)
+
+点击标签或导航项时，可用 `springAnimateToPage` 动画切换到指定页：
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```

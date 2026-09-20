@@ -237,3 +237,49 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 | None | No visual feedback                                                                    |
 | Sink | Applies a sink effect, where the component scales down slightly when pressed          |
 | Tilt | Applies a tilt effect, where the component tilts slightly based on the touch position |
+
+## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
+
+Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
+
+```kotlin
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier.pagerGestureOverride(pagerState),
+    userScrollEnabled = false,
+    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+) { page ->
+    // Page content, such as a LazyColumn
+}
+```
+
+::: warning Required Cross-Axis configuration
+The default `CrossAxisInterceptor` mode **requires both settings**:
+
+- `userScrollEnabled = false`
+- `pageNestedScrollConnection = PagerGestureNestedScrollConnection`
+
+Missing either can cause gesture conflicts or incorrect overscroll. When switching to `Native` or `TapToHalt`, restore the pager's defaults for both settings.
+:::
+
+### Pager Interception Modes (`PagerInterceptionMode`)
+
+Choose an interaction with the modifier's `mode` parameter:
+
+| Mode | Behavior |
+| :--- | :--- |
+| `CrossAxisInterceptor` (default) | Switch pages while a list is scrolling or bouncing back. |
+| `Native` | Use Compose's native pager gestures. |
+| `TapToHalt` | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
+
+To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
+
+### Spring Page Navigation (`springAnimateToPage()`)
+
+Use `springAnimateToPage` to animate to a page when a tab or navigation item is clicked:
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```

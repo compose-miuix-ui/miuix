@@ -34,12 +34,9 @@ import kotlin.math.round
 import kotlin.math.sign
 
 /**
- * A Miuix implementation of [OverscrollFactory] that creates [OverscrollEffect] instances
- * with the same spring-based overscroll physics as [overScrollVertical] and [overScrollHorizontal].
- *
- * Provide this as [androidx.compose.foundation.LocalOverscrollFactory] in
- * [top.yukonga.miuix.kmp.theme.MiuixTheme] to automatically apply the Miuix overscroll
- * effect to all Compose scrollable components.
+ * Creates [MiuixOverscrollEffect] instances for Compose scrollables.
+ * Provided by [top.yukonga.miuix.kmp.theme.MiuixTheme] through
+ * [androidx.compose.foundation.LocalOverscrollFactory].
  */
 object MiuixOverscrollFactory : OverscrollFactory {
     override fun createOverscrollEffect(): OverscrollEffect = MiuixOverscrollEffect()
@@ -50,16 +47,13 @@ object MiuixOverscrollFactory : OverscrollFactory {
 }
 
 /**
- * A Miuix [OverscrollEffect] implementing spring-based overscroll physics identical to
- * [overScrollVertical] and [overScrollHorizontal].
- *
- * Uses the same damping formula, spring parameters, and PullToRefresh coordination as the
- * modifier-based implementation. Both X and Y axes are handled independently.
+ * Spring overscroll sharing damping and spring physics with [overScrollVertical] and
+ * [overScrollHorizontal]. Axes settle independently and coordinate with pull-to-refresh.
  */
 class MiuixOverscrollEffect : OverscrollEffect {
     private val offsetThreshold = 1f
 
-    // Placement pixel-snaps via round(), so only re-place when the whole-pixel value changes.
+    // Placement rounds to pixels, so invalidate only when the rounded offset changes.
     private var lastPlacedOffsetX = 0f
     internal var offsetX = 0f
         private set(value) {
@@ -151,7 +145,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
         offsetY = sign(rawTouchAccumulationY) * SpringMath.obtainDampingDistance(normalized, scrollRangeV)
     }
 
-    // Inverse of the damping curve: re-derive raw accumulation from offset when a drag takes over a spring.
+    // Invert the damping curve when a drag takes over a spring.
     private fun syncRawAccumulationFromOffsetX() {
         rawTouchAccumulationX = sign(offsetX) * SpringMath.obtainTouchDistance(offsetX, scrollRangeH)
     }
@@ -160,7 +154,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
         rawTouchAccumulationY = sign(offsetY) * SpringMath.obtainTouchDistance(offsetY, scrollRangeV)
     }
 
-    // Reclaims a stale offset once the child can scroll again in the accumulated direction (e.g. pagination); otherwise applyToFling swallows the next fling.
+    // Release stale overscroll once the child can scroll again, preserving the next fling.
     private fun unwindStaleOffsetX(consumedDelta: Float) {
         if (abs(offsetX) <= offsetThreshold || consumedDelta == 0f) return
         if (rawTouchAccumulationX == 0f) syncRawAccumulationFromOffsetX()
@@ -248,14 +242,16 @@ class MiuixOverscrollEffect : OverscrollEffect {
         val bypassY = shouldBypassForPullToRefreshY()
 
         // Resync raw accumulation, then cancel running springs the drag is taking over.
-        if (!bypassY) {
+        if (!bypassY && delta.y != 0f) {
             if (animationJobY?.isActive == true) syncRawAccumulationFromOffsetY()
             animationJobY?.cancel()
         }
-        if (animationJobX?.isActive == true) syncRawAccumulationFromOffsetX()
-        animationJobX?.cancel()
+        if (delta.x != 0f) {
+            if (animationJobX?.isActive == true) syncRawAccumulationFromOffsetX()
+            animationJobX?.cancel()
+        }
 
-        // Y-axis pre-scroll: consume from overscroll first when scrolling back toward center
+        // Reduce vertical overscroll before scrolling back into the content.
         var performScrollDeltaY = delta.y
         var extraConsumedY = 0f
         if (!bypassY && abs(offsetY) > offsetThreshold && delta.y != 0f && sign(delta.y) != sign(rawTouchAccumulationY)) {
@@ -275,7 +271,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
             }
         }
 
-        // X-axis pre-scroll: consume from overscroll first when scrolling back toward center
+        // Reduce horizontal overscroll before scrolling back into the content.
         var performScrollDeltaX = delta.x
         var extraConsumedX = 0f
         if (abs(offsetX) > offsetThreshold && delta.x != 0f && sign(delta.x) != sign(rawTouchAccumulationX)) {
@@ -295,7 +291,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
             }
         }
 
-        // Post-scroll: call performScroll, apply any unconsumed remainder to overscroll
+        // Apply unconsumed scroll to overscroll.
         val adjustedDelta = Offset(performScrollDeltaX, performScrollDeltaY)
         val scrollConsumed = performScroll(adjustedDelta)
         val scrollRemaining = adjustedDelta - scrollConsumed
@@ -308,7 +304,6 @@ class MiuixOverscrollEffect : OverscrollEffect {
 
         updateOverScrollState()
 
-        // Total consumed = overscroll reduction + scroll consumed + overscroll-absorbed remainder
         return Offset(
             x = extraConsumedX + scrollConsumed.x + (if (scrollRemaining.x != 0f) scrollRemaining.x else 0f),
             y = extraConsumedY + scrollConsumed.y + (if (scrollRemaining.y != 0f && !bypassY) scrollRemaining.y else 0f),
@@ -328,20 +323,17 @@ class MiuixOverscrollEffect : OverscrollEffect {
 
         var performVelocity = velocity
 
-        // Y-axis: when overscrolled, spring absorbs velocity before scroll
+        // Overscroll absorbs outward velocity and attenuates inward velocity.
         if (!bypassY && isActiveY && velocity.y != 0f) {
             if (sign(velocity.y) == sign(offsetY)) {
-                // Same direction fling: spring absorbs all velocity, scroll gets nothing
                 startSpringAnimationY(velocity.y)
                 performVelocity = Velocity(performVelocity.x, 0f)
             } else {
-                // Opposite direction fling: spring starts with full velocity, scroll gets attenuated
                 startSpringAnimationY(velocity.y)
                 performVelocity = Velocity(performVelocity.x, velocity.y / 2.13333f)
             }
         }
 
-        // X-axis: same logic
         if (isActiveX && velocity.x != 0f) {
             if (sign(velocity.x) == sign(offsetX)) {
                 startSpringAnimationX(velocity.x)
@@ -355,7 +347,7 @@ class MiuixOverscrollEffect : OverscrollEffect {
         val consumed = performFling(performVelocity)
         val remaining = performVelocity - consumed
 
-        // Post-fling: always restart spring with attenuated remaining velocity (mirrors onPostFling)
+        // Match the modifier's post-fling velocity attenuation.
         if (!bypassY) {
             startSpringAnimationY(remaining.y / 1.53333f)
         }

@@ -56,6 +56,7 @@ private val BlurStyleOptions = listOf("Gaussian", "Progressive")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
+private val PagerGestureModeOptions = listOf("Default", "Cross-Axis", "iOS-like")
 
 @Composable
 fun SettingsPage(
@@ -179,6 +180,14 @@ private fun SettingsContent(
                         checked = appState.enablePageUserScroll,
                         onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                     )
+                    AnimatedVisibility(visible = appState.enablePageUserScroll) {
+                        OverlayDropdownPreference(
+                            title = "Pager Gesture Mode",
+                            items = PagerGestureModeOptions,
+                            selectedIndex = appState.pagerInterceptionMode,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(pagerInterceptionMode = it) } },
+                        )
+                    }
                     SwitchPreference(
                         title = "Show TopAppBar",
                         checked = appState.showTopAppBar,
