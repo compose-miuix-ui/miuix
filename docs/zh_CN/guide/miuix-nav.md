@@ -309,7 +309,7 @@ NavDisplay(
 
 ## 条目生命周期与 ViewModel
 
-每个 entry 运行在自己的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下，`collectAsStateWithLifecycle`、`viewModel()` 与基于 store 的依赖注入无需额外配置即可按屏幕划分作用域。
+每个 entry 均运行在独立的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下。对标 AndroidX Navigation 3，`collectAsStateWithLifecycle`、`viewModel()` 以及 Hilt（`hiltViewModel()` 与 `SavedStateHandle`）无需额外配置即可按屏幕划分作用域。
 
 生命周期是深度的纯函数：静止的顶层为 `RESUMED`；被覆盖层、正在进入与正在离开的层为 `STARTED`；正在移除的 entry 降为 `CREATED` 直到卸载。**手势**驱动期间所有层封顶为 `STARTED`——`RESUMED` 意为「已静止的唯一顶层」，依赖它的逻辑不会因手指在转场阈值附近徘徊而反复触发。
 

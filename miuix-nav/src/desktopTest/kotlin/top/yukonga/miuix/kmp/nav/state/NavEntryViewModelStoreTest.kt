@@ -4,21 +4,36 @@
 package top.yukonga.miuix.kmp.nav.state
 
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.enableSavedStateHandles
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.core.navBackStackOf
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -39,6 +54,31 @@ private class TrackedViewModel : ViewModel() {
 }
 
 private val trackedFactory = viewModelFactory { initializer { TrackedViewModel() } }
+private class SavedStateTrackedViewModel(val handle: SavedStateHandle) : ViewModel()
+
+private val savedStateTrackedFactory = viewModelFactory {
+    initializer {
+        SavedStateTrackedViewModel(createSavedStateHandle())
+    }
+}
+
+private class TestSavedStateRegistryOwner :
+    SavedStateRegistryOwner,
+    ViewModelStoreOwner {
+    override val viewModelStore = ViewModelStore()
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    private val controller = SavedStateRegistryController.create(this)
+
+    init {
+        controller.performAttach()
+        enableSavedStateHandles()
+        controller.performRestore(null)
+        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+    }
+
+    override val lifecycle: Lifecycle get() = lifecycleRegistry
+    override val savedStateRegistry: SavedStateRegistry get() = controller.savedStateRegistry
+}
 
 /**
  * An entry's ViewModelStore must be scoped to back-stack membership, not to composition presence:
@@ -112,5 +152,63 @@ class NavEntryViewModelStoreTest {
         onNodeWithText("page-a").assertExists()
 
         assertTrue(tracked.cleared, "ViewModel must be cleared once the entry permanently leaves the stack")
+    }
+
+    @Test
+    fun navEntryProvidesHasDefaultViewModelProviderFactoryAndSavedStateExtras() = runComposeUiTest {
+        val backStack = navBackStackOf(StoreRouteA)
+        val hostRegistryOwner = TestSavedStateRegistryOwner()
+        var entryStoreOwner: ViewModelStoreOwner? = null
+        var createdVm: SavedStateTrackedViewModel? = null
+
+        setContent {
+            CompositionLocalProvider(LocalSavedStateRegistryOwner provides hostRegistryOwner) {
+                NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                    entry<StoreRouteA> {
+                        val owner = checkNotNull(LocalViewModelStoreOwner.current)
+                        entryStoreOwner = owner
+                        createdVm = remember(owner) {
+                            ViewModelProvider.create(owner, savedStateTrackedFactory)[SavedStateTrackedViewModel::class]
+                        }
+                        BasicText("page-a")
+                    }
+                }
+            }
+        }
+
+        onNodeWithText("page-a").assertExists()
+        val storeOwner = checkNotNull(entryStoreOwner)
+        assertTrue(storeOwner is HasDefaultViewModelProviderFactory, "entry store owner must implement HasDefaultViewModelProviderFactory")
+        assertTrue(storeOwner is SavedStateRegistryOwner, "entry store owner must implement SavedStateRegistryOwner")
+
+        val extras = (storeOwner as HasDefaultViewModelProviderFactory).defaultViewModelCreationExtras
+        assertSame(storeOwner, extras[VIEW_MODEL_STORE_OWNER_KEY], "VIEW_MODEL_STORE_OWNER_KEY must match entry store owner")
+        assertSame(storeOwner, extras[SAVED_STATE_REGISTRY_OWNER_KEY], "SAVED_STATE_REGISTRY_OWNER_KEY must match entry store owner")
+
+        val vm = checkNotNull(createdVm)
+        vm.handle["test_arg"] = "saved_value"
+        assertEquals("saved_value", vm.handle["test_arg"])
+    }
+
+    @Test
+    fun navEntryProvidesDefaultExtrasWithoutHostSavedStateRegistry() = runComposeUiTest {
+        val backStack = navBackStackOf(StoreRouteA)
+        var entryStoreOwner: ViewModelStoreOwner? = null
+
+        setContent {
+            NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
+                entry<StoreRouteA> {
+                    entryStoreOwner = LocalViewModelStoreOwner.current
+                    BasicText("page-a")
+                }
+            }
+        }
+
+        onNodeWithText("page-a").assertExists()
+        val storeOwner = checkNotNull(entryStoreOwner)
+        assertTrue(storeOwner is HasDefaultViewModelProviderFactory, "entry store owner must implement HasDefaultViewModelProviderFactory")
+
+        val extras = (storeOwner as HasDefaultViewModelProviderFactory).defaultViewModelCreationExtras
+        assertSame(storeOwner, extras[VIEW_MODEL_STORE_OWNER_KEY], "VIEW_MODEL_STORE_OWNER_KEY must match entry store owner")
     }
 }
