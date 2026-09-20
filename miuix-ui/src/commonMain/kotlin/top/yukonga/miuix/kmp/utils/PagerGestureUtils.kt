@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -48,7 +47,6 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -59,6 +57,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.sign
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Horizontal pager behavior when a child scrollable is flinging or overscrolling.
@@ -138,13 +137,9 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  *
  * Set [HorizontalPager]'s userScrollEnabled to false and its pageNestedScrollConnection to
  * [PagerGestureNestedScrollConnection] while enabled to prevent competing gesture recognition.
- * Animations use the modifier node's scope; [coroutineScope] is unused.
  */
-@Suppress("UNUSED_PARAMETER")
 fun Modifier.horizontalPagerSwipeOverride(
     pagerState: PagerState,
-    coroutineScope: CoroutineScope,
-    mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxisInterceptor,
     enabled: Boolean = true,
     onIntercepted: (() -> Unit)? = null,
 ): Modifier = if (!enabled) this else then(PagerSwipeElement(pagerState, onIntercepted))
@@ -318,7 +313,7 @@ private class PagerSwipeNode(
         if (isWheel) {
             wheelEndJob?.cancel()
             wheelEndJob = coroutineScope.launch {
-                delay(120)
+                delay(120.milliseconds)
                 finishNonTouchInput()
             }
         }
@@ -415,13 +410,12 @@ class PagerFlingTrackerConnection : NestedScrollConnection {
  */
 fun Modifier.iosStyleMomentumHalt(
     flingTracker: PagerFlingTrackerConnection,
-    mode: PagerInterceptionMode = PagerInterceptionMode.TapToHalt,
     enabled: Boolean = true,
     onHalted: (() -> Unit)? = null,
 ): Modifier = if (!enabled) {
     this
 } else {
-    this.nestedScroll(flingTracker).pointerInput(flingTracker, mode, enabled, onHalted) {
+    this.nestedScroll(flingTracker).pointerInput(flingTracker, enabled, onHalted) {
         val touchSlop = viewConfiguration.touchSlop
 
         awaitEachGesture {
@@ -467,7 +461,6 @@ fun Modifier.iosStyleMomentumHalt(
  */
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
-    coroutineScope: CoroutineScope,
     mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxisInterceptor,
     enabled: Boolean = true,
     flingTracker: PagerFlingTrackerConnection? = null,
@@ -475,8 +468,6 @@ fun Modifier.pagerGestureOverride(
 ): Modifier = when (mode) {
     PagerInterceptionMode.CrossAxisInterceptor -> horizontalPagerSwipeOverride(
         pagerState = pagerState,
-        coroutineScope = coroutineScope,
-        mode = mode,
         enabled = enabled,
         onIntercepted = onTriggered,
     )
@@ -484,7 +475,6 @@ fun Modifier.pagerGestureOverride(
     PagerInterceptionMode.TapToHalt -> if (flingTracker != null) {
         iosStyleMomentumHalt(
             flingTracker = flingTracker,
-            mode = mode,
             enabled = enabled,
             onHalted = onTriggered,
         )
@@ -500,14 +490,12 @@ fun Modifier.pagerGestureOverride(
  */
 fun Modifier.pagerGestureOverride(
     pagerState: PagerState,
-    coroutineScope: CoroutineScope,
     mode: Int,
     enabled: Boolean = true,
     flingTracker: PagerFlingTrackerConnection? = null,
     onTriggered: (() -> Unit)? = null,
 ): Modifier = pagerGestureOverride(
     pagerState = pagerState,
-    coroutineScope = coroutineScope,
     mode = PagerInterceptionMode.entries.getOrElse(mode) { PagerInterceptionMode.Native },
     enabled = enabled,
     flingTracker = flingTracker,
@@ -525,11 +513,9 @@ fun Modifier.pagerGestureOverride(
     enabled: Boolean = true,
     onTriggered: (() -> Unit)? = null,
 ): Modifier {
-    val coroutineScope = rememberCoroutineScope()
     val flingTracker = remember { PagerFlingTrackerConnection() }
     return pagerGestureOverride(
         pagerState = pagerState,
-        coroutineScope = coroutineScope,
         mode = mode,
         enabled = enabled,
         flingTracker = flingTracker,
