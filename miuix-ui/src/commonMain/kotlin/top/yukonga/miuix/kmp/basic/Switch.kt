@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
+import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 import kotlin.math.absoluteValue
 
 /**
@@ -167,7 +168,7 @@ fun Switch(
                 }
                 .then(
                     if (enabled) {
-                        Modifier.draggable(
+                        Modifier.pagerGesturePriority().draggable(
                             orientation = Orientation.Horizontal,
                             state = rememberDraggableState { dragAmount ->
                                 rawDragOffset += dragAmount / 2f

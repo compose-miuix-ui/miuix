@@ -25,7 +25,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
@@ -34,7 +36,9 @@ import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.SemanticsModifierNode
+import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.traverseAncestors
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
@@ -142,7 +147,46 @@ fun Modifier.horizontalPagerSwipeOverride(
     pagerState: PagerState,
     enabled: Boolean = true,
     onIntercepted: (() -> Unit)? = null,
-): Modifier = if (!enabled) this else then(PagerSwipeElement(pagerState, onIntercepted))
+): Modifier = if (!enabled) this else pagerGesturePriority().then(PagerSwipeElement(pagerState, onIntercepted))
+
+/**
+ * Keeps touch gestures starting in this subtree with its content for the entire press.
+ * Apply to custom horizontal scrollables or draggables inside a Cross-Axis pager.
+ * Miuix horizontal controls apply this automatically. Pointer events remain unconsumed,
+ * so vertical scrolling and the child's own gesture handling continue normally.
+ */
+fun Modifier.pagerGesturePriority(enabled: Boolean = true): Modifier = if (enabled) then(PagerGesturePriorityElement) else this
+
+private data object PagerGesturePriorityElement : ModifierNodeElement<PagerGesturePriorityNode>() {
+    override fun create(): PagerGesturePriorityNode = PagerGesturePriorityNode()
+
+    override fun update(node: PagerGesturePriorityNode) = Unit
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "pagerGesturePriority"
+    }
+}
+
+private class PagerGesturePriorityNode :
+    Modifier.Node(),
+    PointerInputModifierNode {
+    override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
+        if (pass != PointerEventPass.Initial) return
+        for (change in pointerEvent.changes) {
+            if (change.changedToDownIgnoreConsumed()) {
+                // Only the hit child can claim this gesture.
+                traverseAncestors(PagerGestureTraversalKey) {
+                    (it as PagerSwipeNode).givePriorityToChild(change.id)
+                    true
+                }
+            }
+        }
+    }
+
+    override fun onCancelPointerInput() = Unit
+}
+
+private object PagerGestureTraversalKey
 
 private data class PagerSwipeElement(
     val pagerState: PagerState,
@@ -171,7 +215,11 @@ private class PagerSwipeNode(
 ) : DelegatingNode(),
     CompositionLocalConsumerModifierNode,
     SemanticsModifierNode,
-    PointerInputModifierNode {
+    PointerInputModifierNode,
+    TraversableNode {
+    override val traverseKey: Any = PagerGestureTraversalKey
+    private var gesturePointerId: PointerId? = null
+    private var childOwnsGesture = false
     private var motionJob: Job? = null
     private var nonTouchEvents: Channel<PagerDragEvent>? = null
     private var wheelEndJob: Job? = null
@@ -180,6 +228,8 @@ private class PagerSwipeNode(
             val velocityTracker = VelocityTracker()
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                gesturePointerId = down.id
+                childOwnsGesture = false
                 val state = pagerState
                 val scrollSign = scrollSign()
                 finishNonTouchInput()
@@ -194,6 +244,11 @@ private class PagerSwipeNode(
                 try {
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (childOwnsGesture) {
+                            // Hold the pager still until release, even if the pointer leaves the child.
+                            if (event.changes.fastAny { it.pressed }) continue
+                            break
+                        }
                         val change = event.changes.fastFirstOrNull { it.id == pointerId } ?: break
                         if (change.isConsumed) break
                         if (!change.pressed) {
@@ -226,6 +281,7 @@ private class PagerSwipeNode(
                             val y = abs(accumulated.y)
                             if (x > viewConfiguration.touchSlop && x > y) {
                                 dragging = true
+                                gesturePointerId = null
                                 onIntercepted?.invoke()
                                 change.consume()
                                 // Keep the first drag frame's movement beyond slop.
@@ -243,10 +299,16 @@ private class PagerSwipeNode(
                 } finally {
                     if (!ended) events.trySend(PagerDragEvent.End(0f))
                     events.close()
+                    gesturePointerId = null
+                    childOwnsGesture = false
                 }
             }
         },
     )
+
+    fun givePriorityToChild(pointerId: PointerId) {
+        if (gesturePointerId == pointerId) childOwnsGesture = true
+    }
 
     private fun scrollSign(): Float = if (
         (currentValueOf(LocalLayoutDirection) == LayoutDirection.Rtl) xor pagerState.layoutInfo.reverseLayout

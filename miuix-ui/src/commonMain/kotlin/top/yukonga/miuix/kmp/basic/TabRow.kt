@@ -61,6 +61,7 @@ import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
+import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 
 /**
  * A [TabRow] with Miuix style.
@@ -144,6 +145,7 @@ fun TabRow(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .pagerGesturePriority(config.listState.canScrollBackward || config.listState.canScrollForward)
                 .nestedScroll(TabRowNestedScrollConnection)
                 .overScrollHorizontal(
                     nestedScrollToParent = false,
@@ -283,6 +285,7 @@ fun TabRowWithContour(
                 .fillMaxSize()
                 .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
                 .padding(contourPadding)
+                .pagerGesturePriority(config.listState.canScrollBackward || config.listState.canScrollForward)
                 .nestedScroll(TabRowNestedScrollConnection)
                 .overScrollHorizontal(
                     nestedScrollToParent = false,

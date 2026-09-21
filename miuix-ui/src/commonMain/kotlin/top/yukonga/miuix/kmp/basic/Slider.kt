@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 import kotlin.math.abs
 
 /**
@@ -200,6 +201,7 @@ fun Slider(
                             interactionSource = interactionSource,
                             enabled = enabled,
                         )
+                        .pagerGesturePriority()
                         .draggable(
                             orientation = Orientation.Horizontal,
                             state = rememberDraggableState { dragAmount ->
@@ -634,6 +636,7 @@ fun RangeSlider(
                             }
                         }
                         .hoverable(interactionSource = interactionSource, enabled = enabled)
+                        .pagerGesturePriority()
                         .draggable(
                             orientation = Orientation.Horizontal,
                             state = rememberDraggableState { dragAmount ->

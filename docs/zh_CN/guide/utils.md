@@ -274,6 +274,18 @@ HorizontalPager(
 
 禁用滑动切页时，将修饰符的 `enabled` 和 Pager 的 `userScrollEnabled` 都设为 `false`。
 
+### 页面内的自定义横向控件
+
+使用 `CrossAxisInterceptor` 时，为自定义横向控件（包括嵌套的原生 Pager）添加 `pagerGesturePriority()`，使控件优先处理从自身区域开始的触摸：
+
+```kotlin
+LazyRow(modifier = Modifier.pagerGesturePriority()) {
+    // 列表内容
+}
+```
+
+仅将此修饰符应用于自定义控件区域。
+
 ### 统一弹簧切页 (`springAnimateToPage()`)
 
 点击标签或导航项时，可用 `springAnimateToPage` 动画切换到指定页：

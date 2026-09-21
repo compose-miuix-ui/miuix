@@ -34,9 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -45,10 +49,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollHorizontal
+import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 
 /**
  * A single segment in a [BreadcrumbBar]. Each item carries a [path] segment used to reconstruct the
@@ -137,6 +144,12 @@ fun BreadcrumbBar(
 
     Row(
         modifier = modifier
+            .pagerGesturePriority(resolvedScrollState.canScrollBackward || resolvedScrollState.canScrollForward)
+            .nestedScroll(BreadcrumbBarNestedScrollConnection)
+            .overScrollHorizontal(
+                nestedScrollToParent = false,
+                isEnabled = { resolvedScrollState.canScrollBackward || resolvedScrollState.canScrollForward },
+            )
             .horizontalScroll(resolvedScrollState)
             .padding(insideMargin),
         verticalAlignment = Alignment.CenterVertically,
@@ -168,6 +181,19 @@ fun BreadcrumbBar(
             )
         }
     }
+}
+
+private object BreadcrumbBarNestedScrollConnection : NestedScrollConnection {
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset = Offset(available.x, 0f)
+
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity = Velocity(available.x, 0f)
 }
 
 @Composable

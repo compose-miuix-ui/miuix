@@ -274,6 +274,18 @@ Choose an interaction with the modifier's `mode` parameter:
 
 To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
 
+### Custom horizontal controls within a page
+
+When using `CrossAxisInterceptor`, add `pagerGesturePriority()` to a custom horizontal control, including a nested native pager, so it keeps touches that start in its bounds:
+
+```kotlin
+LazyRow(modifier = Modifier.pagerGesturePriority()) {
+    // List items
+}
+```
+
+Apply this modifier only to the custom control's area.
+
 ### Spring Page Navigation (`springAnimateToPage()`)
 
 Use `springAnimateToPage` to animate to a page when a tab or navigation item is clicked:

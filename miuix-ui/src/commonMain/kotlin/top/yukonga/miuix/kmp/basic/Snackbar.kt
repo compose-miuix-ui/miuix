@@ -72,6 +72,7 @@ import top.yukonga.miuix.kmp.icon.basic.Close
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -328,6 +329,7 @@ fun SnackbarHost(
                             }
                             anchoredDraggableState.updateAnchors(anchors)
                         }
+                        .pagerGesturePriority(entry.visible && canSwipeToDismiss)
                         .anchoredDraggable(
                             state = anchoredDraggableState,
                             orientation = Orientation.Horizontal,
