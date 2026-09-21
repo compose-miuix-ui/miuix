@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
@@ -344,6 +345,7 @@ private fun NavDisplayLayout(
     val topIndex = backStack.lastIndex
     val backScope = rememberCoroutineScope()
     val currentOnBack = rememberUpdatedState(onBack)
+    val focusManager = LocalFocusManager.current
 
     // Build entries for the current back stack and reconcile. The build runs only when the back-stack
     // key list changes; entry instances for surviving keys are reused by the presentation. The
@@ -353,6 +355,17 @@ private fun NavDisplayLayout(
     // recover an index (no O(n^2)). Declared ahead of the gesture wiring: the settle physics
     // resolution below feeds the gesture callbacks.
     val currentKeyList = backStack.toList()
+    // Covered entries stay composed, so clear their focus when the top entry changes.
+    val previousTopKey = remember { arrayOfNulls<NavKey>(1) }
+    DisposableEffect(currentKeyList.lastOrNull()) {
+        val currentTopKey = currentKeyList.lastOrNull()
+        val previous = previousTopKey[0]
+        if (previous != null && previous != currentTopKey) {
+            focusManager.clearFocus()
+        }
+        previousTopKey[0] = currentTopKey
+        onDispose { }
+    }
     // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
     // by UI, so it must not be snapshot state (no cross-phase back-write).
     val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
