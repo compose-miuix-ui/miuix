@@ -52,7 +52,6 @@ import top.yukonga.miuix.kmp.color.space.Hsv
 import top.yukonga.miuix.kmp.color.space.OkHsv
 import top.yukonga.miuix.kmp.color.space.OkLab
 import top.yukonga.miuix.kmp.color.space.OkLch
-import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -1196,7 +1195,6 @@ private fun ColorSlider(
                 }
             }
             .onSizeChanged { sliderWidthPxState = it.width.toFloat() }
-            .pagerGesturePriority()
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->

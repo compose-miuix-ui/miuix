@@ -43,7 +43,6 @@ import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleClip
-import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -201,7 +200,6 @@ private fun PaletteCanvas(
         modifier = Modifier
             .squircleClip(cornerRadius)
             .onGloballyPositioned { sizePx = it.size }
-            .pagerGesturePriority()
             .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown()

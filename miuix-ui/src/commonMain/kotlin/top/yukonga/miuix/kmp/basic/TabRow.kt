@@ -8,6 +8,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +44,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
@@ -61,7 +64,6 @@ import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
-import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 
 /**
  * A [TabRow] with Miuix style.
@@ -142,11 +144,25 @@ fun TabRow(
             }
         }
 
+        val hasScrollRange by remember(config.listState) {
+            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+        }
+        val reverseScrolling by remember(config.listState) {
+            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+        }
+        val reverseDirection = ScrollableDefaults.reverseDirection(
+            layoutDirection = LocalLayoutDirection.current,
+            orientation = Orientation.Horizontal,
+            reverseScrolling = reverseScrolling,
+        )
+        val nestedScrollConnection = remember(config.listState, reverseDirection) {
+            TabRowNestedScrollConnection(config.listState, reverseDirection)
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pagerGesturePriority(config.listState.canScrollBackward || config.listState.canScrollForward)
-                .nestedScroll(TabRowNestedScrollConnection)
+                .nestedScroll(nestedScrollConnection)
                 .overScrollHorizontal(
                     nestedScrollToParent = false,
                     isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
@@ -169,6 +185,7 @@ fun TabRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
+                userScrollEnabled = hasScrollRange,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItem(
@@ -280,13 +297,27 @@ fun TabRowWithContour(
             }
         }
 
+        val hasScrollRange by remember(config.listState) {
+            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+        }
+        val reverseScrolling by remember(config.listState) {
+            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+        }
+        val reverseDirection = ScrollableDefaults.reverseDirection(
+            layoutDirection = LocalLayoutDirection.current,
+            orientation = Orientation.Horizontal,
+            reverseScrolling = reverseScrolling,
+        )
+        val nestedScrollConnection = remember(config.listState, reverseDirection) {
+            TabRowNestedScrollConnection(config.listState, reverseDirection)
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
                 .padding(contourPadding)
-                .pagerGesturePriority(config.listState.canScrollBackward || config.listState.canScrollForward)
-                .nestedScroll(TabRowNestedScrollConnection)
+                .nestedScroll(nestedScrollConnection)
                 .overScrollHorizontal(
                     nestedScrollToParent = false,
                     isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
@@ -309,6 +340,7 @@ fun TabRowWithContour(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
+                userScrollEnabled = hasScrollRange,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
@@ -329,17 +361,29 @@ fun TabRowWithContour(
     }
 }
 
-private object TabRowNestedScrollConnection : NestedScrollConnection {
+private class TabRowNestedScrollConnection(
+    private val listState: LazyListState,
+    private val reverseDirection: Boolean,
+) : NestedScrollConnection {
+    private fun canConsume(delta: Float): Boolean {
+        val logicalDelta = if (reverseDirection) -delta else delta
+        return when {
+            logicalDelta > 0f -> listState.canScrollForward
+            logicalDelta < 0f -> listState.canScrollBackward
+            else -> false
+        }
+    }
+
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
-    ): Offset = Offset(available.x, 0f)
+    ): Offset = if (canConsume(available.x)) Offset(available.x, 0f) else Offset.Zero
 
     override suspend fun onPostFling(
         consumed: Velocity,
         available: Velocity,
-    ): Velocity = Velocity(available.x, 0f)
+    ): Velocity = if (canConsume(available.x)) Velocity(available.x, 0f) else Velocity.Zero
 }
 
 @Composable

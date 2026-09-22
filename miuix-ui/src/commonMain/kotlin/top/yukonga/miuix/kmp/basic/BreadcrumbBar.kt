@@ -6,28 +6,34 @@ package top.yukonga.miuix.kmp.basic
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -41,8 +47,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +59,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
-import top.yukonga.miuix.kmp.utils.pagerGesturePriority
 
 /**
  * A single segment in a [BreadcrumbBar]. Each item carries a [path] segment used to reconstruct the
@@ -89,7 +92,7 @@ data class BreadcrumbItem(
  * @param colors The [BreadcrumbBarColors] of the [BreadcrumbBar].
  * @param insideMargin The margin inside the [BreadcrumbBar].
  * @param itemMaxWidth The maximum width of each capsule-shaped item. Text beyond this is truncated.
- * @param scrollState The [ScrollState] to be used for horizontal scrolling. If null, an internal
+ * @param listState The [LazyListState] to be used for horizontal scrolling. If null, an internal
  *   state is created. Pass an externally hoisted state to preserve scroll position across recompositions.
  * @param interactionSource The [MutableInteractionSource] to be used for the items.
  * @param indication The [Indication] to be used for click interactions.
@@ -104,96 +107,146 @@ fun BreadcrumbBar(
     colors: BreadcrumbBarColors = BreadcrumbBarDefaults.breadcrumbBarColors(),
     insideMargin: PaddingValues = BreadcrumbBarDefaults.InsideMargin,
     itemMaxWidth: Dp = BreadcrumbBarDefaults.ItemMaxWidth,
-    scrollState: ScrollState? = null,
+    listState: LazyListState? = null,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = LocalIndication.current,
 ) {
     val currentOnItemClick by rememberUpdatedState(onItemClick)
-    val resolvedScrollState = scrollState ?: rememberScrollState()
-    val hasHighlight = highlightIndex >= 0
-    var highlightItemX by remember { mutableFloatStateOf(0f) }
-    var highlightItemWidth by remember { mutableFloatStateOf(0f) }
-    var positioned by remember { mutableStateOf(false) }
+    val resolvedListState = listState ?: rememberLazyListState()
+    val hasHighlight = highlightIndex in items.indices
+    var lastSettledHighlightIndex by remember(resolvedListState) { mutableIntStateOf(-1) }
 
-    LaunchedEffect(highlightIndex) {
-        // scroll to highlight when highlightIndex changed
+    LaunchedEffect(highlightIndex, items.size, resolvedListState) {
         if (!hasHighlight) return@LaunchedEffect
-        if (!positioned) return@LaunchedEffect
-        if (highlightItemWidth > 0f) {
-            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
-            if (viewportWidth > 0f) {
-                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
-                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
-                resolvedScrollState.animateScrollTo(targetScroll.toInt())
-            }
-        }
+        val animate = lastSettledHighlightIndex >= 0 && lastSettledHighlightIndex != highlightIndex
+        resolvedListState.centerItem(highlightIndex, animate)
+        lastSettledHighlightIndex = highlightIndex
     }
 
-    LaunchedEffect(positioned) {
-        if (!hasHighlight) return@LaunchedEffect
-        if (!positioned) return@LaunchedEffect
-        if (highlightItemWidth > 0f) {
-            val viewportWidth = resolvedScrollState.viewportSize.toFloat()
-            if (viewportWidth > 0f) {
-                val targetScroll = (highlightItemX - (viewportWidth - highlightItemWidth) / 2f)
-                    .coerceIn(0f, resolvedScrollState.maxValue.toFloat())
-                resolvedScrollState.scrollTo(targetScroll.toInt())
-            }
+    val hasScrollRange by remember(resolvedListState) {
+        derivedStateOf {
+            resolvedListState.canScrollBackward || resolvedListState.canScrollForward
         }
     }
+    val reverseScrolling by remember(resolvedListState) {
+        derivedStateOf { resolvedListState.layoutInfo.reverseLayout }
+    }
+    val reverseDirection = ScrollableDefaults.reverseDirection(
+        layoutDirection = LocalLayoutDirection.current,
+        orientation = Orientation.Horizontal,
+        reverseScrolling = reverseScrolling,
+    )
+    val nestedScrollConnection = remember(resolvedListState, reverseDirection) {
+        BreadcrumbBarNestedScrollConnection(resolvedListState, reverseDirection)
+    }
 
-    Row(
+    Box(
         modifier = modifier
-            .pagerGesturePriority(resolvedScrollState.canScrollBackward || resolvedScrollState.canScrollForward)
-            .nestedScroll(BreadcrumbBarNestedScrollConnection)
+            .padding(insideMargin)
+            .nestedScroll(nestedScrollConnection)
             .overScrollHorizontal(
                 nestedScrollToParent = false,
-                isEnabled = { resolvedScrollState.canScrollBackward || resolvedScrollState.canScrollForward },
-            )
-            .horizontalScroll(resolvedScrollState)
-            .padding(insideMargin),
-        verticalAlignment = Alignment.CenterVertically,
+                isEnabled = { hasScrollRange },
+            ),
     ) {
-        items.forEachIndexed { index, item ->
-            if (index > 0) {
-                BreadcrumbSeparator(
-                    color = if (enabled) colors.separatorColor else colors.disabledColor,
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(BreadcrumbBarDefaults.ItemHeight),
+            state = resolvedListState,
+            horizontalArrangement = Arrangement.spacedBy(0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            overscrollEffect = null,
+            userScrollEnabled = hasScrollRange,
+        ) {
+            itemsIndexed(items) { index, item ->
+                BreadcrumbItemContent(
+                    item = item,
+                    index = index,
+                    itemCount = items.size,
+                    highlighted = hasHighlight && index == highlightIndex,
+                    enabled = enabled,
+                    colors = colors,
+                    itemMaxWidth = itemMaxWidth,
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    onClick = { currentOnItemClick(index) },
                 )
             }
-            BreadcrumbSegment(
-                text = item.text ?: item.path,
-                highlighted = hasHighlight && index == highlightIndex,
-                enabled = enabled,
-                colors = colors,
-                itemMaxWidth = itemMaxWidth,
-                interactionSource = interactionSource,
-                indication = indication,
-                onPositioned = if (hasHighlight && index == highlightIndex) {
-                    { x, width ->
-                        highlightItemX = x + resolvedScrollState.value
-                        highlightItemWidth = width
-                        if (!positioned) positioned = true
-                    }
-                } else {
-                    null
-                },
-                onClick = { currentOnItemClick(index) },
-            )
         }
     }
 }
 
-private object BreadcrumbBarNestedScrollConnection : NestedScrollConnection {
+private suspend fun LazyListState.centerItem(index: Int, animate: Boolean) {
+    if (layoutInfo.visibleItemsInfo.none { it.index == index }) {
+        scrollToItem(index)
+    }
+    val item = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } ?: return
+    val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
+    val itemCenter = item.offset + item.size / 2f
+    val delta = itemCenter - viewportCenter
+    if (animate) {
+        animateScrollBy(delta)
+    } else {
+        scrollBy(delta)
+    }
+}
+
+private class BreadcrumbBarNestedScrollConnection(
+    private val listState: LazyListState,
+    private val reverseDirection: Boolean,
+) : NestedScrollConnection {
+    private fun canConsume(delta: Float): Boolean {
+        val logicalDelta = if (reverseDirection) -delta else delta
+        return when {
+            logicalDelta > 0f -> listState.canScrollForward
+            logicalDelta < 0f -> listState.canScrollBackward
+            else -> false
+        }
+    }
+
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
-    ): Offset = Offset(available.x, 0f)
+    ): Offset = if (canConsume(available.x)) Offset(available.x, 0f) else Offset.Zero
 
     override suspend fun onPostFling(
         consumed: Velocity,
         available: Velocity,
-    ): Velocity = Velocity(available.x, 0f)
+    ): Velocity = if (canConsume(available.x)) Velocity(available.x, 0f) else Velocity.Zero
+}
+
+@Composable
+private fun BreadcrumbItemContent(
+    item: BreadcrumbItem,
+    index: Int,
+    itemCount: Int,
+    highlighted: Boolean,
+    enabled: Boolean,
+    colors: BreadcrumbBarColors,
+    itemMaxWidth: Dp,
+    interactionSource: MutableInteractionSource?,
+    indication: Indication?,
+    onClick: () -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BreadcrumbSegment(
+            text = item.text ?: item.path,
+            highlighted = highlighted,
+            enabled = enabled,
+            colors = colors,
+            itemMaxWidth = itemMaxWidth,
+            interactionSource = interactionSource,
+            indication = indication,
+            onClick = onClick,
+        )
+        if (index < itemCount - 1) {
+            BreadcrumbSeparator(
+                color = if (enabled) colors.separatorColor else colors.disabledColor,
+            )
+        }
+    }
 }
 
 @Composable
@@ -205,7 +258,6 @@ private fun BreadcrumbSegment(
     itemMaxWidth: Dp,
     interactionSource: MutableInteractionSource?,
     indication: Indication?,
-    onPositioned: ((x: Float, width: Float) -> Unit)?,
     onClick: () -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
@@ -226,16 +278,6 @@ private fun BreadcrumbSegment(
         modifier = Modifier
             .height(BreadcrumbBarDefaults.ItemHeight)
             .widthIn(max = itemMaxWidth)
-            .then(
-                if (onPositioned != null) {
-                    Modifier.onGloballyPositioned { coordinates ->
-                        val pos = coordinates.positionInRoot()
-                        onPositioned(pos.x, coordinates.size.width.toFloat())
-                    }
-                } else {
-                    Modifier
-                },
-            )
             .clip(CircleShape)
             .background(backgroundColor)
             .clickable(
@@ -261,7 +303,7 @@ private fun BreadcrumbSegment(
 }
 
 @Composable
-private fun RowScope.BreadcrumbSeparator(
+private fun BreadcrumbSeparator(
     color: Color,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -271,8 +313,7 @@ private fun RowScope.BreadcrumbSeparator(
             .size(width = 10.dp, height = 16.dp)
             .graphicsLayer {
                 scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            }
-            .align(Alignment.CenterVertically),
+            },
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = ColorFilter.tint(color),
