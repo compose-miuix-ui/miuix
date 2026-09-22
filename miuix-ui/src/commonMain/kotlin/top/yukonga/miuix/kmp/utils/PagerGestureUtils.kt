@@ -32,7 +32,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
-import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
@@ -45,7 +44,6 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.requireDensity
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -58,13 +56,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Horizontal pager behavior when a child scrollable is flinging or overscrolling.
@@ -141,8 +137,8 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
 /**
  * Applies [mode] to a [HorizontalPager].
  *
- * A Cross-Axis pager replaces the pager's own touch scrolling with the recognizer
- * [Modifier.pagerPageGesture] installs in each page, so it has to be configured like this:
+ * A Cross-Axis pager replaces the pager's own touch scrolling with the recognizer this modifier
+ * installs, so it has to be configured like this:
  *
  * ```kotlin
  * val flingBehavior = PagerDefaults.flingBehavior(pagerState, PagerNavigationSpringSpec)
@@ -153,7 +149,7 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  *     flingBehavior = flingBehavior,
  *     pageNestedScrollConnection = PagerGestureNestedScrollConnection,
  * ) { page ->
- *     LazyColumn(Modifier.fillMaxSize().pagerPageGesture(pagerState)) { ... }
+ *     LazyColumn(Modifier.fillMaxSize()) { ... }
  * }
  * ```
  *
@@ -240,37 +236,6 @@ fun Modifier.pagerGestureOverride(
     )
 }
 
-/**
- * Lets a Cross-Axis pager take horizontal touch drags while the page's children keep the gestures
- * Compose gives them.
- *
- * Apply to the root of each page, wrapping the page's content:
- *
- * ```kotlin
- * HorizontalPager(...) { page ->
- *     LazyColumn(Modifier.fillMaxSize().pagerPageGesture(pagerState)) { ... }
- * }
- * ```
- *
- * The recognizer lives *inside* the page, so it joins Compose's own drag arbitration instead of
- * fighting it from outside the pager's layout node. A horizontal child that is draggable or
- * scrollable — `Slider`, `RangeSlider`, `Switch`, `BreadcrumbBar`, `TabRow`, `LazyRow`,
- * `horizontalScroll`, `ColorPalette`, ... — wins a drag that is aligned with it. A drag aligned
- * with the pager, or one that starts outside such a child, moves the pager.
- *
- * A touch that lands while a child is flinging or overscrolling stops that child and takes the drag
- * for the pager, because such a child otherwise claims every touch for as long as its animation
- * runs.
- *
- * @param pagerState the pager the page belongs to.
- * @param onIntercepted called whenever the pager takes over a touch drag.
- */
-fun Modifier.pagerPageGesture(
-    pagerState: PagerState,
-    onIntercepted: (() -> Unit)? = null,
-    flingTracker: PagerFlingTrackerConnection? = null,
-): Modifier = then(PagerPageGestureElement(pagerState, onIntercepted))
-
 private data class PagerPageGestureElement(
     val pagerState: PagerState,
     val onIntercepted: (() -> Unit)?,
@@ -282,13 +247,13 @@ private data class PagerPageGestureElement(
     }
 
     override fun InspectorInfo.inspectableProperties() {
-        name = "pagerPageGesture"
+        name = "pagerGestureOverride"
         properties["pagerState"] = pagerState
     }
 }
 
 /**
- * The pager's touch drag recognizer for one page.
+ * The pager's touch drag recognizer, installed by `Modifier.pagerGestureOverride`.
  *
  * It is a Foundation [DragGestureNode] on the pager's horizontal axis, so the framework's own angle
  * based arbitration decides between it and the page's children: a horizontal child the drag is
