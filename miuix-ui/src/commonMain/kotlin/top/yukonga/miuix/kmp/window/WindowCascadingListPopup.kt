@@ -60,7 +60,7 @@ fun WindowCascadingListPopup(
 /**
  * A cascading list popup rendered at window level (as a [Dialog]) instead of inside a
  * `Scaffold`, with a caller-provided panel surface. Pass `glassSurface(...)` from `miuix-glass` to
- * give it the OS4 glass material. Otherwise behaves identically to
+ * give it the glass material. Otherwise behaves identically to
  * [top.yukonga.miuix.kmp.overlay.OverlayCascadingListPopup].
  *
  * @param show Whether the popup is shown.

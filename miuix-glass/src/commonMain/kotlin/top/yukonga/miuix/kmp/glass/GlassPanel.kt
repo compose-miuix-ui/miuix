@@ -13,9 +13,8 @@ import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 /**
  * Makes this composable a sheet of glass over [backdrop], with the shadow it casts.
  *
- * The pair belongs together — a panel without its shadow reads as painted on rather than as lying
- * over — and every glass surface in this module is built from it. A device without runtime shaders
- * has no backdrop to sample, so [fallback] says what the surface is instead.
+ * A device without runtime shaders has no backdrop to sample, so [fallback] says what the surface
+ * is instead.
  *
  * @param backdrop The [Backdrop] behind the glass. `null` uses [fallback].
  * @param shape The silhouette. It drives the shadow, the clip and the shader alike.
@@ -24,8 +23,8 @@ import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
  * @param material The panel's own body. `null` leaves the blurred backdrop as the whole of it.
  * @param stroke Optional bloom stroke along the rim.
  * @param shadow The shadow. `null` removes it.
- * @param shading Whether the surface refracts and shades what it stands on. A bar or a menu is a
- *   material and wants `false`; a control is glass and wants `true`.
+ * @param shading Whether the surface refracts and shades what it stands on. `true` for a control,
+ *   `false` for a bar or a menu.
  * @param fallback What the surface is when there is no backdrop. The default clips to [shape] and
  *   leaves whatever the caller paints next as the body.
  */

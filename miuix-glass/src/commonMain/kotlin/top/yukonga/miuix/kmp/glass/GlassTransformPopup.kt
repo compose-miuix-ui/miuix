@@ -44,12 +44,8 @@ import kotlin.math.roundToInt
 /**
  * The control a [GlassTransformPopup] grows out of.
  *
- * The source system opens a menu two ways, and this is the second of them. A plain control gets
- * [GlassPopup]: the panel is revealed at the control's corner and the control itself never moves.
- * A control that declares itself transformable instead *becomes* the panel — the panel starts as
- * the control's own rectangle, at the control's own place, with the control's own corner radius,
- * and travels and grows out to where the menu belongs. The control's contents come along with it
- * and dissolve out as the panel's contents dissolve in.
+ * The panel starts as the control's own rectangle, place and corner radius, and travels and grows
+ * out to where the menu belongs; the control's contents dissolve out as the panel's dissolve in.
  *
  * Hold one with [rememberGlassPopupAnchor], report the control with [glassPopupAnchor] and its
  * contents with [glassPopupAnchorContent], and hand it to [GlassTransformPopup].
@@ -88,22 +84,16 @@ class GlassPopupAnchor {
     internal var cornerRadius: Dp by mutableStateOf(0.dp)
 
     /**
-     * Whether the control floats over its page rather than sitting in it.
-     *
-     * A floating control's panel is drawn at full strength for the whole journey, so the panel is
-     * watched all the way home. A control that sits in the page instead has its panel fade with the
-     * icon, and the panel is gone well before the spring has settled.
+     * Whether the control floats over its page rather than sitting in it. A floating control's
+     * panel is drawn at full strength for the whole journey; one that sits in the page has its
+     * panel fade with the icon instead.
      */
     internal var floating: Boolean by mutableStateOf(false)
 
     /**
-     * Whether the control is standing aside for the menu.
-     *
-     * Both openings that take a control need this, and both hand it back only when the menu has
-     * finished leaving. [GlassTransformPopup] stands the whole control down, because from the
-     * moment it opens the panel *is* the control and two of it would be drawn. [GlassDropdownPopup]
-     * stands down only the value the row displays, because the list about to open is that value's
-     * own choices. [glassPopupAnchor] and [glassPopupAnchorValue] read this; a control never has to.
+     * Whether the control is standing aside for the menu. [GlassTransformPopup] stands the whole
+     * control down; [GlassDropdownPopup] stands down only the value the row displays.
+     * [glassPopupAnchor] and [glassPopupAnchorValue] read this; a control never has to.
      */
     internal var contentHidden: Boolean by mutableStateOf(false)
 
@@ -131,9 +121,8 @@ internal data class GlassPopupAnchorElement(val anchor: GlassPopupAnchor) : Modi
 /**
  * Remembers a [GlassPopupAnchor].
  *
- * The fade [glassPopupAnchorValue] draws with is animated here rather than inside the menu. A menu
- * stops composing the moment it has finished leaving, which is exactly when the control is due to
- * come back — driven from there, the control would be left stranded halfway.
+ * The fade [glassPopupAnchorValue] draws with is animated here rather than inside the menu, which
+ * stops composing exactly when the control is due to come back.
  */
 @Composable
 fun rememberGlassPopupAnchor(): GlassPopupAnchor {
@@ -150,16 +139,13 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
 /**
  * Reports a control to [anchor], and stands it down while its menu is open.
  *
- * Put this on the control's outermost node — the pill, not the icon inside it. The panel begins
- * life as exactly this rectangle, with this corner radius, so the control itself has to go: two of
- * it would be drawn otherwise. It comes back when the panel has shrunk into it again.
- * On [GlassIconButton], this also shares the button's backdrop, blur and colour treatment with
- * [GlassTransformPopup], including the action bar's parent material when present.
+ * Put this on the control's outermost node — the pill, not the icon inside it, which the panel
+ * replaces for the length of the animation. On [GlassIconButton] it also shares the button's
+ * backdrop, blur and colour treatment with [GlassTransformPopup].
  *
  * @param anchor The anchor to report to.
  * @param cornerRadius The control's own corner radius. Half the control's height, for a pill.
- * @param floating Whether the control floats over its page. A floating control keeps its panel at
- *   full strength for the whole journey instead of fading it with the control's contents.
+ * @param floating Whether the control floats over its page.
  */
 @Stable
 fun Modifier.glassPopupAnchor(
@@ -178,10 +164,8 @@ fun Modifier.glassPopupAnchor(
 /**
  * Narrows what the menu copies to one part of a control.
  *
- * Put this on the icon inside a control whose background the panel is already taking over. A glass
- * pill wants exactly that: the panel *is* the pill for the length of the animation, so copying the
- * pill as well would stack two of them and read as a doubled, too-bright glass. Left off, the menu
- * copies the control whole, which is what a control with nothing behind its icon wants.
+ * Put this on the icon when the panel already takes over the control's background; copying the
+ * pill as well would stack two of them. Left off, the menu copies the control whole.
  *
  * @param anchor The anchor to report to.
  */
@@ -199,10 +183,9 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
 /**
  * Fades a row's displayed value out while its list of choices is open.
  *
- * Put this on the value the row shows and the chevron beside it, not on the row. The list about to
- * open *is* that value's choices, so the source stands it down the moment the list starts to open
- * and hands it back only once the list has finished leaving. That asymmetry is deliberate: the
- * value going first is what makes the list read as coming out of it.
+ * Put this on the value and the chevron beside it, not on the row: the list about to open *is*
+ * that value's choices, so the value stands down as it opens and returns only once the list has
+ * left.
  *
  * @param anchor The anchor the row reported itself to.
  */
@@ -214,50 +197,43 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.gr
 /**
  * A menu that grows out of the control it belongs to, on glass.
  *
- * The second of the source system's three openings, and the one a control that can take part gets.
- * Four things move at once, each on its own curve:
+ * The second of the three openings, and the one a control that can take part gets. Four things move
+ * at once, each on its own curve:
  *
  * - The **panel's rectangle** runs from the control's out to the menu's on one spring, carrying the
  *   corner radius with it.
- * - The **panel's centre** runs on a quicker spring, so it arrives where it belongs before the
- *   panel has finished growing. That difference is the whole reason the travel does not read as a
- *   slide across the screen.
- * - The **control's contents** are copied, and the copy travels by exactly the centre's
- *   displacement, grows with the panel, fades out and blurs *up*.
- * - The **panel's contents** scale with the panel's width, fade in and blur *down*, 50ms behind the
- *   control's. On the way out the two swap which of them waits.
+ * - The **panel's centre** runs on a quicker spring, so it arrives before the panel has finished
+ *   growing.
+ * - The **control's contents** are copied, and the copy travels with the centre, grows with the
+ *   panel, fades out and blurs *up*.
+ * - The **panel's contents** scale with the panel's width, fade in and blur *down*, 50ms behind.
  *
- * Rows accept input during opening and while open, unless a secondary menu is stacked above them.
- * During dismissal they remain drawn for the transform, but cannot activate a submenu.
- * Predictive Back follows the transform toward the anchor and springs back on cancellation.
- * While [stacked], the secondary menu handles Back instead.
+ * Rows accept input while open unless a secondary menu is stacked above them. Predictive Back
+ * follows the transform toward the anchor and springs back on cancellation; while [stacked] the
+ * secondary menu handles Back instead.
  *
  * @param show Whether the menu is open.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchor The control the menu grows out of.
- * @param backdrop The [Backdrop] behind the glass when the anchor has no shared button surface.
- *   A [GlassIconButton] anchor supplies its own resolved backdrop, including a null fallback.
- *   With no backdrop, the panel retains its configured bloom stroke and Compose shadow.
+ * @param backdrop The [Backdrop] behind the glass when the anchor has no shared button surface. A
+ *   [GlassIconButton] anchor supplies its own resolved backdrop.
  * @param anchorContent A copy of the control — its background as well as its icon, unless
  *   [glassPopupAnchorContent] named a smaller part.
  * @param modifier The modifier applied to the panel.
- * @param simplified Whether the control's contents stay out of the opening transform. Overflow
- *   buttons use this because their compact glyph should hand directly to the panel instead of
- *   growing to the panel's width before it fades. The contents still join the reverse transform
- *   so the glyph travels back into the control when the panel closes.
- * @param stacked Whether a second menu stands in front of this one. It shrinks and takes a wash,
- *   which is what the source does when a submenu opens over a menu.
+ * @param simplified Whether the control's contents stay out of the opening transform, so a compact
+ *   glyph hands straight to the panel instead of growing to its width first. Overflow buttons use
+ *   this. The contents still join the reverse transform.
+ * @param stacked Whether a second menu stands in front of this one. It shrinks and takes a wash.
  * @param maskColor The wash laid over it while [stacked].
  * @param sizing How wide and tall the panel may be.
  * @param visuals The panel's appearance. A [GlassIconButton] anchor overrides the style, material,
- *   stroke and fallback colour with its own; popup opacity and shadow still come from [visuals].
- * @param anchorAlpha Background opacity for anchors without a shared button surface. Glass button
- *   anchors publish their actual animated opacity automatically, including during floating changes.
+ *   stroke and fallback colour with its own.
+ * @param anchorAlpha Background opacity for anchors without a shared button surface.
  * @param cornerRadius Corner radius the panel settles at.
  * @param gap Gap between the control and the panel.
  * @param contentPadding Padding around the items.
  * @param onMeasured Called with the size the panel settles at. A second menu opened from one of its
- *   rows is measured at least this wide, which is what puts the two panels' edges in line.
+ *   rows is measured at least this wide.
  * @param content The items.
  */
 @Composable
@@ -467,7 +443,7 @@ internal fun shouldRenderAnchorContent(simplified: Boolean, show: Boolean): Bool
 /** Retained exit content is visual only, even before the transition starts its first exit frame. */
 internal fun isTransformPopupInteractive(show: Boolean, stacked: Boolean): Boolean = show && !stacked
 
-/** Matches `TransformAnimation.updateFloatingAlpha()` on the popup's whole container view. */
+/** The floating alpha applies to the popup's whole container, not to the panel alone. */
 internal fun transformPanelAlpha(
     visualAlpha: Float,
     floating: Boolean,

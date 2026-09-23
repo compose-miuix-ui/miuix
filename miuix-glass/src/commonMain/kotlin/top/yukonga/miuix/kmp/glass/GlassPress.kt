@@ -22,7 +22,7 @@ import kotlin.math.min
 /**
  * How far a pressed surface shrinks.
  *
- * The source takes a fixed number of pixels off the surface rather than a fixed proportion, so a
+ * A fixed number of pixels comes off the surface rather than a fixed proportion, so a
  * small control shrinks proportionally more than a large one, down to a floor.
  *
  * @param shorterSidePx The shorter of the surface's two sides, in pixels.
@@ -36,9 +36,9 @@ fun glassPressScale(shorterSidePx: Float, density: Float): Float = if (shorterSi
 }
 
 /**
- * The press feedback the source system gives every tappable surface.
+ * The press feedback every tappable surface gets.
  *
- * @param interactionSource The source whose press state drives the scale.
+ * @param interactionSource The interaction source whose press state drives the scale.
  * @param enabled Whether to react at all. When false the modifier adds nothing.
  */
 @Composable

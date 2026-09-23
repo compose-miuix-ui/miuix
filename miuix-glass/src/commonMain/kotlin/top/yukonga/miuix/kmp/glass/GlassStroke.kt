@@ -41,10 +41,10 @@ data class GlassStroke(
     val secondary: GlassStrokeLight,
 )
 
-/** The stock bloom strokes, ported from the source system's `BloomStrokeToken`. */
+/** The stock bloom strokes. */
 object GlassStrokes {
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Big_Light`. */
+    /** The big light bloom stroke. */
     @Stable
     val BigLight: GlassStroke = GlassStroke(
         width = 0.8f,
@@ -54,7 +54,7 @@ object GlassStrokes {
         secondary = GlassStrokeLight(0.5f, 0.9f, -0.5f, Color(1f, 1f, 1f, 0.05f)),
     )
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Middle_Light`. */
+    /** The middle light bloom stroke. */
     @Stable
     val MiddleLight: GlassStroke = GlassStroke(
         width = 0.8f,
@@ -64,7 +64,7 @@ object GlassStrokes {
         secondary = GlassStrokeLight(0.7f, 0.8f, 0f, Color(1f, 1f, 1f, 0.3f)),
     )
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Small_Light`. */
+    /** The small light bloom stroke. */
     @Stable
     val SmallLight: GlassStroke = GlassStroke(
         width = 0.8f,
@@ -74,7 +74,7 @@ object GlassStrokes {
         secondary = GlassStrokeLight(0.5f, 0.95f, -0.5f, Color(1f, 1f, 1f, 0.35f)),
     )
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Big_Dark`. */
+    /** The big dark bloom stroke. */
     @Stable
     val BigDark: GlassStroke = GlassStroke(
         width = 0.8f,
@@ -84,7 +84,7 @@ object GlassStrokes {
         secondary = GlassStrokeLight(0.5f, 0.9f, -0.5f, Color(1f, 1f, 1f, 0.01f)),
     )
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Middle_Dark`. */
+    /** The middle dark bloom stroke. */
     @Stable
     val MiddleDark: GlassStroke = GlassStroke(
         width = 0.8f,
@@ -94,7 +94,7 @@ object GlassStrokes {
         secondary = GlassStrokeLight(0.7f, 0.8f, 0f, Color(1f, 1f, 1f, 0.2f)),
     )
 
-    /** Port of `BloomStrokeToken.Glass_Stroke_Small_Dark`. */
+    /** The small dark bloom stroke. */
     @Stable
     val SmallDark: GlassStroke = GlassStroke(
         width = 0.8f,

@@ -63,10 +63,9 @@ data class GlassBlend(
  * The glass body itself.
  *
  * @property bottom Strength of the additive glow along the bottom edge.
- * @property tint The colour of the glass. Its own alpha is ignored — [tintStrength] carries it,
- *   because the source values go above 1.
- * @property tintStrength How far the backdrop colour moves toward [tint]. Values above 1 push past
- *   the tint and are legal.
+ * @property tint The colour of the glass. Its own alpha is ignored — [tintStrength] carries it.
+ * @property tintStrength How far the backdrop colour moves toward [tint]. Values above 1 are
+ *   legal.
  * @property colorWhite How far the wide-blur backdrop moves toward white before it tints the glass.
  * @property colorMix How far the finished glass colour replaces the refracted backdrop.
  * @property colorPow Final gamma applied to the material. Above 1 darkens, below 1 lifts.
@@ -84,7 +83,7 @@ data class GlassInner(
 )
 
 /**
- * The rim geometry, in source pixels.
+ * The rim geometry, in pixels.
  *
  * @property width Width of the rim band.
  * @property pow Curvature exponent of the rim profile. 1 is a soft dome; higher values keep the
@@ -162,9 +161,9 @@ data class GlassBackground(
 /**
  * The two backdrop blur radii, in pixels at [GlassDefaults.SourceDensity].
  *
- * @property small Radius of the refraction source. It keeps structure, so the rim shows a
+ * @property small Radius of the refraction blur. It keeps structure, so the rim shows a
  *   recognisable bent image of the backdrop.
- * @property big Radius of the colour source. It only supplies a low-frequency tint.
+ * @property big Radius of the colour blur. It only supplies a low-frequency tint.
  */
 @Immutable
 data class GlassBlur(

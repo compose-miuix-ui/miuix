@@ -61,7 +61,7 @@ fun WindowIconCascadingDropdownMenu(
 /**
  * An [IconButton] wrapper that opens a [WindowCascadingListPopup] for one [DropdownEntry], with a
  * caller-provided panel surface. Pass `glassSurface(...)` from `miuix-glass` to give this popup the
- * OS4 glass material.
+ * glass material.
  *
  * Items whose [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu
  * triggers; cascading depth is limited to 2. Keep the entry and item order stable while the menu is
@@ -143,7 +143,7 @@ fun WindowIconCascadingDropdownMenu(
 /**
  * An [IconButton] wrapper that opens a [WindowCascadingListPopup] for one or more
  * [DropdownEntry] groups, with a caller-provided panel surface. Pass `glassSurface(...)` from
- * `miuix-glass` to give this popup the OS4 glass material. Items whose
+ * `miuix-glass` to give this popup the glass material. Items whose
  * [top.yukonga.miuix.kmp.basic.DropdownItem.children] is non-empty become submenu triggers;
  * cascading depth is limited to 2. Keep the entry and item order stable while the menu is shown;
  * item state such as

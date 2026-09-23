@@ -52,8 +52,8 @@ object GlassTopAppBarDefaults {
     val RampStart: Dp = 0.dp
 
     /**
-     * Scroll distance for the retained Compose shadow ramp. The mask and button material use
-     * timed transitions independent of this distance.
+     * Scroll distance for the retained Compose shadow ramp. The mask and button material use timed
+     * transitions independent of this distance.
      */
     val RampDistance: Dp = 32.dp
 
@@ -89,7 +89,7 @@ object GlassTopAppBarDefaults {
     @Composable
     fun buttonFill(): Color = if (isDarkTheme()) Color(0xFF2C2C2C) else Color.White
 
-    /** The source system's `internal-pured-thin-glass` action-button material. */
+    /** The `internal-pured-thin-glass` action-button material. */
     @Composable
     fun buttonMaterial(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
 
@@ -97,7 +97,7 @@ object GlassTopAppBarDefaults {
     @Composable
     internal fun nestedMaterialBlurRadius(): Dp = if (isDarkTheme()) NESTED_BLUR_DARK else NESTED_BLUR_LIGHT
 
-    /** Parent `Mask.Pured_Regular` material applied before child button and tab materials. */
+    /** The parent material applied before child button and tab materials. */
     @Composable
     internal fun actionBarUnderlayMaterial(): GlassMaterial = GlassMaterials.actionBarMask(isDarkTheme())
 
@@ -165,9 +165,7 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * `canScrollBackward` value. Both overloads retain the same public visual parameters.
  *
  * @param title The compact title, centred once the bar has collapsed.
- * @param backdrop The page behind the action bar. Its details remain visible through the controls,
- *   but their effective blur combines the bar's parent mask blur with their own 20dp mask blur so
- *   text and hard edges do not pass through unchanged. `null` uses [fill].
+ * @param backdrop The page behind the action bar. `null` uses [fill].
  * @param modifier The modifier applied to the bar.
  * @param largeTitle The title shown large before the content scrolls. Defaults to [title].
  * @param subtitle Optional line under the title.
@@ -176,24 +174,22 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  *   strength, which is what a bar over non-scrolling content wants.
  * @param bandBrush The band that dims the content passing under the bar.
  * @param bandOverhang How far the band reaches past the bottom of the bar.
- * @param style Compatibility style forwarded to the renderer. The default source-style button
- *   uses [GlassTopAppBarDefaults.buttonMaterial] with bionic shading disabled, so the style does
- *   not recolour that material.
+ * @param style Compatibility style forwarded to the renderer. The default button body uses
+ *   [GlassTopAppBarDefaults.buttonMaterial] with bionic shading disabled.
  * @param alpha Opacity multiplier for the button pills, on top of their floating transition.
  * @param buttonShape Silhouette of the button pills. Defaults to a circle of [buttonSize].
  * @param buttonSize Diameter of the button pills.
  * @param buttonShadow The shadow under the button pills. `null` removes it.
  * @param fill Traditional fill behind the button pills when runtime shaders are unavailable.
- * @param stroke Optional bloom stroke on the button pills. The default is the source system's
+ * @param stroke Optional bloom stroke on the button pills. The default is the
  *   small action-button stroke.
  * @param defaultWindowInsetsPadding Whether to inset the bar for the status bar.
  * @param contentModifier Applied to the foreground bar, leaving its background band stationary.
  * @param titleAlpha Draw-phase opacity of the compact and large title containers.
- * @param navigationIcon The leading control. Use [GlassIconButton] for the same glass surface
- *   and press feedback as trailing controls. The slot is rendered without an extra surface.
+ * @param navigationIcon The leading control. Use [GlassIconButton] for the same glass surface and
+ *   press feedback as trailing controls; the slot adds no surface of its own.
  * @param actions Trailing controls. Wrap them in [GlassIconButton] to give them the same pill.
- * @param bottomContent Content pinned under the title, inside the bar. A tab row goes here: the
- *   band reaches over it, so the list passing underneath is dimmed before it meets the tabs.
+ * @param bottomContent Content pinned under the title, inside the bar. A tab row goes here.
  */
 @Composable
 fun GlassTopAppBar(
@@ -250,9 +246,9 @@ fun GlassTopAppBar(
  *
  * @param title The compact title.
  * @param isContentScrolled Whether page content has left its resting position. For a lazy list,
- *   pass `listState.canScrollBackward`. This clears the material when the page returns to the
- *   top even if the large title stays collapsed. The mask animates over 100ms and both button
- *   surfaces share a 350ms transition. Other parameters behave as in the scroll-behaviour overload.
+ *   pass `listState.canScrollBackward`. This clears the material when the page returns to the top
+ *   even if the large title stays collapsed. Other parameters behave as in the scroll-behaviour
+ *   overload.
  */
 @Composable
 fun GlassTopAppBar(
@@ -352,22 +348,21 @@ fun GlassTopAppBar(
 }
 
 /**
- * A round glass button, the shape the source system gives a bar control once its bar has collapsed.
- * When [glassPopupAnchor] is attached, the button shares its resolved backdrop and material with
- * [GlassTransformPopup] so the panel retains the same blur and colour treatment as it grows.
+ * A round glass button for a bar's leading or trailing controls.
+ *
+ * With [glassPopupAnchor] attached, the button shares its resolved backdrop and material with
+ * [GlassTransformPopup], so the panel keeps the same blur and colour treatment as it grows.
  *
  * @param onClick Called when the button is tapped.
  * @param backdrop Optional [Backdrop] behind the glass. Inside [GlassTopAppBar] the button inherits
- *   its page backdrop and effective nested blur; elsewhere `null` gives the traditional [fill].
+ *   the bar's backdrop and effective blur; elsewhere `null` gives the traditional [fill].
  * @param modifier The modifier applied to the button.
- * @param surfaceAlpha Opacity of the pill. Inside [GlassTopAppBar], leave this at its default so
- *   the bar can drive the source-style floating transition.
- * @param style Compatibility style forwarded to the renderer. The source-style button body uses
- *   [GlassTopAppBarDefaults.buttonMaterial] without bionic shading.
+ * @param surfaceAlpha Opacity of the pill. Inside [GlassTopAppBar], leave this at its default.
+ * @param style Compatibility style forwarded to the renderer.
  * @param size Diameter of the button.
  * @param shape The button's silhouette. Defaults to a circle of [size].
  * @param shadow The shadow under the button. `null` removes it.
- * @param stroke Optional bloom stroke along the rim. The default is the small action-button token.
+ * @param stroke Optional bloom stroke along the rim.
  * @param content The icon inside.
  */
 @Composable

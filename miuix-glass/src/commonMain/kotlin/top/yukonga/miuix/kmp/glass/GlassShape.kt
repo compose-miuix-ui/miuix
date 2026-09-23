@@ -21,11 +21,10 @@ import androidx.compose.ui.unit.LayoutDirection
  * @param topEnd Corner size at the top-end corner.
  * @param bottomEnd Corner size at the bottom-end corner.
  * @param bottomStart Corner size at the bottom-start corner.
- * @property smoothing 0 draws a circular corner, 1 draws the continuous corner. Values between the
- *   two interpolate. Only the glass shaders read it — the mask, the stroke and the rim. [Modifier
- *   .clip] and anything else built on [createOutline] get a plain rounded rectangle, because the
- *   supercircle the shaders trace is a distance field with no exact path form. Draw a smoothed
- *   surface through [Modifier.glass], or through the same mask pass it runs.
+ * @property smoothing 0 draws a circular corner, 1 the continuous corner; values between
+ *   interpolate. Only the glass shaders read it. [Modifier.clip] and anything built on
+ *   [createOutline] get a plain rounded rectangle, since the supercircle is a distance field with
+ *   no exact path form.
  */
 @Immutable
 class GlassShape(

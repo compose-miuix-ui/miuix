@@ -24,30 +24,22 @@ import top.yukonga.miuix.kmp.glass.internal.glassEffect
 /**
  * Renders this composable as a sheet of glass over [backdrop].
  *
- * @param backdrop The [Backdrop] supplying the content behind the glass. This composable must sit
- *   *outside* the subtree that backdrop records. Inside it the two form a cycle — the layer records
- *   a surface that draws the layer — and the render thread walks it until it runs out of stack.
- * @param shape The silhouette. It drives the layer clip, the [stroke] and the shader, so all
- *   three agree.
+ * @param backdrop The content behind the glass. This composable must sit *outside* the subtree the
+ *   backdrop records — inside it the two form a cycle.
+ * @param shape The silhouette. Drives the clip, the [stroke] and the shader, so all three agree.
  * @param style The material. Pick one from [GlassStyles] or start from [GlassDefaults.style].
- * @param alpha Opacity multiplier folded into the material's colour layers, shading and stroke.
- *   The backdrop blur stays allocated while [enabled] is true so an animated alpha does not switch
- *   render paths halfway through its transition.
- * @param tint Overrides [GlassInner.tint]. Its alpha replaces the style's tint strength.
- *   [Color.Unspecified], the default, keeps the style's own tint.
- * @param material The panel's own body: a blur radius and the colour layers that go over it. It
- *   overrides the blur radius [style] asks for. `null` leaves the surface at whatever the blurred
- *   backdrop is, which reads as a hole over a dark page rather than as a panel.
- * @param noiseCoefficient Noise dithering coefficient for the backdrop blur, which prevents
- *   banding across large flat areas. 0 disables it.
- * @param stroke Optional bloom stroke traced along the rim. `null` skips it.
+ * @param alpha Opacity multiplier for the colour layers, shading and stroke.
+ * @param tint Overrides [GlassInner.tint]; its alpha replaces the style's tint strength.
+ *   [Color.Unspecified] keeps the style's own tint.
+ * @param material The panel's own body: a blur radius plus the colour layers over it. It overrides
+ *   the blur radius [style] asks for. `null` leaves the blurred backdrop as the whole body.
+ * @param noiseCoefficient Noise dithering for the backdrop blur, which prevents banding over large
+ *   flat areas. 0 disables it.
+ * @param stroke Optional bloom stroke along the rim. `null` skips it.
  * @param contentBlendMode How this composable's content composites over the glass.
  * @param enabled Whether the material is active. When false the content draws on its own.
- * @param shading Whether the surface is glass on top of its material. The source system declares a
- *   surface one way or the other and never both: a bar or a menu is a material token — a blur, the
- *   colour layers over it, a rim and a shadow — while a control is a glass token that refracts and
- *   shades what it stands on. `false` leaves the colour layers as the whole body, which is what a
- *   menu wants; the style's own tint is a shading value and would otherwise grey the panel.
+ * @param shading Whether the surface refracts and shades what it stands on. `true` for a control,
+ *   `false` for a bar or a menu whose body is [material] alone.
  */
 fun Modifier.glass(
     backdrop: Backdrop,
@@ -76,7 +68,7 @@ fun Modifier.glass(
     shading = shading,
 )
 
-/** Applies a child material over the OS4 action bar's already blurred and colour-treated surface. */
+/** Applies a child material over the action bar's already blurred and colour-treated surface. */
 internal fun Modifier.glassOnActionBar(
     backdrop: Backdrop,
     shape: GlassShape,

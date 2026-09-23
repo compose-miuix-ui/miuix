@@ -14,13 +14,13 @@ object GlassDefaults {
     /** Default corner radius of a glass surface. */
     val CornerRadius: Dp = 24.dp
 
-    /** Default corner smoothing. 1 draws the continuous corner the source effect uses. */
+    /** Default corner smoothing. 1 draws the continuous corner. */
     val Smoothing: Float = 1f
 
     /**
-     * Display density the source design tokens were authored at. [GlassEdge] and [GlassBlur] hold
-     * pixels at this density; `Modifier.glass` rescales them by `density / SourceDensity` so a rim
-     * keeps the same physical size on any screen.
+     * Display density the [GlassStyle] and [GlassShadow] tokens are authored at, in pixels per dp.
+     * Their pixel values are rescaled by `density / SourceDensity`, so a rim keeps the same
+     * physical size on any screen.
      */
     val SourceDensity: Float = 3f
 
@@ -29,17 +29,16 @@ object GlassDefaults {
 
     /**
      * How far the material is drawn past its silhouette, in dp. A full-resolution mask pass trims
-     * the edge afterwards, so the material only has to reach beyond it — far enough to cover the
-     * widest downscale the backdrop blur picks.
+     * the edge afterwards, so the material only has to reach beyond it.
      */
     val Overspill: Float = 3f
 
-    /** Default material — the everyday light-theme card. */
+    /** Default material. */
     @Stable
     val Style: GlassStyle = GlassStyles.CommonMediumRegularLowLight
 
     /**
-     * The everyday card material for the current theme.
+     * The default material for the current theme.
      *
      * @param isDark True to return the dark-theme material.
      */

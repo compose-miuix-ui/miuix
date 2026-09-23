@@ -65,13 +65,7 @@ object GlassPopupDefaults {
     /** Padding above the first item and below the last: `miuix_popup_window_vertical_padding`. */
     val ContentPaddingVertical: Dp = 8.dp
 
-    /**
-     * Corner radius of an anchored menu: `miuix_theme_radius_demi_big`.
-     *
-     * The wider of the two the source offers. Read off a menu's left edge at four depths, the
-     * corner runs far further in than a 16dp one would — it is the demi-big token, not the common
-     * one the popup window's own background uses.
-     */
+    /** Corner radius of an anchored menu: `miuix_theme_radius_demi_big`. */
     val CornerRadius: Dp = 24.dp
 
     /** Corner radius of a list dropdown: `miuix_theme_radius_demi_big`. */
@@ -94,10 +88,7 @@ object GlassPopupDefaults {
 
     /**
      * Side inset of the line between two groups of rows: `popup_menu_divider_line`'s own inset.
-     *
-     * The source draws the line as a layer-list inside a 16dp block, inset 20dp on each side and
-     * 7.75dp above and below. The block is what keeps the two groups apart; the line only marks
-     * where the gap is.
+     * The line sits inside a 16dp block, which is what keeps the two groups apart.
      */
     val DividerPaddingHorizontal: Dp = 20.dp
 
@@ -113,30 +104,13 @@ object GlassPopupDefaults {
     /** Size of the chevron on a row that leads to a further menu. */
     val ItemArrowSize: Dp = 16.dp
 
-    /**
-     * How far the block under a pressed row is held back from the panel's own edges.
-     *
-     * Measured off the source: the panel's inner surface starts 19px in from its rim on a 2.75
-     * screen and the pressed block starts at 19px past that, which is 7dp. It is not the row's own
-     * 20dp padding — the icon's left edge sits at that, well inside the block.
-     */
+    /** How far the block under a pressed row is held back from the panel's own edges. */
     val ItemPressInset: Dp = 7.dp
 
-    /**
-     * Corner radius of that block.
-     *
-     * Measured off the source at 41px on a 2.75 screen, horizontally and vertically alike. Near
-     * enough concentric with the panel's own 24dp corner across the 7dp inset, which is what makes
-     * the two curves read as belonging to each other rather than as a box inside a box.
-     */
+    /** Corner radius of the block behind a pressed row. */
     val ItemPressRadius: Dp = 15.dp
 
-    /**
-     * Fill of that block.
-     *
-     * Measured at 224 over a panel of 248, which is a tenth of the opposite tone. The dark side is
-     * the same figure mirrored and has not been measured against a dark source page.
-     */
+    /** Fill of the block behind a pressed row. */
     @Composable
     fun itemPressedColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color.White.copy(alpha = 0.1f)
@@ -145,11 +119,9 @@ object GlassPopupDefaults {
     }
 
     /**
-     * The wash laid over a menu while a second one stands in front of it.
-     *
-     * `hyperMenuMask`, which the source resolves to white at 0.4 on a light theme and black at 0.4
-     * on a dark one. It lightens rather than dims on a light page: the menu behind has not gone
-     * away, it has gone out of focus.
+     * The wash laid over a menu while a second one stands in front of it: `hyperMenuMask`, white
+     * at 0.4 on a light theme and black at 0.4 on a dark one. It lightens rather than dims, because
+     * the menu behind has gone out of focus rather than away.
      */
     @Composable
     fun maskColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
@@ -158,7 +130,7 @@ object GlassPopupDefaults {
         Color.White.copy(alpha = 0.4f)
     }
 
-    /** What a menu's surface is made of, with the source's own tokens as the defaults. */
+    /** What a menu's surface is made of, with the stock tokens as the defaults. */
     @Composable
     fun visuals(
         style: GlassStyle = GlassDefaults.Style,
@@ -173,7 +145,7 @@ object GlassPopupDefaults {
     @Composable
     fun shape(cornerRadius: Dp = CornerRadius): GlassShape = GlassShape(cornerRadius)
 
-    /** The popup's own body: `popupview-glass`, with the source token's 60dp mask blur. */
+    /** The popup's own body: `popupview-glass`, with its 60dp mask blur. */
     @Composable
     fun material(): GlassMaterial = GlassMaterials.popupViewGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -188,12 +160,8 @@ object GlassPopupDefaults {
     )
 
     /**
-     * Fill behind the popup when it carries no material.
-     *
-     * `miuix_default_color_surface_highest`, which the source resolves to plain white on a light
-     * theme and to `#2C2C2C` on a dark one. Highest, not container: a menu is the topmost surface
-     * a page has, and a container grey under it reads as a card rather than as a panel over
-     * everything.
+     * Fill behind the popup when it carries no material: `miuix_default_color_surface_highest`,
+     * white on a light theme and `#2C2C2C` on a dark one.
      */
     @Composable
     fun containerColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
@@ -206,19 +174,16 @@ object GlassPopupDefaults {
 /**
  * A menu that opens at the corner of the control it belongs to, on glass.
  *
- * The first of the source system's three openings, and the one a plain control gets. Two edges of
- * the panel never move — its right, and whichever of its top and bottom sits against the control.
- * The other two are interpolated, and not by one scale: the width runs to the panel's width while
- * the aspect ratio separately runs from a fifth up to the panel's own, so the panel is wide and
- * flat early on and lets its height out afterwards.
+ * The first of the three openings, and the one a plain control gets. Two edges of the panel never
+ * move; the other two are interpolated, so the panel is wide and flat early on and lets its height
+ * out afterwards.
  *
  * Put it at the root of the page, not beside the control — a bar clips its own contents.
  *
  * @param show Whether the popup is open.
  * @param onDismissRequest Called when a tap outside should close it.
- * @param anchorBounds The control's bounds, in this composable's own coordinate space. A second
- *   menu takes the resting bounds of the row it belongs to. Bounds read out of the first menu
- *   while it is shrunk behind this one drag this one off it.
+ * @param anchorBounds The control's bounds, in this composable's own coordinate space. Bounds read
+ *   out of a menu that is shrunk behind this one drag this one off it.
  * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
  *   configured bloom stroke and Compose shadow.
  * @param modifier The modifier applied to the panel.
@@ -226,8 +191,8 @@ object GlassPopupDefaults {
  * @param visuals What its surface is made of.
  * @param cornerRadius Corner radius the panel settles at.
  * @param secondary Whether this menu was opened from a row of another one. Delegates to
- *   [GlassSecondaryPopup]'s OS4 row-to-panel geometry. Use that component directly to inherit
- *   the primary popup's button material through its `materialAnchor` parameter.
+ *   [GlassSecondaryPopup]'s geometry; use that component directly to inherit the primary popup's
+ *   button material through `materialAnchor`.
  * @param contentPadding Padding around the items.
  * @param content The items.
  */
@@ -344,9 +309,8 @@ private fun directionFrame(
 /**
  * One row of a [GlassPopup].
  *
- * Everything but the label is optional, and the source's own menus use every combination: a bare
- * label for a plain menu, a label and a tick for a list of choices, and a label stacked over a
- * summary with an icon beside it and a chevron after it for a menu whose rows lead somewhere.
+ * Only [text] is required: the icon, the summary, the tick and the chevron each appear on their
+ * own or together.
  *
  * @param text The label.
  * @param onClick Called when the row is tapped.

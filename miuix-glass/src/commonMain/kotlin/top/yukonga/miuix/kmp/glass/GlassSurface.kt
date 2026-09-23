@@ -15,9 +15,8 @@ import top.yukonga.miuix.kmp.blur.Backdrop
 /**
  * A sheet of glass, in the form the library's own components ask for their surface in.
  *
- * The components already know how to lay a menu out, stack a second one over it, dim the one behind
- * and morph between them. What they do not know is what their panel is made of, so they ask for it.
- * Handing them this is the whole of what makes them glass — there is no second implementation.
+ * Hand it to an overlay component's `surface` slot to make that component glass — there is no
+ * second implementation.
  *
  * ```
  * OverlayIconCascadingDropdownMenu(

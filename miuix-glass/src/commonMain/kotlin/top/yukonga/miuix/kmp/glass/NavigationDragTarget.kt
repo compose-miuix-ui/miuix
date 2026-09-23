@@ -22,10 +22,11 @@ internal data class NavigationDragTarget(
 }
 
 /**
- * Mirrors OverlayView's same-item drag trail and cross-item edge-spring targets.
+ * The same-item drag trail and the cross-item edge-spring targets.
+ *
  * The 60px trail cap is deliberately not density-scaled. Raw spring targets may extend past the
- * container; [navigationIndicatorBounds] limits the rendered edges, just like the native property
- * setters. Stretch is suppressed when the leading target reaches the container boundary.
+ * container; [navigationIndicatorBounds] limits the rendered edges. Stretch is suppressed when the
+ * leading target reaches the container boundary.
  */
 internal fun navigationDragTarget(
     left: Float,

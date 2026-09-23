@@ -29,28 +29,24 @@ import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.blur.Backdrop
 
 /**
- * OS4 secondary menu grown from a primary menu row, not an edge-revealed ordinary popup.
+ * A secondary menu grown from a primary menu row, not an edge-revealed ordinary popup.
  *
- * The row plus [contentPadding] is the initial clip rectangle. All four edges travel to the
- * measured menu bounds; rows remain full-size and move with the clip's top-left corner. The
- * panel does not fade or blur its rows during expansion and collapse; its glass material is
- * unchanged. Its start edge aligns to the row
- * (mirrored in RTL), and insufficient space below shifts it up rather than reversing the reveal.
- * Rows accept input during opening; requesting dismissal disables them immediately.
- * Predictive Back previews collapse, restores the panel on cancellation, and requests dismissal
- * on completion. A shared [materialAnchor] also drives the primary panel's scale and mask.
+ * The row plus [contentPadding] is the initial clip rectangle; all four edges travel to the
+ * measured menu bounds while the rows keep their size and move with the clip. The start edge
+ * aligns to the row, mirrored in RTL. Rows accept input while opening and stop the moment
+ * dismissal is requested. Predictive Back previews the collapse, restores on cancellation and
+ * dismisses on completion.
  *
  * @param show Whether the secondary menu is expanded. Keep this call composed during collapse.
  * @param onDismissRequest Called by a tap outside or Back to return to the primary menu.
  * @param anchorBounds Resting bounds of the trigger row, in the same root as this popup. Freeze
  *   these before setting the primary [GlassTransformPopup]'s `stacked` flag.
- * @param backdrop Background sampled behind this menu. Include the primary popup in this layer
- *   so its rendered content is blurred underneath the secondary. Null uses the anchor backdrop.
+ * @param backdrop Background sampled behind this menu. Include the primary popup in this layer so
+ *   its rendered content is blurred underneath. `null` uses the anchor's backdrop.
  * @param modifier Modifier applied to the panel.
- * @param materialAnchor The primary transform popup's button anchor. Passing the same anchor
- *   shares its blur, colour treatment and bloom stroke across both menu levels; an explicit
- *   [backdrop] takes precedence over the button backdrop.
- * @param sizing Panel limits. Set minWidth to the primary panel's measured width.
+ * @param materialAnchor The primary popup's button anchor. Passing the same anchor shares its
+ *   blur, colour treatment and bloom stroke across both levels.
+ * @param sizing Panel limits. Set `minWidth` to the primary panel's measured width.
  * @param visuals Surface appearance, also used when no anchor surface is available.
  * @param cornerRadius Rounded clip radius throughout the transition.
  * @param contentPadding Insets around the menu rows, also included around the collapsed row.
@@ -145,7 +141,7 @@ fun BoxScope.GlassSecondaryPopup(
     )
 }
 
-/** SecondaryPopupWindowStrategy: start-edge alignment, then shift upward to fit. */
+/** Start-edge alignment, then a shift upward to fit. */
 internal fun placeGlassSecondaryPopup(anchor: Rect, size: Size, margin: Float, page: Size, direction: LayoutDirection): Rect {
     val width = size.width.coerceAtMost((page.width - margin * 2f).coerceAtLeast(0f))
     val height = size.height.coerceAtMost((page.height - margin * 2f).coerceAtLeast(0f))

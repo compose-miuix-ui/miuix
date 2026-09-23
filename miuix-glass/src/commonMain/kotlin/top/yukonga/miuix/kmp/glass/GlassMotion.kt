@@ -13,19 +13,15 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.anim.folmeSpring
 
-/** The motion the source system animates its glass surfaces with. */
+/** The motion the glass surfaces animate with. */
 object GlassMotion {
 
     /**
-     * Converts one of the source system's spring definitions into a Compose [SpringSpec].
-     *
-     * The conversion itself is [folmeSpring], which the library already carries. This adds only the
-     * check that the response is usable.
+     * Converts a damping ratio and a response time into a Compose [SpringSpec].
      *
      * @param damping The damping ratio. 1 settles without overshoot; below 1 overshoots once.
-     * @param response The period of the undamped oscillation, in seconds. Smaller is faster. Must
-     *   be greater than zero — the stiffness is derived by dividing by it, and zero would hand the
-     *   animation an infinite or undefined stiffness rather than failing where the mistake is.
+     * @param response The period of the undamped oscillation, in seconds. Smaller is faster, and it
+     *   must be greater than zero — the stiffness is derived by dividing by it.
      */
     @Stable
     fun <T> springOf(damping: Float, response: Float): SpringSpec<T> {
@@ -42,13 +38,8 @@ object GlassMotion {
     )
 
     /**
-     * The spring the leading edge of the bottom bar's capsule travels on.
-     *
-     * The capsule does not travel rigidly. Its `OverlayView` puts the two edges on different
-     * springs and swaps which edge gets which by the direction of travel, so the trailing edge is
-     * always the slower of the two ([navIndicatorTrail]) and the capsule stretches on its way. That
-     * stretch, and the overshoot this spring's damping ratio leaves, are the whole of what makes
-     * the capsule read as elastic rather than as a box on rails.
+     * The spring the leading edge of the bottom bar's capsule travels on. The trailing edge uses
+     * the slower [navIndicatorTrail], which is what stretches the capsule as it moves.
      */
     @Stable
     fun <T> navIndicator(): SpringSpec<T> = springOf(0.7f, 0.4f)
@@ -74,15 +65,13 @@ object GlassMotion {
     fun navPressExit(): SpringSpec<Color> = springOf(0.95f, 0.35f)
 
     /**
-     * A menu row's fill leaving on release.
-     *
-     * Shorter than the bar's. A row is often gone, or behind a second menu, before the bar's fade
-     * would finish, and the block that outlives its row reads as a stain on the panel under it.
+     * A menu row's fill leaving on release. Shorter than the bar's, since a row is often gone
+     * before the bar's fade would finish.
      */
     @Stable
     fun popupPressExit(): SpringSpec<Color> = springOf(1f, 0.15f)
 
-    /** The spring the bottom bar shows and hides on, from the same source class. */
+    /** The spring the bottom bar shows and hides on. */
     @Stable
     fun <T> navShowHide(): SpringSpec<T> = springOf(1f, 0.3f)
 
@@ -90,7 +79,7 @@ object GlassMotion {
     @Stable
     fun <T> default(): SpringSpec<T> = springOf(0.95f, 0.35f)
 
-    /** HyperPopupWindow's default opening spring and explicit secondary collapse spring. */
+    /** The default opening spring, and the explicit secondary collapse spring. */
     @Stable
     fun secondaryPopup(expanding: Boolean): SpringSpec<Float> = if (expanding) {
         transformSpring(0.95f, 0.35f)
@@ -98,7 +87,7 @@ object GlassMotion {
         transformSpring(0.95f, 0.2f)
     }
 
-    /** HyperPopupWindow's independent AUTO_ALPHA track, with ViewProperty's alpha threshold. */
+    /** The mask's own alpha track, with its own visibility threshold. */
     @Stable
     internal fun secondaryPopupMask(expanding: Boolean): SpringSpec<Float> = folmeSpring(
         damping = 0.95f,
@@ -106,7 +95,7 @@ object GlassMotion {
         visibilityThreshold = POPUP_MASK_MIN_VISIBLE_CHANGE * 0.75f,
     )
 
-    /** ViewProperty.AUTO_ALPHA hides the mask below one 8-bit alpha step. */
+    /** The mask hides below one 8-bit alpha step. */
     internal const val POPUP_MASK_MIN_VISIBLE_CHANGE: Float = 1f / 256f
 
     /** A top bar expanding back to its large title. */
@@ -128,7 +117,7 @@ object GlassMotion {
         easing = LinearEasing,
     )
 
-    /** ActionBarContainer's overlay mask follows a separate 100ms linear transition. */
+    /** The bar's overlay mask follows a separate 100ms linear transition. */
     @Stable
     fun topBarMask(): FiniteAnimationSpec<Float> = tween(durationMillis = 100, easing = LinearEasing)
 
@@ -193,24 +182,18 @@ object GlassMotion {
     fun fadeOut(): FiniteAnimationSpec<Float> = tween(durationMillis = 150, easing = LinearEasing)
 
     /**
-     * The spring an anchored menu morphs on.
-     *
      * The spring an anchored menu's geometry runs on.
      *
      * It carries the width and the aspect ratio together, not a uniform scale. The panel's right
      * and top edges never move; it opens leftward and downward, wide and flat at first and only
-     * then letting its height out. Overshoot is about a percent at roughly 290ms, and the tail is
-     * settled by 460ms — what a person reads is "open in 200ms" with a soft finish behind it.
+     * then letting its height out.
      */
     @Stable
     fun popupMorph(): SpringSpec<Float> = springOf(0.82f, 0.33f)
 
     /**
-     * The curve a menu's opacity and its blur correction run on.
-     *
-     * Linear over 200ms, and deliberately not the spring: by the time the geometry is still
-     * settling the panel is already fully drawn, so the overshoot is felt and not seen. A
-     * dismissal is quicker, at 150ms, so it does not read as a lag behind the finger.
+     * The curve a menu's opacity and its blur correction run on: 200ms linear in, 150ms out, so the
+     * panel is already fully drawn while the geometry is still settling.
      *
      * @param entering Whether the menu is opening.
      */
@@ -218,11 +201,8 @@ object GlassMotion {
     fun popupMorphFade(entering: Boolean): FiniteAnimationSpec<Float> = tween(durationMillis = if (entering) 200 else 150, easing = LinearEasing)
 
     /**
-     * The curve a menu blurs its own contents on.
-     *
-     * Its own channel, and 200ms linear in both directions, unlike the opacity beside it. The
-     * blur is what carries the opening for a menu with no icon to hand over to: the rows arrive
-     * unreadable and sharpen, rather than simply fading up.
+     * The curve a menu blurs its own contents on: 200ms linear in both directions. The blur is what
+     * carries the opening for a menu with no icon to hand over to.
      */
     @Stable
     fun popupMorphBlur(): FiniteAnimationSpec<Float> = tween(durationMillis = 200, easing = LinearEasing)
@@ -230,10 +210,9 @@ object GlassMotion {
     /**
      * The spring the geometry of a menu grown out of its own control runs on.
      *
-     * This is the other of the two openings the source system has. It applies when the control
-     * itself takes part: the panel is not revealed beside the control, it *is* the control, grown
-     * from the control's own rectangle and corner radius out to the panel's. The control's
-     * contents travel with it and dissolve out while the panel's dissolve in.
+     * This is the other of the two openings: it applies when the control itself takes part, so the
+     * panel is not revealed beside the control but *is* the control, grown from the control's own
+     * rectangle and corner radius out to the panel's.
      *
      * @param entering Whether the menu is opening.
      */
@@ -245,10 +224,8 @@ object GlassMotion {
     }
 
     /**
-     * The spring the *centre* of that panel travels on.
-     *
-     * Deliberately not [transformBounds]. The panel reaches where it belongs sooner than it
-     * finishes growing to size, and that difference is what stops the travel reading as a slide.
+     * The spring the *centre* of that panel travels on. Deliberately not [transformBounds]: the
+     * panel reaches where it belongs sooner than it finishes growing to size.
      *
      * @param entering Whether the menu is opening.
      */
@@ -260,11 +237,9 @@ object GlassMotion {
     }
 
     /**
-     * The ramp the control's own contents dissolve out on as the panel takes over.
-     *
-     * The two dissolves are the same 80ms ramp with 50ms between them, and which of the two waits
-     * swaps with the direction: opening, the control goes first and the panel's contents follow;
-     * closing, the panel's contents go first.
+     * The ramp the control's own contents dissolve out on as the panel takes over. The two
+     * dissolves share an 80ms ramp with 50ms between them, and which one waits swaps with the
+     * direction.
      *
      * @param entering Whether the menu is opening.
      */
@@ -292,9 +267,8 @@ object GlassMotion {
     /**
      * How far the two halves of that dissolve blur, in pixels.
      *
-     * Pixels, not dp, because the source hands this straight to the platform's blur and never
-     * scales it by density. A denser screen therefore gets a proportionally softer dissolve, and
-     * that is what the source looks like.
+     * Pixels, not dp, because this goes straight to the platform's blur and is never scaled by
+     * density. A denser screen therefore gets a proportionally softer dissolve.
      */
     const val TRANSFORM_BLUR_PX: Float = 50f
 
@@ -314,16 +288,11 @@ object GlassMotion {
     const val POPUP_MORPH_BLUR_PX: Float = 40f
 
     /**
-     * The spring the *size* of a spinner's dropdown runs on.
+     * The spring the *size* of a dropdown runs on.
      *
-     * The third of the source system's openings, and the one a settings row's list of choices
-     * gets. Unlike the other two it does not hold any edge still: the panel's size and its centre
-     * run on two springs of different speeds, so the capsule reaches where it belongs before it has
-     * finished growing and the panel's far edges pull in and rebound. That difference is the whole
-     * of the arc.
-     *
-     * Opening, the centre is the quicker of the two. Closing, the two swap, so the panel collapses
-     * to a capsule where it stands and only then travels back.
+     * The third of the openings, and the one that holds no edge still: the panel's size and its
+     * centre run on two springs of different speeds, which is what makes the travel an arc. Opening
+     * the centre is the quicker of the two; closing they swap.
      *
      * @param entering Whether the dropdown is opening.
      */
@@ -335,10 +304,8 @@ object GlassMotion {
     fun <T> arcPosition(entering: Boolean): SpringSpec<T> = if (entering) springOf(0.8f, 0.22f) else springOf(0.8f, 0.35f)
 
     /**
-     * The ramp a spinner's dropdown fades on.
-     *
-     * 50ms in and 200ms out. The opening is brisk enough that the panel is already legible by the
-     * time it becomes visible at all, and the closing is slow enough to carry the blur with it.
+     * The ramp a dropdown fades on: 50ms in and 200ms out, so the panel is already legible by the
+     * time it becomes visible at all.
      *
      * @param entering Whether the dropdown is opening.
      */
@@ -348,8 +315,8 @@ object GlassMotion {
     /**
      * The ramp that dropdown blurs itself on as it leaves.
      *
-     * One-sided. The source blurs the panel only on the way out, so the opening has none of it at
-     * all and the value snaps sharp rather than arriving out of focus.
+     * One-sided. The panel is blurred only on the way out, so the opening has none of it at all
+     * and the value snaps sharp rather than arriving out of focus.
      *
      * @param entering Whether the dropdown is opening.
      */

@@ -26,28 +26,28 @@ data class GlassShadow(
     val dispersion: Float,
 )
 
-/** The stock shadows, ported from the source system's `ShadowToken`. */
+/** The stock shadows. */
 object GlassShadows {
 
     private val Black = Color(0f, 0f, 0f, 0.05f)
 
-    /** Port of `ShadowToken.Low`. A surface resting on the page. */
+    /** A surface resting on the page. */
     @Stable
     val Low: GlassShadow = GlassShadow(Black, 0f, 0f, 44f, 0.5f)
 
-    /** Port of `ShadowToken.Regular`. The everyday panel. */
+    /** The everyday panel. */
     @Stable
     val Regular: GlassShadow = GlassShadow(Black, 0f, 2f, 64f, 0.5f)
 
-    /** Port of `ShadowToken.High`. A surface lifted clear of the page. */
+    /** A surface lifted clear of the page. */
     @Stable
     val High: GlassShadow = GlassShadow(Black, 0f, 4f, 80f, 0.5f)
 
-    /** Port of `ShadowToken.ExtraHigh`. A dialog over a dimmed page. */
+    /** A dialog over a dimmed page. */
     @Stable
     val ExtraHigh: GlassShadow = GlassShadow(Black, 0f, 70f, 96f, 0.5f)
 
-    /** Port of `ShadowToken.Float`. A floating control. */
+    /** A floating control. */
     @Stable
     val Float: GlassShadow = GlassShadow(Black, 0f, 0f, 24f, 0.5f)
 }

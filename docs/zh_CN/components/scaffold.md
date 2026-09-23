@@ -59,7 +59,7 @@ Scaffold(
 | floatingActionButtonPosition | FabPosition                         | 显示悬浮按钮的位置                           | FabPosition.End                   | 否       |
 | floatingToolbar              | @Composable () -> Unit              | 悬浮工具栏                                   | {}                                | 否       |
 | floatingToolbarPosition      | ToolbarPosition                     | 显示悬浮工具栏的位置                         | ToolbarPosition.BottomCenter      | 否       |
-| snackbarHost                 | @Composable () -> Unit              | 用于显示 Snackbar 的容器，Miuix 不提供此组件 | {}                                | 否       |
+| snackbarHost                 | @Composable () -> Unit              | 用于显示 Snackbar 的容器，通常是 SnackbarHost | {}                                | 否       |
 | popupHost                    | @Composable () -> Unit              | 用于显示弹出窗口的容器                       | \{ MiuixPopupHost() }             | 否       |
 | containerColor               | Color                               | 脚手架的背景颜色                             | MiuixTheme.colorScheme.surface | 否       |
 | contentWindowInsets          | WindowInsets                        | 传递给内容的窗口插入边距                     | WindowInsets.systemBars.union(WindowInsets.displayCutout) | 否       |
@@ -107,18 +107,19 @@ Scaffold(
         )
     },
     bottomBar = {
-        val items = listOf(
-            NavigationItem("首页", MiuixIcons.VerticalSplit),
-            NavigationItem("设置", MiuixIcons.Settings)
-        )
-        var selectedItem by remember { mutableStateOf(0) }
-        NavigationBar(
-            items = items,
-            selected = selectedItem,
-            onClick = { index ->
-                selectedItem = index
-            },
-        )
+        val pages = listOf("首页", "设置")
+        val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Settings)
+        var selectedIndex by remember { mutableStateOf(0) }
+        NavigationBar {
+            pages.forEachIndexed { index, label ->
+                NavigationBarItem(
+                    selected = selectedIndex == index,
+                    onClick = { selectedIndex = index },
+                    icon = icons[index],
+                    label = label,
+                )
+            }
+        }
     },
     content = { paddingValues ->
         // 内容区域需要考虑 padding
@@ -169,14 +170,14 @@ Scaffold(
 )
 ```
 
-### 带有 Snackbar 的页面布局（需要使用 Material 组件）
+### 带有 Snackbar 的页面布局
 
 ```kotlin
 val snackbarHostState = remember { SnackbarHostState() }
 val scope = rememberCoroutineScope()
 
 Scaffold(
-    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    snackbarHost = { SnackbarHost(state = snackbarHostState) },
     topBar = {
         SmallTopAppBar(title = "标题")
     },

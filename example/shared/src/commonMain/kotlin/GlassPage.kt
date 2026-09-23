@@ -171,7 +171,7 @@ private const val MATERIAL_LIGHT = 7
 private const val MATERIAL_DARK = 9
 
 /**
- * The glass components on a flat page, the way the source system shows them.
+ * The glass components on a flat page.
  *
  * The page is flat by default. A busy photograph flatters a refractive material and hides a rim
  * that is a pixel too wide, and a flat page is what the system's own settings pages actually are.

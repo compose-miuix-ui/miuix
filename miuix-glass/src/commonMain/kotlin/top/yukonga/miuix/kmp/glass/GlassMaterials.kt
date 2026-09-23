@@ -7,13 +7,10 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/** The stock materials, ported from the source system's material tokens. */
+/** The stock materials. */
 object GlassMaterials {
 
-    /**
-     * Port of `internal-pured-thin-glass`, light: what the source system's floating bars and
-     * popups are made of over a light page.
-     */
+    /** `internal-pured-thin-glass`, light: the body of the floating bars and popups. */
     @Stable
     val PuredThinGlassLight: GlassMaterial = GlassMaterial(
         blurRadius = 20.dp,
@@ -22,7 +19,7 @@ object GlassMaterials {
         third = GlassColorLayer(Color(0x66FFFFFF), GlassColorBlendMode.HardLight),
     )
 
-    /** Port of `internal-pured-thin-glass`, dark. */
+    /** `internal-pured-thin-glass`, dark. */
     @Stable
     val PuredThinGlassDark: GlassMaterial = GlassMaterial(
         blurRadius = 20.dp,
@@ -31,15 +28,15 @@ object GlassMaterials {
         third = GlassColorLayer(Color(0x993F3F3F), GlassColorBlendMode.Overlay),
     )
 
-    /** Port of `popupview-glass`, light: pured-thin colour layers with a 60dp mask blur. */
+    /** `popupview-glass`, light: pured-thin colour layers with a 60dp mask blur. */
     @Stable
     val PopupViewGlassLight: GlassMaterial = PuredThinGlassLight.copy(blurRadius = 60.dp)
 
-    /** Port of `popupview-glass`, dark: pured-thin colour layers with a 60dp mask blur. */
+    /** `popupview-glass`, dark: pured-thin colour layers with a 60dp mask blur. */
     @Stable
     val PopupViewGlassDark: GlassMaterial = PuredThinGlassDark.copy(blurRadius = 60.dp)
 
-    /** Port of the OS4 action bar's `mask-pured-regular`, light. */
+    /** The action bar's `mask-pured-regular`, light. */
     @Stable
     val ActionBarMaskLight: GlassMaterial = GlassMaterial(
         blurRadius = 40.dp,
@@ -47,7 +44,7 @@ object GlassMaterials {
         second = GlassColorLayer(Color(0xB3FFFFFF), GlassColorBlendMode.HardLight),
     )
 
-    /** Port of the OS4 action bar's `mask-pured-regular`, dark. */
+    /** The action bar's `mask-pured-regular`, dark. */
     @Stable
     val ActionBarMaskDark: GlassMaterial = GlassMaterial(
         blurRadius = 60.dp,

@@ -17,7 +17,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 fun LazyListScope.glassEntrySection() {
     item(key = "glass-entry") {
         val navigator = LocalNavigator.current
-        SmallTitle(text = "OS4")
+        SmallTitle(text = "Glass")
         Card(modifier = Modifier.padding(horizontal = 12.dp)) {
             ArrowPreference(
                 title = "Glass Components",

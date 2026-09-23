@@ -148,7 +148,7 @@ fun TopAppBar(
 }
 
 /**
- * An OS4 [BlurTopAppBar] whose large title blurs as it collapses.
+ * A [BlurTopAppBar] whose large title blurs as it collapses.
  *
  * @param title The title of the [BlurTopAppBar].
  * @param largeTitleBlurRadius How far the large title blurs out as it collapses. It reaches this

@@ -13,49 +13,12 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 ```
 
 ## 基本用法
-
-### 玻璃顶栏材质显示
-
-可选模块 `miuix-glass` 中的 `GlassTopAppBar` 提供带必填参数 `isContentScrolled`
-的独立重载。传入 `listState.canScrollBackward` 后，页面离开顶部时开始显示材质，
-回到顶部时反向退出，即使大标题仍处于收起状态也能正确恢复。顶栏遮罩使用 100ms
-线性过渡，导航按钮与操作按钮的表面共用 350ms 线性过渡；保留原有 Compose 阴影
-外观及随滚动变化的阴影进度。
-
-顶部两侧按钮的边距均为 `GlassTopAppBarDefaults.HorizontalPadding`（12dp）。
-页面卡片和标签复用此值，即可对齐外边缘。
-
-```kotlin
-GlassTopAppBar(
-    title = "Glass",
-    isContentScrolled = listState.canScrollBackward,
-    backdrop = backdrop,
-    scrollBehavior = scrollBehavior,
-    navigationIcon = {
-        GlassIconButton(onClick = { navigator.pop() }) {
-            Icon(
-                imageVector = MiuixIcons.Back,
-                contentDescription = "Back",
-                modifier = Modifier.size(20.dp),
-            )
-        }
-    },
-)
-```
-
-`navigationIcon` 和 `actions` 都直接绘制调用方内容。两侧均使用 `GlassIconButton`
-即可获得一致的按压反馈，导航栏不会再额外包裹玻璃背景。按钮继承导航栏的材质、
-尺寸、形状、填充、描边和阴影默认值。原有带 clickable 的导航图标应改为
-`GlassIconButton(onClick = { navigator.pop() }) { Icon(...) }`。
-
-不带 `isContentScrolled` 的原重载仍然可用，通过 `scrollBehavior.state.contentOffset`
-推导显示状态。能够获取列表准确顶部位置时，建议使用显式重载。以 `GlassIconButton`
-为锚点的变换菜单会自动继承按钮材质及当前表面透明度。
 
 ### 小标题顶部栏
 
@@ -207,6 +170,31 @@ TopAppBar(
 | actionIconPadding          | Dp                              | 操作图标的末尾边距       | TopAppBarDefaults.ActionIconPadding | 否       |
 | bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的可组合内容 | {}                                | 否       |
 
+### BlurTopAppBar 属性
+
+`BlurTopAppBar` 即带有“大标题折叠时模糊”能力的 `TopAppBar`，`largeTitleBlurRadius` 为必填参数。
+
+| 属性名                     | 类型                            | 说明                                             | 默认值                          | 必填 |
+| -------------------------- | ------------------------------- | ------------------------------------------------ | ------------------------------- | ---- |
+| title                      | String                          | 顶栏标题                                          | -                               | 是   |
+| largeTitleBlurRadius       | Dp                              | 大标题完全淡出时的模糊半径                         | -                               | 是   |
+| modifier                   | Modifier                        | 应用于顶栏的 Modifier                             | Modifier                        | 否   |
+| color                      | Color                           | 顶栏背景色                                        | MiuixTheme.colorScheme.surface  | 否   |
+| titleColor                 | Color                           | 收起后小标题的文字颜色                             | MiuixTheme.colorScheme.onSurface | 否   |
+| largeTitle                 | String                          | 大标题文字                                        | title                           | 否   |
+| largeTitleColor            | Color                           | 展开后大标题的文字颜色                             | MiuixTheme.colorScheme.onSurface | 否   |
+| subtitle                   | String                          | 显示在标题栏下方的副标题                           | ""                              | 否   |
+| subtitleColor              | Color                           | 副标题的文字颜色                                   | MiuixTheme.colorScheme.onSurfaceVariantSummary | 否   |
+| navigationIcon             | @Composable () -> Unit          | 导航图标区域的 Composable                          | {}                              | 否   |
+| actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的 Composable                          | {}                              | 否   |
+| scrollBehavior             | ScrollBehavior?                 | 控制顶栏滚动行为                                   | null                            | 否   |
+| defaultWindowInsetsPadding | Boolean                         | 是否应用默认的窗口边距                             | true                            | 否   |
+| titlePadding               | Dp                              | 水平内容边距                                      | TopAppBarDefaults.TitlePadding  | 否   |
+| navigationIconPadding      | Dp                              | 导航图标的起始边距                                 | TopAppBarDefaults.NavigationIconPadding | 否   |
+| actionIconPadding          | Dp                              | 操作图标的结束边距                                 | TopAppBarDefaults.ActionIconPadding | 否   |
+| titleAlpha                 | () -> Float                     | 绘制阶段作用于两个标题容器的透明度                  | { 1f }                          | 否   |
+| bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的内容                             | {}                              | 否   |
+
 ### TopAppBarDefaults 对象
 
 TopAppBarDefaults 对象提供了 TopAppBar 和 SmallTopAppBar 组件的默认值。
@@ -312,14 +300,37 @@ Box(modifier = Modifier.fillMaxSize()) {
 }
 ```
 
-### 玻璃顶栏的搜索过渡
+## 柔光玻璃顶栏
 
-`GlassTopAppBar` 提供 `contentModifier: Modifier = Modifier`，用于独立变换前景，
-保持背景遮罩不动。搜索模式的缩放、透明度和模糊应放在 `contentModifier` 上；
-`modifier` 会变换整个顶栏，包括遮挡滚动内容的背景带。
+可选模块 `miuix-glass` 提供 `GlassTopAppBar`，即建立在柔光玻璃之上的顶栏。安装方式见 [柔光玻璃](/zh_CN/guide/glass)。
 
-`GlassTopAppBar` 和 `BlurTopAppBar` 均支持 `titleAlpha: () -> Float = { 1f }`。
-该值在绘制阶段读取，与现有的折叠透明度相乘，作用于小标题、大标题及副标题容器。
+### 材质显示
+
+默认情况下，`GlassTopAppBar` 从 `scrollBehavior.state.contentOffset` 推导材质的显示状态。另一个重载则直接接收页面自身的“内容已离开顶部”信号，在大标题已经收起时更准确：
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    isContentScrolled = listState.canScrollBackward,
+    backdrop = backdrop,
+    scrollBehavior = scrollBehavior,
+    navigationIcon = {
+        GlassIconButton(onClick = { navigator.pop() }) {
+            Icon(
+                imageVector = MiuixIcons.Glass.ChevronBackward,
+                contentDescription = "Back",
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    },
+)
+```
+
+`navigationIcon` 与 `actions` 都直接绘制调用方内容，顶栏不会再额外包裹一层柔光玻璃背景。两侧均使用 `GlassIconButton`，按钮即可继承顶栏的材质并获得一致的按压反馈。以 `GlassIconButton` 为锚点的变换菜单会自动继承按钮材质及当前表面透明度。
+
+### 搜索过渡
+
+`GlassTopAppBar` 提供 `contentModifier: Modifier = Modifier`，用于独立变换前景，保持背景遮罩不动。搜索模式的缩放、透明度和模糊应放在 `contentModifier` 上；`modifier` 会变换整个顶栏，包括遮挡滚动内容的背景带。
 
 ```kotlin
 GlassTopAppBar(
@@ -328,3 +339,19 @@ GlassTopAppBar(
     titleAlpha = { titleOpacity.value },
 )
 ```
+
+`titleAlpha` 在绘制阶段读取，与原有的折叠透明度相乘，作用于小标题、大标题及副标题容器。
+
+### BlurTopAppBar
+
+`BlurTopAppBar` 是 `GlassTopAppBar` 在 `miuix-ui` 中构建所依赖的函数，本身也是公开 API：它是带有“大标题在折叠时模糊淡出”能力的 `TopAppBar`。
+
+```kotlin
+BlurTopAppBar(
+    title = "Glass",
+    largeTitleBlurRadius = 8.dp,
+    scrollBehavior = scrollBehavior,
+)
+```
+
+`largeTitleBlurRadius` 表示标题完全淡出时的模糊半径，取 `0.dp` 即等价于 `TopAppBar`。它同样支持 `titleAlpha`。

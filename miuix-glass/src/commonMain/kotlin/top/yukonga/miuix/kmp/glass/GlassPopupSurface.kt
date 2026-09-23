@@ -133,10 +133,9 @@ internal fun placeGlassPopup(
 /**
  * The panel every glass menu is built on.
  *
- * It owns everything the three openings share: the catcher that closes on a tap outside, the
- * placement, the shadow and the material, and the one measurement that freezes the rows at the size
- * the panel settles at so nothing reflows while it moves. What each opening supplies is only its
- * own geometry — [frame] for the panel and [contentLayer] for the rows inside it.
+ * It owns what the three openings share: the catcher that closes on a tap outside, the placement,
+ * the shadow, the material, and the measurement that freezes the rows at the size the panel settles
+ * at. Each opening supplies only its own geometry — [frame] and [contentLayer].
  *
  * @param onDismissRequest Called when a tap outside should close the menu.
  * @param backdrop The [Backdrop] behind the glass. `null` uses [GlassPopupVisuals.containerColor]
@@ -295,7 +294,7 @@ internal fun BoxScope.GlassPopupSurface(
     }
 }
 
-/** Match drawGlassShadow's bounds, including its source-density conversion and offset. */
+/** Match drawGlassShadow's bounds, including its density conversion and offset. */
 internal fun Density.popupShadowOutsets(shadow: GlassShadow?): LayerOutsets {
     if (shadow == null) return LayerOutsets.Zero
     val sourceScale = density / GlassDefaults.SourceDensity
