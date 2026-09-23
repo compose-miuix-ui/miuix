@@ -402,7 +402,11 @@ fun GlassPage(padding: PaddingValues) {
                             }
                             item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
                             item(key = "glass-dropdown") {
-                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = horizontalPadding)
+                                        .padding(bottom = 12.dp),
+                                ) {
                                     GlassDropdownRow(
                                         title = "Bluetooth stack log",
                                         value = LogLevels[logLevel],
@@ -414,7 +418,11 @@ fun GlassPage(padding: PaddingValues) {
                             }
                             item(key = "layout-title") { SmallTitle(text = "Layout") }
                             item(key = "layout") {
-                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = horizontalPadding)
+                                        .padding(bottom = 12.dp),
+                                ) {
                                     GlassDropdownRow(
                                         title = "Tab row",
                                         value = TabPlacements[tabPlacement],
@@ -426,7 +434,11 @@ fun GlassPage(padding: PaddingValues) {
                             }
                             item(key = "controls-title") { SmallTitle(text = "Material") }
                             item(key = "controls") {
-                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = horizontalPadding)
+                                        .padding(bottom = 12.dp),
+                                ) {
                                     GlassDropdownRow(
                                         title = "Material",
                                         value = Materials[materialIndex].first,
@@ -488,7 +500,11 @@ fun GlassPage(padding: PaddingValues) {
                             }
                             item(key = "content-title") { SmallTitle(text = "Content") }
                             item(key = "content") {
-                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = horizontalPadding)
+                                        .padding(bottom = 12.dp),
+                                ) {
                                     repeat(8) { index ->
                                         BasicComponent(
                                             title = "Content ${index + 1}",

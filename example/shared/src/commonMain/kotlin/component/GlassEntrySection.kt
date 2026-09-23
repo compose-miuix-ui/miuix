@@ -18,7 +18,11 @@ fun LazyListScope.glassEntrySection() {
     item(key = "glass-entry") {
         val navigator = LocalNavigator.current
         SmallTitle(text = "Glass")
-        Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
             ArrowPreference(
                 title = "Glass Components",
                 summary = "Top bar, bottom bar, popup and dialog",
