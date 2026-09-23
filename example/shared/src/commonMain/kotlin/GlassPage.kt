@@ -61,6 +61,7 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassOverlayDefaults
+import top.yukonga.miuix.kmp.glass.GlassPopupAnchor
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
@@ -156,6 +157,7 @@ private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
 private const val OVERLAY_DROPDOWN = 3
+private const val OVERLAY_TAB_ROW = 4
 
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
@@ -210,6 +212,8 @@ fun GlassPage(padding: PaddingValues) {
     val menuAnchor = rememberGlassPopupAnchor()
     var dropdownAnchor by remember { mutableStateOf(Rect.Zero) }
     val dropdownRow = rememberGlassPopupAnchor()
+    var tabRowAnchor by remember { mutableStateOf(Rect.Zero) }
+    val tabRowDropdown = rememberGlassPopupAnchor()
     var logLevel by remember { mutableIntStateOf(2) }
 
     val style = Materials[materialIndex].second
@@ -387,49 +391,24 @@ fun GlassPage(padding: PaddingValues) {
                             item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
                             item(key = "glass-dropdown") {
                                 Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .onGloballyPositioned { dropdownAnchor = it.boundsInRoot() }
-                                            .clickable(interactionSource = null, indication = null) {
-                                                overlayIndex = OVERLAY_DROPDOWN
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = "Bluetooth stack log",
-                                            modifier = Modifier.weight(1f),
-                                            style = MiuixTheme.textStyles.body1,
-                                            color = MiuixTheme.colorScheme.onSurface,
-                                        )
-                                        Row(
-                                            modifier = Modifier.glassPopupAnchorValue(dropdownRow),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            Text(
-                                                text = LogLevels[logLevel],
-                                                style = MiuixTheme.textStyles.body2,
-                                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                            )
-                                            Icon(
-                                                imageVector = MiuixIcons.Basic.ArrowUpDown,
-                                                contentDescription = null,
-                                                modifier = Modifier.padding(start = 8.dp).size(14.dp),
-                                                tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                            )
-                                        }
-                                    }
+                                    GlassDropdownRow(
+                                        title = "Bluetooth stack log",
+                                        value = LogLevels[logLevel],
+                                        anchor = dropdownRow,
+                                        onClick = { overlayIndex = OVERLAY_DROPDOWN },
+                                        onBounds = { dropdownAnchor = it },
+                                    )
                                 }
                             }
                             item(key = "layout-title") { SmallTitle(text = "Layout") }
                             item(key = "layout") {
                                 Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                                    OverlayDropdownPreference(
+                                    GlassDropdownRow(
                                         title = "Tab row",
-                                        items = TabPlacements,
-                                        selectedIndex = tabPlacement,
-                                        onSelectedIndexChange = { tabPlacement = it },
+                                        value = TabPlacements[tabPlacement],
+                                        anchor = tabRowDropdown,
+                                        onClick = { overlayIndex = OVERLAY_TAB_ROW },
+                                        onBounds = { tabRowAnchor = it },
                                     )
                                 }
                             }
@@ -689,9 +668,70 @@ fun GlassPage(padding: PaddingValues) {
                 )
             }
         }
+        GlassDropdownPopup(
+            show = overlayIndex == OVERLAY_TAB_ROW,
+            onDismissRequest = { overlayIndex = OVERLAY_NONE },
+            anchorBounds = tabRowAnchor,
+            anchor = tabRowDropdown,
+            backdrop = backdrop,
+            visuals = popupVisuals,
+        ) {
+            TabPlacements.forEachIndexed { position, label ->
+                GlassPopupItem(
+                    text = label,
+                    onClick = {
+                        tabPlacement = position
+                        overlayIndex = OVERLAY_NONE
+                    },
+                    selected = position == tabPlacement,
+                )
+            }
+        }
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
         )
+    }
+}
+
+/** One settings row whose value opens a [GlassDropdownPopup]. */
+@Composable
+private fun GlassDropdownRow(
+    title: String,
+    value: String,
+    anchor: GlassPopupAnchor,
+    onClick: () -> Unit,
+    onBounds: (Rect) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { onBounds(it.boundsInRoot()) }
+            .clickable(interactionSource = null, indication = null, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.weight(1f),
+            style = MiuixTheme.textStyles.body1,
+            color = MiuixTheme.colorScheme.onSurface,
+        )
+        Row(
+            modifier = Modifier.glassPopupAnchorValue(anchor),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = value,
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+            )
+            Icon(
+                imageVector = MiuixIcons.Basic.ArrowUpDown,
+                contentDescription = null,
+                modifier = Modifier.padding(start = 8.dp).size(14.dp),
+                tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
+            )
+        }
     }
 }
