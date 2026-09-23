@@ -485,9 +485,17 @@ private class PagerChildMotionConnection : NestedScrollConnection {
      */
     private var flingHadVelocity = false
 
+    /**
+     * A pager takeover can cancel more than one child scrollable. Their cancelled drags can each
+     * dispatch a zero-velocity [onPreFling] afterwards, so ignore fling callbacks until the next
+     * real user scroll instead of treating a later callback as a fresh settling animation.
+     */
+    private var suppressMotionUntilUserScroll = false
+
     fun stop() {
         isInMotion = false
         flingHadVelocity = false
+        suppressMotionUntilUserScroll = true
     }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -495,17 +503,20 @@ private class PagerChildMotionConnection : NestedScrollConnection {
         if (source == NestedScrollSource.UserInput) {
             isInMotion = false
             flingHadVelocity = false
+            suppressMotionUntilUserScroll = false
         }
         return Offset.Zero
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
+        if (suppressMotionUntilUserScroll) return Velocity.Zero
         flingHadVelocity = available.x != 0f || available.y != 0f
         isInMotion = true
         return Velocity.Zero
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        if (suppressMotionUntilUserScroll) return Velocity.Zero
         // A settling animation runs inside this call, so the flag has to outlive it. Only a fling
         // that carried velocity is done here; an overscroll rebound keeps animating afterwards.
         if (flingHadVelocity) {
