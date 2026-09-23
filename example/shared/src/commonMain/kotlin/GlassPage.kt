@@ -183,6 +183,7 @@ fun GlassPage(padding: PaddingValues) {
     val bottomBarMargin = if (navigationBarInset < 24.dp) 24.dp else navigationBarInset + 8.dp
     val backdrop = rememberLayerBackdrop()
     val secondaryBackdrop = rememberLayerBackdrop()
+    val wallpaperBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
@@ -228,13 +229,16 @@ fun GlassPage(padding: PaddingValues) {
     )
     val shape = GlassShape(cornerRadius.dp, smoothing)
     val tabsInTopBar = tabPlacement == TABS_IN_TOP_BAR
+    // A tab row placed in the list sits inside the layer the bars sample, so it samples the page
+    // background instead — sampling its own layer would close the loop and take the renderer down.
+    val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
     val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
         Column(modifier = tabModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             GlassTabRow(
                 tabs = listOf("Sound", "Haptics"),
                 selectedIndex = primaryTab,
                 onSelect = { primaryTab = it },
-                backdrop = backdrop,
+                backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
                 surfaceAlpha = 1f,
@@ -244,7 +248,7 @@ fun GlassPage(padding: PaddingValues) {
                 tabs = listOf("Home", "Widget", "Theme", "Paper"),
                 selectedIndex = neutralTab,
                 onSelect = { neutralTab = it },
-                backdrop = backdrop,
+                backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
                 surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
@@ -256,7 +260,7 @@ fun GlassPage(padding: PaddingValues) {
                 tabs = listOf("Privacy", "Security"),
                 selectedIndex = joinedTab,
                 onSelect = { joinedTab = it },
-                backdrop = backdrop,
+                backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
                 surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
@@ -349,14 +353,21 @@ fun GlassPage(padding: PaddingValues) {
                 },
             ) { innerPadding ->
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
-                    Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop).background(MiuixTheme.colorScheme.surface)) {
-                        if (wallpaper) {
-                            Image(
-                                painter = painterResource(Res.drawable.blur_test),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                            )
+                    Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .layerBackdrop(wallpaperBackdrop)
+                                .background(MiuixTheme.colorScheme.surface),
+                        ) {
+                            if (wallpaper) {
+                                Image(
+                                    painter = painterResource(Res.drawable.blur_test),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                         }
                         LazyColumn(
                             state = listState,
