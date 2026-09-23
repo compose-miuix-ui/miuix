@@ -91,7 +91,6 @@ import top.yukonga.miuix.kmp.icon.glass.Image
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.Settings
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
@@ -156,8 +155,12 @@ private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
-private const val OVERLAY_DROPDOWN = 3
-private const val OVERLAY_TAB_ROW = 4
+private const val DROPDOWN_NONE = 0
+private const val DROPDOWN_LOG_LEVEL = 1
+private const val DROPDOWN_TAB_ROW = 2
+private const val DROPDOWN_MATERIAL = 3
+private const val DROPDOWN_STROKE = 4
+private const val DROPDOWN_OVERLAY = 5
 
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
@@ -202,6 +205,7 @@ fun GlassPage(padding: PaddingValues) {
     var smoothing by remember { mutableFloatStateOf(1f) }
     var alpha by remember { mutableFloatStateOf(1f) }
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
+    var activeDropdown by remember { mutableIntStateOf(DROPDOWN_NONE) }
     var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var navIndex by remember { mutableIntStateOf(0) }
     var primaryTab by remember { mutableIntStateOf(0) }
@@ -214,6 +218,12 @@ fun GlassPage(padding: PaddingValues) {
     val dropdownRow = rememberGlassPopupAnchor()
     var tabRowAnchor by remember { mutableStateOf(Rect.Zero) }
     val tabRowDropdown = rememberGlassPopupAnchor()
+    var materialAnchor by remember { mutableStateOf(Rect.Zero) }
+    val materialDropdown = rememberGlassPopupAnchor()
+    var strokeAnchor by remember { mutableStateOf(Rect.Zero) }
+    val strokeDropdown = rememberGlassPopupAnchor()
+    var overlayAnchor by remember { mutableStateOf(Rect.Zero) }
+    val overlayDropdown = rememberGlassPopupAnchor()
     var logLevel by remember { mutableIntStateOf(2) }
 
     val style = Materials[materialIndex].second
@@ -314,6 +324,7 @@ fun GlassPage(padding: PaddingValues) {
                                     onClick = {
                                         submenu = false
                                         overlayIndex = OVERLAY_NONE
+                                        activeDropdown = DROPDOWN_NONE
                                         searchExpanded = true
                                     },
                                 ) {
@@ -328,6 +339,7 @@ fun GlassPage(padding: PaddingValues) {
                                     onClick = {
                                         submenu = false
                                         overlayIndex = OVERLAY_POPUP
+                                        activeDropdown = DROPDOWN_NONE
                                     },
                                     modifier = Modifier.glassPopupAnchor(
                                         anchor = menuAnchor,
@@ -395,7 +407,7 @@ fun GlassPage(padding: PaddingValues) {
                                         title = "Bluetooth stack log",
                                         value = LogLevels[logLevel],
                                         anchor = dropdownRow,
-                                        onClick = { overlayIndex = OVERLAY_DROPDOWN },
+                                        onClick = { activeDropdown = DROPDOWN_LOG_LEVEL },
                                         onBounds = { dropdownAnchor = it },
                                     )
                                 }
@@ -407,7 +419,7 @@ fun GlassPage(padding: PaddingValues) {
                                         title = "Tab row",
                                         value = TabPlacements[tabPlacement],
                                         anchor = tabRowDropdown,
-                                        onClick = { overlayIndex = OVERLAY_TAB_ROW },
+                                        onClick = { activeDropdown = DROPDOWN_TAB_ROW },
                                         onBounds = { tabRowAnchor = it },
                                     )
                                 }
@@ -415,23 +427,26 @@ fun GlassPage(padding: PaddingValues) {
                             item(key = "controls-title") { SmallTitle(text = "Material") }
                             item(key = "controls") {
                                 Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                                    OverlayDropdownPreference(
+                                    GlassDropdownRow(
                                         title = "Material",
-                                        items = Materials.map { it.first },
-                                        selectedIndex = materialIndex,
-                                        onSelectedIndexChange = { materialIndex = it },
+                                        value = Materials[materialIndex].first,
+                                        anchor = materialDropdown,
+                                        onClick = { activeDropdown = DROPDOWN_MATERIAL },
+                                        onBounds = { materialAnchor = it },
                                     )
-                                    OverlayDropdownPreference(
+                                    GlassDropdownRow(
                                         title = "Bloom Stroke",
-                                        items = Strokes.map { it.first },
-                                        selectedIndex = strokeIndex,
-                                        onSelectedIndexChange = { strokeIndex = it },
+                                        value = Strokes[strokeIndex].first,
+                                        anchor = strokeDropdown,
+                                        onClick = { activeDropdown = DROPDOWN_STROKE },
+                                        onBounds = { strokeAnchor = it },
                                     )
-                                    OverlayDropdownPreference(
+                                    GlassDropdownRow(
                                         title = "Overlay",
-                                        items = OverlayNames,
-                                        selectedIndex = overlayIndex,
-                                        onSelectedIndexChange = { overlayIndex = it },
+                                        value = OverlayNames[overlayIndex],
+                                        anchor = overlayDropdown,
+                                        onClick = { activeDropdown = DROPDOWN_OVERLAY },
+                                        onBounds = { overlayAnchor = it },
                                     )
                                     SwitchPreference(
                                         title = "Wallpaper",
@@ -445,6 +460,7 @@ fun GlassPage(padding: PaddingValues) {
                                         onCheckedChange = {
                                             visible = it
                                             overlayIndex = if (it) OVERLAY_DIALOG else OVERLAY_NONE
+                                            activeDropdown = DROPDOWN_NONE
                                         },
                                     )
                                     HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
@@ -650,8 +666,8 @@ fun GlassPage(padding: PaddingValues) {
         }
 
         GlassDropdownPopup(
-            show = overlayIndex == OVERLAY_DROPDOWN,
-            onDismissRequest = { overlayIndex = OVERLAY_NONE },
+            show = activeDropdown == DROPDOWN_LOG_LEVEL,
+            onDismissRequest = { activeDropdown = DROPDOWN_NONE },
             anchorBounds = dropdownAnchor,
             anchor = dropdownRow,
             backdrop = backdrop,
@@ -662,15 +678,15 @@ fun GlassPage(padding: PaddingValues) {
                     text = label,
                     onClick = {
                         logLevel = position
-                        overlayIndex = OVERLAY_NONE
+                        activeDropdown = DROPDOWN_NONE
                     },
                     selected = position == logLevel,
                 )
             }
         }
         GlassDropdownPopup(
-            show = overlayIndex == OVERLAY_TAB_ROW,
-            onDismissRequest = { overlayIndex = OVERLAY_NONE },
+            show = activeDropdown == DROPDOWN_TAB_ROW,
+            onDismissRequest = { activeDropdown = DROPDOWN_NONE },
             anchorBounds = tabRowAnchor,
             anchor = tabRowDropdown,
             backdrop = backdrop,
@@ -681,9 +697,68 @@ fun GlassPage(padding: PaddingValues) {
                     text = label,
                     onClick = {
                         tabPlacement = position
-                        overlayIndex = OVERLAY_NONE
+                        activeDropdown = DROPDOWN_NONE
                     },
                     selected = position == tabPlacement,
+                )
+            }
+        }
+
+        GlassDropdownPopup(
+            show = activeDropdown == DROPDOWN_MATERIAL,
+            onDismissRequest = { activeDropdown = DROPDOWN_NONE },
+            anchorBounds = materialAnchor,
+            anchor = materialDropdown,
+            backdrop = backdrop,
+            visuals = popupVisuals,
+        ) {
+            Materials.forEachIndexed { position, material ->
+                GlassPopupItem(
+                    text = material.first,
+                    onClick = {
+                        materialIndex = position
+                        activeDropdown = DROPDOWN_NONE
+                    },
+                    selected = position == materialIndex,
+                )
+            }
+        }
+        GlassDropdownPopup(
+            show = activeDropdown == DROPDOWN_STROKE,
+            onDismissRequest = { activeDropdown = DROPDOWN_NONE },
+            anchorBounds = strokeAnchor,
+            anchor = strokeDropdown,
+            backdrop = backdrop,
+            visuals = popupVisuals,
+        ) {
+            Strokes.forEachIndexed { position, stroke ->
+                GlassPopupItem(
+                    text = stroke.first,
+                    onClick = {
+                        strokeIndex = position
+                        activeDropdown = DROPDOWN_NONE
+                    },
+                    selected = position == strokeIndex,
+                )
+            }
+        }
+        GlassDropdownPopup(
+            show = activeDropdown == DROPDOWN_OVERLAY,
+            onDismissRequest = { activeDropdown = DROPDOWN_NONE },
+            anchorBounds = overlayAnchor,
+            anchor = overlayDropdown,
+            backdrop = backdrop,
+            visuals = popupVisuals,
+        ) {
+            OverlayNames.forEachIndexed { position, label ->
+                GlassPopupItem(
+                    text = label,
+                    onClick = {
+                        overlayIndex = position
+                        visible = position == OVERLAY_DIALOG
+                        activeDropdown = DROPDOWN_NONE
+                    },
+                    selected = position == overlayIndex,
                 )
             }
         }
