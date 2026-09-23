@@ -101,8 +101,8 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-* `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
-* `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
+- `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+- `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
 
 ### Via OverscrollFactory (Theme-Level Integration)
 
@@ -146,13 +146,13 @@ LazyColumn(
 
 **Comparison with `overScrollVertical()`:**
 
-| Feature | `overScrollVertical()` | `MiuixOverscrollFactory` |
-| :--- | :---: | :---: |
-| How it's applied | `Modifier` per component | Theme-level, automatic |
-| Spring physics | Identical | Identical |
-| Platforms enabled by default | All platforms | All platforms (via theme) |
-| Triggers when content does not overflow container | ✅ | ❌ |
-| Requires a modifier on each component | ✅ | ❌ |
+| Feature                                           |  `overScrollVertical()`  | `MiuixOverscrollFactory`  |
+| :------------------------------------------------ | :----------------------: | :-----------------------: |
+| How it's applied                                  | `Modifier` per component |  Theme-level, automatic   |
+| Spring physics                                    |        Identical         |         Identical         |
+| Platforms enabled by default                      |      All platforms       | All platforms (via theme) |
+| Triggers when content does not overflow container |            ✅            |            ❌             |
+| Requires a modifier on each component             |            ✅            |            ❌             |
 
 > **Limitation:** `MiuixOverscrollFactory` works by receiving the delta that the scrollable component could not consume after reaching its scroll boundary. If the content does not overflow the container (e.g., a `LazyColumn` whose items all fit on screen), the scrollable component never reaches a boundary, so `applyToScroll` is never called with a non-zero remainder and the overscroll effect will **not** trigger. For such cases, use `overScrollVertical()` instead.
 
@@ -175,7 +175,7 @@ LazyColumn(
 
 **Parameter Explanation:**
 
-* `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
+- `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
 
 ## Press Feedback Effects (Modifier.pressable())
 
@@ -243,34 +243,38 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
 
 ```kotlin
+val flingBehavior = PagerDefaults.flingBehavior(
+    state = pagerState,
+    snapAnimationSpec = PagerNavigationSpringSpec,
+)
+
 HorizontalPager(
     state = pagerState,
-    modifier = Modifier.pagerGestureOverride(pagerState),
+    modifier = Modifier.pagerGestureOverride(
+        pagerState = pagerState,
+        flingBehavior = flingBehavior,
+    ),
     userScrollEnabled = false,
+    flingBehavior = flingBehavior,
     pageNestedScrollConnection = PagerGestureNestedScrollConnection,
 ) { page ->
     // Page content, such as a LazyColumn
 }
 ```
 
-::: warning Required Cross-Axis configuration
-The default `CrossAxisInterceptor` mode **requires both settings**:
-
-- `userScrollEnabled = false`
-- `pageNestedScrollConnection = PagerGestureNestedScrollConnection`
-
-Missing either can cause gesture conflicts or incorrect overscroll. When switching to `Native` or `TapToHalt`, restore the pager's defaults for both settings.
+::: warning Cross-Axis configuration
+Set `userScrollEnabled = false` and pass the same `flingBehavior` to the modifier and pager. Cross-Axis handles touch separately while preserving the pager's wheel, Shift+wheel, trackpad, and snap behavior. Use `PagerGestureNestedScrollConnection` so vertical child scrolling remains available while a page is settling.
 :::
 
 ### Pager Interception Modes (`PagerInterceptionMode`)
 
 Choose an interaction with the modifier's `mode` parameter:
 
-| Mode | Behavior |
-| :--- | :--- |
-| `CrossAxisInterceptor` (default) | Switch pages while a list is scrolling or bouncing back. |
-| `Native` | Use Compose's native pager gestures. |
-| `TapToHalt` | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
+| Mode                  | Behavior                                                                                  |
+| :-------------------- | :---------------------------------------------------------------------------------------- |
+| `CrossAxis` (default) | Switch pages while a list is scrolling or bouncing back.                                  |
+| `Native`              | Use Compose's native pager gestures.                                                      |
+| `TapToHalt`           | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
 
 To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
 

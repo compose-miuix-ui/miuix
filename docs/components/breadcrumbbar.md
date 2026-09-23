@@ -85,7 +85,7 @@ BreadcrumbBar(
 | colors            | BreadcrumbBarColors       | Color configuration for the breadcrumb bar                                      | BreadcrumbBarDefaults.breadcrumbBarColors() | No       |
 | insideMargin      | PaddingValues             | Internal padding of the breadcrumb bar                                          | BreadcrumbBarDefaults.InsideMargin          | No       |
 | itemMaxWidth      | Dp                        | Maximum width of each capsule-shaped item; text beyond this is truncated        | BreadcrumbBarDefaults.ItemMaxWidth          | No       |
-| scrollState       | ScrollState?              | Scroll state for horizontal scrolling; pass an externally hoisted state to preserve scroll position across recompositions | null | No    |
+| listState         | LazyListState?            | Lazy list state for horizontal scrolling; pass an externally hoisted state to preserve scroll position across recompositions | null | No    |
 | interactionSource | MutableInteractionSource? | Interaction source for the items                                                | null                                        | No       |
 | indication        | Indication?               | Indication for click interactions                                               | LocalIndication.current                     | No       |
 

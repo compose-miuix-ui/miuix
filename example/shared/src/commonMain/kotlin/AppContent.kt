@@ -755,17 +755,24 @@ fun AppPager(
         state = pagerState,
         snapAnimationSpec = PagerNavigationSpringSpec,
     )
-    val intercept = appState.pagerInterceptionMode == PagerInterceptionMode.CrossAxisInterceptor.ordinal
     val nativeConnection = PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
     HorizontalPager(
         state = pagerState,
         modifier = modifier.pagerGestureOverride(
             pagerState = pagerState,
+            flingBehavior = flingBehavior,
             mode = appState.pagerInterceptionMode,
             enabled = appState.enablePageUserScroll,
         ),
-        userScrollEnabled = appState.enablePageUserScroll && !intercept,
-        pageNestedScrollConnection = if (intercept) PagerGestureNestedScrollConnection else nativeConnection,
+        userScrollEnabled = appState.enablePageUserScroll &&
+            appState.pagerInterceptionMode != PagerInterceptionMode.CrossAxis.ordinal,
+        pageNestedScrollConnection = if (
+            appState.pagerInterceptionMode == PagerInterceptionMode.CrossAxis.ordinal
+        ) {
+            PagerGestureNestedScrollConnection
+        } else {
+            nativeConnection
+        },
         verticalAlignment = Alignment.Top,
         flingBehavior = flingBehavior,
         pageContent = { page ->
