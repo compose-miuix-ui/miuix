@@ -21,10 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
@@ -225,7 +228,7 @@ fun BoxScope.GlassPopup(
         )
         return
     }
-    val progress by animateFloatAsState(
+    val progress = animateFloatAsState(
         targetValue = if (show) 1f else 0f,
         animationSpec = GlassMotion.popupMorph(),
         label = "glassPopupBounds",
@@ -240,7 +243,9 @@ fun BoxScope.GlassPopup(
         animationSpec = GlassMotion.popupMorphBlur(),
         label = "glassPopupBlur",
     )
-    val active = progress > 0.001f || show
+    val active by remember(show, progress) {
+        derivedStateOf { progress.value > 0.001f || show }
+    }
     rememberGlassPopupBackProgress(
         show = show,
         active = active,
@@ -264,10 +269,10 @@ fun BoxScope.GlassPopup(
         overlay = {},
         frame = { end, page ->
             val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), page, layoutDirection)
-            directionFrame(settled, end, progress, startRadius, cornerRadius, layoutDirection)
+            directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection)
         },
         contentLayer = { _, _ ->
-            val t = progress.coerceIn(0f, 1f)
+            val t = progress.value.coerceIn(0f, 1f)
             val scale = GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t
             scaleX = scale
             scaleY = scale
@@ -345,7 +350,7 @@ fun GlassPopupItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
-    val pressFill by animateColorAsState(
+    val pressFill = animateColorAsState(
         targetValue = if (pressed) pressedColor else Color.Transparent,
         animationSpec = if (pressed) snap() else GlassMotion.popupPressExit(),
         label = "glassPopupItemPress",
@@ -360,7 +365,12 @@ fun GlassPopupItem(
             .fillMaxWidth()
             .heightIn(min = GlassPopupDefaults.ItemMinHeight)
             .padding(horizontal = GlassPopupDefaults.ItemPressInset)
-            .background(pressFill, GlassShape(GlassPopupDefaults.ItemPressRadius))
+            .drawBehind {
+                drawRoundRect(
+                    color = pressFill.value,
+                    cornerRadius = CornerRadius(GlassPopupDefaults.ItemPressRadius.toPx()),
+                )
+            }
             .selectable(
                 selected = selected,
                 enabled = enabled,

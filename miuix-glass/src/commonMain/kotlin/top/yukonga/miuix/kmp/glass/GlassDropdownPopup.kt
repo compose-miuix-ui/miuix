@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -66,7 +68,7 @@ fun BoxScope.GlassDropdownPopup(
     contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val size by animateFloatAsState(
+    val size = animateFloatAsState(
         targetValue = if (show) 1f else 0f,
         animationSpec = GlassMotion.arcBounds(show),
         label = "glassDropdownSize",
@@ -87,7 +89,9 @@ fun BoxScope.GlassDropdownPopup(
         label = "glassDropdownBlur",
     )
 
-    val active = show || size > 0.0001f
+    val active by remember(show, size) {
+        derivedStateOf { show || size.value > 0.0001f }
+    }
     val layoutDirection = LocalLayoutDirection.current
     val backProgress = rememberGlassPopupBackProgress(
         show = show,
@@ -105,7 +109,7 @@ fun BoxScope.GlassDropdownPopup(
             }
         }
     }
-    fun geometryProgress() = popupFractionWithBack(size, backProgress.value)
+    fun geometryProgress() = popupFractionWithBack(size.value, backProgress.value)
     fun positionProgress() = popupFractionWithBack(position, backProgress.value)
     fun fadeProgress() = fade * (1f - backProgress.value.coerceIn(0f, 1f))
     fun sharpnessProgress() = sharpness * (1f - backProgress.value.coerceIn(0f, 1f))

@@ -21,12 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
@@ -229,99 +231,103 @@ fun GlassTabRow(
         horizontalArrangement = Arrangement.spacedBy(tabGap),
     ) {
         tabs.forEachIndexed { position, label ->
-            val selected = position == index
-            val interactionSource = remember { MutableInteractionSource() }
-            val pressed by interactionSource.collectIsPressedAsState()
-            val target by animateColorAsState(
-                targetValue = if (selected) colors.selectedContainerColor else colors.containerColor,
-                animationSpec = GlassMotion.navContent(),
-                label = "glassTabContainer",
-            )
-            val container = if (selected) target else lerp(colors.restingContainerColor, target, ramp)
-            val content by animateColorAsState(
-                targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
-                animationSpec = GlassMotion.navContent(),
-                label = "glassTabContent",
-            )
-            val overlay by animateColorAsState(
-                targetValue = if (pressed) colors.pressedOverlayColor else Color.Transparent,
-                animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
-                label = "glassTabOverlay",
-            )
-            val rim by animateFloatAsState(
-                targetValue = if (selected) 0f else colors.restingStrokeAlpha,
-                animationSpec = GlassMotion.navContentFloat(),
-                label = "glassTabRim",
-            )
-            val restingRim = alpha * (1f - ramp) * rim
-            val materialSurface = if (resolvedBackdrop != null && underlayMaterial != null) {
-                Modifier
-                    .glassShadow(shape, shadow, alpha * ramp)
-                    .glassOnActionBar(
+            key(label) {
+                val selected = position == index
+                val interactionSource = remember { MutableInteractionSource() }
+                val pressed by interactionSource.collectIsPressedAsState()
+                val target = animateColorAsState(
+                    targetValue = if (selected) colors.selectedContainerColor else colors.containerColor,
+                    animationSpec = GlassMotion.navContent(),
+                    label = "glassTabContainer",
+                )
+                val content by animateColorAsState(
+                    targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
+                    animationSpec = GlassMotion.navContent(),
+                    label = "glassTabContent",
+                )
+                val overlay = animateColorAsState(
+                    targetValue = if (pressed) colors.pressedOverlayColor else Color.Transparent,
+                    animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
+                    label = "glassTabOverlay",
+                )
+                val rim = animateFloatAsState(
+                    targetValue = if (selected) 0f else colors.restingStrokeAlpha,
+                    animationSpec = GlassMotion.navContentFloat(),
+                    label = "glassTabRim",
+                )
+
+                fun containerColor(): Color {
+                    val settled = target.value
+                    return if (selected) settled else lerp(colors.restingContainerColor, settled, ramp)
+                }
+                val materialSurface = if (resolvedBackdrop != null && underlayMaterial != null) {
+                    Modifier
+                        .glassShadow(shape, shadow, alpha * ramp)
+                        .glassOnActionBar(
+                            backdrop = resolvedBackdrop,
+                            shape = shape,
+                            style = style,
+                            alpha = alpha * ramp,
+                            material = resolvedMaterial,
+                            underlayMaterial = underlayMaterial,
+                            stroke = stroke,
+                        )
+                } else {
+                    Modifier.glassPanel(
                         backdrop = resolvedBackdrop,
                         shape = shape,
                         style = style,
                         alpha = alpha * ramp,
                         material = resolvedMaterial,
-                        underlayMaterial = underlayMaterial,
                         stroke = stroke,
+                        shadow = shadow,
+                        shading = false,
                     )
-            } else {
-                Modifier.glassPanel(
-                    backdrop = resolvedBackdrop,
-                    shape = shape,
-                    style = style,
-                    alpha = alpha * ramp,
-                    material = resolvedMaterial,
-                    stroke = stroke,
-                    shadow = shadow,
-                    shading = false,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .then(materialSurface)
-                    .background(container)
-                    .background(overlay)
-                    .then(
-                        if (restingRim > 0.001f) {
-                            Modifier.drawWithContent {
-                                drawContent()
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .then(materialSurface)
+                        .drawBehind {
+                            drawRect(containerColor())
+                            drawRect(overlay.value)
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            val restingRim = alpha * (1f - ramp) * rim.value
+                            if (restingRim > 0.001f) {
                                 if (stroke != null) {
                                     drawGlassStroke(shape, layoutDirection, stroke, restingRim)
                                 }
-                                drawGlassRim(shape, layoutDirection, style, container, restingRim)
+                                drawGlassRim(shape, layoutDirection, style, containerColor(), restingRim)
                             }
+                        }
+                        .selectable(
+                            selected = selected,
+                            role = Role.Tab,
+                            interactionSource = interactionSource,
+                            indication = null,
+                        ) { onSelect(position) }
+                        .padding(
+                            horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
+                            vertical = GlassTabRowDefaults.TabPaddingVertical,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = label,
+                        style = if (selected) {
+                            MiuixTheme.textStyles.subtitle
                         } else {
-                            Modifier
+                            MiuixTheme.textStyles.body2
                         },
+                        color = content,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    .selectable(
-                        selected = selected,
-                        role = Role.Tab,
-                        interactionSource = interactionSource,
-                        indication = null,
-                    ) { onSelect(position) }
-                    .padding(
-                        horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
-                        vertical = GlassTabRowDefaults.TabPaddingVertical,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label,
-                    style = if (selected) {
-                        MiuixTheme.textStyles.subtitle
-                    } else {
-                        MiuixTheme.textStyles.body2
-                    },
-                    color = content,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                }
             }
         }
     }
@@ -512,38 +518,40 @@ fun GlassSegmentedTabRow(
             horizontalArrangement = Arrangement.spacedBy(GlassSegmentedTabRowDefaults.TabGap),
         ) {
             tabs.forEachIndexed { position, label ->
-                val selected = position == index
-                val content by animateColorAsState(
-                    targetValue = if (selected) selectedContentColor else contentColor,
-                    animationSpec = GlassMotion.navContent(),
-                    label = "glassSegmentedTabContent",
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(indicatorShape)
-                        .selectable(
-                            selected = selected,
-                            role = Role.Tab,
-                            interactionSource = null,
-                            indication = null,
-                        ) { onSelect(position) }
-                        .padding(horizontal = GlassSegmentedTabRowDefaults.TabPaddingHorizontal),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = label,
-                        style = if (selected) {
-                            MiuixTheme.textStyles.subtitle
-                        } else {
-                            MiuixTheme.textStyles.body2
-                        },
-                        color = content,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                key(label) {
+                    val selected = position == index
+                    val content by animateColorAsState(
+                        targetValue = if (selected) selectedContentColor else contentColor,
+                        animationSpec = GlassMotion.navContent(),
+                        label = "glassSegmentedTabContent",
                     )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(indicatorShape)
+                            .selectable(
+                                selected = selected,
+                                role = Role.Tab,
+                                interactionSource = null,
+                                indication = null,
+                            ) { onSelect(position) }
+                            .padding(horizontal = GlassSegmentedTabRowDefaults.TabPaddingHorizontal),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label,
+                            style = if (selected) {
+                                MiuixTheme.textStyles.subtitle
+                            } else {
+                                MiuixTheme.textStyles.body2
+                            },
+                            color = content,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }

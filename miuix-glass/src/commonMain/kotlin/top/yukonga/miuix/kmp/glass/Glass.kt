@@ -141,8 +141,14 @@ fun Modifier.glassShadow(
     shape: GlassShape,
     shadow: GlassShadow? = GlassShadows.Regular,
     alpha: Float = 1f,
+): Modifier = glassShadow(shape, shadow) { alpha }
+
+internal fun Modifier.glassShadow(
+    shape: GlassShape,
+    shadow: GlassShadow?,
+    alpha: () -> Float,
 ): Modifier = if (shadow == null) {
     this
 } else {
-    this.drawBehind { drawGlassShadow(shape, layoutDirection, shadow, alpha) }
+    this.drawBehind { drawGlassShadow(shape, layoutDirection, shadow, alpha()) }
 }

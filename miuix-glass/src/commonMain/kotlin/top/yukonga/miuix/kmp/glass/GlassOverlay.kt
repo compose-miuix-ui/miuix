@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
@@ -73,12 +75,14 @@ fun GlassDialog(
     shadow: GlassShadow? = GlassShadows.ExtraHigh,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val scrim by animateFloatAsState(
+    val scrim = animateFloatAsState(
         targetValue = if (visible) scrimAlpha else 0f,
         animationSpec = if (visible) GlassMotion.dialogEnter() else GlassMotion.dialogExit(),
         label = "glassDialogScrim",
     )
-    val active = visible || scrim > 0.001f
+    val active by remember(visible, scrim) {
+        derivedStateOf { visible || scrim.value > 0.001f }
+    }
     rememberGlassPopupBackProgress(
         show = visible,
         active = active,
@@ -94,7 +98,7 @@ fun GlassDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(scrimColor.copy(alpha = scrim))
+                .drawBehind { drawRect(scrimColor.copy(alpha = scrim.value)) }
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,

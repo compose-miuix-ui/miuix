@@ -191,7 +191,7 @@ fun GlassPage(padding: PaddingValues) {
     val secondaryBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
-    val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior)
+    val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
     val contentUnderTopBar by remember {
         derivedStateOf { listState.canScrollBackward }
     }

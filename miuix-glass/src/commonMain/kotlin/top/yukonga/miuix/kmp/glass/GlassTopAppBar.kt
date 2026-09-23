@@ -18,12 +18,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -76,13 +79,19 @@ object GlassTopAppBarDefaults {
      *   which is what a bar over content that does not scroll wants.
      */
     @Composable
-    fun collapseRamp(scrollBehavior: ScrollBehavior?): Float {
+    fun collapseRamp(scrollBehavior: ScrollBehavior?): State<Float> {
         val density = LocalDensity.current
         val startPx = with(density) { RampStart.toPx() }
         val rampPx = with(density) { RampDistance.toPx() }
-        return scrollBehavior?.state?.let {
-            ((-it.contentOffset - startPx) / rampPx).coerceIn(0f, 1f)
-        } ?: 1f
+        return remember(scrollBehavior, startPx, rampPx) {
+            if (scrollBehavior == null) {
+                mutableFloatStateOf(1f)
+            } else {
+                derivedStateOf {
+                    ((-scrollBehavior.state.contentOffset - startPx) / rampPx).coerceIn(0f, 1f)
+                }
+            }
+        }
     }
 
     /** The traditional fill used when backdrop material is unavailable. */
@@ -146,7 +155,7 @@ internal data class GlassTopAppBarContext(
     val underlayMaterial: GlassMaterial?,
     val floating: Boolean,
     val alpha: Float,
-    val shadowAlpha: Float,
+    val ramp: State<Float>,
     val materialProgress: State<Float>,
     val keepMaterial: Boolean,
     val style: GlassStyle,
@@ -215,31 +224,36 @@ fun GlassTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
-) = GlassTopAppBar(
-    title = title,
-    isContentScrolled = scrollBehavior?.state?.let { it.contentOffset < 0f } ?: true,
-    modifier = modifier,
-    backdrop = backdrop,
-    largeTitle = largeTitle,
-    subtitle = subtitle,
-    scrollBehavior = scrollBehavior,
-    bandBrush = bandBrush,
-    bandOverhang = bandOverhang,
-    largeTitleBlurRadius = largeTitleBlurRadius,
-    style = style,
-    alpha = alpha,
-    buttonSize = buttonSize,
-    buttonShape = buttonShape,
-    fill = fill,
-    stroke = stroke,
-    buttonShadow = buttonShadow,
-    defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-    contentModifier = contentModifier,
-    titleAlpha = titleAlpha,
-    navigationIcon = navigationIcon,
-    actions = actions,
-    bottomContent = bottomContent,
-)
+) {
+    val isContentScrolled by remember(scrollBehavior) {
+        derivedStateOf { scrollBehavior?.state?.let { it.contentOffset < 0f } ?: true }
+    }
+    GlassTopAppBar(
+        title = title,
+        isContentScrolled = isContentScrolled,
+        modifier = modifier,
+        backdrop = backdrop,
+        largeTitle = largeTitle,
+        subtitle = subtitle,
+        scrollBehavior = scrollBehavior,
+        bandBrush = bandBrush,
+        bandOverhang = bandOverhang,
+        largeTitleBlurRadius = largeTitleBlurRadius,
+        style = style,
+        alpha = alpha,
+        buttonSize = buttonSize,
+        buttonShape = buttonShape,
+        fill = fill,
+        stroke = stroke,
+        buttonShadow = buttonShadow,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        contentModifier = contentModifier,
+        titleAlpha = titleAlpha,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        bottomContent = bottomContent,
+    )
+}
 
 /**
  * A glass top bar with an explicit page-overlap state.
@@ -287,7 +301,9 @@ fun GlassTopAppBar(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
     ) { if (it) 1f else 0f }
-    val keepMaterial = floating || materialProgress.value > 0f
+    val keepMaterial by remember(floating, materialProgress) {
+        derivedStateOf { floating || materialProgress.value > 0f }
+    }
     val baseMaterial = GlassTopAppBarDefaults.buttonMaterial()
     val material = if (keepMaterial && backdrop != null) {
         baseMaterial.copy(blurRadius = GlassTopAppBarDefaults.nestedMaterialBlurRadius())
@@ -316,7 +332,7 @@ fun GlassTopAppBar(
                 underlayMaterial = underlayMaterial,
                 floating = floating,
                 alpha = alpha,
-                shadowAlpha = ramp * alpha,
+                ramp = ramp,
                 materialProgress = materialProgress,
                 keepMaterial = keepMaterial,
                 style = style,
@@ -382,11 +398,13 @@ fun GlassIconButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val topBarContext = LocalGlassTopAppBarContext.current
+    val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
+    val topBarRamp = topBarContext?.ramp
     GlassButtonSurface(
         backdrop = topBarContext?.backdrop ?: backdrop,
         floating = topBarContext?.floating ?: (surfaceAlpha > 0.01f),
-        surfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f),
-        shadowAlpha = surfaceAlpha * (topBarContext?.shadowAlpha ?: 1f),
+        surfaceAlpha = resolvedSurfaceAlpha,
+        shadowAlpha = { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) },
         style = style,
         material = topBarContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
         underlayMaterial = topBarContext?.underlayMaterial,
@@ -416,7 +434,7 @@ private fun GlassButtonSurface(
     backdrop: Backdrop?,
     floating: Boolean,
     surfaceAlpha: Float,
-    shadowAlpha: Float,
+    shadowAlpha: () -> Float,
     style: GlassStyle,
     material: GlassMaterial,
     underlayMaterial: GlassMaterial?,
@@ -447,22 +465,29 @@ private fun GlassButtonSurface(
             if (active) 1f else 0f
         }
     }
-    val keepMaterial = sharedKeepMaterial ?: (floating || progress.value > 0f)
+    val ownKeepMaterial by remember(floating, progress) {
+        derivedStateOf { floating || progress.value > 0f }
+    }
+    val keepMaterial = sharedKeepMaterial ?: ownKeepMaterial
     val opacity = surfaceAlpha.coerceIn(0f, 1f)
+    val anchorSurface = remember(backdrop, style, material, underlayMaterial, stroke, fill) {
+        GlassAnchorSurface(backdrop, style, material, underlayMaterial, stroke, fill)
+    }
     SideEffect {
-        popupAnchor?.surface = GlassAnchorSurface(backdrop, style, material, underlayMaterial, stroke, fill)
-        popupAnchor?.surfaceProgress = progress
-        popupAnchor?.surfaceOpacity = opacity
-        popupAnchor?.surfaceFloating = floating
+        val anchor = popupAnchor ?: return@SideEffect
+        anchor.surface = anchorSurface
+        anchor.surfaceProgress = progress
+        anchor.surfaceOpacity = opacity
+        anchor.surfaceFloating = floating
     }
     val pressTransition = updateTransition(targetState = pressed, label = "glassTopBarButtonPress")
-    val contentAlpha by pressTransition.animateFloat(
+    val contentAlpha = pressTransition.animateFloat(
         transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
         label = "glassTopBarButtonContentAlpha",
     ) { down ->
         if (down) GlassTopAppBarDefaults.PressedContentAlpha else 1f
     }
-    val overlayAlpha by pressTransition.animateFloat(
+    val overlayAlpha = pressTransition.animateFloat(
         transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
         label = "glassTopBarButtonOverlayAlpha",
     ) { down ->
@@ -531,10 +556,12 @@ private fun GlassButtonSurface(
             modifier = Modifier
                 .matchParentSize()
                 .clip(shape)
-                .background(pressedOverlay.copy(alpha = pressedOverlay.alpha * overlayAlpha.coerceIn(0f, 1f))),
+                .drawBehind {
+                    drawRect(pressedOverlay.copy(alpha = pressedOverlay.alpha * overlayAlpha.value.coerceIn(0f, 1f)))
+                },
         )
         Box(
-            modifier = Modifier.graphicsLayer { alpha = contentAlpha.coerceIn(0f, 1f) },
+            modifier = Modifier.graphicsLayer { alpha = contentAlpha.value.coerceIn(0f, 1f) },
             contentAlignment = Alignment.Center,
         ) {
             content()
