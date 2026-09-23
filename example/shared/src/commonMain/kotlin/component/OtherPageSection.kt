@@ -23,11 +23,6 @@ fun LazyListScope.otherPageSection() {
                 .padding(horizontal = 12.dp),
         ) {
             ArrowPreference(
-                title = "Glass Components",
-                summary = "Bars, tabs, popup and dialog on glass",
-                onClick = { navigator.push(Route.Glass) },
-            )
-            ArrowPreference(
                 title = "PullToRefresh Test",
                 summary = "Navigate to a PullToRefresh Page",
                 onClick = {
