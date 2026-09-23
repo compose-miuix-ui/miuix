@@ -309,12 +309,6 @@ private class PagerPageGestureNode(
     private val takeoverNode = delegate(PagerPageTakeoverNode(motion, childMotion))
 
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
-        if (pass == PointerEventPass.Initial) {
-            val down = pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() }
-            // A touch that lands during a page transition stops it where it is, whichever node
-            // ends up owning the gesture, the same way a scrollable stops when it is touched.
-            if (down != null) motion.onTouchDown()
-        }
         // Takeover must own the complete pointer cycle. Feeding that same cycle to the Foundation
         // drag node would start a second UserInput mutation; reset the Foundation node when a
         // takeover claims a down so its previous child-owned cycle cannot remain latched.
@@ -543,8 +537,6 @@ private class PagerPageMotion(
     private var settleJob: Job? = null
     private var takeoverJob: Job? = null
     private var takeoverChannel: Channel<Float>? = null
-    private var interruptJob: Job? = null
-
     var childMotion: PagerChildMotionConnection? = null
     lateinit var nodeScope: CoroutineScope
     var minimumVelocity: Float = 0f
@@ -554,20 +546,6 @@ private class PagerPageMotion(
     fun update(state: PagerState, intercepted: (() -> Unit)?) {
         pagerState = state
         onIntercepted = intercepted
-    }
-
-    /**
-     * Stops a running page transition without moving the pager, so that a gesture the page's child
-     * owns leaves the pager where the transition had reached.
-     */
-    fun onTouchDown() {
-        if (!pagerState.isScrollInProgress) return
-        settleJob?.cancel()
-        settleJob = null
-        interruptJob?.cancel()
-        interruptJob = nodeScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            pagerState.scroll(MutatePriority.UserInput) { /* preempt only */ }
-        }
     }
 
     fun onDragStarted() {
