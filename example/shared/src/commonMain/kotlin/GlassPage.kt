@@ -185,7 +185,7 @@ fun GlassPage(padding: PaddingValues) {
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
     val isInDark = isInDarkTheme()
     val navigationBarInset = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
-    val bottomBarMargin = if (navigationBarInset < 24.dp) 24.dp else navigationBarInset + 8.dp
+    val bottomBarMargin = maxOf(24.dp, navigationBarInset + 8.dp, padding.calculateBottomPadding() + 8.dp)
     val backdrop = rememberLayerBackdrop()
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
@@ -298,6 +298,37 @@ fun GlassPage(padding: PaddingValues) {
                 modifier = Modifier
                     .fillMaxSize()
                     .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
+                bottomBar = {
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin)
+                            .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        GlassNavigationBar(
+                            items = NavItems,
+                            selectedIndex = navIndex,
+                            onSelect = { navIndex = it },
+                            backdrop = backdrop,
+                            modifier = Modifier.layout { measurable, constraints ->
+                                // BottomNavigator's four/five-item rule accounts for overlapping items
+                                // before deciding whether to use the compact 344dp wide-screen bar.
+                                val available = constraints.maxWidth + (10.dp * (NavItems.size - 1) - 6.dp).roundToPx()
+                                val width = if (constraints.hasBoundedWidth && available > 400.dp.roundToPx()) {
+                                    constraints.constrainWidth(344.dp.roundToPx())
+                                } else {
+                                    constraints.maxWidth
+                                }
+                                val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                                layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+                            },
+                            style = style,
+                            alpha = alpha,
+                            stroke = stroke,
+                        )
+                    }
+                },
                 topBar = {
                     GlassTopAppBar(
                         title = "Glass",
@@ -392,7 +423,7 @@ fun GlassPage(padding: PaddingValues) {
                                 .nestedScroll(scrollBehavior.nestedScrollConnection),
                             contentPadding = PaddingValues(
                                 top = innerPadding.calculateTopPadding(),
-                                bottom = 160.dp + padding.calculateBottomPadding(),
+                                bottom = innerPadding.calculateBottomPadding(),
                             ),
                         ) {
                             item(key = "glass-tabs") {
@@ -515,78 +546,49 @@ fun GlassPage(padding: PaddingValues) {
                             }
                         }
                     }
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        GlassNavigationBar(
-                            items = NavItems,
-                            selectedIndex = navIndex,
-                            onSelect = { navIndex = it },
-                            backdrop = backdrop,
-                            modifier = Modifier.layout { measurable, constraints ->
-                                // BottomNavigator's four/five-item rule accounts for overlapping items
-                                // before deciding whether to use the compact 344dp wide-screen bar.
-                                val available = constraints.maxWidth + (10.dp * (NavItems.size - 1) - 6.dp).roundToPx()
-                                val width = if (constraints.hasBoundedWidth && available > 400.dp.roundToPx()) {
-                                    constraints.constrainWidth(344.dp.roundToPx())
-                                } else {
-                                    constraints.maxWidth
-                                }
-                                val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
-                                layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-                            },
-                            style = style,
-                            alpha = alpha,
-                            stroke = stroke,
-                        )
-                    }
+                }
+            }
 
-                    GlassDialog(
-                        visible = overlayIndex == OVERLAY_DIALOG,
-                        onDismissRequest = {
+            GlassDialog(
+                visible = overlayIndex == OVERLAY_DIALOG,
+                onDismissRequest = {
+                    overlayIndex = OVERLAY_NONE
+                    visible = false
+                },
+                backdrop = backdrop,
+                scrimAlpha = if (isInDark) {
+                    GlassOverlayDefaults.ScrimAlphaDark
+                } else {
+                    GlassOverlayDefaults.ScrimAlphaLight
+                },
+                style = style,
+                alpha = alpha,
+                stroke = stroke,
+            ) {
+                Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
+                Text(
+                    text = "The dialog wears the material the page is set to.",
+                    style = MiuixTheme.textStyles.body2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 18.dp),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    TextButton(
+                        text = "Cancel",
+                        onClick = {
                             overlayIndex = OVERLAY_NONE
                             visible = false
                         },
-                        backdrop = backdrop,
-                        scrimAlpha = if (isInDark) {
-                            GlassOverlayDefaults.ScrimAlphaDark
-                        } else {
-                            GlassOverlayDefaults.ScrimAlphaLight
+                        modifier = Modifier.weight(1f),
+                    )
+                    Button(
+                        onClick = {
+                            overlayIndex = OVERLAY_NONE
+                            visible = false
                         },
-                        style = style,
-                        alpha = alpha,
-                        stroke = stroke,
+                        modifier = Modifier.weight(1f),
                     ) {
-                        Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-                        Text(
-                            text = "The dialog wears the material the page is set to.",
-                            style = MiuixTheme.textStyles.body2,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 18.dp),
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TextButton(
-                                text = "Cancel",
-                                onClick = {
-                                    overlayIndex = OVERLAY_NONE
-                                    visible = false
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
-                            Button(
-                                onClick = {
-                                    overlayIndex = OVERLAY_NONE
-                                    visible = false
-                                },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text(text = "Confirm", style = MiuixTheme.textStyles.button)
-                            }
-                        }
+                        Text(text = "Confirm", style = MiuixTheme.textStyles.button)
                     }
                 }
             }
