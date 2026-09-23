@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -42,12 +41,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import component.basicComponentSection
-import component.buttonSection
-import component.cardSection
-import component.sliderSection
-import component.switchSection
-import component.textFieldSection
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Button
@@ -57,7 +50,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
@@ -66,7 +58,6 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDropdownPopup
 import top.yukonga.miuix.kmp.glass.GlassIconButton
-import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassOverlayDefaults
@@ -90,7 +81,6 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
@@ -158,6 +148,10 @@ private val NavItems: List<GlassNavigationItem> = listOf(
 )
 
 private val OverlayNames = listOf("None", "Popup", "Dialog")
+
+private val TabPlacements = listOf("Top bar", "List")
+private const val TABS_IN_TOP_BAR = 0
+private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
@@ -205,6 +199,7 @@ fun GlassPage(padding: PaddingValues) {
     var smoothing by remember { mutableFloatStateOf(1f) }
     var alpha by remember { mutableFloatStateOf(1f) }
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
+    var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var navIndex by remember { mutableIntStateOf(0) }
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
@@ -232,6 +227,43 @@ fun GlassPage(padding: PaddingValues) {
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
     val shape = GlassShape(cornerRadius.dp, smoothing)
+    val tabsInTopBar = tabPlacement == TABS_IN_TOP_BAR
+    val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
+        Column(modifier = tabModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            GlassTabRow(
+                tabs = listOf("Sound", "Haptics"),
+                selectedIndex = primaryTab,
+                onSelect = { primaryTab = it },
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = 1f,
+                stroke = stroke,
+            )
+            GlassTabRow(
+                tabs = listOf("Home", "Widget", "Theme", "Paper"),
+                selectedIndex = neutralTab,
+                onSelect = { neutralTab = it },
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                stroke = stroke,
+                height = GlassTabRowDefaults.NeutralHeight,
+                colors = GlassTabRowDefaults.neutralColors(),
+            )
+            GlassSegmentedTabRow(
+                tabs = listOf("Privacy", "Security"),
+                selectedIndex = joinedTab,
+                onSelect = { joinedTab = it },
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                stroke = stroke,
+            )
+        }
+    }
 
     if (!isRuntimeShaderSupported()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -305,43 +337,11 @@ fun GlassPage(padding: PaddingValues) {
                             }
                         },
                         bottomContent = {
-                            Column(
-                                modifier = Modifier
-                                    .padding(horizontal = horizontalPadding).padding(bottom = 6.dp)
-                                    .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                GlassTabRow(
-                                    tabs = listOf("Sound", "Haptics"),
-                                    selectedIndex = primaryTab,
-                                    onSelect = { primaryTab = it },
-                                    backdrop = backdrop,
-                                    style = style,
-                                    alpha = alpha,
-                                    surfaceAlpha = 1f,
-                                    stroke = stroke,
-                                )
-                                GlassTabRow(
-                                    tabs = listOf("Home", "Widget", "Theme", "Paper"),
-                                    selectedIndex = neutralTab,
-                                    onSelect = { neutralTab = it },
-                                    backdrop = backdrop,
-                                    style = style,
-                                    alpha = alpha,
-                                    surfaceAlpha = tabSurfaceAlpha,
-                                    stroke = stroke,
-                                    height = GlassTabRowDefaults.NeutralHeight,
-                                    colors = GlassTabRowDefaults.neutralColors(),
-                                )
-                                GlassSegmentedTabRow(
-                                    tabs = listOf("Privacy", "Security"),
-                                    selectedIndex = joinedTab,
-                                    onSelect = { joinedTab = it },
-                                    backdrop = backdrop,
-                                    style = style,
-                                    alpha = alpha,
-                                    surfaceAlpha = tabSurfaceAlpha,
-                                    stroke = stroke,
+                            if (tabsInTopBar) {
+                                tabRows(
+                                    Modifier
+                                        .padding(horizontal = horizontalPadding).padding(bottom = 6.dp)
+                                        .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
                                 )
                             }
                         },
@@ -368,6 +368,11 @@ fun GlassPage(padding: PaddingValues) {
                                 bottom = 160.dp + padding.calculateBottomPadding(),
                             ),
                         ) {
+                            item(key = "glass-tabs") {
+                                if (!tabsInTopBar) {
+                                    tabRows(Modifier.padding(horizontal = horizontalPadding).padding(top = 12.dp))
+                                }
+                            }
                             item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
                             item(key = "glass-dropdown") {
                                 Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
@@ -406,11 +411,17 @@ fun GlassPage(padding: PaddingValues) {
                                     }
                                 }
                             }
-                            switchSection()
-                            buttonSection()
-                            cardSection()
-                            sliderSection()
-                            textFieldSection()
+                            item(key = "layout-title") { SmallTitle(text = "Layout") }
+                            item(key = "layout") {
+                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                    OverlayDropdownPreference(
+                                        title = "Tab row",
+                                        items = TabPlacements,
+                                        selectedIndex = tabPlacement,
+                                        onSelectedIndexChange = { tabPlacement = it },
+                                    )
+                                }
+                            }
                             item(key = "controls-title") { SmallTitle(text = "Material") }
                             item(key = "controls") {
                                 Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
@@ -467,6 +478,17 @@ fun GlassPage(padding: PaddingValues) {
                                         value = alpha,
                                         onValueChange = { alpha = it },
                                     )
+                                }
+                            }
+                            item(key = "content-title") { SmallTitle(text = "Content") }
+                            item(key = "content") {
+                                Card(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                                    repeat(8) { index ->
+                                        BasicComponent(
+                                            title = "Content ${index + 1}",
+                                            summary = "Scrolls under the top bar",
+                                        )
+                                    }
                                 }
                             }
                         }
