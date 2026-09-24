@@ -143,7 +143,7 @@ internal fun GlassSearchOverlay(
                     false
                 }
             }
-            .graphicsLayer { alpha = if (expanded) 1f else 0f }
+            .graphicsLayer { alpha = progress.value }
             .windowInsetsPadding(WindowInsets.statusBars)
             .imePadding(),
     ) {
