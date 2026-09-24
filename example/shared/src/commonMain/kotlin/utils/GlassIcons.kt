@@ -70,7 +70,7 @@ import top.yukonga.miuix.kmp.icon.glass.Lock
 import top.yukonga.miuix.kmp.icon.glass.MapAlbum
 import top.yukonga.miuix.kmp.icon.glass.MarkAllAsRead
 import top.yukonga.miuix.kmp.icon.glass.MarkAsRead
-import top.yukonga.miuix.kmp.icon.glass.MarkRasUnread
+import top.yukonga.miuix.kmp.icon.glass.MarkAsUnread
 import top.yukonga.miuix.kmp.icon.glass.MemoryFunction
 import top.yukonga.miuix.kmp.icon.glass.Menu
 import top.yukonga.miuix.kmp.icon.glass.Merge
@@ -250,7 +250,7 @@ val MiuixIcons.Glass.All: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.MapAlbum,
             MiuixIcons.Glass.Light.MarkAllAsRead,
             MiuixIcons.Glass.Light.MarkAsRead,
-            MiuixIcons.Glass.Light.MarkRasUnread,
+            MiuixIcons.Glass.Light.MarkAsUnread,
             MiuixIcons.Glass.Light.MemoryFunction,
             MiuixIcons.Glass.Light.Menu,
             MiuixIcons.Glass.Light.Merge,
@@ -428,7 +428,7 @@ val MiuixIcons.Glass.All: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.MapAlbum,
             MiuixIcons.Glass.Normal.MarkAllAsRead,
             MiuixIcons.Glass.Normal.MarkAsRead,
-            MiuixIcons.Glass.Normal.MarkRasUnread,
+            MiuixIcons.Glass.Normal.MarkAsUnread,
             MiuixIcons.Glass.Normal.MemoryFunction,
             MiuixIcons.Glass.Normal.Menu,
             MiuixIcons.Glass.Normal.Merge,
@@ -606,7 +606,7 @@ val MiuixIcons.Glass.All: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.MapAlbum,
             MiuixIcons.Glass.Regular.MarkAllAsRead,
             MiuixIcons.Glass.Regular.MarkAsRead,
-            MiuixIcons.Glass.Regular.MarkRasUnread,
+            MiuixIcons.Glass.Regular.MarkAsUnread,
             MiuixIcons.Glass.Regular.MemoryFunction,
             MiuixIcons.Glass.Regular.Menu,
             MiuixIcons.Glass.Regular.Merge,
@@ -784,7 +784,7 @@ val MiuixIcons.Glass.All: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.MapAlbum,
             MiuixIcons.Glass.Medium.MarkAllAsRead,
             MiuixIcons.Glass.Medium.MarkAsRead,
-            MiuixIcons.Glass.Medium.MarkRasUnread,
+            MiuixIcons.Glass.Medium.MarkAsUnread,
             MiuixIcons.Glass.Medium.MemoryFunction,
             MiuixIcons.Glass.Medium.Menu,
             MiuixIcons.Glass.Medium.Merge,
@@ -962,7 +962,7 @@ val MiuixIcons.Glass.All: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.MapAlbum,
             MiuixIcons.Glass.Demibold.MarkAllAsRead,
             MiuixIcons.Glass.Demibold.MarkAsRead,
-            MiuixIcons.Glass.Demibold.MarkRasUnread,
+            MiuixIcons.Glass.Demibold.MarkAsUnread,
             MiuixIcons.Glass.Demibold.MemoryFunction,
             MiuixIcons.Glass.Demibold.Menu,
             MiuixIcons.Glass.Demibold.Merge,

@@ -12,14 +12,14 @@ import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 
-val MiuixIcons.Glass.MarkRasUnread: ImageVector
-    get() = MiuixIcons.Glass.Regular.MarkRasUnread
+val MiuixIcons.Glass.MarkAsUnread: ImageVector
+    get() = MiuixIcons.Glass.Regular.MarkAsUnread
 
-val MiuixIcons.Glass.Light.MarkRasUnread: ImageVector
+val MiuixIcons.Glass.Light.MarkAsUnread: ImageVector
     get() {
-        if (_markRasUnreadLight != null) return _markRasUnreadLight!!
-        _markRasUnreadLight = ImageVector.Builder(
-            name = "MarkRasUnread.Glass.Light",
+        if (_markAsUnreadLight != null) return _markAsUnreadLight!!
+        _markAsUnreadLight = ImageVector.Builder(
+            name = "MarkAsUnread.Glass.Light",
             defaultWidth = 24.0f.dp,
             defaultHeight = 24.0f.dp,
             viewportWidth = 1142.9f,
@@ -118,16 +118,16 @@ val MiuixIcons.Glass.Light.MarkRasUnread: ImageVector
                 )
             }
         }.build()
-        return _markRasUnreadLight!!
+        return _markAsUnreadLight!!
     }
 
-private var _markRasUnreadLight: ImageVector? = null
+private var _markAsUnreadLight: ImageVector? = null
 
-val MiuixIcons.Glass.Normal.MarkRasUnread: ImageVector
+val MiuixIcons.Glass.Normal.MarkAsUnread: ImageVector
     get() {
-        if (_markRasUnreadNormal != null) return _markRasUnreadNormal!!
-        _markRasUnreadNormal = ImageVector.Builder(
-            name = "MarkRasUnread.Glass.Normal",
+        if (_markAsUnreadNormal != null) return _markAsUnreadNormal!!
+        _markAsUnreadNormal = ImageVector.Builder(
+            name = "MarkAsUnread.Glass.Normal",
             defaultWidth = 24.0f.dp,
             defaultHeight = 24.0f.dp,
             viewportWidth = 1142.9f,
@@ -226,16 +226,16 @@ val MiuixIcons.Glass.Normal.MarkRasUnread: ImageVector
                 )
             }
         }.build()
-        return _markRasUnreadNormal!!
+        return _markAsUnreadNormal!!
     }
 
-private var _markRasUnreadNormal: ImageVector? = null
+private var _markAsUnreadNormal: ImageVector? = null
 
-val MiuixIcons.Glass.Regular.MarkRasUnread: ImageVector
+val MiuixIcons.Glass.Regular.MarkAsUnread: ImageVector
     get() {
-        if (_markRasUnreadRegular != null) return _markRasUnreadRegular!!
-        _markRasUnreadRegular = ImageVector.Builder(
-            name = "MarkRasUnread.Glass.Regular",
+        if (_markAsUnreadRegular != null) return _markAsUnreadRegular!!
+        _markAsUnreadRegular = ImageVector.Builder(
+            name = "MarkAsUnread.Glass.Regular",
             defaultWidth = 24.0f.dp,
             defaultHeight = 24.0f.dp,
             viewportWidth = 1142.9f,
@@ -334,16 +334,16 @@ val MiuixIcons.Glass.Regular.MarkRasUnread: ImageVector
                 )
             }
         }.build()
-        return _markRasUnreadRegular!!
+        return _markAsUnreadRegular!!
     }
 
-private var _markRasUnreadRegular: ImageVector? = null
+private var _markAsUnreadRegular: ImageVector? = null
 
-val MiuixIcons.Glass.Medium.MarkRasUnread: ImageVector
+val MiuixIcons.Glass.Medium.MarkAsUnread: ImageVector
     get() {
-        if (_markRasUnreadMedium != null) return _markRasUnreadMedium!!
-        _markRasUnreadMedium = ImageVector.Builder(
-            name = "MarkRasUnread.Glass.Medium",
+        if (_markAsUnreadMedium != null) return _markAsUnreadMedium!!
+        _markAsUnreadMedium = ImageVector.Builder(
+            name = "MarkAsUnread.Glass.Medium",
             defaultWidth = 24.0f.dp,
             defaultHeight = 24.0f.dp,
             viewportWidth = 1142.9f,
@@ -442,16 +442,16 @@ val MiuixIcons.Glass.Medium.MarkRasUnread: ImageVector
                 )
             }
         }.build()
-        return _markRasUnreadMedium!!
+        return _markAsUnreadMedium!!
     }
 
-private var _markRasUnreadMedium: ImageVector? = null
+private var _markAsUnreadMedium: ImageVector? = null
 
-val MiuixIcons.Glass.Demibold.MarkRasUnread: ImageVector
+val MiuixIcons.Glass.Demibold.MarkAsUnread: ImageVector
     get() {
-        if (_markRasUnreadDemibold != null) return _markRasUnreadDemibold!!
-        _markRasUnreadDemibold = ImageVector.Builder(
-            name = "MarkRasUnread.Glass.Demibold",
+        if (_markAsUnreadDemibold != null) return _markAsUnreadDemibold!!
+        _markAsUnreadDemibold = ImageVector.Builder(
+            name = "MarkAsUnread.Glass.Demibold",
             defaultWidth = 24.0f.dp,
             defaultHeight = 24.0f.dp,
             viewportWidth = 1142.9f,
@@ -550,7 +550,7 @@ val MiuixIcons.Glass.Demibold.MarkRasUnread: ImageVector
                 )
             }
         }.build()
-        return _markRasUnreadDemibold!!
+        return _markAsUnreadDemibold!!
     }
 
-private var _markRasUnreadDemibold: ImageVector? = null
+private var _markAsUnreadDemibold: ImageVector? = null
