@@ -62,6 +62,7 @@ fun main(args: Array<String>) {
     // Map of BaseName -> Map<Style, RelativePath>
     val basicIconsMap = mutableMapOf<String, MutableMap<String, String>>()
     val extendedIconsMap = mutableMapOf<String, MutableMap<String, String>>()
+    val glassIconsMap = mutableMapOf<String, MutableMap<String, String>>()
 
     srcDirs.forEach { srcDir ->
         val src = File(srcDir)
@@ -260,24 +261,34 @@ fun main(args: Array<String>) {
                     val svg = buildSvg(paths, viewportWidth, viewportHeight, light, dark, preserveColors)
 
                     val relativeDir = file.relativeTo(src).parentFile
+                    val relativeDirPath = relativeDir.path.replace("\\", "/")
                     val outSubDir = File(dest, relativeDir.path)
                     outSubDir.mkdirs()
 
-                    File(outSubDir, "$iconName.svg").writeText(svg)
+                    // Glass vectors name themselves "Close.Glass.Light". Drop the family segment so
+                    // the table keys, and the SVG file names, match the other families.
+                    val isGlass = relativeDirPath == "glass" || relativeDirPath.startsWith("glass/")
+                    val iconBaseName = if (isGlass) iconName.replace(".Glass", "") else iconName
+
+                    File(outSubDir, "$iconBaseName.svg").writeText(svg)
                     count++
 
-                    val relativePath = File(relativeDir, "$iconName.svg").path.replace("\\", "/")
+                    val relativePath = File(relativeDir, "$iconBaseName.svg").path.replace("\\", "/")
 
                     val isBasic =
                         file.path.contains("basic${File.separator}") || file.path.contains("basic/") || file.path.contains("basic\\")
-                    val targetMap = if (isBasic) basicIconsMap else extendedIconsMap
+                    val targetMap = when {
+                        isGlass -> glassIconsMap
+                        isBasic -> basicIconsMap
+                        else -> extendedIconsMap
+                    }
 
-                    val matchedWeight = WEIGHT_NAMES.firstOrNull { iconName.endsWith(".$it") }
+                    val matchedWeight = WEIGHT_NAMES.firstOrNull { iconBaseName.endsWith(".$it") }
                     if (matchedWeight != null) {
-                        val simpleName = iconName.removeSuffix(".$matchedWeight")
+                        val simpleName = iconBaseName.removeSuffix(".$matchedWeight")
                         targetMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
-                    } else if (!iconName.contains(".")) {
-                        targetMap.getOrPut(iconName) { mutableMapOf() }["Regular"] = relativePath
+                    } else if (!iconBaseName.contains(".")) {
+                        targetMap.getOrPut(iconBaseName) { mutableMapOf() }["Regular"] = relativePath
                     }
                 }
             }
@@ -285,7 +296,7 @@ fun main(args: Array<String>) {
     }
 
     println("[iconGen] Generated $count SVG(s) into $dest")
-    if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty())) {
+    if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty() || glassIconsMap.isNotEmpty())) {
         val separator = "|" + "---|".repeat(WEIGHT_NAMES.size + 1)
         fun generateTable(map: Map<String, Map<String, String>>, nameHeader: String): String {
             val sb = StringBuilder()
@@ -307,6 +318,7 @@ fun main(args: Array<String>) {
         if (docFilePath != null || docFilePathZh == null) {
             val basicTable = generateTable(basicIconsMap, "Icon Name")
             val extendedTable = generateTable(extendedIconsMap, "Icon Name")
+            val glassTable = generateTable(glassIconsMap, "Icon Name")
 
             val content = StringBuilder()
             content.append("### Basic Icons\n\n")
@@ -315,6 +327,11 @@ fun main(args: Array<String>) {
             content.append("### Extended Icons\n\n")
             content.append("Extended icons include a wide variety of icons for different use cases. Below is the complete list:\n\n")
             content.append(extendedTable).append("\n")
+            if (glassIconsMap.isNotEmpty()) {
+                content.append("### Glass Icons\n\n")
+                content.append("Glass icons ship in the separate `miuix-glass-icons` artifact. They are reached through `MiuixIcons.Glass` and, like the other families, come in five weights. Below is the complete list:\n\n")
+                content.append(glassTable).append("\n")
+            }
 
             if (docFilePath != null) {
                 updateDocFile(File(docFilePath), content.toString(), "### Basic Icons")
@@ -329,6 +346,7 @@ fun main(args: Array<String>) {
         if (docFilePathZh != null) {
             val basicTable = generateTable(basicIconsMap, "图标名称")
             val extendedTable = generateTable(extendedIconsMap, "图标名称")
+            val glassTable = generateTable(glassIconsMap, "图标名称")
 
             val content = StringBuilder()
             content.append("### Basic（基础图标）\n\n")
@@ -337,6 +355,11 @@ fun main(args: Array<String>) {
             content.append("### Extended (扩展图标)\n\n")
             content.append("扩展图标包含更多场景下的图标。以下是完整的列表：\n\n")
             content.append(extendedTable).append("\n")
+            if (glassIconsMap.isNotEmpty()) {
+                content.append("### Glass 图标\n\n")
+                content.append("Glass 图标位于独立的 `miuix-glass-icons` 构件中，通过 `MiuixIcons.Glass` 访问，与其他图标族一样提供五种字重。以下是完整的列表：\n\n")
+                content.append(glassTable).append("\n")
+            }
 
             updateDocFile(File(docFilePathZh), content.toString(), "### Basic（基础图标）")
         }

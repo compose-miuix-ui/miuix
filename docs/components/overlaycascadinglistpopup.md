@@ -183,3 +183,35 @@ OverlayCascadingListPopup(
 | TopEnd      | Aligns the popup to the top-end of the anchor.      |
 | BottomStart | Aligns the popup to the bottom-start of the anchor. |
 | BottomEnd   | Aligns the popup to the bottom-end of the anchor.   |
+
+## Glass Secondary Menus
+
+The optional `miuix-glass` module provides `GlassSecondaryPopup`, which opens a submenu beside a `GlassTransformPopup` that is already showing. It is a separate glass API and does not change `OverlayCascadingListPopup` or its `surface` hook.
+
+Rows accept clicks while the panel opens, and stop accepting them the moment dismissal is requested.
+
+```kotlin
+var anchorBounds by remember { mutableStateOf(Rect.Zero) }
+
+GlassPopupItem(
+    text = "Sort by",
+    onClick = { submenu = true },
+    modifier = Modifier.onGloballyPositioned { anchorBounds = it.boundsInRoot() },
+)
+
+GlassSecondaryPopup(
+    show = submenu,
+    onDismissRequest = { submenu = false },
+    anchorBounds = anchorBounds,
+    backdrop = backdrop,
+    onDismissFinished = { submenuPresent = false },
+) {
+    GlassPopupItem(text = "Name", onClick = { submenu = false })
+}
+```
+
+Keep the popup composed while it collapses, and freeze the trigger bounds before opening — resume capturing them only after `onDismissFinished`, not as soon as `show` becomes false. Pass the primary popup's `materialAnchor` to share its blur, colour treatment and bloom stroke. An explicit `backdrop` takes precedence, and `null` falls back to the anchor's backdrop. Secondary visibility must depend on the primary being open, never the other way round.
+
+`GlassPopup(secondary = true)` delegates to the same geometry, but does not inherit the anchor's material. Back and outside taps request a collapse; predictive back previews the secondary collapsing first and, with no secondary open, the primary transforming back into its button. The host has to provide a navigation event dispatcher for back gestures.
+
+See [Glass Material](/guide/glass) for setup and the rest of the glass components.

@@ -48,6 +48,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
@@ -90,7 +91,9 @@ fun IconsPage(
     var searchOffsetY by remember { mutableStateOf(0.dp) }
 
     // Icon data
-    val allIcons = remember { MiuixIcons.All }
+    val iconFamilies = remember { listOf("Original", "Glass") }
+    var glass by remember { mutableStateOf(false) }
+    val allIcons = remember(glass) { if (glass) MiuixIcons.Glass.All else MiuixIcons.All }
     val regularIcons = remember(allIcons) { allIcons["Regular"] ?: emptyList() }
     val weightVariants: List<Pair<String, List<ImageVector>>> = remember(allIcons) {
         listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
@@ -237,6 +240,17 @@ fun IconsPage(
                 ),
                 contentPadding = contentPadding,
             ) {
+                item(key = "iconFamily") {
+                    TabRow(
+                        tabs = iconFamilies,
+                        selectedTabIndex = if (glass) 1 else 0,
+                        onTabSelected = { index ->
+                            glass = index == 1
+                            expandedIndex = -1
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                    )
+                }
                 item(key = "iconsHeader") {
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(

@@ -75,3 +75,18 @@ The Scaffold component provides a suitable container for cross-platform popup wi
 | [WindowIconCascadingDropdownMenu](../components/windowiconcascadingdropdownmenu) | Window-level icon-button cascading two-level menu                                        | Toolbar actions with submenus          |
 | [WindowBottomSheet](../components/windowbottomsheet) | Window-level bottom sheet component                                                      | Bottom drawer, additional options      |
 | [WindowDialog](../components/windowdialog)           | Window-level dialog component                                                            | Prompts, action confirmation           |
+
+## Glass Components
+
+The optional `miuix-glass` module provides the glass material and the components built on it. It requires Android API 33 or higher; see the [Glass Material](../guide/glass) guide for setup, the material tokens and worked examples.
+
+| Component                                              | Description                       | Common Usage                   |
+| ------------------------------------------------------ | --------------------------------- | ------------------------------ |
+| [GlassTopAppBar](../guide/glass#glasstopappbar)        | Glass top bar                     | Page title, primary actions    |
+| [GlassNavigationBar](../guide/glass#glassnavigationbar) | Glass bottom navigation bar       | Main page switching            |
+| [GlassTabRow](../guide/glass#glasstabrow)              | Glass tab row, plus a segmented row | Content category browsing    |
+| [GlassDialog](../guide/glass#glassdialog)              | Dialog on glass, over a scrim     | Prompts, action confirmation   |
+| [GlassTransformPopup](../guide/glass#popups)           | Menu that grows out of its button | Toolbar actions, overflow menu |
+| [GlassPopup](../guide/glass#popups)                    | Anchored glass menu               | Option selection, feature list |
+| [GlassSecondaryPopup](../guide/glass#popups)           | Submenu beside an open glass menu | Cascading menus                |
+| [GlassDropdownPopup](../guide/glass#popups)            | List-shaped glass dropdown        | Option selection, feature list |

@@ -342,3 +342,21 @@ Scaffold(
     }
 }
 ```
+
+## Glass Navigation Bar
+
+The optional `miuix-glass` module provides `GlassNavigationBar`, a glass bottom bar.
+
+```kotlin
+GlassNavigationBar(
+    items = items,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    modifier = Modifier.padding(horizontal = 24.dp),
+)
+```
+
+`items` is a `List<GlassNavigationItem>` — an icon plus a caption each. `onSelect` fires on press rather than being deferred to release.
+
+`height` is a minimum rather than a fixed size, and outer placement stays with the caller: the component does not add system-bar insets itself. None of this changes `NavigationBar` or `FloatingNavigationBar`. See [Glass Material](/guide/glass) for setup and the rest of the glass components.
