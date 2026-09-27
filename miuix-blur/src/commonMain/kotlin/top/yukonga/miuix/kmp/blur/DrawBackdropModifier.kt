@@ -256,6 +256,8 @@ private class DrawBackdropNode(
     ObserverModifierNode,
     CompositionLocalConsumerModifierNode {
 
+    override val shouldAutoInvalidate: Boolean = false
+
     private val shapeProvider: ShapeProvider = ShapeProvider(shape)
 
     fun updateShape(shape: () -> Shape) {

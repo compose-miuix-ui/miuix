@@ -39,6 +39,8 @@ internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 
+private const val PROGRESSIVE_MAX_DOWNSCALE_EXP = 4
+
 /**
  * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
  * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps
@@ -92,11 +94,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
     uniform float2 in_gradAxis;
     uniform float2 in_gradBand;
     uniform float in_curve;
-    uniform float in_noise;
 $maskUniforms
-    float progRand(float2 co) {
-        return fract(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
-    }
 
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
@@ -112,8 +110,7 @@ $maskWeight
             return s * half(mw);
         }
         float inv2s2 = -1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
-        float2 jitter = ((progRand(xy) - 0.5) * in_noise) * in_step;
-        half4 color = child.eval(clamp(xy + jitter, float2(0.5), in_maxCoord));
+        half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
         float total = 1.0;
         for (int j = 0; j < ${maxTap / 2}; j++) {
             float a = float(2 * j + 1);
@@ -124,8 +121,8 @@ $maskWeight
             float wb = exp(b * b * inv2s2) * clamp(radius - b + 1.0, 0.0, 1.0);
             float wsum = wa + wb;
             float2 o = ((a * wa + b * wb) / wsum) * in_step;
-            color += (child.eval(clamp(xy + o + jitter, float2(0.5), in_maxCoord)) +
-                child.eval(clamp(xy - o + jitter, float2(0.5), in_maxCoord))) * half(wsum);
+            color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
+                child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * half(wsum);
             total += 2.0 * wsum;
         }
         color = color / half(max(total, 0.0001));
@@ -157,6 +154,34 @@ internal fun progressiveLoopTapBound(maxRadius: Float): Int {
     val needed = kotlin.math.ceil(maxRadius).toInt()
     return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
 }
+
+private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
+    Array(PROGRESSIVE_MAX_DOWNSCALE_EXP + 1) { exp ->
+        Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
+            if (tap > 0 && tap % 4 == 0) {
+                "LMPGaussLoop_${if (axis == 0) 'H' else 'V'}_d${1 shl exp}_t$tap"
+            } else {
+                ""
+            }
+        }
+    }
+}
+
+internal fun progressiveLoopShaderKey(axis: Int, downScale: Int, tap: Int): String = PROGRESSIVE_LOOP_KEYS[axis][downScale.countTrailingZeroBits()][tap]
+
+private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
+    Array(2) { masked ->
+        Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
+            if (tap > 0 && tap % 4 == 0) {
+                "ProgSharpLoop_${if (axis == 0) 'H' else 'V'}_t$tap${if (masked == 1) "_m" else ""}"
+            } else {
+                ""
+            }
+        }
+    }
+}
+
+internal fun progressiveSharpShaderKey(axis: Int, tap: Int, masked: Boolean): String = PROGRESSIVE_SHARP_KEYS[axis][if (masked) 1 else 0][tap]
 
 /** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
 internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
