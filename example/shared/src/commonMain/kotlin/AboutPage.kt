@@ -122,7 +122,7 @@ fun AboutPage(
             val titleColor = MiuixTheme.colorScheme.onSurface.copy(
                 alpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f),
             )
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 SmallTopAppBar(
                     title = "About",
                     scrollBehavior = topAppBarScrollBehavior,

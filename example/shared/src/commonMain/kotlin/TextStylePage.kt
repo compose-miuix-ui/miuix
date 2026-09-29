@@ -86,7 +86,7 @@ fun TextStylePage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Text Style",
                     showTopAppBar = appState.showTopAppBar,

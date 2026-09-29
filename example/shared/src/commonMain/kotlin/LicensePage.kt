@@ -80,7 +80,7 @@ fun LicensePage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Third Party Licenses",
                     showTopAppBar = appState.showTopAppBar,

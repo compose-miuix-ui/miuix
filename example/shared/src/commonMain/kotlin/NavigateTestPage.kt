@@ -68,7 +68,7 @@ fun NavTestPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Navigate Test $index",
                     showTopAppBar = appState.showTopAppBar,

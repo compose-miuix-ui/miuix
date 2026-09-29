@@ -71,7 +71,7 @@ fun SettingsPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Settings",
                     showTopAppBar = appState.showTopAppBar,

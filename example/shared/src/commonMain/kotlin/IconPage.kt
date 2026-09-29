@@ -141,7 +141,7 @@ fun IconsPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 searchStatus.TopAppBarAnim(backgroundColor = barColor) {
                     AdaptiveTopAppBar(
                         title = "Icon",
