@@ -44,3 +44,7 @@
 ### HyperIsland
 
 [HyperIsland](https://github.com/1812z/HyperIsland) 是一个增强小米 HyperOS 超级岛的 Xposed 模块。
+
+### YumeBox
+
+[YumeBox](https://github.com/YumeYucca/YumeBox) 是一个基于 Mihomo 开源的 Android 客户端。
