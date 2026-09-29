@@ -38,6 +38,7 @@ export default defineConfig({
                         { text: "Navigation Support", link: "/guide/miuix-nav" },
                         { text: "Blur Effects", link: "/guide/blur" },
                         { text: "Squircle Shapes", link: "/guide/squircle" },
+                        { text: "Glass Material", link: "/guide/glass" },
                         { text: "Platform Support", link: "/guide/multiplatform" },
                         { text: "Best Practices", link: "/guide/best-practices" },
                     ],

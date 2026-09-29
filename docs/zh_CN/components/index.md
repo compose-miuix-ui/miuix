@@ -75,3 +75,18 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Over
 | [WindowIconCascadingDropdownMenu](../components/windowiconcascadingdropdownmenu) | 基于 IconButton 的窗口级二级级联动作菜单组件                                       | 含子菜单的工具栏动作   |
 | [WindowBottomSheet](../components/windowbottomsheet) | 窗口级底部抽屉组件                                                                 | 底部抽屉、附加选项     |
 | [WindowDialog](../components/windowdialog)           | 窗口级对话框组件                                                                   | 提示、确认操作         |
+
+## 柔光玻璃组件
+
+可选的 `miuix-glass` 模块提供柔光玻璃材质及其上层组件，需要 Android API 33 或更高。安装方式、材质令牌与完整示例见 [柔光玻璃](../guide/glass) 指南。
+
+| 组件                                                   | 说明                     | 常见用途             |
+| ------------------------------------------------------ | ------------------------ | -------------------- |
+| [GlassTopAppBar](../guide/glass#glasstopappbar)        | 柔光玻璃顶栏                 | 页面标题、主要操作   |
+| [GlassNavigationBar](../guide/glass#glassnavigationbar) | 柔光玻璃底部导航栏          | 主页面切换           |
+| [GlassTabRow](../guide/glass#glasstabrow)              | 柔光玻璃标签栏与相连变体     | 内容分类浏览         |
+| [GlassDialog](../guide/glass#glassdialog)              | 遮罩之上的柔光玻璃对话框     | 提示、确认操作       |
+| [GlassTransformPopup](../guide/glass#弹窗)           | 从按钮生长出的菜单       | 工具栏动作、更多菜单 |
+| [GlassPopup](../guide/glass#弹窗)                    | 锚定式柔光玻璃菜单           | 选项选择、功能列表   |
+| [GlassSecondaryPopup](../guide/glass#弹窗)           | 一级柔光玻璃菜单旁的二级菜单 | 级联菜单             |
+| [GlassDropdownPopup](../guide/glass#弹窗)            | 列表形态的柔光玻璃下拉菜单   | 选项选择、功能列表   |
