@@ -80,6 +80,9 @@ class GlassPopupAnchor {
     /** The control's contents' bounds, in the root's coordinate space. */
     internal var contentBounds: Rect by mutableStateOf(Rect.Zero)
 
+    /** The dropdown's value and chevron bounds, in the root's coordinate space. */
+    internal var dropdownValueBounds: Rect? by mutableStateOf(null)
+
     /** The control's own corner radius. The panel's radius starts here and relaxes to its own. */
     internal var cornerRadius: Dp by mutableStateOf(0.dp)
 
@@ -181,7 +184,7 @@ fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.
 fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.containerBounds = it.boundsInRoot() }
 
 /**
- * Fades a row's displayed value out while its list of choices is open.
+ * Reports a row's value bounds for dropdown positioning and fades it out while its choices are open.
  *
  * Put this on the value and the chevron beside it, not on the row: the list about to open *is*
  * that value's choices, so the value stands down as it opens and returns only once the list has
@@ -190,9 +193,11 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
  * @param anchor The anchor the row reported itself to.
  */
 @Stable
-fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this.graphicsLayer {
-    alpha = maxOf(anchor.valueAlpha, anchor.dropdownValueAlpha)
-}
+fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
+    .onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInRoot() }
+    .graphicsLayer {
+        alpha = maxOf(anchor.valueAlpha, anchor.dropdownValueAlpha)
+    }
 
 /**
  * A menu that grows out of the control it belongs to, on glass.

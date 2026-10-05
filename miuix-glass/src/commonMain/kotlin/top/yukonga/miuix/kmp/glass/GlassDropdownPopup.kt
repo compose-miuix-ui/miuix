@@ -47,7 +47,8 @@ object GlassDropdownDefaults {
  *   configured bloom stroke and Compose shadow.
  * @param modifier The modifier applied to the panel.
  * @param anchor Optional handle for the row. Given one, the panel stands the row's displayed value
- *   down while it is open — see [glassPopupAnchorValue].
+ *   down while it is open and aligns horizontally to the value reported by
+ *   [glassPopupAnchorValue]. Without a reported value, placement uses [anchorBounds].
  * @param sizing How wide and tall the panel may be.
  * @param visuals What its surface is made of.
  * @param cornerRadius Corner radius the panel settles at.
@@ -137,6 +138,7 @@ fun BoxScope.GlassDropdownPopup(
         frame = { end, page ->
             arcFrame(
                 anchorBounds,
+                anchor?.dropdownValueBounds,
                 end,
                 page,
                 sizing.safeMargin.toPx(),
@@ -166,6 +168,7 @@ fun BoxScope.GlassDropdownPopup(
  */
 private fun arcFrame(
     anchor: Rect,
+    valueAnchor: Rect?,
     end: Size,
     page: Size,
     margin: Float,
@@ -175,7 +178,7 @@ private fun arcFrame(
     endRadius: Dp,
     layoutDirection: LayoutDirection,
 ): GlassPopupFrame {
-    val placement = placeGlassPopup(anchor, end, margin, page, layoutDirection)
+    val placement = placeGlassDropdownPopup(anchor, valueAnchor, end, margin, page, layoutDirection)
     val startWidth = end.width * GlassMotion.ARC_START_WIDTH
     val startHeight = startWidth * GlassMotion.ARC_START_RATIO
     val width = startWidth + (end.width - startWidth) * sizeFraction
@@ -183,10 +186,11 @@ private fun arcFrame(
     val ratio = GlassMotion.ARC_START_RATIO + (endRatio - GlassMotion.ARC_START_RATIO) * sizeFraction
     val height = ratio * width
 
-    val startCenterX = if (layoutDirection == LayoutDirection.Ltr) {
-        placement.rect.right - startWidth / 2f
-    } else {
+    val alignLeft = valueAnchor?.let { it.center.x <= page.width / 2f } ?: (layoutDirection == LayoutDirection.Rtl)
+    val startCenterX = if (alignLeft) {
         placement.rect.left + startWidth / 2f
+    } else {
+        placement.rect.right - startWidth / 2f
     }
     val startCenterY = if (placement.alignTop) {
         placement.rect.top + startHeight / 2f
@@ -204,5 +208,28 @@ private fun arcFrame(
             bottom = centerY + height / 2f,
         ),
         cornerRadius = radius,
+    )
+}
+
+internal fun placeGlassDropdownPopup(
+    row: Rect,
+    valueAnchor: Rect?,
+    size: Size,
+    margin: Float,
+    page: Size,
+    direction: LayoutDirection = LayoutDirection.Ltr,
+): GlassPopupPlacement {
+    if (valueAnchor == null) return placeGlassPopup(row, size, margin, page, direction)
+    // Spinner chooses the horizontal edge from the value's position in the container.
+    val wantedLeft = if (valueAnchor.center.x <= page.width / 2f) {
+        valueAnchor.left
+    } else {
+        valueAnchor.right - size.width
+    }
+    val left = wantedLeft.coerceIn(margin, (page.width - size.width - margin).coerceAtLeast(margin))
+    val verticalPlacement = placeGlassPopup(row, size, margin, page, LayoutDirection.Ltr)
+    return GlassPopupPlacement(
+        rect = Rect(left, verticalPlacement.rect.top, left + size.width, verticalPlacement.rect.bottom),
+        alignTop = verticalPlacement.alignTop,
     )
 }
