@@ -3,6 +3,8 @@
 
 @file:Suppress("UnstableApiUsage")
 
+rootProject.name = "build-logic"
+
 pluginManagement {
     repositories {
         google {
