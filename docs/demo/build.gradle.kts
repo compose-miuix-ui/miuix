@@ -34,5 +34,5 @@ kotlin {
 }
 
 rootProject.plugins.withType<YarnPlugin> {
-    rootProject.the<YarnRootExtension>().lockFileDirectory = rootProject.file("docs/demo").resolve("kotlin-js-store")
+    rootProject.the<YarnRootExtension>().lockFileDirectoryProperty = rootProject.file("docs/demo").resolve("kotlin-js-store")
 }
