@@ -183,3 +183,35 @@ OverlayCascadingListPopup(
 | TopEnd      | 将弹窗对齐到锚点的顶部结束端 |
 | BottomStart | 将弹窗对齐到锚点的底部起始端 |
 | BottomEnd   | 将弹窗对齐到锚点的底部结束端 |
+
+## 柔光玻璃二级菜单
+
+可选模块 `miuix-glass` 提供 `GlassSecondaryPopup`，用于在已展开的 `GlassTransformPopup` 旁打开二级菜单。这是独立的柔光玻璃 API，不改变 `OverlayCascadingListPopup` 或其 `surface` 接口。
+
+打开动画期间允许行点击，一旦请求关闭便立即禁止。
+
+```kotlin
+var anchorBounds by remember { mutableStateOf(Rect.Zero) }
+
+GlassPopupItem(
+    text = "Sort by",
+    onClick = { submenu = true },
+    modifier = Modifier.onGloballyPositioned { anchorBounds = it.boundsInRoot() },
+)
+
+GlassSecondaryPopup(
+    show = submenu,
+    onDismissRequest = { submenu = false },
+    anchorBounds = anchorBounds,
+    backdrop = backdrop,
+    onDismissFinished = { submenuPresent = false },
+) {
+    GlassPopupItem(text = "Name", onClick = { submenu = false })
+}
+```
+
+收起期间请保持组件调用；展开前冻结触发行坐标，并且只有在 `onDismissFinished` 之后才恢复采集，而不是 `show` 刚变为 false 时。传入一级弹窗的 `materialAnchor` 可共享模糊、混色与高光描边。显式传入的 `backdrop` 优先，传 `null` 时回退到锚点背景。二级菜单的显示必须以一级菜单已打开为前提，不能反过来。
+
+`GlassPopup(secondary = true)` 会转入同一套几何实现，但不继承锚点材质。返回键与外部点击请求收起；预测返回会优先预览二级菜单收起，没有二级菜单时则预览一级菜单缩回按钮。宿主需要提供导航事件分发器才能接收返回手势。
+
+安装方式及其余柔光玻璃组件见 [柔光玻璃](/zh_CN/guide/glass)。

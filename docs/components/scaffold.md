@@ -59,7 +59,7 @@ Scaffold(
 | floatingActionButtonPosition | FabPosition                         | Position to display the floating action button                           | FabPosition.End                   | No       |
 | floatingToolbar              | @Composable () -> Unit              | Floating toolbar                                                         | {}                                | No       |
 | floatingToolbarPosition      | ToolbarPosition                     | Position to display the floating toolbar                                 | ToolbarPosition.BottomCenter      | No       |
-| snackbarHost                 | @Composable () -> Unit              | Container for displaying Snackbar, Miuix does not provide this component | {}                                | No       |
+| snackbarHost                 | @Composable () -> Unit              | Container for displaying Snackbar, usually a SnackbarHost                | {}                                | No       |
 | popupHost                    | @Composable () -> Unit              | Container for displaying popup windows                                   | \{ MiuixPopupHost() }             | No       |
 | containerColor               | Color                               | Background color of the scaffold                                         | MiuixTheme.colorScheme.surface | No       |
 | contentWindowInsets          | WindowInsets                        | Window insets passed to the content                                      | WindowInsets.systemBars.union(WindowInsets.displayCutout) | No       |
@@ -107,18 +107,19 @@ Scaffold(
         )
     },
     bottomBar = {
-        val items = listOf(
-            NavigationItem("Home", MiuixIcons.VerticalSplit),
-            NavigationItem("Settings", MiuixIcons.Settings)
-        )
-        var selectedItem by remember { mutableStateOf(0) }
-        NavigationBar(
-            items = items,
-            selected = selectedItem,
-            onClick = { index ->
-                selectedItem = index
-            },
-        )
+        val pages = listOf("Home", "Settings")
+        val icons = listOf(MiuixIcons.VerticalSplit, MiuixIcons.Settings)
+        var selectedIndex by remember { mutableStateOf(0) }
+        NavigationBar {
+            pages.forEachIndexed { index, label ->
+                NavigationBarItem(
+                    selected = selectedIndex == index,
+                    onClick = { selectedIndex = index },
+                    icon = icons[index],
+                    label = label,
+                )
+            }
+        }
     },
     content = { paddingValues ->
         // The content area needs to consider padding
@@ -169,14 +170,14 @@ Scaffold(
 )
 ```
 
-### Page Layout with Snackbar (requires Material components)
+### Page Layout with Snackbar
 
 ```kotlin
 val snackbarHostState = remember { SnackbarHostState() }
 val scope = rememberCoroutineScope()
 
 Scaffold(
-    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    snackbarHost = { SnackbarHost(state = snackbarHostState) },
     topBar = {
         SmallTopAppBar(title = "Title")
     },

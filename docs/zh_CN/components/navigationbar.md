@@ -342,3 +342,21 @@ Scaffold(
     }
 }
 ```
+
+## 柔光玻璃底栏
+
+可选模块 `miuix-glass` 提供 `GlassNavigationBar`，即柔光玻璃底栏。
+
+```kotlin
+GlassNavigationBar(
+    items = items,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    modifier = Modifier.padding(horizontal = 24.dp),
+)
+```
+
+`items` 是 `List<GlassNavigationItem>`，每项包含一个图标和一行标签。`onSelect` 在按下时触发，而不是推迟到松手。
+
+`height` 为最小高度而非固定高度；外部位置由调用方控制，组件不会自行添加系统栏 inset。以上默认值不影响 `NavigationBar` 与 `FloatingNavigationBar`。安装方式及其余柔光玻璃组件见 [柔光玻璃](/zh_CN/guide/glass)。
