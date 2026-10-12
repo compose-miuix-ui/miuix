@@ -47,6 +47,7 @@ export default defineConfig({
                         { text: "导航支持", link: "/zh_CN/guide/miuix-nav" },
                         { text: "模糊效果", link: "/zh_CN/guide/blur" },
                         { text: "平滑圆角", link: "/zh_CN/guide/squircle" },
+                        { text: "柔光玻璃", link: "/zh_CN/guide/glass" },
                         { text: "平台支持", link: "/zh_CN/guide/multiplatform" },
                         { text: "最佳实践", link: "/zh_CN/guide/best-practices" },
                     ],

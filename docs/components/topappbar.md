@@ -13,6 +13,7 @@ This component is typically used in conjunction with the `Scaffold` component to
 ```kotlin
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 ```
@@ -169,6 +170,31 @@ TopAppBar(
 | actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
 | bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area | {} | No |
 
+### BlurTopAppBar Properties
+
+`BlurTopAppBar` is `TopAppBar` with a large title that blurs as it collapses. `largeTitleBlurRadius` is required.
+
+| Property Name              | Type                            | Description                                             | Default Value                   | Required |
+| -------------------------- | ------------------------------- | ------------------------------------------------------- | ------------------------------- | -------- |
+| title                      | String                          | Top bar title                                           | -                               | Yes      |
+| largeTitleBlurRadius       | Dp                              | Blur radius of the large title once it has fully faded   | -                               | Yes      |
+| modifier                   | Modifier                        | Modifier applied to the top bar                         | Modifier                        | No       |
+| color                      | Color                           | Top bar background color                                | MiuixTheme.colorScheme.surface  | No       |
+| titleColor                 | Color                           | Color of the collapsed small title text                 | MiuixTheme.colorScheme.onSurface | No       |
+| largeTitle                 | String                          | Large title text                                        | title                           | No       |
+| largeTitleColor            | Color                           | Color of the expanded large title text                  | MiuixTheme.colorScheme.onSurface | No       |
+| subtitle                   | String                          | Subtitle text displayed below the title bar             | ""                              | No       |
+| subtitleColor              | Color                           | Color of the subtitle text                              | MiuixTheme.colorScheme.onSurfaceVariantSummary | No       |
+| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area            | {}                              | No       |
+| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area             | {}                              | No       |
+| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior                        | null                            | No       |
+| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding          | true                            | No       |
+| titlePadding               | Dp                              | Horizontal content padding                              | TopAppBarDefaults.TitlePadding  | No       |
+| navigationIconPadding      | Dp                              | Start padding of the navigation icon                    | TopAppBarDefaults.NavigationIconPadding | No       |
+| actionIconPadding          | Dp                              | End padding of the action icons                         | TopAppBarDefaults.ActionIconPadding | No       |
+| titleAlpha                 | () -> Float                     | Draw-phase opacity applied to both title containers     | { 1f }                          | No       |
+| bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area   | {}                              | No       |
+
 ### TopAppBarDefaults Object
 
 The TopAppBarDefaults object provides default values for TopAppBar and SmallTopAppBar components.
@@ -273,3 +299,59 @@ Box(modifier = Modifier.fillMaxSize()) {
     }
 }
 ```
+
+## Glass Top Bar
+
+The optional `miuix-glass` module provides `GlassTopAppBar`, a top bar built on the glass material. See [Glass Material](/guide/glass) for setup.
+
+### Material visibility
+
+By default `GlassTopAppBar` derives the material's visibility from `scrollBehavior.state.contentOffset`. A second overload takes the page's own "content has left the top" signal instead, which is more accurate when the large title is already collapsed:
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    isContentScrolled = listState.canScrollBackward,
+    backdrop = backdrop,
+    scrollBehavior = scrollBehavior,
+    navigationIcon = {
+        GlassIconButton(onClick = { navigator.pop() }) {
+            Icon(
+                imageVector = MiuixIcons.Glass.ChevronBackward,
+                contentDescription = "Back",
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    },
+)
+```
+
+`navigationIcon` and `actions` render their content directly — the bar does not wrap them in a second glass surface. Use `GlassIconButton` in either slot so the buttons inherit the bar's material and get matching press feedback. A transforming popup anchored to a `GlassIconButton` inherits the button's material and its current surface opacity automatically.
+
+### Search transitions
+
+`GlassTopAppBar` provides `contentModifier: Modifier = Modifier` for transforming its foreground independently of the background band. Keep search-mode scale, alpha and blur on `contentModifier`; `modifier` transforms the entire bar, including the band that masks scrolling content.
+
+```kotlin
+GlassTopAppBar(
+    title = "Glass",
+    contentModifier = Modifier.graphicsLayer { alpha = foregroundAlpha.value },
+    titleAlpha = { titleOpacity.value },
+)
+```
+
+`titleAlpha` is read during drawing and multiplies the collapse opacity of the compact and large title containers, subtitle included.
+
+### BlurTopAppBar
+
+`BlurTopAppBar` is the `miuix-ui` function `GlassTopAppBar` builds on, and is public in its own right: `TopAppBar` with a large title that blurs out as it collapses.
+
+```kotlin
+BlurTopAppBar(
+    title = "Glass",
+    largeTitleBlurRadius = 8.dp,
+    scrollBehavior = scrollBehavior,
+)
+```
+
+`largeTitleBlurRadius` is how far the title blurs at the point it has fully faded, so `0.dp` reproduces `TopAppBar`. It also accepts `titleAlpha`.

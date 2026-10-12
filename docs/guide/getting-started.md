@@ -27,15 +27,17 @@ repositories {
 
 Miuix is composed of several modules that can be used independently:
 
-| Module             | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| `miuix-ui`         | Core UI component library                            |
-| `miuix-preference` | Preference components library, depends on `miuix-ui` |
-| `miuix-icons`      | Extended icon library, can be used independently     |
-| `miuix-blur`       | Blur effect library, can be used independently       |
-| `miuix-squircle`   | Squircle shapes library, can be used independently   |
-| `miuix-nav`        | Navigation library, can be used independently        |
-| `miuix-shader`     | Low-level runtime shader / render effect abstraction |
+| Module              | Description                                           |
+| ------------------- | ----------------------------------------------------- |
+| `miuix-ui`          | Core UI component library                             |
+| `miuix-preference`  | Preference components library, depends on `miuix-ui`  |
+| `miuix-icons`       | Extended icon library, can be used independently      |
+| `miuix-glass-icons` | Glass icon library, can be used independently        |
+| `miuix-blur`        | Blur effect library, can be used independently        |
+| `miuix-squircle`    | Squircle shapes library, can be used independently    |
+| `miuix-glass`       | Glass material and components, requires minSdk 33    |
+| `miuix-nav`         | Navigation library, can be used independently         |
+| `miuix-shader`      | Low-level runtime shader / render effect abstraction  |
 
 - For Compose Multiplatform projects:
 
@@ -54,6 +56,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
+            // Optional: Add miuix-glass for the glass material and components (requires minSdk 33)
+            implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
+            // Optional: Add miuix-glass-icons for the Glass icon set
+            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
         }
     }
 }
@@ -74,6 +80,10 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
     // Optional: Add miuix-nav for navigation
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")
+    // Optional: Add miuix-glass for the glass material and components (requires minSdk 33)
+    implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
+    // Optional: Add miuix-glass-icons for the Glass icon set
+    implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
 }
 ```
 
@@ -84,43 +94,57 @@ implementation("top.yukonga.miuix.kmp:miuix-ui-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-ui-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-ui-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-ui-js:<version>")
 // Optional: Add miuix-preference
 implementation("top.yukonga.miuix.kmp:miuix-preference-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-preference-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-preference-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-js:<version>")
 // Optional: Add miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-blur-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-blur-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-js:<version>")
 // Optional: Add miuix-nav
 implementation("top.yukonga.miuix.kmp:miuix-nav-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-nav-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-nav-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-nav-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-nav-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-nav-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-nav-js:<version>")
 // Optional: Add miuix-icons
 implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
 // Optional: Add miuix-squircle
 implementation("top.yukonga.miuix.kmp:miuix-squircle-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-squircle-iossimulatorarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-squircle-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-squircle-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-squircle-wasmjs:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-squircle-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-squircle-js:<version>")
+// Optional: Add miuix-glass
+implementation("top.yukonga.miuix.kmp:miuix-glass-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-wasm-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-js:<version>")
+// Optional: Add miuix-glass-icons
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-wasm-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-glass-icons-js:<version>")
 ```
 
 ## Basic Usage

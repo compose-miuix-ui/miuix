@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.blur
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -11,6 +12,7 @@ import androidx.compose.ui.unit.Density
 /**
  * Defines how backdrop content is drawn behind a blurred surface.
  */
+@Stable
 interface Backdrop {
 
     /**
