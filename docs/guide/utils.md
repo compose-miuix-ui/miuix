@@ -59,6 +59,22 @@ Miuix provides easy-to-use overscroll effect modifiers for smoother and more nat
 
 The overscroll effect engages only during press or pan gestures (touch drag; trackpad pan on Android). Mouse wheel and keyboard scrolling pass through unchanged, as does desktop/macOS trackpad scrolling (delivered as wheel events) — none of them provide a release signal to settle the bounce. With a snap- or pager-style fling behavior, leftover wheel velocity can still produce a small edge bounce.
 
+### Touch Scrolling on Web
+
+When Compose should own touch scrolling and overscroll, set `touch-action: none` on the HTML container passed to `ComposeViewport`:
+
+```css
+#composeApp {
+    touch-action: none;
+}
+```
+
+Use your actual viewport container ID. Apply this rule before the first gesture; changing `touch-action` after a touch begins does not affect that gesture. The container's restriction also applies to the canvas that Compose creates inside it.
+
+At a list boundary, a drag can be consumed entirely by overscroll without moving the list. Allowing browser-native panning in the same area can cause the browser to take over and cancel the Compose gesture. This CSS rule keeps touch panning under Compose's control without disabling the overscroll effect or affecting mouse-wheel input.
+
+Scope the rule to the Compose container, not the entire page. Browser-native touch panning and pinch-to-zoom are disabled inside that container, so use it only where Compose owns the interaction. HTML areas outside the container can retain their normal browser gestures. Android and iOS native apps do not need this configuration.
+
 ### Vertical Overscroll
 
 ```kotlin
