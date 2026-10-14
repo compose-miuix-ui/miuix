@@ -21,6 +21,7 @@ fun MiuixCaptionButtonClose(
     enabled: Boolean = true,
     height: Dp = 32.dp,
     iconFontFamily: FontFamily? = null,
+    contentDescription: String? = "Close",
 ) {
     MiuixCaptionButton(
         onClick = onClick,
@@ -28,6 +29,7 @@ fun MiuixCaptionButtonClose(
         enabled = enabled,
         height = height,
         isClose = true,
+        contentDescription = contentDescription,
     ) { iconColor ->
         if (iconFontFamily != null) {
             Text(

@@ -26,12 +26,14 @@ fun MiuixCaptionButtonMaximize(
     enabled: Boolean = true,
     height: Dp = 32.dp,
     iconFontFamily: FontFamily? = null,
+    contentDescription: String? = if (maximized) "Restore" else "Maximize",
 ) {
     MiuixCaptionButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         height = height,
+        contentDescription = contentDescription,
     ) { iconColor ->
         if (iconFontFamily != null) {
             val glyph = if (maximized) {

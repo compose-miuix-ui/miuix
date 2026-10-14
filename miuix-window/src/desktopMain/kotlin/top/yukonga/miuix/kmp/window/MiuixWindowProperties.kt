@@ -4,25 +4,25 @@
 package top.yukonga.miuix.kmp.window
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
+import top.yukonga.miuix.kmp.window.platform.macos.MacOSWindowMetrics
 import java.awt.Window
 
 @Composable
 fun defaultCaptionBarHeight(): Dp = when {
-    DesktopOS.isMacOS() -> 52.dp
-    DesktopOS.isLinux() -> 32.dp
-    else -> 40.dp
+    DesktopOS.isMacOS() -> MacOSWindowMetrics.defaultCaptionBarHeight
+    else -> 32.dp
 }
 
 /**
  * Properties for configuring [MiuixWindow] and [MiuixDialogWindow].
  */
-@Immutable
+@Stable
 data class MiuixWindowProperties<T : Window>(
     val minSize: DpSize = DpSize.Zero,
     val onVisibleChange: (T, Boolean) -> Unit = { _, _ -> },

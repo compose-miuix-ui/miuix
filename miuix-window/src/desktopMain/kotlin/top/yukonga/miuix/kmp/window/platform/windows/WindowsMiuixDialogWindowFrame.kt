@@ -78,7 +78,7 @@ internal fun DialogWindowScope.WindowsMiuixDialogWindowFrame(
                     windowClientInsets.insets = windowInsets
                 },
                 onResizeEdgeChange = { edge ->
-                    properties.onResizeEdgeChange(window, edge)
+                    currentProperties.onResizeEdgeChange(window, edge)
                 },
             ).apply {
                 updateBorderAndShadow(true)

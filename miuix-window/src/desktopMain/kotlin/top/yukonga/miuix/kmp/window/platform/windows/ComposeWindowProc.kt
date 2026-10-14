@@ -229,8 +229,8 @@ internal class ComposeWindowProc(
                     updateMenuItemInfo(menu, menuItemInfo, SC_CLOSE, true)
                     user32.SetMenuDefaultItem(menu, WINT_MAX, false)
                     val lParamValue = lParam.toInt()
-                    val x = lParamValue and 0xFFFF
-                    val y = (lParamValue shr 16) and 0xFFFF
+                    val x = lParamValue.toShort().toInt()
+                    val y = (lParamValue shr 16).toShort().toInt()
                     val ret = user32.TrackPopupMenu(menu, TPM_RETURNCMD, x, y, 0, hwnd, null)
                     if (ret != 0) {
                         user32.PostMessage(

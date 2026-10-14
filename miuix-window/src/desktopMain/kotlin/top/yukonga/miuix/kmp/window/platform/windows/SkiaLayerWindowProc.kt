@@ -102,7 +102,8 @@ internal class SkiaLayerWindowProc(
                     HitTestResult.HTMAXBUTTON,
                     HitTestResult.HTCLOSE,
                     -> {
-                        User32Ex.INSTANCE.SendMessage(originalHwnd, WM_MOUSEMOVE, wParam, lParam)
+                        val clientParam = clientLParam(lParam)
+                        User32Ex.INSTANCE.SendMessage(originalHwnd, WM_MOUSEMOVE, WinDef.WPARAM(0L), clientParam)
                     }
 
                     else -> {}
@@ -111,17 +112,27 @@ internal class SkiaLayerWindowProc(
             }
 
             WM_NCLBUTTONDOWN -> {
-                User32Ex.INSTANCE.SendMessage(originalHwnd, WM_LBUTTONDOWN, wParam, lParam)
+                val clientParam = clientLParam(lParam)
+                User32Ex.INSTANCE.SendMessage(originalHwnd, WM_LBUTTONDOWN, WinDef.WPARAM(0x0001L), clientParam)
                 HitTestResult.HTNOWHERE.toLRESULT()
             }
 
             WM_NCLBUTTONUP -> {
-                User32Ex.INSTANCE.SendMessage(originalHwnd, WM_LBUTTONUP, wParam, lParam)
+                val clientParam = clientLParam(lParam)
+                User32Ex.INSTANCE.SendMessage(originalHwnd, WM_LBUTTONUP, WinDef.WPARAM(0L), clientParam)
                 HitTestResult.HTNOWHERE.toLRESULT()
             }
 
             else -> super.callback(hwnd, uMsg, wParam, lParam)
         }
+    }
+
+    private fun clientLParam(lParam: WinDef.LPARAM): WinDef.LPARAM {
+        val point = POINT(lParam.x, lParam.y)
+        User32Ex.INSTANCE.ScreenToClient(skiaLayerHwnd, point)
+        val clientX = point.x and 0xFFFF
+        val clientY = point.y and 0xFFFF
+        return WinDef.LPARAM(((clientY shl 16) or clientX).toLong())
     }
 }
 

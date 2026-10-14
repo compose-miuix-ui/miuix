@@ -23,6 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.FontLoadResult
@@ -69,6 +72,7 @@ fun MiuixCaptionButton(
     width: Dp = MiuixCaptionButtonWidth,
     height: Dp = 32.dp,
     isClose: Boolean = false,
+    contentDescription: String? = null,
     content: @Composable (iconColor: Color) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -99,8 +103,15 @@ fun MiuixCaptionButton(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
+                role = Role.Button,
+                onClickLabel = contentDescription,
                 onClick = onClick,
-            ),
+            )
+            .semantics {
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
         content(iconColor)

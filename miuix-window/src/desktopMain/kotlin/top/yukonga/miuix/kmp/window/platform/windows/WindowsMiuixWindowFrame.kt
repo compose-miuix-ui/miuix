@@ -49,14 +49,15 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
     properties: MiuixWindowProperties<ComposeWindow>,
     content: @Composable FrameWindowScope.() -> Unit,
 ) {
+    val windowState = LocalWindowState.current
+
     val currentResizable by rememberUpdatedState(resizable)
     val currentProperties by rememberUpdatedState(properties)
+    val currentIsFullscreen by rememberUpdatedState(windowState.placement == WindowPlacement.Fullscreen)
 
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
-    val windowState = LocalWindowState.current
-    val isFullscreen = windowState.placement == WindowPlacement.Fullscreen
-    val effectiveCaptionBarHeight = if (isFullscreen) 0.dp else properties.captionBarHeight
-    val effectiveButtonsWidth = if (isFullscreen || !properties.captionButtonsVisible) 0.dp else MiuixCaptionButtonWidth * 3f
+    val effectiveCaptionBarHeight = if (currentIsFullscreen) 0.dp else properties.captionBarHeight
+    val effectiveButtonsWidth = if (currentIsFullscreen || !properties.captionButtonsVisible) 0.dp else MiuixCaptionButtonWidth * 3f
     val iconFontFamily by rememberWindowsCaptionBarFontIconFamily()
     CompositionLocalProvider(
         LocalMiuixWindowInfo provides MiuixWindowInfo(
@@ -78,20 +79,20 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
                 window = window,
                 hitTest = { x, y ->
                     when {
-                        !isFullscreen &&
+                        !currentIsFullscreen &&
                             currentProperties.captionButtonsVisible &&
                             minimizeButtonRect.contains(x, y) -> HitTestResult.HTMINBUTTON
 
-                        !isFullscreen &&
+                        !currentIsFullscreen &&
                             currentProperties.captionButtonsVisible &&
                             currentResizable &&
                             maximizeButtonRect.contains(x, y) -> HitTestResult.HTMAXBUTTON
 
-                        !isFullscreen &&
+                        !currentIsFullscreen &&
                             currentProperties.captionButtonsVisible &&
                             closeButtonRect.contains(x, y) -> HitTestResult.HTCLOSE
 
-                        !isFullscreen &&
+                        !currentIsFullscreen &&
                             currentProperties.moveable &&
                             captionBarRect.contains(x, y) &&
                             isHitTestInCaptionBar.value -> HitTestResult.HTCAPTION
@@ -112,8 +113,8 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
             styler.updateIsResizable(resizable)
         }
 
-        LaunchedEffect(isFullscreen) {
-            styler.updateBorderAndShadow(!isFullscreen)
+        LaunchedEffect(currentIsFullscreen) {
+            styler.updateBorderAndShadow(!currentIsFullscreen)
         }
 
         LaunchedEffect(properties.backgroundType, properties.backgroundIsDarkTheme) {
@@ -128,7 +129,7 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
                 .fillMaxSize()
                 .windowInsetsPadding(windowClientInsets),
         ) {
-            if (!isFullscreen && effectiveCaptionBarHeight > 0.dp) {
+            if (!currentIsFullscreen && effectiveCaptionBarHeight > 0.dp) {
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -143,7 +144,7 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
 
             content()
 
-            if (properties.captionButtonsVisible && !isFullscreen) {
+            if (properties.captionButtonsVisible && !currentIsFullscreen) {
                 Row(
                     modifier = Modifier.align(Alignment.TopEnd),
                 ) {

@@ -22,12 +22,14 @@ fun MiuixCaptionButtonMinimize(
     enabled: Boolean = true,
     height: Dp = 32.dp,
     iconFontFamily: FontFamily? = null,
+    contentDescription: String? = "Minimize",
 ) {
     MiuixCaptionButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         height = height,
+        contentDescription = contentDescription,
     ) { iconColor ->
         if (iconFontFamily != null) {
             Text(

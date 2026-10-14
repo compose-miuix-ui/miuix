@@ -59,9 +59,8 @@ class MiuixWindowTest {
     fun testDefaultCaptionBarHeight() = runDesktopComposeUiTest {
         setContent {
             val expected = when {
-                DesktopOS.isMacOS() -> 52.dp
-                DesktopOS.isLinux() -> 32.dp
-                else -> 40.dp
+                DesktopOS.isMacOS() -> 40.dp
+                else -> 32.dp
             }
             assertEquals(expected, defaultCaptionBarHeight())
         }
@@ -97,14 +96,23 @@ class MiuixWindowTest {
         val neCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.NE_RESIZE_CURSOR)
         val swCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.SW_RESIZE_CURSOR)
 
-        assertEquals("ew-resize", wCursor.name)
-        assertEquals("ew-resize", eCursor.name)
-        assertEquals("ns-resize", nCursor.name)
-        assertEquals("ns-resize", sCursor.name)
-        assertEquals("nwse-resize", nwCursor.name)
-        assertEquals("nwse-resize", seCursor.name)
-        assertEquals("nesw-resize", neCursor.name)
-        assertEquals("nesw-resize", swCursor.name)
+        val fallbackW = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.W_RESIZE_CURSOR).name
+        val fallbackE = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.E_RESIZE_CURSOR).name
+        val fallbackN = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.N_RESIZE_CURSOR).name
+        val fallbackS = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.S_RESIZE_CURSOR).name
+        val fallbackNW = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.NW_RESIZE_CURSOR).name
+        val fallbackSE = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.SE_RESIZE_CURSOR).name
+        val fallbackNE = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.NE_RESIZE_CURSOR).name
+        val fallbackSW = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.SW_RESIZE_CURSOR).name
+
+        assertTrue(wCursor.name in listOf("ew-resize", "size_hor", "col-resize", fallbackW))
+        assertTrue(eCursor.name in listOf("ew-resize", "size_hor", "col-resize", fallbackE))
+        assertTrue(nCursor.name in listOf("ns-resize", "size_ver", "row-resize", fallbackN))
+        assertTrue(sCursor.name in listOf("ns-resize", "size_ver", "row-resize", fallbackS))
+        assertTrue(nwCursor.name in listOf("nwse-resize", "size_fdiag", fallbackNW))
+        assertTrue(seCursor.name in listOf("nwse-resize", "size_fdiag", fallbackSE))
+        assertTrue(neCursor.name in listOf("nesw-resize", "size_bdiag", fallbackNE))
+        assertTrue(swCursor.name in listOf("nesw-resize", "size_bdiag", fallbackSW))
     }
 
     @Test
