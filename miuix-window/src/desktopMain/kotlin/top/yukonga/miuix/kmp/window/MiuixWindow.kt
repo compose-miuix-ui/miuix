@@ -18,8 +18,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.awt.SwingWindow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.platform.LocalDensity
@@ -154,7 +152,6 @@ fun MiuixWindow(
             WindowBackgroundBox(
                 transparent = resolvedTransparent,
                 backgroundType = resolvedProperties.backgroundType,
-                isDarkTheme = resolvedBackgroundIsDarkTheme,
             ) {
                 when (DesktopOS.current) {
                     is DesktopOS.Windows ->
@@ -194,7 +191,6 @@ internal fun WindowBackgroundBox(
     transparent: Boolean,
     backgroundType: MiuixWindowBackgroundType,
     modifier: Modifier = Modifier,
-    isDarkTheme: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val shouldDrawBackground = when (DesktopOS.current) {
@@ -210,12 +206,7 @@ internal fun WindowBackgroundBox(
         else -> !transparent
     }
 
-    val themeBackground = MiuixTheme.colorScheme.background
-    val backgroundColor = when {
-        isDarkTheme && themeBackground.luminance() >= 0.5f -> Color(0xFF121212)
-        !isDarkTheme && themeBackground.luminance() < 0.5f -> Color(0xFFF7F7F7)
-        else -> themeBackground
-    }
+    val backgroundColor = MiuixTheme.colorScheme.surface
 
     Box(
         modifier = modifier.thenIf(shouldDrawBackground) {

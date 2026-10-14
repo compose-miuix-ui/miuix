@@ -22,12 +22,15 @@ kotlin {
 
 使用 `MiuixWindow` 替代 Compose 原生 `Window`，并结合 `MiuixCaptionBar` 快速构建自定义标题栏：
 
+将应用的 `MiuixTheme` 放在 `MiuixWindow` 外层，让窗口背景、标题栏和内容使用同一份配色。纯色窗口背景始终使用 `MiuixTheme.colorScheme.surface`；`backgroundIsDarkTheme` 仅控制原生背景材质的深浅色，不会替换主题背景色。
+
 ```kotlin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
@@ -39,34 +42,34 @@ import top.yukonga.miuix.kmp.window.*
 fun main() = application {
     val state = rememberWindowState(size = DpSize(960.dp, 640.dp))
 
-    MiuixWindow(
-        state = state,
-        onCloseRequest = ::exitApplication,
-        title = "Miuix 桌面端",
-        properties = MiuixWindowProperties.default(
-            backgroundType = when {
-                MiuixWindowBackgroundType.Vibrancy.isSupported() -> MiuixWindowBackgroundType.Vibrancy
-                MiuixWindowBackgroundType.Mica.isSupported() -> MiuixWindowBackgroundType.Mica
-                else -> MiuixWindowBackgroundType.None
-            },
-        ),
-    ) {
-        val windowProperties = LocalMiuixWindowProperties.current
-        val isWindowDark = windowProperties.captionButtonIsDarkTheme == true
-
-        MiuixTheme {
+    MiuixTheme {
+        val isDark = MiuixTheme.colorScheme.surface.luminance() < 0.5f
+        MiuixWindow(
+            state = state,
+            onCloseRequest = ::exitApplication,
+            title = "Miuix 桌面端",
+            properties = MiuixWindowProperties.default(
+                captionButtonIsDarkTheme = isDark,
+                backgroundIsDarkTheme = isDark,
+                backgroundType = when {
+                    MiuixWindowBackgroundType.Vibrancy.isSupported() -> MiuixWindowBackgroundType.Vibrancy
+                    MiuixWindowBackgroundType.Mica.isSupported() -> MiuixWindowBackgroundType.Mica
+                    else -> MiuixWindowBackgroundType.None
+                },
+            ),
+        ) {
             val captionBarHeight = LocalMiuixWindowInfo.current.captionBarHeight
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MiuixTheme.colorScheme.background),
+                    .background(MiuixTheme.colorScheme.surface),
             ) {
                 if (captionBarHeight > 0.dp) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(captionBarHeight)
-                            .background(MiuixTheme.colorScheme.background),
+                            .background(MiuixTheme.colorScheme.surface),
                     ) {
                         CaptionBarHitTest()
                         MiuixCaptionBar {

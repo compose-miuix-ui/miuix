@@ -113,7 +113,7 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
             undecoratedWindowResizer.enabled = resizable
         }
 
-        val backgroundColor = MiuixTheme.colorScheme.background
+        val backgroundColor = MiuixTheme.colorScheme.surface
         Box(
             modifier = Modifier
                 .fillMaxSize()

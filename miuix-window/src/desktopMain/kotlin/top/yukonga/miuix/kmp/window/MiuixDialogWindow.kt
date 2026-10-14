@@ -207,7 +207,7 @@ internal fun DialogBackgroundBox(
         else -> !transparent
     }
 
-    val backgroundColor = MiuixTheme.colorScheme.background
+    val backgroundColor = MiuixTheme.colorScheme.surface
     Box(
         modifier = modifier.thenIf(shouldDrawBackground) {
             background(backgroundColor)

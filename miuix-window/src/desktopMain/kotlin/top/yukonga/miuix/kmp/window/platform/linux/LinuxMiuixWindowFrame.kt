@@ -133,7 +133,7 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
             undecoratedWindowResizer.enabled = resizable && !isMaximizedOrFullScreen
         }
 
-        val backgroundColor = MiuixTheme.colorScheme.background
+        val backgroundColor = MiuixTheme.colorScheme.surface
         Box(
             modifier = Modifier
                 .fillMaxSize()

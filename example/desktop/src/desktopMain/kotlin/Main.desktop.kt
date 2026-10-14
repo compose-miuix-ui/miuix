@@ -12,20 +12,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.skiko.SystemTheme
+import org.jetbrains.skiko.currentSystemTheme
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.icon
@@ -38,6 +45,7 @@ import top.yukonga.miuix.kmp.window.MiuixWindow
 import top.yukonga.miuix.kmp.window.MiuixWindowBackgroundType
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 import ui.AppTheme
+import ui.keyColorFor
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
@@ -46,50 +54,50 @@ fun main() = application {
         position = WindowPosition.Aligned(Alignment.Center),
     )
     val isHotReloadMode = System.getProperty("app.mode") == "hot"
-    var colorMode by remember { mutableIntStateOf(0) }
-    val isDark = when (colorMode) {
-        1, 4 -> false
-        2, 5, 6 -> true
-        else -> null
+    var appState by remember { mutableStateOf(AppState()) }
+    val updateAppState: ((AppState) -> AppState) -> Unit = remember {
+        { transform -> appState = transform(appState) }
     }
+    val systemIsDark = rememberDesktopSystemDarkTheme()
 
-    MiuixWindow(
-        state = state,
-        onCloseRequest = ::exitApplication,
-        alwaysOnTop = isHotReloadMode,
-        title = "Miuix",
-        icon = painterResource(Res.drawable.icon),
-        properties = MiuixWindowProperties.default(
-            minSize = DpSize(380.dp, 600.dp),
-            captionButtonIsDarkTheme = isDark,
-            backgroundIsDarkTheme = isDark,
-            backgroundType = when {
-                MiuixWindowBackgroundType.Vibrancy.isSupported() -> MiuixWindowBackgroundType.Vibrancy
-                MiuixWindowBackgroundType.Mica.isSupported() -> MiuixWindowBackgroundType.Mica
-                else -> MiuixWindowBackgroundType.None
-            },
-        ),
+    AppTheme(
+        colorMode = appState.colorMode,
+        keyColor = keyColorFor(appState.seedIndex),
+        paletteStyle = appState.paletteStyle,
+        colorSpec = appState.colorSpec,
+        isDark = systemIsDark,
     ) {
-        val windowProperties = top.yukonga.miuix.kmp.window.LocalMiuixWindowProperties.current
-        val isWindowDark = windowProperties.captionButtonIsDarkTheme == true
-
-        AppTheme(
-            colorMode = colorMode,
-            isDark = if (colorMode == 0 || colorMode == 3) isWindowDark else null,
+        val isDark = MiuixTheme.colorScheme.surface.luminance() < 0.5f
+        MiuixWindow(
+            state = state,
+            onCloseRequest = ::exitApplication,
+            alwaysOnTop = isHotReloadMode,
+            title = "Miuix",
+            icon = painterResource(Res.drawable.icon),
+            properties = MiuixWindowProperties.default(
+                minSize = DpSize(380.dp, 600.dp),
+                captionButtonIsDarkTheme = isDark,
+                backgroundIsDarkTheme = isDark,
+                backgroundType = when {
+                    MiuixWindowBackgroundType.Vibrancy.isSupported() -> MiuixWindowBackgroundType.Vibrancy
+                    MiuixWindowBackgroundType.Mica.isSupported() -> MiuixWindowBackgroundType.Mica
+                    else -> MiuixWindowBackgroundType.None
+                },
+            ),
         ) {
             val isFullscreen = LocalWindowState.current.placement == WindowPlacement.Fullscreen
             val captionBarHeight = LocalMiuixWindowInfo.current.captionBarHeight
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MiuixTheme.colorScheme.background),
+                    .background(MiuixTheme.colorScheme.surface),
             ) {
                 if (!isFullscreen && captionBarHeight > 0.dp) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(captionBarHeight)
-                            .background(MiuixTheme.colorScheme.background),
+                            .background(MiuixTheme.colorScheme.surface),
                     ) {
                         CaptionBarHitTest()
                         MiuixCaptionBar {
@@ -113,9 +121,24 @@ fun main() = application {
                     }
                 }
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    App(onColorModeChange = { colorMode = it })
+                    App(
+                        appState = appState,
+                        onUpdateAppState = updateAppState,
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun rememberDesktopSystemDarkTheme(): Boolean {
+    var isDark by remember { mutableStateOf(currentSystemTheme == SystemTheme.DARK) }
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            isDark = currentSystemTheme == SystemTheme.DARK
+            delay(500)
+        }
+    }
+    return isDark
 }

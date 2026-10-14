@@ -34,20 +34,32 @@ fun App(
             .collect { currentOnColorModeChange?.invoke(it) }
     }
 
-    val keyColor = keyColorFor(appState.seedIndex)
-
     AppTheme(
         colorMode = appState.colorMode,
-        keyColor = keyColor,
+        keyColor = keyColorFor(appState.seedIndex),
         paletteStyle = appState.paletteStyle,
         colorSpec = appState.colorSpec,
     ) {
-        CompositionLocalProvider(
-            LocalAppState provides appState,
-            LocalUpdateAppState provides updateAppState,
-            LocalSquircleEnabled provides appState.enableSquircle,
-        ) {
-            AppContent(padding = padding)
-        }
+        App(
+            appState = appState,
+            onUpdateAppState = updateAppState,
+            padding = padding,
+        )
+    }
+}
+
+/** Renders the app using the caller's theme and state. */
+@Composable
+fun App(
+    appState: AppState,
+    onUpdateAppState: ((AppState) -> AppState) -> Unit,
+    padding: PaddingValues = PaddingValues(0.dp),
+) {
+    CompositionLocalProvider(
+        LocalAppState provides appState,
+        LocalUpdateAppState provides onUpdateAppState,
+        LocalSquircleEnabled provides appState.enableSquircle,
+    ) {
+        AppContent(padding = padding)
     }
 }

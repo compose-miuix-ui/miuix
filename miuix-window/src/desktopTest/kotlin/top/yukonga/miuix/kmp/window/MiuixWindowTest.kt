@@ -3,9 +3,21 @@
 
 package top.yukonga.miuix.kmp.window
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.DpSize
@@ -13,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
 import top.yukonga.miuix.kmp.window.platform.linux.LinuxWindowBackend
 import top.yukonga.miuix.kmp.window.platform.windows.HitTestResult
@@ -113,6 +127,43 @@ class MiuixWindowTest {
         assertTrue(seCursor.name in listOf("nwse-resize", "size_fdiag", fallbackSE))
         assertTrue(neCursor.name in listOf("nesw-resize", "size_bdiag", fallbackNE))
         assertTrue(swCursor.name in listOf("nesw-resize", "size_bdiag", fallbackSW))
+    }
+
+    @Test
+    fun testWindowAndDialogBackgroundsFollowThemeSurface() = runDesktopComposeUiTest {
+        val backgrounds = listOf(
+            lightColorScheme().surface,
+            darkColorScheme().surface,
+            Color(0xFFFFF0F5),
+            Color(0xFF201520),
+            Color(0xFFF0FFF5),
+            Color(0xFF152015),
+        )
+        var background by mutableStateOf(backgrounds.first())
+        setContent {
+            MiuixTheme(colors = lightColorScheme(surface = background)) {
+                Row {
+                    WindowBackgroundBox(
+                        transparent = false,
+                        backgroundType = MiuixWindowBackgroundType.None,
+                        modifier = Modifier.size(40.dp).testTag("windowBackground"),
+                    ) {}
+                    DialogBackgroundBox(
+                        transparent = false,
+                        backgroundType = MiuixWindowBackgroundType.None,
+                        modifier = Modifier.size(40.dp).testTag("dialogBackground"),
+                    ) {}
+                }
+            }
+        }
+
+        for (expected in backgrounds) {
+            runOnIdle { background = expected }
+            for (tag in listOf("windowBackground", "dialogBackground")) {
+                val pixels = onNodeWithTag(tag).captureToImage().toPixelMap()
+                assertEquals(expected.toArgb(), pixels[pixels.width / 2, pixels.height / 2].toArgb())
+            }
+        }
     }
 
     @Test
