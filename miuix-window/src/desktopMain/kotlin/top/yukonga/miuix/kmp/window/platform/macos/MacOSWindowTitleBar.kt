@@ -163,6 +163,9 @@ private class MacOSNativeWindowTitleBar private constructor(
     private val willEnterFullScreenCallback = notificationCallback { handler ->
         handler.willEnterFullScreen()
     }
+    private val didEnterFullScreenCallback = notificationCallback { handler ->
+        handler.didEnterFullScreen()
+    }
     private val willExitFullScreenCallback = notificationCallback { handler ->
         handler.willExitFullScreen()
     }
@@ -178,6 +181,10 @@ private class MacOSNativeWindowTitleBar private constructor(
                 ObjectiveCMethod(
                     selector = WILL_ENTER_FULL_SCREEN_SELECTOR,
                     callback = willEnterFullScreenCallback,
+                ),
+                ObjectiveCMethod(
+                    selector = DID_ENTER_FULL_SCREEN_SELECTOR,
+                    callback = didEnterFullScreenCallback,
                 ),
                 ObjectiveCMethod(
                     selector = WILL_EXIT_FULL_SCREEN_SELECTOR,
@@ -306,7 +313,15 @@ private class MacOSNativeWindowTitleBar private constructor(
     }
 
     private fun ensureLayout(installation: NativeInstallation): NativeLayout? {
-        if (installation.removed || isFullScreen(installation.nativeWindow)) return null
+        // AppKit can clear the full-screen style before the exit notification. Queued Compose
+        // updates must not reinstall constraints while AppKit is still moving the title bar.
+        if (
+            installation.removed ||
+            installation.fullScreenTransitionInProgress ||
+            isFullScreen(installation.nativeWindow)
+        ) {
+            return null
+        }
         installation.layout?.let { return it }
         return applyLayout(installation).also { layout ->
             installation.layout = layout
@@ -554,15 +569,24 @@ private class MacOSNativeWindowTitleBar private constructor(
         val key = Pointer.nativeValue(observer)
         val handler = FullScreenHandler(
             willEnterFullScreen = {
+                installation.fullScreenTransitionInProgress = true
                 installation.layout?.let(::removeLayout)
                 installation.layout = null
             },
+            didEnterFullScreen = {
+                installation.fullScreenTransitionInProgress = false
+            },
             willExitFullScreen = {
+                installation.fullScreenTransitionInProgress = true
                 setWindowControlsHidden(installation.nativeWindow, true)
             },
             didExitFullScreen = {
-                installation.layout = applyLayout(installation)
-                setWindowControlsHidden(installation.nativeWindow, false)
+                installation.fullScreenTransitionInProgress = false
+                try {
+                    ensureLayout(installation)
+                } finally {
+                    setWindowControlsHidden(installation.nativeWindow, false)
+                }
                 if (installation.layout == null) {
                     scheduleLayoutRetry(installation)
                 }
@@ -581,6 +605,13 @@ private class MacOSNativeWindowTitleBar private constructor(
                 observer = observer,
                 selectorName = WILL_ENTER_FULL_SCREEN_SELECTOR,
                 notificationName = NS_WINDOW_WILL_ENTER_FULL_SCREEN_NOTIFICATION,
+                nativeWindow = installation.nativeWindow,
+            )
+            addObserver(
+                center = center,
+                observer = observer,
+                selectorName = DID_ENTER_FULL_SCREEN_SELECTOR,
+                notificationName = NS_WINDOW_DID_ENTER_FULL_SCREEN_NOTIFICATION,
                 nativeWindow = installation.nativeWindow,
             )
             addObserver(
@@ -1000,6 +1031,7 @@ private class MacOSNativeWindowTitleBar private constructor(
         var layout: NativeLayout? = null,
         var observer: Pointer? = null,
         var removed: Boolean = false,
+        var fullScreenTransitionInProgress: Boolean = false,
     ) : MacOSWindowTitleBarInstallation
 
     private data class NativeLayout(
@@ -1024,6 +1056,7 @@ private class MacOSNativeWindowTitleBar private constructor(
 
     private data class FullScreenHandler(
         val willEnterFullScreen: () -> Unit,
+        val didEnterFullScreen: () -> Unit,
         val willExitFullScreen: () -> Unit,
         val didExitFullScreen: () -> Unit,
     )
@@ -1080,10 +1113,13 @@ private class MacOSNativeWindowTitleBar private constructor(
         private const val MAX_REASONABLE_SUBVIEW_COUNT = 1024L
         private const val OBSERVER_CLASS_NAME = "SaltUIWindowTitleBarObserver"
         private const val WILL_ENTER_FULL_SCREEN_SELECTOR = "saltWindowWillEnterFullScreen:"
+        private const val DID_ENTER_FULL_SCREEN_SELECTOR = "saltWindowDidEnterFullScreen:"
         private const val WILL_EXIT_FULL_SCREEN_SELECTOR = "saltWindowWillExitFullScreen:"
         private const val DID_EXIT_FULL_SCREEN_SELECTOR = "saltWindowDidExitFullScreen:"
         private const val NS_WINDOW_WILL_ENTER_FULL_SCREEN_NOTIFICATION =
             "NSWindowWillEnterFullScreenNotification"
+        private const val NS_WINDOW_DID_ENTER_FULL_SCREEN_NOTIFICATION =
+            "NSWindowDidEnterFullScreenNotification"
         private const val NS_WINDOW_WILL_EXIT_FULL_SCREEN_NOTIFICATION =
             "NSWindowWillExitFullScreenNotification"
         private const val NS_WINDOW_DID_EXIT_FULL_SCREEN_NOTIFICATION =
