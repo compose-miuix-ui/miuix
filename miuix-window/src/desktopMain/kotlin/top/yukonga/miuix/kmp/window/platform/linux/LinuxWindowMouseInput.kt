@@ -95,21 +95,28 @@ internal object LinuxWindowMouseInput {
             val component = mouseEvent?.source as? Component
             val window = component as? Window ?: component?.let(SwingUtilities::getWindowAncestor)
             val registrations = handlers[window]?.toList()
-            if (mouseEvent == null || window == null || registrations.isNullOrEmpty()) {
-                super.dispatchEvent(event)
-                return
+            try {
+                if (mouseEvent == null || window == null || registrations.isNullOrEmpty()) {
+                    super.dispatchEvent(event)
+                    return
+                }
+                if (!window.isShowing || !window.isEnabled) {
+                    registrations.forEach { it.handler.cancel() }
+                    super.dispatchEvent(event)
+                    return
+                }
+                if (registrations.any { it.handler.onMouseEvent(mouseEvent) }) {
+                    mouseEvent.consume()
+                } else {
+                    super.dispatchEvent(event)
+                }
+                registrations.forEach { it.handler.afterMouseEvent(mouseEvent) }
+            } catch (e: IllegalArgumentException) {
+                if (e.message?.contains("RootNodeOwner is already disposed") == true) {
+                    return
+                }
+                throw e
             }
-            if (!window.isShowing || !window.isEnabled) {
-                registrations.forEach { it.handler.cancel() }
-                super.dispatchEvent(event)
-                return
-            }
-            if (registrations.any { it.handler.onMouseEvent(mouseEvent) }) {
-                mouseEvent.consume()
-            } else {
-                super.dispatchEvent(event)
-            }
-            registrations.forEach { it.handler.afterMouseEvent(mouseEvent) }
         }
 
         fun uninstallIfCurrent() {

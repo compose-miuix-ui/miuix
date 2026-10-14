@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.window.platform.linux
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -10,11 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.window.WindowResizeEdge
@@ -33,7 +33,16 @@ internal class UndecoratedWindowResizer(
     var resizerThickness: Dp by mutableStateOf(4.dp)
 
     private val sideBounds = mutableMapOf<Int, Rect>()
-    private val sideCursors = mutableMapOf<Int, Int>()
+    private val sideCursors = mapOf(
+        Side.Left to Cursor.W_RESIZE_CURSOR,
+        Side.Right to Cursor.E_RESIZE_CURSOR,
+        Side.Top to Cursor.N_RESIZE_CURSOR,
+        Side.Bottom to Cursor.S_RESIZE_CURSOR,
+        (Side.Left or Side.Top) to Cursor.NW_RESIZE_CURSOR,
+        (Side.Right or Side.Top) to Cursor.NE_RESIZE_CURSOR,
+        (Side.Left or Side.Bottom) to Cursor.SW_RESIZE_CURSOR,
+        (Side.Right or Side.Bottom) to Cursor.SE_RESIZE_CURSOR,
+    )
     private var resizingSide = 0
     private var hoveredSide = 0
     private var suppressClick = false
@@ -46,54 +55,43 @@ internal class UndecoratedWindowResizer(
 
     @Composable
     fun Content(modifier: Modifier = Modifier) {
-        DisposableEffect(this, enabled) {
+        DisposableEffect(this) {
             val unregister = LinuxWindowMouseInput.register(
                 window = window,
                 handler = this@UndecoratedWindowResizer,
                 priority = 1,
             )
-            onDispose { unregister() }
+            onDispose {
+                unregister()
+                sideBounds.clear()
+            }
         }
-        if (!enabled) return
 
-        Layout(
-            {
-                Side(Cursor.W_RESIZE_CURSOR, Side.Left)
-                Side(Cursor.E_RESIZE_CURSOR, Side.Right)
-                Side(Cursor.N_RESIZE_CURSOR, Side.Top)
-                Side(Cursor.S_RESIZE_CURSOR, Side.Bottom)
-                Side(Cursor.NW_RESIZE_CURSOR, Side.Left or Side.Top)
-                Side(Cursor.NE_RESIZE_CURSOR, Side.Right or Side.Top)
-                Side(Cursor.SW_RESIZE_CURSOR, Side.Left or Side.Bottom)
-                Side(Cursor.SE_RESIZE_CURSOR, Side.Right or Side.Bottom)
-            },
-            modifier = modifier,
-            measurePolicy = { measurables, constraints ->
-                val b = resizerThickness.roundToPx()
+        val density = LocalDensity.current
+        Spacer(
+            modifier = modifier
+                .fillMaxSize()
+                .onGloballyPositioned { coordinates ->
+                    if (!enabled) {
+                        sideBounds.clear()
+                        return@onGloballyPositioned
+                    }
+                    val bounds = coordinates.boundsInWindow()
+                    val b = with(density) { resizerThickness.toPx() }
+                    val l = bounds.left
+                    val t = bounds.top
+                    val w = bounds.width
+                    val h = bounds.height
 
-                fun Measurable.measureSide(width: Int, height: Int) = measure(
-                    Constraints.fixed(width.coerceAtLeast(0), height.coerceAtLeast(0)),
-                )
-
-                val left = measurables[0].measureSide(b, constraints.maxHeight - 2 * b)
-                val right = measurables[1].measureSide(b, constraints.maxHeight - 2 * b)
-                val top = measurables[2].measureSide(constraints.maxWidth - 2 * b, b)
-                val bottom = measurables[3].measureSide(constraints.maxWidth - 2 * b, b)
-                val leftTop = measurables[4].measureSide(b, b)
-                val rightTop = measurables[5].measureSide(b, b)
-                val leftBottom = measurables[6].measureSide(b, b)
-                val rightBottom = measurables[7].measureSide(b, b)
-                layout(constraints.maxWidth, constraints.maxHeight) {
-                    left.place(0, b)
-                    right.place(constraints.maxWidth - b, b)
-                    top.place(b, 0)
-                    bottom.place(b, constraints.maxHeight - b)
-                    leftTop.place(0, 0)
-                    rightTop.place(constraints.maxWidth - b, 0)
-                    leftBottom.place(0, constraints.maxHeight - b)
-                    rightBottom.place(constraints.maxWidth - b, constraints.maxHeight - b)
-                }
-            },
+                    sideBounds[Side.Left] = Rect(l, t + b, l + b, t + h - b)
+                    sideBounds[Side.Right] = Rect(l + w - b, t + b, l + w, t + h - b)
+                    sideBounds[Side.Top] = Rect(l + b, t, l + w - b, t + b)
+                    sideBounds[Side.Bottom] = Rect(l + b, t + h - b, l + w - b, t + h)
+                    sideBounds[Side.Left or Side.Top] = Rect(l, t, l + b, t + b)
+                    sideBounds[Side.Right or Side.Top] = Rect(l + w - b, t, l + w, t + b)
+                    sideBounds[Side.Left or Side.Bottom] = Rect(l, t + h - b, l + b, t + h)
+                    sideBounds[Side.Right or Side.Bottom] = Rect(l + w - b, t + h - b, l + w, t + h)
+                },
         )
     }
 
@@ -115,7 +113,7 @@ internal class UndecoratedWindowResizer(
                 initialWindowPos = window.location
                 initialWindowSize = window.size
                 setHoveredSide(side)
-                resizeCursor = LinuxResizeCursor.get(sideCursors.getValue(side))
+                resizeCursor = sideCursors[side]?.let(LinuxResizeCursor::get)
                 return true
             }
 
@@ -174,26 +172,6 @@ internal class UndecoratedWindowResizer(
         cursorComponent?.cursor = previousCursor
         cursorComponent = null
         previousCursor = null
-    }
-
-    @Composable
-    private fun Side(cursorId: Int, sides: Int) {
-        DisposableEffect(sides) {
-            sideCursors[sides] = cursorId
-            onDispose {
-                sideBounds.remove(sides)
-                sideCursors.remove(sides)
-            }
-        }
-        Layout(
-            content = {},
-            modifier = Modifier.onGloballyPositioned {
-                sideBounds[sides] = it.boundsInWindow()
-            },
-            measurePolicy = { _, constraints ->
-                layout(constraints.maxWidth, constraints.maxHeight) {}
-            },
-        )
     }
 
     private fun Int.toWindowResizeEdge(): WindowResizeEdge {
