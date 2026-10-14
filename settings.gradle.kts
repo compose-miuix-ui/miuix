@@ -48,6 +48,7 @@ include(":miuix-blur")
 include(":miuix-squircle")
 include(":miuix-icons")
 include(":miuix-nav")
+include(":miuix-window")
 
 include(":example:shared")
 include(":example:android")

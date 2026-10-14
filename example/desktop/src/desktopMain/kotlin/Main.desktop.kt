@@ -1,32 +1,121 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import org.jetbrains.compose.resources.painterResource
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.icon
-import java.awt.Dimension
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.CaptionBarHitTest
+import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
+import top.yukonga.miuix.kmp.window.LocalWindowState
+import top.yukonga.miuix.kmp.window.MiuixCaptionBar
+import top.yukonga.miuix.kmp.window.MiuixWindow
+import top.yukonga.miuix.kmp.window.MiuixWindowBackgroundType
+import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import ui.AppTheme
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
     val state = rememberWindowState(
         size = DpSize(420.dp, 840.dp),
         position = WindowPosition.Aligned(Alignment.Center),
     )
     val isHotReloadMode = System.getProperty("app.mode") == "hot"
-    Window(
+    var colorMode by remember { mutableIntStateOf(0) }
+    val isDark = when (colorMode) {
+        1, 4 -> false
+        2, 5, 6 -> true
+        else -> null
+    }
+
+    MiuixWindow(
         state = state,
         onCloseRequest = ::exitApplication,
         alwaysOnTop = isHotReloadMode,
         title = "Miuix",
         icon = painterResource(Res.drawable.icon),
+        properties = MiuixWindowProperties.default(
+            minSize = DpSize(380.dp, 600.dp),
+            captionButtonIsDarkTheme = isDark,
+            backgroundIsDarkTheme = isDark,
+            backgroundType = when {
+                MiuixWindowBackgroundType.Vibrancy.isSupported() -> MiuixWindowBackgroundType.Vibrancy
+                MiuixWindowBackgroundType.Mica.isSupported() -> MiuixWindowBackgroundType.Mica
+                else -> MiuixWindowBackgroundType.None
+            },
+        ),
     ) {
-        window.minimumSize = Dimension(300, 600)
-        App()
+        val windowProperties = top.yukonga.miuix.kmp.window.LocalMiuixWindowProperties.current
+        val isWindowDark = windowProperties.captionButtonIsDarkTheme == true
+
+        AppTheme(
+            colorMode = colorMode,
+            isDark = if (colorMode == 0 || colorMode == 3) isWindowDark else null,
+        ) {
+            val isFullscreen = LocalWindowState.current.placement == WindowPlacement.Fullscreen
+            val captionBarHeight = LocalMiuixWindowInfo.current.captionBarHeight
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MiuixTheme.colorScheme.background),
+            ) {
+                if (!isFullscreen && captionBarHeight > 0.dp) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(captionBarHeight)
+                            .background(MiuixTheme.colorScheme.background),
+                    ) {
+                        CaptionBarHitTest()
+                        MiuixCaptionBar {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Spacer(Modifier.width(8.dp))
+                                Image(
+                                    painter = painterResource(Res.drawable.icon),
+                                    contentDescription = "Miuix",
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "Miuix",
+                                    style = MiuixTheme.textStyles.body2,
+                                )
+                            }
+                        }
+                    }
+                }
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    App(onColorModeChange = { colorMode = it })
+                }
+            }
+        }
     }
 }

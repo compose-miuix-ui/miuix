@@ -28,7 +28,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -304,11 +304,13 @@ private class PagerPageGestureNode(
         }
     }
 
-    private val dragNode = delegate(PagerPageDragNode(motion, childMotion))
-    private val nestedScrollNode = delegate(nestedScrollModifierNode(childMotion, null))
+    private val dragNode = delegate(PagerPageDragNode(motion))
     private val takeoverNode = delegate(PagerPageTakeoverNode(motion, childMotion))
 
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
+        if (pointerEvent.changes.fastAny { it.type == PointerType.Mouse }) {
+            return
+        }
         // Takeover must own the complete pointer cycle. Feeding that same cycle to the Foundation
         // drag node would start a second UserInput mutation; reset the Foundation node when a
         // takeover claims a down so its previous child-owned cycle cannot remain latched.
@@ -439,7 +441,6 @@ private class PagerPageTakeoverNode(
 
 private class PagerPageDragNode(
     private val motion: PagerPageMotion,
-    private val childMotion: PagerChildMotionConnection,
 ) : DragGestureNode(
     canDrag = { it != PointerType.Mouse },
     enabled = true,
@@ -529,11 +530,9 @@ private class PagerChildMotionConnection : NestedScrollConnection {
  * position, while the settle is interrupted only by real user input.
  */
 private class PagerPageMotion(
-    pagerState: PagerState,
-    onIntercepted: (() -> Unit)?,
+    private var pagerState: PagerState,
+    private var onIntercepted: (() -> Unit)?,
 ) {
-    private var pagerState: PagerState = pagerState
-    private var onIntercepted: (() -> Unit)? = onIntercepted
     private var settleJob: Job? = null
     private var takeoverJob: Job? = null
     private var takeoverChannel: Channel<Float>? = null
