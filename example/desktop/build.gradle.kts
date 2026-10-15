@@ -18,6 +18,7 @@ kotlin {
     sourceSets {
         val desktopMain by getting
         desktopMain.dependencies {
+            implementation(projects.miuixWindow)
             implementation(projects.example.shared)
             implementation(compose.desktop.currentOs)
         }

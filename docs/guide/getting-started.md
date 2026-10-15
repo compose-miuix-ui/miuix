@@ -36,6 +36,7 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-squircle`   | Squircle shapes library, can be used independently   |
 | `miuix-nav`        | Navigation library, can be used independently        |
 | `miuix-shader`     | Low-level runtime shader / render effect abstraction |
+| `miuix-window`     | Desktop window & caption bar styling library (Desktop JVM) |
 
 - For Compose Multiplatform projects:
 
@@ -54,6 +55,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
+            // Optional: Add miuix-window for desktop window and caption bar styling (Desktop JVM)
+            desktopMain.dependencies {
+                implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
+            }
         }
     }
 }

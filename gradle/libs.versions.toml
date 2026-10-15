@@ -2,7 +2,7 @@
 agp = "9.4.1"
 kotlin = "2.4.21"
 kotlinx-serialization = "1.11.0"
-kotlinx-collections-immutable = "0.5.1"
+kotlinx-collections-immutable = "0.5.2"
 
 about-libraries = "15.3.0"
 androidx-activity = "1.13.0"
@@ -13,6 +13,7 @@ jetbrains-dokka = "2.2.0"
 jetbrains-compose-hotReload = "1.2.0"
 jetbrains-lifecycle = "2.11.0"
 materialKolor-utilities = "5.0.1"
+jna = "5.19.1"
 spotless = "8.10.4"
 
 junit = "1.3.0"
@@ -29,6 +30,9 @@ spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradl
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
+
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "about-libraries" }
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }

@@ -36,6 +36,7 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-squircle` | 平滑圆角形状，可独立使用（已由 `miuix-ui` 传递包含） |
 | `miuix-shader` | 底层运行时着色器 / 渲染效果抽象，已由 `miuix-blur` / `miuix-squircle` 传递包含 |
 | `miuix-nav` | 自包含导航库，可独立使用 |
+| `miuix-window` | 桌面端窗口与自绘标题栏样式库（仅支持 Desktop JVM） |
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
@@ -54,6 +55,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // 可选：添加 miuix-nav 以获取导航支持
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
+            // 可选：添加 miuix-window 以获取桌面端窗口与标题栏支持（仅 Desktop JVM）
+            desktopMain.dependencies {
+                implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
+            }
         }
     }
 }
