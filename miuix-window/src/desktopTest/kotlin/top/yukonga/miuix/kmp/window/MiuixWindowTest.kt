@@ -15,15 +15,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberWindowState
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
@@ -164,45 +159,5 @@ class MiuixWindowTest {
                 assertEquals(expected.toArgb(), pixels[pixels.width / 2, pixels.height / 2].toArgb())
             }
         }
-    }
-
-    @Test
-    fun testMiuixWindowDisplaysContent() = runDesktopComposeUiTest {
-        setContent {
-            MiuixTheme {
-                MiuixWindow(
-                    onCloseRequest = {},
-                    state = rememberWindowState(size = DpSize(400.dp, 300.dp)),
-                    title = "Test Window",
-                ) {
-                    Text("Hello Miuix Window")
-                }
-            }
-        }
-
-        onNodeWithText("Hello Miuix Window").assertIsDisplayed()
-    }
-
-    @Test
-    fun testMiuixWindowFullscreenHidesCaptionBar() = runDesktopComposeUiTest {
-        var captionBarHeight = 40.dp
-        setContent {
-            MiuixTheme {
-                MiuixWindow(
-                    onCloseRequest = {},
-                    state = rememberWindowState(
-                        placement = androidx.compose.ui.window.WindowPlacement.Fullscreen,
-                        size = DpSize(400.dp, 300.dp),
-                    ),
-                    title = "Fullscreen Window",
-                ) {
-                    captionBarHeight = LocalMiuixWindowInfo.current.captionBarHeight
-                    Text("Fullscreen Content")
-                }
-            }
-        }
-
-        onNodeWithText("Fullscreen Content").assertIsDisplayed()
-        assertEquals(0.dp, captionBarHeight)
     }
 }

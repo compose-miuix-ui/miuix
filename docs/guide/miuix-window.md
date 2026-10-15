@@ -102,24 +102,24 @@ Drop-in containers for standard Compose `Window` and `DialogWindow`. They automa
 
 ### `MiuixCaptionBar` & `CaptionBarHitTest`
 
-- **`MiuixCaptionBar`**: Automatically reserves space based on platform button alignment (left on macOS for traffic lights, right on Windows/Linux for minimize/maximize/close buttons).
+- **`MiuixCaptionBar`**: Automatically reserves space based on platform button alignment (left on macOS for traffic lights, right on Windows, and the configured system position on Linux).
 - **`CaptionBarHitTest`**: Placed behind or around interactive elements in the caption bar to capture native drag-to-move gestures without intercepting clicks on buttons or search fields.
 
 ### `MiuixWindowProperties`
 
 Configures window appearance and behavior:
 
-| Property | Type | Description |
-|---|---|---|
-| `captionBarHeight` | `Dp` | Height of the caption bar (`defaultCaptionBarHeight()`: 32.dp on Linux and Windows, 40.dp on macOS) |
-| `captionButtonHeight` | `Dp` | Height of caption buttons (defaults to `captionBarHeight`) |
-| `captionButtonsVisible` | `Boolean` | Whether caption buttons are visible (default `true`) |
-| `captionButtonIsDarkTheme` | `Boolean?` | Dark appearance for caption buttons (`null` to follow system dynamically) |
-| `backgroundType` | `MiuixWindowBackgroundType` | Native backdrop: `None`, `Mica`, `Acrylic`, `MicaAlt`, or `Vibrancy` |
-| `backgroundIsDarkTheme` | `Boolean?` | Dark appearance for native backdrop (`null` to follow system dynamically) |
-| `moveable` | `Boolean` | Whether native caption dragging is enabled (default `true`) |
-| `minSize` | `DpSize` | Minimum window size constraints |
-| `onResizeEdgeChange` | `(Window, WindowResizeEdge) -> Unit` | Callback when cursor enters/leaves resize borders |
+| Property                   | Type                                 | Description                                                                                         |
+| -------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `captionBarHeight`         | `Dp`                                 | Height of the caption bar (`defaultCaptionBarHeight()`: 32.dp on Linux and Windows, 40.dp on macOS) |
+| `captionButtonHeight`      | `Dp`                                 | Height of caption buttons (defaults to `captionBarHeight`)                                          |
+| `captionButtonsVisible`    | `Boolean`                            | Whether caption buttons are visible (default `true`)                                                |
+| `captionButtonIsDarkTheme` | `Boolean?`                           | Dark appearance for caption buttons (`null` to follow system dynamically)                           |
+| `backgroundType`           | `MiuixWindowBackgroundType`          | Native backdrop: `None`, `Mica`, `Acrylic`, `MicaAlt`, or `Vibrancy`                                |
+| `backgroundIsDarkTheme`    | `Boolean?`                           | Dark appearance for native backdrop (`null` to follow system dynamically)                           |
+| `moveable`                 | `Boolean`                            | Whether native caption dragging is enabled (default `true`)                                         |
+| `minSize`                  | `DpSize`                             | Minimum window size constraints                                                                     |
+| `onResizeEdgeChange`       | `(Window, WindowResizeEdge) -> Unit` | Callback when cursor enters/leaves resize borders                                                   |
 
 ## Platform Specifics
 

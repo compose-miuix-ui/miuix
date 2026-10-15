@@ -35,7 +35,6 @@ import top.yukonga.miuix.kmp.window.LocalIsHitTestInCaptionBarState
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
-import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonClose
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
@@ -57,6 +56,7 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
     }
 
     val currentProperties by rememberUpdatedState(properties)
+    val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
@@ -73,8 +73,8 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
     CompositionLocalProvider(
         LocalMiuixWindowInfo provides MiuixWindowInfo(
             captionBarHeight = properties.captionBarHeight,
-            captionButtonsAlign = CaptionButtonsAlign.End,
-            captionButtonsFullWidth = MiuixCaptionButtonWidth,
+            captionButtonsAlign = systemDecoration.alignment,
+            captionButtonsFullWidth = if (properties.captionButtonsVisible) MiuixCaptionButtonWidth else 0.dp,
         ),
         LocalMiuixWindowContentDecoration provides MiuixWindowContentDecoration(
             inset = shadowMargin,
@@ -136,16 +136,27 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
                     }
                     Row(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
+                            .align(
+                                if (systemDecoration.alignment == CaptionButtonsAlign.Start) {
+                                    Alignment.TopStart
+                                } else {
+                                    Alignment.TopEnd
+                                },
+                            )
                             .onGloballyPositioned {
                                 captionBarHitTest.buttonsBounds = it.boundsInWindow()
                             },
                     ) {
-                        MiuixCaptionButtonClose(
+                        LinuxSystemCaptionButton(
+                            type = LinuxCaptionButtonType.Close,
+                            iconPack = systemDecoration.iconPack,
+                            iconTheme = systemDecoration.iconTheme,
                             onClick = {
                                 window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING))
                             },
+                            maximized = false,
                             height = properties.captionButtonHeight,
+                            enabled = true,
                         )
                     }
                 }

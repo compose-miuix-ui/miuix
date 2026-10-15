@@ -37,10 +37,6 @@ import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.LocalWindowState
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
-import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonClose
-import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMaximize
-import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMinimize
-import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
 import java.awt.event.WindowEvent
@@ -66,6 +62,7 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
     }
 
     val currentProperties by rememberUpdatedState(properties)
+    val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
@@ -86,12 +83,16 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
         0.dp
     }
     val effectiveCaptionBarHeight = if (isFullscreen) 0.dp else properties.captionBarHeight
-    val effectiveButtonsWidth = if (isFullscreen || !properties.captionButtonsVisible) 0.dp else MiuixCaptionButtonWidth * 3f
+    val effectiveButtonsWidth = if (isFullscreen || !properties.captionButtonsVisible) {
+        0.dp
+    } else {
+        systemDecoration.buttonsWidth
+    }
 
     CompositionLocalProvider(
         LocalMiuixWindowInfo provides MiuixWindowInfo(
             captionBarHeight = effectiveCaptionBarHeight,
-            captionButtonsAlign = CaptionButtonsAlign.End,
+            captionButtonsAlign = systemDecoration.alignment,
             captionButtonsFullWidth = effectiveButtonsWidth,
         ),
         LocalMiuixWindowContentDecoration provides MiuixWindowContentDecoration(
@@ -157,39 +158,53 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
                     }
                     Row(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
+                            .align(
+                                if (systemDecoration.alignment == CaptionButtonsAlign.Start) {
+                                    Alignment.TopStart
+                                } else {
+                                    Alignment.TopEnd
+                                },
+                            )
                             .onGloballyPositioned {
                                 captionBarHitTest.buttonsBounds = it.boundsInWindow()
                             },
                     ) {
-                        MiuixCaptionButtonMinimize(
-                            onClick = {
-                                windowState.isMinimized = true
-                            },
-                            height = properties.captionButtonHeight,
-                            enabled = properties.minimizeButtonEnabled,
-                        )
                         val isMaximized = windowState.placement == WindowPlacement.Maximized
-                        MiuixCaptionButtonMaximize(
-                            onClick = {
-                                if (isMaximized) {
-                                    windowState.placement = WindowPlacement.Floating
-                                } else {
-                                    windowState.placement = WindowPlacement.Maximized
-                                }
-                            },
-                            maximized = isMaximized,
-                            height = properties.captionButtonHeight,
-                            enabled = properties.maximizeOrRestoreButtonEnabled &&
-                                resizable &&
-                                windowState.placement != WindowPlacement.Fullscreen,
-                        )
-                        MiuixCaptionButtonClose(
-                            onClick = {
-                                window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING))
-                            },
-                            height = properties.captionButtonHeight,
-                        )
+                        systemDecoration.buttons.forEach { button ->
+                            LinuxSystemCaptionButton(
+                                type = button,
+                                iconPack = systemDecoration.iconPack,
+                                iconTheme = systemDecoration.iconTheme,
+                                onClick = {
+                                    when (button) {
+                                        LinuxCaptionButtonType.Minimize -> windowState.isMinimized = true
+
+                                        LinuxCaptionButtonType.Maximize -> {
+                                            windowState.placement = if (isMaximized) {
+                                                WindowPlacement.Floating
+                                            } else {
+                                                WindowPlacement.Maximized
+                                            }
+                                        }
+
+                                        LinuxCaptionButtonType.Close ->
+                                            window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING))
+                                    }
+                                },
+                                maximized = isMaximized,
+                                height = properties.captionButtonHeight,
+                                enabled = when (button) {
+                                    LinuxCaptionButtonType.Minimize -> properties.minimizeButtonEnabled
+
+                                    LinuxCaptionButtonType.Maximize ->
+                                        properties.maximizeOrRestoreButtonEnabled &&
+                                            resizable &&
+                                            windowState.placement != WindowPlacement.Fullscreen
+
+                                    LinuxCaptionButtonType.Close -> true
+                                },
+                            )
+                        }
                     }
                 }
             }

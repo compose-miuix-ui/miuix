@@ -102,22 +102,22 @@ Compose 原生 `Window` 与 `DialogWindow` 的强化替代容器。自动接管�
 
 ### `MiuixCaptionBar` 与 `CaptionBarHitTest`
 
-- **`MiuixCaptionBar`**：自适应标题栏容器，macOS 端自动向右让出红绿灯按钮空间，Windows 和 Linux 端自动避让右侧最小化、最大化和关闭控制按钮。
+- **`MiuixCaptionBar`**：自适应标题栏容器，macOS 端自动向右让出红绿灯按钮空间，Windows 端避让右侧控制按钮，Linux 端按照系统配置的位置避让控制按钮。
 - **`CaptionBarHitTest`**：放置在标题栏底层，负责捕获拖拽，避免遮挡上层交互控件（如搜索栏、标签页或操作按钮）。
 
 ### `MiuixWindowProperties` 属性配置
 
-| 属性 | 类型 | 说明 |
-|---|---|---|
-| `captionBarHeight` | `Dp` | 标题栏高度（`defaultCaptionBarHeight()`：Linux 与 Windows 默认为 32.dp，macOS 默认为 40.dp） |
-| `captionButtonHeight` | `Dp` | 控制按钮高度（默认与 `captionBarHeight` 一致） |
-| `captionButtonsVisible` | `Boolean` | 控制按钮是否可见（默认 `true`） |
-| `captionButtonIsDarkTheme` | `Boolean?` | 控制按钮深浅色（传 `null` 时自动跟随系统深浅色动态切换） |
-| `backgroundType` | `MiuixWindowBackgroundType` | 原生材质：`None`、`Mica`、`Acrylic`、`MicaAlt` 或 `Vibrancy` |
-| `backgroundIsDarkTheme` | `Boolean?` | 原生材质深浅色（传 `null` 时自动跟随系统深浅色动态切换） |
-| `moveable` | `Boolean` | 是否支持标题栏拖拽移动（默认 `true`） |
-| `minSize` | `DpSize` | 窗口最小尺寸约束 |
-| `onResizeEdgeChange` | `(Window, WindowResizeEdge) -> Unit` | 鼠标进入/离开拉伸边缘的回调 |
+| 属性                       | 类型                                 | 说明                                                                                         |
+| -------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `captionBarHeight`         | `Dp`                                 | 标题栏高度（`defaultCaptionBarHeight()`：Linux 与 Windows 默认为 32.dp，macOS 默认为 40.dp） |
+| `captionButtonHeight`      | `Dp`                                 | 控制按钮高度（默认与 `captionBarHeight` 一致）                                               |
+| `captionButtonsVisible`    | `Boolean`                            | 控制按钮是否可见（默认 `true`）                                                              |
+| `captionButtonIsDarkTheme` | `Boolean?`                           | 控制按钮深浅色（传 `null` 时自动跟随系统深浅色动态切换）                                     |
+| `backgroundType`           | `MiuixWindowBackgroundType`          | 原生材质：`None`、`Mica`、`Acrylic`、`MicaAlt` 或 `Vibrancy`                                 |
+| `backgroundIsDarkTheme`    | `Boolean?`                           | 原生材质深浅色（传 `null` 时自动跟随系统深浅色动态切换）                                     |
+| `moveable`                 | `Boolean`                            | 是否支持标题栏拖拽移动（默认 `true`）                                                        |
+| `minSize`                  | `DpSize`                             | 窗口最小尺寸约束                                                                             |
+| `onResizeEdgeChange`       | `(Window, WindowResizeEdge) -> Unit` | 鼠标进入/离开拉伸边缘的回调                                                                  |
 
 ## 跨平台特性说明
 
