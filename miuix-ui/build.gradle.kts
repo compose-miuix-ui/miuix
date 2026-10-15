@@ -79,8 +79,15 @@ baselineProfile {
 val convertBaselineProfile =
     tasks.register<ConvertBaselineProfileTask>("convertBaselineProfile") {
         description = "convertBaselineProfile"
-        inputFile.set(
-            layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt"),
+        inputFile.convention(
+            provider {
+                val generatedUiProfile = layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt")
+                val generatedExampleProfile =
+                    rootProject.layout.projectDirectory.file(
+                        "example/android/src/release/generated/baselineProfiles/baseline-prof.txt",
+                    )
+                if (generatedUiProfile.asFile.exists()) generatedUiProfile else generatedExampleProfile
+            },
         )
         outputFile.set(
             layout.projectDirectory.file("src/androidMain/baselineProfiles/baseline-prof.txt"),
@@ -94,6 +101,20 @@ val convertBaselineProfile =
         )
         additionalOutputs.put(
             "top/yukonga/miuix/kmp/preference/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/menu/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/popup/",
             rootProject.layout.projectDirectory
                 .file(
                     "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",

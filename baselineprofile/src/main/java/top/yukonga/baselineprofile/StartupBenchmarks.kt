@@ -59,8 +59,6 @@ class StartupBenchmarks {
             },
             measureBlock = {
                 startActivityAndWait()
-
-                // Wait for the Home tab content to be fully rendered
                 device.wait(Until.hasObject(By.text("Home")), 5_000)
             },
         )

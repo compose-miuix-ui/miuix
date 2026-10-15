@@ -2,7 +2,7 @@
   <configuration default="false" name="miuix [baseline]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/miuix" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/miuix-ui" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">

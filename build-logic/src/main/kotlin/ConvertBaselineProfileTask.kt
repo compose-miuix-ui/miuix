@@ -79,15 +79,17 @@ abstract class ConvertBaselineProfileTask : DefaultTask() {
 
         // Partition classes into main output and additional outputs
         val mainClasses = mutableMapOf<String, Set<Char>>()
-        val additionalClasses = mutableMapOf<String, MutableMap<String, Set<Char>>>()
-        for ((pkg, _) in sortedAdditional) {
-            additionalClasses[pkg] = mutableMapOf()
+        val pathClasses = mutableMapOf<String, MutableMap<String, MutableSet<Char>>>()
+        for ((_, path) in sortedAdditional) {
+            pathClasses.getOrPut(path) { mutableMapOf() }
         }
 
         for ((className, flags) in classFlags) {
-            val matchedPkg = sortedAdditional.firstOrNull { className.startsWith(it.key) }?.key
-            if (matchedPkg != null) {
-                additionalClasses[matchedPkg]!![className] = flags
+            val matchedEntry = sortedAdditional.firstOrNull { className.startsWith(it.key) }
+            if (matchedEntry != null) {
+                val targetClasses = pathClasses.getOrPut(matchedEntry.value) { mutableMapOf() }
+                val flagSet = targetClasses.getOrPut(className) { mutableSetOf() }
+                flagSet.addAll(flags)
             } else {
                 mainClasses[className] = flags
             }
@@ -97,8 +99,7 @@ abstract class ConvertBaselineProfileTask : DefaultTask() {
         writeProfileFile(output, mainClasses)
 
         // Write additional outputs
-        for ((pkg, path) in additional) {
-            val classes = additionalClasses[pkg] ?: emptyMap()
+        for ((path, classes) in pathClasses) {
             if (classes.isNotEmpty()) {
                 writeProfileFile(java.io.File(path), classes)
             }
