@@ -34,7 +34,7 @@ version = "${BuildConfig.LIBRARY_VERSION}$versionSuffix"
 
 val publicationExt = extensions.create<MiuixPublicationExtension>("miuixPublication")
 
-val javadocJar by tasks.registering(Jar::class) {
+val javadocJar = tasks.register<Jar>("javadocJar") {
     description = "javadocJar"
     archiveClassifier.set("javadoc")
 }
@@ -70,7 +70,7 @@ publishing {
         }
     }
     publications.withType<MavenPublication> {
-        artifact(javadocJar.get())
+        artifact(javadocJar)
         pom {
             name.set(project.name)
             description.set(publicationExt.description)

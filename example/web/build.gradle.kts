@@ -40,9 +40,10 @@ kotlin {
             }
         }
 
-        val webMain by creating {
-            dependsOn(commonMain.get())
-        }
+        val webMain =
+            create("webMain") {
+                dependsOn(commonMain.get())
+            }
 
         wasmJsMain {
             dependsOn(webMain)

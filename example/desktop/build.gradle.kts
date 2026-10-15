@@ -16,11 +16,12 @@ kotlin {
     jvm("desktop")
 
     sourceSets {
-        val desktopMain by getting
-        desktopMain.dependencies {
-            implementation(projects.miuixWindow)
-            implementation(projects.example.shared)
-            implementation(compose.desktop.currentOs)
+        named("desktopMain") {
+            dependencies {
+                implementation(projects.miuixWindow)
+                implementation(projects.example.shared)
+                implementation(compose.desktop.currentOs)
+            }
         }
     }
 }
