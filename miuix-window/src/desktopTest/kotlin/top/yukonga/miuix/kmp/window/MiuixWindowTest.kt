@@ -19,15 +19,20 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowExceptionHandler
+import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
+import top.yukonga.miuix.kmp.window.internal.createSafeWindowExceptionHandlerFactory
+import top.yukonga.miuix.kmp.window.internal.isIgnorableComposeDisposalException
 import top.yukonga.miuix.kmp.window.platform.linux.LinuxWindowBackend
 import top.yukonga.miuix.kmp.window.platform.windows.HitTestResult
 import top.yukonga.miuix.kmp.window.platform.windows.toWindowResizeEdge
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -159,5 +164,43 @@ class MiuixWindowTest {
                 assertEquals(expected.toArgb(), pixels[pixels.width / 2, pixels.height / 2].toArgb())
             }
         }
+    }
+
+    @Test
+    fun testIsIgnorableComposeDisposalException() {
+        val direct = IllegalArgumentException("RootNodeOwner is already disposed")
+        assertTrue(isIgnorableComposeDisposalException(direct))
+
+        val wrapped = RuntimeException("Wrapped error", direct)
+        assertTrue(isIgnorableComposeDisposalException(wrapped))
+
+        val otherMessage = IllegalArgumentException("Other message")
+        assertFalse(isIgnorableComposeDisposalException(otherMessage))
+
+        val otherType = IllegalStateException("RootNodeOwner is already disposed")
+        assertFalse(isIgnorableComposeDisposalException(otherType))
+
+        val npe = NullPointerException()
+        assertFalse(isIgnorableComposeDisposalException(npe))
+    }
+
+    @Test
+    fun testCreateSafeWindowExceptionHandlerFactory() {
+        var delegatedException: Throwable? = null
+        val parentFactory = WindowExceptionHandlerFactory {
+            WindowExceptionHandler { throwable -> delegatedException = throwable }
+        }
+        val safeFactory = createSafeWindowExceptionHandlerFactory(parentFactory)
+        val handler = safeFactory.exceptionHandler(java.awt.Frame())
+
+        // Ignorable exception is swallowed
+        val ignorable = IllegalArgumentException("RootNodeOwner is already disposed")
+        handler.onException(ignorable)
+        kotlin.test.assertNull(delegatedException)
+
+        // Other exception is forwarded
+        val fatal = RuntimeException("Real crash")
+        handler.onException(fatal)
+        assertEquals(fatal, delegatedException)
     }
 }

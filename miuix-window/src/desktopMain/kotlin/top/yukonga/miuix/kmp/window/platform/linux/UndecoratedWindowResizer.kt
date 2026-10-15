@@ -217,8 +217,7 @@ internal class UndecoratedWindowResizer(
         } else if (sides.contains(Side.Bottom)) {
             newHeight = (initialWindowSize.height + diffY).coerceAtLeast(window.minimumSize.height)
         }
-        window.setLocation(newXPos, newYPos)
-        window.setSize(newWidth, newHeight)
+        window.setBounds(newXPos, newYPos, newWidth, newHeight)
     }
 
     @Suppress("ConstPropertyName")

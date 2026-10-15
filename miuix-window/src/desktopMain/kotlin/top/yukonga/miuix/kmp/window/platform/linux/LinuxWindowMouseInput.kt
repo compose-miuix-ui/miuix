@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.window.platform.linux
 
 import androidx.compose.ui.geometry.Offset
 import top.yukonga.miuix.kmp.window.internal.findSkiaLayer
+import top.yukonga.miuix.kmp.window.internal.isIgnorableComposeDisposalException
 import java.awt.AWTEvent
 import java.awt.Component
 import java.awt.EventQueue
@@ -111,8 +112,8 @@ internal object LinuxWindowMouseInput {
                     super.dispatchEvent(event)
                 }
                 registrations.forEach { it.handler.afterMouseEvent(mouseEvent) }
-            } catch (e: IllegalArgumentException) {
-                if (e.message?.contains("RootNodeOwner is already disposed") == true) {
+            } catch (e: Throwable) {
+                if (isIgnorableComposeDisposalException(e)) {
                     return
                 }
                 throw e

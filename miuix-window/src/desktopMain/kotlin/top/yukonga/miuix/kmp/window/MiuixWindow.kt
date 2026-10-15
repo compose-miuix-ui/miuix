@@ -24,13 +24,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
 import androidx.compose.ui.window.WindowDecoration
+import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
+import top.yukonga.miuix.kmp.window.internal.createSafeWindowExceptionHandlerFactory
 import top.yukonga.miuix.kmp.window.internal.findSkiaLayer
 import top.yukonga.miuix.kmp.window.internal.hackContentPane
+import top.yukonga.miuix.kmp.window.internal.isIgnorableComposeDisposalException
 import top.yukonga.miuix.kmp.window.internal.rememberDesktopSystemDarkTheme
 import top.yukonga.miuix.kmp.window.internal.resolveForPlatform
 import top.yukonga.miuix.kmp.window.platform.linux.LinuxClientShadow
@@ -73,109 +77,127 @@ fun MiuixWindow(
     val resolvedTransparent = transparent ||
         (DesktopOS.isLinux() && LinuxClientShadow.shouldUseClientShadow(decoration))
 
-    SwingWindow(
-        onCloseRequest = onCloseRequest,
-        state = state,
-        visible = visible,
-        title = title,
-        icon = icon,
-        decoration = resolvedDecoration,
-        transparent = resolvedTransparent,
-        resizable = resizable,
-        enabled = enabled,
-        focusable = focusable,
-        alwaysOnTop = alwaysOnTop,
-        onPreviewKeyEvent = onPreviewKeyEvent,
-        onKeyEvent = onKeyEvent,
-        init = { window ->
-            window.background = java.awt.Color.BLACK
-            window.findSkiaLayer()?.transparency = true
-            window.hackContentPane()
-            init(window)
-        },
+    val currentExceptionHandlerFactory = LocalWindowExceptionHandlerFactory.current
+    val safeExceptionHandlerFactory = remember(currentExceptionHandlerFactory) {
+        createSafeWindowExceptionHandlerFactory(currentExceptionHandlerFactory)
+    }
+
+    CompositionLocalProvider(
+        LocalWindowExceptionHandlerFactory provides safeExceptionHandlerFactory,
     ) {
-        val density = LocalDensity.current
-        val isSystemDark = rememberDesktopSystemDarkTheme()
-        val resolvedCaptionButtonIsDarkTheme = properties.captionButtonIsDarkTheme ?: isSystemDark
-        val resolvedBackgroundIsDarkTheme = properties.backgroundIsDarkTheme ?: isSystemDark
-        val resolvedProperties = remember(properties, resolvedCaptionButtonIsDarkTheme, resolvedBackgroundIsDarkTheme) {
-            properties.copy(
-                captionButtonIsDarkTheme = resolvedCaptionButtonIsDarkTheme,
-                backgroundIsDarkTheme = resolvedBackgroundIsDarkTheme,
-            )
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        CompositionLocalProvider(
-            LocalWindowState provides state,
-            LocalMiuixWindowProperties provides resolvedProperties as MiuixWindowProperties<Window>,
-            LocalDensity provides Density(
-                density = density.density * resolvedProperties.extraDisplayScale,
-                fontScale = density.fontScale * resolvedProperties.extraFontScale,
-            ),
+        SwingWindow(
+            onCloseRequest = onCloseRequest,
+            state = state,
+            visible = visible,
+            title = title,
+            icon = icon,
+            decoration = resolvedDecoration,
+            transparent = resolvedTransparent,
+            resizable = resizable,
+            enabled = enabled,
+            focusable = focusable,
+            alwaysOnTop = alwaysOnTop,
+            onPreviewKeyEvent = onPreviewKeyEvent,
+            onKeyEvent = onKeyEvent,
+            init = { window ->
+                window.background = java.awt.Color.BLACK
+                window.findSkiaLayer()?.transparency = true
+                window.hackContentPane()
+                val existingHandler = window.exceptionHandler
+                if (existingHandler != null) {
+                    window.exceptionHandler = WindowExceptionHandler { throwable ->
+                        if (isIgnorableComposeDisposalException(throwable)) {
+                            return@WindowExceptionHandler
+                        }
+                        existingHandler.onException(throwable)
+                    }
+                }
+                init(window)
+            },
         ) {
-            val minSize = properties.minSize
-            LaunchedEffect(minSize) {
-                if (minSize.width.isSpecified && minSize.height.isSpecified) {
-                    window.minimumSize = Dimension(minSize.width.value.toInt(), minSize.height.value.toInt())
-                }
+            val density = LocalDensity.current
+            val isSystemDark = rememberDesktopSystemDarkTheme()
+            val resolvedCaptionButtonIsDarkTheme = properties.captionButtonIsDarkTheme ?: isSystemDark
+            val resolvedBackgroundIsDarkTheme = properties.backgroundIsDarkTheme ?: isSystemDark
+            val resolvedProperties = remember(properties, resolvedCaptionButtonIsDarkTheme, resolvedBackgroundIsDarkTheme) {
+                properties.copy(
+                    captionButtonIsDarkTheme = resolvedCaptionButtonIsDarkTheme,
+                    backgroundIsDarkTheme = resolvedBackgroundIsDarkTheme,
+                )
             }
 
-            DisposableEffect(window) {
-                val adapter = object : WindowAdapter(), ComponentListener {
-                    override fun windowActivated(e: WindowEvent?) {}
-                    override fun windowDeactivated(e: WindowEvent?) {}
-                    override fun windowIconified(e: WindowEvent?) {}
-                    override fun windowDeiconified(e: WindowEvent?) {}
-                    override fun windowStateChanged(e: WindowEvent) {}
-                    override fun componentResized(e: ComponentEvent?) {}
-                    override fun componentMoved(e: ComponentEvent?) {}
-                    override fun componentShown(e: ComponentEvent?) {
-                        currentProperties.onVisibleChange(window, true)
-                    }
-                    override fun componentHidden(e: ComponentEvent?) {
-                        currentProperties.onVisibleChange(window, false)
-                    }
-                }
-
-                window.addWindowListener(adapter)
-                window.addWindowStateListener(adapter)
-                window.addComponentListener(adapter)
-
-                onDispose {
-                    window.removeWindowListener(adapter)
-                    window.removeWindowStateListener(adapter)
-                    window.removeComponentListener(adapter)
-                }
-            }
-
-            WindowBackgroundBox(
-                transparent = resolvedTransparent,
-                backgroundType = resolvedProperties.backgroundType,
+            @Suppress("UNCHECKED_CAST")
+            CompositionLocalProvider(
+                LocalWindowState provides state,
+                LocalMiuixWindowProperties provides resolvedProperties as MiuixWindowProperties<Window>,
+                LocalDensity provides Density(
+                    density = density.density * resolvedProperties.extraDisplayScale,
+                    fontScale = density.fontScale * resolvedProperties.extraFontScale,
+                ),
             ) {
-                when (DesktopOS.current) {
-                    is DesktopOS.Windows ->
-                        WindowsMiuixWindowFrame(
-                            resizable = resizable,
-                            properties = resolvedProperties,
-                            content = content,
-                        )
+                val minSize = properties.minSize
+                LaunchedEffect(minSize) {
+                    if (minSize.width.isSpecified && minSize.height.isSpecified) {
+                        window.minimumSize = Dimension(minSize.width.value.toInt(), minSize.height.value.toInt())
+                    }
+                }
 
-                    is DesktopOS.MacOS ->
-                        MacOSMiuixWindowFrame(
-                            properties = resolvedProperties,
-                            content = content,
-                        )
+                DisposableEffect(window) {
+                    val adapter = object : WindowAdapter(), ComponentListener {
+                        override fun windowActivated(e: WindowEvent?) {}
+                        override fun windowDeactivated(e: WindowEvent?) {}
+                        override fun windowIconified(e: WindowEvent?) {}
+                        override fun windowDeiconified(e: WindowEvent?) {}
+                        override fun windowStateChanged(e: WindowEvent) {}
+                        override fun componentResized(e: ComponentEvent?) {}
+                        override fun componentMoved(e: ComponentEvent?) {}
+                        override fun componentShown(e: ComponentEvent?) {
+                            currentProperties.onVisibleChange(window, true)
+                        }
+                        override fun componentHidden(e: ComponentEvent?) {
+                            currentProperties.onVisibleChange(window, false)
+                        }
+                    }
 
-                    is DesktopOS.Linux ->
-                        LinuxMiuixWindowFrame(
-                            resizable = resizable,
-                            decoration = decoration,
-                            properties = resolvedProperties,
-                            content = content,
-                        )
+                    window.addWindowListener(adapter)
+                    window.addWindowStateListener(adapter)
+                    window.addComponentListener(adapter)
 
-                    else -> content()
+                    onDispose {
+                        window.removeWindowListener(adapter)
+                        window.removeWindowStateListener(adapter)
+                        window.removeComponentListener(adapter)
+                    }
+                }
+
+                WindowBackgroundBox(
+                    transparent = resolvedTransparent,
+                    backgroundType = resolvedProperties.backgroundType,
+                ) {
+                    when (DesktopOS.current) {
+                        is DesktopOS.Windows ->
+                            WindowsMiuixWindowFrame(
+                                resizable = resizable,
+                                properties = resolvedProperties,
+                                content = content,
+                            )
+
+                        is DesktopOS.MacOS ->
+                            MacOSMiuixWindowFrame(
+                                properties = resolvedProperties,
+                                content = content,
+                            )
+
+                        is DesktopOS.Linux ->
+                            LinuxMiuixWindowFrame(
+                                resizable = resizable,
+                                decoration = decoration,
+                                properties = resolvedProperties,
+                                content = content,
+                            )
+
+                        else -> content()
+                    }
                 }
             }
         }

@@ -3,8 +3,11 @@
 
 package top.yukonga.miuix.kmp.window.internal
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.window.WindowExceptionHandler
+import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.WinDef
 import org.jetbrains.skiko.SkiaLayer
@@ -131,3 +134,28 @@ private fun <T : JComponent> findComponent(container: Container, klass: Class<T>
 }
 
 private inline fun <reified T : JComponent> Container.findComponent(): T? = findComponent(this, T::class.java)
+
+@OptIn(ExperimentalComposeUiApi::class)
+internal fun isIgnorableComposeDisposalException(throwable: Throwable): Boolean {
+    var current: Throwable? = throwable
+    while (current != null) {
+        if (current is IllegalArgumentException && current.message?.contains("RootNodeOwner is already disposed") == true) {
+            return true
+        }
+        current = current.cause
+    }
+    return false
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+internal fun createSafeWindowExceptionHandlerFactory(
+    parentFactory: WindowExceptionHandlerFactory,
+): WindowExceptionHandlerFactory = WindowExceptionHandlerFactory { window ->
+    val defaultHandler = parentFactory.exceptionHandler(window)
+    WindowExceptionHandler { throwable ->
+        if (isIgnorableComposeDisposalException(throwable)) {
+            return@WindowExceptionHandler
+        }
+        defaultHandler.onException(throwable)
+    }
+}
