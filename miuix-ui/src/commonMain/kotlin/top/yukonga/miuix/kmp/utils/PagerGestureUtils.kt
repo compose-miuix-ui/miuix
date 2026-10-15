@@ -28,6 +28,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.CancellationException
@@ -277,6 +279,9 @@ private class PagerPageGestureNode(
 
     init {
         motion.childMotion = childMotion
+        // Must be delegated to register childMotion into Compose's nested scroll tree.
+        // Called directly in init without storing a val property to avoid IDE "unused property" warnings.
+        delegate(nestedScrollModifierNode(childMotion, null))
     }
 
     // CompositionLocal reads have to happen while the node is attached, and the pager's layout
@@ -308,7 +313,7 @@ private class PagerPageGestureNode(
     private val takeoverNode = delegate(PagerPageTakeoverNode(motion, childMotion))
 
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
-        if (pointerEvent.changes.fastAny { it.type == PointerType.Mouse }) {
+        if (pointerEvent.changes.fastAll { it.type == PointerType.Mouse }) {
             return
         }
         // Takeover must own the complete pointer cycle. Feeding that same cycle to the Foundation
@@ -367,24 +372,24 @@ private class PagerPageTakeoverNode(
 
     fun willTrackPointer(pointerEvent: PointerEvent, pass: PointerEventPass): Boolean = pass == PointerEventPass.Initial &&
         pointerId == null &&
-        childMotion.isInMotion &&
-        pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() } != null
-
+        (childMotion.isInMotion || motion.isSettling) &&
+        pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() && it.type != PointerType.Mouse } != null
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
         if (pass != PointerEventPass.Initial) return
         val tracked = pointerId
         if (tracked == null) {
-            val down = pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() } ?: return
-            if (!childMotion.isInMotion) return
+            val down = pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() && it.type != PointerType.Mouse } ?: return
+            val shouldTakeover = childMotion.isInMotion || motion.isSettling
+            if (!shouldTakeover) return
             pointerId = down.id
             isHandlingPointer = false
             dragged = false
             accumulated = Offset.Zero
             velocityTracker.resetTracking()
             velocityTracker.addPointerInputChange(down)
-            // The touch itself supersedes the child's old animation. Keep the local tracking
-            // decision alive so a later horizontal delta can still be handed to the pager.
-            motion.stopChildMotion()
+            if (childMotion.isInMotion) {
+                motion.stopChildMotion()
+            }
             return
         }
         val change = pointerEvent.changes.fastFirstOrNull { it.id == tracked } ?: return
@@ -542,6 +547,8 @@ private class PagerPageMotion(
     var touchSlop: Float = 0f
     var directionSign: Float = -1f
 
+    val isSettling: Boolean
+        get() = settleJob?.isActive == true
     fun update(state: PagerState, intercepted: (() -> Unit)?) {
         pagerState = state
         onIntercepted = intercepted
