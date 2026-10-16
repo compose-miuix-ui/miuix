@@ -22,10 +22,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(project(":miuix-ui"))
-            api(project(":miuix-preference"))
-            implementation(project(":miuix-icons"))
-            implementation(project(":miuix-nav"))
+            api(projects.miuixUi)
+            api(projects.miuixPreference)
+            implementation(projects.miuixIcons)
+            implementation(projects.miuixNav)
         }
     }
 }

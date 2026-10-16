@@ -26,7 +26,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":example:shared"))
+                implementation(projects.example.shared)
             }
         }
 

@@ -58,8 +58,8 @@ kotlin {
         }
 
         commonMain.dependencies {
-            api(project(":miuix-core"))
-            api(project(":miuix-squircle"))
+            api(projects.miuixCore)
+            api(projects.miuixSquircle)
             api(libs.jetbrains.compose.foundation)
 
             implementation(libs.androidx.navigationevent)
@@ -155,5 +155,5 @@ tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
 }
 
 dependencies {
-    baselineProfile(project(":baselineprofile"))
+    baselineProfile(projects.baselineprofile)
 }

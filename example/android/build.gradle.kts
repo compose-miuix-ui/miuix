@@ -12,10 +12,10 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":example:shared"))
+    implementation(projects.example.shared)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.profileinstaller)
-    "baselineProfile"(project(":baselineprofile"))
+    "baselineProfile"(projects.baselineprofile)
 }
 
 @Suppress("UnstableApiUsage")

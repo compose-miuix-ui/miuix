@@ -18,8 +18,8 @@ kotlin {
     sourceSets {
         named("desktopMain") {
             dependencies {
-                implementation(project(":miuix-window"))
-                implementation(project(":example:shared"))
+                implementation(projects.miuixWindow)
+                implementation(projects.example.shared)
                 implementation(compose.desktop.currentOs)
                 implementation(libs.nucleus.darkmode.detector)
             }

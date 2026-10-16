@@ -21,7 +21,7 @@ kotlin {
     sourceSets {
         named("desktopMain") {
             dependencies {
-                implementation(project(":example:shared"))
+                implementation(projects.example.shared)
                 implementation(compose.desktop.currentOs)
                 implementation(libs.nucleus.application)
                 implementation(libs.nucleus.decorated.window.tao)

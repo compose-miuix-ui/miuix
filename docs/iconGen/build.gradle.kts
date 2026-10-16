@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":miuix-ui"))
+    implementation(projects.miuixUi)
 }
 
 val iconsSourceDir =

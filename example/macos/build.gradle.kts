@@ -26,7 +26,7 @@ kotlin {
         macosArm64Main {
             kotlin.srcDir("src/macosMain/kotlin")
             dependencies {
-                implementation(project(":example:shared"))
+                implementation(projects.example.shared)
             }
         }
     }

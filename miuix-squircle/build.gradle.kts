@@ -194,7 +194,7 @@ kotlin {
         commonMain {
             kotlin.srcDir(bakeSquircleSdf)
             dependencies {
-                api(project(":miuix-shader"))
+                api(projects.miuixShader)
                 implementation(libs.jetbrains.compose.foundation)
             }
         }
