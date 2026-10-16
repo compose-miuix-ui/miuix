@@ -33,6 +33,10 @@ kotlin {
 nucleus.application {
     mainClass = "Main_desktopKt"
     buildTypes.release.proguard {
+        isEnabled = true
+        optimize = true
+        obfuscate = false
+        joinOutputJars = true
         configurationFiles.from(project.file("proguard-rules.pro"))
     }
 
@@ -44,13 +48,12 @@ nucleus.application {
     }
 
     nativeDistributions {
-        targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
+        targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb)
         packageName = BuildConfig.APPLICATION_NAME
         packageVersion = BuildConfig.APPLICATION_VERSION_NAME
         homepage = "https://github.com/compose-miuix-ui/miuix"
 
         cleanupNativeLibs = true
-        enableAotCache = true
         compressionLevel = CompressionLevel.Maximum
 
         macOS {
