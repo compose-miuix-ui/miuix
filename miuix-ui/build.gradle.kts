@@ -58,8 +58,8 @@ kotlin {
         }
 
         commonMain.dependencies {
-            api(projects.miuixCore)
-            api(projects.miuixSquircle)
+            api(project(":miuix-core"))
+            api(project(":miuix-squircle"))
             api(libs.jetbrains.compose.foundation)
 
             implementation(libs.androidx.navigationevent)

@@ -22,9 +22,9 @@ kotlin {
     sourceSets {
         getByName("desktopMain") {
             dependencies {
-                api(projects.miuixCore)
-                api(projects.miuixSquircle)
-                api(projects.miuixUi)
+                api(project(":miuix-core"))
+                api(project(":miuix-squircle"))
+                api(project(":miuix-ui"))
                 api(libs.jetbrains.compose.foundation)
                 implementation(libs.jna)
                 implementation(libs.jna.platform)

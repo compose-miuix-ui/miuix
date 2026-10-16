@@ -12,7 +12,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.example.shared)
+    implementation(project(":example:shared"))
     implementation(libs.androidx.activity)
     implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))

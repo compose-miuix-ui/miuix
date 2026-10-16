@@ -18,8 +18,8 @@ kotlin {
     sourceSets {
         named("desktopMain") {
             dependencies {
-                implementation(projects.miuixWindow)
-                implementation(projects.example.shared)
+                implementation(project(":miuix-window"))
+                implementation(project(":example:shared"))
                 implementation(compose.desktop.currentOs)
             }
         }

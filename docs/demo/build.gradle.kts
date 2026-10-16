@@ -1,9 +1,6 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
-
 plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
@@ -25,14 +22,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.miuixUi)
-            api(projects.miuixPreference)
-            implementation(projects.miuixIcons)
-            implementation(projects.miuixNav)
+            api(project(":miuix-ui"))
+            api(project(":miuix-preference"))
+            implementation(project(":miuix-icons"))
+            implementation(project(":miuix-nav"))
         }
     }
-}
-
-rootProject.plugins.withType<YarnPlugin> {
-    rootProject.the<YarnRootExtension>().lockFileDirectoryProperty = rootProject.file("docs/demo").resolve("kotlin-js-store")
 }

@@ -9,3 +9,9 @@ plugins.withType<KotlinBasePlugin> {
         jvmToolchain(BuildConfig.JDK_VERSION)
     }
 }
+
+// CMP 1.12.0's checkComposeUiTestConfigurationFor* false-positives on any Skiko
+// dependency; this repo runs no Compose UI browser tests (CMP-4906).
+tasks.matching { it.name.startsWith("checkComposeUiTestConfigurationFor") }.configureEach {
+    enabled = false
+}

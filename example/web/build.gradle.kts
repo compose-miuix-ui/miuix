@@ -36,7 +36,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(projects.example.shared)
+                implementation(project(":example:shared"))
             }
         }
 
