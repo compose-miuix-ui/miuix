@@ -30,6 +30,9 @@ kotlin {
 
 nucleus.application {
     mainClass = "Main_desktopKt"
+    buildTypes.release.proguard {
+        configurationFiles.from(project.file("proguard-rules.pro"))
+    }
 
     graalvm {
         isEnabled = true
