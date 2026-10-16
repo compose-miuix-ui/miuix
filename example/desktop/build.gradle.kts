@@ -21,6 +21,7 @@ kotlin {
                 implementation(project(":miuix-window"))
                 implementation(project(":example:shared"))
                 implementation(compose.desktop.currentOs)
+                implementation(libs.nucleus.darkmode.detector)
             }
         }
     }

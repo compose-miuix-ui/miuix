@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,11 +26,8 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import dev.nucleusframework.darkmodedetector.isSystemInDarkMode
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.skiko.SystemTheme
-import org.jetbrains.skiko.currentSystemTheme
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.icon
@@ -58,7 +53,7 @@ fun main() = application {
     val updateAppState: ((AppState) -> AppState) -> Unit = remember {
         { transform -> appState = transform(appState) }
     }
-    val systemIsDark = rememberDesktopSystemDarkTheme()
+    val systemIsDark = isSystemInDarkMode()
 
     AppTheme(
         colorMode = appState.colorMode,
@@ -129,16 +124,4 @@ fun main() = application {
             }
         }
     }
-}
-
-@Composable
-private fun rememberDesktopSystemDarkTheme(): Boolean {
-    var isDark by remember { mutableStateOf(currentSystemTheme == SystemTheme.DARK) }
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            isDark = currentSystemTheme == SystemTheme.DARK
-            delay(500)
-        }
-    }
-    return isDark
 }

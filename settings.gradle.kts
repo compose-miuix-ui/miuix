@@ -54,6 +54,7 @@ include(":miuix-window")
 include(":example:shared")
 include(":example:android")
 include(":example:desktop")
+include(":example:desktop-nucleus")
 include(":example:web")
 include(":example:macos")
 
