@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import dev.nucleusframework.desktop.application.dsl.CompressionLevel
+import dev.nucleusframework.desktop.application.dsl.NativeImageOptimization
 import dev.nucleusframework.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -37,6 +39,8 @@ nucleus.application {
     graalvm {
         isEnabled = true
         imageName = "miuix"
+        optimization = NativeImageOptimization.SIZE
+        buildArgs.add("-H:-IncludeMethodData")
     }
 
     nativeDistributions {
@@ -44,6 +48,10 @@ nucleus.application {
         packageName = BuildConfig.APPLICATION_NAME
         packageVersion = BuildConfig.APPLICATION_VERSION_NAME
         homepage = "https://github.com/compose-miuix-ui/miuix"
+
+        cleanupNativeLibs = true
+        enableAotCache = true
+        compressionLevel = CompressionLevel.Maximum
 
         macOS {
             bundleID = BuildConfig.APPLICATION_ID
