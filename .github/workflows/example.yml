@@ -191,6 +191,8 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y patchelf
       - name: Build GraalVM app (${{ matrix.platform }})
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew :example:desktop-nucleus:createGraalvmNativeDistributable
       - name: Rename ${{ matrix.platform }} artifact
         run: mv example/desktop-nucleus/build/compose/binaries/main/graalvm-app/Miuix ${{ matrix.artifact-name }}

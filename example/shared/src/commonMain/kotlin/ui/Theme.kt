@@ -31,7 +31,7 @@ fun AppTheme(
     content: @Composable () -> Unit,
 ) {
     val spec = ThemeColorSpec.entries.getOrNull(colorSpec) ?: ThemeColorSpec.Spec2021
-    val style = ThemePaletteStyle.entries.getOrNull(paletteStyle) ?: ThemePaletteStyle.Content
+    val style = ThemePaletteStyle.entries.getOrNull(paletteStyle) ?: ThemePaletteStyle.TonalSpot
     val parentIsDark = LocalIsDarkTheme.current
     val resolvedIsDark = isDark ?: parentIsDark
     val controller = remember(colorMode, keyColor, spec, style, resolvedIsDark) {

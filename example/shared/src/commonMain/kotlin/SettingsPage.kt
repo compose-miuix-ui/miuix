@@ -146,12 +146,40 @@ private fun SettingsContent(
                                 title = "Palette Style",
                                 items = PaletteStyleOptions,
                                 selectedIndex = appState.paletteStyle,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
+                                onSelectedIndexChange = { styleIndex ->
+                                    updateAppState { state ->
+                                        val newSpec = when (styleIndex) {
+                                            ThemePaletteStyle.Cmf.ordinal -> ThemeColorSpec.Spec2026.ordinal
+                                            else -> state.colorSpec
+                                        }
+                                        state.copy(paletteStyle = styleIndex, colorSpec = newSpec)
+                                    }
+                                },
                             )
+                            val currentStyle = ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
+                            val isCmf = currentStyle == ThemePaletteStyle.Cmf
+                            val isModernSpecSupported = currentStyle in listOf(
+                                ThemePaletteStyle.TonalSpot,
+                                ThemePaletteStyle.Neutral,
+                                ThemePaletteStyle.Vibrant,
+                                ThemePaletteStyle.Expressive,
+                            )
+                            val colorSpecSummary = when {
+                                isCmf -> "Cmf only supports Spec2026"
+                                !isModernSpecSupported -> "${currentStyle.name} only supports Spec2021"
+                                else -> null
+                            }
+                            val effectiveSpecIndex = when {
+                                isCmf -> ThemeColorSpec.Spec2026.ordinal
+                                !isModernSpecSupported -> ThemeColorSpec.Spec2021.ordinal
+                                else -> appState.colorSpec
+                            }
                             OverlayDropdownPreference(
                                 title = "Color Spec",
+                                summary = colorSpecSummary,
+                                enabled = isModernSpecSupported,
                                 items = ColorSpecOptions,
-                                selectedIndex = appState.colorSpec,
+                                selectedIndex = effectiveSpecIndex,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                             )
                         }
