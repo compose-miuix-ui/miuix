@@ -12,16 +12,6 @@ plugins {
 }
 
 kotlin {
-    js {
-        outputModuleName = "composeApp"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-            }
-        }
-        binaries.executable()
-    }
-
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "composeApp"
@@ -46,10 +36,6 @@ kotlin {
             }
 
         wasmJsMain {
-            dependsOn(webMain)
-        }
-
-        jsMain {
             dependsOn(webMain)
         }
     }

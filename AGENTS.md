@@ -20,7 +20,6 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Run Android demo    | `./gradlew :example:android:installDebug`               |
 | Run Desktop demo    | `./gradlew :example:desktop:hotRunDesktop --auto`       |
 | Run WasmJs demo     | `./gradlew :example:web:wasmJsBrowserRun`               |
-| Run Js demo         | `./gradlew :example:web:jsBrowserDevelopmentRun`        |
 | Run macOS demo      | `./gradlew :example:macos:runDebugExecutableMacosArm64` |
 | Run iOS demo        | Open `example/ios/iosApp.xcodeproj` in Xcode and run    |
 

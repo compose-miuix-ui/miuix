@@ -6,12 +6,30 @@ package webfont
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 
-/** One `@font-face` subset reduced to what the preloader needs: where to fetch it and how to tag it. */
 internal data class FontFaceDecl(
     val weight: FontWeight,
     val style: FontStyle,
     val url: String,
-)
+    val ranges: List<IntRange> = emptyList(),
+) {
+    fun covers(codePoint: Int): Boolean {
+        if (ranges.isEmpty()) return false
+        var low = 0
+        var high = ranges.size - 1
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val r = ranges[mid]
+            if (codePoint < r.first) {
+                high = mid - 1
+            } else if (codePoint > r.last) {
+                low = mid + 1
+            } else {
+                return true
+            }
+        }
+        return false
+    }
+}
 
 internal fun parseCssFontFaces(css: String, baseUrl: String? = null): List<FontFaceDecl> {
     val out = mutableListOf<FontFaceDecl>()
@@ -21,7 +39,8 @@ internal fun parseCssFontFaces(css: String, baseUrl: String? = null): List<FontF
         val weight = parseWeight(pickKey(body, "font-weight"))
         val style = parseStyle(pickKey(body, "font-style"))
         val url = pickFontUrl(pickKey(body, "src"), baseUrl) ?: continue
-        out += FontFaceDecl(weight, style, url)
+        val ranges = parseUnicodeRanges(pickKey(body, "unicode-range"))
+        out += FontFaceDecl(weight, style, url, ranges)
     }
     return out
 }
@@ -34,8 +53,6 @@ private fun pickKey(block: String, key: String): String? {
 private fun parseWeight(raw: String?): FontWeight {
     if (raw == null) return FontWeight.Normal
     val tokens = raw.trim().lowercase().split(Regex("\\s+"))
-    // Variable font ranges like "1 999" or "100 900": collapse to Normal so Skia
-    // picks the regular instance instead of an extreme axis value.
     if (tokens.size >= 2 && tokens[0].toIntOrNull() != null && tokens[1].toIntOrNull() != null) {
         return FontWeight.Normal
     }
@@ -49,6 +66,31 @@ private fun parseWeight(raw: String?): FontWeight {
 
 private fun parseStyle(raw: String?): FontStyle = if (raw?.trim()?.lowercase() == "italic") FontStyle.Italic else FontStyle.Normal
 
+private fun parseUnicodeRanges(raw: String?): List<IntRange> {
+    if (raw == null) return emptyList()
+    val out = mutableListOf<IntRange>()
+    val tokens = raw.split(',')
+    for (token in tokens) {
+        val trimmed = token.trim()
+        if (trimmed.isEmpty()) continue
+        val hex = if (trimmed.startsWith("U+", ignoreCase = true)) trimmed.substring(2) else trimmed
+        val dashIdx = hex.indexOf('-')
+        if (dashIdx >= 0) {
+            val start = hex.substring(0, dashIdx).trim().toIntOrNull(16)
+            val end = hex.substring(dashIdx + 1).trim().toIntOrNull(16)
+            if (start != null && end != null) {
+                out.add(start..end)
+            }
+        } else {
+            val point = hex.toIntOrNull(16)
+            if (point != null) {
+                out.add(point..point)
+            }
+        }
+    }
+    return out
+}
+
 private fun pickFontUrl(srcRaw: String?, baseUrl: String?): String? {
     if (srcRaw == null) return null
     val entryRegex = Regex(
@@ -60,8 +102,9 @@ private fun pickFontUrl(srcRaw: String?, baseUrl: String?): String? {
         val format = m.groupValues.getOrNull(2)?.trim()?.lowercase().orEmpty()
         val url = resolveUrl(rawUrl, baseUrl)
         val ext = url.substringBefore('?').substringAfterLast('.', "").lowercase()
-        val isTtfOrOtf = format == "truetype" || format == "opentype" || ext == "ttf" || ext == "otf"
-        if (isTtfOrOtf) return url
+        val isSupportedFont = format in setOf("woff2", "woff", "truetype", "opentype") ||
+            ext in setOf("woff2", "woff", "ttf", "otf")
+        if (isSupportedFont) return url
     }
     return null
 }

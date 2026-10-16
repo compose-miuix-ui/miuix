@@ -14,6 +14,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.drop
 import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.TextStyles
 import ui.AppTheme
 import ui.keyColorFor
 
@@ -21,6 +23,7 @@ import ui.keyColorFor
 fun App(
     padding: PaddingValues = PaddingValues(0.dp),
     onColorModeChange: ((Int) -> Unit)? = null,
+    textStyles: TextStyles = MiuixTheme.textStyles,
 ) {
     var appState by remember { mutableStateOf(AppState()) }
     val updateAppState: ((AppState) -> AppState) -> Unit = remember {
@@ -39,6 +42,7 @@ fun App(
         keyColor = keyColorFor(appState.seedIndex),
         paletteStyle = appState.paletteStyle,
         colorSpec = appState.colorSpec,
+        textStyles = textStyles,
     ) {
         App(
             appState = appState,

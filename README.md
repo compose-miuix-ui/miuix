@@ -12,17 +12,15 @@ A UI library for Compose Multiplatform.
 ### Supported Platforms
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)
-![iOS](https://img.shields.io/badge/iOS-Native-white?logo=apple)
-![macOS](https://img.shields.io/badge/macOS-Native-white?logo=apple)
-![Desktop](https://img.shields.io/badge/Desktop-JVM-007396?logo=openjdk)
-![JsCanvas](https://img.shields.io/badge/Web-JsCanvas-F7DF1E?logo=javascript&logoColor=white)
-![WasmJs](https://img.shields.io/badge/Web-WasmJs-654FF0?logo=webassembly&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-000000?logo=apple&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)
+![Desktop](https://img.shields.io/badge/Desktop-007396?logo=openjdk&logoColor=white)
+![Web](https://img.shields.io/badge/Web-4285F4?logo=googlechrome&logoColor=white)
 
 ### Demos
 
-[![JsCanvas](https://img.shields.io/badge/Demo-JsCanvas-F7DF1E?logo=javascript&logoColor=white)](https://compose-miuix-ui.github.io/miuix-jsCanvas/)
-[![WasmJs](https://img.shields.io/badge/Demo-WasmJs-654FF0?logo=webassembly&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
-[![Other](https://img.shields.io/badge/Demo-Other-white?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
+[![Web](https://img.shields.io/badge/Demo-Web-4285F4?logo=googlechrome&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
+[![Other](https://img.shields.io/badge/Demo-Other-2088FF?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
 
 ### Modules
 
