@@ -146,40 +146,27 @@ private fun SettingsContent(
                                 title = "Palette Style",
                                 items = PaletteStyleOptions,
                                 selectedIndex = appState.paletteStyle,
-                                onSelectedIndexChange = { styleIndex ->
-                                    updateAppState { state ->
-                                        val newSpec = when (styleIndex) {
-                                            ThemePaletteStyle.Cmf.ordinal -> ThemeColorSpec.Spec2026.ordinal
-                                            else -> state.colorSpec
-                                        }
-                                        state.copy(paletteStyle = styleIndex, colorSpec = newSpec)
-                                    }
-                                },
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
                             )
                             val currentStyle = ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
                             val isCmf = currentStyle == ThemePaletteStyle.Cmf
-                            val isModernSpecSupported = currentStyle in listOf(
+                            val isSpec2025Supported = currentStyle in listOf(
                                 ThemePaletteStyle.TonalSpot,
                                 ThemePaletteStyle.Neutral,
                                 ThemePaletteStyle.Vibrant,
                                 ThemePaletteStyle.Expressive,
                             )
                             val colorSpecSummary = when {
-                                isCmf -> "Cmf only supports Spec2026"
-                                !isModernSpecSupported -> "${currentStyle.name} only supports Spec2021"
+                                isCmf -> "Cmf automatically uses 2026 specification"
+                                !isSpec2025Supported -> "${currentStyle.name} only supports Spec2021"
                                 else -> null
-                            }
-                            val effectiveSpecIndex = when {
-                                isCmf -> ThemeColorSpec.Spec2026.ordinal
-                                !isModernSpecSupported -> ThemeColorSpec.Spec2021.ordinal
-                                else -> appState.colorSpec
                             }
                             OverlayDropdownPreference(
                                 title = "Color Spec",
                                 summary = colorSpecSummary,
-                                enabled = isModernSpecSupported,
+                                enabled = isSpec2025Supported,
                                 items = ColorSpecOptions,
-                                selectedIndex = effectiveSpecIndex,
+                                selectedIndex = if (isSpec2025Supported) appState.colorSpec else ThemeColorSpec.Spec2021.ordinal,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                             )
                         }

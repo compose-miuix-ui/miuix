@@ -55,7 +55,7 @@ fun App() {
   ```
 
   ::: tip 提示
-  `ThemeColorSpec.Spec2025` 仅支持 `TonalSpot`、`Neutral`、`Vibrant` 与 `Expressive` 调色板风格；`ThemeColorSpec.Spec2026` 在此基础上额外支持 `Cmf`，且 `Cmf` 风格仅支持 `Spec2026`。其他风格会自动降级为 `Spec2021`。
+  `ThemeColorSpec.Spec2025` 仅由 `TonalSpot`、`Neutral`、`Vibrant` 与 `Expressive` 调色板风格支持，其他风格会自动降级为 `Spec2021`（`Cmf` 风格会自动使用 2026 规范）。
   :::
 
 - **手动控制深色模式**
@@ -126,26 +126,25 @@ fun App() {
 
 ### ThemePaletteStyle
 
-| 值         | 色彩规范                     | 说明                                   |
-| ---------- | ---------------------------- | -------------------------------------- |
-| TonalSpot  | Spec2021, Spec2025, Spec2026 | 默认 Material You 风格，平衡的色调变化 |
-| Neutral    | Spec2021, Spec2025, Spec2026 | 柔和、低彩度调色板                     |
-| Vibrant    | Spec2021, Spec2025, Spec2026 | 高彩度、鲜艳调色板                     |
-| Expressive | Spec2021, Spec2025, Spec2026 | 大胆且富有艺术感的创意配色             |
-| Rainbow    | Spec2021                     | 广谱多色相调色板                       |
-| FruitSalad | Spec2021                     | 活泼的多色相调色板                     |
-| Monochrome | Spec2021                     | 单色灰度调色板                         |
-| Fidelity   | Spec2021                     | 紧密匹配种子颜色                       |
-| Content    | Spec2021                     | 从内容颜色派生，最大程度保持准确性     |
-| Cmf        | Spec2026                     | Color, Material, Finish 调色板         |
+| 值         | 色彩规范           | 说明                                   |
+| ---------- | ------------------ | -------------------------------------- |
+| TonalSpot  | Spec2021, Spec2025 | 默认 Material You 风格，平衡的色调变化 |
+| Neutral    | Spec2021, Spec2025 | 柔和、低彩度调色板                     |
+| Vibrant    | Spec2021, Spec2025 | 高彩度、鲜艳调色板                     |
+| Expressive | Spec2021, Spec2025 | 大胆且富有艺术感的创意配色             |
+| Rainbow    | Spec2021           | 广谱多色相调色板                       |
+| FruitSalad | Spec2021           | 活泼的多色相调色板                     |
+| Monochrome | Spec2021           | 单色灰度调色板                         |
+| Fidelity   | Spec2021           | 紧密匹配种子颜色                       |
+| Content    | Spec2021           | 从内容颜色派生，最大程度保持准确性     |
+| Cmf        | Spec2026 (自动)    | Color, Material, Finish (CMF) 调色板   |
 
 ### ThemeColorSpec
 
-| 值       | 说明                                                               |
-| -------- | ------------------------------------------------------------------ |
-| Spec2021 | 原始 Material Design 3 颜色规范                                    |
-| Spec2025 | 2025 颜色规范（TonalSpot、Neutral、Vibrant、Expressive 支持）      |
-| Spec2026 | 2026 颜色规范（TonalSpot、Neutral、Vibrant、Expressive、Cmf 支持） |
+| 值       | 说明                                                          |
+| -------- | ------------------------------------------------------------- |
+| Spec2021 | 原始 Material Design 3 颜色规范                               |
+| Spec2025 | 2025 颜色规范（TonalSpot、Neutral、Vibrant、Expressive 支持） |
 
 ## MiuixTheme 对象
 

@@ -56,7 +56,7 @@ fun App() {
   ```
 
   ::: tip
-  `ThemeColorSpec.Spec2025` is only supported by `TonalSpot`, `Neutral`, `Vibrant`, and `Expressive` palette styles. `ThemeColorSpec.Spec2026` additionally supports `Cmf`, and `Cmf` itself only supports `Spec2026`. Other styles gracefully fall back to `Spec2021`.
+  `ThemeColorSpec.Spec2025` is only supported by `TonalSpot`, `Neutral`, `Vibrant`, and `Expressive` palette styles; other styles gracefully fall back to `Spec2021` (`Cmf` style automatically uses the 2026 specification).
   :::
 
 - **Manual Dark Mode Control**
@@ -127,26 +127,25 @@ The `ThemeController` manages the current color scheme of the Miuix theme.
 
 ### ThemePaletteStyle
 
-| Value      | Color Spec                   | Description                                               |
-| ---------- | ---------------------------- | --------------------------------------------------------- |
-| TonalSpot  | Spec2021, Spec2025, Spec2026 | Default Material You style with balanced tonal variations |
-| Neutral    | Spec2021, Spec2025, Spec2026 | Muted, low-chroma palette                                 |
-| Vibrant    | Spec2021, Spec2025, Spec2026 | High-chroma, vivid palette                                |
-| Expressive | Spec2021, Spec2025, Spec2026 | Bold and artistic palette with creative color shifts      |
-| Rainbow    | Spec2021                     | Broad spectrum of hues                                    |
-| FruitSalad | Spec2021                     | Playful, multi-hue palette                                |
-| Monochrome | Spec2021                     | Single-hue grayscale palette                              |
-| Fidelity   | Spec2021                     | Closely matches the seed color                            |
-| Content    | Spec2021                     | Derived from content colors for maximum accuracy          |
-| Cmf        | Spec2026                     | Color, Material, Finish palette                           |
+| Value      | Color Spec         | Description                                               |
+| ---------- | ------------------ | --------------------------------------------------------- |
+| TonalSpot  | Spec2021, Spec2025 | Default Material You style with balanced tonal variations |
+| Neutral    | Spec2021, Spec2025 | Muted, low-chroma palette                                 |
+| Vibrant    | Spec2021, Spec2025 | High-chroma, vivid palette                                |
+| Expressive | Spec2021, Spec2025 | Bold and artistic palette with creative color shifts      |
+| Rainbow    | Spec2021           | Broad spectrum of hues                                    |
+| FruitSalad | Spec2021           | Playful, multi-hue palette                                |
+| Monochrome | Spec2021           | Single-hue grayscale palette                              |
+| Fidelity   | Spec2021           | Closely matches the seed color                            |
+| Content    | Spec2021           | Derived from content colors for maximum accuracy          |
+| Cmf        | Spec2026 (Auto)    | Color, Material, Finish (CMF) palette                     |
 
 ### ThemeColorSpec
 
-| Value    | Description                                                                          |
-| -------- | ------------------------------------------------------------------------------------ |
-| Spec2021 | Original Material Design 3 color specification                                       |
-| Spec2025 | 2025 color specification (supported by TonalSpot, Neutral, Vibrant, Expressive)      |
-| Spec2026 | 2026 color specification (supported by TonalSpot, Neutral, Vibrant, Expressive, Cmf) |
+| Value    | Description                                                                             |
+| -------- | --------------------------------------------------------------------------------------- |
+| Spec2021 | Original Material Design 3 color specification                                          |
+| Spec2025 | 2025 color specification (supported by TonalSpot, Neutral, Vibrant, Expressive) |
 
 ## MiuixTheme Object
 

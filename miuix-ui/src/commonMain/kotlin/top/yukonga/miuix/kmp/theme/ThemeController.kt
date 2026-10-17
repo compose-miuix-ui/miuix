@@ -31,7 +31,6 @@ import com.materialkolor.scheme.SchemeVibrant
 enum class ThemeColorSpec {
     Spec2021,
     Spec2025,
-    Spec2026,
 }
 
 @Stable
@@ -65,8 +64,8 @@ internal fun colorsFromSeed(
     paletteStyle: ThemePaletteStyle,
     dark: Boolean,
 ): Colors {
-    // Check if the selected style supports modern specs (SPEC_2025 / SPEC_2026)
-    val isModernSpecSupported = when (paletteStyle) {
+    // Check if the selected style supports SPEC_2025
+    val isSpec2025Supported = when (paletteStyle) {
         ThemePaletteStyle.TonalSpot,
         ThemePaletteStyle.Neutral,
         ThemePaletteStyle.Vibrant,
@@ -77,11 +76,10 @@ internal fun colorsFromSeed(
     }
 
     // SchemeCmf only supports SPEC_2026.
-    // For other styles, gracefully downgrade to SPEC_2021 if modern specs are unsupported.
+    // For other styles, gracefully downgrade to SPEC_2021 if SPEC_2025 is unsupported.
     val internalSpec = when {
         paletteStyle == ThemePaletteStyle.Cmf -> ColorSpec.SpecVersion.SPEC_2026
-        colorSpec == ThemeColorSpec.Spec2026 && isModernSpecSupported -> ColorSpec.SpecVersion.SPEC_2026
-        colorSpec == ThemeColorSpec.Spec2025 && isModernSpecSupported -> ColorSpec.SpecVersion.SPEC_2025
+        colorSpec == ThemeColorSpec.Spec2025 && isSpec2025Supported -> ColorSpec.SpecVersion.SPEC_2025
         else -> ColorSpec.SpecVersion.SPEC_2021
     }
 
@@ -214,17 +212,15 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  * @param darkColors The color scheme to use when the dark appearance is active. This is used when
  *   the [colorSchemeMode] is [ColorSchemeMode.Dark] or when it is [ColorSchemeMode.System] and a
  *   dark theme is selected.
- * @param keyColor The key color for generating dynamic color schemes. This is used when the
- *   [colorSchemeMode] is set to a Monet mode.
  * @param colorSpec The requested Material color specification to use when generating dynamic color
- *   schemes in Monet modes. When [ThemeColorSpec.Spec2026] or [ThemeColorSpec.Spec2025] is requested,
- *   it is only honored for palette styles whose underlying implementation supports modern specs
- *   ([ThemePaletteStyle.Cmf] only supports 2026); otherwise, the effective spec is downgraded
- *   to [ThemeColorSpec.Spec2021] at runtime by [colorsFromSeed].
+ *   schemes in Monet modes. When [ThemeColorSpec.Spec2025] is requested, it is only honored for
+ *   palette styles whose underlying implementation supports the 2025 spec; otherwise, the effective
+ *   spec is downgraded to [ThemeColorSpec.Spec2021] at runtime by [colorsFromSeed] ([ThemePaletteStyle.Cmf]
+ *   always uses the 2026 spec).
  * @param paletteStyle The palette style to use when generating dynamic color schemes. The selected
- *   style determines whether [ThemeColorSpec.Spec2026] or [ThemeColorSpec.Spec2025] can be applied
- *   ([ThemePaletteStyle.Cmf] only supports 2026); if modern specs are not supported, the effective
- *   [colorSpec] will fall back to [ThemeColorSpec.Spec2021].
+ *   style determines whether [ThemeColorSpec.Spec2025] can be applied; if it is not supported, the
+ *   effective [colorSpec] will fall back to [ThemeColorSpec.Spec2021] ([ThemePaletteStyle.Cmf]
+ *   always uses the 2026 spec).
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */
