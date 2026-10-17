@@ -147,7 +147,7 @@ internal class UndecoratedWindowResizer(
         if (cursorComponent !== component) {
             restoreCursor()
             cursorComponent = component
-            previousCursor = component.cursor
+            previousCursor = if (component.isCursorSet) component.cursor else null
         }
         // Compose may update the cursor while dispatching hover events to a Dialog.
         component.cursor = cursor
