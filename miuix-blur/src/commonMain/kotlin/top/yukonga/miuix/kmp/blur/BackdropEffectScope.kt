@@ -248,6 +248,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var blurBlendFactor: Float = 0f
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
+    override fun clear() = runtimeShaderCache.clear()
 
     fun update(scope: DrawScope): Boolean {
         val newDensity = scope.density
@@ -364,6 +365,7 @@ internal abstract class BackdropEffectScopeImpl :
         blurBlendExpLo = 0
         blurBlendExpHi = 0
         blurBlendFactor = 0f
+        clear()
     }
 }
 

@@ -3,22 +3,31 @@
 
 package top.yukonga.miuix.kmp.blur
 
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
@@ -35,6 +44,7 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
@@ -42,6 +52,11 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.highlight.drawHighlight
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
@@ -117,24 +132,65 @@ fun Modifier.drawBackdrop(
     // The effect pipeline (blur / blend / highlight / custom passes) is built on RuntimeShader.
     val effectiveEnabled = enabled && isRuntimeShaderSupported()
     return this
+        .then(if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier)
         .then(
-            if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier,
-        )
-        .then(
-            DrawBackdropElement(
-                backdrop = backdrop,
-                shape = shape,
-                effects = effects,
-                highlight = highlight,
-                layerBlock = layerBlock,
-                onDrawBehind = onDrawBehind,
-                onDrawBackdrop = onDrawBackdrop,
-                onDrawSurface = onDrawSurface,
-                onDrawFront = onDrawFront,
-                contentBlendMode = contentBlendMode,
-                progressiveGradient = progressiveGradient,
-                enabled = effectiveEnabled,
-            ),
+            Modifier.composed {
+                val lifecycle = LocalLifecycleOwner.current.lifecycle
+                val coroutineScope = rememberCoroutineScope()
+                var resumeGeneration by remember(lifecycle) { mutableIntStateOf(0) }
+
+                DisposableEffect(lifecycle, coroutineScope) {
+                    var resumeJob: Job? = null
+                    var skipInitialResume = lifecycle.currentState == Lifecycle.State.RESUMED
+                    val observer = LifecycleEventObserver { _, event ->
+                        when (event) {
+                            Lifecycle.Event.ON_PAUSE -> {
+                                resumeJob?.cancel()
+                                resumeJob = null
+                            }
+
+                            Lifecycle.Event.ON_RESUME -> {
+                                if (skipInitialResume) {
+                                    skipInitialResume = false
+                                    return@LifecycleEventObserver
+                                }
+                                resumeJob?.cancel()
+                                resumeJob = coroutineScope.launch {
+                                    withFrameNanos { }
+                                    withFrameNanos { }
+                                    resumeGeneration++
+                                }
+                            }
+
+                            else -> Unit
+                        }
+                    }
+                    lifecycle.addObserver(observer)
+
+                    onDispose {
+                        resumeJob?.cancel()
+                        lifecycle.removeObserver(observer)
+                    }
+                }
+
+                key(backdrop, resumeGeneration) {
+                    DrawBackdropElement(
+                        backdrop = backdrop,
+                        shape = shape,
+                        effects = effects,
+                        highlight = highlight,
+                        layerBlock = layerBlock,
+                        onDrawBehind = onDrawBehind,
+                        onDrawBackdrop = onDrawBackdrop,
+                        onDrawSurface = onDrawSurface,
+                        onDrawFront = onDrawFront,
+                        contentBlendMode = contentBlendMode,
+                        progressiveGradient = progressiveGradient,
+                        enabled = effectiveEnabled,
+                        resumeGeneration = resumeGeneration,
+                    )
+                }
+            },
         )
 }
 
@@ -151,6 +207,7 @@ private class DrawBackdropElement(
     val contentBlendMode: BlendMode = BlendMode.SrcOver,
     val progressiveGradient: ProgressiveBlur? = null,
     val enabled: Boolean = true,
+    val resumeGeneration: Int,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
@@ -166,10 +223,12 @@ private class DrawBackdropElement(
         contentBlendMode = contentBlendMode,
         progressiveGradient = progressiveGradient,
         enabled = enabled,
+        resumeGeneration = resumeGeneration,
     )
 
     override fun update(node: DrawBackdropNode) {
-        val enabledChanged = node.enabled != enabled
+        val wasEnabled = node.isEnabled
+        val resumeGenerationChanged = node.resumeGeneration != resumeGeneration
         val gradientCleared = node.progressiveGradient != null && progressiveGradient == null
         node.backdrop = backdrop
         node.updateShape(shape)
@@ -183,14 +242,19 @@ private class DrawBackdropElement(
         node.contentBlendMode = contentBlendMode
         node.progressiveGradient = progressiveGradient
         node.enabled = enabled
+        node.resumeGeneration = resumeGeneration
         if (gradientCleared) {
             node.releaseCompositeResources()
         }
-        if (enabledChanged) {
-            if (!enabled) {
+        if (resumeGenerationChanged) {
+            node.onResumeGenerationChanged()
+        }
+        if (wasEnabled != node.isEnabled) {
+            if (!node.isEnabled) {
                 node.releaseGraphicsLayers()
             }
             node.invalidateMeasurement()
+            node.invalidateDraw()
         }
         node.invalidateDrawCache()
     }
@@ -216,6 +280,7 @@ private class DrawBackdropElement(
         if (contentBlendMode != other.contentBlendMode) return false
         if (progressiveGradient != other.progressiveGradient) return false
         if (enabled != other.enabled) return false
+        if (resumeGeneration != other.resumeGeneration) return false
         return true
     }
 
@@ -232,6 +297,7 @@ private class DrawBackdropElement(
         result = 31 * result + contentBlendMode.hashCode()
         result = 31 * result + (progressiveGradient?.hashCode() ?: 0)
         result = 31 * result + enabled.hashCode()
+        result = 31 * result + resumeGeneration
         return result
     }
 }
@@ -249,6 +315,7 @@ private class DrawBackdropNode(
     var contentBlendMode: BlendMode = BlendMode.SrcOver,
     var progressiveGradient: ProgressiveBlur? = null,
     var enabled: Boolean = true,
+    var resumeGeneration: Int,
 ) : Modifier.Node(),
     LayoutModifierNode,
     DrawModifierNode,
@@ -257,6 +324,10 @@ private class DrawBackdropNode(
     CompositionLocalConsumerModifierNode {
 
     override val shouldAutoInvalidate: Boolean = false
+
+    private var lifecycle: Lifecycle? = null
+    private var lifecycleObserver: LifecycleEventObserver? = null
+    val isEnabled: Boolean get() = enabled
 
     private val shapeProvider: ShapeProvider = ShapeProvider(shape)
 
@@ -355,11 +426,8 @@ private class DrawBackdropNode(
     /** Smoothstep weight of the higher (secondary) level while [blending]. */
     private var blendFactor: Float by mutableFloatStateOf(0f)
 
-    private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
-        clip = true
-        shape = shapeProvider.shape
-        compositingStrategy = CompositingStrategy.Offscreen
-    }
+    private val shapeClipPath = Path()
+    private val foregroundGroupPaint = Paint()
 
     private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
 
@@ -525,11 +593,7 @@ private class DrawBackdropNode(
     ): MeasureResult {
         val placeable = measurable.measure(constraints)
         return layout(placeable.width, placeable.height) {
-            if (enabled) {
-                placeable.placeWithLayer(IntOffset.Zero, layerBlock = layoutLayerBlock)
-            } else {
-                placeable.place(IntOffset.Zero)
-            }
+            placeable.place(IntOffset.Zero)
         }
     }
 
@@ -656,10 +720,32 @@ private class DrawBackdropNode(
     }
 
     override fun ContentDrawScope.draw() {
-        if (!enabled) {
+        if (!isEnabled) {
             drawContent()
             return
         }
+        shapeClipPath.reset()
+        when (val outline = shapeProvider.shape.createOutline(size, layoutDirection, this)) {
+            is Outline.Rectangle -> shapeClipPath.addRect(outline.rect)
+            is Outline.Rounded -> shapeClipPath.addRoundRect(outline.roundRect)
+            is Outline.Generic -> shapeClipPath.addPath(outline.path)
+        }
+        clipPath(shapeClipPath) {
+            if (contentBlendMode == BlendMode.DstIn) {
+                val bounds = Rect(0f, 0f, size.width, size.height)
+                drawContext.canvas.saveLayer(bounds, foregroundGroupPaint)
+                try {
+                    this@draw.drawBackdropContent()
+                } finally {
+                    drawContext.canvas.restore()
+                }
+            } else {
+                this@draw.drawBackdropContent()
+            }
+        }
+    }
+
+    private fun ContentDrawScope.drawBackdropContent() {
         if (effectScope.update(this)) {
             updateEffects()
         }
@@ -723,7 +809,7 @@ private class DrawBackdropNode(
     }
 
     private fun updateEffects() {
-        if (!enabled) return
+        if (!isEnabled) return
         primary.ensureMain()
 
         // Gradient mode: progressiveBlur() records radii + downscale and splits the chain; the
@@ -970,7 +1056,18 @@ private class DrawBackdropNode(
 
     override fun onAttach() {
         effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
-        if (enabled) {
+        val ownerLifecycle = currentValueOf(LocalLifecycleOwner).lifecycle
+        lifecycle = ownerLifecycle
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Rebuild stale GPU resources without disabling blur during navigation lifecycle
+                // transitions (visible entries commonly move between STARTED and RESUMED).
+                recreateGraphicsResources()
+            }
+        }
+        lifecycleObserver = observer
+        ownerLifecycle.addObserver(observer)
+        if (isEnabled) {
             primary.ensureMain()
             observeEffects()
         }
@@ -1102,7 +1199,21 @@ private class DrawBackdropNode(
     }
 
     override fun onDetach() {
+        lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
+        lifecycleObserver = null
+        lifecycle = null
         releaseGraphicsLayers()
         layoutCoordinates = null
+    }
+
+    private fun recreateGraphicsResources() {
+        releaseGraphicsLayers()
+        if (enabled) primary.ensureMain()
+        invalidateMeasurement()
+        invalidateDraw()
+    }
+
+    fun onResumeGenerationChanged() {
+        recreateGraphicsResources()
     }
 }
