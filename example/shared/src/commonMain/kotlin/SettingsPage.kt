@@ -156,17 +156,16 @@ private fun SettingsContent(
                                 ThemePaletteStyle.Vibrant,
                                 ThemePaletteStyle.Expressive,
                             )
-                            val colorSpecSummary = when {
-                                isCmf -> "Cmf automatically uses 2026 specification"
-                                !isSpec2025Supported -> "${currentStyle.name} only supports Spec2021"
-                                else -> null
+                            val (colorSpecItems, colorSpecIndex, colorSpecEnabled) = when {
+                                isCmf -> Triple(listOf("Spec2026"), 0, false)
+                                !isSpec2025Supported -> Triple(listOf("Spec2021"), 0, false)
+                                else -> Triple(ColorSpecOptions, appState.colorSpec, true)
                             }
                             OverlayDropdownPreference(
                                 title = "Color Spec",
-                                summary = colorSpecSummary,
-                                enabled = isSpec2025Supported,
-                                items = ColorSpecOptions,
-                                selectedIndex = if (isSpec2025Supported) appState.colorSpec else ThemeColorSpec.Spec2021.ordinal,
+                                enabled = colorSpecEnabled,
+                                items = colorSpecItems,
+                                selectedIndex = colorSpecIndex,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                             )
                         }
