@@ -47,7 +47,7 @@ internal class LinuxCaptionBarHitTest {
             is ComposeDialog -> window.semanticsOwners
             else -> return isHovered
         }
-        // Keep normal Compose hit testing for custom controls layered above CaptionBarHitTest.
+        // Keep normal Compose hit testing for custom controls layered above WindowDraggableArea.
         // For a modal scene, use its public dialog semantics rather than changing Dialog itself.
         val dialog = owners.toList().asReversed().firstNotNullOfOrNull {
             findDialog(it.rootSemanticsNode)

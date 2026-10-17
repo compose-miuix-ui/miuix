@@ -22,7 +22,7 @@ import top.yukonga.miuix.kmp.window.platform.windows.windowsCaptionBarTouchInput
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CaptionBarHitTest(
+fun WindowDraggableArea(
     modifier: Modifier = Modifier,
 ) {
     val windowInfo = LocalMiuixWindowInfo.current

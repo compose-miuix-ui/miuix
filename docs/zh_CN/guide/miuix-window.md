@@ -71,7 +71,7 @@ fun main() = application {
                             .height(captionBarHeight)
                             .background(MiuixTheme.colorScheme.surface),
                     ) {
-                        CaptionBarHitTest()
+                        WindowDraggableArea()
                         MiuixCaptionBar {
                             Text(
                                 text = "Miuix 桌面端",
@@ -100,10 +100,10 @@ fun main() = application {
 
 Compose 原生 `Window` 与 `DialogWindow` 的强化替代容器。自动接管跨平台非客户区扩展、输入消息拦截与样式处理。
 
-### `MiuixCaptionBar` 与 `CaptionBarHitTest`
+### `MiuixCaptionBar` 与 `WindowDraggableArea`
 
 - **`MiuixCaptionBar`**：自适应标题栏容器，macOS 端自动向右让出红绿灯按钮空间，Windows 端避让右侧控制按钮，Linux 端按照系统配置的位置避让控制按钮。
-- **`CaptionBarHitTest`**：放置在标题栏底层，负责捕获拖拽，避免遮挡上层交互控件（如搜索栏、标签页或操作按钮）。
+- **`WindowDraggableArea`**：放置在标题栏底层，负责捕获拖拽，避免遮挡上层交互控件（如搜索栏、标签页或操作按钮）。
 
 ### `MiuixWindowProperties` 属性配置
 

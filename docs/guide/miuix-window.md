@@ -71,7 +71,7 @@ fun main() = application {
                             .height(captionBarHeight)
                             .background(MiuixTheme.colorScheme.surface),
                     ) {
-                        CaptionBarHitTest()
+                        WindowDraggableArea()
                         MiuixCaptionBar {
                             Text(
                                 text = "Miuix Desktop",
@@ -100,10 +100,10 @@ fun main() = application {
 
 Drop-in containers for standard Compose `Window` and `DialogWindow`. They automatically setup platform-specific styling hooks, input handling, and non-client region geometry.
 
-### `MiuixCaptionBar` & `CaptionBarHitTest`
+### `MiuixCaptionBar` & `WindowDraggableArea`
 
 - **`MiuixCaptionBar`**: Automatically reserves space based on platform button alignment (left on macOS for traffic lights, right on Windows, and the configured system position on Linux).
-- **`CaptionBarHitTest`**: Placed behind or around interactive elements in the caption bar to capture native drag-to-move gestures without intercepting clicks on buttons or search fields.
+- **`WindowDraggableArea`**: Placed behind or around interactive elements in the caption bar to capture native drag-to-move gestures without intercepting clicks on buttons or search fields.
 
 ### `MiuixWindowProperties`
 

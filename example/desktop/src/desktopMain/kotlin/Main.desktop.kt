@@ -32,13 +32,13 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.icon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.CaptionBarHitTest
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.LocalWindowState
 import top.yukonga.miuix.kmp.window.MiuixCaptionBar
 import top.yukonga.miuix.kmp.window.MiuixWindow
 import top.yukonga.miuix.kmp.window.MiuixWindowBackgroundType
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.WindowDraggableArea
 import ui.AppTheme
 import ui.keyColorFor
 
@@ -94,7 +94,7 @@ fun main() = application {
                             .height(captionBarHeight)
                             .background(MiuixTheme.colorScheme.surface),
                     ) {
-                        CaptionBarHitTest()
+                        WindowDraggableArea()
                         MiuixCaptionBar {
                             Row(
                                 modifier = Modifier.fillMaxSize(),
