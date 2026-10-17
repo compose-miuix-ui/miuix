@@ -196,6 +196,8 @@ kotlin {
             dependencies {
                 api(projects.miuixShader)
                 implementation(libs.jetbrains.compose.foundation)
+                implementation(libs.jetbrains.lifecycle.runtime)
+                implementation(libs.jetbrains.lifecycle.runtime.compose)
             }
         }
     }

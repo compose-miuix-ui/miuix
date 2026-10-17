@@ -20,6 +20,8 @@ sealed interface RuntimeShaderCache {
      * @param string The AGSL/SkSL shader source compiled on a cache miss.
      */
     fun obtainRuntimeShader(key: String, string: String): RuntimeShader
+
+    fun clear()
 }
 
 /**
@@ -41,5 +43,9 @@ internal class RuntimeShaderCacheImpl : RuntimeShaderCache {
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = synchronized(lock) {
         runtimeShaders.getOrPut(key) { RuntimeShader(string) }
+    }
+
+    override fun clear() {
+        runtimeShaders.clear()
     }
 }
