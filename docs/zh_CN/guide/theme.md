@@ -204,3 +204,31 @@ fun MyApp() {
     }
 }
 ```
+
+## 屏幕缺口适配 (`ProvideDisplayCutoutFix`)
+
+Miuix 在 `MiuixTheme` 根组合项中默认集成了 `ProvideDisplayCutoutFix`。
+
+在部分 Android OEM 设备上（尤其是横屏平板设备和折叠屏设备），系统在向 View 树派发窗口边距时，可能会缺失屏幕缺口信息（导致 `WindowInsets.displayCutout` 为 0），从而引起侧边导航栏或顶部应用栏被摄像头挖孔遮挡。
+
+`ProvideDisplayCutoutFix` 会在 Android 11+（API 30+）读取底层的 `WindowManager.currentWindowMetrics` 并动态补齐缺失的缺口数据，让所有依赖标准 Insets 的组件（如 `NavigationRail`、`TopAppBar`、`Scaffold`、`ListPopup` 等）均能正常识别并安全避让缺口。
+
+### 手动调用
+
+通常情况下由 `MiuixTheme` 自动挂载，无需手动调用。如果存在未被 `MiuixTheme` 包裹的自定义窗口或独立层级，也可按需手动引入：
+
+```kotlin
+ProvideDisplayCutoutFix()
+```
+
+### 禁用缺口修复
+
+如果应用需要自行完全接管窗口边距或保持系统原始行为，可通过 `LocalDisplayCutoutFixEnabled` 显式关闭：
+
+```kotlin
+CompositionLocalProvider(LocalDisplayCutoutFixEnabled provides false) {
+    MiuixTheme {
+        // 禁用自动缺口修复的内容
+    }
+}
+```

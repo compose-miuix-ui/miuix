@@ -204,4 +204,32 @@ fun MyApp() {
         // Application content
     }
 }
+
+## Display Cutout Adaptation (`ProvideDisplayCutoutFix`)
+
+Miuix automatically integrates `ProvideDisplayCutoutFix` into `MiuixTheme`.
+
+On certain Android devices (especially tablets in landscape orientation and foldable devices), the OEM system window insets dispatch mechanism may fail to report the display cutout to the View tree (`WindowInsets.displayCutout` evaluates to 0) even when the window extends into the cutout area.
+
+`ProvideDisplayCutoutFix` queries the WindowManager's current window metrics (API 30+) and supplements the View tree's `WindowInsets` so that all Compose components (such as `NavigationRail`, `TopAppBar`, `Scaffold`, and `ListPopup`) properly avoid display cutouts.
+
+### Manual Usage
+
+Normally this is handled automatically by `MiuixTheme`. If you have a custom root window or overlay outside of `MiuixTheme`, you can also invoke it directly:
+
+```kotlin
+ProvideDisplayCutoutFix()
+```
+
+### Disabling the Fix
+
+If your application handles display cutouts manually or requires the default system behavior without supplementation, you can disable it via `LocalDisplayCutoutFixEnabled`:
+
+```kotlin
+CompositionLocalProvider(LocalDisplayCutoutFixEnabled provides false) {
+    MiuixTheme {
+        // Content with automatic cutout fix disabled
+    }
+}
+```
 ```

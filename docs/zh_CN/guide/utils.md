@@ -303,3 +303,9 @@ coroutineScope.launch {
     pagerState.springAnimateToPage(targetPage)
 }
 ```
+
+## 屏幕缺口修复 (`ProvideDisplayCutoutFix`)
+
+`ProvideDisplayCutoutFix` 解决了部分 Android OEM 设备（如横屏平板设备和折叠屏设备）在系统分发时丢失屏幕缺口（Cutout）的缺陷，通过底层 `WindowManager.currentWindowMetrics` 动态补齐缺口安全边距。
+
+该功能已默认内置在 `MiuixTheme` 中。详情请参见[主题系统](theme.md#屏幕缺口适配-providedisplaycutoutfix)指南。

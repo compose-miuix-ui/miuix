@@ -433,9 +433,13 @@ private fun WideScreenContent(
             .fillMaxSize(),
         contentWindowInsets =
         WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Start),
-            ),
+            if (appState.showNavigationBar) {
+                WindowInsets.displayCutout.exclude(
+                    WindowInsets.displayCutout.only(WindowInsetsSides.Start),
+                )
+            } else {
+                WindowInsets.displayCutout
+            },
         ),
         floatingActionButton = {
             FloatingActionButton(show = appState.showFloatingActionButton)

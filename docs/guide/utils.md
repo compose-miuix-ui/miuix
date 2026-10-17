@@ -303,3 +303,9 @@ coroutineScope.launch {
     pagerState.springAnimateToPage(targetPage)
 }
 ```
+
+## Display Cutout Fix (`ProvideDisplayCutoutFix`)
+
+`ProvideDisplayCutoutFix` resolves display cutout dispatching bugs on certain OEM Android devices (e.g. tablets in landscape orientation and foldable devices) by supplementing missing cutout data from `WindowManager.currentWindowMetrics`.
+
+It is integrated automatically in `MiuixTheme`. For details, see the [Theme System](theme.md#display-cutout-adaptation-providedisplaycutoutfix) guide.
