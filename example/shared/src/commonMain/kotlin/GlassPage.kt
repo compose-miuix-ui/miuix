@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,12 +39,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import component.GlassBottomSheetDemo
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
@@ -51,16 +51,16 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.glass.GlassDialog
+import top.yukonga.miuix.kmp.glass.GlassDialogButton
+import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.GlassDropdownPopup
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
-import top.yukonga.miuix.kmp.glass.GlassOverlayDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupAnchor
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
@@ -77,6 +77,7 @@ import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassTransformPopup
+import top.yukonga.miuix.kmp.glass.glassDialogSurface
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
@@ -91,6 +92,8 @@ import top.yukonga.miuix.kmp.icon.glass.Image
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.Settings
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
@@ -147,7 +150,7 @@ private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Glass.Settings, "Settings"),
 )
 
-private val OverlayNames = listOf("None", "Popup", "Dialog")
+private val OverlayNames = listOf("None", "Popup", "Dialog", "Bottom Sheet")
 
 private val TabPlacements = listOf("Top bar", "List")
 private const val TABS_IN_TOP_BAR = 0
@@ -155,6 +158,7 @@ private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
+private const val OVERLAY_BOTTOM_SHEET = 3
 private const val DROPDOWN_NONE = 0
 private const val DROPDOWN_LOG_LEVEL = 1
 private const val DROPDOWN_TAB_ROW = 2
@@ -189,6 +193,7 @@ fun GlassPage(padding: PaddingValues) {
     val backdrop = rememberLayerBackdrop()
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
+    val dialogBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
@@ -211,7 +216,6 @@ fun GlassPage(padding: PaddingValues) {
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
     var joinedTab by remember { mutableIntStateOf(0) }
-    var visible by remember { mutableStateOf(false) }
     var wallpaper by remember { mutableStateOf(false) }
     val menuAnchor = rememberGlassPopupAnchor()
     var dropdownAnchor by remember { mutableStateOf(Rect.Zero) }
@@ -290,13 +294,16 @@ fun GlassPage(padding: PaddingValues) {
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    GlassPageHost(modifier = Modifier.fillMaxSize()) {
         // Record the page and primary menu, including its scale and dimming mask.
         // The secondary must stay outside this layer so it never samples itself.
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(secondaryBackdrop)) {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
+                    // The dialog renders in the outer host, outside this recording.
+                    // Capture the page's bars as well as its body, before the route scrim.
+                    .layerBackdrop(dialogBackdrop)
                     .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
                 bottomBar = {
                     Column(
@@ -399,6 +406,37 @@ fun GlassPage(padding: PaddingValues) {
                     )
                 },
             ) { innerPadding ->
+                OverlayDialog(
+                    show = overlayIndex == OVERLAY_DIALOG,
+                    surface = glassDialogSurface(backdrop = dialogBackdrop),
+                    dimColor = GlassDialogDefaults.ScrimColor,
+                    title = "Glass Dialog",
+                    summary = "Blurred background with the dialog's own three-layer material.",
+                    onDismissRequest = { overlayIndex = OVERLAY_NONE },
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        GlassDialogButton(
+                            onClick = { overlayIndex = OVERLAY_NONE },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(text = "Cancel", style = MiuixTheme.textStyles.button)
+                        }
+                        GlassDialogButton(
+                            onClick = { overlayIndex = OVERLAY_NONE },
+                            modifier = Modifier.weight(1f),
+                            role = GlassDialogButtonRole.Primary,
+                        ) {
+                            Text(text = "Confirm", style = MiuixTheme.textStyles.button)
+                        }
+                    }
+                }
+
+                GlassBottomSheetDemo(
+                    onDismissRequest = { overlayIndex = OVERLAY_NONE },
+                    show = overlayIndex == OVERLAY_BOTTOM_SHEET,
+                    backdrop = dialogBackdrop,
+                )
+
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
                     Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
                         Box(
@@ -497,12 +535,17 @@ fun GlassPage(padding: PaddingValues) {
                                         checked = wallpaper,
                                         onCheckedChange = { wallpaper = it },
                                     )
-                                    SwitchPreference(
+                                    ArrowPreference(
                                         title = "Show Dialog",
-                                        checked = visible,
-                                        onCheckedChange = {
-                                            visible = it
-                                            overlayIndex = if (it) OVERLAY_DIALOG else OVERLAY_NONE
+                                        onClick = {
+                                            overlayIndex = OVERLAY_DIALOG
+                                            activeDropdown = DROPDOWN_NONE
+                                        },
+                                    )
+                                    ArrowPreference(
+                                        title = "Show Bottom Sheet",
+                                        onClick = {
+                                            overlayIndex = OVERLAY_BOTTOM_SHEET
                                             activeDropdown = DROPDOWN_NONE
                                         },
                                     )
@@ -545,50 +588,6 @@ fun GlassPage(padding: PaddingValues) {
                                 }
                             }
                         }
-                    }
-                }
-            }
-
-            GlassDialog(
-                visible = overlayIndex == OVERLAY_DIALOG,
-                onDismissRequest = {
-                    overlayIndex = OVERLAY_NONE
-                    visible = false
-                },
-                backdrop = backdrop,
-                scrimAlpha = if (isInDark) {
-                    GlassOverlayDefaults.ScrimAlphaDark
-                } else {
-                    GlassOverlayDefaults.ScrimAlphaLight
-                },
-                style = style,
-                alpha = alpha,
-                stroke = stroke,
-            ) {
-                Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-                Text(
-                    text = "The dialog wears the material the page is set to.",
-                    style = MiuixTheme.textStyles.body2,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 18.dp),
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    TextButton(
-                        text = "Cancel",
-                        onClick = {
-                            overlayIndex = OVERLAY_NONE
-                            visible = false
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                    Button(
-                        onClick = {
-                            overlayIndex = OVERLAY_NONE
-                            visible = false
-                        },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(text = "Confirm", style = MiuixTheme.textStyles.button)
                     }
                 }
             }
@@ -773,7 +772,6 @@ fun GlassPage(padding: PaddingValues) {
                     text = label,
                     onClick = {
                         overlayIndex = position
-                        visible = position == OVERLAY_DIALOG
                         activeDropdown = DROPDOWN_NONE
                     },
                     selected = position == overlayIndex,
@@ -784,6 +782,17 @@ fun GlassPage(padding: PaddingValues) {
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
         )
+    }
+}
+
+/** Keeps the root popup host outside the page recording used by the dialog. */
+@Composable
+private fun GlassPageHost(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Scaffold(modifier = modifier, contentWindowInsets = WindowInsets(0)) {
+        Box(modifier = Modifier.fillMaxSize(), content = content)
     }
 }
 

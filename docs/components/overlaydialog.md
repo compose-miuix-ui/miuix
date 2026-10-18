@@ -78,6 +78,8 @@ Scaffold {
 | maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
 | largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
 | cornerRadius               | Dp?                    | Overrides the dialog corner radius. When null, DialogDefaults.CornerRadius for the centered presentation, or derived from the screen corner radius (clamped to 32dp..48dp) when bottom-attached | null | No |
+| dimColor                   | Color                  | Dimming color before opening/closing and predictive-back progress are applied | MiuixTheme.colorScheme.windowDimming | No |
+| surface                    | (@Composable DialogSurfaceScope.() -> Modifier)? | Replaces the default background and clip, before content padding | null | No |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                     | Yes      |
 
 ### DialogDefaults Object
@@ -102,6 +104,36 @@ The DialogDefaults object provides default settings for the OverlayDialog compon
 | backgroundColor() | Color       | Get default dialog background color |
 
 ## Advanced Usage
+
+### Custom Surface
+
+The optional `surface` slot replaces the dialog background and clipping while retaining the host's layout, animation, insets and dismissal behavior. `backgroundColor` applies only when `surface` is null. The slot receives a `DialogSurfaceScope`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| cornerRadius | Dp | Resolved radius, including explicit overrides and screen-dependent defaults |
+| scrimColor | State&lt;Color&gt; | Current animated dimming color; transparent when window dimming is disabled |
+| scale | State&lt;Float&gt; | Combined opening/closing and predictive-back scale, for screen-aligned backdrop sampling |
+
+Read animated state in the drawing phase. With `miuix-glass`, use the dialog-specific material:
+
+```kotlin
+OverlayDialog(
+    show = showDialog,
+    onDismissRequest = { showDialog = false },
+    dimColor = GlassDialogDefaults.ScrimColor,
+    surface = glassDialogSurface(backdrop = dialogBackdrop),
+) {
+    GlassDialogButton(
+        onClick = { showDialog = false },
+        role = GlassDialogButtonRole.Primary,
+    ) {
+        Text("Close", style = MiuixTheme.textStyles.button)
+    }
+}
+```
+
+Import these helpers from `top.yukonga.miuix.kmp.glass`. `GlassDialogButton` uses a translucent tonal fill for `Normal` and `Destructive`, and the primary theme fill for `Primary`; all variants share the dialog's material. See [Dialog Actions](/guide/glass#dialog-actions) for parameters and defaults. The backdrop must record the page and its bars **outside the popup host**, excluding the dialog and its scrim. See [Glass Material](/guide/glass#dialog-material) for capture placement and calibration limits.
 
 ### Custom Styled Dialog
 

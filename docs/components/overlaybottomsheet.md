@@ -76,6 +76,8 @@ Scaffold {
 | enableNestedScroll         | Boolean                   | Whether to enable nested scrolling for the content             | true                                       | No       |
 | renderInRootScaffold       | Boolean                   | Whether to render the bottom sheet in the root (outermost) Scaffold. When true, it covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                          | Yes      |
+| dimColor                   | Color                     | Dimming color before opening, closing and drag progress are applied | MiuixTheme.colorScheme.windowDimming | No |
+| surface                    | (@Composable BottomSheetSurfaceScope.() -> Modifier)? | Replaces the background and clipping, including the elastic bottom extension | null | No |
 
 ### BottomSheetDefaults Object
 
@@ -98,6 +100,34 @@ The BottomSheetDefaults object provides default settings for the OverlayBottomSh
 | dragHandleColor() | Color       | Get default drag indicator color |
 
 ## Advanced Usage
+
+### Glass Surface
+
+With `miuix-glass`, use the launcher's bottom-sheet blur/blend material:
+
+```kotlin
+OverlayBottomSheet(
+    show = showBottomSheet,
+    title = "Glass Bottom Sheet",
+    onDismissRequest = { showBottomSheet = false },
+    dimColor = GlassBottomSheetDefaults.ScrimColor,
+    surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+) {
+    Text("Content stays sharp above the shared material")
+}
+```
+
+Import `GlassBottomSheetDefaults` and `glassBottomSheetSurface` from `top.yukonga.miuix.kmp.glass`. Record the page and its bars in `sheetBackdrop`, excluding the sheet host and its scrim. With nested scaffolds, record the inner page and keep `renderInRootScaffold = true`. See [Bottom Sheet Material](/guide/glass#bottom-sheet-material) for capture placement and calibration limits.
+
+The optional `surface` slot replaces `backgroundColor` and the default clipping while preserving the handle, content layout, insets, slide animation, nested scrolling and dismissal. Its receiver is `BottomSheetSurfaceScope`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `cornerRadius` | Dp | Resolved top radius; bottom corners remain square |
+| `scrimColor` | State&lt;Color&gt; | Animated dim color; transparent when window dimming is disabled |
+| `isOverscroll` | Boolean | True for the exposed bottom extension during upward overscroll; its radius is zero |
+
+Read animated state during drawing. A custom surface can be called for both the sheet and its elastic extension; omit edge strokes on the latter. `glassBottomSheetSurface` handles this automatically.
 
 ### Custom Styled Bottom Sheet
 

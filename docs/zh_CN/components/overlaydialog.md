@@ -78,6 +78,8 @@ Scaffold {
 | maxWidth                   | Dp                     | 对话框最大宽度                               | DialogDefaults.MaxWidth          | 否       |
 | largeScreen                | Boolean?               | 覆盖大屏呈现样式（居中缩放淡入而非底部滑入）。为 null 时根据窗口尺寸自动检测 | null | 否 |
 | cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导（限制在 32dp..48dp） | null | 否 |
+| dimColor                   | Color                  | 应用显隐动画和预测返回进度之前的遮罩颜色 | MiuixTheme.colorScheme.windowDimming | 否 |
+| surface                    | (@Composable DialogSurfaceScope.() -> Modifier)? | 在内容内边距之前替换默认背景及裁剪 | null | 否 |
 | content                    | @Composable () -> Unit | 对话框的内容                                 | -                                     | 是       |
 
 ### DialogDefaults
@@ -100,6 +102,36 @@ Scaffold {
 | backgroundColor() | Color    | 获取默认对话框背景颜色 |
 
 ## 进阶用法
+
+### 自定义表面
+
+可选的 `surface` 插槽替换对话框背景和裁剪，布局、动画、系统插入内边距及关闭行为仍由宿主负责。只有 `surface` 为 null 时才使用 `backgroundColor`。插槽接收 `DialogSurfaceScope`：
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| cornerRadius | Dp | 已解析的圆角，包含显式覆盖及随屏幕变化的默认值 |
+| scrimColor | State&lt;Color&gt; | 当前动画中的遮罩颜色；关闭窗口遮罩时为透明 |
+| scale | State&lt;Float&gt; | 显隐和预测返回的组合缩放，用于保持背景采样与屏幕对齐 |
+
+动画状态应在绘制阶段读取。引入 `miuix-glass` 后，可以使用对话框专用材质：
+
+```kotlin
+OverlayDialog(
+    show = showDialog,
+    onDismissRequest = { showDialog = false },
+    dimColor = GlassDialogDefaults.ScrimColor,
+    surface = glassDialogSurface(backdrop = dialogBackdrop),
+) {
+    GlassDialogButton(
+        onClick = { showDialog = false },
+        role = GlassDialogButtonRole.Primary,
+    ) {
+        Text("关闭", style = MiuixTheme.textStyles.button)
+    }
+}
+```
+
+从 `top.yukonga.miuix.kmp.glass` 导入这些辅助组件。`GlassDialogButton` 的 `Normal` 和 `Destructive` 使用半透明填色，`Primary` 使用主题主色，均共享对话框材质；参数与默认值见[对话框操作按钮](/zh_CN/guide/glass#对话框操作按钮)。背景采样必须位于弹窗宿主之外，记录页面及其顶部、底部栏，并排除对话框和遮罩。采样位置和校准限制见[玻璃材质](/zh_CN/guide/glass#对话框材质)。
 
 ### 自定义样式对话框
 

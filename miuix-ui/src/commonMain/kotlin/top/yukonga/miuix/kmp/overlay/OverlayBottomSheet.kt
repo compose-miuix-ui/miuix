@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
+import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 
 /**
@@ -40,6 +42,10 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  * @param renderInRootScaffold Whether to render the bottom sheet in the root (outermost) Scaffold.
  *   When true (default), the bottom sheet covers the full screen. When false, it renders within the
  *   current Scaffold's bounds.
+ * @param dimColor The unanimated dimming color.
+ * @param surface Optional replacement for the default background and clipping. Also used for
+ *   the exposed bottom edge during upward overscroll, with [BottomSheetSurfaceScope.isOverscroll].
+ *   [backgroundColor] applies only when this is null.
  * @param content The [Composable] content of the [OverlayBottomSheet].
  */
 @Composable
@@ -62,6 +68,8 @@ fun OverlayBottomSheet(
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     renderInRootScaffold: Boolean = true,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     BottomSheetContentLayout(
@@ -96,6 +104,8 @@ fun OverlayBottomSheet(
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
+        dimColor = dimColor,
+        surface = surface,
         content = content,
     )
 }

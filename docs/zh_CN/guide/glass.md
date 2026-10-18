@@ -78,6 +78,8 @@ Box(
 
 `GlassMaterial` 是悬浮栏使用的另一套处理：一个模糊半径，外加最多三层颜色，每层各自使用独立的混合模式。`GlassMaterials.puredThinGlass(isDark)` 是每个悬浮栏都使用的令牌，`GlassMaterials.popupViewGlass(isDark)` 对应弹窗，`GlassMaterials.actionBarMask(isDark)` 对应顶栏遮罩。
 
+`GlassMaterials.dialogGlass(isDark)` 选择下文中的对话框专用材质。
+
 `GlassMotion` 保存组件使用的弹簧参数，需要与组件对齐动画时可读取。
 
 ## 表面
@@ -177,6 +179,149 @@ GlassTabRow(
 组件自带两套配色：`GlassTabRowDefaults.primaryColors()` 用于默认观感，`GlassTabRowDefaults.neutralColors()` 适合内容本身已占据强调色的页面（配合 `GlassTabRowDefaults.NeutralHeight` 使用）。
 
 `surfaceAlpha` 表示材质的显现程度。请由页面重叠状态驱动它，而不是标题的展开状态。`GlassSegmentedTabRow` 是相连的变体。
+
+### 对话框材质
+
+`glassDialogSurface` 为 `OverlayDialog` 提供专用的模糊混色材质。标题、尺寸、系统插入内边距和关闭行为仍由 `OverlayDialog` 负责。操作按钮使用 `GlassDialogButton`，在这层共享材质上叠加填色。
+
+背景采样应位于弹窗宿主下方。例如，让外层 `Scaffold` 承载对话框，内层记录页面及顶部、底部栏：
+
+```kotlin
+val dialogBackdrop = rememberLayerBackdrop()
+var showDialog by remember { mutableStateOf(false) }
+
+Scaffold(contentWindowInsets = WindowInsets(0)) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize().layerBackdrop(dialogBackdrop),
+        topBar = { /* 页面顶部栏 */ },
+        bottomBar = { /* 页面底部栏 */ },
+    ) { padding ->
+        TextButton(
+            text = "显示对话框",
+            onClick = { showDialog = true },
+            modifier = Modifier.padding(padding),
+        )
+        OverlayDialog(
+            show = showDialog,
+            onDismissRequest = { showDialog = false },
+            dimColor = GlassDialogDefaults.ScrimColor,
+            surface = glassDialogSurface(backdrop = dialogBackdrop),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                GlassDialogButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("取消", style = MiuixTheme.textStyles.button)
+                }
+                GlassDialogButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier.weight(1f),
+                    role = GlassDialogButtonRole.Primary,
+                ) {
+                    Text("确定", style = MiuixTheme.textStyles.button)
+                }
+            }
+        }
+    }
+}
+```
+
+此处应保持 `renderInRootScaffold = true`，使对话框位于内层采样之外。如果已有外层宿主提供这个边界，直接复用即可。
+
+| GlassDialogDefaults | 默认值 / 行为 |
+| --- | --- |
+| ScrimColor | `#33000000`，即 20% 黑色 |
+| material() | 按主题选择 `DialogGlassLight` / `DialogGlassDark`，模糊输入为 60dp |
+| stroke() | 使用浅色 / 深色小描边作为首版 bloom 近似 |
+| containerColor() | 主题背景色，用于不透明回退 |
+
+`glassDialogSurface(backdrop, material, stroke, containerColor)` 支持覆盖这些参数；背景为空或运行时 shader 不可用时使用不透明回退。圆角由宿主传入，此表面关闭折射及额外投影。
+
+材质按以下顺序混色：
+
+| 层 | 浅色 | 深色 |
+| --- | --- | --- |
+| 1 | `#05000000 / PlusDarker` | `#1A000000 / PlusDarker` |
+| 2 | `#99FFFFFF / SoftLight` | `#996C6C6C / Luminosity` |
+| 3 | `#99FFFFFF / HardLight` | `#99060606 / SoftLight` |
+
+当前实现先采样干净的页面，在局部采样中混入宿主的实时遮罩，再模糊和混色。传入的背景应排除遮罩。原生遮罩采样顺序、模糊核换算及 bloom 仍需视觉校准，这是首版还原。
+
+#### 对话框操作按钮
+
+`GlassDialogButton` 直接绘制在父级对话框材质上，不接收背景采样。普通和警示按钮通过半透明填色透出模糊背景，主操作按钮使用主题主色填充。
+
+| `GlassDialogButtonRole` | 填色 | 内容颜色 |
+| --- | --- | --- |
+| `Normal`（默认） | 主题 `onBackground`，浅色 15/255、深色 36/255 不透明度 | `onBackground`，浅色 90%、深色 80% |
+| `Primary` | `primary` | `onPrimary` |
+| `Destructive` | 与 `Normal` 相同 | `error` |
+
+默认中性主题下，普通填色为 `#0F000000` / `#24FFFFFF`。按下时在填色和内容上方共同覆盖 `#1F000000` / `#24FFFFFF`，按下、松开和取消时即时更新，不额外添加涟漪、模糊或缩放。
+
+| 参数 | 默认值 / 行为 |
+| --- | --- |
+| `onClick` | 必填操作回调 |
+| `modifier` | `Modifier`；宽度和位置由调用方决定 |
+| `enabled` | `true`；禁用时无按压覆盖层，也不触发回调 |
+| `role` | `GlassDialogButtonRole.Normal` |
+| `cornerRadius` | `GlassDialogButtonDefaults.CornerRadius` = 16dp |
+| `minWidth` / `minHeight` | `GlassDialogButtonDefaults.MinWidth` / `MinHeight` = 0dp / 50dp |
+| `colors` | `GlassDialogButtonDefaults.buttonColors(role)`，返回 `ButtonColors` |
+| `pressedColor` | `GlassDialogButtonDefaults.pressedColor()`，按当前主题选择 |
+| `insideMargin` | `GlassDialogButtonDefaults.InsideMargin` = 水平 24dp |
+| `interactionSource` | 可选 `MutableInteractionSource` |
+| `content` | 居中的 `RowScope` 插槽；文字使用 `MiuixTheme.textStyles.button` |
+
+禁用的普通和警示按钮保留半透明填色，内容不透明度分别为 38% 和 30%。禁用主按钮使用 30% 主色填充，`onPrimary` 在浅色模式保持不透明，深色模式使用 77/255 不透明度。主色与警示色的 RGB 跟随 Compose 主题。当前水平内边距始终为 24dp；原生 Flutter 会在文字缩放从 1 增至 3 时，把水平内边距从 24 插值到 12、再到 6。
+
+### 底部抽屉材质
+
+桌面原生 bottomsheet 和 dialog 引用了完全相同的浅深色三层混色表，模糊输入同为 60dp。贴底形态只圆顶部。`glassBottomSheetSurface` 通过 `OverlayBottomSheet.surface` 接入这套材质：
+
+```kotlin
+val sheetBackdrop = rememberLayerBackdrop()
+var showSheet by remember { mutableStateOf(false) }
+
+Scaffold(contentWindowInsets = WindowInsets(0)) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize().layerBackdrop(sheetBackdrop),
+        topBar = { /* 页面顶部栏 */ },
+        bottomBar = { /* 页面底部栏 */ },
+    ) { padding ->
+        TextButton(
+            text = "显示底部抽屉",
+            onClick = { showSheet = true },
+            modifier = Modifier.padding(padding),
+        )
+        OverlayBottomSheet(
+            show = showSheet,
+            title = "Glass Bottom Sheet",
+            onDismissRequest = { showSheet = false },
+            dimColor = GlassBottomSheetDefaults.ScrimColor,
+            surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+        ) {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text("可滚动的内容清晰地绘制在材质上方")
+            }
+        }
+    }
+}
+```
+
+保持 `renderInRootScaffold = true`，让外层 Scaffold 在采样区域之外承载 sheet。已有的干净页面背景可以和 dialog 共用；不要把任何浮层或其遮罩录入背景。
+
+| GlassBottomSheetDefaults | 默认值 / 行为 |
+| --- | --- |
+| `ScrimColor` | `#33000000`，即 20% 黑色，由宿主驱动动画 |
+| `material()` | 按主题选择 `DialogGlassLight` / `DialogGlassDark`；原生 sheet 共用这些模糊和颜色输入 |
+| `stroke()` | 使用 `MiddleLight` / `MiddleDark` 作为首版 bloom 近似 |
+| `containerColor()` | 主题背景色，用于不透明回退 |
+
+`glassBottomSheetSurface(backdrop, material, stroke, containerColor)` 支持参数覆盖。背景为空或运行时 shader 不可用时使用回退。宿主通过 `BottomSheetSurfaceScope` 提供顶部圆角及绘制阶段读取的实时遮罩。上拉回弹时，露出的底部区域也会补上相同材质，使用直角并关闭描边。滑入和拖动时按 sheet 当前屏幕位置采样；内容、拖动条、系统插入内边距、嵌套滚动及关闭行为仍由宿主负责。
+
+此辅助组件面向贴底的 `OverlayBottomSheet`，不实现原生浮动 sheet 形态或分段停靠。原生 sheet 的 bloom 配置与 dialog 不同；bloom 映射、模糊核换算及遮罩采样顺序仍需视觉校准。当前实现不添加折射或额外投影。
 
 ### GlassDialog
 

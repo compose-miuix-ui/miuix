@@ -128,7 +128,7 @@ class GlassNavigationDragTest {
         var previous = 0f
         for (frame in 1..60) {
             val value = animation.getValueFromNanos(frame * 16_000_000L)
-            assertTrue(value >= previous && value <= 100f)
+            assertTrue(value in previous..100f)
             previous = value
         }
         assertEquals(100f, previous)

@@ -75,6 +75,8 @@ Scaffold {
 | enableNestedScroll         | Boolean                   | 是否允许内容嵌套滚动                         | true                                       | 否       |
 | renderInRootScaffold       | Boolean                   | 是否在根（最外层）Scaffold 中渲染底部抽屉。为 true 时，覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染 | true | 否 |
 | content                    | @Composable () -> Unit    | 底部抽屉的内容                               | -                                          | 是       |
+| dimColor                   | Color                     | 应用显隐与拖动进度前的遮罩颜色 | MiuixTheme.colorScheme.windowDimming | 否 |
+| surface                    | (@Composable BottomSheetSurfaceScope.() -> Modifier)? | 替换背景与裁剪，同时用于上拉回弹时的底部延伸区域 | null | 否 |
 
 ### BottomSheetDefaults
 
@@ -95,6 +97,34 @@ Scaffold {
 | dragHandleColor() | Color    | 获取默认拖拽指示器颜色 |
 
 ## 进阶用法
+
+### 玻璃表面
+
+引入 `miuix-glass` 后，可以使用桌面原生 bottomsheet 的模糊混色材质：
+
+```kotlin
+OverlayBottomSheet(
+    show = showBottomSheet,
+    title = "Glass Bottom Sheet",
+    onDismissRequest = { showBottomSheet = false },
+    dimColor = GlassBottomSheetDefaults.ScrimColor,
+    surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+) {
+    Text("内容清晰地绘制在共享材质上方")
+}
+```
+
+从 `top.yukonga.miuix.kmp.glass` 导入 `GlassBottomSheetDefaults` 和 `glassBottomSheetSurface`。`sheetBackdrop` 应记录页面及顶部、底部栏，排除 sheet 宿主和遮罩。使用嵌套 Scaffold 时，采样内层页面，并保持 `renderInRootScaffold = true`。完整采样示例与校准限制见[底部抽屉材质](/zh_CN/guide/glass#底部抽屉材质)。
+
+可选的 `surface` 插槽替换 `backgroundColor` 和默认裁剪，同时保留拖动条、内容布局、系统插入内边距、滑入动画、嵌套滚动和关闭行为。接收者为 `BottomSheetSurfaceScope`：
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| `cornerRadius` | Dp | 已解析的顶部圆角，底部保持直角 |
+| `scrimColor` | State&lt;Color&gt; | 动画中的遮罩颜色；关闭窗口遮罩时为透明 |
+| `isOverscroll` | Boolean | 上拉回弹时补出的底部区域为 true，此时圆角为零 |
+
+动画状态应在绘制阶段读取。自定义表面可能分别用于 sheet 主体和回弹延伸区域，后者应关闭边缘描边；`glassBottomSheetSurface` 已自动处理。
 
 ### 自定义样式底部抽屉
 

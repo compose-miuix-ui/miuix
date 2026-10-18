@@ -78,6 +78,8 @@ Three companions complete a surface:
 
 `GlassMaterial` is the treatment the floating bars use: a blur radius plus up to three colour layers, each on its own blend mode. `GlassMaterials.puredThinGlass(isDark)` is the token every floating bar uses, `GlassMaterials.popupViewGlass(isDark)` covers a popup, and `GlassMaterials.actionBarMask(isDark)` covers a bar's mask.
 
+`GlassMaterials.dialogGlass(isDark)` selects the separate dialog material described below.
+
 `GlassMotion` holds the springs the components animate with, if you need to match them.
 
 ## Surfaces
@@ -177,6 +179,149 @@ GlassTabRow(
 Two colour sets ship with it: `GlassTabRowDefaults.primaryColors()` for the default look, and `GlassTabRowDefaults.neutralColors()` for a page whose content already owns the accent (pair it with `GlassTabRowDefaults.NeutralHeight`).
 
 `surfaceAlpha` is how far the material has come up. Drive it from the page-overlap state rather than the title's expand state. `GlassSegmentedTabRow` is the joined variant.
+
+### Dialog Material
+
+`glassDialogSurface` gives `OverlayDialog` a dialog-specific blur/blend material. Its title, sizing, insets and dismissal still belong to `OverlayDialog`. Use `GlassDialogButton` for actions that tint this shared material.
+
+Keep the recording below the popup host. For example, the outer `Scaffold` hosts the dialog and the inner one records the page, including its bars:
+
+```kotlin
+val dialogBackdrop = rememberLayerBackdrop()
+var showDialog by remember { mutableStateOf(false) }
+
+Scaffold(contentWindowInsets = WindowInsets(0)) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize().layerBackdrop(dialogBackdrop),
+        topBar = { /* Page top bar */ },
+        bottomBar = { /* Page bottom bar */ },
+    ) { padding ->
+        TextButton(
+            text = "Show dialog",
+            onClick = { showDialog = true },
+            modifier = Modifier.padding(padding),
+        )
+        OverlayDialog(
+            show = showDialog,
+            onDismissRequest = { showDialog = false },
+            dimColor = GlassDialogDefaults.ScrimColor,
+            surface = glassDialogSurface(backdrop = dialogBackdrop),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                GlassDialogButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("Cancel", style = MiuixTheme.textStyles.button)
+                }
+                GlassDialogButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier.weight(1f),
+                    role = GlassDialogButtonRole.Primary,
+                ) {
+                    Text("OK", style = MiuixTheme.textStyles.button)
+                }
+            }
+        }
+    }
+}
+```
+
+`renderInRootScaffold` must remain true here so the dialog is outside the inner recording. If an existing outer host already provides this separation, reuse it.
+
+| GlassDialogDefaults | Value / behavior |
+| --- | --- |
+| ScrimColor | `#33000000` (20% black) |
+| material() | Theme-selected `DialogGlassLight` / `DialogGlassDark`, 60dp blur input |
+| stroke() | Initial bloom approximation using the small light/dark stroke |
+| containerColor() | Theme background, used for the opaque fallback |
+
+`glassDialogSurface(backdrop, material, stroke, containerColor)` accepts overrides; a null backdrop or unavailable runtime shader uses the fallback. The radius comes from the host. This surface has no refraction or additional drop shadow.
+
+The material applies these layers in order:
+
+| Layer | Light | Dark |
+| --- | --- | --- |
+| 1 | `#05000000 / PlusDarker` | `#1A000000 / PlusDarker` |
+| 2 | `#99FFFFFF / SoftLight` | `#996C6C6C / Luminosity` |
+| 3 | `#99FFFFFF / HardLight` | `#99060606 / SoftLight` |
+
+This implementation samples the clean scene, applies the host's current scrim locally, then blurs and blends. Do not capture the scrim in the supplied backdrop. Native scrim sampling order, blur-kernel conversion and bloom still need visual calibration; this is an initial reconstruction, not a pixel-match guarantee.
+
+#### Dialog Actions
+
+`GlassDialogButton` draws over the parent dialog material and takes no backdrop. The normal and destructive variants retain the blurred scene through a translucent fill. Primary actions use the theme's primary fill.
+
+| `GlassDialogButtonRole` | Fill | Content |
+| --- | --- | --- |
+| `Normal` (default) | Theme `onBackground` at 15/255 light, 36/255 dark | `onBackground` at 90% light, 80% dark |
+| `Primary` | `primary` | `onPrimary` |
+| `Destructive` | Same as `Normal` | `error` |
+
+With the default neutral theme, the normal fill is `#0F000000` / `#24FFFFFF`. While pressed, a foreground overlay covers both the fill and content: `#1F000000` / `#24FFFFFF`. It appears and clears immediately on press, release or cancellation. There is no additional ripple, blur or scale effect.
+
+| Parameter | Default / behavior |
+| --- | --- |
+| `onClick` | Required action callback |
+| `modifier` | `Modifier`; the caller controls width and placement |
+| `enabled` | `true`; disabled actions have no press overlay or click callback |
+| `role` | `GlassDialogButtonRole.Normal` |
+| `cornerRadius` | `GlassDialogButtonDefaults.CornerRadius` = 16dp |
+| `minWidth` / `minHeight` | `GlassDialogButtonDefaults.MinWidth` / `MinHeight` = 0dp / 50dp |
+| `colors` | `GlassDialogButtonDefaults.buttonColors(role)`, returning `ButtonColors` |
+| `pressedColor` | `GlassDialogButtonDefaults.pressedColor()`, selected from the current theme |
+| `insideMargin` | `GlassDialogButtonDefaults.InsideMargin` = 24dp horizontal |
+| `interactionSource` | Optional `MutableInteractionSource` |
+| `content` | Centered `RowScope` slot; text uses `MiuixTheme.textStyles.button` |
+
+Disabled normal and destructive actions retain the tonal fill; their content opacity is 38% and 30% respectively. A disabled primary action uses a 30% primary fill, with `onPrimary` at full opacity in light mode and 77/255 in dark mode. Primary/error RGB values follow the Compose theme. Padding remains 24dp horizontally at all font scales; native Flutter interpolates its horizontal padding from 24 to 12 to 6 as text scale grows from 1 to 3.
+
+### Bottom Sheet Material
+
+The launcher's native bottom sheet references the same light/dark three-layer color lists and 60dp blur input as its dialog. Its attached presentation rounds only the top corners. `glassBottomSheetSurface` applies that material through `OverlayBottomSheet.surface`:
+
+```kotlin
+val sheetBackdrop = rememberLayerBackdrop()
+var showSheet by remember { mutableStateOf(false) }
+
+Scaffold(contentWindowInsets = WindowInsets(0)) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize().layerBackdrop(sheetBackdrop),
+        topBar = { /* Page top bar */ },
+        bottomBar = { /* Page bottom bar */ },
+    ) { padding ->
+        TextButton(
+            text = "Show sheet",
+            onClick = { showSheet = true },
+            modifier = Modifier.padding(padding),
+        )
+        OverlayBottomSheet(
+            show = showSheet,
+            title = "Glass Bottom Sheet",
+            onDismissRequest = { showSheet = false },
+            dimColor = GlassBottomSheetDefaults.ScrimColor,
+            surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+        ) {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text("Scrollable content stays sharp above the material")
+            }
+        }
+    }
+}
+```
+
+Keep `renderInRootScaffold = true` so the outer scaffold hosts the sheet outside the recording. An existing clean page backdrop may be shared with the dialog. Do not capture either overlay or its scrim.
+
+| GlassBottomSheetDefaults | Value / behavior |
+| --- | --- |
+| `ScrimColor` | `#33000000` (20% black), animated by the host |
+| `material()` | Theme-selected `DialogGlassLight` / `DialogGlassDark`; native sheets share these exact blur/color inputs |
+| `stroke()` | Initial bloom approximation using `MiddleLight` / `MiddleDark` |
+| `containerColor()` | Theme background for the opaque fallback |
+
+`glassBottomSheetSurface(backdrop, material, stroke, containerColor)` accepts overrides. A null backdrop or unavailable runtime shaders use the fallback. The host's `BottomSheetSurfaceScope` supplies the top radius and the current scrim color as drawing state. The material also fills the exposed bottom edge during upward overscroll, with square corners and no edge stroke. Slide/drag translations keep sampling the scene at the sheet's current screen position. Content, the handle, insets, nested scrolling and dismissal remain host-owned.
+
+This helper targets the attached `OverlayBottomSheet`; it does not implement the native floating-sheet presentation or detents. Native sheets have a different bloom configuration from dialogs. Bloom mapping, blur-kernel conversion and scrim sampling order still need visual calibration. The implementation uses no refraction or extra drop shadow.
 
 ### GlassDialog
 

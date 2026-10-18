@@ -36,6 +36,24 @@ object GlassMaterials {
     @Stable
     val PopupViewGlassDark: GlassMaterial = PuredThinGlassDark.copy(blurRadius = 60.dp)
 
+    /** Dialog blur/blend material, light. The three layers are applied in declaration order. */
+    @Stable
+    val DialogGlassLight: GlassMaterial = GlassMaterial(
+        blurRadius = 60.dp,
+        first = GlassColorLayer(Color(0x05000000), GlassColorBlendMode.PlusDarker),
+        second = GlassColorLayer(Color(0x99FFFFFF), GlassColorBlendMode.SoftLight),
+        third = GlassColorLayer(Color(0x99FFFFFF), GlassColorBlendMode.HardLight),
+    )
+
+    /** Dialog blur/blend material, dark. */
+    @Stable
+    val DialogGlassDark: GlassMaterial = GlassMaterial(
+        blurRadius = 60.dp,
+        first = GlassColorLayer(Color(0x1A000000), GlassColorBlendMode.PlusDarker),
+        second = GlassColorLayer(Color(0x996C6C6C), GlassColorBlendMode.Luminosity),
+        third = GlassColorLayer(Color(0x99060606), GlassColorBlendMode.SoftLight),
+    )
+
     /** The action bar's `mask-pured-regular`, light. */
     @Stable
     val ActionBarMaskLight: GlassMaterial = GlassMaterial(
@@ -63,6 +81,10 @@ object GlassMaterials {
     /** [PopupViewGlassLight] or [PopupViewGlassDark], for the current theme. */
     @Stable
     fun popupViewGlass(isDark: Boolean): GlassMaterial = forTheme(isDark, PopupViewGlassLight, PopupViewGlassDark)
+
+    /** [DialogGlassLight] or [DialogGlassDark], for the current theme. */
+    @Stable
+    fun dialogGlass(isDark: Boolean): GlassMaterial = forTheme(isDark, DialogGlassLight, DialogGlassDark)
 
     /** [ActionBarMaskLight] or [ActionBarMaskDark], for the current theme. */
     @Stable
