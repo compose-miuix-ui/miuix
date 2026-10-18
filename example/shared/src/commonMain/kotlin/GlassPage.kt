@@ -54,9 +54,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
-import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.GlassDropdownPopup
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
@@ -67,7 +67,6 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
-import top.yukonga.miuix.kmp.glass.GlassShape
 import top.yukonga.miuix.kmp.glass.GlassStroke
 import top.yukonga.miuix.kmp.glass.GlassStrokes
 import top.yukonga.miuix.kmp.glass.GlassStyle
@@ -77,7 +76,6 @@ import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassTransformPopup
-import top.yukonga.miuix.kmp.glass.glassDialogSurface
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
@@ -92,7 +90,6 @@ import top.yukonga.miuix.kmp.icon.glass.Image
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.Settings
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
@@ -154,7 +151,6 @@ private val OverlayNames = listOf("None", "Popup", "Dialog", "Bottom Sheet")
 
 private val TabPlacements = listOf("Top bar", "List")
 private const val TABS_IN_TOP_BAR = 0
-private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
@@ -245,7 +241,6 @@ fun GlassPage(padding: PaddingValues) {
         targetValue = if (submenu) arrowTurn else 0f,
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
-    val shape = GlassShape(cornerRadius.dp, smoothing)
     val tabsInTopBar = tabPlacement == TABS_IN_TOP_BAR
     // A tab row placed in the list sits inside the layer the bars sample, so it samples the page
     // background instead — sampling its own layer would close the loop and take the renderer down.
@@ -406,10 +401,9 @@ fun GlassPage(padding: PaddingValues) {
                     )
                 },
             ) { innerPadding ->
-                OverlayDialog(
+                GlassDialog(
                     show = overlayIndex == OVERLAY_DIALOG,
-                    surface = glassDialogSurface(backdrop = dialogBackdrop),
-                    dimColor = GlassDialogDefaults.ScrimColor,
+                    backdrop = dialogBackdrop,
                     title = "Glass Dialog",
                     summary = "Blurred background with the dialog's own three-layer material.",
                     onDismissRequest = { overlayIndex = OVERLAY_NONE },

@@ -1,6 +1,6 @@
 # Glass Material
 
-`miuix-glass` is a standalone module that brings the glass material to Compose Multiplatform, together with the components built on it: top app bar, navigation bar, tab row, popup and dialog. It supports Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
+`miuix-glass` is a standalone module that brings the glass material to Compose Multiplatform, together with the components built on it: top app bar, navigation bar, tab row, popup, dialog and bottom sheet. It supports Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
 
 ::: warning
 On Android, `miuix-glass` requires `minSdk` 33 (Android 13) or higher. The material is drawn with a runtime shader, so the floor is the same one `miuix-blur` has. If your app ships a lower `minSdk`, gate glass code paths with [the capability checks](/guide/blur#runtime-capability-checks).
@@ -182,7 +182,7 @@ Two colour sets ship with it: `GlassTabRowDefaults.primaryColors()` for the defa
 
 ### Dialog Material
 
-`glassDialogSurface` gives `OverlayDialog` a dialog-specific blur/blend material. Its title, sizing, insets and dismissal still belong to `OverlayDialog`. Use `GlassDialogButton` for actions that tint this shared material.
+`GlassDialog` packages the dialog-specific blur/blend material, scrim and `OverlayDialog` host. It handles titles, sizing, insets, animation and dismissal. Use `GlassDialogButton` for actions that tint the shared material. Import these components from `top.yukonga.miuix.kmp.glass`.
 
 Keep the recording below the popup host. For example, the outer `Scaffold` hosts the dialog and the inner one records the page, including its bars:
 
@@ -201,11 +201,10 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
             onClick = { showDialog = true },
             modifier = Modifier.padding(padding),
         )
-        OverlayDialog(
+        GlassDialog(
             show = showDialog,
             onDismissRequest = { showDialog = false },
-            dimColor = GlassDialogDefaults.ScrimColor,
-            surface = glassDialogSurface(backdrop = dialogBackdrop),
+            backdrop = dialogBackdrop,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GlassDialogButton(
@@ -278,7 +277,7 @@ Disabled normal and destructive actions retain the tonal fill; their content opa
 
 ### Bottom Sheet Material
 
-The launcher's native bottom sheet references the same light/dark three-layer color lists and 60dp blur input as its dialog. Its attached presentation rounds only the top corners. `glassBottomSheetSurface` applies that material through `OverlayBottomSheet.surface`:
+The launcher's native bottom sheet uses the same light/dark three-layer color lists and 60dp blur input as its dialog. `GlassBottomSheet` packages this material with the attached `OverlayBottomSheet` host, rounded top corners and the host's content layout:
 
 ```kotlin
 val sheetBackdrop = rememberLayerBackdrop()
@@ -295,15 +294,19 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
             onClick = { showSheet = true },
             modifier = Modifier.padding(padding),
         )
-        OverlayBottomSheet(
+        GlassBottomSheet(
             show = showSheet,
             title = "Glass Bottom Sheet",
             onDismissRequest = { showSheet = false },
-            dimColor = GlassBottomSheetDefaults.ScrimColor,
-            surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+            backdrop = sheetBackdrop,
         ) {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                Text("Scrollable content stays sharp above the material")
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp),
+            ) {
+                repeat(24) { index -> Text("Sheet item ${index + 1}") }
             }
         }
     }
@@ -319,24 +322,61 @@ Keep `renderInRootScaffold = true` so the outer scaffold hosts the sheet outside
 | `stroke()` | Initial bloom approximation using `MiddleLight` / `MiddleDark` |
 | `containerColor()` | Theme background for the opaque fallback |
 
+The wrapper preserves `OverlayBottomSheet`'s content layout and default padding (24dp horizontal, 0dp bottom). The host handles IME insets. Apply navigation-bar padding and extra bottom spacing inside your scroll container, as shown above, so they scroll with the content while the material extends to the screen edge. Use `insideMargin` when you want fixed panel padding instead. Put long content in `verticalScroll` or a `LazyColumn`.
+
 `glassBottomSheetSurface(backdrop, material, stroke, containerColor)` accepts overrides. A null backdrop or unavailable runtime shaders use the fallback. The host's `BottomSheetSurfaceScope` supplies the top radius and the current scrim color as drawing state. The material also fills the exposed bottom edge during upward overscroll, with square corners and no edge stroke. Slide/drag translations keep sampling the scene at the sheet's current screen position. Content, the handle, insets, nested scrolling and dismissal remain host-owned.
 
 This helper targets the attached `OverlayBottomSheet`; it does not implement the native floating-sheet presentation or detents. Native sheets have a different bloom configuration from dialogs. Bloom mapping, blur-kernel conversion and scrim sampling order still need visual calibration. The implementation uses no refraction or extra drop shadow.
 
 ### GlassDialog
 
-```kotlin
-GlassDialog(
-    visible = showDialog,
-    onDismissRequest = { showDialog = false },
-    backdrop = backdrop,
-) {
-    Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-    TextButton(text = "OK", onClick = { showDialog = false })
-}
-```
+Use `show` to control the packaged dialog. Both overlay components share these parameters:
 
-The scrim and the predictive back gesture are handled inside.
+| Parameter | Default / behavior |
+| --- | --- |
+| `onDismissRequest` | Required; update `show` when dismissal is requested |
+| `show` | Required visibility state |
+| `backdrop` | Required clean page recording, excluding overlays and scrims; `null` selects the opaque fallback |
+| `modifier` | `Modifier`, applied to the panel |
+| `enableWindowDim` | `true`; draw the scrim and include it in local material sampling |
+| `defaultWindowInsetsPadding` | `true`; the host's default window insets, including IME padding for sheets |
+| `renderInRootScaffold` | `true`; use the outermost Scaffold host |
+| `title` | `null`; optional title |
+| `outsideMargin` | Respective `DialogDefaults.outsideMargin` / `BottomSheetDefaults.outsideMargin` |
+| `insideMargin` | `DialogDefaults.insideMargin` / `BottomSheetDefaults.insideMargin` |
+| `material` | Respective `GlassDialogDefaults.material()` / `GlassBottomSheetDefaults.material()` |
+| `stroke` | Respective Defaults `stroke()`; `null` disables the stroke |
+| `containerColor` | Respective Defaults `containerColor()`, for the opaque fallback |
+| `dimColor` | Respective Defaults `ScrimColor`, `#33000000` |
+| `onDismissFinished` | `null`; called after the hide animation completes |
+| `content` | Required sharp content slot above the material |
+
+Dialog-specific parameters:
+
+| Parameter | Default / behavior |
+| --- | --- |
+| `largeScreen` | `null`; automatically select centered scale or small-screen slide presentation, with an explicit override available |
+| `titleColor` | `DialogDefaults.titleColor()` |
+| `summary` / `summaryColor` | `null` / `DialogDefaults.summaryColor()` |
+| `cornerRadius` | `null`; resolved by the host for its presentation |
+| `maxWidth` | `DialogDefaults.MaxWidth` |
+
+The original `GlassDialog(visible = …)` and `GlassOverlayDefaults` have been removed. Migrate to `GlassDialog(show = …)` and `GlassDialogDefaults`. Replace appearance options such as `style`, `shape` and `scrimColor` / `scrimAlpha` with `material`, `cornerRadius` and `dimColor`, and use the Scaffold host and recording placement shown above.
+
+### GlassBottomSheet
+
+In addition to the shared parameters above:
+
+| Parameter | Default / behavior |
+| --- | --- |
+| `allowDismiss` | `true`; allow outside taps, dragging and back dismissal |
+| `enableNestedScroll` | `true`; hand motion between scrolling content and the sheet |
+| `startAction` / `endAction` | `null`; content slots on either side of the header |
+| `cornerRadius` | `BottomSheetDefaults.cornerRadius`, applied only to the top corners |
+| `sheetMaxWidth` | `BottomSheetDefaults.maxWidth` |
+| `dragHandleColor` | `BottomSheetDefaults.dragHandleColor()` |
+
+Use `glassDialogSurface` and `glassBottomSheetSurface` when composing the Overlay hosts yourself.
 
 ### Popups
 
@@ -397,6 +437,8 @@ GlassSecondaryPopup(
 
 `GlassSecondaryPopup` opens beside a menu that is already open; keep it composed while it collapses, and pass the primary popup's `materialAnchor` so the two share their material.
 
+`GlassDropdownPopup` keeps its panel composed during the exit animation, but stops pointer input and accessibility actions on its rows as soon as `show` becomes false.
+
 ## Complete Example
 
 ```kotlin
@@ -404,34 +446,26 @@ GlassSecondaryPopup(
 fun GlassPage() {
     if (!isRuntimeShaderSupported()) return
 
-    val backdrop = rememberLayerBackdrop()
+    val pageBackdrop = rememberLayerBackdrop()
+    val overlayBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
-    var tab by remember { mutableIntStateOf(0) }
     var dialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            GlassTopAppBar(
-                title = "Glass",
-                backdrop = backdrop,
-                scrollBehavior = scrollBehavior,
-                bottomContent = {
-                    GlassTabRow(
-                        tabs = listOf("Home", "Widget", "Theme"),
-                        selectedIndex = tab,
-                        onSelect = { tab = it },
-                        backdrop = backdrop,
-                    )
-                },
-            )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            // The page records itself, and everything glass samples that recording.
+    Scaffold(contentWindowInsets = WindowInsets(0)) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize().layerBackdrop(overlayBackdrop),
+            topBar = {
+                GlassTopAppBar(
+                    title = "Glass",
+                    backdrop = pageBackdrop,
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .layerBackdrop(backdrop)
+                    .layerBackdrop(pageBackdrop)
                     .background(MiuixTheme.colorScheme.surface),
             ) {
                 LazyColumn(
@@ -446,19 +480,25 @@ fun GlassPage() {
                     }
                 }
             }
-
             GlassDialog(
-                visible = dialog,
+                show = dialog,
                 onDismissRequest = { dialog = false },
-                backdrop = backdrop,
+                backdrop = overlayBackdrop,
+                title = "Glass Dialog",
             ) {
-                Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-                TextButton(text = "OK", onClick = { dialog = false })
+                GlassDialogButton(
+                    onClick = { dialog = false },
+                    role = GlassDialogButtonRole.Primary,
+                ) {
+                    Text("OK", style = MiuixTheme.textStyles.button)
+                }
             }
         }
     }
 }
 ```
+
+The top bar samples only the page content. The dialog samples the inner Scaffold, including the bar, while the outer Scaffold hosts its overlay outside that recording.
 
 ## See Also
 

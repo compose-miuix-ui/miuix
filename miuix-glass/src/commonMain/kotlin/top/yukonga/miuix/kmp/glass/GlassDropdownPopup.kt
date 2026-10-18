@@ -40,7 +40,8 @@ object GlassDropdownDefaults {
  * its centre run on two springs of different speeds, so it travels along an arc rather than
  * growing out of a pinned corner.
  *
- * @param show Whether the panel is open.
+ * @param show Whether the panel is open. Row input and accessibility actions stop immediately
+ *   when this becomes false, while the exit animation finishes.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchorBounds The row's bounds, in this composable's own coordinate space.
  * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
@@ -128,6 +129,7 @@ fun BoxScope.GlassDropdownPopup(
         modifier = modifier,
         sizing = sizing,
         visuals = visuals,
+        interactive = show,
         contentPadding = contentPadding,
         panelLayer = {
             alpha = if (show && geometryProgress() <= GlassMotion.ARC_VISIBLE_FRACTION) 0f else fadeProgress()

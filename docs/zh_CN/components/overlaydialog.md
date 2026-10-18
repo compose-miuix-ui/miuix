@@ -105,6 +105,8 @@ Scaffold {
 
 ### 自定义表面
 
+需要完整玻璃对话框时，可直接使用 `miuix-glass` 提供的 [`GlassDialog`](/zh_CN/guide/glass#对话框材质)，其中已配置材质、遮罩和当前 Overlay 宿主。下面的插槽适用于需要自行组合宿主的场景。
+
 可选的 `surface` 插槽替换对话框背景和裁剪，布局、动画、系统插入内边距及关闭行为仍由宿主负责。只有 `surface` 为 null 时才使用 `backgroundColor`。插槽接收 `DialogSurfaceScope`：
 
 | 属性 | 类型 | 说明 |

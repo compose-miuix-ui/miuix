@@ -103,6 +103,8 @@ The BottomSheetDefaults object provides default settings for the OverlayBottomSh
 
 ### Glass Surface
 
+For a ready-to-use glass sheet, use [`GlassBottomSheet`](/guide/glass#bottom-sheet-material) from `miuix-glass`; it configures the material, scrim and Overlay host while preserving this component's content layout. The slot below is available for custom host composition.
+
 With `miuix-glass`, use the launcher's bottom-sheet blur/blend material:
 
 ```kotlin

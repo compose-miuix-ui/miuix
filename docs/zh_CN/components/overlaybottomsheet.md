@@ -100,6 +100,8 @@ Scaffold {
 
 ### 玻璃表面
 
+需要完整玻璃底部抽屉时，可直接使用 `miuix-glass` 提供的 [`GlassBottomSheet`](/zh_CN/guide/glass#底部抽屉材质)，其中已配置材质、遮罩和 Overlay 宿主，并沿用当前组件的内容布局。下面的插槽适用于需要自行组合宿主的场景。
+
 引入 `miuix-glass` 后，可以使用桌面原生 bottomsheet 的模糊混色材质：
 
 ```kotlin

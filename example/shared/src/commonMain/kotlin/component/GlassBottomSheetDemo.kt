@@ -16,11 +16,9 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
+import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
-import top.yukonga.miuix.kmp.glass.glassBottomSheetSurface
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** A sheet with transparent content, so the shared material remains visible while scrolling. */
@@ -31,12 +29,11 @@ internal fun GlassBottomSheetDemo(
     backdrop: Backdrop?,
     modifier: Modifier = Modifier,
 ) {
-    OverlayBottomSheet(
+    GlassBottomSheet(
         show = show,
         modifier = modifier,
         title = "Glass Bottom Sheet",
-        dimColor = GlassBottomSheetDefaults.ScrimColor,
-        surface = glassBottomSheetSurface(backdrop),
+        backdrop = backdrop,
         onDismissRequest = onDismissRequest,
     ) {
         Column(

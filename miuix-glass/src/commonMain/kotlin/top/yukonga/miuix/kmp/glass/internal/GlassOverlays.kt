@@ -63,8 +63,10 @@ internal fun DrawScope.drawGlassRim(
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
     if (style.background.unShade >= 0.999f) return
 
+    // Tiny surfaces take precedence over the nominal minimum band width.
     val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
-        .coerceIn(1f, size.minDimension * 0.5f)
+        .coerceAtLeast(1f)
+        .coerceAtMost(size.minDimension * 0.5f)
 
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
     shader.setFloatUniform("in_rimEdge", edge, style.edge.pow.coerceAtLeast(0.01f), alpha, 0f)
@@ -100,7 +102,9 @@ internal fun DrawScope.drawGlassStroke(
 
     // setBloomStrokeConfig uses the scalar setBloomStrokeWithDp overload, which retains
     // the half-pixel bias instead of rounding to an integer like the array overload.
-    val width = (stroke.width * density + 0.5f).coerceIn(0.5f, size.minDimension * 0.5f)
+    val width = (stroke.width * density + 0.5f)
+        .coerceAtLeast(0.5f)
+        .coerceAtMost(size.minDimension * 0.5f)
     val bevel = (stroke.bevel * density + 0.5f).coerceAtLeast(0.5f)
 
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)

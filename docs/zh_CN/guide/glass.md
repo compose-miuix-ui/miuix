@@ -1,6 +1,6 @@
 # 柔光玻璃
 
-`miuix-glass` 是一个独立模块，把柔光玻璃材质带到了 Compose Multiplatform，并附带建立在该材质之上的组件：顶栏、底栏、标签栏、弹窗与对话框。支持 Android、Desktop (JVM)、iOS、macOS 以及 Web (WasmJs/Js)。
+`miuix-glass` 是一个独立模块，把柔光玻璃材质带到了 Compose Multiplatform，并附带建立在该材质之上的组件：顶栏、底栏、标签栏、弹窗、对话框与底部抽屉。支持 Android、Desktop (JVM)、iOS、macOS 以及 Web (WasmJs/Js)。
 
 ::: warning
 在 Android 上，`miuix-glass` 需要 `minSdk` 33（Android 13）或更高。材质由运行时着色器绘制，因此下限与 `miuix-blur` 相同。如果应用仍需支持更低的 `minSdk`，请用[能力检测](/zh_CN/guide/blur#运行时能力检查)包住相关代码路径。
@@ -182,7 +182,7 @@ GlassTabRow(
 
 ### 对话框材质
 
-`glassDialogSurface` 为 `OverlayDialog` 提供专用的模糊混色材质。标题、尺寸、系统插入内边距和关闭行为仍由 `OverlayDialog` 负责。操作按钮使用 `GlassDialogButton`，在这层共享材质上叠加填色。
+`GlassDialog` 封装了专用的模糊混色材质、遮罩与 `OverlayDialog` 宿主，直接提供标题、尺寸、系统插入内边距、动画及关闭行为。操作按钮使用 `GlassDialogButton`，在共享材质上叠加填色。以下组件均从 `top.yukonga.miuix.kmp.glass` 导入。
 
 背景采样应位于弹窗宿主下方。例如，让外层 `Scaffold` 承载对话框，内层记录页面及顶部、底部栏：
 
@@ -201,11 +201,10 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
             onClick = { showDialog = true },
             modifier = Modifier.padding(padding),
         )
-        OverlayDialog(
+        GlassDialog(
             show = showDialog,
             onDismissRequest = { showDialog = false },
-            dimColor = GlassDialogDefaults.ScrimColor,
-            surface = glassDialogSurface(backdrop = dialogBackdrop),
+            backdrop = dialogBackdrop,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GlassDialogButton(
@@ -278,7 +277,7 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
 
 ### 底部抽屉材质
 
-桌面原生 bottomsheet 和 dialog 引用了完全相同的浅深色三层混色表，模糊输入同为 60dp。贴底形态只圆顶部。`glassBottomSheetSurface` 通过 `OverlayBottomSheet.surface` 接入这套材质：
+桌面原生 bottomsheet 和 dialog 引用了完全相同的浅深色三层混色表，模糊输入同为 60dp。`GlassBottomSheet` 将这套材质与 `OverlayBottomSheet` 的贴底宿主封装在一起，默认只圆顶部，并沿用宿主的内容布局：
 
 ```kotlin
 val sheetBackdrop = rememberLayerBackdrop()
@@ -295,15 +294,19 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
             onClick = { showSheet = true },
             modifier = Modifier.padding(padding),
         )
-        OverlayBottomSheet(
+        GlassBottomSheet(
             show = showSheet,
             title = "Glass Bottom Sheet",
             onDismissRequest = { showSheet = false },
-            dimColor = GlassBottomSheetDefaults.ScrimColor,
-            surface = glassBottomSheetSurface(backdrop = sheetBackdrop),
+            backdrop = sheetBackdrop,
         ) {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                Text("可滚动的内容清晰地绘制在材质上方")
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp),
+            ) {
+                repeat(24) { index -> Text("列表项 ${index + 1}") }
             }
         }
     }
@@ -319,24 +322,61 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
 | `stroke()` | 使用 `MiddleLight` / `MiddleDark` 作为首版 bloom 近似 |
 | `containerColor()` | 主题背景色，用于不透明回退 |
 
+封装沿用 `OverlayBottomSheet` 的内容布局及默认内边距（水平 24dp、底部 0dp），IME 插入内边距由宿主处理。如上例所示，将导航栏内边距和额外底边距放在滚动容器内部，使它们随内容一起滚动，材质仍延伸至屏幕底边。需要固定的面板内边距时可使用 `insideMargin`。长内容需要自行放入 `verticalScroll` 或 `LazyColumn`。
+
 `glassBottomSheetSurface(backdrop, material, stroke, containerColor)` 支持参数覆盖。背景为空或运行时 shader 不可用时使用回退。宿主通过 `BottomSheetSurfaceScope` 提供顶部圆角及绘制阶段读取的实时遮罩。上拉回弹时，露出的底部区域也会补上相同材质，使用直角并关闭描边。滑入和拖动时按 sheet 当前屏幕位置采样；内容、拖动条、系统插入内边距、嵌套滚动及关闭行为仍由宿主负责。
 
 此辅助组件面向贴底的 `OverlayBottomSheet`，不实现原生浮动 sheet 形态或分段停靠。原生 sheet 的 bloom 配置与 dialog 不同；bloom 映射、模糊核换算及遮罩采样顺序仍需视觉校准。当前实现不添加折射或额外投影。
 
 ### GlassDialog
 
-```kotlin
-GlassDialog(
-    visible = showDialog,
-    onDismissRequest = { showDialog = false },
-    backdrop = backdrop,
-) {
-    Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-    TextButton(text = "OK", onClick = { showDialog = false })
-}
-```
+新入口以 `show` 控制显示。以下为两个封装组件的公共参数：
 
-遮罩与预测返回手势都由组件内部处理。
+| 参数 | 默认值 / 行为 |
+| --- | --- |
+| `onDismissRequest` | 必填；请求关闭时更新 `show` |
+| `show` | 必填；控制显示与隐藏 |
+| `backdrop` | 必填；不含浮层与遮罩的页面采样，`null` 使用不透明回退 |
+| `modifier` | `Modifier`，应用于面板 |
+| `enableWindowDim` | `true`，绘制遮罩并将其混入局部采样 |
+| `defaultWindowInsetsPadding` | `true`；使用宿主默认插入内边距，包含 sheet 的 IME 内边距 |
+| `renderInRootScaffold` | `true`，由最外层 Scaffold 承载 |
+| `title` | `null`，可选标题 |
+| `outsideMargin` | 对应 `DialogDefaults.outsideMargin` / `BottomSheetDefaults.outsideMargin` |
+| `insideMargin` | `DialogDefaults.insideMargin` / `BottomSheetDefaults.insideMargin` |
+| `material` | 对应 `GlassDialogDefaults.material()` / `GlassBottomSheetDefaults.material()` |
+| `stroke` | 对应 Defaults 的 `stroke()`；`null` 关闭描边 |
+| `containerColor` | 对应 Defaults 的 `containerColor()`，用于不透明回退 |
+| `dimColor` | 对应 Defaults 的 `ScrimColor`，即 `#33000000` |
+| `onDismissFinished` | `null`，隐藏动画完成后回调 |
+| `content` | 必填内容插槽，清晰地绘制在材质上方 |
+
+对话框特有参数：
+
+| 参数 | 默认值 / 行为 |
+| --- | --- |
+| `largeScreen` | `null`，自动选择大屏居中缩放或小屏滑入；可显式覆盖 |
+| `titleColor` | `DialogDefaults.titleColor()` |
+| `summary` / `summaryColor` | `null` / `DialogDefaults.summaryColor()` |
+| `cornerRadius` | `null`，由宿主按展示形态决定 |
+| `maxWidth` | `DialogDefaults.MaxWidth` |
+
+原有 `GlassDialog(visible = …)` 和 `GlassOverlayDefaults` 已移除。请迁移至 `GlassDialog(show = …)` 和 `GlassDialogDefaults`，将旧的 `style`、`shape`、`scrimColor` / `scrimAlpha` 等外观配置改为 `material`、`cornerRadius`、`dimColor`，并在上面的 Scaffold 宿主与采样布局中调用。
+
+### GlassBottomSheet
+
+除了上面的公共参数，还支持：
+
+| 参数 | 默认值 / 行为 |
+| --- | --- |
+| `allowDismiss` | `true`，允许点击外部、拖动或返回关闭 |
+| `enableNestedScroll` | `true`，让内容滚动与 sheet 拖动衔接 |
+| `startAction` / `endAction` | `null`，标题行两侧的内容插槽 |
+| `cornerRadius` | `BottomSheetDefaults.cornerRadius`，只应用于顶部 |
+| `sheetMaxWidth` | `BottomSheetDefaults.maxWidth` |
+| `dragHandleColor` | `BottomSheetDefaults.dragHandleColor()` |
+
+需要自行组合 Overlay 宿主时，仍可使用 `glassDialogSurface` 和 `glassBottomSheetSurface`。
 
 ### 弹窗
 
@@ -397,6 +437,8 @@ GlassSecondaryPopup(
 
 `GlassSecondaryPopup` 在已展开的菜单旁打开二级菜单；收起过程中请保持其组合，并把一级弹窗的 `materialAnchor` 传给它，让两者共享材质。
 
+`GlassDropdownPopup` 在退场动画期间保留面板，但 `show` 变为 false 时立即停止菜单项的指针交互和无障碍操作。
+
 ## 完整示例
 
 ```kotlin
@@ -404,34 +446,26 @@ GlassSecondaryPopup(
 fun GlassPage() {
     if (!isRuntimeShaderSupported()) return
 
-    val backdrop = rememberLayerBackdrop()
+    val pageBackdrop = rememberLayerBackdrop()
+    val overlayBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
-    var tab by remember { mutableIntStateOf(0) }
     var dialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            GlassTopAppBar(
-                title = "Glass",
-                backdrop = backdrop,
-                scrollBehavior = scrollBehavior,
-                bottomContent = {
-                    GlassTabRow(
-                        tabs = listOf("Home", "Widget", "Theme"),
-                        selectedIndex = tab,
-                        onSelect = { tab = it },
-                        backdrop = backdrop,
-                    )
-                },
-            )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            // 页面记录自身，所有柔光玻璃表面都采样这份记录。
+    Scaffold(contentWindowInsets = WindowInsets(0)) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize().layerBackdrop(overlayBackdrop),
+            topBar = {
+                GlassTopAppBar(
+                    title = "Glass",
+                    backdrop = pageBackdrop,
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .layerBackdrop(backdrop)
+                    .layerBackdrop(pageBackdrop)
                     .background(MiuixTheme.colorScheme.surface),
             ) {
                 LazyColumn(
@@ -446,19 +480,25 @@ fun GlassPage() {
                     }
                 }
             }
-
             GlassDialog(
-                visible = dialog,
+                show = dialog,
                 onDismissRequest = { dialog = false },
-                backdrop = backdrop,
+                backdrop = overlayBackdrop,
+                title = "Glass Dialog",
             ) {
-                Text(text = "Glass Dialog", style = MiuixTheme.textStyles.title4)
-                TextButton(text = "OK", onClick = { dialog = false })
+                GlassDialogButton(
+                    onClick = { dialog = false },
+                    role = GlassDialogButtonRole.Primary,
+                ) {
+                    Text("OK", style = MiuixTheme.textStyles.button)
+                }
             }
         }
     }
 }
 ```
+
+顶部栏只采样页面内容。对话框采样内层 Scaffold，包含顶部栏；外层 Scaffold 在采样区域之外承载浮层。
 
 ## 另见
 

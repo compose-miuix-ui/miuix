@@ -107,6 +107,8 @@ The DialogDefaults object provides default settings for the OverlayDialog compon
 
 ### Custom Surface
 
+For a ready-to-use glass dialog, use [`GlassDialog`](/guide/glass#dialog-material) from `miuix-glass`; it configures the material, scrim and this Overlay host. The slot below is available for custom host composition.
+
 The optional `surface` slot replaces the dialog background and clipping while retaining the host's layout, animation, insets and dismissal behavior. `backgroundColor` applies only when `surface` is null. The slot receives a `DialogSurfaceScope`:
 
 | Property | Type | Description |
