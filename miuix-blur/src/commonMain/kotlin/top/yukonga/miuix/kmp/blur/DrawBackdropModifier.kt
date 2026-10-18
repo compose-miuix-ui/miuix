@@ -268,6 +268,7 @@ private class DrawBackdropNode(
 
     private var lifecycle: Lifecycle? = null
     private var lifecycleObserver: LifecycleEventObserver? = null
+    private var resumeGeneration: BackdropResumeGeneration? = null
     private var resumeJob: Job? = null
     val isEnabled: Boolean get() = enabled
 
@@ -764,21 +765,24 @@ private class DrawBackdropNode(
 
         stopObservingLifecycle()
         lifecycle = ownerLifecycle
+        val generation = BackdropResumeGeneration.acquire(ownerLifecycle)
+        resumeGeneration = generation
         var skipInitialResume = ownerLifecycle.currentState == Lifecycle.State.RESUMED
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    recreateGraphicsResources()
                     if (skipInitialResume) {
                         skipInitialResume = false
                     } else {
                         resumeJob?.cancel()
+                        recreateGraphicsResources(generation.immediate)
+                        val delayedGeneration = generation.delayed
                         resumeJob = coroutineScope.launch {
                             // HWUI may discard resources after ON_RESUME. Keep the second rebuild
                             // after two frames, as in the former composed modifier.
                             withFrameNanos { }
                             withFrameNanos { }
-                            recreateGraphicsResources()
+                            recreateGraphicsResources(delayedGeneration)
                             invalidateDrawCache()
                         }
                     }
@@ -801,6 +805,8 @@ private class DrawBackdropNode(
         resumeJob = null
         lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
         lifecycleObserver = null
+        resumeGeneration?.release()
+        resumeGeneration = null
         lifecycle = null
     }
 
@@ -1185,9 +1191,9 @@ private class DrawBackdropNode(
         layoutCoordinates = null
     }
 
-    private fun recreateGraphicsResources() {
-        // Scope cleanup preserves shared shaders; resume must explicitly discard stale shaders.
-        effectScope.runtimeShaderCache.clear()
+    private fun recreateGraphicsResources(generation: Any) {
+        // Invalidate once per shared cache in each resume phase, then rebuild node-local layers.
+        effectScope.runtimeShaderCache.invalidate(generation)
         releaseGraphicsLayers()
         if (enabled) primary.ensureMain()
         invalidateMeasurement()
