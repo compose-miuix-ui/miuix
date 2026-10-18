@@ -3,19 +3,13 @@
 
 package top.yukonga.miuix.kmp.blur
 
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
@@ -134,63 +128,20 @@ fun Modifier.drawBackdrop(
     return this
         .then(if (layerBlock != null) Modifier.graphicsLayer(layerBlock) else Modifier)
         .then(
-            Modifier.composed {
-                val lifecycle = LocalLifecycleOwner.current.lifecycle
-                val coroutineScope = rememberCoroutineScope()
-                var resumeGeneration by remember(lifecycle) { mutableIntStateOf(0) }
-
-                DisposableEffect(lifecycle, coroutineScope) {
-                    var resumeJob: Job? = null
-                    var skipInitialResume = lifecycle.currentState == Lifecycle.State.RESUMED
-                    val observer = LifecycleEventObserver { _, event ->
-                        when (event) {
-                            Lifecycle.Event.ON_PAUSE -> {
-                                resumeJob?.cancel()
-                                resumeJob = null
-                            }
-
-                            Lifecycle.Event.ON_RESUME -> {
-                                if (skipInitialResume) {
-                                    skipInitialResume = false
-                                    return@LifecycleEventObserver
-                                }
-                                resumeJob?.cancel()
-                                resumeJob = coroutineScope.launch {
-                                    withFrameNanos { }
-                                    withFrameNanos { }
-                                    resumeGeneration++
-                                }
-                            }
-
-                            else -> Unit
-                        }
-                    }
-                    lifecycle.addObserver(observer)
-
-                    onDispose {
-                        resumeJob?.cancel()
-                        lifecycle.removeObserver(observer)
-                    }
-                }
-
-                key(backdrop, resumeGeneration) {
-                    DrawBackdropElement(
-                        backdrop = backdrop,
-                        shape = shape,
-                        effects = effects,
-                        highlight = highlight,
-                        layerBlock = layerBlock,
-                        onDrawBehind = onDrawBehind,
-                        onDrawBackdrop = onDrawBackdrop,
-                        onDrawSurface = onDrawSurface,
-                        onDrawFront = onDrawFront,
-                        contentBlendMode = contentBlendMode,
-                        progressiveGradient = progressiveGradient,
-                        enabled = effectiveEnabled,
-                        resumeGeneration = resumeGeneration,
-                    )
-                }
-            },
+            DrawBackdropElement(
+                backdrop = backdrop,
+                shape = shape,
+                effects = effects,
+                highlight = highlight,
+                layerBlock = layerBlock,
+                onDrawBehind = onDrawBehind,
+                onDrawBackdrop = onDrawBackdrop,
+                onDrawSurface = onDrawSurface,
+                onDrawFront = onDrawFront,
+                contentBlendMode = contentBlendMode,
+                progressiveGradient = progressiveGradient,
+                enabled = effectiveEnabled,
+            ),
         )
 }
 
@@ -207,7 +158,6 @@ private class DrawBackdropElement(
     val contentBlendMode: BlendMode = BlendMode.SrcOver,
     val progressiveGradient: ProgressiveBlur? = null,
     val enabled: Boolean = true,
-    val resumeGeneration: Int,
 ) : ModifierNodeElement<DrawBackdropNode>() {
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
@@ -223,12 +173,10 @@ private class DrawBackdropElement(
         contentBlendMode = contentBlendMode,
         progressiveGradient = progressiveGradient,
         enabled = enabled,
-        resumeGeneration = resumeGeneration,
     )
 
     override fun update(node: DrawBackdropNode) {
         val wasEnabled = node.isEnabled
-        val resumeGenerationChanged = node.resumeGeneration != resumeGeneration
         val gradientCleared = node.progressiveGradient != null && progressiveGradient == null
         node.backdrop = backdrop
         node.updateShape(shape)
@@ -242,12 +190,8 @@ private class DrawBackdropElement(
         node.contentBlendMode = contentBlendMode
         node.progressiveGradient = progressiveGradient
         node.enabled = enabled
-        node.resumeGeneration = resumeGeneration
         if (gradientCleared) {
             node.releaseCompositeResources()
-        }
-        if (resumeGenerationChanged) {
-            node.onResumeGenerationChanged()
         }
         if (wasEnabled != node.isEnabled) {
             if (!node.isEnabled) {
@@ -280,7 +224,6 @@ private class DrawBackdropElement(
         if (contentBlendMode != other.contentBlendMode) return false
         if (progressiveGradient != other.progressiveGradient) return false
         if (enabled != other.enabled) return false
-        if (resumeGeneration != other.resumeGeneration) return false
         return true
     }
 
@@ -297,7 +240,6 @@ private class DrawBackdropElement(
         result = 31 * result + contentBlendMode.hashCode()
         result = 31 * result + (progressiveGradient?.hashCode() ?: 0)
         result = 31 * result + enabled.hashCode()
-        result = 31 * result + resumeGeneration
         return result
     }
 }
@@ -315,7 +257,6 @@ private class DrawBackdropNode(
     var contentBlendMode: BlendMode = BlendMode.SrcOver,
     var progressiveGradient: ProgressiveBlur? = null,
     var enabled: Boolean = true,
-    var resumeGeneration: Int,
 ) : Modifier.Node(),
     LayoutModifierNode,
     DrawModifierNode,
@@ -327,6 +268,7 @@ private class DrawBackdropNode(
 
     private var lifecycle: Lifecycle? = null
     private var lifecycleObserver: LifecycleEventObserver? = null
+    private var resumeJob: Job? = null
     val isEnabled: Boolean get() = enabled
 
     private val shapeProvider: ShapeProvider = ShapeProvider(shape)
@@ -805,7 +747,61 @@ private class DrawBackdropNode(
     }
 
     private fun observeEffects() {
-        observeReads { updateEffects() }
+        observeReads {
+            val cache = currentValueOf(LocalRuntimeShaderCache)
+            if (effectScope.runtimeShaderCache !== cache) {
+                releaseGraphicsLayers()
+                effectScope.runtimeShaderCache = cache
+                invalidateDraw()
+            }
+            observeLifecycle(currentValueOf(LocalLifecycleOwner).lifecycle)
+            updateEffects()
+        }
+    }
+
+    private fun observeLifecycle(ownerLifecycle: Lifecycle) {
+        if (lifecycle === ownerLifecycle) return
+
+        stopObservingLifecycle()
+        lifecycle = ownerLifecycle
+        var skipInitialResume = ownerLifecycle.currentState == Lifecycle.State.RESUMED
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    recreateGraphicsResources()
+                    if (skipInitialResume) {
+                        skipInitialResume = false
+                    } else {
+                        resumeJob?.cancel()
+                        resumeJob = coroutineScope.launch {
+                            // HWUI may discard resources after ON_RESUME. Keep the second rebuild
+                            // after two frames, as in the former composed modifier.
+                            withFrameNanos { }
+                            withFrameNanos { }
+                            recreateGraphicsResources()
+                            invalidateDrawCache()
+                        }
+                    }
+                }
+
+                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_DESTROY -> {
+                    resumeJob?.cancel()
+                    resumeJob = null
+                }
+
+                else -> Unit
+            }
+        }
+        lifecycleObserver = observer
+        ownerLifecycle.addObserver(observer)
+    }
+
+    private fun stopObservingLifecycle() {
+        resumeJob?.cancel()
+        resumeJob = null
+        lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
+        lifecycleObserver = null
+        lifecycle = null
     }
 
     private fun updateEffects() {
@@ -1055,22 +1051,7 @@ private class DrawBackdropNode(
     }
 
     override fun onAttach() {
-        effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
-        val ownerLifecycle = currentValueOf(LocalLifecycleOwner).lifecycle
-        lifecycle = ownerLifecycle
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                // Rebuild stale GPU resources without disabling blur during navigation lifecycle
-                // transitions (visible entries commonly move between STARTED and RESUMED).
-                recreateGraphicsResources()
-            }
-        }
-        lifecycleObserver = observer
-        ownerLifecycle.addObserver(observer)
-        if (isEnabled) {
-            primary.ensureMain()
-            observeEffects()
-        }
+        observeEffects()
     }
 
     /**
@@ -1199,9 +1180,7 @@ private class DrawBackdropNode(
     }
 
     override fun onDetach() {
-        lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
-        lifecycleObserver = null
-        lifecycle = null
+        stopObservingLifecycle()
         releaseGraphicsLayers()
         layoutCoordinates = null
     }
@@ -1213,9 +1192,5 @@ private class DrawBackdropNode(
         if (enabled) primary.ensureMain()
         invalidateMeasurement()
         invalidateDraw()
-    }
-
-    fun onResumeGenerationChanged() {
-        recreateGraphicsResources()
     }
 }
