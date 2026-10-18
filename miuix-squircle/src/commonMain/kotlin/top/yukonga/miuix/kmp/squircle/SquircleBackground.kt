@@ -7,7 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -21,6 +24,8 @@ import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.CompositingStrategy
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -246,41 +251,56 @@ fun Modifier.absoluteSquircleSurface(
 
 /**
  * Shared squircle clip/surface mask for [squircleClip] / [squircleSurface] and their absolute
- * variants. Up to [MAX_OFFSCREEN_PX] content is composited in a temporary offscreen layer and only
- * the corners are carved; past that a full-node offscreen would overflow the GPU max texture and
- * render transparent, so content is replayed per corner band instead.
+ * variants. Up to [MAX_OFFSCREEN_PX] content is cached in a [CompositingStrategy.Offscreen] layer
+ * for reuse while scrolling, and only the corners are carved; past that a full-node offscreen would
+ * overflow the GPU max texture and render transparent, so content is replayed per corner band instead.
  */
 @Composable
 private fun Modifier.squircleShaderMask(
     brush: SquircleShaderBrush,
     fillColor: Color?,
-): Modifier = this.drawWithCache {
-    val layerPaint = Paint()
-    val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
-    val contentLayer = if (fastPath) null else obtainGraphicsLayer()
-    onDrawWithContent {
-        if (fastPath) {
-            drawSquircleFast(brush, fillColor, layerPaint)
-        } else {
-            val recordedContentLayer = requireNotNull(contentLayer)
-            recordedContentLayer.record { this@onDrawWithContent.drawContent() }
-            drawSquircleBanded(brush, fillColor, layerPaint, recordedContentLayer)
+): Modifier {
+    val resourceGeneration = brush.resourceGeneration
+    val rebuildLayer = remember(resourceGeneration) { mutableStateOf(false) }
+    LaunchedEffect(resourceGeneration) {
+        if (resourceGeneration != null) {
+            // Match blur's delayed rebuild: HWUI can discard resources after the first resume draw.
+            withFrameNanos { }
+            withFrameNanos { }
+            rebuildLayer.value = true
         }
     }
+
+    return this
+        .graphicsLayer()
+        .drawWithCache {
+            // Invalidating this cache releases its managed layers, including the offscreen target.
+            rebuildLayer.value
+            val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
+            val layerPaint = if (fastPath) null else Paint()
+            val contentLayer = obtainGraphicsLayer().apply {
+                compositingStrategy = if (fastPath) CompositingStrategy.Offscreen else CompositingStrategy.Auto
+            }
+            onDrawWithContent {
+                if (fastPath) {
+                    contentLayer.record { this@onDrawWithContent.drawSquircleFast(brush, fillColor) }
+                    drawLayer(contentLayer)
+                } else {
+                    contentLayer.record { this@onDrawWithContent.drawContent() }
+                    drawSquircleBanded(brush, fillColor, requireNotNull(layerPaint), contentLayer)
+                }
+            }
+        }
 }
 
-// Fast path: use a fresh offscreen surface each draw so a lost graphics layer can't remain cached.
+// Fast path: the managed Offscreen layer holds fill + content for the corner mask and reuse.
 private fun ContentDrawScope.drawSquircleFast(
     brush: SquircleShaderBrush,
     fillColor: Color?,
-    layerPaint: Paint,
 ) {
-    val canvas = drawContext.canvas
-    canvas.saveLayer(Rect(0f, 0f, size.width, size.height), layerPaint)
     if (fillColor != null) drawRect(fillColor)
     drawContent()
     maskSquircleCorners(brush, top = true, bottom = true)
-    canvas.restore()
 }
 
 // Oversize path: replay recorded content per corner band so no single offscreen exceeds the texture
@@ -379,13 +399,14 @@ private fun rememberSquircleBrush(
         }
     }
     return remember(color, tiles, resourceGeneration) {
-        SquircleShaderBrush(color, tiles)
+        SquircleShaderBrush(color, tiles, resourceGeneration)
     }
 }
 
 private class SquircleShaderBrush(
     private val color: Color,
     private val cornerTilesPx: FloatArray,
+    val resourceGeneration: Any?,
 ) : ShaderBrush() {
     private val runtimeShader = RuntimeShader(SQUIRCLE_SHADER)
     private val cornerSdfShader = makeLinearShader(bakedSdfImage)
