@@ -365,7 +365,6 @@ internal abstract class BackdropEffectScopeImpl :
         blurBlendExpLo = 0
         blurBlendExpHi = 0
         blurBlendFactor = 0f
-        clear()
     }
 }
 

@@ -64,8 +64,6 @@ kotlin {
 
             implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
-            implementation(libs.jetbrains.lifecycle.runtime)
-            implementation(libs.jetbrains.lifecycle.runtime.compose)
 
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }

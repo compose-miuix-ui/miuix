@@ -1207,6 +1207,8 @@ private class DrawBackdropNode(
     }
 
     private fun recreateGraphicsResources() {
+        // Scope cleanup preserves shared shaders; resume must explicitly discard stale shaders.
+        effectScope.runtimeShaderCache.clear()
         releaseGraphicsLayers()
         if (enabled) primary.ensureMain()
         invalidateMeasurement()

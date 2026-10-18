@@ -37,40 +37,20 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * Use [Modifier.layerBackdrop][layerBackdrop] on the content container to capture its
  * rendered output, then pass this [LayerBackdrop] to blur modifiers.
  *
- * The instance is keyed on its current graphics layer; the default layer is recreated after
- * resume. [onDraw] is read via [rememberUpdatedState] so a fresh lambda each frame does not rebuild
- * the backdrop and reset its layer coordinates.
+ * The instance is keyed only on [graphicsLayer]; [onDraw] is read via [rememberUpdatedState]
+ * so a fresh lambda each frame does not rebuild the backdrop and reset its layer coordinates.
  *
- * @param graphicsLayer Optional graphics layer to record content into. When omitted, it is
- *   recreated after each resume so the backdrop does not retain invalidated platform resources.
+ * @param graphicsLayer The graphics layer to record content into.
  * @param onDraw Custom draw logic for the layer content.
  */
 @Composable
 fun rememberLayerBackdrop(
-    graphicsLayer: GraphicsLayer? = null,
+    graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
     onDraw: ContentDrawScope.() -> Unit = DefaultOnDraw,
 ): LayerBackdrop {
-    // FIXME maybe drop graphicsLayer param? because it is unused after app resume
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    var resumeGeneration by remember(lifecycle) { mutableIntStateOf(0) }
-
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                resumeGeneration++
-            }
-        }
-        lifecycle.addObserver(observer)
-
-        onDispose { lifecycle.removeObserver(observer) }
-    }
-
-    val currentGraphicsLayer = key(resumeGeneration) {
-        graphicsLayer ?: rememberGraphicsLayer()
-    }
     val currentOnDraw by rememberUpdatedState(onDraw)
-    return remember(currentGraphicsLayer) {
-        LayerBackdrop(currentGraphicsLayer) { currentOnDraw() }
+    return remember(graphicsLayer) {
+        LayerBackdrop(graphicsLayer) { currentOnDraw() }
     }
 }
 

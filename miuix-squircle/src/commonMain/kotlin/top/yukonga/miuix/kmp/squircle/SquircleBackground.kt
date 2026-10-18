@@ -7,8 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +25,9 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import top.yukonga.miuix.kmp.shader.RuntimeShader
 import top.yukonga.miuix.kmp.shader.asComposeShader
+import top.yukonga.miuix.kmp.shader.internal.rememberGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
@@ -258,34 +254,17 @@ fun Modifier.absoluteSquircleSurface(
 private fun Modifier.squircleShaderMask(
     brush: SquircleShaderBrush,
     fillColor: Color?,
-): Modifier {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val resumeGeneration = remember(lifecycle) { mutableIntStateOf(0) }
-
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                resumeGeneration.intValue++
-            }
-        }
-        lifecycle.addObserver(observer)
-
-        onDispose { lifecycle.removeObserver(observer) }
-    }
-
-    return this.drawWithCache {
-        resumeGeneration.intValue
-        val layerPaint = Paint()
-        val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
-        val contentLayer = if (fastPath) null else obtainGraphicsLayer()
-        onDrawWithContent {
-            if (fastPath) {
-                drawSquircleFast(brush, fillColor, layerPaint)
-            } else {
-                val recordedContentLayer = requireNotNull(contentLayer)
-                recordedContentLayer.record { this@onDrawWithContent.drawContent() }
-                drawSquircleBanded(brush, fillColor, layerPaint, recordedContentLayer)
-            }
+): Modifier = this.drawWithCache {
+    val layerPaint = Paint()
+    val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
+    val contentLayer = if (fastPath) null else obtainGraphicsLayer()
+    onDrawWithContent {
+        if (fastPath) {
+            drawSquircleFast(brush, fillColor, layerPaint)
+        } else {
+            val recordedContentLayer = requireNotNull(contentLayer)
+            recordedContentLayer.record { this@onDrawWithContent.drawContent() }
+            drawSquircleBanded(brush, fillColor, layerPaint, recordedContentLayer)
         }
     }
 }
@@ -386,19 +365,7 @@ private fun rememberSquircleBrush(
 ): SquircleShaderBrush? {
     if (!LocalSquircleEnabled.current || !isRuntimeShaderSupported()) return null
     val density = LocalDensity.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val resumeGeneration = remember(lifecycle) { mutableIntStateOf(0) }
-
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                resumeGeneration.intValue++
-            }
-        }
-        lifecycle.addObserver(observer)
-
-        onDispose { lifecycle.removeObserver(observer) }
-    }
+    val resourceGeneration = rememberGraphicsResourceGeneration()
 
     val extClamped = extension.coerceIn(SquircleDefaults.ExtensionMin, SquircleDefaults.ExtensionMax)
     val tiles = remember(topStart, topEnd, bottomEnd, bottomStart, extClamped, density) {
@@ -411,7 +378,7 @@ private fun rememberSquircleBrush(
             )
         }
     }
-    return remember(color, tiles, resumeGeneration.intValue) {
+    return remember(color, tiles, resourceGeneration) {
         SquircleShaderBrush(color, tiles)
     }
 }
