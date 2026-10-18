@@ -24,11 +24,11 @@
         var finished = false;
         var indeterminate = false;
         var startedFill = false;
+        var reachedHundred = false;
         var appBar = null;
         var appPct = null;
         var shownApp = 0,
           targetApp = 0;
-
         // Only track the heavy runtime payload (wasm + skiko side modules) for the app bar.
         function shouldTrack(url) {
           return /\.(wasm|mjs)(\?|#|$)/.test(url);
@@ -55,8 +55,20 @@
           }
           shownApp += (targetApp - shownApp) * 0.12; // ease toward target, never step backwards
           if (!indeterminate) {
-            if (appBar) appBar.style.width = (shownApp * 100).toFixed(1) + "%";
-            if (appPct) appPct.textContent = Math.round(shownApp * 100) + "%";
+            if (targetApp >= 1 && shownApp >= 0.995) {
+              shownApp = 1;
+              if (appBar) appBar.style.width = "100%";
+              if (appPct) appPct.textContent = "100%";
+              if (!reachedHundred) {
+                reachedHundred = true;
+                setTimeout(function () {
+                  if (!finished) setIndeterminate(true);
+                }, 200);
+              }
+            } else {
+              if (appBar) appBar.style.width = (shownApp * 100).toFixed(1) + "%";
+              if (appPct) appPct.textContent = Math.round(shownApp * 100) + "%";
+            }
           }
           requestAnimationFrame(tick);
         }
@@ -122,13 +134,13 @@
         window.__miuixLoading = {
           finish: function () {
             finished = true;
-            indeterminate = false;
             var root = document.getElementById("loading");
-            if (root) root.classList.remove("indeterminate");
             var a = document.getElementById("loading-bar-fill-app");
             var ap = document.getElementById("loading-percent-app");
-            if (a) a.style.width = "100%";
-            if (ap) ap.textContent = "100%";
+            if (!indeterminate) {
+              if (a) a.style.width = "100%";
+              if (ap) ap.textContent = "100%";
+            }
             if (root) {
               root.classList.add("hidden");
               setTimeout(function () {
