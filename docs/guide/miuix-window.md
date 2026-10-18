@@ -126,3 +126,44 @@ Configures window appearance and behavior:
 - **Windows**: Intercepts `WM_NCHITTEST` and reports `HTMAXBUTTON` over the custom maximize button, triggering Windows 11 Snap Layouts flyout menus natively.
 - **macOS**: Repositions the native traffic light buttons vertically to align with `captionBarHeight` and applies `NSVisualEffectView` Vibrancy behind the transparent window.
 - **Linux**: Applies `_GTK_FRAME_EXTENTS` for proper window snapping and shadows, initiates `_NET_WM_MOVERESIZE` for smooth window manager moves, and uses native Xcursor theme cursors.
+
+## ProGuard / Release Packaging
+
+When packaging a Desktop JVM application with ProGuard enabled (e.g. running `./gradlew packageRelease*` or `createReleaseDistributable`), ProGuard's default shrinking rules may strip JNA native dispatch methods and reflection metadata needed by `miuix-window`.
+
+Add the following ProGuard configuration to your application's `build.gradle.kts`:
+
+```kotlin
+compose.desktop {
+    application {
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("proguard-rules.pro"))
+        }
+    }
+}
+```
+
+And include the following rules in your `proguard-rules.pro`:
+
+```pro
+# JNA (Java Native Access)
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.** { *; }
+-keep interface * extends com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.Callback { *; }
+-keep class * implements com.sun.jna.Library { *; }
+-keep class * implements com.sun.jna.Structure { *; }
+-keep class * extends com.sun.jna.Structure { *; }
+-keepclassmembers class * extends com.sun.jna.Structure {
+    <fields>;
+}
+-keep class * extends com.sun.jna.NativeLong { *; }
+-dontwarn com.sun.jna.**
+-dontnote com.sun.jna.**
+
+# miuix-window
+-keep class top.yukonga.miuix.kmp.window.** { *; }
+-dontnote top.yukonga.miuix.**
+```
+
+> **Note**: If you use `dev.nucleusframework` plugin (e.g. for GraalVM native images), these JNA rules are automatically injected by the Nucleus plugin.

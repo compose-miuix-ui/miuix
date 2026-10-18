@@ -30,6 +30,9 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "Main_desktopKt"
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("proguard-rules.pro"))
+        }
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = BuildConfig.APPLICATION_NAME

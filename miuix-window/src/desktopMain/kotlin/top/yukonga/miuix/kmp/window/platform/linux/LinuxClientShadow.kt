@@ -114,7 +114,9 @@ internal object LinuxClientShadow {
      * fully undecorated.
      */
     @OptIn(ExperimentalComposeUiApi::class)
-    fun shouldUseClientShadow(decoration: WindowDecoration): Boolean = decoration == WindowDecoration.SystemDefault && isTranslucencySupported
+    fun shouldUseClientShadow(decoration: WindowDecoration): Boolean = decoration == WindowDecoration.SystemDefault &&
+        LinuxWindowBackend.current != LinuxWindowBackend.FallbackSystem &&
+        isTranslucencySupported
 
     /**
      * Sets or removes the `_GTK_FRAME_EXTENTS` property (left, right, top, bottom) so the window

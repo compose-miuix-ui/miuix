@@ -124,3 +124,44 @@ Compose 原生 `Window` 与 `DialogWindow` 的强化替代容器。自动接管�
 - **Windows**：自绘最大化按钮通过 `WM_NCHITTEST` 上报 `HTMAXBUTTON`，可原生唤起 Windows 11 贴靠布局（Snap Layouts）飞出菜单；支持 DWM Mica 与深浅色无缝联动。
 - **macOS**：保留系统级红绿灯交通灯按钮，并在窗口运行时动态将其在 Y 轴上垂直居中对齐 `captionBarHeight`；底层通过 `NSVisualEffectView` 实现 Vibrancy 磨砂半透明背景。
 - **Linux**：通过写入 `_GTK_FRAME_EXTENTS` 支持平滑投影与贴靠对齐；标题栏拖拽使用 EWMH `_NET_WM_MOVERESIZE` 原生交互式移动；自动加载系统当前光标主题（如 Breeze、Adwaita）的原生硬件真彩色拉伸光标。
+
+## Release 打包与混淆（ProGuard）
+
+当使用 Compose Multiplatform Desktop 打包 Release 分发包（例如执行 `./gradlew packageRelease*` 或 `createReleaseDistributable`）且启用了 ProGuard 时，ProGuard 默认的代码裁剪 pass 会剔除 `miuix-window` 底层所需的 JNA 原生调度方法及反射结构。
+
+请在应用模块的 `build.gradle.kts` 中配置规则文件：
+
+```kotlin
+compose.desktop {
+    application {
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("proguard-rules.pro"))
+        }
+    }
+}
+```
+
+并在 `proguard-rules.pro` 中加入以下保留规则：
+
+```pro
+# JNA (Java Native Access)
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.** { *; }
+-keep interface * extends com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.Callback { *; }
+-keep class * implements com.sun.jna.Library { *; }
+-keep class * implements com.sun.jna.Structure { *; }
+-keep class * extends com.sun.jna.Structure { *; }
+-keepclassmembers class * extends com.sun.jna.Structure {
+    <fields>;
+}
+-keep class * extends com.sun.jna.NativeLong { *; }
+-dontwarn com.sun.jna.**
+-dontnote com.sun.jna.**
+
+# miuix-window
+-keep class top.yukonga.miuix.kmp.window.** { *; }
+-dontnote top.yukonga.miuix.**
+```
+
+> **提示**：如果项目使用了 `dev.nucleusframework` 插件构建，Nucleus 插件会自动注入 JNA 相关规则，无需重复手动配置。
