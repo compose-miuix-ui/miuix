@@ -113,6 +113,7 @@ export default defineConfig({
                         { text: "OverlayListPopup", link: "/zh_CN/components/overlaylistpopup" },
                         { text: "OverlayCascadingListPopup", link: "/zh_CN/components/overlaycascadinglistpopup" },
                         { text: "OverlayDropdownPreference", link: "/zh_CN/components/overlaydropdownpreference" },
+                        { text: "GlassDropdownPreference", link: "/zh_CN/components/glassdropdownpreference" },
                         { text: "OverlaySpinnerPreference", link: "/zh_CN/components/overlayspinnerpreference" },
                         { text: "OverlayDropdownMenu", link: "/zh_CN/components/overlaydropdownmenu" },
                         { text: "OverlayIconDropdownMenu", link: "/zh_CN/components/overlayicondropdownmenu" },

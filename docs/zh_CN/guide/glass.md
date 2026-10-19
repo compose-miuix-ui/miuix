@@ -378,6 +378,12 @@ Scaffold(contentWindowInsets = WindowInsets(0)) {
 
 需要自行组合 Overlay 宿主时，仍可使用 `glassDialogSurface` 和 `glassBottomSheetSurface`。
 
+### GlassDropdownPreference
+
+[`GlassDropdownPreference`](/zh_CN/components/glassdropdownpreference) 将标准设置行与玻璃下拉弹窗封装在一起，内部管理展开、选择回调、锚点测量和关闭，无需在页面单独管理 `GlassDropdownPopup`。
+
+设置行复用 `BasicComponent` 的 17sp Medium 标题、内边距和标准下拉箭头。弹出选项使用 16sp Medium，与标准下拉组件一致。通过 `visuals` 自定义弹窗材质，通过 `sizing` 调整尺寸限制。弹窗默认由根 `Scaffold` 承载，该浮层宿主应位于传入的背景采样层之外。
+
 ### 弹窗
 
 `GlassTransformPopup` 会从按钮处生长出面板。先持有 `GlassPopupAnchor`，用 `Modifier.glassPopupAnchor` 上报按钮、用 `Modifier.glassPopupAnchorContent` 上报按钮内容，再把锚点交给弹窗：

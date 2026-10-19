@@ -49,6 +49,7 @@ class GlassDropdownPopupInteractionTest {
                 }
             }
         }
+        mainClock.advanceTimeBy(1000)
         waitForIdle()
         val row = onNodeWithText("Choose").assertHasClickAction()
         val position = row.fetchSemanticsNode().boundsInRoot.center

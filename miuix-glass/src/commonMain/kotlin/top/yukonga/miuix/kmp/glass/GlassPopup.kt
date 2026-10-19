@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -396,7 +397,8 @@ fun GlassPopupItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = text,
-                style = MiuixTheme.textStyles.headline2,
+                fontSize = MiuixTheme.textStyles.body1.fontSize,
+                fontWeight = FontWeight.Medium,
                 color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

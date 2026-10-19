@@ -378,6 +378,12 @@ In addition to the shared parameters above:
 
 Use `glassDialogSurface` and `glassBottomSheetSurface` when composing the Overlay hosts yourself.
 
+### GlassDropdownPreference
+
+[`GlassDropdownPreference`](/components/glassdropdownpreference) packages a standard preference row with a glass dropdown. It owns expansion, selection callbacks, anchor measurement and dismissal, so callers do not need to manage a separate `GlassDropdownPopup`.
+
+The row shares `BasicComponent`'s 17sp Medium title, padding and dropdown arrow. Popup options use 16sp Medium, matching the standard dropdown. Use `visuals` to override the popup material and `sizing` to adjust its limits. The popup is hosted in the root `Scaffold` by default; keep that host outside the supplied backdrop recording.
+
 ### Popups
 
 `GlassTransformPopup` grows a panel out of a button. Hold a `GlassPopupAnchor`, report the button with `Modifier.glassPopupAnchor` and its contents with `Modifier.glassPopupAnchorContent`, and hand the anchor to the popup:

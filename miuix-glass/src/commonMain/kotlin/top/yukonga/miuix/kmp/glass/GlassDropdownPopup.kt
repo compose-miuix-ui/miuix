@@ -3,16 +3,21 @@
 
 package top.yukonga.miuix.kmp.glass
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
@@ -70,29 +75,68 @@ fun BoxScope.GlassDropdownPopup(
     contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val size = animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.arcBounds(show),
+    GlassDropdownPopupContent(
+        show = show,
+        onDismissRequest = onDismissRequest,
+        anchorBounds = anchorBounds,
+        backdrop = backdrop,
+        modifier = modifier,
+        anchor = anchor,
+        sizing = sizing,
+        visuals = visuals,
+        cornerRadius = cornerRadius,
+        contentPadding = contentPadding,
+        content = content,
+    )
+}
+
+/** Shared dropdown renderer; Scaffold hosts supply their origin in root coordinates. */
+@Composable
+internal fun BoxScope.GlassDropdownPopupContent(
+    show: Boolean,
+    onDismissRequest: () -> Unit,
+    anchorBounds: Rect,
+    backdrop: Backdrop?,
+    modifier: Modifier = Modifier,
+    anchor: GlassPopupAnchor? = null,
+    sizing: GlassPopupSizing = GlassPopupSizing(),
+    visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
+    cornerRadius: Dp = GlassDropdownDefaults.CornerRadius,
+    contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
+    coordinateOrigin: Offset = Offset.Zero,
+    onDismissFinished: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    // Scaffold content is first composed after the row has already requested opening.
+    // Retain a closed initial state so that first composition still has an enter transition.
+    val visibility = remember { MutableTransitionState(false) }
+    LaunchedEffect(show) {
+        visibility.targetState = show
+    }
+    val transition = rememberTransition(visibility, label = "glassDropdown")
+    val size = transition.animateFloat(
+        transitionSpec = { GlassMotion.arcBounds(targetState) },
         label = "glassDropdownSize",
-    )
-    val position by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.arcPosition(show),
+    ) { if (it) 1f else 0f }
+    val position by transition.animateFloat(
+        transitionSpec = { GlassMotion.arcPosition(targetState) },
         label = "glassDropdownPosition",
-    )
-    val fade by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.arcFade(show),
+    ) { if (it) 1f else 0f }
+    val fade by transition.animateFloat(
+        transitionSpec = { GlassMotion.arcFade(targetState) },
         label = "glassDropdownFade",
-    )
-    val sharpness by animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.arcBlur(show),
+    ) { if (it) 1f else 0f }
+    val sharpness by transition.animateFloat(
+        transitionSpec = { GlassMotion.arcBlur(targetState) },
         label = "glassDropdownBlur",
-    )
+    ) { if (it) 1f else 0f }
 
     val active by remember(show, size) {
         derivedStateOf { show || size.value > 0.0001f }
+    }
+    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    LaunchedEffect(show, active) {
+        if (!show && !active) currentOnDismissFinished?.invoke()
     }
     val layoutDirection = LocalLayoutDirection.current
     val backProgress = rememberGlassPopupBackProgress(
@@ -139,8 +183,8 @@ fun BoxScope.GlassDropdownPopup(
         overlay = {},
         frame = { end, page ->
             arcFrame(
-                anchorBounds,
-                anchor?.dropdownValueBounds,
+                anchorBounds.translate(-coordinateOrigin),
+                anchor?.dropdownValueBounds?.translate(-coordinateOrigin),
                 end,
                 page,
                 sizing.safeMargin.toPx(),

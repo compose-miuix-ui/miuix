@@ -104,6 +104,7 @@ export default defineConfig({
                         { text: "OverlayListPopup", link: "/components/overlaylistpopup" },
                         { text: "OverlayCascadingListPopup", link: "/components/overlaycascadinglistpopup" },
                         { text: "OverlayDropdownPreference", link: "/components/overlaydropdownpreference" },
+                        { text: "GlassDropdownPreference", link: "/components/glassdropdownpreference" },
                         { text: "OverlaySpinnerPreference", link: "/components/overlayspinnerpreference" },
                         { text: "OverlayDropdownMenu", link: "/components/overlaydropdownmenu" },
                         { text: "OverlayIconDropdownMenu", link: "/components/overlayicondropdownmenu" },
