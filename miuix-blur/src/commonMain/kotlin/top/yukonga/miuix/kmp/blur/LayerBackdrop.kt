@@ -96,11 +96,11 @@ class LayerBackdrop internal constructor(
                 val inv = 1f / downscaleFactor
                 val scaledX = offset.x * inv
                 val scaledY = offset.y * inv
-                val roundedX = kotlin.math.round(scaledX * 0.5f).toInt().toFloat() * 2f
-                val roundedY = kotlin.math.round(scaledY * 0.5f).toInt().toFloat() * 2f
-                offsetResidualX = (scaledX - roundedX) * downscaleFactor
-                offsetResidualY = (scaledY - roundedY) * downscaleFactor
-                translate(-roundedX, -roundedY)
+                // Keep moving surfaces continuous. Snapping this origin and compensating only
+                // after filtering changes the sampled pixels abruptly at each grid boundary.
+                offsetResidualX = 0f
+                offsetResidualY = 0f
+                translate(-scaledX, -scaledY)
                 scale(inv, inv, Offset.Zero)
             } else {
                 offsetResidualX = 0f

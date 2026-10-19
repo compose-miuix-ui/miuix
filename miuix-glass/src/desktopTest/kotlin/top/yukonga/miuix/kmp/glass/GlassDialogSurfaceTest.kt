@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -22,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -44,6 +48,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
 import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -54,6 +59,48 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassDialogSurfaceTest {
+
+    @Test
+    fun blurredBackgroundChangesContinuouslyDuringSmallOpeningRebounds() = runComposeUiTest {
+        val translation = mutableFloatStateOf(0f)
+        setContent {
+            val backdrop = rememberLayerBackdrop()
+            Box(Modifier.size(500.dp)) {
+                Box(
+                    Modifier.fillMaxSize().layerBackdrop(backdrop).drawBehind {
+                        drawRect(Color.Black)
+                        for (y in 0..500 step 64) {
+                            drawRect(Color.Blue, Offset(0f, y.toFloat()), Size(size.width, 32f))
+                        }
+                    },
+                )
+                val scale = remember { mutableFloatStateOf(1f) }
+                val scrim = remember { mutableStateOf(Color.Transparent) }
+                val dimmedBackdrop = remember { ScrimBackdrop(backdrop, scrim, scale) }
+                Box(
+                    Modifier.offset(100.dp, 200.dp).size(300.dp, 180.dp)
+                        .graphicsLayer { translationY = translation.floatValue }
+                        .glassPanel(
+                            backdrop = dimmedBackdrop,
+                            shape = GlassShape(28.dp),
+                            material = GlassMaterial(60.dp, GlassColorLayer(Color.Transparent, GlassColorBlendMode.SrcOver)),
+                            stroke = null,
+                            shadow = null,
+                            shading = false,
+                        ),
+                )
+            }
+        }
+        val samples = listOf(0f, -1f, -2f, -3f, -2f, -1f, 0f, 1f, 0f).map { offset ->
+            runOnIdle { translation.floatValue = offset }
+            mainClock.advanceTimeByFrame()
+            onRoot().captureToImage().toPixelMap()[250, 220].blue
+        }
+        // Small phase/interpolation differences are expected while the sampling window moves;
+        // a one-pixel rebound must not jump an entire downsample-grid cell.
+        val largestStep = samples.zipWithNext { before, after -> kotlin.math.abs(after - before) }.max()
+        assertTrue(largestStep < 0.015f, "One-pixel rebounds must not flash: $samples")
+    }
 
     @Test
     fun fallbackReplacesTheHostFillAndRetainsRadiusAndDismissal() = runComposeUiTest {

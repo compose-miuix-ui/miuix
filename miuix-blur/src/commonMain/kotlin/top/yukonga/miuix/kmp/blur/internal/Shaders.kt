@@ -350,18 +350,19 @@ internal const val DOWNSAMPLE_2X_SHADER = """
     }
 """
 
-/** 4× downsample — 4-tap ±0.75 dual-filter, 16-tap tent footprint. */
+/** 4× downsample — sample every texel in the 4×4 footprint before decimation. */
 internal const val DOWNSAMPLE_4X_SHADER = """
     uniform shader child;
     uniform float2 maxCoord;
     half4 main(float2 xy) {
-        float2 minCoord = float2(0.5);
         half4 color = half4(0);
-        color += child.eval(clamp(xy + float2(-0.75, -0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2( 0.75, -0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2(-0.75,  0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2( 0.75,  0.75), minCoord, maxCoord));
-        return color * 0.25;
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                float2 offset = float2(float(x), float(y)) - 1.5;
+                color += child.eval(clamp(xy + offset, float2(0.5), maxCoord));
+            }
+        }
+        return color * 0.0625;
     }
 """
 

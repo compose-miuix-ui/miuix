@@ -1003,7 +1003,8 @@ private class DrawBackdropNode(
         recordLayer(dest, size = IntSize(destW, destH)) {
             scale(scale, scale, Offset.Zero) { drawLayer(source) }
         }
-        source.renderEffect = null
+        // drawLayer records a reference, not a flattened bitmap. Keep the filter attached
+        // until the recorded destination is rendered; clearing it here skips prefiltering.
     }
 
     /**

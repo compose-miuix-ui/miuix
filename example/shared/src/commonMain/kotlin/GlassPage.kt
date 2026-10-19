@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
@@ -100,6 +102,7 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import kotlin.math.roundToInt
 
 private val Materials: List<Pair<String, GlassStyle>> = listOf(
     "Common Small Thin" to GlassStyles.CommonSmallThin,
@@ -205,6 +208,7 @@ fun GlassPage(padding: PaddingValues) {
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
     var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var progressiveTopBarBlur by remember { mutableStateOf(false) }
+    val topBarWindowInsets = WindowInsets.statusBars
     var navIndex by remember { mutableIntStateOf(0) }
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
@@ -329,14 +333,29 @@ fun GlassPage(padding: PaddingValues) {
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
+                                    .layout { measurable, constraints ->
+                                        // Demo tab rows have their own material; keep the band at toolbar height.
+                                        val barHeight = topBarWindowInsets.getTop(this) +
+                                            TopAppBarDefaults.CollapsedHeight.toPx()
+                                        val blurHeight = ((barHeight + 20.dp.toPx()) * 1.2f).roundToInt()
+                                        val placeable = measurable.measure(
+                                            constraints.copy(minHeight = blurHeight, maxHeight = blurHeight),
+                                        )
+                                        // Let the blur overhang without changing Scaffold's content inset.
+                                        layout(constraints.maxWidth, constraints.maxHeight) {
+                                            placeable.placeRelative(0, 0)
+                                        }
+                                    }
                                     .graphicsLayer {
                                         this.alpha = (-scrollBehavior.state.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f)
                                     }
                                     .progressiveTextureBlur(
                                         backdrop = backdrop,
                                         shape = RectangleShape,
-                                        gradient = ProgressiveBlur.Top.copy(curve = 2.2f),
-                                        blurRadius = 10f,
+                                        // Start sharpening early so the lower edge stays subtle at this radius.
+                                        gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
+                                        // Xiaomi sigma 36 / Miuix's radius-to-sigma factor 0.45.
+                                        blurRadius = 80f,
                                         colors = blurColors,
                                     ),
                             )
