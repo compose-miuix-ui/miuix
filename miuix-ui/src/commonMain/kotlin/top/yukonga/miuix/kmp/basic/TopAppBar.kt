@@ -36,6 +36,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -45,10 +46,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -62,6 +65,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
@@ -721,6 +726,7 @@ private fun TopAppBarLayout(
     titleAlpha: () -> Float = { 1f },
     bottomContent: @Composable () -> Unit = {},
 ) {
+    val titleClip = remember { TopAppBarTitleClip() }
     // Producer lambdas — reads stay in layout/draw phases so scroll never recomposes this subtree.
     val scrolledOffset = remember(scrollBehavior) {
         { scrollBehavior?.state?.heightOffset ?: 0f }
@@ -809,6 +815,7 @@ private fun TopAppBarLayout(
             Box(
                 Modifier
                     .layoutId("title")
+                    .clipTopAppBarTitle(titleClip) { titleClip.titleOrigin }
                     .padding(horizontal = titlePadding)
                     .graphicsLayer {
                         alpha = smallTitleAlpha.value * titleAlpha()
@@ -834,6 +841,7 @@ private fun TopAppBarLayout(
             Box(
                 Modifier
                     .layoutId("largeTitle")
+                    .clipTopAppBarTitle(titleClip) { titleClip.largeTitleOrigin }
                     .padding(top = TopAppBarDefaults.CollapsedHeight)
                     .padding(horizontal = titlePadding)
                     .graphicsLayer {
@@ -880,6 +888,7 @@ private fun TopAppBarLayout(
                 Box(
                     Modifier
                         .layoutId("smallSubtitle")
+                        .clipTopAppBarTitle(titleClip) { titleClip.subtitleOrigin }
                         .graphicsLayer {
                             alpha = smallTitleAlpha.value * titleAlpha()
                             translationY = smallTitleTranslationY.value
@@ -907,7 +916,8 @@ private fun TopAppBarLayout(
                     Modifier
                 },
             )
-            .clipToBounds()
+            // Titles retain the viewport clip; controls can cast shadows beyond the bar.
+            .onSizeChanged { titleClip.viewportSize = it }
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
             .pointerInput(Unit) {
                 detectTapGestures { /* Consume click */ }
@@ -992,6 +1002,7 @@ private fun TopAppBarLayout(
         }
         val contentTop = maxOf(barHeight + expandedBottomPadding, smallSubtitleBottom + expandedBottomPadding)
         val layoutHeight = contentTop + bottomContentPlaceable.height
+        titleClip.contentHeight = layoutHeight
 
         layout(constraints.maxWidth, layoutHeight) {
             // Navigation icon
@@ -1007,16 +1018,23 @@ private fun TopAppBarLayout(
             } else if (baseX + titlePlaceable.width > constraints.maxWidth - actionIconsPlaceable.width) {
                 baseX += ((constraints.maxWidth - actionIconsPlaceable.width) - (baseX + titlePlaceable.width))
             }
-            titlePlaceable.placeRelative(
-                x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2,
+            val titleY = verticalCenter - titlePlaceable.height / 2
+            titleClip.titleOrigin = IntOffset(
+                if (layoutDirection == LayoutDirection.Ltr) baseX else constraints.maxWidth - baseX - titlePlaceable.width,
+                titleY,
             )
+            titlePlaceable.placeRelative(x = baseX, y = titleY)
 
             // Small subtitle (centered below small title, same alpha as small title)
-            smallSubtitlePlaceable?.placeRelative(
-                x = (constraints.maxWidth - smallSubtitlePlaceable.width) / 2,
-                y = verticalCenter + titlePlaceable.height / 2,
-            )
+            smallSubtitlePlaceable?.let { subtitle ->
+                val subtitleX = (constraints.maxWidth - subtitle.width) / 2
+                val subtitleY = verticalCenter + titlePlaceable.height / 2
+                titleClip.subtitleOrigin = IntOffset(
+                    if (layoutDirection == LayoutDirection.Ltr) subtitleX else constraints.maxWidth - subtitleX - subtitle.width,
+                    subtitleY,
+                )
+                subtitle.placeRelative(x = subtitleX, y = subtitleY)
+            }
 
             // Action icons
             actionIconsPlaceable.placeRelative(
@@ -1025,11 +1043,41 @@ private fun TopAppBarLayout(
             )
 
             // Large title (includes large subtitle in a Column)
+            titleClip.largeTitleOrigin = IntOffset(
+                if (layoutDirection == LayoutDirection.Ltr) 0 else constraints.maxWidth - largeTitlePlaceable.width,
+                0,
+            )
             largeTitlePlaceable.placeRelative(x = 0, y = 0)
 
             // Bottom content (pinned, below bar and subtitle)
             bottomContentPlaceable.placeRelative(x = 0, y = contentTop)
         }
+    }
+}
+
+/** Viewport geometry published by layout and read only while drawing the title layers. */
+private class TopAppBarTitleClip {
+    var viewportSize: IntSize by mutableStateOf(IntSize.Zero)
+    var contentHeight: Int by mutableIntStateOf(0)
+    var titleOrigin: IntOffset by mutableStateOf(IntOffset.Zero)
+    var largeTitleOrigin: IntOffset by mutableStateOf(IntOffset.Zero)
+    var subtitleOrigin: IntOffset by mutableStateOf(IntOffset.Zero)
+}
+
+/** Keep the original bar clip around transformed titles without clipping control shadows. */
+private fun Modifier.clipTopAppBarTitle(
+    clip: TopAppBarTitleClip,
+    origin: () -> IntOffset,
+): Modifier = drawWithContent {
+    val position = origin()
+    val topInset = clip.viewportSize.height - clip.contentHeight
+    clipRect(
+        left = -position.x.toFloat(),
+        top = -position.y.toFloat() - topInset,
+        right = clip.viewportSize.width - position.x.toFloat(),
+        bottom = clip.contentHeight - position.y.toFloat(),
+    ) {
+        this@drawWithContent.drawContent()
     }
 }
 

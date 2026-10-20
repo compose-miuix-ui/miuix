@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.LayerOutsets
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
@@ -63,16 +65,21 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.glass.GlassDefaults
+import top.yukonga.miuix.kmp.glass.GlassShadows
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.math.sqrt
+
+private const val SEARCH_TOP_BAR_BLUR_RADIUS = 50f
 
 // EaseManager.SpringInterpolator (the nested legacy class) evaluates one second
 // across the 400ms animator. The standalone SpringInterpolator is a different API.
@@ -132,7 +139,7 @@ internal fun GlassSearchOverlay(
         onBackCompleted = onDismissRequest,
     )
     val colors = MiuixTheme.colorScheme
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .onPreviewKeyEvent {
@@ -142,118 +149,138 @@ internal fun GlassSearchOverlay(
                 } else {
                     false
                 }
-            }
-            .graphicsLayer { alpha = progress.value }
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .imePadding(),
+            },
     ) {
+        // A faded bar still participates in hit testing. Cover every gap around the search
+        // controls, including their outer padding, until the exit transition has finished.
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
-                // Without a content anchor, native search animates only its top inset.
-                .graphicsLayer { translationY = -statusBarHeight * (1f - progress.value) },
-        ) {
-            BasicTextField(
-                value = query,
-                onValueChange = { query = it },
-                enabled = expanded,
-                singleLine = true,
-                textStyle = MiuixTheme.textStyles.body1.copy(color = colors.onSurface),
-                cursorBrush = SolidColor(colors.primary),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .layout { measurable, constraints ->
-                        val endSpace = (54.dp.toPx() * progress.value).toInt()
-                        val width = (constraints.maxWidth - endSpace).coerceAtLeast(0)
-                        val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
-                        layout(constraints.maxWidth, placeable.height) {
-                            placeable.placeRelative(0, 0)
-                        }
-                    }
-                    .height(44.dp)
-                    .focusRequester(focusRequester),
-                decorationBox = { field ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(colors.surfaceContainerHigh, CircleShape)
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(24.dp), tint = colors.disabledOnSurface)
-                        Box(Modifier.weight(1f)) {
-                            if (query.isEmpty()) Text("Search", color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
-                            field()
-                        }
-                        if (query.isNotEmpty()) {
-                            IconButton(onClick = {
-                                query = ""
-                                focusRequester.requestFocus()
-                            }, modifier = Modifier.size(24.dp)) {
-                                Icon(MiuixIcons.Glass.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = colors.disabledOnSurface)
-                            }
-                        }
-                    }
-                },
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .graphicsLayer {
-                        val fraction = progress.value
-                        translationX = 66.dp.toPx() * (1f - fraction) * if (direction == LayoutDirection.Ltr) 1f else -1f
-                        scaleX = fraction
-                        scaleY = fraction
-                        alpha = cancelAlpha.value
-                        val blur = 50f * (1f - cancelAlpha.value)
-                        renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
-                    },
-            ) {
-                IconButton(
-                    onClick = onDismissRequest,
-                    enabled = expanded,
-                    modifier = Modifier.size(44.dp).background(colors.surfaceContainerHigh, CircleShape),
-                ) {
-                    Icon(MiuixIcons.Glass.Close, contentDescription = "Cancel", modifier = Modifier.size(24.dp), tint = colors.onSurface)
-                }
-            }
-        }
-        Box(
+                .matchParentSize()
+                .clickable(interactionSource = null, indication = null) { keyboard?.hide() },
+        )
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(interactionSource = null, indication = null) { keyboard?.hide() },
-            contentAlignment = Alignment.TopCenter,
+                .graphicsLayer { alpha = progress.value }
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .imePadding(),
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
+                    // Without a content anchor, native search animates only its top inset.
+                    .graphicsLayer { translationY = -statusBarHeight * (1f - progress.value) },
+            ) {
+                BasicTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    enabled = expanded,
+                    singleLine = true,
+                    textStyle = MiuixTheme.textStyles.body1.copy(color = colors.onSurface),
+                    cursorBrush = SolidColor(colors.primary),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .layout { measurable, constraints ->
+                            val endSpace = (54.dp.toPx() * progress.value).toInt()
+                            val width = (constraints.maxWidth - endSpace).coerceAtLeast(0)
+                            val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                            layout(constraints.maxWidth, placeable.height) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        }
+                        .height(44.dp)
+                        .focusRequester(focusRequester),
+                    decorationBox = { field ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(colors.surfaceContainerHigh, CircleShape)
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(24.dp), tint = colors.disabledOnSurface)
+                            Box(Modifier.weight(1f)) {
+                                if (query.isEmpty()) Text("Search", color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
+                                field()
+                            }
+                            if (query.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    query = ""
+                                    focusRequester.requestFocus()
+                                }, modifier = Modifier.size(24.dp)) {
+                                    Icon(MiuixIcons.Glass.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = colors.disabledOnSurface)
+                                }
+                            }
+                        }
+                    },
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .graphicsLayer {
+                            val fraction = progress.value
+                            translationX = 66.dp.toPx() * (1f - fraction) * if (direction == LayoutDirection.Ltr) 1f else -1f
+                            scaleX = fraction
+                            scaleY = fraction
+                            alpha = cancelAlpha.value
+                            val blur = 50f * (1f - cancelAlpha.value)
+                            renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
+                        },
+                ) {
+                    IconButton(
+                        onClick = onDismissRequest,
+                        enabled = expanded,
+                        modifier = Modifier.size(44.dp).background(colors.surfaceContainerHigh, CircleShape),
+                    ) {
+                        Icon(MiuixIcons.Glass.Close, contentDescription = "Cancel", modifier = Modifier.size(24.dp), tint = colors.onSurface)
+                    }
+                }
+            }
         }
     }
 }
 
-/** ActionBarView fades, shrinks to 0.9, and blurs while entering search mode. */
+/** Share the existing bar fade with its independently rendered progressive-blur background. */
 @Composable
-internal fun Modifier.glassSearchBarTransition(expanded: Boolean): Modifier {
-    val transition = updateTransition(expanded, label = "glassSearchTopBar")
-    val scale = transition.animateFloat(
-        transitionSpec = { tween(400, easing = SearchModeEasing) },
-        label = "glassSearchTopBarScale",
-    ) { if (it) 0.9f else 1f }
-    val opacity = transition.animateFloat(
+internal fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
+    val transition = updateTransition(expanded, label = "glassSearchTopBarOpacity")
+    return transition.animateFloat(
         transitionSpec = {
             tween(150, easing = if (targetState) CubicBezierEasing(0f, 0f, 0.67f, 1f) else CubicBezierEasing(0.26f, 0f, 0.6f, 0.2f))
         },
         label = "glassSearchTopBarAlpha",
     ) { if (it) 0f else 1f }
+}
+
+/** ActionBarView fades, shrinks to 0.9, and blurs while entering search mode. */
+@Composable
+internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -> Float): Modifier {
+    val density = LocalDensity.current
+    val layerOutsets = remember(density) {
+        val shadow = GlassShadows.Regular
+        val shadowOutset = ((shadow.radius + maxOf(abs(shadow.offsetX), abs(shadow.offsetY))) / GlassDefaults.SourceDensity).dp
+        // Keep a fixed halo for the shadows and maximum blur throughout the offscreen fade.
+        val outset = shadowOutset + with(density) { (SEARCH_TOP_BAR_BLUR_RADIUS * 3f).toDp() }
+        LayerOutsets(left = outset, top = outset, right = outset, bottom = outset)
+    }
+    val transition = updateTransition(expanded, label = "glassSearchTopBar")
+    val scale = transition.animateFloat(
+        transitionSpec = { tween(400, easing = SearchModeEasing) },
+        label = "glassSearchTopBarScale",
+    ) { if (it) 0.9f else 1f }
     val blur = transition.animateFloat(
         transitionSpec = { tween(if (targetState) 150 else 120, easing = LinearEasing) },
         label = "glassSearchTopBarBlur",
-    ) { if (it) 50f else 0f }
+    ) { if (it) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
     return graphicsLayer {
+        outsets = layerOutsets
         scaleX = scale.value
         scaleY = scale.value
-        alpha = opacity.value
+        alpha = barAlpha()
         renderEffect = if (blur.value > 0.5f) BlurEffect(blur.value, blur.value, TileMode.Decal) else null
     }
 }

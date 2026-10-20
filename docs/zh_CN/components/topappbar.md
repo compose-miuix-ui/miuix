@@ -4,6 +4,8 @@
 
 此组件通常与 `Scaffold` 组件结合使用，以便在应用程序的不同页面中保持一致的布局和行为。
 
+`TopAppBar` 与 `BlurTopAppBar` 将标题裁剪在顶部栏视口内，同时允许导航按钮、操作按钮和 `bottomContent` 的阴影向外延伸，不增加顶部栏的布局高度。若在整个顶部栏外包裹淡出或离屏绘制的 `graphicsLayer`，需通过 `outsets` 为阴影和模糊预留足够空间。
+
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=topAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>

@@ -221,6 +221,7 @@ fun GlassPage(padding: PaddingValues) {
     val stroke = if (isInDark) StrokesDark[strokeIndex] else Strokes[strokeIndex].second
     val popupVisuals = GlassPopupDefaults.visuals(style = style, alpha = alpha, stroke = stroke)
     var searchExpanded by remember { mutableStateOf(false) }
+    val searchBarAlpha = rememberGlassSearchBarAlpha(searchExpanded)
     var submenu by remember { mutableStateOf(false) }
     var submenuPresent by remember { mutableStateOf(false) }
     var submenuAnchor by remember { mutableStateOf(Rect.Zero) }
@@ -347,7 +348,7 @@ fun GlassPage(padding: PaddingValues) {
                                         }
                                     }
                                     .graphicsLayer {
-                                        this.alpha = (-scrollBehavior.state.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f)
+                                        this.alpha = (-scrollBehavior.state.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f) * searchBarAlpha.value
                                     }
                                     .progressiveTextureBlur(
                                         backdrop = backdrop,
@@ -362,7 +363,7 @@ fun GlassPage(padding: PaddingValues) {
                         }
                         GlassTopAppBar(
                             title = "Glass",
-                            contentModifier = Modifier.glassSearchBarTransition(searchExpanded),
+                            contentModifier = Modifier.glassSearchBarTransition(searchExpanded, barAlpha = { searchBarAlpha.value }),
                             titleAlpha = rememberGlassSearchTitleAlpha(searchExpanded, scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit),
                             isContentScrolled = contentUnderTopBar,
                             backdrop = backdrop,
