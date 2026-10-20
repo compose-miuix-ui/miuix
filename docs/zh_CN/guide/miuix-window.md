@@ -1,4 +1,4 @@
-# miuix-window
+# 窗口与标题栏
 
 `miuix-window` 是专为 Compose Multiplatform 桌面端（Desktop JVM）打造的窗口样式与自绘标题栏模块，全面支持 **Windows (10/11)**、**macOS** 与 **Linux (X11 & Wayland)**。
 

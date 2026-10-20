@@ -1,4 +1,4 @@
-# miuix-nav
+# 导航支持
 
 `miuix-nav` 是一个自研的 Compose Multiplatform 导航运行时，核心模型为**连续栈深度**。整条返回栈由单个 `Animatable<Float>`（`animatedTop`）驱动；每个 entry 的视觉是其相对深度的纯函数。由此，连续出入栈、完全自定义的 float 驱动转场、以及 1:1 跟手的手势返回都自然成立。它**零依赖** `androidx.navigation3`。
 

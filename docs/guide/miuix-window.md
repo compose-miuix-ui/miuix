@@ -1,4 +1,4 @@
-# miuix-window
+# Window & Title Bar
 
 `miuix-window` is a desktop-only window styling and custom caption bar module for Compose Multiplatform, targeting **Windows (10/11)**, **macOS**, and **Linux (X11 & Wayland)**.
 
