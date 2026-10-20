@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -143,7 +144,7 @@ internal fun placeGlassPopup(
  * @param modifier The modifier applied to the panel.
  * @param sizing How wide and tall the panel may be.
  * @param visuals What its surface is made of.
- * @param underlayMaterial Parent colour treatment inherited from an action-bar button anchor.
+ * @param surface Optional background layers, drawn behind the rows inside the panel silhouette.
  * @param contentPadding Padding around the rows.
  * @param panelLayer Applied to the panel as a whole: its opacity, its blur, its scale.
  * @param overlay Drawn over the panel and its rows, inside the silhouette.
@@ -170,7 +171,7 @@ internal fun BoxScope.GlassPopupSurface(
     contentLayer: GraphicsLayerScope.(end: Size, rect: Rect) -> Unit,
     modifier: Modifier = Modifier,
     reveal: Modifier = Modifier,
-    underlayMaterial: GlassMaterial? = null,
+    surface: (@Composable BoxScope.(GlassShape) -> Unit)? = null,
     onMeasured: ((Size) -> Unit)? = null,
     interactive: Boolean = true,
     scrollable: Boolean = false,
@@ -192,7 +193,7 @@ internal fun BoxScope.GlassPopupSurface(
         GlassShape(corner, corner, corner, corner)
     }
 
-    Box(
+    Layout(
         modifier = modifier
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
@@ -209,36 +210,6 @@ internal fun BoxScope.GlassPopupSurface(
             .then(reveal)
             .glassShadow(shape, visuals.shadow, visuals.alpha)
             .clip(shape)
-            .then(
-                if (backdrop == null) {
-                    Modifier
-                        .background(visuals.containerColor)
-                        .drawWithContent {
-                            drawContent()
-                            visuals.stroke?.let { drawGlassStroke(shape, layoutDirection, it, visuals.alpha) }
-                        }
-                } else if (underlayMaterial != null) {
-                    Modifier.glassOnActionBar(
-                        backdrop = backdrop,
-                        shape = shape,
-                        style = visuals.style,
-                        alpha = visuals.alpha,
-                        material = visuals.material,
-                        underlayMaterial = underlayMaterial,
-                        stroke = visuals.stroke,
-                    )
-                } else {
-                    Modifier.glass(
-                        backdrop = backdrop,
-                        shape = shape,
-                        style = visuals.style,
-                        alpha = visuals.alpha,
-                        material = visuals.material,
-                        stroke = visuals.stroke,
-                        shading = false,
-                    )
-                },
-            )
             .drawWithContent {
                 drawContent()
                 overlay()
@@ -257,41 +228,91 @@ internal fun BoxScope.GlassPopupSurface(
                             }
                         }
                 },
+            ),
+        content = {
+            Box {
+                if (surface != null) {
+                    surface(shape)
+                } else {
+                    GlassPopupBackground(backdrop, shape, visuals)
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .graphicsLayer {
+                        transformOrigin = TransformOrigin(0f, 0f)
+                        contentLayer(measured.end, measured.rect)
+                    }
+                    .padding(contentPadding),
+                content = content,
             )
-            .layout { measurable, constraints ->
-                val safeInset = if (scrollable) sizing.safeMargin.roundToPx() * 2 else 0
-                val widest = sizing.maxWidth.roundToPx().coerceAtMost((constraints.maxWidth - safeInset).coerceAtLeast(0))
-                val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
-                val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
-                val width = measurable.maxIntrinsicWidth(tallest).coerceIn(narrowest, widest)
-                val placeable = measurable.measure(
-                    Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = tallest),
-                )
-                measured.end = Size(placeable.width.toFloat(), placeable.height.toFloat())
-                onMeasured?.invoke(measured.end)
-                val page = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
-                val current = frame(measured.end, page)
-                measured.rect = current.rect
-                measured.cornerRadius = current.cornerRadius
-                layout(
-                    current.rect.width.roundToInt().coerceAtLeast(0),
-                    current.rect.height.roundToInt().coerceAtLeast(0),
-                ) {
-                    placeable.place(0, 0)
-                }
-            },
-    ) {
-        Column(
-            modifier = Modifier
-                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                .graphicsLayer {
-                    transformOrigin = TransformOrigin(0f, 0f)
-                    contentLayer(measured.end, measured.rect)
-                }
-                .padding(contentPadding),
-            content = content,
+        },
+    ) { measurables, constraints ->
+        val safeInset = if (scrollable) sizing.safeMargin.roundToPx() * 2 else 0
+        val widest = sizing.maxWidth.roundToPx().coerceAtMost((constraints.maxWidth - safeInset).coerceAtLeast(0))
+        val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
+        val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
+        val width = measurables[1].maxIntrinsicWidth(tallest).coerceIn(narrowest, widest)
+        val foreground = measurables[1].measure(
+            Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = tallest),
         )
+        measured.end = Size(foreground.width.toFloat(), foreground.height.toFloat())
+        onMeasured?.invoke(measured.end)
+        val page = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
+        val current = frame(measured.end, page)
+        measured.rect = current.rect
+        measured.cornerRadius = current.cornerRadius
+        val panelWidth = current.rect.width.roundToInt().coerceAtLeast(0)
+        val panelHeight = current.rect.height.roundToInt().coerceAtLeast(0)
+        // Material and rim follow the animated silhouette; rows retain their settled size.
+        val background = measurables[0].measure(Constraints.fixed(panelWidth, panelHeight))
+        layout(panelWidth, panelHeight) {
+            background.place(0, 0)
+            foreground.place(0, 0)
+        }
     }
+}
+
+/** A background layer that follows the panel without transforming its foreground content. */
+@Composable
+internal fun BoxScope.GlassPopupBackground(
+    backdrop: Backdrop?,
+    shape: GlassShape,
+    visuals: GlassPopupVisuals,
+    modifier: Modifier = Modifier,
+    underlayMaterial: GlassMaterial? = null,
+) {
+    Box(
+        modifier = Modifier.matchParentSize().then(modifier).then(
+            if (backdrop == null) {
+                Modifier.background(visuals.containerColor).drawWithContent {
+                    drawContent()
+                    visuals.stroke?.let { drawGlassStroke(shape, layoutDirection, it, visuals.alpha) }
+                }
+            } else if (underlayMaterial != null) {
+                Modifier.glassOnActionBar(
+                    backdrop = backdrop,
+                    shape = shape,
+                    style = visuals.style,
+                    alpha = visuals.alpha,
+                    material = visuals.material,
+                    underlayMaterial = underlayMaterial,
+                    stroke = visuals.stroke,
+                )
+            } else {
+                Modifier.glass(
+                    backdrop = backdrop,
+                    shape = shape,
+                    style = visuals.style,
+                    alpha = visuals.alpha,
+                    material = visuals.material,
+                    stroke = visuals.stroke,
+                    shading = false,
+                )
+            },
+        ),
+    )
 }
 
 /** Match drawGlassShadow's bounds, including its density conversion and offset. */

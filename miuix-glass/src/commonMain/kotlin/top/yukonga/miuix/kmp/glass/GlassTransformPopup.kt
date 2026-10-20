@@ -68,6 +68,9 @@ class GlassPopupAnchor {
     /** Material supplied by an attached glass button, including its resolved backdrop. */
     internal var surface: GlassAnchorSurface? by mutableStateOf(null)
 
+    /** Expanded menu appearance shared with a secondary popup. */
+    internal var popupVisuals: GlassPopupVisuals? by mutableStateOf(null)
+
     /** Current button surface opacity and target state, independent of the legacy shadow ramp. */
     internal var surfaceProgress: State<Float>? by mutableStateOf(null)
     internal var surfaceOpacity: Float by mutableFloatStateOf(1f)
@@ -108,7 +111,7 @@ class GlassPopupAnchor {
         get() = dropdownBackProgressState?.value?.coerceIn(0f, 1f) ?: 0f
 }
 
-/** The sampling and colour treatment shared by a glass button and its transforming menu. */
+/** The button's sampling and colour treatment at the collapsed endpoint of its menu. */
 internal data class GlassAnchorSurface(
     val backdrop: Backdrop?,
     val style: GlassStyle,
@@ -143,8 +146,8 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
  * Reports a control to [anchor], and stands it down while its menu is open.
  *
  * Put this on the control's outermost node — the pill, not the icon inside it, which the panel
- * replaces for the length of the animation. On [GlassIconButton] it also shares the button's
- * backdrop, blur and colour treatment with [GlassTransformPopup].
+ * replaces for the length of the animation. On [GlassIconButton] it also supplies the button's
+ * backdrop, blur and colour treatment for [GlassTransformPopup]'s collapsed endpoint.
  *
  * @param anchor The anchor to report to.
  * @param cornerRadius The control's own corner radius. Half the control's height, for a pill.
@@ -220,8 +223,8 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
  * @param show Whether the menu is open.
  * @param onDismissRequest Called when a tap outside should close it.
  * @param anchor The control the menu grows out of.
- * @param backdrop The [Backdrop] behind the glass when the anchor has no shared button surface. A
- *   [GlassIconButton] anchor supplies its own resolved backdrop.
+ * @param backdrop Scene sampled by the expanded menu, including bars but excluding the popup.
+ *   `null` falls back to the button's backdrop. The collapsed endpoint uses the button's surface.
  * @param anchorContent A copy of the control — its background as well as its icon, unless
  *   [glassPopupAnchorContent] named a smaller part.
  * @param modifier The modifier applied to the panel.
@@ -231,8 +234,8 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
  * @param stacked Whether a second menu stands in front of this one. It shrinks and takes a wash.
  * @param maskColor The wash laid over it while [stacked].
  * @param sizing How wide and tall the panel may be.
- * @param visuals The panel's appearance. A [GlassIconButton] anchor overrides the style, material,
- *   stroke and fallback colour with its own.
+ * @param visuals The expanded panel's appearance. A [GlassIconButton] anchor supplies the
+ *   collapsed endpoint, blended into this appearance along the existing geometry animation.
  * @param anchorAlpha Background opacity for anchors without a shared button surface.
  * @param cornerRadius Corner radius the panel settles at.
  * @param gap Gap between the control and the panel.
@@ -298,6 +301,10 @@ fun BoxScope.GlassTransformPopup(
         resetSpec = GlassMotion.transformBounds(true),
         onDismissRequest = onDismissRequest,
     )
+    SideEffect { anchor.popupVisuals = visuals }
+    DisposableEffect(anchor) {
+        onDispose { anchor.popupVisuals = null }
+    }
     DisposableEffect(active, anchor) {
         anchor.contentHidden = active
         onDispose { anchor.contentHidden = false }
@@ -305,15 +312,18 @@ fun BoxScope.GlassTransformPopup(
     if (!active) return
 
     val anchorSurface = anchor.surface
-    val resolvedVisuals = if (anchorSurface != null) {
-        visuals.copy(
-            style = anchorSurface.style,
-            material = anchorSurface.material,
-            stroke = anchorSurface.stroke,
-            containerColor = anchorSurface.fill,
-        )
-    } else {
-        visuals
+    val anchorVisuals = anchorSurface?.let {
+        visuals.copy(style = it.style, material = it.material, stroke = it.stroke, containerColor = it.fill, alpha = 1f)
+    }
+    val menuBackdrop = backdrop ?: anchorSurface?.backdrop
+    val materialProgress = remember(bounds, backProgress) {
+        derivedStateOf { popupFractionWithBack(bounds.value, backProgress.value).coerceIn(0f, 1f) }
+    }
+    val drawAnchorSurface by remember(anchorSurface, materialProgress) {
+        derivedStateOf { anchorSurface != null && materialProgress.value < 1f }
+    }
+    val drawMenuSurface by remember(anchorSurface, materialProgress) {
+        derivedStateOf { anchorSurface == null || materialProgress.value > 0f }
     }
 
     val startRect = anchor.containerBounds
@@ -341,12 +351,31 @@ fun BoxScope.GlassTransformPopup(
 
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
-        backdrop = if (anchorSurface != null) anchorSurface.backdrop else backdrop,
+        backdrop = menuBackdrop,
         modifier = modifier,
         sizing = sizing,
-        visuals = resolvedVisuals.copy(alpha = 1f),
+        visuals = visuals.copy(alpha = 1f),
         interactive = isTransformPopupInteractive(show, stacked),
-        underlayMaterial = anchorSurface?.underlayMaterial,
+        surface = { shape ->
+            if (drawAnchorSurface && anchorSurface != null && anchorVisuals != null) {
+                GlassPopupBackground(
+                    backdrop = anchorSurface.backdrop,
+                    shape = shape,
+                    visuals = anchorVisuals,
+                    underlayMaterial = anchorSurface.underlayMaterial,
+                )
+            }
+            if (drawMenuSurface) {
+                GlassPopupBackground(
+                    backdrop = menuBackdrop,
+                    shape = shape,
+                    visuals = visuals.copy(alpha = 1f),
+                    modifier = Modifier.graphicsLayer {
+                        alpha = if (anchorSurface != null) materialProgress.value else 1f
+                    },
+                )
+            }
+        },
         contentPadding = contentPadding,
         onMeasured = onMeasured,
         panelLayer = {

@@ -45,9 +45,9 @@ import top.yukonga.miuix.kmp.blur.Backdrop
  *   its rendered content is blurred underneath. `null` uses the anchor's backdrop.
  * @param modifier Modifier applied to the panel.
  * @param materialAnchor The primary popup's button anchor. Passing the same anchor shares its
- *   blur, colour treatment and bloom stroke across both levels.
+ *   expanded popup appearance across both levels.
  * @param sizing Panel limits. Set `minWidth` to the primary panel's measured width.
- * @param visuals Surface appearance, also used when no anchor surface is available.
+ * @param visuals Surface appearance, used when no primary popup appearance is available.
  * @param cornerRadius Rounded clip radius throughout the transition.
  * @param contentPadding Insets around the menu rows, also included around the collapsed row.
  * @param onDismissFinished Called when the collapse animation has finished.
@@ -106,11 +106,7 @@ fun BoxScope.GlassSecondaryPopup(
     if (!active) return
     val direction = LocalLayoutDirection.current
     val source = materialAnchor?.surface
-    val resolvedVisuals = if (source != null) {
-        visuals.copy(style = source.style, material = source.material, stroke = source.stroke, containerColor = source.fill)
-    } else {
-        visuals
-    }
+    val resolvedVisuals = materialAnchor?.popupVisuals ?: visuals
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop ?: source?.backdrop,
@@ -119,7 +115,6 @@ fun BoxScope.GlassSecondaryPopup(
         visuals = resolvedVisuals,
         interactive = show,
         scrollable = true,
-        underlayMaterial = source?.underlayMaterial,
         contentPadding = contentPadding,
         panelLayer = {},
         overlay = {},

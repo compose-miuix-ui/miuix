@@ -418,7 +418,9 @@ Box {
 }
 ```
 
-Sharing the anchor is what keeps the button and the panel that grows out of it consistent.
+The anchor supplies the button's collapsed appearance. As the existing geometry animation expands the panel, its background blends into the popup's own `visuals`; closing reverses that blend. The expanded menu uses an independent 60dp blur material with its own light and dark colour layers.
+
+For a top-bar menu, pass a `backdrop` that records the page including the top bar, and render the popup outside that recording. The bar can continue to sample only the body. An explicit popup backdrop takes priority; `null` falls back to the button's backdrop.
 
 `GlassPopup`, `GlassSecondaryPopup` and `GlassDropdownPopup` take an `anchorBounds: Rect` instead, so the caller reports the trigger itself:
 
@@ -441,7 +443,7 @@ GlassSecondaryPopup(
 }
 ```
 
-`GlassSecondaryPopup` opens beside a menu that is already open; keep it composed while it collapses, and pass the primary popup's `materialAnchor` so the two share their material.
+`GlassSecondaryPopup` opens beside a menu that is already open; keep it composed while it collapses, and pass the primary popup's anchor as `materialAnchor` so the two share the expanded menu appearance. Its backdrop should include the primary popup and exclude the secondary popup itself.
 
 `GlassDropdownPopup` keeps its panel composed during the exit animation, but stops pointer input and accessibility actions on its rows as soon as `show` becomes false.
 

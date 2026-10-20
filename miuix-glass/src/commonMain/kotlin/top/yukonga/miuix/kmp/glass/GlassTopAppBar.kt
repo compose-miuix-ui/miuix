@@ -366,8 +366,8 @@ fun GlassTopAppBar(
 /**
  * A round glass button for a bar's leading or trailing controls.
  *
- * With [glassPopupAnchor] attached, the button shares its resolved backdrop and material with
- * [GlassTransformPopup], so the panel keeps the same blur and colour treatment as it grows.
+ * With [glassPopupAnchor] attached, the button supplies its resolved backdrop and material to
+ * [GlassTransformPopup]'s collapsed endpoint. The panel blends into its own material as it grows.
  *
  * @param onClick Called when the button is tapped.
  * @param backdrop Optional [Backdrop] behind the glass. Inside [GlassTopAppBar] the button inherits

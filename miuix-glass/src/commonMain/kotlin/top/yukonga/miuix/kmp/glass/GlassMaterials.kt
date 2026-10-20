@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 /** The stock materials. */
 object GlassMaterials {
 
-    /** `internal-pured-thin-glass`, light: the body of the floating bars and popups. */
+    /** `internal-pured-thin-glass`, light: the body of the floating bars. */
     @Stable
     val PuredThinGlassLight: GlassMaterial = GlassMaterial(
         blurRadius = 20.dp,
@@ -28,13 +28,23 @@ object GlassMaterials {
         third = GlassColorLayer(Color(0x993F3F3F), GlassColorBlendMode.Overlay),
     )
 
-    /** `popupview-glass`, light: pured-thin colour layers with a 60dp mask blur. */
+    /** Popup material, light: 60dp blur with its own three colour layers. */
     @Stable
-    val PopupViewGlassLight: GlassMaterial = PuredThinGlassLight.copy(blurRadius = 60.dp)
+    val PopupViewGlassLight: GlassMaterial = GlassMaterial(
+        blurRadius = 60.dp,
+        first = GlassColorLayer(Color(0x05000000), GlassColorBlendMode.PlusDarker),
+        second = GlassColorLayer(Color(0x99FFFFFF), GlassColorBlendMode.SoftLight),
+        third = GlassColorLayer(Color(0x99FFFFFF), GlassColorBlendMode.HardLight),
+    )
 
-    /** `popupview-glass`, dark: pured-thin colour layers with a 60dp mask blur. */
+    /** Popup material, dark: 60dp blur with its own three colour layers. */
     @Stable
-    val PopupViewGlassDark: GlassMaterial = PuredThinGlassDark.copy(blurRadius = 60.dp)
+    val PopupViewGlassDark: GlassMaterial = GlassMaterial(
+        blurRadius = 60.dp,
+        first = GlassColorLayer(Color(0x1A000000), GlassColorBlendMode.PlusDarker),
+        second = GlassColorLayer(Color(0x996C6C6C), GlassColorBlendMode.Luminosity),
+        third = GlassColorLayer(Color(0x99060606), GlassColorBlendMode.SoftLight),
+    )
 
     /** Dialog blur/blend material, light. The three layers are applied in declaration order. */
     @Stable

@@ -418,7 +418,9 @@ Box {
 }
 ```
 
-共享同一个锚点，才能让按钮和从它生长出的面板保持一致。
+锚点提供按钮在收起端点的外观。面板随着现有形变动画展开时，背景平滑过渡到弹窗自己的 `visuals`，收起时反向过渡。展开后的菜单使用独立的 60dp 模糊材质，并分别配置亮色、暗色的颜色混合层。
+
+顶栏菜单的 `backdrop` 应记录包含顶栏的页面，弹窗绘制在该采样层之外；顶栏本身仍可只采样页面内容。显式传入的弹窗背景优先使用，`null` 时回退到按钮的背景。
 
 `GlassPopup`、`GlassSecondaryPopup` 与 `GlassDropdownPopup` 则接收 `anchorBounds: Rect`，由调用方上报触发元素自身：
 
@@ -441,7 +443,7 @@ GlassSecondaryPopup(
 }
 ```
 
-`GlassSecondaryPopup` 在已展开的菜单旁打开二级菜单；收起过程中请保持其组合，并把一级弹窗的 `materialAnchor` 传给它，让两者共享材质。
+`GlassSecondaryPopup` 在已展开的菜单旁打开二级菜单；收起过程中请保持其组合，并把一级弹窗的锚点传给 `materialAnchor`，让两者共享展开后的菜单外观。二级菜单的采样背景应包含一级菜单，并排除二级菜单自身。
 
 `GlassDropdownPopup` 在退场动画期间保留面板，但 `show` 变为 false 时立即停止菜单项的指针交互和无障碍操作。
 

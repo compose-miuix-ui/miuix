@@ -196,7 +196,7 @@ object GlassPopupDefaults {
  * @param cornerRadius Corner radius the panel settles at.
  * @param secondary Whether this menu was opened from a row of another one. Delegates to
  *   [GlassSecondaryPopup]'s geometry; use that component directly to inherit the primary popup's
- *   button material through `materialAnchor`.
+ *   expanded appearance through `materialAnchor`.
  * @param contentPadding Padding around the items.
  * @param content The items.
  */

@@ -189,7 +189,7 @@ fun GlassPage(padding: PaddingValues) {
     val backdrop = rememberLayerBackdrop()
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
-    val dialogBackdrop = rememberLayerBackdrop()
+    val pageBackdrop = rememberLayerBackdrop()
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
@@ -287,9 +287,9 @@ fun GlassPage(padding: PaddingValues) {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    // The dialog renders in the outer host, outside this recording.
+                    // Dialogs and the top-bar popup render outside this recording.
                     // Capture the page's bars as well as its body, before the route scrim.
-                    .layerBackdrop(dialogBackdrop)
+                    .layerBackdrop(pageBackdrop)
                     .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
                 bottomBar = {
                     Column(
@@ -435,7 +435,7 @@ fun GlassPage(padding: PaddingValues) {
             ) { innerPadding ->
                 GlassDialog(
                     show = overlayIndex == OVERLAY_DIALOG,
-                    backdrop = dialogBackdrop,
+                    backdrop = pageBackdrop,
                     title = "Glass Dialog",
                     summary = "Blurred background with the dialog's own three-layer material.",
                     onDismissRequest = { overlayIndex = OVERLAY_NONE },
@@ -460,7 +460,7 @@ fun GlassPage(padding: PaddingValues) {
                 GlassBottomSheetDemo(
                     onDismissRequest = { overlayIndex = OVERLAY_NONE },
                     show = overlayIndex == OVERLAY_BOTTOM_SHEET,
-                    backdrop = dialogBackdrop,
+                    backdrop = pageBackdrop,
                 )
 
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
@@ -633,7 +633,7 @@ fun GlassPage(padding: PaddingValues) {
                     overlayIndex = OVERLAY_NONE
                 },
                 anchor = menuAnchor,
-                backdrop = backdrop,
+                backdrop = pageBackdrop,
                 anchorContent = {
                     Icon(
                         imageVector = MiuixIcons.Glass.Settings,
