@@ -7,13 +7,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 
 private val graphicsResourceResetRegistry = GraphicsResourceResetRegistry()
 
 internal expect val graphicsResourcesResetOnResume: Boolean
+
+/** Host lifecycle used for graphics resources; Android always resolves the Activity lifecycle. */
+@Composable
+internal expect fun graphicsResourceLifecycle(): Lifecycle?
+
+/** Internal implementation shared by Miuix graphics modifier nodes. */
+expect fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle?
 
 /**
  * Internal implementation shared by Miuix graphics components; not a supported public API.
@@ -34,13 +41,13 @@ fun observeGraphicsResourceResets(lifecycle: Lifecycle, onReset: (Any) -> Unit):
  * Internal implementation shared by Miuix graphics components; not a supported public API.
  *
  * Returns a new identity token when Android graphics resources must be recreated. The token is
- * scoped to the current lifecycle and remains null until its first resource reset.
+ * scoped to the host Activity lifecycle and remains null until its first resource reset.
  */
 @Composable
 fun rememberGraphicsResourceGeneration(): Any? {
     if (!graphicsResourcesResetOnResume) return null
 
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycle = graphicsResourceLifecycle() ?: return null
     val generation = remember(lifecycle) { mutableStateOf<Any?>(null) }
     DisposableEffect(lifecycle) {
         val stopObserving = observeGraphicsResourceResets(lifecycle) { generation.value = it }

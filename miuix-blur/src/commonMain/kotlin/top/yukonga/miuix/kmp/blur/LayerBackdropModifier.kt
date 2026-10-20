@@ -10,13 +10,12 @@ import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
+import top.yukonga.miuix.kmp.shader.internal.graphicsResourceLifecycle
 
 /**
  * Captures the content of this composable into the given [LayerBackdrop]'s graphics layer.
@@ -71,7 +70,7 @@ private class LayerBackdropNode(
     }
 
     override fun onAttach() {
-        val ownerLifecycle = currentValueOf(LocalLifecycleOwner).lifecycle
+        val ownerLifecycle = graphicsResourceLifecycle() ?: return
         lifecycle = ownerLifecycle
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {

@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.highlight.Highlight
@@ -65,6 +64,7 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
+import top.yukonga.miuix.kmp.shader.internal.graphicsResourceLifecycle
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -755,15 +755,16 @@ private class DrawBackdropNode(
                 effectScope.runtimeShaderCache = cache
                 invalidateDraw()
             }
-            observeLifecycle(currentValueOf(LocalLifecycleOwner).lifecycle)
+            observeLifecycle(graphicsResourceLifecycle())
             updateEffects()
         }
     }
 
-    private fun observeLifecycle(ownerLifecycle: Lifecycle) {
+    private fun observeLifecycle(ownerLifecycle: Lifecycle?) {
         if (lifecycle === ownerLifecycle) return
 
         stopObservingLifecycle()
+        if (ownerLifecycle == null) return
         lifecycle = ownerLifecycle
         val generation = BackdropResumeGeneration.acquire(ownerLifecycle)
         resumeGeneration = generation
