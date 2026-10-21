@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
+import top.yukonga.miuix.kmp.glass.GlassShadows
 import top.yukonga.miuix.kmp.glass.GlassStroke
 import top.yukonga.miuix.kmp.glass.GlassStrokes
 import top.yukonga.miuix.kmp.glass.GlassStyle
@@ -342,6 +343,7 @@ fun GlassPage(padding: PaddingValues) {
                                         style = style,
                                         surfaceAlpha = alpha,
                                         stroke = stroke,
+                                        shadow = GlassShadows.Float,
                                     ) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Search,
