@@ -55,6 +55,11 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
         return
     }
 
+    DisposableEffect(window) {
+        val focus = LinuxWindowFocus.install(window)
+        onDispose { focus?.close() }
+    }
+
     val currentProperties by rememberUpdatedState(properties)
     val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
