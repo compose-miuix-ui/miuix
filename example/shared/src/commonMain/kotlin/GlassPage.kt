@@ -295,6 +295,7 @@ fun GlassPage(padding: PaddingValues) {
                 bottomBar = {
                     Column(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin)
                             .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
                         verticalArrangement = Arrangement.spacedBy(12.dp),
