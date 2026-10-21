@@ -165,6 +165,35 @@ GlassNavigationBar(
 
 `items` 是 `List<GlassNavigationItem>`，每项包含一个图标和一行标签。`height` 为最小高度而非固定高度；外部位置由调用方控制，组件不会自行添加系统栏 inset。
 
+通过 `trailingAction` 在胶囊旁挂载独立的搜索按钮或其他操作。布局先预留按钮的实测宽度和 12dp 间距，再测量导航项。按钮位于导航指示器和拖动区域之外，整组控件共享底栏的显示与隐藏过渡。运行时将槽位设为 `null` 即可移除。按钮自行控制尺寸和材质；`GlassIconButton` 可采样同一份干净的页面背景。
+
+```kotlin
+GlassNavigationBar(
+    items = items,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    trailingAction = if (showSearch) {
+        {
+            GlassIconButton(
+                onClick = openSearch,
+                backdrop = backdrop,
+                size = GlassNavigationBarDefaults.Height,
+            ) {
+                Icon(MiuixIcons.Glass.Search, contentDescription = "搜索")
+            }
+        }
+    } else {
+        null
+    },
+)
+```
+
+| 参数 / 默认值 | 值 / 行为 |
+| --- | --- |
+| `trailingAction` | `null`；尺寸与材质独立的可选操作 |
+| `GlassNavigationBarDefaults.ActionSpacing` | `12.dp`；玻璃胶囊与尾部操作的间距 |
+
 ### GlassTabRow
 
 ```kotlin

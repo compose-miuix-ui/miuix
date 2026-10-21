@@ -24,11 +24,13 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -184,6 +186,7 @@ fun AppContent(
     MainScreenBackHandler(mainPagerState, navigator)
 
     val isWideScreen = shouldShowSplitPane()
+    val hasNavigationRail = isWideScreen && appState.showNavigationBar
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
@@ -247,7 +250,7 @@ fun AppContent(
         // Keep NavDisplay at one composition location while adaptive chrome changes around it.
         // Otherwise switching between the compact and wide branches recreates the current route.
         Row(modifier = Modifier.fillMaxSize()) {
-            if (isWideScreen && appState.showNavigationBar) {
+            if (hasNavigationRail) {
                 PersistentNavigationRail(
                     navigationItems = navigationItems,
                     mainPagerState = mainPagerState,
@@ -257,6 +260,19 @@ fun AppContent(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    // The sibling rail already offsets this pane past the start-side safe area.
+                    // Share that consumption so page bars do not add the same inset again.
+                    .then(
+                        if (hasNavigationRail) {
+                            Modifier.consumeWindowInsets(
+                                WindowInsets.displayCutout
+                                    .union(WindowInsets.navigationBars)
+                                    .only(WindowInsetsSides.Start),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
                     // Wide-screen transition layers must not draw over the navigation rail.
                     .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
             ) {

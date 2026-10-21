@@ -94,6 +94,9 @@ object GlassNavigationBarDefaults {
     /** Minimum height; wrapped captions can make the bar taller. */
     val Height: Dp = 54.dp
 
+    /** Space between the glass capsule and an optional trailing action. */
+    val ActionSpacing: Dp = 12.dp
+
     /** Size of an icon. */
     val IconSize: Dp = 28.dp
 
@@ -176,6 +179,8 @@ object GlassNavigationBarDefaults {
  * @param selectedColor Tint of the selected icon and label.
  * @param unselectedColor Tint of the others. They are not dimmed; the indicator alone says which
  *   one is current.
+ * @param trailingAction Optional independent action outside the glass capsule. It owns its size
+ *   and material, and shares the bar's show/hide transition. Use [GlassIconButton] for a round action.
  */
 @Composable
 fun GlassNavigationBar(
@@ -196,6 +201,7 @@ fun GlassNavigationBar(
     indicatorPressedColor: Color = GlassNavigationBarDefaults.indicatorPressedColor(),
     selectedColor: Color = MiuixTheme.colorScheme.onBackground,
     unselectedColor: Color = MiuixTheme.colorScheme.onBackground,
+    trailingAction: (@Composable () -> Unit)? = null,
 ) {
     if (items.isEmpty()) return
     val index = selectedIndex.coerceIn(0, items.lastIndex)
@@ -271,10 +277,9 @@ fun GlassNavigationBar(
     )
 
     val onSelectState by rememberUpdatedState(onSelect)
-    Box(
+    GlassNavigationBarLayout(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = height)
             .graphicsLayer {
                 val show = showScale.value
                 scaleX = show
@@ -288,199 +293,219 @@ fun GlassNavigationBar(
                         .coerceIn(0f, 1f) * GlassMotion.NAV_HIDE_BLUR_DP
                     ).dp,
                 edgeTreatment = BlurredEdgeTreatment.Unbounded,
-            )
-            .glassPanel(
-                backdrop = backdrop,
-                shape = shape,
-                style = style,
-                alpha = alpha,
-                material = material,
-                stroke = stroke,
-                shadow = shadow,
-                shading = false,
-            )
-            .onSizeChanged { barWidth = it.width }
-            .then(
-                if (interactionEnabled) {
-                    Modifier.pointerInput(items.size, contentInset, overhang, layoutDirection) {
-                        awaitEachGesture {
-                            val down = awaitFirstDown(requireUnconsumed = false)
-                            val width = size.width.toFloat()
-                            if (width <= contentInset * 2f) return@awaitEachGesture
-                            fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
-                            val span = (width - contentInset * 2f) / items.size
-                            fun indexAt(x: Float) = if (span <= 0f) {
-                                0
-                            } else {
-                                ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
-                            }
-
-                            val chipW = span + overhang * 2f
-                            val minLeft = contentInset - overhang
-                            val maxLeft = (width - chipW).coerceAtLeast(0f)
-                            val downX = logicalX(down.position.x)
-                            var lastX = downX
-                            var current = indexAt(downX)
-                            pressedIndex = current
-                            onSelectState(current)
-                            var grabOffset = Float.NaN
-                            try {
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                    if (!change.pressed || change.isConsumed) break
-                                    val x = logicalX(change.position.x)
-                                    if (grabOffset.isNaN()) {
-                                        if (abs(x - downX) < viewConfiguration.touchSlop) {
-                                            pressedIndex = indexAt(x)
-                                            continue
-                                        }
-                                        val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
-                                        grabOffset = x - bounds.x
-                                        lastX = x
-                                        dragging.value = true
-                                    }
-                                    val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
-                                    val next = indexAt(x)
-                                    val target = navigationDragTarget(chipLeft, chipW, width, x - lastX, next != current)
-                                    animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
-                                    if (next != current) {
-                                        current = next
-                                        onSelectState(next)
-                                    }
-                                    pressedIndex = next
-                                    lastX = x
-                                    change.consume()
-                                }
-                            } finally {
-                                pressedIndex = -1
-                                dragging.value = false
-                                if (!grabOffset.isNaN()) {
-                                    val homeLeft = minLeft + current * span
-                                    animateIndicator(homeLeft, homeLeft + chipW)
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    Modifier
-                },
             ),
-        contentAlignment = Alignment.Center,
+        trailingAction = trailingAction?.let { action ->
+            {
+                Box(
+                    modifier = Modifier
+                        .then(if (interactionEnabled) Modifier else Modifier.clearAndSetSemantics { })
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) {
+                                if (interactionEnabled) placeable.placeRelative(0, 0)
+                            }
+                        },
+                ) { action() }
+            }
+        },
     ) {
         Box(
             modifier = Modifier
-                .matchParentSize()
-                .padding(vertical = GlassNavigationBarDefaults.IndicatorPaddingVertical)
-                .layout { measurable, constraints ->
-                    // Both edges are clamped on every frame, not just at the target. Keep the
-                    // spring alive so the other edge still rebounds.
-                    val bounds = navigationIndicatorBounds(
-                        left.value,
-                        right.value,
-                        constraints.maxWidth.toFloat(),
-                        contentInset - overhang,
-                    )
-                    val start = bounds.x.roundToInt()
-                    val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
-                    val placeable = measurable.measure(
-                        constraints.copy(minWidth = width, maxWidth = width),
-                    )
-                    layout(constraints.maxWidth, placeable.height) {
-                        placeable.placeRelative(IntOffset(start, 0))
-                    }
-                }
-                .graphicsLayer {
-                    scaleX = chipScale
-                    scaleY = chipScale
-                }
-                .clip(RoundedCornerShape(percent = 50))
-                .drawBehind { drawRect(chipFill.value) },
-        )
-
-        Row(
-            modifier = Modifier
                 .fillMaxWidth()
-                .selectableGroup()
-                .padding(horizontal = GlassNavigationBarDefaults.ContentPaddingHorizontal),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            items.forEachIndexed { position, item ->
-                key(item) {
-                    val selected = position == index
-                    val tint by animateColorAsState(
-                        targetValue = if (selected) selectedColor else unselectedColor,
-                        animationSpec = GlassMotion.navContent(),
-                        label = "glassNavigationTint",
-                    )
-                    val pressAlpha = animateFloatAsState(
-                        targetValue = if (position == pressedIndex) {
-                            GlassNavigationBarDefaults.PressedAlpha
-                        } else {
-                            1f
-                        },
-                        animationSpec = GlassMotion.navContentFloat(),
-                        label = "glassNavigationPress",
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(
-                                horizontal = GlassNavigationBarDefaults.IndicatorOverhang,
-                                vertical = GlassNavigationBarDefaults.ContentPaddingVertical,
-                            )
-                            .then(
-                                if (interactionEnabled) {
-                                    Modifier
-                                        .semantics(mergeDescendants = true) {
-                                            this.role = Role.Tab
-                                            this.selected = selected
-                                            (item.contentDescription ?: item.label)?.let {
-                                                this.contentDescription = it
-                                            }
-                                            onClick {
-                                                onSelectState(position)
-                                                true
-                                            }
-                                        }
-                                        .onKeyEvent { event ->
-                                            val activationKey = event.key == Key.Enter ||
-                                                event.key == Key.NumPadEnter ||
-                                                event.key == Key.Spacebar
-                                            if (activationKey) {
-                                                if (event.type == KeyEventType.KeyUp) onSelectState(position)
-                                                true
-                                            } else {
-                                                false
-                                            }
-                                        }
-                                        .focusable()
+                .heightIn(min = height)
+                .glassPanel(
+                    backdrop = backdrop,
+                    shape = shape,
+                    style = style,
+                    alpha = alpha,
+                    material = material,
+                    stroke = stroke,
+                    shadow = shadow,
+                    shading = false,
+                )
+                .onSizeChanged { barWidth = it.width }
+                .then(
+                    if (interactionEnabled) {
+                        Modifier.pointerInput(items.size, contentInset, overhang, layoutDirection) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                val width = size.width.toFloat()
+                                if (width <= contentInset * 2f) return@awaitEachGesture
+                                fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
+                                val span = (width - contentInset * 2f) / items.size
+                                fun indexAt(x: Float) = if (span <= 0f) {
+                                    0
                                 } else {
-                                    Modifier.clearAndSetSemantics { }
-                                },
-                            )
-                            .graphicsLayer { this.alpha = pressAlpha.value },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        androidx.compose.foundation.layout.Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
-                        ) {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
-                                tint = tint,
-                            )
-                            if (item.label != null) {
-                                Text(
-                                    text = item.label,
-                                    style = MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
-                                    color = tint,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
+                                    ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
+                                }
+
+                                val chipW = span + overhang * 2f
+                                val minLeft = contentInset - overhang
+                                val maxLeft = (width - chipW).coerceAtLeast(0f)
+                                val downX = logicalX(down.position.x)
+                                var lastX = downX
+                                var current = indexAt(downX)
+                                pressedIndex = current
+                                onSelectState(current)
+                                var grabOffset = Float.NaN
+                                try {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                        if (!change.pressed || change.isConsumed) break
+                                        val x = logicalX(change.position.x)
+                                        if (grabOffset.isNaN()) {
+                                            if (abs(x - downX) < viewConfiguration.touchSlop) {
+                                                pressedIndex = indexAt(x)
+                                                continue
+                                            }
+                                            val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
+                                            grabOffset = x - bounds.x
+                                            lastX = x
+                                            dragging.value = true
+                                        }
+                                        val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
+                                        val next = indexAt(x)
+                                        val target = navigationDragTarget(chipLeft, chipW, width, x - lastX, next != current)
+                                        animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
+                                        if (next != current) {
+                                            current = next
+                                            onSelectState(next)
+                                        }
+                                        pressedIndex = next
+                                        lastX = x
+                                        change.consume()
+                                    }
+                                } finally {
+                                    pressedIndex = -1
+                                    dragging.value = false
+                                    if (!grabOffset.isNaN()) {
+                                        val homeLeft = minLeft + current * span
+                                        animateIndicator(homeLeft, homeLeft + chipW)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(vertical = GlassNavigationBarDefaults.IndicatorPaddingVertical)
+                    .layout { measurable, constraints ->
+                        // Both edges are clamped on every frame, not just at the target. Keep the
+                        // spring alive so the other edge still rebounds.
+                        val bounds = navigationIndicatorBounds(
+                            left.value,
+                            right.value,
+                            constraints.maxWidth.toFloat(),
+                            contentInset - overhang,
+                        )
+                        val start = bounds.x.roundToInt()
+                        val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
+                        val placeable = measurable.measure(
+                            constraints.copy(minWidth = width, maxWidth = width),
+                        )
+                        layout(constraints.maxWidth, placeable.height) {
+                            placeable.placeRelative(IntOffset(start, 0))
+                        }
+                    }
+                    .graphicsLayer {
+                        scaleX = chipScale
+                        scaleY = chipScale
+                    }
+                    .clip(RoundedCornerShape(percent = 50))
+                    .drawBehind { drawRect(chipFill.value) },
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectableGroup()
+                    .padding(horizontal = GlassNavigationBarDefaults.ContentPaddingHorizontal),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items.forEachIndexed { position, item ->
+                    key(item) {
+                        val selected = position == index
+                        val tint by animateColorAsState(
+                            targetValue = if (selected) selectedColor else unselectedColor,
+                            animationSpec = GlassMotion.navContent(),
+                            label = "glassNavigationTint",
+                        )
+                        val pressAlpha = animateFloatAsState(
+                            targetValue = if (position == pressedIndex) {
+                                GlassNavigationBarDefaults.PressedAlpha
+                            } else {
+                                1f
+                            },
+                            animationSpec = GlassMotion.navContentFloat(),
+                            label = "glassNavigationPress",
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(
+                                    horizontal = GlassNavigationBarDefaults.IndicatorOverhang,
+                                    vertical = GlassNavigationBarDefaults.ContentPaddingVertical,
                                 )
+                                .then(
+                                    if (interactionEnabled) {
+                                        Modifier
+                                            .semantics(mergeDescendants = true) {
+                                                this.role = Role.Tab
+                                                this.selected = selected
+                                                (item.contentDescription ?: item.label)?.let {
+                                                    this.contentDescription = it
+                                                }
+                                                onClick {
+                                                    onSelectState(position)
+                                                    true
+                                                }
+                                            }
+                                            .onKeyEvent { event ->
+                                                val activationKey = event.key == Key.Enter ||
+                                                    event.key == Key.NumPadEnter ||
+                                                    event.key == Key.Spacebar
+                                                if (activationKey) {
+                                                    if (event.type == KeyEventType.KeyUp) onSelectState(position)
+                                                    true
+                                                } else {
+                                                    false
+                                                }
+                                            }
+                                            .focusable()
+                                    } else {
+                                        Modifier.clearAndSetSemantics { }
+                                    },
+                                )
+                                .graphicsLayer { this.alpha = pressAlpha.value },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            androidx.compose.foundation.layout.Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
+                                    tint = tint,
+                                )
+                                if (item.label != null) {
+                                    Text(
+                                        text = item.label,
+                                        style = MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
+                                        color = tint,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
                             }
                         }
                     }

@@ -165,6 +165,35 @@ GlassNavigationBar(
 
 `items` is a `List<GlassNavigationItem>` — an icon plus a caption each. `height` is a minimum rather than a fixed size, and outer placement stays with the caller: the component does not add system bar insets itself.
 
+Use `trailingAction` to mount an independent search or other action beside the capsule. The layout reserves the action's measured width and a 12dp gap before measuring the destinations. The action stays outside the navigation indicator and drag region, and the whole group shares the bar's show/hide transition. Set the slot to `null` to remove it at runtime. The action owns its size and material; a `GlassIconButton` can sample the same clean page backdrop.
+
+```kotlin
+GlassNavigationBar(
+    items = items,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    trailingAction = if (showSearch) {
+        {
+            GlassIconButton(
+                onClick = openSearch,
+                backdrop = backdrop,
+                size = GlassNavigationBarDefaults.Height,
+            ) {
+                Icon(MiuixIcons.Glass.Search, contentDescription = "Search")
+            }
+        }
+    } else {
+        null
+    },
+)
+```
+
+| Parameter / default | Value / behavior |
+| --- | --- |
+| `trailingAction` | `null`; optional independently sized and styled action |
+| `GlassNavigationBarDefaults.ActionSpacing` | `12.dp`; gap between the glass capsule and trailing action |
+
 ### GlassTabRow
 
 ```kotlin
