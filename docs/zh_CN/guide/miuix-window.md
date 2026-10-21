@@ -165,3 +165,69 @@ compose.desktop {
 ```
 
 > **提示**：如果项目使用了 `dev.nucleusframework` 插件构建，Nucleus 插件会自动注入 JNA 相关规则，无需重复手动配置。
+
+### 剔除非目标平台原生库（可选体积优化）
+
+JNA 官方在 Maven Central 仅提供全平台单体 JAR（内置了 Windows、Linux、macOS、FreeBSD、AIX、Solaris 等 20 余个平台的原生库），因此在面向特定平台（如仅针对 Linux x64 或 Windows x64）分发时，其余不相关架构的动态库会导致大约 1.5 MB 的额外体积开销。
+
+若追求极致的安装包体积，可在应用模块的 `build.gradle.kts` 中配置打包任务，自动剥离当前目标平台之外的原生库：
+
+```kotlin
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
+
+tasks.withType<AbstractProguardTask>().configureEach {
+    doLast {
+        val osName = System.getProperty("os.name").lowercase()
+        val osArch = System.getProperty("os.arch").lowercase()
+
+        val jnaTarget = when {
+            osName.contains("linux") && (osArch == "x86_64" || osArch == "amd64") -> "linux-x86-64"
+            osName.contains("linux") && (osArch == "aarch64" || osArch == "arm64") -> "linux-aarch64"
+            osName.contains("windows") && (osArch == "x86_64" || osArch == "amd64") -> "win32-x86-64"
+            osName.contains("windows") && (osArch == "aarch64" || osArch == "arm64") -> "win32-aarch64"
+            osName.contains("mac") && (osArch == "x86_64" || osArch == "amd64") -> "darwin-x86-64"
+            osName.contains("mac") && (osArch == "aarch64" || osArch == "arm64") -> "darwin-aarch64"
+            else -> null
+        }
+
+        if (jnaTarget != null) {
+            val nativeExts = listOf(".so", ".dll", ".dylib", ".a")
+            destinationDir.asFile.get().listFiles()?.filter { it.extension == "jar" }?.forEach { jarFile ->
+                val tempFile = File(jarFile.parentFile, jarFile.name + ".tmp")
+                var modified = false
+                ZipFile(jarFile).use { zipIn ->
+                    val hasForeign = zipIn.entries().asSequence().any { entry ->
+                        val name = entry.name
+                        val isNative = nativeExts.any { name.endsWith(it) }
+                        name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative
+                    }
+                    if (hasForeign) {
+                        ZipOutputStream(tempFile.outputStream()).use { zipOut ->
+                            for (entry in zipIn.entries()) {
+                                val name = entry.name
+                                val isNative = nativeExts.any { name.endsWith(it) }
+                                val isForeignJna = name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative
+                                if (!isForeignJna) {
+                                    zipOut.putNextEntry(ZipEntry(name))
+                                    zipIn.getInputStream(entry).copyTo(zipOut)
+                                    zipOut.closeEntry()
+                                }
+                            }
+                        }
+                        modified = true
+                    }
+                }
+                if (modified) {
+                    jarFile.delete()
+                    tempFile.renameTo(jarFile)
+                }
+            }
+        }
+    }
+}
+```
+
+> **提示**：如果使用 `dev.nucleusframework` 插件，仅需在 `nativeDistributions { cleanupNativeLibs = true }` 中声明即可，Nucleus 会在构建阶段自动剔除无关原生库。

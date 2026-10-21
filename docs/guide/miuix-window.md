@@ -167,3 +167,69 @@ And include the following rules in your `proguard-rules.pro`:
 ```
 
 > **Note**: If you use `dev.nucleusframework` plugin (e.g. for GraalVM native images), these JNA rules are automatically injected by the Nucleus plugin.
+
+### Stripping Foreign Native Libraries (Optional)
+
+JNA is published to Maven Central as a monolithic JAR containing native dispatch libraries for over 20 platform architectures (Windows, Linux, macOS, FreeBSD, AIX, Solaris, etc.). When packaging for a specific target platform (e.g. Linux x64 or Windows x64), binaries for all other operating systems are redundant and add unnecessary overhead to the distribution package (~1.5 MB).
+
+To minimize distribution size, you can configure an automated pruning hook in your application's `build.gradle.kts`:
+
+```kotlin
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
+
+tasks.withType<AbstractProguardTask>().configureEach {
+    doLast {
+        val osName = System.getProperty("os.name").lowercase()
+        val osArch = System.getProperty("os.arch").lowercase()
+
+        val jnaTarget = when {
+            osName.contains("linux") && (osArch == "x86_64" || osArch == "amd64") -> "linux-x86-64"
+            osName.contains("linux") && (osArch == "aarch64" || osArch == "arm64") -> "linux-aarch64"
+            osName.contains("windows") && (osArch == "x86_64" || osArch == "amd64") -> "win32-x86-64"
+            osName.contains("windows") && (osArch == "aarch64" || osArch == "arm64") -> "win32-aarch64"
+            osName.contains("mac") && (osArch == "x86_64" || osArch == "amd64") -> "darwin-x86-64"
+            osName.contains("mac") && (osArch == "aarch64" || osArch == "arm64") -> "darwin-aarch64"
+            else -> null
+        }
+
+        if (jnaTarget != null) {
+            val nativeExts = listOf(".so", ".dll", ".dylib", ".a")
+            destinationDir.asFile.get().listFiles()?.filter { it.extension == "jar" }?.forEach { jarFile ->
+                val tempFile = File(jarFile.parentFile, jarFile.name + ".tmp")
+                var modified = false
+                ZipFile(jarFile).use { zipIn ->
+                    val hasForeign = zipIn.entries().asSequence().any { entry ->
+                        val name = entry.name
+                        val isNative = nativeExts.any { name.endsWith(it) }
+                        name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative
+                    }
+                    if (hasForeign) {
+                        ZipOutputStream(tempFile.outputStream()).use { zipOut ->
+                            for (entry in zipIn.entries()) {
+                                val name = entry.name
+                                val isNative = nativeExts.any { name.endsWith(it) }
+                                val isForeignJna = name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative
+                                if (!isForeignJna) {
+                                    zipOut.putNextEntry(ZipEntry(name))
+                                    zipIn.getInputStream(entry).copyTo(zipOut)
+                                    zipOut.closeEntry()
+                                }
+                            }
+                        }
+                        modified = true
+                    }
+                }
+                if (modified) {
+                    jarFile.delete()
+                    tempFile.renameTo(jarFile)
+                }
+            }
+        }
+    }
+}
+```
+
+> **Note**: If you use the `dev.nucleusframework` plugin, simply set `nativeDistributions { cleanupNativeLibs = true }`, and Nucleus will automatically prune foreign native libraries during the artifact transform phase.
