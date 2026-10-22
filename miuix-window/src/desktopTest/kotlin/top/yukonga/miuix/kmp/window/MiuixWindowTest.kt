@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.window
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,6 +30,7 @@ import top.yukonga.miuix.kmp.window.platform.windows.HitTestResult
 import top.yukonga.miuix.kmp.window.platform.windows.toWindowResizeEdge
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -179,5 +181,73 @@ class MiuixWindowTest {
 
         val npe = NullPointerException()
         assertFalse(isIgnorableComposeDisposalException(npe))
+    }
+
+    @Test
+    fun testWindowDraggableAreaSingleActiveRegistration() = runDesktopComposeUiTest {
+        val registration = WindowDraggableAreaRegistration()
+        var showFirst by mutableStateOf(true)
+        var showSecond by mutableStateOf(false)
+
+        setContent {
+            CompositionLocalProvider(
+                LocalWindowDraggableAreaRegistration provides registration,
+                LocalMiuixWindowProperties provides MiuixWindowProperties.default(),
+                LocalMiuixWindowInfo provides MiuixWindowInfo(captionBarHeight = 32.dp),
+            ) {
+                if (showFirst) {
+                    WindowDraggableArea()
+                }
+                if (showSecond) {
+                    WindowDraggableArea()
+                }
+            }
+        }
+
+        assertTrue(registration.isRegistered)
+        runOnIdle { showFirst = false }
+        waitForIdle()
+        assertFalse(registration.isRegistered)
+
+        runOnIdle { showSecond = true }
+        waitForIdle()
+        assertTrue(registration.isRegistered)
+    }
+
+    @Test
+    fun testWindowDraggableAreaDuplicateRejected() = runDesktopComposeUiTest {
+        val registration = WindowDraggableAreaRegistration()
+        var duplicate by mutableStateOf(false)
+
+        setContent {
+            CompositionLocalProvider(
+                LocalWindowDraggableAreaRegistration provides registration,
+                LocalMiuixWindowProperties provides MiuixWindowProperties.default(),
+                LocalMiuixWindowInfo provides MiuixWindowInfo(captionBarHeight = 32.dp),
+            ) {
+                WindowDraggableArea()
+                if (duplicate) {
+                    WindowDraggableArea()
+                }
+            }
+        }
+
+        assertTrue(registration.isRegistered)
+
+        runOnIdle { duplicate = true }
+        val error = assertFailsWith<IllegalStateException> {
+            waitForIdle()
+        }
+        assertTrue(error.message.orEmpty().contains("Only one WindowDraggableArea"))
+    }
+
+    @Test
+    fun testWindowDraggableAreaRequiresRegistration() = runDesktopComposeUiTest {
+        val error = assertFailsWith<IllegalStateException> {
+            setContent {
+                WindowDraggableArea()
+            }
+        }
+        assertTrue(error.message.orEmpty().contains("WindowDraggableArea requires content hosted by a MiuixWindow or MiuixDialogWindow."))
     }
 }

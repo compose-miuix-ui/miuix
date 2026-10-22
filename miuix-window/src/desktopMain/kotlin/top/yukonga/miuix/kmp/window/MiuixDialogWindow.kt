@@ -129,6 +129,9 @@ fun MiuixDialogWindow(
             @Suppress("UNCHECKED_CAST")
             CompositionLocalProvider(
                 LocalDialogState provides state,
+                LocalWindowDraggableAreaRegistration provides remember(window) {
+                    WindowDraggableAreaRegistration()
+                },
                 LocalMiuixWindowProperties provides resolvedProperties as MiuixWindowProperties<Window>,
                 LocalDensity provides Density(
                     density = density.density * resolvedProperties.extraDisplayScale,
