@@ -44,7 +44,9 @@ nucleus.application {
         isEnabled = true
         imageName = "miuix"
         optimization = NativeImageOptimization.SIZE
-        buildArgs.add("-H:-IncludeMethodData")
+        toolchain.version = "25i4"
+        buildArgs.addAll("-H:-IncludeMethodData")
+        buildArgs.addAll("-H:ExcludeResources=.libskiko.")
     }
 
     nativeDistributions {
