@@ -33,9 +33,9 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-preference`  | Preference components library, depends on `miuix-ui`  |
 | `miuix-icons`       | Extended icon library, can be used independently      |
 | `miuix-glass-icons` | Glass icon library, can be used independently        |
-| `miuix-blur`        | Blur effect library, can be used independently        |
+| `miuix-blur`        | Blur effect library, can be used independently; requires minSdk 33 on Android |
 | `miuix-squircle`    | Squircle shapes library, can be used independently    |
-| `miuix-glass`       | Glass material and components, requires minSdk 33    |
+| `miuix-glass`       | Glass material and components, requires minSdk 33 on Android |
 | `miuix-nav`         | Navigation library, can be used independently         |
 | `miuix-shader`      | Low-level runtime shader / render effect abstraction  |
 
@@ -50,13 +50,13 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-blur for blur effects
+            // Optional: Add miuix-blur for blur effects (requires minSdk 33 on Android)
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
-            // Optional: Add miuix-glass for the glass material and components (requires minSdk 33)
+            // Optional: Add miuix-glass for the glass material and components (requires minSdk 33 on Android)
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-glass-icons for the Glass icon set
             implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")

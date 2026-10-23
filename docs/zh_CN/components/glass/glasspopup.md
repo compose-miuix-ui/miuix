@@ -1,0 +1,180 @@
+---
+title: GlassPopup
+---
+
+# GlassPopup
+
+`GlassPopup` 从测量得到的普通控件展开菜单，不会变换控件本身。面板对齐锚点的末端边缘，在 RTL 中镜像；面板无法放入下方且上方空间更多时向上展开。
+
+<div style="position: relative; height: 380px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
+::: warning 背景采样
+使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+:::
+
+## 引入
+
+```kotlin
+import top.yukonga.miuix.kmp.glass.GlassPopup
+import top.yukonga.miuix.kmp.glass.GlassPopupItem
+```
+
+## 基本用法
+
+此组件是 `BoxScope` 扩展，不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行拦截外部点击。锚点坐标必须与弹窗所在 `Box` 的坐标系一致。
+
+使用下方 `boundsInRoot()` 示例时，弹窗 `Box` 的原点必须与坐标根原点重合。宿主存在偏移或内缩时，应将触发控件范围转换到该 Box 的局部坐标。弹窗不会自行应用系统栏或 IME insets；`safeMargin` 相对于宿主边缘计算。返回关闭需要 `LocalNavigationEventDispatcherOwner`；没有该 owner 时，外部点击仍可关闭。普通 `GlassPopup` 处理返回完成事件，但不会在手势过程中预览几何变化。
+
+关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
+
+与变换、二级和下拉弹窗不同，普通一级 `GlassPopup` 在保留的退场动画期间仍允许菜单行交互；`show = false` 本身不会禁用这些菜单行。
+
+在与弹窗相同的坐标根中测量触发控件，并在菜单项中更新状态：
+
+```kotlin
+var show by remember { mutableStateOf(false) }
+var anchorBounds by remember { mutableStateOf(Rect.Zero) }
+
+Box(Modifier.fillMaxSize()) {
+    TextButton(
+        text = "操作",
+        onClick = { show = true },
+        modifier = Modifier.onGloballyPositioned {
+            anchorBounds = it.boundsInRoot()
+        },
+    )
+    GlassPopup(
+        show = show,
+        onDismissRequest = { show = false },
+        anchorBounds = anchorBounds,
+        backdrop = backdrop,
+    ) {
+        GlassPopupItem(text = "分享", onClick = { show = false })
+        GlassPopupItem(text = "删除", onClick = { show = false })
+    }
+}
+```
+
+## 属性
+
+### GlassPopup 属性
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| `show` | `Boolean` | 菜单是否打开；退场期间仍须保留调用 | — | 是 |
+| `onDismissRequest` | `() -> Unit` | 外部点击或返回请求时调用 | — | 是 |
+| `anchorBounds` | `Rect` | 控件在当前弹窗 Box 坐标系中的范围 | — | 是 |
+| `backdrop` | `Backdrop?` | 面板背后的场景；`null` 使用不透明回退填充 | — | 是 |
+| `modifier` | `Modifier` | 作用于面板的修饰符 | `Modifier` | 否 |
+| `sizing` | `GlassPopupSizing` | 宽度、高度和安全边距限制 | `GlassPopupSizing()` | 否 |
+| `visuals` | `GlassPopupVisuals` | 面板外观 | `GlassPopupDefaults.visuals()` | 否 |
+| `cornerRadius` | `Dp` | 面板稳定状态的圆角 | `GlassPopupDefaults.CornerRadius`（`24.dp`） | 否 |
+| `secondary` | `Boolean` | 使用二级菜单几何；需要继承一级菜单材质时应使用 `GlassSecondaryPopup` | `false` | 否 |
+| `contentPadding` | `PaddingValues` | 菜单行周围的内边距 | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | 否 |
+| `content` | `@Composable ColumnScope.() -> Unit` | 菜单行 | — | 是 |
+
+### GlassPopupSizing 属性
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| `minWidth` | `Dp` | 面板最小宽度 | `GlassPopupDefaults.MinWidth` | 否 |
+| `maxWidth` | `Dp` | 面板最大宽度 | `GlassPopupDefaults.MaxWidth` | 否 |
+| `maxHeight` | `Dp` | 面板最大高度，超过后菜单行滚动 | `GlassPopupDefaults.MaxHeight` | 否 |
+| `safeMargin` | `Dp` | 与页面边缘的最小距离 | `GlassPopupDefaults.SafeMargin` | 否 |
+
+### GlassPopupVisuals 属性
+
+构造函数的全部字段均为必填。`GlassPopupDefaults.visuals()` 提供 `GlassDefaults.Style`、`1f` 透明度、`GlassShadows.Regular`，以及随主题选择的 `stroke()`、`material()` 和 `containerColor()` 默认值。
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| `style` | `GlassStyle` | 材质未指定模糊半径时的模糊回退；不启用玻璃明暗着色或样式边缘效果 | — | 是 |
+| `alpha` | `Float` | 材质、辉光描边和投影的透明度乘数；`GlassTransformPopup` 还会将其应用于整个面板，包括菜单行和回退填充 | — | 是 |
+| `stroke` | `GlassStroke?` | 辉光描边；`null` 移除描边 | — | 是 |
+| `shadow` | `GlassShadow?` | 面板投影；`null` 移除投影 | — | 是 |
+| `material` | `GlassMaterial?` | 面板颜色处理和可选模糊半径；`null` 移除颜色处理，而非背景采样或模糊 | — | 是 |
+| `containerColor` | `Color` | `backdrop` 为 null 时使用的不透明填充 | — | 是 |
+
+backdrop 非 null 时，有 `material.blurRadius` 就使用该半径，否则使用 `style.blur.small / GlassDefaults.SourceDensity`。`material = null` 仍保留基于样式的模糊、噪声、辉光描边和投影，不会改用 `containerColor`。仅在最终解析出的 backdrop 为 null 时使用回退填充，并保留描边和投影，但不进行背景采样。
+
+## 默认值
+
+### GlassPopupDefaults 对象 {#shared-defaults}
+
+`GlassPopupDefaults` 提供弹窗尺寸、菜单行、表面和叠层共用 token。
+
+#### 常量
+
+| 常量名 | 类型 | 说明 | 值 |
+| --- | --- | --- | --- |
+| `MinWidth` | `Dp` | 面板最小宽度 | `200.dp` |
+| `MaxWidth` | `Dp` | 面板最大宽度 | `288.dp` |
+| `MaxHeight` | `Dp` | 菜单行开始滚动前的高度 | `416.dp` |
+| `SafeMargin` | `Dp` | 页面边缘安全边距 | `12.dp` |
+| `ContentPaddingVertical` | `Dp` | 面板垂直内边距 | `8.dp` |
+| `CornerRadius` | `Dp` | 普通弹窗圆角 | `24.dp` |
+| `DropdownCornerRadius` | `Dp` | 下拉弹窗圆角 | `24.dp` |
+| `ItemMinHeight` | `Dp` | 菜单行最小高度 | `44.dp` |
+| `ItemPaddingHorizontal` | `Dp` | 菜单行水平内边距 | `20.dp` |
+| `ItemPaddingVertical` | `Dp` | 菜单行垂直内边距 | `10.dp` |
+| `ItemIconSize` | `Dp` | 前置图标大小 | `24.dp` |
+| `ItemIconGap` | `Dp` | 菜单行图标间距 | `8.dp` |
+| `ItemTickSize` | `Dp` | 选中勾大小 | `24.dp` |
+| `ItemArrowSize` | `Dp` | 子菜单箭头大小 | `16.dp` |
+| `ItemPressInset` | `Dp` | 按压填充内缩 | `7.dp` |
+| `ItemPressRadius` | `Dp` | 按压填充圆角 | `15.dp` |
+| `DividerPaddingHorizontal` | `Dp` | 分割线水平内缩 | `20.dp` |
+| `DividerPaddingVertical` | `Dp` | 分割线垂直间距 | `7.75.dp` |
+| `DividerThickness` | `Dp` | 分割线厚度 | `0.5.dp` |
+
+#### 方法
+
+| 方法名 | 参数 | 返回类型 | 说明 |
+| --- | --- | --- | --- |
+| `visuals` | `style: GlassStyle = GlassDefaults.Style`、`alpha: Float = 1f`、`stroke: GlassStroke? = stroke()`、`shadow: GlassShadow? = GlassShadows.Regular`、`material: GlassMaterial? = material()`、`containerColor: Color = containerColor()` | `GlassPopupVisuals` | 使用按主题选择的默认值创建弹窗外观 |
+| `shape` | `cornerRadius: Dp = CornerRadius` | `GlassShape` | 创建弹窗轮廓 |
+| `material` | — | `GlassMaterial` | 返回按主题选择的弹窗材质 |
+| `stroke` | — | `GlassStroke` | 返回按主题选择的辉光描边 |
+| `containerColor` | — | `Color` | 浅色主题为白色，深色主题为 `Color(0xFF2C2C2C)` |
+| `itemPressedColor` | — | `Color` | 浅色主题为 `0.1f` 透明度的黑色，深色主题为同透明度白色 |
+| `maskColor` | — | `Color` | 浅色主题为 `0.4f` 透明度的白色，深色主题为同透明度黑色 |
+
+以上方法均为 `@Composable`。主题选择将 `MiuixTheme.colorScheme.background.luminance() < 0.5f` 视为深色。
+
+### GlassDropdownDefaults 对象
+
+#### 常量
+
+| 常量名 | 类型 | 说明 | 值 |
+| --- | --- | --- | --- |
+| `CornerRadius` | `Dp` | 下拉菜单稳定圆角 | `24.dp` |
+| `StartCornerRadius` | `Dp` | 下拉菜单开始展开时的圆角 | `4.dp` |
+
+## 进阶用法
+
+多个菜单需要统一尺寸或外观时，可以共享 `sizing` 和 `visuals`。没有 backdrop 时，仍会在不透明回退填充外保留描边和投影：
+
+```kotlin
+val sizing = GlassPopupSizing(maxWidth = 320.dp, maxHeight = 480.dp)
+val visuals = GlassPopupDefaults.visuals(
+    stroke = null,
+    shadow = null,
+    containerColor = MiuixTheme.colorScheme.background,
+)
+
+GlassPopup(
+    show = show,
+    onDismissRequest = { show = false },
+    anchorBounds = anchorBounds,
+    backdrop = backdrop,
+    sizing = sizing,
+    visuals = visuals,
+) {
+    GlassPopupItem(text = "设置", onClick = { show = false })
+}
+```
+
+需要继承变换中一级菜单的展开材质和返回进度时，不要设置 `secondary = true`，应改用 [`GlassSecondaryPopup`](./glasssecondarypopup)。
+

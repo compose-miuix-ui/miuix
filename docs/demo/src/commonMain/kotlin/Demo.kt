@@ -93,6 +93,18 @@ private val availableComponents = listOf(
     AvailableComponent("WindowIconCascadingDropdownMenu", "windowIconCascadingDropdownMenu") { WindowIconCascadingDropdownMenuDemo() },
     AvailableComponent("WindowBottomSheet", "windowBottomSheet") { WindowBottomSheetDemo() },
     AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
+    AvailableComponent("GlassIconButton", "glassIconButton") { GlassIconButtonDemo() },
+    AvailableComponent("GlassTopAppBar", "glassTopAppBar") { GlassTopAppBarDemo() },
+    AvailableComponent("GlassNavigationBar", "glassNavigationBar") { GlassNavigationBarDemo() },
+    AvailableComponent("GlassTabRow", "glassTabRow") { GlassTabRowDemo() },
+    AvailableComponent("GlassTransformPopup", "glassTransformPopup") { GlassTransformPopupDemo() },
+    AvailableComponent("GlassPopup", "glassPopup") { GlassPopupDemo() },
+    AvailableComponent("GlassSecondaryPopup", "glassSecondaryPopup") { GlassSecondaryPopupDemo() },
+    AvailableComponent("GlassDropdownPopup", "glassDropdownPopup") { GlassDropdownPopupDemo() },
+    AvailableComponent("GlassPopupItem", "glassPopupItem") { GlassPopupItemDemo() },
+    AvailableComponent("GlassDropdownPreference", "glassDropdownPreference") { GlassDropdownPreferenceDemo() },
+    AvailableComponent("GlassDialog", "glassDialog") { GlassDialogDemo() },
+    AvailableComponent("GlassBottomSheet", "glassBottomSheet") { GlassBottomSheetDemo() },
 )
 
 @Composable
