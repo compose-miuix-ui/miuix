@@ -106,18 +106,22 @@ Box(Modifier.fillMaxSize()) {
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | Whether the secondary menu is open; keep the call composed during collapse | — | Yes |
-| `onDismissRequest` | `() -> Unit` | Called for outside tap or Back to return to the primary menu | — | Yes |
-| `anchorBounds` | `Rect` | Frozen resting trigger-row bounds in this popup's coordinate root | — | Yes |
-| `backdrop` | `Backdrop?` | Scene containing the page and primary popup, excluding this popup; `null` tries `materialAnchor`'s button backdrop, then the resolved visuals' `containerColor` | — | Yes |
-| `modifier` | `Modifier` | Modifier applied to the panel | `Modifier` | No |
-| `materialAnchor` | `GlassPopupAnchor?` | Primary anchor whose expanded appearance and Back progress are shared | `null` | No |
-| `sizing` | `GlassPopupSizing` | Panel limits; set `minWidth` to the primary panel width | `GlassPopupSizing()` | No |
-| `visuals` | `GlassPopupVisuals` | Fallback appearance; published expanded popup visuals take precedence even when their `material` is null | `GlassPopupDefaults.visuals()` | No |
-| `cornerRadius` | `Dp` | Panel corner radius during the transition | `GlassPopupDefaults.CornerRadius` (`24.dp`) | No |
-| `contentPadding` | `PaddingValues` | Padding around rows; only top and bottom padding expand the collapsed trigger clip | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | No |
-| `onDismissFinished` | `(() -> Unit)?` | Called after collapse completes following an opening; not called for the initial closed state | `null` | No |
-| `content` | `@Composable ColumnScope.() -> Unit` | Header row followed by secondary choices | — | Yes |
+| show | Boolean | Whether the secondary menu is open; keep the call composed during collapse | - | Yes |
+| onDismissRequest | () -> Unit | Called for outside tap or Back to return to the primary menu | - | Yes |
+| anchorBounds | Rect | Frozen resting trigger-row bounds in this popup's coordinate root | - | Yes |
+| backdrop | Backdrop? | Scene containing the page and primary popup, excluding this popup; null tries materialAnchor's button backdrop, then the resolved visuals' containerColor | - | Yes |
+| modifier | Modifier | Modifier applied to the panel | Modifier | No |
+| materialAnchor | GlassPopupAnchor? | Primary anchor whose expanded appearance and Back progress are shared | null | No |
+| sizing | GlassPopupSizing | Panel limits; set minWidth to the primary panel width | GlassPopupSizing() | No |
+| visuals | GlassPopupVisuals | Fallback appearance; published expanded popup visuals take precedence even when their material is null | GlassPopupDefaults.visuals() | No |
+| cornerRadius | Dp | Panel corner radius during the transition | GlassPopupDefaults.CornerRadius (24.dp) | No |
+| contentPadding | PaddingValues | Padding around rows; only top and bottom padding expand the collapsed trigger clip | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
+| onDismissFinished | (() -> Unit)? | Called after collapse completes following an opening; not called for the initial closed state | null | No |
+| content | @Composable ColumnScope.() -> Unit | Header row followed by secondary choices | - | Yes |
+
+### Defaults
+
+Sizing, visuals, and row tokens are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).
 
 ## Advanced Usage
 
@@ -143,6 +147,3 @@ The secondary rows accept input while opening and stop accepting pointer and acc
 
 Appearance resolution uses the primary anchor's published expanded popup visuals first, then `visuals`; backdrop resolution is the explicit `backdrop` first, then the anchor button's backdrop, then the resolved `containerColor` fill. The primary's explicit expanded-menu backdrop is not inherited through `materialAnchor`, so pass the secondary sampling layer explicitly. Sizing, `cornerRadius`, and `contentPadding` are not inherited. A null material removes its color treatment, not style-based blur when a backdrop remains; see [shared defaults](./glasspopup#shared-defaults).
 
-## Defaults
-
-Sizing, visuals, and row tokens are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).

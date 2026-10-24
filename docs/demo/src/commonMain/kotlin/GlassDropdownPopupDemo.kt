@@ -1,11 +1,14 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -21,6 +24,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassDropdownPopup
@@ -39,38 +43,73 @@ fun GlassDropdownPopupDemo() {
     var rowBounds by remember { mutableStateOf(Rect.Zero) }
     var quality by remember { mutableStateOf("Automatic") }
 
-    Box(Modifier.fillMaxSize()) {
-        GlassDemoBackground(backdrop) {
-            Column(
-                modifier = Modifier.align(Alignment.TopCenter).padding(24.dp).widthIn(max = 600.dp).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(demoBackground()),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .widthIn(max = 600.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp),
             ) {
-                Text("Playback settings", style = MiuixTheme.textStyles.title3)
-                Text("Tap the row to choose a video quality.")
-                Card {
-                    BasicComponent(
-                        title = "Quality",
-                        summary = "Video playback",
-                        modifier = Modifier.glassPopupAnchorRow(anchor).onGloballyPositioned {
-                            rowBounds = it.boundsInRoot()
-                        },
-                        onClick = { show = true },
-                        onClickLabel = "Choose playback quality",
-                        endActions = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MiuixTheme.colorScheme.surface),
+                ) {
+                    GlassDemoBackground(backdrop) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center).padding(16.dp).fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text("Playback settings", style = MiuixTheme.textStyles.title3)
+                            Text("Tap the row to choose a video quality.")
+                            Card {
+                                BasicComponent(
+                                    title = "Quality",
+                                    summary = "Video playback",
+                                    modifier = Modifier.glassPopupAnchorRow(anchor).onGloballyPositioned {
+                                        rowBounds = it.boundsInRoot()
+                                    },
+                                    onClick = { show = true },
+                                    onClickLabel = "Choose playback quality",
+                                    endActions = {
+                                        Row(
+                                            modifier = Modifier.glassPopupAnchorValue(anchor),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                text = quality,
+                                                modifier = Modifier.padding(end = 8.dp),
+                                                fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                            )
+                                            DropdownArrowEndAction(
+                                                actionColor = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                            )
+                                        }
+                                    },
+                                )
+                            }
                             Text(
-                                text = "$quality ⌄",
-                                modifier = Modifier.glassPopupAnchorValue(anchor),
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                text = "Playback quality: $quality",
+                                color = MiuixTheme.colorScheme.onBackground,
                             )
-                        },
-                    )
+                        }
+                    }
                 }
             }
-            Text(
-                text = "Playback quality: $quality",
-                modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp),
-                color = MiuixTheme.colorScheme.onBackground,
-            )
         }
         GlassDropdownPopup(
             show = show,

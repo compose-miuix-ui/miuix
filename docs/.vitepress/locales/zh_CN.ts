@@ -141,7 +141,6 @@ export default defineConfig({
                         { text: "GlassPopup", link: "/zh_CN/components/glass/glasspopup" },
                         { text: "GlassSecondaryPopup", link: "/zh_CN/components/glass/glasssecondarypopup" },
                         { text: "GlassDropdownPopup", link: "/zh_CN/components/glass/glassdropdownpopup" },
-                        { text: "GlassPopupItem", link: "/zh_CN/components/glass/glasspopupitem" },
                         { text: "GlassDropdownPreference", link: "/zh_CN/components/glass/glassdropdownpreference" },
                         { text: "GlassDialog", link: "/zh_CN/components/glass/glassdialog" },
                         { text: "GlassBottomSheet", link: "/zh_CN/components/glass/glassbottomsheet" },

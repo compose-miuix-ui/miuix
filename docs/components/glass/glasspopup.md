@@ -51,9 +51,25 @@ Box(Modifier.fillMaxSize()) {
         anchorBounds = anchorBounds,
         backdrop = backdrop,
     ) {
-        GlassPopupItem(text = "Share", onClick = { show = false })
-        GlassPopupItem(text = "Delete", onClick = { show = false })
+        GlassPopupItem(text = "Share", icon = MiuixIcons.Glass.Share, onClick = { show = false })
+        GlassPopupItem(text = "Favorite", selected = true, onClick = { show = false })
+        GlassPopupItem(text = "More options", summary = "Detailed preferences", showArrow = true, onClick = { show = false })
+        GlassPopupItem(text = "Unavailable", enabled = false, onClick = {})
     }
+}
+```
+
+### Menu Items (GlassPopupItem)
+
+`GlassPopupItem` builds each interactive row inside popup menus, supporting icons, subtitles, checkmarks, and submenu chevrons:
+
+```kotlin
+GlassPopupItem(
+    text = "Sort by",
+    summary = "Name",
+    showArrow = true,
+    onClick = { /* Open submenu */ },
+)
 }
 ```
 
@@ -63,26 +79,43 @@ Box(Modifier.fillMaxSize()) {
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | Whether the menu is open; keep the call composed during exit | — | Yes |
-| `onDismissRequest` | `() -> Unit` | Called for an outside tap or Back request | — | Yes |
-| `anchorBounds` | `Rect` | Trigger bounds in this popup Box's coordinate space | — | Yes |
-| `backdrop` | `Backdrop?` | Scene behind the panel; `null` uses the opaque fallback | — | Yes |
-| `modifier` | `Modifier` | Modifier applied to the panel | `Modifier` | No |
-| `sizing` | `GlassPopupSizing` | Width, height, and safe-margin limits | `GlassPopupSizing()` | No |
-| `visuals` | `GlassPopupVisuals` | Panel appearance | `GlassPopupDefaults.visuals()` | No |
-| `cornerRadius` | `Dp` | Settled panel corner radius | `GlassPopupDefaults.CornerRadius` (`24.dp`) | No |
-| `secondary` | `Boolean` | Uses secondary geometry; use `GlassSecondaryPopup` to inherit a primary popup's material | `false` | No |
-| `contentPadding` | `PaddingValues` | Padding around the rows | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | No |
-| `content` | `@Composable ColumnScope.() -> Unit` | Menu rows | — | Yes |
+| show | Boolean | Whether the menu is open; keep the call composed during exit | - | Yes |
+| onDismissRequest | () -> Unit | Called for an outside tap or Back request | - | Yes |
+| anchorBounds | Rect | Trigger bounds in this popup Box's coordinate space | - | Yes |
+| backdrop | Backdrop? | Scene behind the panel; null uses the opaque fallback | - | Yes |
+| modifier | Modifier | Modifier applied to the panel | Modifier | No |
+| sizing | GlassPopupSizing | Width, height, and safe-margin limits | GlassPopupSizing() | No |
+| visuals | GlassPopupVisuals | Panel appearance | GlassPopupDefaults.visuals() | No |
+| cornerRadius | Dp | Settled panel corner radius | GlassPopupDefaults.CornerRadius (24.dp) | No |
+| secondary | Boolean | Uses secondary geometry; use GlassSecondaryPopup to inherit a primary popup's material | false | No |
+| contentPadding | PaddingValues | Padding around the rows | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
+| content | @Composable ColumnScope.() -> Unit | Menu rows | - | Yes |
 
+### GlassPopupItem Properties {#glasspopupitem}
+
+| Property Name | Type | Description | Default Value | Required |
+| --- | --- | --- | --- | --- |
+| text | String | Single-line row label | - | Yes |
+| onClick | () -> Unit | Called when an enabled row is tapped | - | Yes |
+| modifier | Modifier | Modifier applied to the row | Modifier | No |
+| icon | ImageVector? | Optional leading icon | null | No |
+| summary | String? | Optional single-line second label | null | No |
+| enabled | Boolean | Whether the row responds to taps | true | No |
+| selected | Boolean | Shows a trailing tick; uses selected label and leading-icon color when enabled | false | No |
+| showArrow | Boolean | Shows a trailing submenu chevron | false | No |
+| arrowRotation | () -> Float | Chevron rotation in degrees, read during the layer phase | { 0f } | No |
+| contentColor | Color | Label and icon color | MiuixTheme.colorScheme.onSurfaceContainer | No |
+| summaryColor | Color | Summary and arrow color | MiuixTheme.colorScheme.onSurfaceContainerVariant | No |
+| selectedContentColor | Color | Enabled selected label and leading-icon color; selection tick color even when disabled | MiuixTheme.colorScheme.primary | No |
+| pressedColor | Color | Fill behind a pressed row | GlassPopupDefaults.itemPressedColor() | No |
 ### GlassPopupSizing Properties
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `minWidth` | `Dp` | Narrowest panel width | `GlassPopupDefaults.MinWidth` | No |
-| `maxWidth` | `Dp` | Widest panel width | `GlassPopupDefaults.MaxWidth` | No |
-| `maxHeight` | `Dp` | Maximum panel height before rows scroll | `GlassPopupDefaults.MaxHeight` | No |
-| `safeMargin` | `Dp` | Minimum distance from the page edge | `GlassPopupDefaults.SafeMargin` | No |
+| minWidth | Dp | Narrowest panel width | GlassPopupDefaults.MinWidth | No |
+| maxWidth | Dp | Widest panel width | GlassPopupDefaults.MaxWidth | No |
+| maxHeight | Dp | Maximum panel height before rows scroll | GlassPopupDefaults.MaxHeight | No |
+| safeMargin | Dp | Minimum distance from the page edge | GlassPopupDefaults.SafeMargin | No |
 
 ### GlassPopupVisuals Properties
 
@@ -90,16 +123,14 @@ All constructor fields are required. `GlassPopupDefaults.visuals()` supplies `Gl
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `style` | `GlassStyle` | Blur fallback when material has no blur radius; glass shading and the style's rim are off | — | Yes |
-| `alpha` | `Float` | Material, bloom-stroke, and shadow opacity multiplier; `GlassTransformPopup` additionally applies it to the whole panel, including rows and fallback fill | — | Yes |
-| `stroke` | `GlassStroke?` | Bloom stroke; `null` removes it | — | Yes |
-| `shadow` | `GlassShadow?` | Panel shadow; `null` removes it | — | Yes |
-| `material` | `GlassMaterial?` | Panel color treatment and optional blur radius; `null` removes color treatment, not background sampling or blur | — | Yes |
-| `containerColor` | `Color` | Opaque fill used when `backdrop` is null | — | Yes |
+| style | GlassStyle | Blur fallback when material has no blur radius; glass shading and the style's rim are off | - | Yes |
+| alpha | Float | Material, bloom-stroke, and shadow opacity multiplier; GlassTransformPopup additionally applies it to the whole panel, including rows and fallback fill | - | Yes |
+| stroke | GlassStroke? | Bloom stroke; null removes it | - | Yes |
+| shadow | GlassShadow? | Panel shadow; null removes it | - | Yes |
+| material | GlassMaterial? | Panel color treatment and optional blur radius; null removes color treatment, not background sampling or blur | - | Yes |
+| containerColor | Color | Opaque fill used when backdrop is null | - | Yes |
 
 With a non-null backdrop, blur uses `material.blurRadius` when present, otherwise `style.blur.small / GlassDefaults.SourceDensity`. Setting `material = null` retains that style-based blur, noise, bloom stroke, and shadow; it does not select `containerColor`. Only a null resolved backdrop selects the fallback fill, retaining stroke and shadow but not background sampling.
-
-## Defaults
 
 ### GlassPopupDefaults Object {#shared-defaults}
 
@@ -129,9 +160,9 @@ With a non-null backdrop, blur uses `material.blurRadius` when present, otherwis
 | `DividerPaddingVertical` | `Dp` | Divider vertical space | `7.75.dp` |
 | `DividerThickness` | `Dp` | Divider thickness | `0.5.dp` |
 
-#### Functions
+#### Methods
 
-| Function Name | Parameters | Return Type | Description |
+| Method Name | Parameters | Return Type | Description |
 | --- | --- | --- | --- |
 | `visuals` | `style: GlassStyle = GlassDefaults.Style`, `alpha: Float = 1f`, `stroke: GlassStroke? = stroke()`, `shadow: GlassShadow? = GlassShadows.Regular`, `material: GlassMaterial? = material()`, `containerColor: Color = containerColor()` | `GlassPopupVisuals` | Creates popup visuals from theme-aware defaults |
 | `shape` | `cornerRadius: Dp = CornerRadius` | `GlassShape` | Creates the popup silhouette |

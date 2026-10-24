@@ -78,17 +78,21 @@ Box(Modifier.fillMaxSize()) {
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | Whether the panel is open; row input and accessibility actions stop immediately when false | — | Yes |
-| `onDismissRequest` | `() -> Unit` | Called for an outside tap or Back request | — | Yes |
-| `anchorBounds` | `Rect` | Settings-row bounds in this popup Box's coordinate space | — | Yes |
-| `backdrop` | `Backdrop?` | Scene behind the panel; `null` uses opaque fill with stroke and shadow | — | Yes |
-| `modifier` | `Modifier` | Modifier applied to the panel | `Modifier` | No |
-| `anchor` | `GlassPopupAnchor?` | Optional value alignment and fade coordination anchor; does not supply `anchorBounds`, backdrop, or visuals | `null` | No |
-| `sizing` | `GlassPopupSizing` | Width, height, and safe-margin limits | `GlassPopupSizing()` | No |
-| `visuals` | `GlassPopupVisuals` | Panel appearance | `GlassPopupDefaults.visuals()` | No |
-| `cornerRadius` | `Dp` | Settled dropdown corner radius | `GlassDropdownDefaults.CornerRadius` (`24.dp`) | No |
-| `contentPadding` | `PaddingValues` | Padding around the rows | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | No |
-| `content` | `@Composable ColumnScope.() -> Unit` | Choice rows, usually `GlassPopupItem`s with `selected` | — | Yes |
+| show | Boolean | Whether the panel is open; row input and accessibility actions stop immediately when false | - | Yes |
+| onDismissRequest | () -> Unit | Called for an outside tap or Back request | - | Yes |
+| anchorBounds | Rect | Settings-row bounds in this popup Box's coordinate space | - | Yes |
+| backdrop | Backdrop? | Scene behind the panel; null uses opaque fill with stroke and shadow | - | Yes |
+| modifier | Modifier | Modifier applied to the panel | Modifier | No |
+| anchor | GlassPopupAnchor? | Optional value alignment and fade coordination anchor; does not supply anchorBounds, backdrop, or visuals | null | No |
+| sizing | GlassPopupSizing | Width, height, and safe-margin limits | GlassPopupSizing() | No |
+| visuals | GlassPopupVisuals | Panel appearance | GlassPopupDefaults.visuals() | No |
+| cornerRadius | Dp | Settled dropdown corner radius | GlassDropdownDefaults.CornerRadius (24.dp) | No |
+| contentPadding | PaddingValues | Padding around the rows | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
+| content | @Composable ColumnScope.() -> Unit | Choice rows, usually GlassPopupItems with selected | - | Yes |
+
+### Defaults
+
+Sizing, visuals, and shared row tokens are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).
 
 ## Advanced Usage
 
@@ -115,6 +119,3 @@ GlassDropdownPopup(
 
 `GlassDropdownDefaults.CornerRadius` is `24.dp` and `StartCornerRadius` is `4.dp`. The list scrolls within the available viewport and safe margin. Predictive Back follows the arc, recovers on cancellation, and completes dismissal on commit. See the [`GlassTransformPopup` anchor API](./glasstransformpopup#anchor-api) for row/value modifiers.
 
-## Defaults
-
-Sizing, visuals, and shared row tokens are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).

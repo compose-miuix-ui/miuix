@@ -106,18 +106,22 @@ Box(Modifier.fillMaxSize()) {
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | 二级菜单是否打开；收起期间仍须保留调用 | — | 是 |
-| `onDismissRequest` | `() -> Unit` | 外部点击或返回时调用，回到一级菜单 | — | 是 |
-| `anchorBounds` | `Rect` | 当前弹窗坐标根中冻结的触发行静止范围 | — | 是 |
-| `backdrop` | `Backdrop?` | 包含页面和一级菜单但排除本菜单的场景；`null` 先尝试 `materialAnchor` 的按钮 backdrop，仍不存在时使用解析后外观的 `containerColor` | — | 是 |
-| `modifier` | `Modifier` | 作用于面板的修饰符 | `Modifier` | 否 |
-| `materialAnchor` | `GlassPopupAnchor?` | 共享一级锚点的展开外观与返回进度 | `null` | 否 |
-| `sizing` | `GlassPopupSizing` | 面板限制；`minWidth` 应设置为一级面板宽度 | `GlassPopupSizing()` | 否 |
-| `visuals` | `GlassPopupVisuals` | 仅在 `materialAnchor` 未发布展开弹窗外观时使用；已发布外观即使 `material = null` 也优先 | `GlassPopupDefaults.visuals()` | 否 |
-| `cornerRadius` | `Dp` | 变换期间的面板圆角 | `GlassPopupDefaults.CornerRadius`（`24.dp`） | 否 |
-| `contentPadding` | `PaddingValues` | 菜单行周围的内边距；仅上下内边距扩展收起端触发行裁剪区域 | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | 否 |
-| `onDismissFinished` | `(() -> Unit)?` | 打开后收起动画完成时调用；初始关闭状态不调用 | `null` | 否 |
-| `content` | `@Composable ColumnScope.() -> Unit` | 请求收起的标题行及后续选项 | — | 是 |
+| show | Boolean | 二级菜单是否打开；收起期间仍须保留调用 | - | 是 |
+| onDismissRequest | () -> Unit | 外部点击或返回时调用，回到一级菜单 | - | 是 |
+| anchorBounds | Rect | 当前弹窗坐标根中冻结的触发行静止范围 | - | 是 |
+| backdrop | Backdrop? | 包含页面和一级菜单但排除本菜单的场景；null 先尝试 materialAnchor 的按钮 backdrop，仍不存在时使用解析后外观的 containerColor | - | 是 |
+| modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
+| materialAnchor | GlassPopupAnchor? | 共享一级锚点的展开外观与返回进度 | null | 否 |
+| sizing | GlassPopupSizing | 面板限制；minWidth 应设置为一级面板宽度 | GlassPopupSizing() | 否 |
+| visuals | GlassPopupVisuals | 仅在 materialAnchor 未发布展开弹窗外观时使用；已发布外观即使 material = null 也优先 | GlassPopupDefaults.visuals() | 否 |
+| cornerRadius | Dp | 变换期间的面板圆角 | GlassPopupDefaults.CornerRadius（24.dp） | 否 |
+| contentPadding | PaddingValues | 菜单行周围的内边距；仅上下内边距扩展收起端触发行裁剪区域 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
+| onDismissFinished | (() -> Unit)? | 打开后收起动画完成时调用；初始关闭状态不调用 | null | 否 |
+| content | @Composable ColumnScope.() -> Unit | 请求收起的标题行及后续选项 | - | 是 |
+
+### 默认值
+
+尺寸、外观和菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
 
 ## 进阶用法
 
@@ -143,6 +147,3 @@ GlassSecondaryPopup(
 
 外观先使用一级锚点发布的展开弹窗外观，再回退到 `visuals`；背景先使用显式 `backdrop`，再尝试锚点按钮的 backdrop，最后使用解析后外观的 `containerColor` 填充。`materialAnchor` 不会继承一级菜单显式传入的展开背景，因此应显式传入二级背景采样层。尺寸、`cornerRadius` 和 `contentPadding` 不会继承。material 为 null 只移除其颜色处理，存在 backdrop 时仍有基于样式的模糊；见[共享默认值](./glasspopup#shared-defaults)。
 
-## 默认值
-
-尺寸、外观和菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。

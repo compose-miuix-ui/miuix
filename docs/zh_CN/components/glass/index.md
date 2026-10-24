@@ -15,7 +15,6 @@
 | [GlassPopup](./glasspopup) | 锚定式玻璃菜单 | 操作选择 |
 | [GlassSecondaryPopup](./glasssecondarypopup) | 一级菜单旁的二级菜单 | 级联菜单 |
 | [GlassDropdownPopup](./glassdropdownpopup) | 从设置行展开的玻璃下拉弹窗 | 选项选择 |
-| [GlassPopupItem](./glasspopupitem) | 可带图标与选中标记的菜单项 | 自定义弹窗内容 |
 | [GlassDropdownPreference](./glassdropdownpreference) | 内置玻璃下拉弹窗的设置行 | 设置选项选择 |
 | [GlassDialog](./glassdialog) | 遮罩之上的玻璃对话框 | 提示与确认 |
 | [GlassDialogButton](./glassdialog#glassdialogbutton) | 共享对话框材质的操作按钮 | 对话框操作 |
@@ -51,8 +50,15 @@ dependencies {
 
 完整项目配置与平台依赖见[快速开始](/zh_CN/guide/getting-started)。
 
+## 组件组织与宿主
+
+- **独立玻璃控件**（`GlassIconButton`、`GlassTopAppBar`、`GlassNavigationBar`、`GlassTabRow`）：直接作为页面布局的一部分使用，通过 `backdrop` 采样下层背景并呈现半透明模糊磨砂与高光。
+- **弹窗与变换菜单**（`GlassPopup`、`GlassTransformPopup`、`GlassSecondaryPopup`、`GlassDropdownPopup`）：在 `BoxScope` 中使用，通过几何测量与锚点关联实现平滑变换和多级展开，不依赖 `Scaffold`。
+- **脚手架托管浮层**（`GlassDialog`、`GlassBottomSheet`、`GlassDropdownPreference`）：必须在 Miuix [Scaffold](../basic/scaffold) 中使用，由其提供 `MiuixPopupHost` 渲染遮罩和浮层面板。
+
+使用背景采样时，`backdrop` 应记录组件后方的内容，不能包含使用该采样的玻璃表面。各组件页列出了具体参数、默认值和平台约束。
+
 ## 相关文档
 
 - [玻璃材质](/zh_CN/guide/glass)：材质配置与背景采样。
 - [图标系统](/zh_CN/guide/icons)：Glass 图标的引入与字重。
-

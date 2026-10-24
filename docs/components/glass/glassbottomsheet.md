@@ -18,7 +18,7 @@ popupHost: MiuixPopupHost
 </div>
 
 ::: danger Prerequisite
-This component depends on Miuix `Scaffold` providing `MiuixPopupHost`. It must be used within `Scaffold`, otherwise popup content will not render correctly.
+This component depends on `Scaffold` providing `MiuixPopupHost` to render popup content. It must be used within `Scaffold`, otherwise popup content will not render correctly.
 :::
 
 ::: warning Background Sampling
@@ -122,13 +122,13 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 
 #### Constants
 
-| Constant | Type | Description | Value |
+| Constant Name | Type | Description | Value |
 | --- | --- | --- | --- |
 | ScrimColor | Color | Scrim color before host animation | GlassDialogDefaults.ScrimColor (`Color(0x33000000)`) |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-aware `GlassMaterials.dialogGlass`, shared with GlassDialog |
 | stroke() | GlassStroke | Theme-aware `GlassStrokes.MiddleLight` or `MiddleDark` bloom stroke |

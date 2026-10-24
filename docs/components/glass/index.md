@@ -15,7 +15,6 @@
 | [GlassPopup](./glasspopup) | Anchored glass menu | Action selection |
 | [GlassSecondaryPopup](./glasssecondarypopup) | Submenu beside a primary menu | Cascading menus |
 | [GlassDropdownPopup](./glassdropdownpopup) | Glass dropdown from a settings row | Option selection |
-| [GlassPopupItem](./glasspopupitem) | Menu row with optional icon and selection | Custom popup content |
 | [GlassDropdownPreference](./glassdropdownpreference) | Preference row with a managed glass dropdown | Settings selection |
 | [GlassDialog](./glassdialog) | Glass dialog over a scrim | Prompts and confirmation |
 | [GlassDialogButton](./glassdialog#glassdialogbutton) | Action over shared dialog material | Dialog actions |
@@ -51,8 +50,15 @@ dependencies {
 
 See [Getting Started](/guide/getting-started) for complete project configuration and platform-specific dependencies.
 
+## Component Organization & Hosts
+
+- **Standalone Glass Controls** (`GlassIconButton`, `GlassTopAppBar`, `GlassNavigationBar`, `GlassTabRow`): Used directly in layouts, sampling background content via `backdrop` to render frosted blur, tint, and bloom strokes.
+- **Popup & Transform Menus** (`GlassPopup`, `GlassTransformPopup`, `GlassSecondaryPopup`, `GlassDropdownPopup`): Used in `BoxScope`, providing smooth transformation and cascading levels from measured anchors without requiring a `Scaffold`.
+- **Scaffold-Hosted Overlays** (`GlassDialog`, `GlassBottomSheet`, `GlassDropdownPreference`): Must be used within a Miuix [Scaffold](../basic/scaffold) to provide `MiuixPopupHost` for rendering scrims and overlay panels.
+
+When using background sampling, `backdrop` must record content behind the component and exclude the glass surface itself. Each component page details specific parameters, defaults, and usage.
+
 ## Related Documentation
 
 - [Glass Material](/guide/glass): material configuration and background sampling.
 - [Icon System](/guide/icons): Glass icon imports and weights.
-

@@ -78,9 +78,9 @@ The button requests a square of `size` and adds no separate minimum touch target
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | buttonFill() | Color | White in light mode; `#FF2C2C2C` in dark mode |
 | buttonMaterial() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |

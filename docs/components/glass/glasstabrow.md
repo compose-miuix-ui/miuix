@@ -149,9 +149,9 @@ All constructor fields are required. Use a defaults factory and `copy` when cust
 | TabPaddingHorizontal | Dp | Horizontal content padding | 16.dp |
 | TabPaddingVertical | Dp | Vertical content padding | 6.dp |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | Capsule with radius height / 2 and smoothing 0f |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
@@ -170,9 +170,9 @@ All constructor fields are required. Use a defaults factory and `copy` when cust
 | TabGap | Dp | Gap between tab slots | 8.dp |
 | TabPaddingHorizontal | Dp | Horizontal tab content padding | 16.dp |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | Capsule with radius height / 2 and smoothing 0f |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |

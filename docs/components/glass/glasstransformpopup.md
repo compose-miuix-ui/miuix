@@ -68,24 +68,27 @@ Without `glassPopupAnchorContent`, `anchorContent` represents the whole control.
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | Whether the menu is open; keep the call composed during exit | — | Yes |
-| `onDismissRequest` | `() -> Unit` | Called for an outside tap or Back request | — | Yes |
-| `anchor` | `GlassPopupAnchor` | Measured control and shared material anchor | — | Yes |
-| `backdrop` | `Backdrop?` | Expanded-menu scene; `null` falls back to the attached button backdrop, then to `visuals.containerColor` if neither exists | — | Yes |
-| `anchorContent` | `@Composable () -> Unit` | Visual copy of the control or its marked content | — | Yes |
-| `modifier` | `Modifier` | Modifier applied to the panel | `Modifier` | No |
-| `simplified` | `Boolean` | Omits the outgoing content copy during ordinary opening; the copy still participates in closing and predictive Back | `false` | No |
-| `stacked` | `Boolean` | Shrinks and masks this menu while a secondary menu is in front; its rows stop accepting input | `false` | No |
-| `sizing` | `GlassPopupSizing` | Width, height, and safe-margin limits | `GlassPopupSizing()` | No |
-| `visuals` | `GlassPopupVisuals` | Expanded panel appearance | `GlassPopupDefaults.visuals()` | No |
-| `anchorAlpha` | `Float` | Anchor background opacity when no shared button surface is available | `1f` | No |
-| `maskColor` | `Color` | Wash over the primary menu while stacked | `GlassPopupDefaults.maskColor()` | No |
-| `cornerRadius` | `Dp` | Settled panel corner radius | `GlassPopupDefaults.CornerRadius` (`24.dp`) | No |
-| `gap` | `Dp` | Downward offset applied to the anchor before resolving settled panel placement; not a guaranteed edge-to-edge gap | `0.dp` | No |
-| `contentPadding` | `PaddingValues` | Padding around the rows | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | No |
-| `onMeasured` | `((Size) -> Unit)?` | Called with the settled panel size in pixels | `null` | No |
-| `content` | `@Composable ColumnScope.() -> Unit` | Menu rows | — | Yes |
+| show | Boolean | Whether the menu is open; keep the call composed during exit | - | Yes |
+| onDismissRequest | () -> Unit | Called for an outside tap or Back request | - | Yes |
+| anchor | GlassPopupAnchor | Measured control and shared material anchor | - | Yes |
+| backdrop | Backdrop? | Expanded-menu scene; null falls back to the attached button backdrop, then to visuals.containerColor if neither exists | - | Yes |
+| anchorContent | @Composable () -> Unit | Visual copy of the control or its marked content | - | Yes |
+| modifier | Modifier | Modifier applied to the panel | Modifier | No |
+| simplified | Boolean | Omits the outgoing content copy during ordinary opening; the copy still participates in closing and predictive Back | false | No |
+| stacked | Boolean | Shrinks and masks this menu while a secondary menu is in front; its rows stop accepting input | false | No |
+| sizing | GlassPopupSizing | Width, height, and safe-margin limits | GlassPopupSizing() | No |
+| visuals | GlassPopupVisuals | Expanded panel appearance | GlassPopupDefaults.visuals() | No |
+| anchorAlpha | Float | Anchor background opacity when no shared button surface is available | 1f | No |
+| maskColor | Color | Wash over the primary menu while stacked | GlassPopupDefaults.maskColor() | No |
+| cornerRadius | Dp | Settled panel corner radius | GlassPopupDefaults.CornerRadius (24.dp) | No |
+| gap | Dp | Downward offset applied to the anchor before resolving settled panel placement; not a guaranteed edge-to-edge gap | 0.dp | No |
+| contentPadding | PaddingValues | Padding around the rows | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
+| onMeasured | ((Size) -> Unit)? | Called with the settled panel size in pixels | null | No |
+| content | @Composable ColumnScope.() -> Unit | Menu rows | - | Yes |
 
+### Defaults
+
+Sizing, visuals, and token values are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults). Rows accept input while `show && !stacked`; retained closing rows are visual only. Predictive Back previews the reverse transform, restores on cancellation, and is owned by the secondary popup while `stacked`.
 ## Advanced Usage
 
 ### Anchor API {#anchor-api}
@@ -99,12 +102,12 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 
 | API | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| `rememberGlassPopupAnchor()` | `GlassPopupAnchor` | Remembers the anchor used by a transforming or dropdown popup; no parameters | — | — |
-| `Modifier.glassPopupAnchor(anchor: GlassPopupAnchor, cornerRadius: Dp, floating: Boolean)` | `Modifier` | Reports the outer control, hides it during the transform, and publishes shared GlassIconButton material | `floating = false` | `anchor`, `cornerRadius` |
-| `Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor)` | `Modifier` | Reports only the copied content bounds; omit it to copy the whole control | — | `anchor` |
-| `Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor)` | `Modifier` | Reports dropdown row bounds without hiding the row; the dropdown still takes explicit `anchorBounds` | — | `anchor` |
-| `Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor)` | `Modifier` | Reports and fades the dropdown value and chevron | — | `anchor` |
-| `anchor.secondaryBackProgress` | `Float` | Read-only secondary Back progress, including cancellation recovery and retained exit | `0f` | No |
+| rememberGlassPopupAnchor() | GlassPopupAnchor | Remembers the anchor used by a transforming or dropdown popup; no parameters | - | - |
+| Modifier.glassPopupAnchor(anchor, cornerRadius, floating) | Modifier | Reports the outer control, hides it during the transform, and publishes shared GlassIconButton material | floating = false | anchor, cornerRadius |
+| Modifier.glassPopupAnchorContent(anchor) | Modifier | Reports only the copied content bounds; omit it to copy the whole control | - | anchor |
+| Modifier.glassPopupAnchorRow(anchor) | Modifier | Reports dropdown row bounds without hiding the row; the dropdown still takes explicit anchorBounds | - | anchor |
+| Modifier.glassPopupAnchorValue(anchor) | Modifier | Reports and fades the dropdown value and chevron | - | anchor |
+| anchor.secondaryBackProgress | Float | Read-only secondary Back progress, including cancellation recovery and retained exit | 0f | No |
 
 Read `secondaryBackProgress` in a draw or layer callback when a submenu arrow should follow predictive Back:
 
@@ -120,6 +123,3 @@ GlassIconButton(
 
 For an anchor without a shared button surface, `floating = true` blends panel opacity from `anchorAlpha` to full strength throughout the journey; an in-page panel instead follows the icon-material transition. A participating `GlassIconButton` publishes its resolved backdrop, style, material, underlay, stroke, fill, and surface opacity; those values form the collapsed endpoint and `anchorAlpha` does not replace them. With a shared surface, the popup determines floating behavior from the published button surface (`surfaceFloating || surfaceAlpha > 0f`), not the anchor modifier's `floating` flag. The expanded endpoint always uses `visuals`, and a null explicit backdrop first uses the published button backdrop before falling back to `visuals.containerColor`.
 
-## Defaults
-
-Sizing, visuals, and token values are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults). Rows accept input while `show && !stacked`; retained closing rows are visual only. Predictive Back previews the reverse transform, restores on cancellation, and is owned by the secondary popup while `stacked`.

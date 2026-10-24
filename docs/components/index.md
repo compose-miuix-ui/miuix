@@ -90,7 +90,7 @@ Independent glass components provided by `miuix-glass`. See the [Glass overview]
 | [GlassPopup](./glass/glasspopup) | Anchored glass menu | Action selection |
 | [GlassSecondaryPopup](./glass/glasssecondarypopup) | Submenu beside a primary menu | Cascading menus |
 | [GlassDropdownPopup](./glass/glassdropdownpopup) | Glass dropdown from a settings row | Option selection |
-| [GlassPopupItem](./glass/glasspopupitem) | Menu row with optional icon and selection | Custom popup content |
+| [GlassPopupItem](./glass/glasspopup#glasspopupitem) | Menu row with optional icon and selection | Custom popup content |
 | [GlassDropdownPreference](./glass/glassdropdownpreference) | Preference row with a managed glass dropdown | Settings selection |
 | [GlassDialog](./glass/glassdialog) | Glass dialog over a scrim | Prompts and confirmation |
 | [GlassDialogButton](./glass/glassdialog#glassdialogbutton) | Action over shared dialog material | Dialog actions |

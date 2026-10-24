@@ -17,8 +17,8 @@ popupHost: MiuixPopupHost
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassDropdownPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
-::: danger 前置条件
-此组件依赖 Miuix `Scaffold` 提供的 `MiuixPopupHost`。必须在 `Scaffold` 中使用，否则弹出内容无法正常渲染。
+::: danger 使用前提
+此组件依赖 `Scaffold` 提供的 `MiuixPopupHost` 以显示弹出内容。必须在 `Scaffold` 中使用，否则弹出内容无法正常渲染。
 :::
 
 ::: warning 背景采样

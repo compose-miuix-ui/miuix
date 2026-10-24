@@ -18,7 +18,7 @@ popupHost: MiuixPopupHost
 </div>
 
 ::: danger Prerequisite
-This component depends on Miuix `Scaffold` providing `MiuixPopupHost`. It must be used within `Scaffold`, otherwise popup content will not render correctly.
+This component depends on `Scaffold` providing `MiuixPopupHost` to render popup content. It must be used within `Scaffold`, otherwise popup content will not render correctly.
 :::
 
 ::: warning Background Sampling
@@ -155,13 +155,13 @@ Disabled buttons use the disabled colors and do not respond to clicks. Press fee
 
 #### Constants
 
-| Constant | Type | Description | Value |
+| Constant Name | Type | Description | Value |
 | --- | --- | --- | --- |
 | ScrimColor | Color | Scrim color before host animation | Color(0x33000000) |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-aware `GlassMaterials.dialogGlass` material |
 | stroke() | GlassStroke | Theme-aware `GlassStrokes.SmallLight` or `SmallDark` bloom stroke |
@@ -171,16 +171,16 @@ Disabled buttons use the disabled colors and do not respond to clicks. Press fee
 
 #### Constants
 
-| Constant | Type | Description | Value |
+| Constant Name | Type | Description | Value |
 | --- | --- | --- | --- |
 | CornerRadius | Dp | Default button corner radius | 16.dp |
 | MinWidth | Dp | Default minimum width | 0.dp |
 | MinHeight | Dp | Default minimum height | 50.dp |
 | InsideMargin | PaddingValues | Default content padding | PaddingValues(horizontal = 24.dp) |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | buttonColors(role: GlassDialogButtonRole = GlassDialogButtonRole.Normal) | ButtonColors | Theme-aware enabled and disabled colors for the given role |
 | pressedColor() | Color | Theme `onBackground` with light-mode alpha `31/255` or dark-mode alpha `36/255` |

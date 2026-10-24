@@ -125,9 +125,9 @@ The explicit-overlap overload adds one required parameter:
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
 | BandOverhang | Dp | Band extension below the bar | 28.dp |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | collapseRamp(scrollBehavior: ScrollBehavior?) | State\<Float> | Shadow progress from 0 to 1 over RampDistance after RampStart; null behavior returns 1f |
 | buttonFill() | Color | White in light mode; `#FF2C2C2C` in dark mode |

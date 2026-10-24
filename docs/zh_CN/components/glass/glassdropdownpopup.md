@@ -78,17 +78,21 @@ Box(Modifier.fillMaxSize()) {
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | 面板是否打开；为 false 时立即停止菜单行输入与无障碍操作 | — | 是 |
-| `onDismissRequest` | `() -> Unit` | 外部点击或返回请求时调用 | — | 是 |
-| `anchorBounds` | `Rect` | 设置行在当前弹窗 Box 坐标系中的范围 | — | 是 |
-| `backdrop` | `Backdrop?` | 面板背后的场景；`null` 使用保留描边与投影的不透明填充 | — | 是 |
-| `modifier` | `Modifier` | 作用于面板的修饰符 | `Modifier` | 否 |
-| `anchor` | `GlassPopupAnchor?` | 可选的值对齐与淡出协调锚点；不提供 `anchorBounds`、backdrop 或外观 | `null` | 否 |
-| `sizing` | `GlassPopupSizing` | 宽度、高度和安全边距限制 | `GlassPopupSizing()` | 否 |
-| `visuals` | `GlassPopupVisuals` | 面板外观 | `GlassPopupDefaults.visuals()` | 否 |
-| `cornerRadius` | `Dp` | 稳定下拉圆角 | `GlassDropdownDefaults.CornerRadius`（`24.dp`） | 否 |
-| `contentPadding` | `PaddingValues` | 菜单行周围的内边距 | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | 否 |
-| `content` | `@Composable ColumnScope.() -> Unit` | 选项行，通常为带 `selected` 的 `GlassPopupItem` | — | 是 |
+| show | Boolean | 面板是否打开；为 false 时立即停止菜单行输入与无障碍操作 | - | 是 |
+| onDismissRequest | () -> Unit | 外部点击或返回请求时调用 | - | 是 |
+| anchorBounds | Rect | 设置行在当前弹窗 Box 坐标系中的范围 | - | 是 |
+| backdrop | Backdrop? | 面板背后的场景；null 使用保留描边与投影的不透明填充 | - | 是 |
+| modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
+| anchor | GlassPopupAnchor? | 可选的值对齐与淡出协调锚点；不提供 anchorBounds、backdrop 或外观 | null | 否 |
+| sizing | GlassPopupSizing | 宽度、高度和安全边距限制 | GlassPopupSizing() | 否 |
+| visuals | GlassPopupVisuals | 面板外观 | GlassPopupDefaults.visuals() | 否 |
+| cornerRadius | Dp | 稳定下拉圆角 | GlassDropdownDefaults.CornerRadius（24.dp） | 否 |
+| contentPadding | PaddingValues | 菜单行周围的内边距 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
+| content | @Composable ColumnScope.() -> Unit | 选项行，通常为带 selected 的 GlassPopupItem | - | 是 |
+
+### 默认值
+
+尺寸、外观和共享菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
 
 ## 进阶用法
 
@@ -115,6 +119,3 @@ GlassDropdownPopup(
 
 `GlassDropdownDefaults.CornerRadius` 为 `24.dp`，`StartCornerRadius` 为 `4.dp`。菜单列表会在可用视口与安全边距内滚动。预测性返回沿弧线预览，取消后恢复，提交后关闭。行和值修饰符见 [`GlassTransformPopup` 锚点 API](./glasstransformpopup#anchor-api)。
 
-## 默认值
-
-尺寸、外观和共享菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。

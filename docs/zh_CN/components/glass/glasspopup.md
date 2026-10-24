@@ -51,9 +51,25 @@ Box(Modifier.fillMaxSize()) {
         anchorBounds = anchorBounds,
         backdrop = backdrop,
     ) {
-        GlassPopupItem(text = "分享", onClick = { show = false })
-        GlassPopupItem(text = "删除", onClick = { show = false })
+        GlassPopupItem(text = "分享", icon = MiuixIcons.Glass.Share, onClick = { show = false })
+        GlassPopupItem(text = "收藏", selected = true, onClick = { show = false })
+        GlassPopupItem(text = "更多选项", summary = "详细配置", showArrow = true, onClick = { show = false })
+        GlassPopupItem(text = "不可用操作", enabled = false, onClick = {})
     }
+}
+```
+
+### 菜单项（GlassPopupItem）
+
+`GlassPopupItem` 用于构建弹窗内的每个交互行，支持图标、副标题、选中勾选状态以及子菜单箭头：
+
+```kotlin
+GlassPopupItem(
+    text = "排序方式",
+    summary = "按名称",
+    showArrow = true,
+    onClick = { /* 打开二级菜单 */ },
+)
 }
 ```
 
@@ -63,26 +79,43 @@ Box(Modifier.fillMaxSize()) {
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| `show` | `Boolean` | 菜单是否打开；退场期间仍须保留调用 | — | 是 |
-| `onDismissRequest` | `() -> Unit` | 外部点击或返回请求时调用 | — | 是 |
-| `anchorBounds` | `Rect` | 控件在当前弹窗 Box 坐标系中的范围 | — | 是 |
-| `backdrop` | `Backdrop?` | 面板背后的场景；`null` 使用不透明回退填充 | — | 是 |
-| `modifier` | `Modifier` | 作用于面板的修饰符 | `Modifier` | 否 |
-| `sizing` | `GlassPopupSizing` | 宽度、高度和安全边距限制 | `GlassPopupSizing()` | 否 |
-| `visuals` | `GlassPopupVisuals` | 面板外观 | `GlassPopupDefaults.visuals()` | 否 |
-| `cornerRadius` | `Dp` | 面板稳定状态的圆角 | `GlassPopupDefaults.CornerRadius`（`24.dp`） | 否 |
-| `secondary` | `Boolean` | 使用二级菜单几何；需要继承一级菜单材质时应使用 `GlassSecondaryPopup` | `false` | 否 |
-| `contentPadding` | `PaddingValues` | 菜单行周围的内边距 | `PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical)` | 否 |
-| `content` | `@Composable ColumnScope.() -> Unit` | 菜单行 | — | 是 |
+| show | Boolean | 菜单是否打开；退场期间仍须保留调用 | - | 是 |
+| onDismissRequest | () -> Unit | 外部点击或返回请求时调用 | - | 是 |
+| anchorBounds | Rect | 控件在当前弹窗 Box 坐标系中的范围 | - | 是 |
+| backdrop | Backdrop? | 面板背后的场景；null 使用不透明回退填充 | - | 是 |
+| modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
+| sizing | GlassPopupSizing | 宽度、高度和安全边距限制 | GlassPopupSizing() | 否 |
+| visuals | GlassPopupVisuals | 面板外观 | GlassPopupDefaults.visuals() | 否 |
+| cornerRadius | Dp | 面板稳定状态的圆角 | GlassPopupDefaults.CornerRadius（24.dp） | 否 |
+| secondary | Boolean | 使用二级菜单几何；需要继承一级菜单材质时应使用 GlassSecondaryPopup | false | 否 |
+| contentPadding | PaddingValues | 菜单行周围的内边距 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
+| content | @Composable ColumnScope.() -> Unit | 菜单行 | - | 是 |
 
+### GlassPopupItem 属性 {#glasspopupitem}
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| text | String | 单行菜单标签 | - | 是 |
+| onClick | () -> Unit | 启用菜单行被点击时调用 | - | 是 |
+| modifier | Modifier | 作用于菜单行的修饰符 | Modifier | 否 |
+| icon | ImageVector? | 可选前置图标 | null | 否 |
+| summary | String? | 可选的单行第二标签 | null | 否 |
+| enabled | Boolean | 菜单行是否响应点击 | true | 否 |
+| selected | Boolean | 显示末尾勾；启用时标签和前置图标使用选中颜色 | false | 否 |
+| showArrow | Boolean | 显示末尾子菜单箭头 | false | 否 |
+| arrowRotation | () -> Float | 箭头旋转角度，在图层阶段读取 | { 0f } | 否 |
+| contentColor | Color | 标签和图标颜色 | MiuixTheme.colorScheme.onSurfaceContainer | 否 |
+| summaryColor | Color | 摘要和箭头颜色 | MiuixTheme.colorScheme.onSurfaceContainerVariant | 否 |
+| selectedContentColor | Color | 已启用选中行的标签和前置图标颜色；选中勾在禁用时也使用此色 | MiuixTheme.colorScheme.primary | 否 |
+| pressedColor | Color | 按压时菜单行后的填充色 | GlassPopupDefaults.itemPressedColor() | 否 |
 ### GlassPopupSizing 属性
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| `minWidth` | `Dp` | 面板最小宽度 | `GlassPopupDefaults.MinWidth` | 否 |
-| `maxWidth` | `Dp` | 面板最大宽度 | `GlassPopupDefaults.MaxWidth` | 否 |
-| `maxHeight` | `Dp` | 面板最大高度，超过后菜单行滚动 | `GlassPopupDefaults.MaxHeight` | 否 |
-| `safeMargin` | `Dp` | 与页面边缘的最小距离 | `GlassPopupDefaults.SafeMargin` | 否 |
+| minWidth | Dp | 面板最小宽度 | GlassPopupDefaults.MinWidth | 否 |
+| maxWidth | Dp | 面板最大宽度 | GlassPopupDefaults.MaxWidth | 否 |
+| maxHeight | Dp | 面板最大高度，超过后菜单行滚动 | GlassPopupDefaults.MaxHeight | 否 |
+| safeMargin | Dp | 与页面边缘的最小距离 | GlassPopupDefaults.SafeMargin | 否 |
 
 ### GlassPopupVisuals 属性
 
@@ -90,16 +123,14 @@ Box(Modifier.fillMaxSize()) {
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| `style` | `GlassStyle` | 材质未指定模糊半径时的模糊回退；不启用玻璃明暗着色或样式边缘效果 | — | 是 |
-| `alpha` | `Float` | 材质、辉光描边和投影的透明度乘数；`GlassTransformPopup` 还会将其应用于整个面板，包括菜单行和回退填充 | — | 是 |
-| `stroke` | `GlassStroke?` | 辉光描边；`null` 移除描边 | — | 是 |
-| `shadow` | `GlassShadow?` | 面板投影；`null` 移除投影 | — | 是 |
-| `material` | `GlassMaterial?` | 面板颜色处理和可选模糊半径；`null` 移除颜色处理，而非背景采样或模糊 | — | 是 |
-| `containerColor` | `Color` | `backdrop` 为 null 时使用的不透明填充 | — | 是 |
+| style | GlassStyle | 材质未指定模糊半径时的模糊回退；不启用玻璃明暗着色或样式边缘效果 | - | 是 |
+| alpha | Float | 材质、辉光描边和投影的透明度乘数；GlassTransformPopup 还会将其应用于整个面板，包括菜单行和回退填充 | - | 是 |
+| stroke | GlassStroke? | 辉光描边；null 移除描边 | - | 是 |
+| shadow | GlassShadow? | 面板投影；null 移除投影 | - | 是 |
+| material | GlassMaterial? | 面板颜色处理和可选模糊半径；null 移除颜色处理，而非背景采样或模糊 | - | 是 |
+| containerColor | Color | backdrop 为 null 时使用的不透明填充 | - | 是 |
 
 backdrop 非 null 时，有 `material.blurRadius` 就使用该半径，否则使用 `style.blur.small / GlassDefaults.SourceDensity`。`material = null` 仍保留基于样式的模糊、噪声、辉光描边和投影，不会改用 `containerColor`。仅在最终解析出的 backdrop 为 null 时使用回退填充，并保留描边和投影，但不进行背景采样。
-
-## 默认值
 
 ### GlassPopupDefaults 对象 {#shared-defaults}
 

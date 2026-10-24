@@ -117,9 +117,9 @@ Empty `items` render nothing, including the trailing action. Out-of-range `selec
 | IndicatorOverhang | Dp | Indicator extension on each side of a destination | 5.dp |
 | PressedAlpha | Float | Pressed destination content opacity | 0.6f |
 
-#### Functions
+#### Methods
 
-| Function Name | Return Type | Description |
+| Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
 | stroke() | GlassStroke | `GlassStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |

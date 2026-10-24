@@ -90,7 +90,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Over
 | [GlassPopup](./glass/glasspopup) | 锚定式玻璃菜单 | 操作选择 |
 | [GlassSecondaryPopup](./glass/glasssecondarypopup) | 一级菜单旁的二级菜单 | 级联菜单 |
 | [GlassDropdownPopup](./glass/glassdropdownpopup) | 从设置行展开的玻璃下拉弹窗 | 选项选择 |
-| [GlassPopupItem](./glass/glasspopupitem) | 可带图标与选中标记的菜单项 | 自定义弹窗内容 |
+| [GlassPopupItem](./glass/glasspopup#glasspopupitem) | 菜单行组件（可选图标、摘要、勾选及子菜单） | 弹窗菜单项 |
 | [GlassDropdownPreference](./glass/glassdropdownpreference) | 内置玻璃下拉弹窗的设置行 | 设置选项选择 |
 | [GlassDialog](./glass/glassdialog) | 遮罩之上的玻璃对话框 | 提示与确认 |
 | [GlassDialogButton](./glass/glassdialog#glassdialogbutton) | 共享对话框材质的操作按钮 | 对话框操作 |

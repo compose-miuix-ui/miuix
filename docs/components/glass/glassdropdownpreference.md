@@ -18,7 +18,7 @@ popupHost: MiuixPopupHost
 </div>
 
 ::: danger Prerequisite
-This component depends on Miuix `Scaffold` providing `MiuixPopupHost`. It must be used within `Scaffold`, otherwise popup content will not render correctly.
+This component depends on `Scaffold` providing `MiuixPopupHost` to render popup content. It must be used within `Scaffold`, otherwise popup content will not render correctly.
 :::
 
 ::: warning Background Sampling
