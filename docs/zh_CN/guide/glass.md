@@ -30,6 +30,8 @@ dependencies {
 
 `miuix-glass` 会传递引入 `miuix-blur` 与 `miuix-ui`。
 
+Glass 图标由可选的 `miuix-glass-icons` 模块提供，通过 `MiuixIcons.Glass` 访问，参见[图标系统](/zh_CN/guide/icons)。
+
 ## 基本用法
 
 应用玻璃材质分为三步：

@@ -30,6 +30,8 @@ dependencies {
 
 `miuix-glass` includes `miuix-blur` and `miuix-ui` transitively.
 
+The optional `miuix-glass-icons` module provides the Glass icon set, reached through `MiuixIcons.Glass`; see [Icon System](/guide/icons).
+
 ## Basic Usage
 
 Applying a glass material involves three steps:
