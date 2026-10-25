@@ -23,36 +23,22 @@ internal object LinuxResizeCursor {
             } else {
                 null
             }
-        } catch (_: ReflectiveOperationException) {
-            null
-        } catch (_: RuntimeException) {
-            null
-        } catch (_: LinkageError) {
+        } catch (_: Throwable) {
             null
         }
     }
 
-    fun get(
-        type: Int,
-    ): Cursor {
-        val name = when (type) {
-            Cursor.W_RESIZE_CURSOR -> "w-resize"
-            Cursor.E_RESIZE_CURSOR -> "e-resize"
-            Cursor.N_RESIZE_CURSOR -> "n-resize"
-            Cursor.S_RESIZE_CURSOR -> "s-resize"
-            Cursor.NW_RESIZE_CURSOR -> "nw-resize"
-            Cursor.NE_RESIZE_CURSOR -> "ne-resize"
-            Cursor.SW_RESIZE_CURSOR -> "sw-resize"
-            Cursor.SE_RESIZE_CURSOR -> "se-resize"
+    fun get(type: Int): Cursor {
+        val candidates = when (type) {
+            Cursor.W_RESIZE_CURSOR, Cursor.E_RESIZE_CURSOR -> listOf("ew-resize", "size_hor", "col-resize", "w-resize", "e-resize")
+            Cursor.N_RESIZE_CURSOR, Cursor.S_RESIZE_CURSOR -> listOf("ns-resize", "size_ver", "row-resize", "n-resize", "s-resize")
+            Cursor.NW_RESIZE_CURSOR, Cursor.SE_RESIZE_CURSOR -> listOf("nwse-resize", "size_fdiag", "nw-resize", "se-resize")
+            Cursor.NE_RESIZE_CURSOR, Cursor.SW_RESIZE_CURSOR -> listOf("nesw-resize", "size_bdiag", "ne-resize", "sw-resize")
             else -> return Cursor.getPredefinedCursor(type)
         }
         return try {
-            bridge?.get(name) ?: Cursor.getPredefinedCursor(type)
-        } catch (_: ReflectiveOperationException) {
-            Cursor.getPredefinedCursor(type)
-        } catch (_: RuntimeException) {
-            Cursor.getPredefinedCursor(type)
-        } catch (_: LinkageError) {
+            candidates.firstNotNullOfOrNull { bridge?.get(it) } ?: Cursor.getPredefinedCursor(type)
+        } catch (_: Throwable) {
             Cursor.getPredefinedCursor(type)
         }
     }
@@ -69,21 +55,51 @@ internal object LinuxResizeCursor {
     private class X11CursorBridge {
         private val toolkit = Toolkit.getDefaultToolkit()
         private val xToolkit = toolkit.javaClass
-        private val getDisplay = xToolkit.getMethod("getDisplay").accessible()
-        private val awtLock = xToolkit.getMethod("awtLock").accessible()
-        private val awtUnlock = xToolkit.getMethod("awtUnlock").accessible()
-        private val setPData = Cursor::class.java
-            .getDeclaredMethod("setPData", Long::class.javaPrimitiveType)
-            .accessible()
+        private val getDisplayMethod = runCatching { xToolkit.getMethod("getDisplay").accessible() }.getOrNull()
+        private val awtLockMethod = runCatching {
+            Class.forName("sun.awt.SunToolkit").getMethod("awtLock").accessible()
+        }.getOrNull()
+        private val awtUnlockMethod = runCatching {
+            Class.forName("sun.awt.SunToolkit").getMethod("awtUnlock").accessible()
+        }.getOrNull()
+        private val setPDataMethod = runCatching {
+            Cursor::class.java.getDeclaredMethod("setPData", Long::class.javaPrimitiveType).accessible()
+        }.getOrNull()
+
+        private val unsafe: Any? by lazy {
+            try {
+                val f = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe")
+                f.isAccessible = true
+                f.get(null)
+            } catch (_: Throwable) {
+                null
+            }
+        }
+
+        private val cursorPDataOffset: Long by lazy {
+            try {
+                val u = unsafe ?: return@lazy -1L
+                val field = Cursor::class.java.getDeclaredField("pData")
+                val method = u.javaClass.getMethod("objectFieldOffset", java.lang.reflect.Field::class.java)
+                (method.invoke(u, field) as Number).toLong()
+            } catch (_: Throwable) {
+                -1L
+            }
+        }
+
         private val x11 = LinuxX11.INSTANCE
         private val xcursor = LinuxXcursor.INSTANCE
         private var theme: Theme? = null
         private val cursors = mutableMapOf<String, Cursor?>()
 
+        init {
+            check(getDisplayMethod != null || unsafe != null) {
+                "Cannot access AWT X11 display"
+            }
+        }
+
         @Synchronized
-        fun get(
-            name: String,
-        ): Cursor? {
+        fun get(name: String): Cursor? {
             val currentTheme = readTheme() ?: return null
             if (currentTheme != theme) {
                 // AWT may still use old cursors; its disposer releases them when no longer referenced
@@ -115,31 +131,76 @@ internal object LinuxResizeCursor {
             }
         }
 
+        private fun getAwtDisplayPointer(): Pointer? {
+            if (getDisplayMethod != null) {
+                val handle = getDisplayMethod.invoke(null) as? Long ?: 0L
+                if (handle != 0L) return Pointer(handle)
+            }
+            val u = unsafe ?: return null
+            return try {
+                val displayField = xToolkit.getDeclaredField("display")
+                val staticFieldBase = u.javaClass.getMethod("staticFieldBase", java.lang.reflect.Field::class.java)
+                val staticFieldOffset = u.javaClass.getMethod("staticFieldOffset", java.lang.reflect.Field::class.java)
+                val getLong = u.javaClass.getMethod("getLong", Any::class.java, Long::class.javaPrimitiveType)
+                val base = staticFieldBase.invoke(u, displayField)
+                val offset = (staticFieldOffset.invoke(u, displayField) as Number).toLong()
+                val dpy = (getLong.invoke(u, base, offset) as Number).toLong()
+                if (dpy != 0L) Pointer(dpy) else null
+            } catch (_: Throwable) {
+                null
+            }
+        }
+
+        private fun setCursorPData(cursor: Cursor, handle: Long): Boolean {
+            if (setPDataMethod != null) {
+                try {
+                    setPDataMethod.invoke(cursor, handle)
+                    return true
+                } catch (_: Throwable) {}
+            }
+            val u = unsafe
+            if (cursorPDataOffset >= 0L && u != null) {
+                try {
+                    val putLong = u.javaClass.getMethod(
+                        "putLong",
+                        Any::class.java,
+                        Long::class.javaPrimitiveType,
+                        Long::class.javaPrimitiveType,
+                    )
+                    putLong.invoke(u, cursor, cursorPDataOffset, handle)
+                    return true
+                } catch (_: Throwable) {}
+            }
+            return false
+        }
+
         private fun load(
             name: String,
             theme: Theme,
         ): Cursor? {
-            val images =
-                xcursor.XcursorLibraryLoadImages(name, theme.name, theme.size) ?: return null
+            val images = xcursor.XcursorLibraryLoadImages(name, theme.name, theme.size) ?: return null
             try {
-                awtLock.invoke(null)
+                awtLockMethod?.invoke(null)
                 try {
                     val display = X11.Display().apply {
-                        pointer = Pointer(getDisplay.invoke(null) as Long)
+                        pointer = getAwtDisplayPointer() ?: return null
                     }
                     val handle = xcursor.XcursorImagesLoadCursor(display, images)
                     if (handle.toLong() == 0L) return null
                     try {
-                        return NamedCursor(name).also { setPData.invoke(it, handle.toLong()) }
-                    } catch (error: ReflectiveOperationException) {
+                        val cursor = NamedCursor(name)
+                        if (setCursorPData(cursor, handle.toLong())) {
+                            return cursor
+                        } else {
+                            x11.XFreeCursor(display, handle)
+                            return null
+                        }
+                    } catch (t: Throwable) {
                         x11.XFreeCursor(display, handle)
-                        throw error
-                    } catch (error: RuntimeException) {
-                        x11.XFreeCursor(display, handle)
-                        throw error
+                        throw t
                     }
                 } finally {
-                    awtUnlock.invoke(null)
+                    awtUnlockMethod?.invoke(null)
                 }
             } finally {
                 xcursor.XcursorImagesDestroy(images)
