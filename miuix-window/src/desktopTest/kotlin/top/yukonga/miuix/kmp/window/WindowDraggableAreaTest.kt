@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
@@ -151,9 +152,14 @@ class WindowDraggableAreaTest {
             onNodeWithTag("caption").assertIsDisplayed()
             runOnIdle { registered = false }
             waitForIdle()
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithTag("caption").fetchSemanticsNodes().isEmpty()
+            }
             onNodeWithTag("caption").assertDoesNotExist()
             runOnIdle { registered = true }
-            waitForIdle()
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithTag("caption").fetchSemanticsNodes().size == 1
+            }
             onNodeWithTag("caption").assertIsDisplayed()
         }
         assertNull(windowFailure.get())

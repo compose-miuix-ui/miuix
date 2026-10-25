@@ -55,10 +55,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
-            // Optional: Add miuix-window for desktop window and caption bar styling (Desktop JVM)
-            desktopMain.dependencies {
-                implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
-            }
+        }
+        // Optional: Add miuix-window for desktop window and caption bar styling (Desktop JVM)
+        desktopMain.dependencies {
+            implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
         }
     }
 }

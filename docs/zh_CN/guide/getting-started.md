@@ -55,10 +55,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
             // 可选：添加 miuix-nav 以获取导航支持
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
-            // 可选：添加 miuix-window 以获取桌面端窗口与标题栏支持（仅 Desktop JVM）
-            desktopMain.dependencies {
-                implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
-            }
+        }
+        // 可选：添加 miuix-window 以获取桌面端窗口与标题栏支持（仅 Desktop JVM）
+        desktopMain.dependencies {
+            implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
         }
     }
 }
