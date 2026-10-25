@@ -4,50 +4,77 @@
 package top.yukonga.miuix.kmp.window.platform.linux
 
 import java.awt.Cursor
+import java.awt.Frame
 import java.awt.Point
 import java.awt.Window
-import java.awt.event.MouseEvent
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 
 /**
- * Fallback window mover using AWT mouse events.
- *
- * From `androidx.compose.foundation.window.StandardMoveHandler`
+ * Owns AWT window movement, including asynchronous restore from maximized state.
+ * All positions and the pointer anchor use logical AWT screen coordinates.
  */
-
 internal class LinuxFallbackWindowMover(
     private val window: Window,
 ) {
-    private var dragStartScreenPos: Point? = null
-    private var dragStartWindowPos: Point? = null
-    private var isDragging = false
+    private var restoreWidth = window.width
+    private var drag: Drag? = null
 
-    fun startDrag(e: MouseEvent) {
-        dragStartScreenPos = Point(e.xOnScreen, e.yOnScreen)
-        dragStartWindowPos = window.location
-        isDragging = true
+    fun install(): () -> Unit {
+        val listener = object : ComponentAdapter() {
+            override fun componentResized(event: ComponentEvent) = onWindowResized()
+        }
+        window.addComponentListener(listener)
+        return {
+            window.removeComponentListener(listener)
+            endDrag()
+        }
     }
 
-    fun updateDrag(e: MouseEvent) {
-        if (!isDragging) return
+    fun startDrag(
+        start: Point,
+        current: Point,
+    ) {
+        val frame = window as? Frame
+        val restoring = frame?.extendedState == Frame.MAXIMIZED_BOTH
+        val offsetX = start.x - window.x
+        val anchor = Point(
+            if (restoring) (restoreWidth * offsetX.toFloat() / window.width).toInt() else offsetX,
+            start.y - window.y,
+        )
+        drag = Drag(anchor, Point(current), restoring)
+        if (restoring) {
+            frame.extendedState = Frame.NORMAL
+        } else {
+            updateDrag(current)
+        }
+    }
 
-        val startScreen = dragStartScreenPos ?: return
-        val startWindow = dragStartWindowPos ?: return
-
-        val newX = startWindow.x + (e.xOnScreen - startScreen.x)
-        val newY = startWindow.y + (e.yOnScreen - startScreen.y)
-
-        window.location = Point(newX, newY)
+    fun updateDrag(position: Point) {
+        val active = drag ?: return
+        active.position = Point(position)
+        if (active.restoring) return
+        window.setLocation(position.x - active.anchor.x, position.y - active.anchor.y)
     }
 
     fun endDrag() {
-        if (isDragging) {
-            window.cursor = Cursor.getDefaultCursor()
-        }
-        isDragging = false
-        dragStartScreenPos = null
-        dragStartWindowPos = null
+        if (drag != null) window.cursor = Cursor.getDefaultCursor()
+        drag = null
     }
 
-    val dragging: Boolean
-        get() = isDragging
+    private fun onWindowResized() {
+        if ((window as? Frame)?.extendedState == Frame.MAXIMIZED_BOTH) return
+        restoreWidth = window.width
+        val active = drag ?: return
+        if (!active.restoring) return
+        active.restoring = false
+        // Apply the latest pointer only after restore preserves the WM's saved geometry.
+        updateDrag(active.position)
+    }
+
+    private class Drag(
+        val anchor: Point,
+        var position: Point,
+        var restoring: Boolean,
+    )
 }

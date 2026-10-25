@@ -10,8 +10,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import java.awt.Frame
 import java.awt.Point
 import java.awt.Window
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 
 /**
@@ -35,31 +33,20 @@ internal fun LinuxCaptionBarDragHandler(
 
     DisposableEffect(window, hitTest) {
         val fallbackMover = LinuxFallbackWindowMover(window)
+        val uninstallFallback = fallbackMover.install()
         var useNativeDrag = true
-        var restoreWidth = window.width
         val handler = object : LinuxWindowMouseInput.Handler {
             private var pressed = false
             private var suppressClick = false
             private var pendingDragEvent: MouseEvent? = null
-            private var latestDragEvent: MouseEvent? = null
-            private var restoreDragOffset: Point? = null
 
-            fun onWindowResized() {
-                if ((window as? Frame)?.extendedState == Frame.MAXIMIZED_BOTH) return
-                restoreWidth = window.width
-                val offset = restoreDragOffset ?: return
-                val event = latestDragEvent ?: return
-                restoreDragOffset = null
-                // Wait for the native restore to complete before positioning the restored window.
-                // Moving it while maximized overwrites the window manager's saved geometry.
-                window.setLocation(event.xOnScreen - offset.x, event.yOnScreen - offset.y)
-                startMover(event)
-            }
-
-            private fun startMover(event: MouseEvent) {
-                if (useNativeDrag && LinuxX11WindowMover.tryMove(window, event)) return
+            private fun startMover(startEvent: MouseEvent, currentEvent: MouseEvent) {
+                if (useNativeDrag && LinuxX11WindowMover.tryMove(window, startEvent)) return
                 useNativeDrag = false
-                fallbackMover.startDrag(event)
+                fallbackMover.startDrag(
+                    start = Point(startEvent.xOnScreen, startEvent.yOnScreen),
+                    current = Point(currentEvent.xOnScreen, currentEvent.yOnScreen),
+                )
             }
 
             override fun onMouseEvent(event: MouseEvent): Boolean {
@@ -83,24 +70,11 @@ internal fun LinuxCaptionBarDragHandler(
 
                     MouseEvent.MOUSE_DRAGGED -> {
                         if (!pressed) return false
-                        latestDragEvent = event
-                        if (restoreDragOffset != null) return true
                         pendingDragEvent?.let { startEvent ->
                             pendingDragEvent = null
-                            val frame = window as? Frame
-                            if (frame?.extendedState == Frame.MAXIMIZED_BOTH) {
-                                val localX = startEvent.xOnScreen - window.x
-                                val localY = startEvent.yOnScreen - window.y
-                                restoreDragOffset = Point(
-                                    (restoreWidth * localX.toFloat() / window.width).toInt(),
-                                    localY,
-                                )
-                                frame.extendedState = Frame.NORMAL
-                                return true
-                            }
-                            startMover(startEvent)
+                            startMover(startEvent, event)
                         }
-                        fallbackMover.updateDrag(event)
+                        fallbackMover.updateDrag(Point(event.xOnScreen, event.yOnScreen))
                         return true
                     }
 
@@ -109,8 +83,6 @@ internal fun LinuxCaptionBarDragHandler(
                         if (event.button == MouseEvent.BUTTON1) {
                             pressed = false
                             pendingDragEvent = null
-                            latestDragEvent = null
-                            restoreDragOffset = null
                             fallbackMover.endDrag()
                             suppressClick = true
                         }
@@ -140,21 +112,13 @@ internal fun LinuxCaptionBarDragHandler(
                 pressed = false
                 suppressClick = false
                 pendingDragEvent = null
-                latestDragEvent = null
-                restoreDragOffset = null
                 fallbackMover.endDrag()
             }
         }
-        val componentListener = object : ComponentAdapter() {
-            override fun componentResized(e: ComponentEvent) {
-                handler.onWindowResized()
-            }
-        }
-        window.addComponentListener(componentListener)
         val unregister = LinuxWindowMouseInput.register(window, handler)
         onDispose {
             unregister()
-            window.removeComponentListener(componentListener)
+            uninstallFallback()
         }
     }
 }
