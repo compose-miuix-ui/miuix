@@ -147,15 +147,16 @@ abstract class BakeSquircleSdfTask : DefaultTask() {
     }
 }
 
-val bakeSquircleSdf by tasks.registering(BakeSquircleSdfTask::class) {
-    description = "bakeSquircleSdf"
-    control.set(0.643f)
-    size.set(512)
-    halfRange.set(0.125f)
-    bezierSamples.set(64)
-    packageName.set("top.yukonga.miuix.kmp.squircle.internal")
-    outputDir.set(layout.buildDirectory.dir("generated/baked-sdf"))
-}
+val bakeSquircleSdf =
+    tasks.register<BakeSquircleSdfTask>("bakeSquircleSdf") {
+        description = "bakeSquircleSdf"
+        control.set(0.643f)
+        size.set(512)
+        halfRange.set(0.125f)
+        bezierSamples.set(64)
+        packageName.set("top.yukonga.miuix.kmp.squircle.internal")
+        outputDir.set(layout.buildDirectory.dir("generated/baked-sdf"))
+    }
 
 kotlin {
     withSourcesJar(true)

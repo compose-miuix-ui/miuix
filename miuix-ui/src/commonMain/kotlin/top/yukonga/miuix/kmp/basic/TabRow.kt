@@ -8,6 +8,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,8 +38,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
@@ -48,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastRoundToInt
@@ -55,6 +63,7 @@ import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollHorizontal
 
 /**
  * A [TabRow] with Miuix style.
@@ -135,7 +144,30 @@ fun TabRow(
             }
         }
 
-        Box(Modifier.fillMaxSize()) {
+        val hasScrollRange by remember(config.listState) {
+            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+        }
+        val reverseScrolling by remember(config.listState) {
+            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+        }
+        val reverseDirection = ScrollableDefaults.reverseDirection(
+            layoutDirection = LocalLayoutDirection.current,
+            orientation = Orientation.Horizontal,
+            reverseScrolling = reverseScrolling,
+        )
+        val nestedScrollConnection = remember(config.listState, reverseDirection) {
+            TabRowNestedScrollConnection(config.listState, reverseDirection)
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollConnection)
+                .overScrollHorizontal(
+                    nestedScrollToParent = false,
+                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+                ),
+        ) {
             Box(
                 Modifier
                     .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).fastRoundToInt(), 0) }
@@ -153,6 +185,7 @@ fun TabRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
+                userScrollEnabled = hasScrollRange,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItem(
@@ -264,11 +297,31 @@ fun TabRowWithContour(
             }
         }
 
+        val hasScrollRange by remember(config.listState) {
+            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+        }
+        val reverseScrolling by remember(config.listState) {
+            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+        }
+        val reverseDirection = ScrollableDefaults.reverseDirection(
+            layoutDirection = LocalLayoutDirection.current,
+            orientation = Orientation.Horizontal,
+            reverseScrolling = reverseScrolling,
+        )
+        val nestedScrollConnection = remember(config.listState, reverseDirection) {
+            TabRowNestedScrollConnection(config.listState, reverseDirection)
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
-                .padding(contourPadding),
+                .padding(contourPadding)
+                .nestedScroll(nestedScrollConnection)
+                .overScrollHorizontal(
+                    nestedScrollToParent = false,
+                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+                ),
         ) {
             Box(
                 Modifier
@@ -287,6 +340,7 @@ fun TabRowWithContour(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(itemSpacing),
                 overscrollEffect = null,
+                userScrollEnabled = hasScrollRange,
             ) {
                 itemsIndexed(tabs) { index, tabText ->
                     TabItemWithContour(
@@ -305,6 +359,31 @@ fun TabRowWithContour(
             }
         }
     }
+}
+
+private class TabRowNestedScrollConnection(
+    private val listState: LazyListState,
+    private val reverseDirection: Boolean,
+) : NestedScrollConnection {
+    private fun canConsume(delta: Float): Boolean {
+        val logicalDelta = if (reverseDirection) -delta else delta
+        return when {
+            logicalDelta > 0f -> listState.canScrollForward
+            logicalDelta < 0f -> listState.canScrollBackward
+            else -> false
+        }
+    }
+
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset = if (canConsume(available.x)) Offset(available.x, 0f) else Offset.Zero
+
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity = if (canConsume(available.x)) Velocity(available.x, 0f) else Velocity.Zero
 }
 
 @Composable

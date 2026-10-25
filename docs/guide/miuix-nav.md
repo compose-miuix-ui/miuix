@@ -1,4 +1,4 @@
-# miuix-nav
+# Navigation Support
 
 `miuix-nav` is a self-contained Compose Multiplatform navigation runtime with **continuous stack depth** as its core model. The whole back stack is driven by a single `Animatable<Float>` (`animatedTop`); every entry's visuals are a pure function of its relative depth. This makes continuous push/pop, fully custom float-driven transitions, and 1:1 gesture back fall out naturally. It has **zero dependency** on `androidx.navigation3`.
 
@@ -134,7 +134,11 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `layoutSize`, `layoutDirection` and `density`.
+`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `settle`, `layoutSize`, `layoutDirection` and `density`.
+
+Read `LocalNavTransitionScope.current` from entry content when it needs Miuix's live navigation
+state. Use `isRunning` for the coarse transition lifecycle, and read `relativeDepth`, `gesture` or
+`settle` in a deferred `graphicsLayer` block when implementing entry-local effects.
 
 Generic looks (fade, scale, shared-axis, …) are deliberately not shipped as presets — each is a few lines on this builder. A cross-fade, for instance:
 
@@ -305,7 +309,7 @@ Uniqueness also makes **double taps** an app-level concern: a navigation button 
 
 ## Entry lifecycle and ViewModels
 
-Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`, so `collectAsStateWithLifecycle`, `viewModel()` and store-based DI scope per screen with no extra setup.
+Every entry runs under its own `LifecycleOwner` and `ViewModelStoreOwner`. Conforming to AndroidX Navigation 3, `collectAsStateWithLifecycle`, `viewModel()`, and Hilt (`hiltViewModel()` with `SavedStateHandle`) scope per screen out of the box with no extra setup.
 
 Lifecycle is a pure function of depth: the settled top is `RESUMED`; covered, incoming and leaving layers are `STARTED`; an entry being removed drops to `CREATED` until it unloads. While a **gesture** drives the stack, everyone is capped at `STARTED` — `RESUMED` means "settled, sole top", so work keyed on it does not flap while a finger hovers around the transition thresholds.
 

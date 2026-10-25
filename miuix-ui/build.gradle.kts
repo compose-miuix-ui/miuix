@@ -32,6 +32,7 @@ kotlin {
         }
         minSdk = BuildConfig.MIN_SDK
         namespace = "${BuildConfig.LIBRARY_ID}.ui"
+        withHostTest {}
     }
 
     jvm("desktop")
@@ -52,6 +53,10 @@ kotlin {
     applyMiuixSourceSetHierarchy()
 
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         commonMain.dependencies {
             api(projects.miuixCore)
             api(projects.miuixSquircle)
@@ -71,62 +76,84 @@ baselineProfile {
     }
 }
 
-val convertBaselineProfile by tasks.registering(ConvertBaselineProfileTask::class) {
-    description = "convertBaselineProfile"
-    inputFile.set(
-        layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt"),
-    )
-    outputFile.set(
-        layout.projectDirectory.file("src/androidMain/baselineProfiles/baseline-prof.txt"),
-    )
-    targetPackage.set("top/yukonga/miuix/kmp/")
-    excludePackages.set(
-        listOf(
-            "top/yukonga/miuix/kmp/icon/extended/",
-            "top/yukonga/miuix/kmp/shared/",
-        ),
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/preference/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/blur/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-blur/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/nav/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-nav/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/shader/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-shader/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-    additionalOutputs.put(
-        "top/yukonga/miuix/kmp/squircle/",
-        rootProject.layout.projectDirectory
-            .file(
-                "miuix-squircle/src/androidMain/baselineProfiles/baseline-prof.txt",
-            ).asFile.absolutePath,
-    )
-}
+val convertBaselineProfile =
+    tasks.register<ConvertBaselineProfileTask>("convertBaselineProfile") {
+        description = "convertBaselineProfile"
+        inputFile.convention(
+            provider {
+                val generatedUiProfile = layout.projectDirectory.file("src/androidMain/generated/baselineProfiles/baseline-prof.txt")
+                val generatedExampleProfile =
+                    rootProject.layout.projectDirectory.file(
+                        "example/android/src/release/generated/baselineProfiles/baseline-prof.txt",
+                    )
+                if (generatedUiProfile.asFile.exists()) generatedUiProfile else generatedExampleProfile
+            },
+        )
+        outputFile.set(
+            layout.projectDirectory.file("src/androidMain/baselineProfiles/baseline-prof.txt"),
+        )
+        targetPackage.set("top/yukonga/miuix/kmp/")
+        excludePackages.set(
+            listOf(
+                "top/yukonga/miuix/kmp/icon/extended/",
+                "top/yukonga/miuix/kmp/shared/",
+            ),
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/preference/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/menu/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/popup/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-preference/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/blur/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-blur/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/nav/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-nav/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/shader/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-shader/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+        additionalOutputs.put(
+            "top/yukonga/miuix/kmp/squircle/",
+            rootProject.layout.projectDirectory
+                .file(
+                    "miuix-squircle/src/androidMain/baselineProfiles/baseline-prof.txt",
+                ).asFile.absolutePath,
+        )
+    }
 
 tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
     finalizedBy(convertBaselineProfile)
 }
 
 dependencies {
-    baselineProfile(project(":baselineprofile"))
+    baselineProfile(projects.baselineprofile)
 }

@@ -6,7 +6,7 @@
 此组件仅适用于支持触控的环境!
 :::
 
-如需示例，请查看 <a href="https://compose-miuix-ui.github.io/miuix-jsCanvas/" target="_blank">Miuix Example</a> 的 DropDowns 页。
+如需示例，请查看 <a href="https://compose-miuix-ui.github.io/miuix-wasmJs/" target="_blank">Miuix Example</a> 的 DropDowns 页。
 
 ## 引入
 

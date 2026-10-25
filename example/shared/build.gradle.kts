@@ -84,13 +84,14 @@ compose.resources {
     publicResClass = true
 }
 
-val generateVersionInfo by tasks.registering(GenerateVersionInfoTask::class) {
-    description = "GenerateVersionInfoTask"
-    versionName.set(BuildConfig.APPLICATION_VERSION_NAME)
-    versionCode.set(getGitVersionCode())
-    outputFile.set(generatedSrcDir.map { it.file("kotlin/misc/VersionInfo.kt") })
-    xcconfigFile.set(layout.projectDirectory.file("../ios/iosApp/Generated.xcconfig"))
-}
+val generateVersionInfo =
+    tasks.register<GenerateVersionInfoTask>("generateVersionInfo") {
+        description = "GenerateVersionInfoTask"
+        versionName.set(BuildConfig.APPLICATION_VERSION_NAME)
+        versionCode.set(getGitVersionCode())
+        outputFile.set(generatedSrcDir.map { it.file("kotlin/misc/VersionInfo.kt") })
+        xcconfigFile.set(layout.projectDirectory.file("../ios/iosApp/Generated.xcconfig"))
+    }
 
 aboutLibraries {
     export {

@@ -45,6 +45,7 @@ export default defineConfig({
                         { text: "图标系统", link: "/zh_CN/guide/icons" },
                         { text: "工具函数", link: "/zh_CN/guide/utils" },
                         { text: "导航支持", link: "/zh_CN/guide/miuix-nav" },
+                        { text: "窗口与标题栏", link: "/zh_CN/guide/miuix-window" },
                         { text: "模糊效果", link: "/zh_CN/guide/blur" },
                         { text: "玻璃材质", link: "/zh_CN/guide/glass" },
                         { text: "平滑圆角", link: "/zh_CN/guide/squircle" },

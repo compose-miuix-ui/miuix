@@ -59,6 +59,22 @@ Miuix provides easy-to-use overscroll effect modifiers for smoother and more nat
 
 The overscroll effect engages only during press or pan gestures (touch drag; trackpad pan on Android). Mouse wheel and keyboard scrolling pass through unchanged, as does desktop/macOS trackpad scrolling (delivered as wheel events) — none of them provide a release signal to settle the bounce. With a snap- or pager-style fling behavior, leftover wheel velocity can still produce a small edge bounce.
 
+### Touch Scrolling on Web
+
+When Compose should own touch scrolling and overscroll, set `touch-action: none` on the HTML container passed to `ComposeViewport`:
+
+```css
+#composeApp {
+    touch-action: none;
+}
+```
+
+Use your actual viewport container ID. Apply this rule before the first gesture; changing `touch-action` after a touch begins does not affect that gesture. The container's restriction also applies to the canvas that Compose creates inside it.
+
+At a list boundary, a drag can be consumed entirely by overscroll without moving the list. Allowing browser-native panning in the same area can cause the browser to take over and cancel the Compose gesture. This CSS rule keeps touch panning under Compose's control without disabling the overscroll effect or affecting mouse-wheel input.
+
+Scope the rule to the Compose container, not the entire page. Browser-native touch panning and pinch-to-zoom are disabled inside that container, so use it only where Compose owns the interaction. HTML areas outside the container can retain their normal browser gestures. Android and iOS native apps do not need this configuration.
+
 ### Vertical Overscroll
 
 ```kotlin
@@ -101,8 +117,8 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-* `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
-* `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
+- `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+- `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
 
 ### Via OverscrollFactory (Theme-Level Integration)
 
@@ -146,13 +162,13 @@ LazyColumn(
 
 **Comparison with `overScrollVertical()`:**
 
-| Feature | `overScrollVertical()` | `MiuixOverscrollFactory` |
-| :--- | :---: | :---: |
-| How it's applied | `Modifier` per component | Theme-level, automatic |
-| Spring physics | Identical | Identical |
-| Platforms enabled by default | All platforms | All platforms (via theme) |
-| Triggers when content does not overflow container | ✅ | ❌ |
-| Requires a modifier on each component | ✅ | ❌ |
+| Feature                                           |  `overScrollVertical()`  | `MiuixOverscrollFactory`  |
+| :------------------------------------------------ | :----------------------: | :-----------------------: |
+| How it's applied                                  | `Modifier` per component |  Theme-level, automatic   |
+| Spring physics                                    |        Identical         |         Identical         |
+| Platforms enabled by default                      |      All platforms       | All platforms (via theme) |
+| Triggers when content does not overflow container |            ✅            |            ❌             |
+| Requires a modifier on each component             |            ✅            |            ❌             |
 
 > **Limitation:** `MiuixOverscrollFactory` works by receiving the delta that the scrollable component could not consume after reaching its scroll boundary. If the content does not overflow the container (e.g., a `LazyColumn` whose items all fit on screen), the scrollable component never reaches a boundary, so `applyToScroll` is never called with a non-zero remainder and the overscroll effect will **not** trigger. For such cases, use `overScrollVertical()` instead.
 
@@ -175,7 +191,7 @@ LazyColumn(
 
 **Parameter Explanation:**
 
-* `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
+- `hapticFeedbackType`: Specifies the type of haptic feedback to be performed when the scroll reaches its end. Defaults to `HapticFeedbackType.TextHandleMove`. You can use other types available in `androidx.compose.ui.hapticfeedback.HapticFeedbackType`.
 
 ## Press Feedback Effects (Modifier.pressable())
 
@@ -237,3 +253,59 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 | None | No visual feedback                                                                    |
 | Sink | Applies a sink effect, where the component scales down slightly when pressed          |
 | Tilt | Applies a tilt effect, where the component tilts slightly based on the touch position |
+
+## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
+
+Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
+
+```kotlin
+val flingBehavior = PagerDefaults.flingBehavior(
+    state = pagerState,
+    snapAnimationSpec = PagerNavigationSpringSpec,
+)
+
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier.pagerGestureOverride(
+        pagerState = pagerState,
+        flingBehavior = flingBehavior,
+    ),
+    userScrollEnabled = false,
+    flingBehavior = flingBehavior,
+    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+) { page ->
+    // Page content, such as a LazyColumn
+}
+```
+
+::: warning Cross-Axis configuration
+Set `userScrollEnabled = false` and pass the same `flingBehavior` to the modifier and pager. Cross-Axis handles touch separately while preserving the pager's wheel, Shift+wheel, trackpad, and snap behavior. Use `PagerGestureNestedScrollConnection` so vertical child scrolling remains available while a page is settling.
+:::
+
+### Pager Interception Modes (`PagerInterceptionMode`)
+
+Choose an interaction with the modifier's `mode` parameter:
+
+| Mode                  | Behavior                                                                                  |
+| :-------------------- | :---------------------------------------------------------------------------------------- |
+| `CrossAxis` (default) | Switch pages while a list is scrolling or bouncing back.                                  |
+| `Native`              | Use Compose's native pager gestures.                                                      |
+| `TapToHalt`           | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
+
+To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
+
+### Spring Page Navigation (`springAnimateToPage()`)
+
+Use `springAnimateToPage` to animate to a page when a tab or navigation item is clicked:
+
+```kotlin
+coroutineScope.launch {
+    pagerState.springAnimateToPage(targetPage)
+}
+```
+
+## Display Cutout Fix (`ProvideDisplayCutoutFix`)
+
+`ProvideDisplayCutoutFix` resolves display cutout dispatching bugs on certain OEM Android devices (e.g. tablets in landscape orientation and foldable devices) by supplementing missing cutout data from `WindowManager.currentWindowMetrics`.
+
+It is integrated automatically in `MiuixTheme`. For details, see the [Theme System](theme.md#display-cutout-adaptation-providedisplaycutoutfix) guide.

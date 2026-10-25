@@ -14,8 +14,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.hct.Hct
-import com.materialkolor.scheme.DynamicScheme
+import com.materialkolor.scheme.SchemeCmf
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
 import com.materialkolor.scheme.SchemeFidelity
@@ -43,6 +44,7 @@ enum class ThemePaletteStyle {
     Monochrome,
     Fidelity,
     Content,
+    Cmf,
 }
 
 @Stable
@@ -73,11 +75,12 @@ internal fun colorsFromSeed(
         else -> false
     }
 
-    // Gracefully downgrade to SPEC_2021 if the style doesn't support SPEC_2025
-    val internalSpec = if (colorSpec == ThemeColorSpec.Spec2025 && isSpec2025Supported) {
-        ColorSpec.SpecVersion.SPEC_2025
-    } else {
-        ColorSpec.SpecVersion.SPEC_2021
+    // SchemeCmf only supports SPEC_2026.
+    // For other styles, gracefully downgrade to SPEC_2021 if SPEC_2025 is unsupported.
+    val internalSpec = when {
+        paletteStyle == ThemePaletteStyle.Cmf -> ColorSpec.SpecVersion.SPEC_2026
+        colorSpec == ThemeColorSpec.Spec2025 && isSpec2025Supported -> ColorSpec.SpecVersion.SPEC_2025
+        else -> ColorSpec.SpecVersion.SPEC_2021
     }
 
     val hctColor = Hct.fromInt(seed.toArgb())
@@ -153,6 +156,14 @@ internal fun colorsFromSeed(
             specVersion = internalSpec,
             platform = DynamicScheme.Platform.PHONE,
         )
+
+        ThemePaletteStyle.Cmf -> SchemeCmf(
+            sourceColorHct = hctColor,
+            isDark = dark,
+            contrastLevel = 0.0,
+            specVersion = internalSpec,
+            platform = DynamicScheme.Platform.PHONE,
+        )
     }
     val roles = MonetRoles(
         primary = Color(scheme.primary),
@@ -201,15 +212,15 @@ internal fun monetSystemColors(dark: Boolean): Colors = colorsFromSeed(seed = Co
  * @param darkColors The color scheme to use when the dark appearance is active. This is used when
  *   the [colorSchemeMode] is [ColorSchemeMode.Dark] or when it is [ColorSchemeMode.System] and a
  *   dark theme is selected.
- * @param keyColor The key color for generating dynamic color schemes. This is used when the
- *   [colorSchemeMode] is set to a Monet mode.
  * @param colorSpec The requested Material color specification to use when generating dynamic color
  *   schemes in Monet modes. When [ThemeColorSpec.Spec2025] is requested, it is only honored for
  *   palette styles whose underlying implementation supports the 2025 spec; otherwise, the effective
- *   spec is downgraded to [ThemeColorSpec.Spec2021] at runtime by [colorsFromSeed].
+ *   spec is downgraded to [ThemeColorSpec.Spec2021] at runtime by [colorsFromSeed] ([ThemePaletteStyle.Cmf]
+ *   always uses the 2026 spec).
  * @param paletteStyle The palette style to use when generating dynamic color schemes. The selected
  *   style determines whether [ThemeColorSpec.Spec2025] can be applied; if it is not supported, the
- *   effective [colorSpec] will fall back to [ThemeColorSpec.Spec2021].
+ *   effective [colorSpec] will fall back to [ThemeColorSpec.Spec2021] ([ThemePaletteStyle.Cmf]
+ *   always uses the 2026 spec).
  * @param isDark Whether the system is in dark mode. This is used when the [colorSchemeMode] is
  *   set to a System or MonetSystem mode and the dark mode is not explicitly specified.
  */

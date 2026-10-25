@@ -273,8 +273,9 @@ fun InputField(
                             .heightIn(min = SearchBarDefaults.InputFieldMinHeight),
                         contentAlignment = Alignment.CenterStart,
                     ) {
-                        val mergedLabelStyle = remember(textStyle) {
-                            TextStyle(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
+                        val baseLabelStyle = MiuixTheme.textStyles.main
+                        val mergedLabelStyle = remember(baseLabelStyle, textStyle) {
+                            baseLabelStyle.copy(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
                         }
                         Text(
                             text = labelText,

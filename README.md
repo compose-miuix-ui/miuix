@@ -4,37 +4,36 @@ A UI library for Compose Multiplatform.
 
 > This library is experimental. APIs may change without notice.
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.4.10-7F52FF)](https://kotlinlang.org/)
-[![Compose Multiplatform](https://img.shields.io/badge/compose-1.12.0--rc01-4285F4)](https://kotlinlang.org/compose-multiplatform/)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.4.21-7F52FF)](https://kotlinlang.org/)
+[![Compose Multiplatform](https://img.shields.io/badge/compose-1.12.2-4285F4)](https://kotlinlang.org/compose-multiplatform/)
 [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix-ui)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 [![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
 
 ### Supported Platforms
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)
-![iOS](https://img.shields.io/badge/iOS-Native-white?logo=apple)
-![macOS](https://img.shields.io/badge/macOS-Native-white?logo=apple)
-![Desktop](https://img.shields.io/badge/Desktop-JVM-007396?logo=openjdk)
-![JsCanvas](https://img.shields.io/badge/Web-JsCanvas-F7DF1E?logo=javascript&logoColor=white)
-![WasmJs](https://img.shields.io/badge/Web-WasmJs-654FF0?logo=webassembly&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-000000?logo=apple&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)
+![Desktop](https://img.shields.io/badge/Desktop-007396?logo=openjdk&logoColor=white)
+![Web](https://img.shields.io/badge/Web-4285F4?logo=googlechrome&logoColor=white)
 
 ### Demos
 
-[![JsCanvas](https://img.shields.io/badge/Demo-JsCanvas-F7DF1E?logo=javascript&logoColor=white)](https://compose-miuix-ui.github.io/miuix-jsCanvas/)
-[![WasmJs](https://img.shields.io/badge/Demo-WasmJs-654FF0?logo=webassembly&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
-[![Other](https://img.shields.io/badge/Demo-Other-white?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
+[![Web](https://img.shields.io/badge/Demo-Web-4285F4?logo=googlechrome&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
+[![Other](https://img.shields.io/badge/Demo-Other-2088FF?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
 
 ### Modules
 
-| Module             | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| `miuix-ui`         | Core UI component library                            |
-| `miuix-preference` | Preference components library, depends on `miuix-ui` |
-| `miuix-icons`      | Extended icon library, can be used independently     |
-| `miuix-blur`       | Blur effect library, can be used independently       |
-| `miuix-squircle`   | Squircle shapes library, can be used independently   |
-| `miuix-nav`        | Navigation library, can be used independently        |
-| `miuix-shader`     | Low-level runtime shader / render effect abstraction |
+| Module             | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `miuix-ui`         | Core UI component library                                  |
+| `miuix-preference` | Preference components library, depends on `miuix-ui`       |
+| `miuix-icons`      | Extended icon library, can be used independently           |
+| `miuix-blur`       | Blur effect library, can be used independently             |
+| `miuix-squircle`   | Squircle shapes library, can be used independently         |
+| `miuix-nav`        | Navigation library, can be used independently              |
+| `miuix-window`     | Desktop window & caption bar styling library (Desktop JVM) |
+| `miuix-shader`     | Low-level runtime shader / render effect abstraction       |
 
 ### Getting Started
 
@@ -54,6 +53,10 @@ kotlin {
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
             // Other dependencies...
+        }
+        // Optional: Add miuix-window for desktop window and caption bar styling (Desktop JVM)
+        desktopMain.dependencies {
+            implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
         }
         // Other sourceSets...
     }

@@ -2,30 +2,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.ComposeViewport
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
-import webfont.preloadWebFonts
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import ui.withFontFamily
+import webfont.installOnDemandWebFonts
 import webfont.queryParam
 
 private const val DEFAULT_CSS_URL =
-    "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
+    "https://i02.appmifile.com/i18n/fonts/MiSans/vf/index.css"
 
-// Safety cap on how long the loading overlay waits for fonts; afterwards it hides and any remaining
-// subsets keep downloading in the background.
-private const val LOADING_FONT_TIMEOUT_MS = 10_000L
-
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, InternalComposeApi::class)
 fun main() {
     val cssUrl = queryParam("cssUrl").ifBlank { DEFAULT_CSS_URL }
     ComposeViewport(viewportContainerId = "composeApp") {
@@ -48,22 +48,33 @@ fun main() {
             end = Dp(insetEndPx.toFloat()),
         )
 
-        // Register each CJK subset with the shared resolver so the whole app picks the glyphs up
-        // through the global font fallback (no per-text wrappers), while feeding download progress
-        // into the overlay's font bar. Runs in an outer scope, so it survives the overlay's timeout.
+        // Preload core Latin subsets for English/numbers and fetch CJK subsets on-demand via WebUnresolvedSymbolsRegistry.
         val fontFamilyResolver = LocalFontFamilyResolver.current
         val scope = rememberCoroutineScope()
-        LaunchedEffect(cssUrl, fontFamilyResolver) {
-            withFrameNanos {} // let the first frame paint behind the overlay
-            val preload = scope.launch {
-                preloadWebFonts(cssUrl, fontFamilyResolver) { done, total ->
-                    platformSetFontProgress(done, total)
-                }
+        var miSansFamily by remember { mutableStateOf<FontFamily?>(null) }
+        DisposableEffect(cssUrl, fontFamilyResolver, scope) {
+            val handle = installOnDemandWebFonts(
+                cssUrl = cssUrl,
+                resolver = fontFamilyResolver,
+                scope = scope,
+                onLatinFamilyLoaded = { family ->
+                    miSansFamily = family
+                },
+            )
+            onDispose {
+                handle.close()
             }
-            withTimeoutOrNull(LOADING_FONT_TIMEOUT_MS) { preload.join() }
-            platformHideLoading()
         }
 
-        App(padding = safePadding)
+        val baseTextStyles = MiuixTheme.textStyles
+        val textStyles = remember(miSansFamily, baseTextStyles) {
+            miSansFamily?.let { baseTextStyles.withFontFamily(it) } ?: baseTextStyles
+        }
+
+        LaunchedEffect(Unit) {
+            withFrameNanos {} // let the first frame paint behind the overlay
+            platformHideLoading()
+        }
+        App(padding = safePadding, textStyles = textStyles)
     }
 }

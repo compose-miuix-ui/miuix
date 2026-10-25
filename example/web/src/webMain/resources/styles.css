@@ -111,6 +111,7 @@ body {
 
 #loading.indeterminate #loading-bar-fill-app {
     width: 40%;
+    transition: none;
     animation: indeterminate 1.1s ease-in-out infinite;
 }
 
@@ -131,6 +132,7 @@ body {
 }
 
 #composeApp {
+    touch-action: none;
     width: 100%;
     height: 100%;
     margin: 0;

@@ -1,25 +1,27 @@
 [versions]
-agp = "9.3.2"
-kotlin = "2.4.10"
-kotlinx-serialization = "1.11.0"
-kotlinx-collections-immutable = "0.5.1"
+agp = "9.4.1"
+kotlin = "2.4.21"
+kotlinx-serialization = "1.12.0"
+kotlinx-collections-immutable = "0.5.2"
 
-about-libraries = "15.2.0"
+about-libraries = "15.3.0"
 androidx-activity = "1.13.0"
-androidx-navigationevent = "1.1.2"
-jetbrains-compose-multiplatform = "1.12.0"
+androidx-navigationevent = "1.2.0"
+jetbrains-compose-multiplatform = "1.12.2"
 jetbrains-compose-window-size = "1.12.0-alpha03"
 jetbrains-dokka = "2.2.0"
 jetbrains-compose-hotReload = "1.2.0"
 jetbrains-lifecycle = "2.11.0"
-materialKolor-utilities = "5.0.1"
-spotless = "8.10.1"
+materialKolor-utilities = "6.0.0"
+jna = "5.19.1"
+spotless = "8.10.4"
 
+nucleus = "2.5.18"
 junit = "1.3.0"
 espresso-core = "3.7.0"
 uiautomator = "2.4.0"
-benchmark-macro-junit4 = "1.4.1"
-baselineprofile = "1.5.0-rc02"
+benchmark-macro-junit4 = "1.5.0"
+baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
 
 [libraries]
@@ -29,6 +31,9 @@ spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradl
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
+
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "about-libraries" }
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -49,6 +54,10 @@ androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomato
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 
+nucleus-application = { module = "dev.nucleusframework:nucleus.nucleus-application", version.ref = "nucleus" }
+nucleus-darkmode-detector = { module = "dev.nucleusframework:nucleus.darkmode-detector", version.ref = "nucleus" }
+nucleus-decorated-window-tao = { module = "dev.nucleusframework:nucleus.decorated-window-tao", version.ref = "nucleus" }
+
 [plugins]
 androidApplication = { id = "com.android.application" } # AGP
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library" } # AGP
@@ -63,3 +72,4 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "jetbrains-dokka" }
 
 androidTest = { id = "com.android.test" } # AGP
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+nucleus = { id = "dev.nucleusframework", version.ref = "nucleus" }

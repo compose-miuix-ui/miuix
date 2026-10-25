@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -257,7 +256,7 @@ fun MainPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Home",
                     showTopAppBar = appState.showTopAppBar,
@@ -338,7 +337,8 @@ fun MainPage(
                                         onClick = onCancelSearch,
                                     ),
                                 text = "Cancel",
-                                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = MiuixTheme.colorScheme.primary,
                             )
                         },

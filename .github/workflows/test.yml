@@ -34,7 +34,7 @@ jobs:
             os: ubuntu-latest
           - target: "assembleAndroidTest"
             os: ubuntu-latest
-          - target: "wasmJsBrowserTest"
+          - target: "jsBrowserTest wasmJsBrowserTest"
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -56,8 +56,29 @@ jobs:
           path: ~/.konan
           key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-konan-
+      - name: Install X11 window manager
+        if: matrix.target == 'desktopTest'
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y openbox x11-utils xvfb
       - name: Run test
-        run: ./gradlew ${{ matrix.target }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          if [ "${{ matrix.target }}" = "desktopTest" ]; then
+            xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24 -nolisten tcp" bash -c '
+              openbox --sm-disable &
+              wm_pid=$!
+              for i in {1..50}; do
+                if xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q "window id #"; then
+                  break
+                fi
+                sleep 0.1
+              done
+              ./gradlew ${{ matrix.target }}
+              kill "$wm_pid" 2>/dev/null || true
+            '
+          else
+            ./gradlew ${{ matrix.target }}
+          fi
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v7

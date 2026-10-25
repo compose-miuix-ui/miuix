@@ -6,7 +6,7 @@
 This component is only available in touch-enabled environments.
 :::
 
-For a demo, see the DropDowns page of the <a href="https://compose-miuix-ui.github.io/miuix-jsCanvas/" target="_blank" rel="noopener noreferrer">Miuix Example</a>.
+For a demo, see the DropDowns page of the <a href="https://compose-miuix-ui.github.io/miuix-wasmJs/" target="_blank" rel="noopener noreferrer">Miuix Example</a>.
 
 ## Import
 

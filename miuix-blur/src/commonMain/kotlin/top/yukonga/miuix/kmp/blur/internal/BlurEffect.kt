@@ -178,28 +178,32 @@ internal fun createProgressiveBlurEffect(
 
     if (radiusX > 0f && maxRadiusX >= 0.5f) {
         val tap = progressiveLoopTapBound(maxRadiusX)
-        val hShader = scope.obtainRuntimeShader("LMPGaussLoop_H_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
+        val hShader = scope.obtainRuntimeShader(
+            progressiveLoopShaderKey(axis = 0, downScale = downScale, tap = tap),
+            progressiveBlurShaderForTap(tap),
+        ).apply {
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 1f, 0f)
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
             setFloatUniform("in_curve", clampedCurve)
-            setFloatUniform("in_noise", 0f)
         }
         effect = runtimeShaderEffect(hShader, "child")
     }
 
     if (radiusY > 0f && maxRadiusY >= 0.5f) {
         val tap = progressiveLoopTapBound(maxRadiusY)
-        val vShader = scope.obtainRuntimeShader("LMPGaussLoop_V_d${downScale}_t$tap", progressiveBlurShaderForTap(tap)).apply {
+        val vShader = scope.obtainRuntimeShader(
+            progressiveLoopShaderKey(axis = 1, downScale = downScale, tap = tap),
+            progressiveBlurShaderForTap(tap),
+        ).apply {
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 0f, 1f)
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", projFull, projZero)
             setFloatUniform("in_curve", clampedCurve)
-            setFloatUniform("in_noise", 0f)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
             ?: runtimeShaderEffect(vShader, "child")
@@ -365,11 +369,10 @@ internal fun createProgressiveSharpOverlayEffect(
     val hasH = maxRadiusX >= 0.5f
     val hasV = maxRadiusY >= 0.5f
 
-    fun loopPass(axis: String, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean): RenderEffect {
+    fun loopPass(axis: Int, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean): RenderEffect {
         val tap = progressiveLoopTapBound(maxRadius)
-        val variant = if (masked) "_m" else ""
         val shader = scope.obtainRuntimeShader(
-            "ProgSharpLoop_${axis}_t$tap$variant",
+            progressiveSharpShaderKey(axis = axis, tap = tap, masked = masked),
             progressiveBlurShaderForTap(tap, masked),
         ).apply {
             setFloatUniform("in_maxCoord", bandW - 0.5f, bandH - 0.5f)
@@ -378,7 +381,6 @@ internal fun createProgressiveSharpOverlayEffect(
             setFloatUniform("in_gradAxis", ax, ay)
             setFloatUniform("in_gradBand", loopFull, loopZero)
             setFloatUniform("in_curve", 1f)
-            setFloatUniform("in_noise", 0f)
             if (masked) {
                 setFloatUniform("in_maskBand", projFull - originProj, projZero - originProj)
                 setFloatUniform("in_maskCurve", clampedCurve)
@@ -390,12 +392,12 @@ internal fun createProgressiveSharpOverlayEffect(
     // The ramp mask is folded into the last loop pass (one fewer full-resolution band pass);
     // only the no-blur case runs it standalone.
     return when {
-        hasH && hasV -> loopPass("H", maxRadiusX, 1f, 0f, masked = false)
-            .chain(loopPass("V", maxRadiusY, 0f, 1f, masked = true))
+        hasH && hasV -> loopPass(0, maxRadiusX, 1f, 0f, masked = false)
+            .chain(loopPass(1, maxRadiusY, 0f, 1f, masked = true))
 
-        hasH -> loopPass("H", maxRadiusX, 1f, 0f, masked = true)
+        hasH -> loopPass(0, maxRadiusX, 1f, 0f, masked = true)
 
-        hasV -> loopPass("V", maxRadiusY, 0f, 1f, masked = true)
+        hasV -> loopPass(1, maxRadiusY, 0f, 1f, masked = true)
 
         else -> {
             val mask = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {

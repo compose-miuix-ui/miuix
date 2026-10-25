@@ -76,7 +76,7 @@ fun ColorPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Color",
                     showTopAppBar = appState.showTopAppBar,

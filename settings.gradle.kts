@@ -6,9 +6,10 @@
 rootProject.name = "compose-miuix-ui"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")
 
 pluginManagement {
-    includeBuild("build-plugins")
     repositories {
         google {
             mavenContent {
@@ -39,6 +40,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+includeBuild("build-logic")
+
 include(":miuix-core")
 include(":miuix-ui")
 include(":miuix-preference")
@@ -49,14 +52,16 @@ include(":miuix-glass-icons")
 include(":miuix-squircle")
 include(":miuix-icons")
 include(":miuix-nav")
-
-include(":baselineprofile")
+include(":miuix-window")
 
 include(":example:shared")
 include(":example:android")
 include(":example:desktop")
+include(":example:desktop-nucleus")
 include(":example:web")
 include(":example:macos")
+
+include(":baselineprofile")
 
 include(":docs:demo")
 include(":docs:iconGen")

@@ -55,7 +55,7 @@ fun App() {
   ```
 
   ::: tip 提示
-  `ThemeColorSpec.Spec2025` 仅由 `TonalSpot`、`Neutral`、`Vibrant` 和 `Expressive` 调色板风格支持。其他风格会自动降级为 `Spec2021`。
+  `ThemeColorSpec.Spec2025` 仅由 `TonalSpot`、`Neutral`、`Vibrant` 与 `Expressive` 调色板风格支持，其他风格会自动降级为 `Spec2021`（`Cmf` 风格会自动使用 2026 规范）。
   :::
 
 - **手动控制深色模式**
@@ -103,47 +103,48 @@ fun App() {
 
 ### ThemeController 属性
 
-| 属性名 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| colorSchemeMode | ColorSchemeMode | 配色模式 | ColorSchemeMode.System |
-| lightColors | Colors | 浅色配色方案 | lightColorScheme() |
-| darkColors | Colors | 深色配色方案 | darkColorScheme() |
-| keyColor | Color? | 动态取色的种子颜色。`null` 时使用系统壁纸颜色 | null |
-| colorSpec | ThemeColorSpec | Material 颜色规范版本 | ThemeColorSpec.Spec2021 |
-| paletteStyle | ThemePaletteStyle | 动态取色的调色板风格 | ThemePaletteStyle.TonalSpot |
-| isDark | Boolean? | 覆盖系统深色模式。`null` 时跟随系统 | null |
+| 属性名          | 类型              | 说明                                          | 默认值                      |
+| --------------- | ----------------- | --------------------------------------------- | --------------------------- |
+| colorSchemeMode | ColorSchemeMode   | 配色模式                                      | ColorSchemeMode.System      |
+| lightColors     | Colors            | 浅色配色方案                                  | lightColorScheme()          |
+| darkColors      | Colors            | 深色配色方案                                  | darkColorScheme()           |
+| keyColor        | Color?            | 动态取色的种子颜色。`null` 时使用系统壁纸颜色 | null                        |
+| colorSpec       | ThemeColorSpec    | Material 颜色规范版本                         | ThemeColorSpec.Spec2021     |
+| paletteStyle    | ThemePaletteStyle | 动态取色的调色板风格                          | ThemePaletteStyle.TonalSpot |
+| isDark          | Boolean?          | 覆盖系统深色模式。`null` 时跟随系统           | null                        |
 
 ### ColorSchemeMode
 
-| 值 | 说明 |
-| --- | --- |
-| System | 跟随系统浅色/深色设置 |
-| Light | 强制浅色模式 |
-| Dark | 强制深色模式 |
+| 值          | 说明                        |
+| ----------- | --------------------------- |
+| System      | 跟随系统浅色/深色设置       |
+| Light       | 强制浅色模式                |
+| Dark        | 强制深色模式                |
 | MonetSystem | 动态取色，跟随系统浅色/深色 |
-| MonetLight | 动态取色，强制浅色模式 |
-| MonetDark | 动态取色，强制深色模式 |
+| MonetLight  | 动态取色，强制浅色模式      |
+| MonetDark   | 动态取色，强制深色模式      |
 
 ### ThemePaletteStyle
 
-| 值 | 支持 Spec2025 | 说明 |
-| --- | --- | --- |
-| TonalSpot | 是 | 默认 Material You 风格，平衡的色调变化 |
-| Neutral | 是 | 柔和、低彩度调色板 |
-| Vibrant | 是 | 高彩度、鲜艳调色板 |
-| Expressive | 是 | 大胆且富有艺术感的创意配色 |
-| Rainbow | 否 | 广谱多色相调色板 |
-| FruitSalad | 否 | 活泼的多色相调色板 |
-| Monochrome | 否 | 单色灰度调色板 |
-| Fidelity | 否 | 紧密匹配种子颜色 |
-| Content | 否 | 从内容颜色派生，最大程度保持准确性 |
+| 值         | 色彩规范           | 说明                                   |
+| ---------- | ------------------ | -------------------------------------- |
+| TonalSpot  | Spec2021, Spec2025 | 默认 Material You 风格，平衡的色调变化 |
+| Neutral    | Spec2021, Spec2025 | 柔和、低彩度调色板                     |
+| Vibrant    | Spec2021, Spec2025 | 高彩度、鲜艳调色板                     |
+| Expressive | Spec2021, Spec2025 | 大胆且富有艺术感的创意配色             |
+| Rainbow    | Spec2021           | 广谱多色相调色板                       |
+| FruitSalad | Spec2021           | 活泼的多色相调色板                     |
+| Monochrome | Spec2021           | 单色灰度调色板                         |
+| Fidelity   | Spec2021           | 紧密匹配种子颜色                       |
+| Content    | Spec2021           | 从内容颜色派生，最大程度保持准确性     |
+| Cmf        | Spec2026 (自动)    | Color, Material, Finish (CMF) 调色板   |
 
 ### ThemeColorSpec
 
-| 值 | 说明 |
-| --- | --- |
-| Spec2021 | 原始 Material Design 3 颜色规范 |
-| Spec2025 | 2025 更新版颜色规范（仅 TonalSpot、Neutral、Vibrant、Expressive 支持） |
+| 值       | 说明                                                          |
+| -------- | ------------------------------------------------------------- |
+| Spec2021 | 原始 Material Design 3 颜色规范                               |
+| Spec2025 | 2025 颜色规范（TonalSpot、Neutral、Vibrant、Expressive 支持） |
 
 ## MiuixTheme 对象
 
@@ -156,12 +157,12 @@ val mode = MiuixTheme.colorSchemeMode
 val isDynamic = MiuixTheme.isDynamicColor
 ```
 
-| 属性 | 类型 | 说明 |
-| --- | --- | --- |
-| colorScheme | Colors | 当前颜色方案 |
-| textStyles | TextStyles | 当前文本样式 |
+| 属性            | 类型             | 说明                                            |
+| --------------- | ---------------- | ----------------------------------------------- |
+| colorScheme     | Colors           | 当前颜色方案                                    |
+| textStyles      | TextStyles       | 当前文本样式                                    |
 | colorSchemeMode | ColorSchemeMode? | 当前配色模式（使用直接 `colors` 重载时为 null） |
-| isDynamicColor | Boolean | 当前模式是否为 Monet 动态取色模式 |
+| isDynamicColor  | Boolean          | 当前模式是否为 Monet 动态取色模式               |
 
 ## 自定义主题
 
@@ -200,6 +201,34 @@ fun MyApp() {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
     MiuixTheme(controller = controller) {
         // 应用内容
+    }
+}
+```
+
+## 屏幕缺口适配 (`ProvideDisplayCutoutFix`)
+
+Miuix 在 `MiuixTheme` 根组合项中默认集成了 `ProvideDisplayCutoutFix`。
+
+在部分 Android OEM 设备上（尤其是横屏平板设备和折叠屏设备），系统在向 View 树派发窗口边距时，可能会缺失屏幕缺口信息（导致 `WindowInsets.displayCutout` 为 0），从而引起侧边导航栏或顶部应用栏被摄像头挖孔遮挡。
+
+`ProvideDisplayCutoutFix` 会在 Android 11+（API 30+）读取底层的 `WindowManager.currentWindowMetrics` 并动态补齐缺失的缺口数据，让所有依赖标准 Insets 的组件（如 `NavigationRail`、`TopAppBar`、`Scaffold`、`ListPopup` 等）均能正常识别并安全避让缺口。
+
+### 手动调用
+
+通常情况下由 `MiuixTheme` 自动挂载，无需手动调用。如果存在未被 `MiuixTheme` 包裹的自定义窗口或独立层级，也可按需手动引入：
+
+```kotlin
+ProvideDisplayCutoutFix()
+```
+
+### 禁用缺口修复
+
+如果应用需要自行完全接管窗口边距或保持系统原始行为，可通过 `LocalDisplayCutoutFixEnabled` 显式关闭：
+
+```kotlin
+CompositionLocalProvider(LocalDisplayCutoutFixEnabled provides false) {
+    MiuixTheme {
+        // 禁用自动缺口修复的内容
     }
 }
 ```

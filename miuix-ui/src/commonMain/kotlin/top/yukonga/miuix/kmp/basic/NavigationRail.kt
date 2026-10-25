@@ -73,26 +73,64 @@ import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * A [NavigationRail] that is suitable for wide screens.
+ * A non-expandable [NavigationRail] for wide screens.
  *
- * When a non-null [state] is provided, the rail becomes expandable: a built-in toggle button is
- * shown at the top (aligned to the start when expanded), the rail animates between [minWidth] and
- * [expandedWidth], and its items switch to a horizontal icon-and-label layout with a highlighted
- * pill behind the selected item. When [state] is null the rail keeps its classic collapsed layout
- * with no toggle button.
  *
  * @param modifier The modifier to be applied to the [NavigationRail].
- * @param state Controls the expanded/collapsed state; pass a [rememberNavigationRailState] to make
- *   the rail expandable, or null (default) for the classic non-expandable rail. Keep the same
- *   nullness across window size changes and drive it via [NavigationRailState.expand] /
- *   [NavigationRailState.collapse]; flipping between null and non-null at runtime swaps the item
- *   layout in a single frame without animation.
+ * @param expanded Whether the rail uses its expanded layout.
  * @param header The header of the [NavigationRail], usually a [FloatingActionButton] or a logo.
  * @param color The color of the [NavigationRail].
  * @param showDivider Whether to show the divider line between the [NavigationRail] and the content.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
  * @param minWidth The minimum width of the [NavigationRail], used for the collapsed state.
- * @param expandedWidth The width of the [NavigationRail] when [state] is expanded.
+ * @param expandedWidth The width of the [NavigationRail] when [expanded] is true.
+ * @param scrollState The [ScrollState] of the rail's scrollable content column.
+ * @param content The content of the [NavigationRail], usually [NavigationRailItem]s.
+ */
+@Composable
+fun NavigationRail(
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    header: @Composable (ColumnScope.() -> Unit)? = null,
+    color: Color = MiuixTheme.colorScheme.surface,
+    showDivider: Boolean = true,
+    defaultWindowInsetsPadding: Boolean = true,
+    minWidth: Dp = NavigationRailDefaults.MinWidth,
+    expandedWidth: Dp = NavigationRailDefaults.ExpandedWidth,
+    scrollState: ScrollState = rememberScrollState(),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    NavigationRailImpl(
+        modifier = modifier,
+        state = null,
+        expanded = expanded,
+        header = header,
+        color = color,
+        showDivider = showDivider,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        minWidth = minWidth,
+        expandedWidth = expandedWidth,
+        expandContentDescription = NavigationRailDefaults.ExpandContentDescription,
+        collapseContentDescription = NavigationRailDefaults.CollapseContentDescription,
+        scrollState = scrollState,
+        content = content,
+    )
+}
+
+/**
+ * An expandable [NavigationRail] for wide screens.
+ *
+ * The rail shows a built-in toggle and animates between [minWidth] and [expandedWidth] according
+ * to [state].
+ *
+ * @param modifier The modifier to be applied to the [NavigationRail].
+ * @param state Controls the expanded/collapsed state.
+ * @param header The header of the [NavigationRail], usually a [FloatingActionButton] or a logo.
+ * @param color The color of the [NavigationRail].
+ * @param showDivider Whether to show the divider line between the [NavigationRail] and the content.
+ * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
+ * @param minWidth The minimum width of the [NavigationRail], used for the collapsed state.
+ * @param expandedWidth The width of the [NavigationRail] when expanded.
  * @param expandContentDescription The accessible description of the built-in toggle while the rail
  *   is collapsed; override it to localize the announcement.
  * @param collapseContentDescription The accessible description of the built-in toggle while the
@@ -102,8 +140,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  */
 @Composable
 fun NavigationRail(
+    state: NavigationRailState,
     modifier: Modifier = Modifier,
-    state: NavigationRailState? = null,
     header: @Composable (ColumnScope.() -> Unit)? = null,
     color: Color = MiuixTheme.colorScheme.surface,
     showDivider: Boolean = true,
@@ -115,18 +153,55 @@ fun NavigationRail(
     scrollState: ScrollState = rememberScrollState(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val isExpanded = state?.isExpanded == true
-    val hasState = state != null
+    NavigationRailImpl(
+        modifier = modifier,
+        state = state,
+        expanded = false,
+        header = header,
+        color = color,
+        showDivider = showDivider,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        minWidth = minWidth,
+        expandedWidth = expandedWidth,
+        expandContentDescription = expandContentDescription,
+        collapseContentDescription = collapseContentDescription,
+        scrollState = scrollState,
+        content = content,
+    )
+}
+
+@Composable
+private fun NavigationRailImpl(
+    state: NavigationRailState?,
+    expanded: Boolean,
+    header: @Composable (ColumnScope.() -> Unit)?,
+    color: Color,
+    showDivider: Boolean,
+    defaultWindowInsetsPadding: Boolean,
+    minWidth: Dp,
+    expandedWidth: Dp,
+    expandContentDescription: String,
+    collapseContentDescription: String,
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val isExpandable = state != null
+    val isExpanded = state?.isExpanded ?: expanded
     // Guard against a misconfigured expandedWidth narrower than the collapsed minWidth.
     val effectiveExpandedWidth = expandedWidth.coerceAtLeast(minWidth)
     // Single 0..1 timeline that both the rail width and the item morph derive from. It is read
     // only inside layout-phase blocks (and the small label leaf), so spring frames re-layout the
     // rail without recomposing it or its items.
-    val expandProgress = animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        animationSpec = RailExpandSpring,
-        label = "navigationRailExpandProgress",
-    )
+    val expandProgress = if (isExpandable) {
+        animateFloatAsState(
+            targetValue = if (isExpanded) 1f else 0f,
+            animationSpec = RailExpandSpring,
+            label = "navigationRailExpandProgress",
+        )
+    } else {
+        remember(expanded) { mutableStateOf(if (expanded) 1f else 0f) }
+    }
     val expandInfo = remember(expandProgress, minWidth) {
         NavigationRailExpandInfo(progress = expandProgress, collapsedWidth = minWidth)
     }
@@ -149,8 +224,10 @@ fun NavigationRail(
         Column(
             modifier = Modifier
                 .layout { measurable, constraints ->
-                    val targetWidth = if (hasState) {
+                    val targetWidth = if (isExpandable) {
                         lerp(minWidth, effectiveExpandedWidth, expandProgress.value.coerceIn(0f, 1f))
+                    } else if (expanded) {
+                        effectiveExpandedWidth
                     } else {
                         minWidth
                     }
@@ -188,7 +265,7 @@ fun NavigationRail(
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
             CompositionLocalProvider(
-                LocalNavigationRailExpandInfo provides (if (state != null) expandInfo else null),
+                LocalNavigationRailExpandInfo provides (if (isExpandable || expanded) expandInfo else null),
             ) {
                 content()
             }
@@ -261,6 +338,7 @@ fun NavigationRailItem(
     val interactionSource = remember { MutableInteractionSource() }
 
     val tint = MiuixTheme.colorScheme.onSurfaceContainer
+    val indicatorColor = MiuixTheme.colorScheme.surfaceContainerHigh
     val fontWeight = FontWeight.Medium
     val iconColorFilter = remember(tint) { ColorFilter.tint(tint) }
 
@@ -299,14 +377,32 @@ fun NavigationRailItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
-            Image(
-                modifier = iconModifier.size(NavigationRailDefaults.IconSize),
-                imageVector = icon,
-                // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
-                contentDescription = null,
-                colorFilter = iconColorFilter,
-            )
+        Box(
+            modifier = Modifier
+                .then(
+                    if (selected) {
+                        Modifier.squircleBackground(
+                            color = indicatorColor,
+                            cornerRadius = NavigationRailDefaults.ExpandedItemCornerRadius,
+                        )
+                    } else {
+                        Modifier
+                    },
+                )
+                .padding(
+                    horizontal = NavigationRailDefaults.ExpandedItemContentHorizontalPadding,
+                    vertical = NavigationRailDefaults.CollapsedIndicatorVerticalPadding,
+                ),
+        ) {
+            NavigationItemIcon(badge = badge, modifier = Modifier) { iconModifier ->
+                Image(
+                    modifier = iconModifier.size(NavigationRailDefaults.IconSize),
+                    imageVector = icon,
+                    // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
+                    contentDescription = null,
+                    colorFilter = iconColorFilter,
+                )
+            }
         }
         Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
         Text(

@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -128,7 +127,6 @@ fun rememberBlurBackdrop(): LayerBackdrop? {
 fun BlurredBar(
     backdrop: LayerBackdrop?,
     blurEnabled: Boolean,
-    scrollBehavior: ScrollBehavior? = null,
     content: @Composable () -> Unit,
 ) {
     val progressive = LocalAppState.current.blurStyle == 1
@@ -149,11 +147,6 @@ fun BlurredBar(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer {
-                        alpha = scrollBehavior?.state
-                            ?.let { (-it.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f) }
-                            ?: 1f
-                    }
                     .progressiveTextureBlur(
                         backdrop = backdrop,
                         shape = RectangleShape,

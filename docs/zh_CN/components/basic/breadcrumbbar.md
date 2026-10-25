@@ -85,7 +85,7 @@ BreadcrumbBar(
 | colors            | BreadcrumbBarColors        | 面包屑栏颜色配置                                          | BreadcrumbBarDefaults.breadcrumbBarColors() | 否       |
 | insideMargin      | PaddingValues              | 面包屑栏内部边距                                          | BreadcrumbBarDefaults.InsideMargin          | 否       |
 | itemMaxWidth      | Dp                         | 每个胶囊项的最大宽度；超出此宽度的文本会被截断            | BreadcrumbBarDefaults.ItemMaxWidth          | 否       |
-| scrollState       | ScrollState?               | 水平滚动状态；传入外部提升的 state 可在重组时保留滚动位置 | null                                        | 否       |
+| listState         | LazyListState?             | 水平 Lazy 列表状态；传入外部提升的 state 可在重组时保留滚动位置 | null                                        | 否       |
 | interactionSource | MutableInteractionSource?  | 交互源                                                    | null                                        | 否       |
 | indication        | Indication?                | 点击交互的反馈效果                                        | LocalIndication.current                     | 否       |
 

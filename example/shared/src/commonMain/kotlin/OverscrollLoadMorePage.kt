@@ -86,7 +86,7 @@ fun OverscrollLoadMorePage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Overscroll + Load More",
                     showTopAppBar = appState.showTopAppBar,

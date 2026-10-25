@@ -112,6 +112,17 @@ interface NavTransitionScope {
     val gesture: NavGesture?
 
     /**
+     * Whether this [NavDisplay] is currently handling a navigation transition.
+     *
+     * Unlike per-frame values such as [relativeDepth], this is a coarse, composition-safe signal.
+     * It changes at transition boundaries rather than for every frame of the driving depth.
+     *
+     * It remains `true` for both an interactive gesture and the settle that follows its release,
+     * and becomes `false` once the navigation motion is idle.
+     */
+    val isRunning: Boolean get() = gesture != null || settle != null
+
+    /**
      * Self-driven settle context, or `null` while a finger drives the float or the stack is at
      * rest. Default `null` so existing implementations stay source-compatible (the property set
      * is append-only).

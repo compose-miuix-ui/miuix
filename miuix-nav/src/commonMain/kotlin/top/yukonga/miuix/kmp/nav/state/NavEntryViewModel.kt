@@ -6,16 +6,20 @@ package top.yukonga.miuix.kmp.nav.state
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.RememberObserver
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.defaultViewModelCreationExtras
+import androidx.lifecycle.defaultViewModelProviderFactory
+import androidx.lifecycle.viewmodel.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import kotlin.random.Random
 
 /**
@@ -93,25 +97,36 @@ internal fun rememberNavEntryViewModelStores(): NavEntryViewModelStores {
 }
 
 /**
- * Per-entry [ViewModelStoreOwner]: a plain view over the display registry's store for one entry.
- * Deliberately NOT a [RememberObserver] — leaving the composition (depth cull) must not clear the
- * store; only the registry does, on permanent back-stack removal.
- */
-@Stable
-internal class NavEntryViewModelStoreOwner(
-    override val viewModelStore: ViewModelStore,
-) : ViewModelStoreOwner
-
-/**
- * Remembers the [NavEntryViewModelStoreOwner] for the entry identified by [contentKey], backed by
+ * Remembers the [ViewModelStoreOwner] for the entry identified by [contentKey], backed by
  * the display-level [stores] registry.
+ *
+ * Wires the entry with [savedStateRegistryOwner] and parent [androidx.lifecycle.viewmodel.CreationExtras]
+ * so standard ViewModels, [androidx.lifecycle.SavedStateHandle], and DI frameworks (e.g. Hilt) work out of the box.
  */
 @Composable
 internal fun rememberNavEntryViewModelStoreOwner(
     stores: NavEntryViewModelStores,
     contentKey: Any,
-): NavEntryViewModelStoreOwner = remember(stores, contentKey) {
-    NavEntryViewModelStoreOwner(stores.storeFor(contentKey))
+    parentOwner: ViewModelStoreOwner? = LocalViewModelStoreOwner.current,
+    savedStateRegistryOwner: SavedStateRegistryOwner? = LocalSavedStateRegistryOwner.current,
+): ViewModelStoreOwner {
+    val store = stores.storeFor(contentKey)
+    return remember(stores, contentKey, parentOwner, savedStateRegistryOwner) {
+        if (savedStateRegistryOwner != null) {
+            ViewModelStoreOwner(
+                viewModelStore = store,
+                savedStateRegistryOwner = savedStateRegistryOwner,
+                defaultCreationExtras = parentOwner.defaultViewModelCreationExtras,
+                defaultFactory = parentOwner.defaultViewModelProviderFactory,
+            )
+        } else {
+            ViewModelStoreOwner(
+                viewModelStore = store,
+                defaultCreationExtras = parentOwner.defaultViewModelCreationExtras,
+                defaultFactory = parentOwner.defaultViewModelProviderFactory,
+            )
+        }
+    }
 }
 
 /**
@@ -123,7 +138,7 @@ internal fun rememberNavEntryViewModelStoreOwner(
  */
 @Composable
 internal fun ProvideNavEntryViewModelStore(
-    owner: NavEntryViewModelStoreOwner,
+    owner: ViewModelStoreOwner,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalViewModelStoreOwner provides owner, content = content)

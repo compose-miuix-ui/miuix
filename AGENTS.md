@@ -20,7 +20,6 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Run Android demo    | `./gradlew :example:android:installDebug`               |
 | Run Desktop demo    | `./gradlew :example:desktop:hotRunDesktop --auto`       |
 | Run WasmJs demo     | `./gradlew :example:web:wasmJsBrowserRun`               |
-| Run Js demo         | `./gradlew :example:web:jsBrowserDevelopmentRun`        |
 | Run macOS demo      | `./gradlew :example:macos:runDebugExecutableMacosArm64` |
 | Run iOS demo        | Open `example/ios/iosApp.xcodeproj` in Xcode and run    |
 
@@ -39,7 +38,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `example/`          | Demo app                                                                   |
 | `baselineprofile/`  | Android baseline profile generation                                        |
 | `docs/`             | VitePress documentation site                                               |
-| `build-plugins/`    | Custom Gradle plugins                                                      |
+| `build-logic/`      | Custom Gradle plugins                                                      |
 | `gradle/`           | Version catalog + wrapper                                                  |
 
 ### Component Source Layout
@@ -86,7 +85,7 @@ commonMain
 
 ## Code Style
 
-- **Formatter**: Spotless + ktlint with Compose rules (`io.nlopez.compose.rules:ktlint`); exact versions in `build-plugins/src/main/kotlin/module.spotless.gradle.kts`
+- **Formatter**: Spotless + ktlint with Compose rules (`io.nlopez.compose.rules:ktlint`); exact versions in `build-logic/src/main/kotlin/module.spotless.gradle.kts`
 - **License header** (required on all `.kt` and `.kts` files; Spotless auto-fills `$YEAR` with the current year — do not manually change years in existing headers):
 
   ```

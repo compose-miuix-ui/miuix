@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -23,6 +24,8 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
+import top.yukonga.miuix.kmp.utils.springAnimateToPage
 
 fun LazyListScope.tabRowSection() {
     item(key = "tabRow") {
@@ -57,10 +60,14 @@ fun LazyListScope.tabRowSection() {
                 selectedTabIndex = pagerState.currentPage,
                 onTabSelected = {
                     scope.launch {
-                        pagerState.animateScrollToPage(it)
+                        pagerState.springAnimateToPage(it)
                     }
                 },
                 listState = contourTabListState,
+            )
+            val flingBehavior = PagerDefaults.flingBehavior(
+                state = pagerState,
+                snapAnimationSpec = PagerNavigationSpringSpec,
             )
             HorizontalPager(
                 state = pagerState,
@@ -68,6 +75,7 @@ fun LazyListScope.tabRowSection() {
                     .fillMaxWidth()
                     .padding(top = 12.dp),
                 userScrollEnabled = true,
+                flingBehavior = flingBehavior,
                 key = { it },
                 pageContent = { page ->
                     Text(

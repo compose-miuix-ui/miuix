@@ -1,4 +1,4 @@
-# miuix-nav
+# 导航支持
 
 `miuix-nav` 是一个自研的 Compose Multiplatform 导航运行时，核心模型为**连续栈深度**。整条返回栈由单个 `Animatable<Float>`（`animatedTop`）驱动；每个 entry 的视觉是其相对深度的纯函数。由此，连续出入栈、完全自定义的 float 驱动转场、以及 1:1 跟手的手势返回都自然成立。它**零依赖** `androidx.navigation3`。
 
@@ -134,7 +134,11 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`layoutSize`、`layoutDirection`、`density`。
+`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`isRunning`、`settle`、`layoutSize`、`layoutDirection`、`density`。
+
+entry 内容需要 Miuix 的实时导航状态时，可读取 `LocalNavTransitionScope.current`。
+使用 `isRunning` 判断转场生命周期；实现 entry 局部效果时，`relativeDepth`、`gesture` 或
+`settle` 应在 `graphicsLayer` 等延迟读取区中使用。
 
 通用样式（淡入淡出、缩放、共享轴等）刻意不作为预设内置——在这个 builder 上每种只需几行。例如交叉淡入淡出：
 
@@ -305,7 +309,7 @@ NavDisplay(
 
 ## 条目生命周期与 ViewModel
 
-每个 entry 运行在自己的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下，`collectAsStateWithLifecycle`、`viewModel()` 与基于 store 的依赖注入无需额外配置即可按屏幕划分作用域。
+每个 entry 均运行在独立的 `LifecycleOwner` 与 `ViewModelStoreOwner` 之下。对标 AndroidX Navigation 3，`collectAsStateWithLifecycle`、`viewModel()` 以及 Hilt（`hiltViewModel()` 与 `SavedStateHandle`）无需额外配置即可按屏幕划分作用域。
 
 生命周期是深度的纯函数：静止的顶层为 `RESUMED`；被覆盖层、正在进入与正在离开的层为 `STARTED`；正在移除的 entry 降为 `CREATED` 直到卸载。**手势**驱动期间所有层封顶为 `STARTED`——`RESUMED` 意为「已静止的唯一顶层」，依赖它的逻辑不会因手指在转场阈值附近徘徊而反复触发。
 

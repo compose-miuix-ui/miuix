@@ -56,6 +56,7 @@ private val BlurStyleOptions = listOf("Gaussian", "Progressive")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
+private val PagerGestureModeOptions = listOf("Default", "Cross-Axis", "iOS-like")
 
 @Composable
 fun SettingsPage(
@@ -70,7 +71,7 @@ fun SettingsPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Settings",
                     showTopAppBar = appState.showTopAppBar,
@@ -147,10 +148,24 @@ private fun SettingsContent(
                                 selectedIndex = appState.paletteStyle,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
                             )
+                            val currentStyle = ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
+                            val isCmf = currentStyle == ThemePaletteStyle.Cmf
+                            val isSpec2025Supported = currentStyle in listOf(
+                                ThemePaletteStyle.TonalSpot,
+                                ThemePaletteStyle.Neutral,
+                                ThemePaletteStyle.Vibrant,
+                                ThemePaletteStyle.Expressive,
+                            )
+                            val (colorSpecItems, colorSpecIndex, colorSpecEnabled) = when {
+                                isCmf -> Triple(listOf("Spec2026"), 0, false)
+                                !isSpec2025Supported -> Triple(listOf("Spec2021"), 0, false)
+                                else -> Triple(ColorSpecOptions, appState.colorSpec, true)
+                            }
                             OverlayDropdownPreference(
                                 title = "Color Spec",
-                                items = ColorSpecOptions,
-                                selectedIndex = appState.colorSpec,
+                                enabled = colorSpecEnabled,
+                                items = colorSpecItems,
+                                selectedIndex = colorSpecIndex,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                             )
                         }
@@ -179,6 +194,14 @@ private fun SettingsContent(
                         checked = appState.enablePageUserScroll,
                         onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                     )
+                    AnimatedVisibility(visible = appState.enablePageUserScroll) {
+                        OverlayDropdownPreference(
+                            title = "Pager Gesture Mode",
+                            items = PagerGestureModeOptions,
+                            selectedIndex = appState.pagerInterceptionMode,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(pagerInterceptionMode = it) } },
+                        )
+                    }
                     SwitchPreference(
                         title = "Show TopAppBar",
                         checked = appState.showTopAppBar,

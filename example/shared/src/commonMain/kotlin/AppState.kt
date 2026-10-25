@@ -28,6 +28,7 @@ data class AppState(
     val floatingActionButtonPosition: Int = 2,
     val enablePageUserScroll: Boolean = true,
     val enableScrollEndHaptic: Boolean = true,
+    val pagerInterceptionMode: Int = 1,
     val enableCornerClip: Boolean = true,
     val enableDim: Boolean = true,
     val blockInputDuringTransition: Boolean = false,

@@ -38,6 +38,7 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-nav` | 自包含导航库，可独立使用 |
 | `miuix-glass` | 柔光玻璃材质与组件库，Android 端需要 minSdk 33 |
 | `miuix-glass-icons` | Glass 图标库，可独立使用 |
+| `miuix-window` | 桌面端窗口与自绘标题栏样式库（仅支持 Desktop JVM） |
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
@@ -60,6 +61,10 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // 可选：添加 miuix-glass-icons 以获取 Glass 图标
             implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
+        }
+        // 可选：添加 miuix-window 以获取桌面端窗口与标题栏支持（仅 Desktop JVM）
+        desktopMain.dependencies {
+            implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
         }
     }
 }

@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -137,6 +138,7 @@ fun NavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [NavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param colors The icon and label colors, with state opacity applied to their alpha.
  * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
@@ -147,24 +149,14 @@ fun RowScope.NavigationBarItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     badge: (@Composable () -> Unit)? = null,
 ) {
     val itemHeight = NavigationBarDefaults.ItemHeight
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(NavigationBarDefaults.UnselectedAlpha)
-    }
+    val tint = colors.contentColor(selected, isPressed)
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationBarDisplayMode.current
 
@@ -378,6 +370,7 @@ fun FloatingNavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [FloatingNavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param colors The icon and label colors, with state opacity applied to their alpha.
  * @param badge The optional badge shown on the item's icon, typically a [Badge].
  */
 @Composable
@@ -388,23 +381,13 @@ fun FloatingNavigationBarItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: NavigationBarItemColors = NavigationBarDefaults.navigationBarItemColors(),
     badge: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val onSurfaceContainerColor = MiuixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = FloatingNavigationBarDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(FloatingNavigationBarDefaults.UnselectedAlpha)
-    }
+    val tint = colors.contentColor(selected, isPressed)
 
     Column(
         modifier = modifier
@@ -478,6 +461,49 @@ object NavigationBarDefaults {
 
     /** The alpha value for an unselected item. */
     val UnselectedAlpha = 0.4f
+
+    /**
+     * The default colors for [NavigationBarItem] and [FloatingNavigationBarItem].
+     * State opacity multiplies each color's alpha, preserving transparent colors.
+     *
+     * @param unselectedContentColor The base color for unselected content.
+     * @param selectedContentColor The base color for selected content.
+     */
+    @Composable
+    fun navigationBarItemColors(
+        unselectedContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+        selectedContentColor: Color = MiuixTheme.colorScheme.onSurfaceContainer,
+    ): NavigationBarItemColors = remember(unselectedContentColor, selectedContentColor) {
+        NavigationBarItemColors(
+            unselectedContentColor = unselectedContentColor,
+            selectedContentColor = selectedContentColor,
+        )
+    }
+}
+
+/**
+ * Base content colors shared by [NavigationBarItem] and [FloatingNavigationBarItem].
+ *
+ * @param unselectedContentColor The unselected icon and label color before state opacity.
+ * @param selectedContentColor The selected icon and label color before state opacity.
+ */
+@Immutable
+data class NavigationBarItemColors(
+    private val unselectedContentColor: Color,
+    private val selectedContentColor: Color,
+) {
+    @Stable
+    internal fun contentColor(selected: Boolean, isPressed: Boolean): Color = when {
+        isPressed -> if (selected) {
+            selectedContentColor.copy(alpha = selectedContentColor.alpha * NavigationBarDefaults.SelectedPressedAlpha)
+        } else {
+            unselectedContentColor.copy(alpha = unselectedContentColor.alpha * NavigationBarDefaults.UnselectedPressedAlpha)
+        }
+
+        selected -> selectedContentColor
+
+        else -> unselectedContentColor.copy(alpha = unselectedContentColor.alpha * NavigationBarDefaults.UnselectedAlpha)
+    }
 }
 
 /** Contains default values used by [FloatingNavigationBar] and [FloatingNavigationBarItem]. */

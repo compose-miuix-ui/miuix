@@ -3,12 +3,12 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -233,12 +233,10 @@ private fun PaletteCanvas(
         if (sizePx.width > 0 && sizePx.height > 0) {
             val w = sizePx.width
             val h = sizePx.height
-            val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
-            val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-            val start = colEdges[selectedCol]
-            val end = colEdges[selectedCol + 1]
-            val top = rowEdges[selectedRow]
-            val bottom = rowEdges[selectedRow + 1]
+            val start = (selectedCol * w) / totalColumns
+            val end = ((selectedCol + 1) * w) / totalColumns
+            val top = (selectedRow * h) / rows
+            val bottom = ((selectedRow + 1) * h) / rows
             val cxPx = (start + end) / 2f
             val cyPx = (top + bottom) / 2f
 
@@ -308,31 +306,36 @@ private fun PaletteGrid(
             }
         }
     }
-    Canvas(Modifier.fillMaxSize()) {
-        val w = size.width.toInt()
-        val h = size.height.toInt()
+    Spacer(
+        modifier = Modifier
+            .fillMaxSize()
+            .drawWithCache {
+                val w = size.width.toInt()
+                val h = size.height.toInt()
+                val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
+                val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
 
-        val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
-        val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-
-        for (r in 0 until rows) {
-            val top = rowEdges[r].toFloat()
-            val bottom = rowEdges[r + 1].toFloat()
-            val cellH = bottom - top
-            for (c in 0 until totalColumns) {
-                val start = colEdges[c].toFloat()
-                val end = colEdges[c + 1].toFloat()
-                val cellW = end - start
-                val color = precomputedColors[r][c]
-                val left = if (isRtl) size.width - end else start
-                drawRect(
-                    color = color,
-                    topLeft = Offset(left, top),
-                    size = Size(cellW, cellH),
-                )
-            }
-        }
-    }
+                onDrawBehind {
+                    for (r in 0 until rows) {
+                        val top = rowEdges[r].toFloat()
+                        val bottom = rowEdges[r + 1].toFloat()
+                        val cellH = bottom - top
+                        for (c in 0 until totalColumns) {
+                            val start = colEdges[c].toFloat()
+                            val end = colEdges[c + 1].toFloat()
+                            val cellW = end - start
+                            val color = precomputedColors[r][c]
+                            val left = if (isRtl) size.width - end else start
+                            drawRect(
+                                color = color,
+                                topLeft = Offset(left, top),
+                                size = Size(cellW, cellH),
+                            )
+                        }
+                    }
+                }
+            },
+    )
 }
 
 private fun buildRowSV(rows: Int): List<Pair<Float, Float>> {

@@ -56,7 +56,7 @@ fun App() {
   ```
 
   ::: tip
-  `ThemeColorSpec.Spec2025` is only supported by `TonalSpot`, `Neutral`, `Vibrant`, and `Expressive` palette styles. For other styles, it gracefully falls back to `Spec2021`.
+  `ThemeColorSpec.Spec2025` is only supported by `TonalSpot`, `Neutral`, `Vibrant`, and `Expressive` palette styles; other styles gracefully fall back to `Spec2021` (`Cmf` style automatically uses the 2026 specification).
   :::
 
 - **Manual Dark Mode Control**
@@ -104,47 +104,48 @@ The `ThemeController` manages the current color scheme of the Miuix theme.
 
 ### ThemeController Properties
 
-| Property Name | Type | Description | Default Value |
-| --- | --- | --- | --- |
-| colorSchemeMode | ColorSchemeMode | The color scheme mode | ColorSchemeMode.System |
-| lightColors | Colors | Light color scheme | lightColorScheme() |
-| darkColors | Colors | Dark color scheme | darkColorScheme() |
-| keyColor | Color? | Seed color for dynamic color generation. `null` uses system wallpaper colors | null |
-| colorSpec | ThemeColorSpec | Material color specification version | ThemeColorSpec.Spec2021 |
-| paletteStyle | ThemePaletteStyle | Palette style for dynamic color generation | ThemePaletteStyle.TonalSpot |
-| isDark | Boolean? | Override system dark mode. `null` follows system | null |
+| Property Name   | Type              | Description                                                                  | Default Value               |
+| --------------- | ----------------- | ---------------------------------------------------------------------------- | --------------------------- |
+| colorSchemeMode | ColorSchemeMode   | The color scheme mode                                                        | ColorSchemeMode.System      |
+| lightColors     | Colors            | Light color scheme                                                           | lightColorScheme()          |
+| darkColors      | Colors            | Dark color scheme                                                            | darkColorScheme()           |
+| keyColor        | Color?            | Seed color for dynamic color generation. `null` uses system wallpaper colors | null                        |
+| colorSpec       | ThemeColorSpec    | Material color specification version                                         | ThemeColorSpec.Spec2021     |
+| paletteStyle    | ThemePaletteStyle | Palette style for dynamic color generation                                   | ThemePaletteStyle.TonalSpot |
+| isDark          | Boolean?          | Override system dark mode. `null` follows system                             | null                        |
 
 ### ColorSchemeMode
 
-| Value | Description |
-| --- | --- |
-| System | Follows system light/dark setting |
-| Light | Forces light mode |
-| Dark | Forces dark mode |
+| Value       | Description                               |
+| ----------- | ----------------------------------------- |
+| System      | Follows system light/dark setting         |
+| Light       | Forces light mode                         |
+| Dark        | Forces dark mode                          |
 | MonetSystem | Dynamic colors, follows system light/dark |
-| MonetLight | Dynamic colors, forces light mode |
-| MonetDark | Dynamic colors, forces dark mode |
+| MonetLight  | Dynamic colors, forces light mode         |
+| MonetDark   | Dynamic colors, forces dark mode          |
 
 ### ThemePaletteStyle
 
-| Value | Spec2025 Support | Description |
-| --- | --- | --- |
-| TonalSpot | Yes | Default Material You style with balanced tonal variations |
-| Neutral | Yes | Muted, low-chroma palette |
-| Vibrant | Yes | High-chroma, vivid palette |
-| Expressive | Yes | Bold and artistic palette with creative color shifts |
-| Rainbow | No | Broad spectrum of hues |
-| FruitSalad | No | Playful, multi-hue palette |
-| Monochrome | No | Single-hue grayscale palette |
-| Fidelity | No | Closely matches the seed color |
-| Content | No | Derived from content colors for maximum accuracy |
+| Value      | Color Spec         | Description                                               |
+| ---------- | ------------------ | --------------------------------------------------------- |
+| TonalSpot  | Spec2021, Spec2025 | Default Material You style with balanced tonal variations |
+| Neutral    | Spec2021, Spec2025 | Muted, low-chroma palette                                 |
+| Vibrant    | Spec2021, Spec2025 | High-chroma, vivid palette                                |
+| Expressive | Spec2021, Spec2025 | Bold and artistic palette with creative color shifts      |
+| Rainbow    | Spec2021           | Broad spectrum of hues                                    |
+| FruitSalad | Spec2021           | Playful, multi-hue palette                                |
+| Monochrome | Spec2021           | Single-hue grayscale palette                              |
+| Fidelity   | Spec2021           | Closely matches the seed color                            |
+| Content    | Spec2021           | Derived from content colors for maximum accuracy          |
+| Cmf        | Spec2026 (Auto)    | Color, Material, Finish (CMF) palette                     |
 
 ### ThemeColorSpec
 
-| Value | Description |
-| --- | --- |
-| Spec2021 | Original Material Design 3 color specification |
-| Spec2025 | Updated 2025 color specification (only supported by TonalSpot, Neutral, Vibrant, Expressive) |
+| Value    | Description                                                                             |
+| -------- | --------------------------------------------------------------------------------------- |
+| Spec2021 | Original Material Design 3 color specification                                          |
+| Spec2025 | 2025 color specification (supported by TonalSpot, Neutral, Vibrant, Expressive) |
 
 ## MiuixTheme Object
 
@@ -157,12 +158,12 @@ val mode = MiuixTheme.colorSchemeMode
 val isDynamic = MiuixTheme.isDynamicColor
 ```
 
-| Property | Type | Description |
-| --- | --- | --- |
-| colorScheme | Colors | Current color scheme |
-| textStyles | TextStyles | Current text styles |
+| Property        | Type             | Description                                                        |
+| --------------- | ---------------- | ------------------------------------------------------------------ |
+| colorScheme     | Colors           | Current color scheme                                               |
+| textStyles      | TextStyles       | Current text styles                                                |
 | colorSchemeMode | ColorSchemeMode? | Current color scheme mode (null if using direct `colors` overload) |
-| isDynamicColor | Boolean | Whether the current mode is a Monet dynamic color mode |
+| isDynamicColor  | Boolean          | Whether the current mode is a Monet dynamic color mode             |
 
 ## Customizing the Theme
 
@@ -203,4 +204,32 @@ fun MyApp() {
         // Application content
     }
 }
+
+## Display Cutout Adaptation (`ProvideDisplayCutoutFix`)
+
+Miuix automatically integrates `ProvideDisplayCutoutFix` into `MiuixTheme`.
+
+On certain Android devices (especially tablets in landscape orientation and foldable devices), the OEM system window insets dispatch mechanism may fail to report the display cutout to the View tree (`WindowInsets.displayCutout` evaluates to 0) even when the window extends into the cutout area.
+
+`ProvideDisplayCutoutFix` queries the WindowManager's current window metrics (API 30+) and supplements the View tree's `WindowInsets` so that all Compose components (such as `NavigationRail`, `TopAppBar`, `Scaffold`, and `ListPopup`) properly avoid display cutouts.
+
+### Manual Usage
+
+Normally this is handled automatically by `MiuixTheme`. If you have a custom root window or overlay outside of `MiuixTheme`, you can also invoke it directly:
+
+```kotlin
+ProvideDisplayCutoutFix()
+```
+
+### Disabling the Fix
+
+If your application handles display cutouts manually or requires the default system behavior without supplementation, you can disable it via `LocalDisplayCutoutFixEnabled`:
+
+```kotlin
+CompositionLocalProvider(LocalDisplayCutoutFixEnabled provides false) {
+    MiuixTheme {
+        // Content with automatic cutout fix disabled
+    }
+}
+```
 ```

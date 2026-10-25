@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
@@ -344,6 +345,7 @@ private fun NavDisplayLayout(
     val topIndex = backStack.lastIndex
     val backScope = rememberCoroutineScope()
     val currentOnBack = rememberUpdatedState(onBack)
+    val focusManager = LocalFocusManager.current
 
     // Build entries for the current back stack and reconcile. The build runs only when the back-stack
     // key list changes; entry instances for surviving keys are reused by the presentation. The
@@ -353,6 +355,17 @@ private fun NavDisplayLayout(
     // recover an index (no O(n^2)). Declared ahead of the gesture wiring: the settle physics
     // resolution below feeds the gesture callbacks.
     val currentKeyList = backStack.toList()
+    // Covered entries stay composed, so clear their focus when the top entry changes.
+    val previousTopKey = remember { arrayOfNulls<NavKey>(1) }
+    DisposableEffect(currentKeyList.lastOrNull()) {
+        val currentTopKey = currentKeyList.lastOrNull()
+        val previous = previousTopKey[0]
+        if (previous != null && previous != currentTopKey) {
+            focusManager.clearFocus()
+        }
+        previousTopKey[0] = currentTopKey
+        onDispose { }
+    }
     // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
     // by UI, so it must not be snapshot state (no cross-phase back-write).
     val previousContentKeys = remember { arrayOfNulls<List<Any>>(1) }
@@ -835,7 +848,6 @@ private fun NavEntryHost(
     // Per-entry state scopes. The lifecycle owner is remembered per host; the saveable holder and the
     // view-model store registry are display-level and passed from NavDisplayLayout, so the entry's
     // ViewModelStore outlives this host (depth culling must not clear it).
-    val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
     val maxLifecycle = Lifecycle.State.entries[depthBuckets and DEPTH_BUCKET_LIFECYCLE_MASK]
     val lifecycleOwner = rememberNavEntryLifecycleOwner(maxLifecycle)
 
@@ -857,18 +869,27 @@ private fun NavEntryHost(
     // the top (d <= 0), the upper neighbour's transition while covered (0 < d). The per-frame
     // visual is then a pure deferred read inside the transition's own graphicsLayer.
     val activeTransition = if ((depthBuckets and DEPTH_BUCKET_GOVERNS_OWN) != 0) ownTransition else upperTransition
-    val entryModifier = with(activeTransition) {
-        Modifier.transformEntry(
-            LiveNavTransitionScope(
-                presentation = presentation,
-                entryIndex = entryIndex,
-                isRemoving = entry.presentation.isRemoving,
-                change = change,
-                layoutSize = layoutSize,
-                layoutDirection = layoutDirection,
-                density = density,
-            ),
+    val transitionScope = remember(
+        presentation,
+        entryIndex,
+        entry.presentation.isRemoving,
+        change,
+        layoutSize,
+        layoutDirection,
+        density,
+    ) {
+        LiveNavTransitionScope(
+            presentation = presentation,
+            entryIndex = entryIndex,
+            isRemoving = entry.presentation.isRemoving,
+            change = change,
+            layoutSize = layoutSize,
+            layoutDirection = layoutDirection,
+            density = density,
         )
+    }
+    val entryModifier = with(activeTransition) {
+        Modifier.transformEntry(transitionScope)
     }
 
     val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0) {
@@ -919,10 +940,15 @@ private fun NavEntryHost(
 
     Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier).then(opaqueInputModifier)) {
         ProvideNavEntryBackScope(entryDispatcherOwner) {
-            ProvideNavEntryViewModelStore(vmOwner) {
-                ProvideNavEntryLifecycle(lifecycleOwner) {
-                    stateHolder.EntryStateContent(entry.contentKey) {
-                        movableContent { entry.Content() }
+            stateHolder.EntryStateContent(entry.contentKey) {
+                val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
+                ProvideNavEntryViewModelStore(vmOwner) {
+                    ProvideNavEntryLifecycle(lifecycleOwner) {
+                        movableContent {
+                            CompositionLocalProvider(LocalNavTransitionScope provides transitionScope) {
+                                entry.Content()
+                            }
+                        }
                     }
                 }
             }

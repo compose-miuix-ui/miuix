@@ -36,6 +36,7 @@ export default defineConfig({
                         { text: "Icon System", link: "/guide/icons" },
                         { text: "Utility Functions", link: "/guide/utils" },
                         { text: "Navigation Support", link: "/guide/miuix-nav" },
+                        { text: "Window & Title Bar", link: "/guide/miuix-window" },
                         { text: "Blur Effects", link: "/guide/blur" },
                         { text: "Glass Material", link: "/guide/glass" },
                         { text: "Squircle Shapes", link: "/guide/squircle" },

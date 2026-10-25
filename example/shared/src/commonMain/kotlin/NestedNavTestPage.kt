@@ -80,7 +80,7 @@ fun NestedNavTestPage(padding: PaddingValues) {
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive, topAppBarScrollBehavior) {
+            BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "Nested Navigation",
                     showTopAppBar = appState.showTopAppBar,

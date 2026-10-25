@@ -159,8 +159,56 @@ jobs:
           path: Miuix-android-universal-apk.apk
           archive: false
 
+  graalvm:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux x64
+            artifact-name: Miuix-linux-x64-graalvm-app
+          - os: ubuntu-24.04-arm
+            platform: linux arm64
+            artifact-name: Miuix-linux-arm64-graalvm-app
+          - os: windows-latest
+            platform: windows x64
+            artifact-name: Miuix-windows-x64-graalvm-app
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Setup JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: "zulu"
+          java-version: "21"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Setup MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install patchelf
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y patchelf
+      - name: Build GraalVM app (${{ matrix.platform }})
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./gradlew :example:desktop-nucleus:createGraalvmNativeDistributable
+      - name: Rename ${{ matrix.platform }} artifact
+        run: mv example/desktop-nucleus/build/compose/binaries/main/graalvm-app/Miuix ${{ matrix.artifact-name }}
+        shell: bash
+      - name: Upload Miuix ${{ matrix.platform }} GraalVM artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-name }}
+          archive: true
+
   post_telegram:
-    needs: [build, ios, android]
+    needs: [build, ios, android, graalvm]
     runs-on: ubuntu-latest
     if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
     steps:
