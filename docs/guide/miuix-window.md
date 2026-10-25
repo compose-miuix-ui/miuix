@@ -1,12 +1,12 @@
 # Window & Title Bar
 
-`miuix-window` is a desktop-only window styling and custom caption bar module for Compose Multiplatform, targeting **Windows (10/11)**, **macOS**, and **Linux (X11 & Wayland)**.
+`miuix-window` is a desktop-only window styling and custom caption bar module for Compose Multiplatform on **Windows 10/11**, **macOS**, and **Linux (X11 & Wayland)**.
 
-It provides native desktop integrations such as Windows 11 Snap Layouts, DWM Mica/Acrylic materials, macOS traffic lights layout and Vibrancy, and Linux client-side shadow decorations with smooth window dragging and themed resizing.
+It provides native desktop integrations, including Windows 11 Snap Layouts, DWM Mica / Acrylic materials, macOS traffic light alignment and Vibrancy, Linux client-side decorations (CSD), and multi-touch touchscreen input.
 
 ## Setup
 
-Add the dependency to your `build.gradle.kts` in `desktopMain`:
+Add the dependency to `desktopMain` in your `build.gradle.kts`:
 
 ```kotlin
 kotlin {
@@ -18,11 +18,28 @@ kotlin {
 }
 ```
 
+### Linux JVM Options
+
+On Linux, loading system cursor themes (e.g. Breeze, Adwaita) and managing XInput2 touch focus require access to AWT internal packages. Add the following module opens to your `application` configuration:
+
+```kotlin
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+        if (System.getProperty("os.name").startsWith("Linux")) {
+            jvmArgs += listOf(
+                "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED",
+                "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
+            )
+        }
+    }
+}
+```
+
 ## Basic Usage
 
-Replace `Window` with `MiuixWindow` and use `MiuixCaptionBar` to build an integrated title bar:
-
-Place the app's `MiuixTheme` outside `MiuixWindow` so the window background, caption bar, and content share the same color scheme. The solid window background always uses `MiuixTheme.colorScheme.surface`; `backgroundIsDarkTheme` controls the native backdrop appearance without replacing the theme background color.
+Replace Compose `Window` with `MiuixWindow` and use `MiuixCaptionBar` with `WindowDraggableArea`:
 
 ```kotlin
 import androidx.compose.foundation.background
@@ -68,8 +85,7 @@ fun main() = application {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(captionBarHeight)
-                            .background(MiuixTheme.colorScheme.surface),
+                            .height(captionBarHeight),
                     ) {
                         WindowDraggableArea()
                         MiuixCaptionBar {
@@ -85,7 +101,11 @@ fun main() = application {
                 }
 
                 // Main content
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                ) {
                     Text("Hello Miuix Window", modifier = Modifier.align(Alignment.Center))
                 }
             }
@@ -94,44 +114,60 @@ fun main() = application {
 }
 ```
 
+> Place `MiuixTheme` outside `MiuixWindow` so window decorations, caption bars, and content inherit the same color scheme. `backgroundIsDarkTheme` sets the native backdrop luminance without overriding `MiuixTheme.colorScheme.surface`.
+
 ## Core Components
 
-### `MiuixWindow` / `MiuixDialogWindow`
+### `MiuixWindow` & `MiuixDialogWindow`
 
-Drop-in containers for standard Compose `Window` and `DialogWindow`. They automatically setup platform-specific styling hooks, input handling, and non-client region geometry.
+Drop-in replacements for Compose `Window` and `DialogWindow`. They manage non-client area extension, platform hit-testing, and native backdrop materials.
 
 ### `MiuixCaptionBar` & `WindowDraggableArea`
 
-- **`MiuixCaptionBar`**: Automatically reserves space based on platform button alignment (left on macOS for traffic lights, right on Windows, and the configured system position on Linux).
-- **`WindowDraggableArea`**: Placed behind or around interactive elements in the caption bar to capture native drag-to-move gestures without intercepting clicks on buttons or search fields.
+- **`MiuixCaptionBar`**: Title bar container that automatically insets content for native buttons (left on macOS for traffic lights, right on Windows, and system-configured on Linux).
+- **`WindowDraggableArea`**: Invisible region placed behind interactive elements to handle native dragging without blocking clicks on child controls.
+
+> **Constraint**: Each `MiuixWindow` or `MiuixDialogWindow` scope accepts at most **one** active `WindowDraggableArea`. Child windows and dialogs maintain independent scopes. Keep draggable areas outside overlapping transitions (`AnimatedContent`, `Crossfade`) to avoid temporary duplicate registrations during animation handoff.
 
 ### `MiuixWindowProperties`
 
-Configures window appearance and behavior:
-
-| Property                   | Type                                 | Description                                                                                         |
-| -------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `captionBarHeight`         | `Dp`                                 | Height of the caption bar (`defaultCaptionBarHeight()`: 32.dp on Linux and Windows, 40.dp on macOS) |
-| `captionButtonHeight`      | `Dp`                                 | Height of caption buttons (defaults to `captionBarHeight`)                                          |
-| `captionButtonsVisible`    | `Boolean`                            | Whether caption buttons are visible (default `true`)                                                |
-| `captionButtonIsDarkTheme` | `Boolean?`                           | Dark appearance for caption buttons (`null` to follow system dynamically)                           |
-| `backgroundType`           | `MiuixWindowBackgroundType`          | Native backdrop: `None`, `Mica`, `Acrylic`, `MicaAlt`, or `Vibrancy`                                |
-| `backgroundIsDarkTheme`    | `Boolean?`                           | Dark appearance for native backdrop (`null` to follow system dynamically)                           |
-| `moveable`                 | `Boolean`                            | Whether native caption dragging is enabled (default `true`)                                         |
-| `minSize`                  | `DpSize`                             | Minimum window size constraints                                                                     |
-| `onResizeEdgeChange`       | `(Window, WindowResizeEdge) -> Unit` | Callback when cursor enters/leaves resize borders                                                   |
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `captionBarHeight` | `Dp` | `defaultCaptionBarHeight()` | Caption bar height (32.dp on Windows/Linux, 40.dp on macOS) |
+| `captionButtonHeight` | `Dp` | `captionBarHeight` | Height of caption buttons |
+| `captionButtonsVisible` | `Boolean` | `true` | Whether native/custom caption buttons are visible |
+| `captionButtonIsDarkTheme` | `Boolean?` | `null` | Dark appearance for caption buttons (`null` follows system) |
+| `backgroundType` | `MiuixWindowBackgroundType` | `None` | Native backdrop: `None`, `Mica`, `Acrylic`, `MicaAlt`, or `Vibrancy` |
+| `backgroundIsDarkTheme` | `Boolean?` | `null` | Dark appearance for native backdrop (`null` follows system) |
+| `moveable` | `Boolean` | `true` | Whether caption dragging is enabled |
+| `minimizeButtonEnabled` | `Boolean` | `true` | Enables or disables the minimize button |
+| `maximizeOrRestoreButtonEnabled` | `Boolean` | `true` | Enables or disables maximize and restore operations |
+| `minSize` | `DpSize` | `DpSize.Zero` | Minimum window size constraint |
+| `extraDisplayScale` | `Float` | `1.0f` | Additional UI display scaling factor |
+| `extraFontScale` | `Float` | `1.0f` | Additional font scaling factor |
+| `onResizeEdgeChange` | `(Window, WindowResizeEdge) -> Unit` | `{ _, _ -> }` | Callback when pointer enters/leaves resize borders |
+| `onVisibleChange` | `(Window, Boolean) -> Unit` | `{ _, _ -> }` | Callback on window visibility change |
 
 ## Platform Specifics
 
-- **Windows**: Intercepts `WM_NCHITTEST` and reports `HTMAXBUTTON` over the custom maximize button, triggering Windows 11 Snap Layouts flyout menus natively.
-- **macOS**: Repositions the native traffic light buttons vertically to align with `captionBarHeight` and applies `NSVisualEffectView` Vibrancy behind the transparent window.
-- **Linux**: Applies `_GTK_FRAME_EXTENTS` for proper window snapping and shadows, initiates `_NET_WM_MOVERESIZE` for smooth window manager moves, and uses native Xcursor theme cursors.
+- **Windows**:
+  - Reports `HTMAXBUTTON` on maximize button hover to invoke Windows 11 Snap Layouts flyout menus.
+  - Supports DWM Mica, Mica Alt, and Acrylic materials with automatic dark mode switching.
+  - Multi-touch touchscreen input and caption dragging via `WM_POINTER`.
+- **macOS**:
+  - Vertically centers native traffic light buttons to match `captionBarHeight`.
+  - Full-window `NSVisualEffectView` Vibrancy material behind transparent surfaces.
+- **Linux**:
+  - Client-side shadows with `_GTK_FRAME_EXTENTS` for window manager snapping and positioning.
+  - Smooth native dragging via EWMH `_NET_WM_MOVERESIZE`.
+  - Automatic Xcursor theme loading (Breeze, Adwaita, etc.) with bidirectional resize cursors.
+  - Multi-touch touchscreen gestures via XInput2 (XI2).
 
-## ProGuard / Release Packaging
+## Release Packaging & ProGuard
 
-When packaging a Desktop JVM application with ProGuard enabled (e.g. running `./gradlew packageRelease*` or `createReleaseDistributable`), ProGuard's default shrinking rules may strip JNA native dispatch methods and reflection metadata needed by `miuix-window`.
+When building release distributions with ProGuard (`./gradlew packageReleaseDistributable`), preserve JNA and `miuix-window` symbols.
 
-Add the following ProGuard configuration to your application's `build.gradle.kts`:
+Add to `build.gradle.kts`:
 
 ```kotlin
 compose.desktop {
@@ -143,10 +179,10 @@ compose.desktop {
 }
 ```
 
-And include the following rules in your `proguard-rules.pro`:
+Add to `proguard-rules.pro`:
 
 ```pro
-# JNA (Java Native Access)
+# JNA
 -keep class com.sun.jna.** { *; }
 -keepclassmembers class * extends com.sun.jna.** { *; }
 -keep interface * extends com.sun.jna.** { *; }
@@ -154,9 +190,7 @@ And include the following rules in your `proguard-rules.pro`:
 -keep class * implements com.sun.jna.Library { *; }
 -keep class * implements com.sun.jna.Structure { *; }
 -keep class * extends com.sun.jna.Structure { *; }
--keepclassmembers class * extends com.sun.jna.Structure {
-    <fields>;
-}
+-keepclassmembers class * extends com.sun.jna.Structure { <fields>; }
 -keep class * extends com.sun.jna.NativeLong { *; }
 -dontwarn com.sun.jna.**
 -dontnote com.sun.jna.**
@@ -166,13 +200,11 @@ And include the following rules in your `proguard-rules.pro`:
 -dontnote top.yukonga.miuix.**
 ```
 
-> **Note**: If you use `dev.nucleusframework` plugin (e.g. for GraalVM native images), these JNA rules are automatically injected by the Nucleus plugin.
+> **Note**: If using `dev.nucleusframework`, JNA rules are automatically injected.
 
-### Stripping Foreign Native Libraries (Optional)
+### Pruning Foreign Native Libraries (Optional)
 
-JNA is published to Maven Central as a monolithic JAR containing native dispatch libraries for over 20 platform architectures (Windows, Linux, macOS, FreeBSD, AIX, Solaris, etc.). When packaging for a specific target platform (e.g. Linux x64 or Windows x64), binaries for all other operating systems are redundant and add unnecessary overhead to the distribution package (~1.5 MB).
-
-To minimize distribution size, you can configure an automated pruning hook in your application's `build.gradle.kts`:
+JNA bundles native binaries for ~20 platforms (~1.5 MB total). To reduce distribution size, strip foreign binaries during packaging:
 
 ```kotlin
 import java.util.zip.ZipEntry
@@ -232,4 +264,4 @@ tasks.withType<AbstractProguardTask>().configureEach {
 }
 ```
 
-> **Note**: If you use the `dev.nucleusframework` plugin, simply set `nativeDistributions { cleanupNativeLibs = true }`, and Nucleus will automatically prune foreign native libraries during the artifact transform phase.
+> **Note**: In `dev.nucleusframework`, simply enable `nativeDistributions { cleanupNativeLibs = true }`.
