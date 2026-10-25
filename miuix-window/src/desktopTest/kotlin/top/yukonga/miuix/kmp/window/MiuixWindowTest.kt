@@ -100,14 +100,14 @@ class MiuixWindowTest {
 
     @Test
     fun testLinuxResizeCursor() {
-        val wCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.W_RESIZE_CURSOR)
-        val eCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.E_RESIZE_CURSOR)
-        val nCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.N_RESIZE_CURSOR)
-        val sCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.S_RESIZE_CURSOR)
-        val nwCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.NW_RESIZE_CURSOR)
-        val seCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.SE_RESIZE_CURSOR)
-        val neCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.NE_RESIZE_CURSOR)
-        val swCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.SW_RESIZE_CURSOR)
+        val wCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.W_RESIZE_CURSOR)
+        val eCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.E_RESIZE_CURSOR)
+        val nCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.N_RESIZE_CURSOR)
+        val sCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.S_RESIZE_CURSOR)
+        val nwCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.NW_RESIZE_CURSOR)
+        val seCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.SE_RESIZE_CURSOR)
+        val neCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.NE_RESIZE_CURSOR)
+        val swCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.SW_RESIZE_CURSOR)
 
         val fallbackW = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.W_RESIZE_CURSOR).name
         val fallbackE = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.E_RESIZE_CURSOR).name

@@ -15,7 +15,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
-import top.yukonga.miuix.kmp.window.platform.linux.linuxCaptionBarHitTest
+import top.yukonga.miuix.kmp.window.platform.linux.input.linuxCaptionBarInput
 import top.yukonga.miuix.kmp.window.platform.windows.windowsCaptionBarTouchInput
 
 /**
@@ -66,7 +66,7 @@ fun WindowDraggableArea(
             .run {
                 when {
                     DesktopOS.isWindows() -> windowsCaptionBarTouchInput(properties.moveable)
-                    DesktopOS.isLinux() -> linuxCaptionBarHitTest()
+                    DesktopOS.isLinux() -> linuxCaptionBarInput()
                     else -> this
                 }
             }

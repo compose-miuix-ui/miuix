@@ -39,6 +39,13 @@ import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
+import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowGestures
+import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowInputEffect
+import top.yukonga.miuix.kmp.window.platform.linux.input.LocalLinuxWindowGestures
+import top.yukonga.miuix.kmp.window.platform.linux.window.LinuxCaptionBarHitTest
+import top.yukonga.miuix.kmp.window.platform.linux.window.LinuxWindowGestureEffects
+import top.yukonga.miuix.kmp.window.platform.linux.window.LocalLinuxCaptionBarHitTest
+import top.yukonga.miuix.kmp.window.platform.linux.window.UndecoratedWindowResizer
 import java.awt.event.WindowEvent
 
 @Suppress("ktlint:compose:content-slot-reused")
@@ -61,18 +68,12 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
         return
     }
 
-    DisposableEffect(window) {
-        val focus = LinuxWindowFocus.install(window)
-        onDispose { focus?.close() }
-    }
-
     val currentProperties by rememberUpdatedState(properties)
     val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
         UndecoratedWindowResizer(
-            window = window,
             onResizeEdgeChange = { edge ->
                 currentProperties.onResizeEdgeChange(window, edge)
             },
@@ -94,6 +95,16 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
         systemDecoration.buttonsWidth
     }
 
+    val windowGestures = remember(window) {
+        LinuxWindowGestures(
+            window = window,
+            caption = captionBarHitTest,
+            resizer = undecoratedWindowResizer,
+            captionHovered = isHitTestInCaptionBar,
+            effects = LinuxWindowGestureEffects(window, undecoratedWindowResizer),
+        )
+    }
+
     CompositionLocalProvider(
         LocalMiuixWindowInfo provides MiuixWindowInfo(
             captionBarHeight = effectiveCaptionBarHeight,
@@ -105,18 +116,17 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
             cornerRadius = if (shadowMargin > 0.dp) LinuxClientShadow.cornerRadius else 0.dp,
         ),
         LocalLinuxCaptionBarHitTest provides captionBarHitTest,
+        LocalLinuxWindowGestures provides windowGestures,
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,
     ) {
-        if (currentProperties.moveable) {
-            LinuxCaptionBarDragHandler(
-                window = window,
-                hitTest = captionBarHitTest,
-                isMoveable = properties.moveable,
-                isHitTestInCaptionBar = isHitTestInCaptionBar.value,
-                canDrag = windowState.placement != WindowPlacement.Fullscreen,
-                canMaximize = resizable && properties.maximizeOrRestoreButtonEnabled,
-            )
-        }
+        LinuxWindowInputEffect(
+            window = window,
+            gestures = windowGestures,
+            moveable = properties.moveable,
+            resizable = resizable && !isMaximizedOrFullScreen,
+            canDrag = windowState.placement != WindowPlacement.Fullscreen,
+            canMaximize = resizable && properties.maximizeOrRestoreButtonEnabled,
+        )
 
         if (clientShadow && backend == LinuxWindowBackend.X11OrXWayland) {
             LinuxClientShadowEffect(
@@ -133,10 +143,6 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
                     window.undecoratedResizerThickness
                 }
             window.undecoratedResizerThickness = 0.dp
-        }
-
-        LaunchedEffect(resizable, windowState.placement) {
-            undecoratedWindowResizer.enabled = resizable && !isMaximizedOrFullScreen
         }
 
         val backgroundColor = MiuixTheme.colorScheme.surface
@@ -215,7 +221,9 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
             }
 
             undecoratedWindowResizer.Content(
-                modifier = Modifier.layoutId("UndecoratedWindowResizer"),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .layoutId("UndecoratedWindowResizer"),
             )
         }
     }

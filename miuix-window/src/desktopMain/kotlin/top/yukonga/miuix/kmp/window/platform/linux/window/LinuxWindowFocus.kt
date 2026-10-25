@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package top.yukonga.miuix.kmp.window.platform.linux
+package top.yukonga.miuix.kmp.window.platform.linux.window
 
 import com.sun.jna.Memory
 import com.sun.jna.Native
@@ -10,6 +10,7 @@ import com.sun.jna.platform.unix.X11
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.NativeLongByReference
 import com.sun.jna.ptr.PointerByReference
+import top.yukonga.miuix.kmp.window.platform.linux.x11.LinuxX11
 import java.awt.AWTEvent
 import java.awt.Component
 import java.awt.Toolkit
@@ -19,11 +20,11 @@ import java.awt.event.MouseEvent
 import javax.swing.SwingUtilities
 
 /**
- * 将 AWT 原生子窗口的输入时间同步到顶层窗口，供窗口管理器判断用户主动激活
+ * Requests window-manager activation with the X11 input time shared by mouse and touch presses.
  */
 internal class LinuxWindowFocus private constructor(
     private val window: Window,
-    private val x11: X11,
+    private val x11: LinuxX11,
     private val display: X11.Display,
 ) : AutoCloseable {
     private val userTime = x11.XInternAtom(
@@ -38,56 +39,69 @@ internal class LinuxWindowFocus private constructor(
     )
     private val listener = AWTEventListener { event ->
         if (event.id == MouseEvent.MOUSE_PRESSED) {
-            try {
-                handleInput(event)
-            } catch (exception: Exception) {
-                log.log(
-                    System.Logger.Level.WARNING,
-                    "Failed to update the Linux window input time",
-                    exception,
-                )
-            }
+            val component = event.source as? Component ?: return@AWTEventListener
+            onPointerPress(component)
         }
     }
 
-    private fun handleInput(event: AWTEvent) {
-        val component = event.source as? Component ?: return
+    /**
+     * Requests activation for a pointer press in this window, leaving the decision to the WM.
+     *
+     * @param timestamp The original X11 server time. When omitted, reads the time JBR recorded
+     * on the source's native child window. JVM and Compose event clocks cannot be used here.
+     */
+    fun onPointerPress(
+        component: Component,
+        timestamp: Long? = null,
+    ) {
         if (SwingUtilities.getWindowAncestor(component) !== window ||
             !window.isShowing || !window.isEnabled || !window.isFocusableWindow
         ) {
             return
         }
+        try {
+            val inputTime = timestamp ?: run {
+                val nativeComponent = generateSequence(component) { it.parent }
+                    .firstOrNull { !it.isLightweight } ?: return
+                if (!nativeComponent.isDisplayable) return
+                val source = X11.Window(Native.getComponentID(nativeComponent))
+                readUserTime(source) ?: return
+            }
+            if (inputTime == 0L) return
+            val target = X11.Window(Native.getComponentID(window))
 
-        val nativeComponent = generateSequence(component) { it.parent }
-            .firstOrNull { !it.isLightweight } ?: return
-        if (!nativeComponent.isDisplayable) return
-        val source = X11.Window(Native.getComponentID(nativeComponent))
-        val target = X11.Window(Native.getComponentID(window))
-        val timestamp = readUserTime(source) ?: return
+            // JBR records mouse input on its child window; XI2 touch supplies the server time
+            // directly. Publish either source on the top-level window read by the WM.
+            Memory(NativeLong.SIZE.toLong()).use { data ->
+                data.setNativeLong(0, NativeLong(inputTime))
+                x11.XChangeProperty(
+                    display,
+                    target,
+                    userTime,
+                    X11.XA_CARDINAL,
+                    32,
+                    X11.PropModeReplace,
+                    data,
+                    1,
+                )
+            }
 
-        // JBR 将 Skia Canvas 的点击时间写在子窗口上，KWin 只读取顶层窗口
-        // 使用 X11 原始事件时间，不能用 MouseEvent.when 的 Unix 时间或当前时间代替
-        Memory(NativeLong.SIZE.toLong()).use { data ->
-            data.setNativeLong(0, NativeLong(timestamp))
-            x11.XChangeProperty(
-                display,
-                target,
-                userTime,
-                X11.XA_CARDINAL,
-                32,
-                X11.PropModeReplace,
-                data,
-                1,
+            // AWT's focus request may have been refused. Always ask the WM with this press's
+            // time, including during the asynchronous FocusIn/FocusOut handoff.
+            requestActivation(target, inputTime)
+            x11.XFlush(display)
+        } catch (exception: Exception) {
+            log.log(
+                System.Logger.Level.WARNING,
+                "Failed to update the Linux window input time",
+                exception,
             )
         }
-
-        // AWT 的直接焦点请求可能已被拒绝，携带本次点击时间重新交由 WM 决定
-        // 即使 AWT 暂时报告已聚焦也需要发送，避免 FocusIn/FocusOut 异步交接的竞态
-        requestActivation(target, timestamp)
-        x11.XFlush(display)
     }
 
-    private fun readUserTime(source: X11.Window): Long? {
+    private fun readUserTime(
+        source: X11.Window,
+    ): Long? {
         val type = X11.AtomByReference()
         val format = IntByReference()
         val count = NativeLongByReference()
@@ -120,7 +134,10 @@ internal class LinuxWindowFocus private constructor(
         }
     }
 
-    private fun requestActivation(target: X11.Window, timestamp: Long) {
+    private fun requestActivation(
+        target: X11.Window,
+        timestamp: Long,
+    ) {
         val event = X11.XEvent()
         event.setType(X11.XClientMessageEvent::class.java)
         event.xclient.apply {
@@ -153,10 +170,12 @@ internal class LinuxWindowFocus private constructor(
     companion object {
         private val log = System.getLogger(LinuxWindowFocus::class.java.name)
 
-        fun install(window: Window): LinuxWindowFocus? {
+        fun install(
+            window: Window,
+        ): LinuxWindowFocus? {
             if (Toolkit.getDefaultToolkit().javaClass.name != "sun.awt.X11.XToolkit") return null
             return try {
-                val x11 = X11.INSTANCE
+                val x11 = LinuxX11.INSTANCE
                 val display = x11.XOpenDisplay(null) ?: return null
                 try {
                     LinuxWindowFocus(

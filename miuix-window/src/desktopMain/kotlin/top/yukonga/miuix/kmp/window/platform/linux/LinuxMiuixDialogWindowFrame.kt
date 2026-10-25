@@ -38,6 +38,13 @@ import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
+import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowGestures
+import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowInputEffect
+import top.yukonga.miuix.kmp.window.platform.linux.input.LocalLinuxWindowGestures
+import top.yukonga.miuix.kmp.window.platform.linux.window.LinuxCaptionBarHitTest
+import top.yukonga.miuix.kmp.window.platform.linux.window.LinuxWindowGestureEffects
+import top.yukonga.miuix.kmp.window.platform.linux.window.LocalLinuxCaptionBarHitTest
+import top.yukonga.miuix.kmp.window.platform.linux.window.UndecoratedWindowResizer
 import java.awt.event.WindowEvent
 
 @Suppress("ktlint:compose:content-slot-reused")
@@ -55,18 +62,12 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
         return
     }
 
-    DisposableEffect(window) {
-        val focus = LinuxWindowFocus.install(window)
-        onDispose { focus?.close() }
-    }
-
     val currentProperties by rememberUpdatedState(properties)
     val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
         UndecoratedWindowResizer(
-            window = window,
             onResizeEdgeChange = { edge ->
                 currentProperties.onResizeEdgeChange(window, edge)
             },
@@ -74,6 +75,16 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
     }
     val clientShadow = LinuxClientShadow.shouldUseClientShadow(decoration)
     val shadowMargin = if (clientShadow) LinuxClientShadow.margin else 0.dp
+
+    val windowGestures = remember(window) {
+        LinuxWindowGestures(
+            window = window,
+            caption = captionBarHitTest,
+            resizer = undecoratedWindowResizer,
+            captionHovered = isHitTestInCaptionBar,
+            effects = LinuxWindowGestureEffects(window, undecoratedWindowResizer),
+        )
+    }
 
     CompositionLocalProvider(
         LocalMiuixWindowInfo provides MiuixWindowInfo(
@@ -86,16 +97,15 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
             cornerRadius = if (clientShadow) LinuxClientShadow.cornerRadius else 0.dp,
         ),
         LocalLinuxCaptionBarHitTest provides captionBarHitTest,
+        LocalLinuxWindowGestures provides windowGestures,
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,
     ) {
-        if (currentProperties.moveable) {
-            LinuxCaptionBarDragHandler(
-                window = window,
-                hitTest = captionBarHitTest,
-                isMoveable = properties.moveable,
-                isHitTestInCaptionBar = isHitTestInCaptionBar.value,
-            )
-        }
+        LinuxWindowInputEffect(
+            window = window,
+            gestures = windowGestures,
+            moveable = properties.moveable,
+            resizable = resizable,
+        )
 
         LaunchedEffect(decoration) {
             undecoratedWindowResizer.resizerThickness =
@@ -112,10 +122,6 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
                 window = window,
                 margin = shadowMargin,
             )
-        }
-
-        LaunchedEffect(resizable) {
-            undecoratedWindowResizer.enabled = resizable
         }
 
         val backgroundColor = MiuixTheme.colorScheme.surface
@@ -152,23 +158,29 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
                                 captionBarHitTest.buttonsBounds = it.boundsInWindow()
                             },
                     ) {
-                        LinuxSystemCaptionButton(
-                            type = LinuxCaptionButtonType.Close,
-                            iconPack = systemDecoration.iconPack,
-                            iconTheme = systemDecoration.iconTheme,
-                            onClick = {
-                                window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING))
-                            },
-                            maximized = false,
-                            height = properties.captionButtonHeight,
-                            enabled = true,
-                        )
+                        systemDecoration.buttons.forEach { button ->
+                            if (button == LinuxCaptionButtonType.Close) {
+                                LinuxSystemCaptionButton(
+                                    type = button,
+                                    iconPack = systemDecoration.iconPack,
+                                    iconTheme = systemDecoration.iconTheme,
+                                    onClick = {
+                                        window.dispatchEvent(WindowEvent(window, WindowEvent.WINDOW_CLOSING))
+                                    },
+                                    maximized = false,
+                                    height = properties.captionButtonHeight,
+                                    enabled = true,
+                                )
+                            }
+                        }
                     }
                 }
             }
 
             undecoratedWindowResizer.Content(
-                modifier = Modifier.layoutId("UndecoratedWindowResizer"),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .layoutId("UndecoratedWindowResizer"),
             )
         }
     }

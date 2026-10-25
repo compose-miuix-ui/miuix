@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package top.yukonga.miuix.kmp.window.platform.windows
+package top.yukonga.miuix.kmp.window.platform.input
 
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.awt.ComposeDialog
@@ -15,8 +15,12 @@ import java.awt.Window
 import java.lang.reflect.Field
 import javax.swing.SwingUtilities
 
+/**
+ * ComposeWindow does not expose its ComposeScene. Keep the Compose internals here so
+ * upgrading Compose only requires checking this adapter. Resolve it before consuming native input.
+ */
 @OptIn(InternalComposeUiApi::class)
-internal class WindowsTouchScene private constructor(
+internal class DesktopTouchScene private constructor(
     val scene: ComposeScene,
     private val mediator: Any,
     private val container: Container,
@@ -37,7 +41,7 @@ internal class WindowsTouchScene private constructor(
     }
 
     companion object {
-        fun create(window: Window): WindowsTouchScene? = try {
+        fun create(window: Window): DesktopTouchScene? = try {
             val windowClass = when (window) {
                 is ComposeWindow -> ComposeWindow::class.java
                 is ComposeDialog -> ComposeDialog::class.java
@@ -48,14 +52,19 @@ internal class WindowsTouchScene private constructor(
             val mediator = composeContainer.javaClass.field("mediator").get(composeContainer)
             val sceneDelegate = mediator.javaClass
                 .field("scene\$delegate").get(mediator) as Lazy<*>
-            WindowsTouchScene(
+            DesktopTouchScene(
                 scene = sceneDelegate.value as ComposeScene,
                 mediator = mediator,
                 container = mediator.javaClass.field("container").get(mediator) as Container,
                 disposedField = mediator.javaClass.field("isDisposed"),
                 boundsField = mediator.javaClass.field("sceneBoundsInPx"),
             )
-        } catch (_: Exception) {
+        } catch (exception: Exception) {
+            System.getLogger(DesktopTouchScene::class.java.name).log(
+                System.Logger.Level.WARNING,
+                "Cannot access ComposeScene; native touch is unavailable",
+                exception,
+            )
             null
         }
 
