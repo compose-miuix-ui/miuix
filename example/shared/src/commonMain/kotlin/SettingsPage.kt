@@ -44,7 +44,7 @@ import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
-private val FloatingNavigationBarStyleOptions = listOf("Default", "iOS-like")
+private val FloatingNavigationBarStyleOptions = listOf("Default", "Glass", "iOS-like")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
     listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter")

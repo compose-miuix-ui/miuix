@@ -6,16 +6,23 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectableGroup
@@ -71,8 +78,11 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.Platform
+import top.yukonga.miuix.kmp.utils.platform
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * One destination in a [GlassNavigationBar].
@@ -164,6 +174,8 @@ object GlassNavigationBarDefaults {
  * @param onSelect Called with the index under the finger, on press and while dragging.
  * @param backdrop The [Backdrop] supplying the content behind the glass.
  * @param modifier The modifier applied to the bar.
+ * @param defaultWindowInsetsPadding Whether to apply the default floating bottom margin and
+ *   navigation/caption-bar insets to the whole group. Disable when the caller handles them.
  * @param style The glass material.
  * @param shape The bar's silhouette. Defaults to a capsule of [height].
  * @param alpha Opacity multiplier for the material.
@@ -189,6 +201,7 @@ fun GlassNavigationBar(
     onSelect: (Int) -> Unit,
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
+    defaultWindowInsetsPadding: Boolean = true,
     style: GlassStyle = GlassDefaults.Style,
     shape: GlassShape = GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)),
     alpha: Float = 1f,
@@ -222,7 +235,7 @@ fun GlassNavigationBar(
     LaunchedEffect(visible) {
         if (visible) {
             interactionEnabled = true
-            delay(GlassMotion.NAV_SHOW_DELAY_MS)
+            delay(GlassMotion.NAV_SHOW_DELAY_MS.milliseconds)
             showScale.animateTo(1f, GlassMotion.navShowHide())
         } else {
             showScale.animateTo(GlassMotion.NAV_HIDE_SCALE, GlassMotion.navShowHide())
@@ -245,6 +258,7 @@ fun GlassNavigationBar(
         scope.launch { left.animateTo(newLeft, leftSpring) }
         scope.launch { right.animateTo(newRight, rightSpring) }
     }
+
     val slot = if (barWidth <= 0) 0f else (barWidth - contentInset * 2f) / items.size
     val chipWidth = slot + overhang * 2f
     val targetLeft = contentInset - overhang + index * slot
@@ -277,9 +291,31 @@ fun GlassNavigationBar(
     )
 
     val onSelectState by rememberUpdatedState(onSelect)
+    val bottomPadding = if (defaultWindowInsetsPadding) {
+        val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+            .asPaddingValues().calculateBottomPadding()
+        val floatingMargin = if (platform() == Platform.IOS) {
+            36.dp
+        } else if (navigationBarBottom == 0.dp) {
+            32.dp
+        } else {
+            16.dp + navigationBarBottom
+        }
+        val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
+            .asPaddingValues().calculateBottomPadding()
+        val animatedCaptionBarHeight by animateDpAsState(
+            targetValue = captionBarBottom.coerceAtLeast(0.dp),
+            animationSpec = tween(durationMillis = 300),
+            label = "glassNavigationCaptionBarHeight",
+        )
+        floatingMargin + animatedCaptionBarHeight
+    } else {
+        0.dp
+    }
     GlassNavigationBarLayout(
         modifier = modifier
             .fillMaxWidth()
+            .padding(bottom = bottomPadding)
             .graphicsLayer {
                 val show = showScale.value
                 scaleX = show

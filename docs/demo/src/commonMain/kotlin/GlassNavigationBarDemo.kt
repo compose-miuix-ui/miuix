@@ -76,6 +76,7 @@ fun GlassNavigationBarDemo() {
                             selectedIndex = selectedIndex,
                             onSelect = { selectedIndex = it },
                             backdrop = backdrop,
+                            defaultWindowInsetsPadding = false,
                             modifier = Modifier
                                 .padding(16.dp)
                                 .fillMaxWidth(),

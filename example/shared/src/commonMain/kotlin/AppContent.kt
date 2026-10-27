@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -101,6 +102,8 @@ import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassNavigationBar
+import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -608,44 +611,63 @@ private fun NavigationBar(
                 if (isDark) Highlight.GlassStrokeMiddleDark else Highlight.GlassStrokeMiddleLight
             }
             Box(modifier = modifier) {
-                if (appState.floatingNavigationBarStyle == 1) {
-                    IosLiquidGlassNavigationBar(
-                        items = navigationItems,
-                        selectedIndex = page,
-                        onItemClick = { mainPagerState.animateToPage(it) },
-                        backdrop = backdrop,
-                        isBlurActive = blurActive,
-                        badge = { navigationItemBadge(it, appState.showNavigationBarBadge) },
-                    )
-                } else {
-                    FloatingNavigationBar(
-                        modifier = if (blurActive) {
-                            Modifier.textureBlur(
-                                backdrop = backdrop,
-                                shape = floatingBarShape,
-                                blurRadius = 25f,
-                                colors = BlurDefaults.blurColors(
-                                    blendColors = listOf(
-                                        BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                when (appState.floatingNavigationBarStyle) {
+                    1 if backdrop != null -> {
+                        val glassItems = remember(navigationItems) {
+                            navigationItems.map { GlassNavigationItem(icon = it.icon, label = it.label) }
+                        }
+                        GlassNavigationBar(
+                            items = glassItems,
+                            selectedIndex = page,
+                            onSelect = { mainPagerState.animateToPage(it) },
+                            backdrop = backdrop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                        )
+                    }
+
+                    2 -> {
+                        IosLiquidGlassNavigationBar(
+                            items = navigationItems,
+                            selectedIndex = page,
+                            onItemClick = { mainPagerState.animateToPage(it) },
+                            backdrop = backdrop,
+                            isBlurActive = blurActive,
+                            badge = { navigationItemBadge(it, appState.showNavigationBarBadge) },
+                        )
+                    }
+
+                    else -> {
+                        FloatingNavigationBar(
+                            modifier = if (blurActive) {
+                                Modifier.textureBlur(
+                                    backdrop = backdrop,
+                                    shape = floatingBarShape,
+                                    blurRadius = 25f,
+                                    colors = BlurDefaults.blurColors(
+                                        blendColors = listOf(
+                                            BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                                        ),
                                     ),
-                                ),
-                                highlight = floatingHighlight,
-                            )
-                        } else {
-                            Modifier
-                        },
-                        color = floatingBarColor,
-                        horizontalAlignment = FloatingNavigationBarAlignment.fromInt(appState.floatingNavigationBarPosition)
-                            .toAlignment(),
-                    ) {
-                        navigationItems.forEachIndexed { index, item ->
-                            FloatingNavigationBarItem(
-                                selected = page == index,
-                                onClick = { mainPagerState.animateToPage(index) },
-                                icon = item.icon,
-                                label = item.label,
-                                badge = navigationItemBadge(index, appState.showNavigationBarBadge),
-                            )
+                                    highlight = floatingHighlight,
+                                )
+                            } else {
+                                Modifier
+                            },
+                            color = floatingBarColor,
+                            horizontalAlignment = FloatingNavigationBarAlignment.fromInt(appState.floatingNavigationBarPosition)
+                                .toAlignment(),
+                        ) {
+                            navigationItems.forEachIndexed { index, item ->
+                                FloatingNavigationBarItem(
+                                    selected = page == index,
+                                    onClick = { mainPagerState.animateToPage(index) },
+                                    icon = item.icon,
+                                    label = item.label,
+                                    badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+                                )
+                            }
                         }
                     }
                 }

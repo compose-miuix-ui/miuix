@@ -36,13 +36,11 @@ GlassNavigationBar(
     selectedIndex = selectedIndex,
     onSelect = { selectedIndex = it },
     backdrop = backdrop,
-    modifier = Modifier
-        .navigationBarsPadding()
-        .padding(horizontal = 24.dp, vertical = 12.dp),
+    modifier = Modifier.padding(horizontal = 24.dp),
 )
 ```
 
-The bar fills the available width and adds no system-bar insets. Provide bounded horizontal space and apply margins and insets as needed. Destinations have equal widths; labels allow two lines and can increase the bar's height.
+The bar fills the available width. Horizontal margins remain caller-owned. Destinations have equal widths; labels allow two lines and can increase the bar's height.
 
 `onSelect` runs on pointer down and when a drag enters another destination, not only on release; pressing the current destination also calls it. Keyboard activation with Enter, NumPad Enter or Space calls it on key up, and accessibility activation calls it directly. Give icon-only items a meaningful `contentDescription`.
 
@@ -75,6 +73,7 @@ GlassNavigationBar(
 | onSelect | (Int) -> Unit | Callback for pointer, keyboard and accessibility selection | - | Yes |
 | backdrop | Backdrop | Background sampling source | - | Yes |
 | modifier | Modifier | Modifier applied to the capsule and action group | Modifier | No |
+| defaultWindowInsetsPadding | Boolean | Apply default window insets padding | true | No |
 | style | GlassStyle | Rendering style | GlassDefaults.Style | No |
 | shape | GlassShape | Capsule shape | GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)) | No |
 | alpha | Float | Capsule material opacity multiplier | 1f | No |

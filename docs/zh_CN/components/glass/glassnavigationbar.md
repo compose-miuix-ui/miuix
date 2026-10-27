@@ -36,13 +36,11 @@ GlassNavigationBar(
     selectedIndex = selectedIndex,
     onSelect = { selectedIndex = it },
     backdrop = backdrop,
-    modifier = Modifier
-        .navigationBarsPadding()
-        .padding(horizontal = 24.dp, vertical = 12.dp),
+    modifier = Modifier.padding(horizontal = 24.dp),
 )
 ```
 
-导航栏填满可用宽度，不自动添加系统栏内边距。请提供有界的水平空间，并按需添加外边距和系统栏内边距。各目的地等宽，标签最多两行，可能使导航栏高度增加。
+导航栏填满可用宽度，水平外边距由调用方提供。各目的地等宽，标签最多两行，可能使导航栏高度增加。
 
 `onSelect` 在指针按下和拖动进入其他目的地时调用，并非只在松手时调用；按下当前目的地也会触发回调。使用 Enter、NumPad Enter 或空格键激活时在按键松开时调用，无障碍激活则直接调用。纯图标项目应提供有意义的 `contentDescription`。
 
@@ -75,6 +73,7 @@ GlassNavigationBar(
 | onSelect | (Int) -> Unit | 指针、键盘和无障碍选择的回调 | - | 是 |
 | backdrop | Backdrop | 背景采样源 | - | 是 |
 | modifier | Modifier | 应用于胶囊和尾部操作组合的修饰符 | Modifier | 否 |
+| defaultWindowInsetsPadding | Boolean | 是否应用默认窗口嵌入边距 | true | 否 |
 | style | GlassStyle | 渲染样式 | GlassDefaults.Style | 否 |
 | shape | GlassShape | 胶囊形状 | GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)) | 否 |
 | alpha | Float | 胶囊材质透明度乘数 | 1f | 否 |

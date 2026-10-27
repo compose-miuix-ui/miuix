@@ -42,6 +42,52 @@ import kotlin.test.assertTrue
 class GlassNavigationActionTest {
 
     @Test
+    fun windowInsetPaddingMovesTheWholeGroupWithoutStretchingItsSurfaces() = runComposeUiTest {
+        val applyInsets = mutableStateOf(true)
+        setContent {
+            DialogTestHost {
+                val backdrop = rememberLayerBackdrop()
+                Box(Modifier.size(410.dp, 180.dp).testTag("scene")) {
+                    Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
+                    GlassNavigationBar(
+                        items = listOf(GlassNavigationItem(MiuixIcons.Basic.Search, "Home")),
+                        selectedIndex = 0,
+                        onSelect = {},
+                        backdrop = backdrop,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        defaultWindowInsetsPadding = applyInsets.value,
+                        trailingAction = {
+                            GlassIconButton(
+                                onClick = {},
+                                backdrop = backdrop,
+                                size = GlassNavigationBarDefaults.Height,
+                                modifier = Modifier.testTag("action"),
+                            ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                        },
+                    )
+                }
+            }
+        }
+        val scene = onNodeWithTag("scene").fetchSemanticsNode().boundsInRoot
+        val insetBar = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
+            .fetchSemanticsNode().boundsInRoot
+        val insetAction = onNodeWithTag("action").fetchSemanticsNode().boundsInRoot
+        assertEquals(insetBar.center.y, insetAction.center.y, 1f)
+        saveImage("navigation-insets-enabled", onRoot().captureToImage())
+
+        runOnIdle { applyInsets.value = false }
+        val bareBar = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
+            .fetchSemanticsNode().boundsInRoot
+        val bareAction = onNodeWithTag("action").fetchSemanticsNode().boundsInRoot
+        assertTrue(insetAction.bottom < bareAction.bottom, "Default padding must lift the group above the bottom edge")
+        assertEquals(scene.bottom, bareAction.bottom, 1f)
+        assertEquals(bareBar.center.y, bareAction.center.y, 1f)
+        assertEquals(insetBar.size, bareBar.size)
+        assertEquals(insetAction.size, bareAction.size)
+        saveImage("navigation-insets-disabled", onRoot().captureToImage())
+    }
+
+    @Test
     fun glassBarAndActionAreCenteredTogether() = assertGlassLayout(LayoutDirection.Ltr)
 
     @Test
@@ -61,6 +107,7 @@ class GlassNavigationActionTest {
                             onSelect = {},
                             backdrop = backdrop,
                             modifier = Modifier.width(410.dp).align(Alignment.Center),
+                            defaultWindowInsetsPadding = false,
                             trailingAction = {
                                 GlassIconButton(
                                     onClick = { searches++ },
@@ -113,6 +160,7 @@ class GlassNavigationActionTest {
                         },
                         backdrop = backdrop,
                         modifier = Modifier.testTag("group"),
+                        defaultWindowInsetsPadding = false,
                         trailingAction = if (showAction.value) {
                             {
                                 GlassIconButton(
@@ -164,6 +212,7 @@ class GlassNavigationActionTest {
                         onSelect = {},
                         backdrop = backdrop,
                         modifier = Modifier.testTag("group"),
+                        defaultWindowInsetsPadding = false,
                         trailingAction = {
                             GlassIconButton(
                                 onClick = {},

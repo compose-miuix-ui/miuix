@@ -314,6 +314,7 @@ fun GlassPage(padding: PaddingValues) {
                             selectedIndex = navIndex,
                             onSelect = { navIndex = it },
                             backdrop = backdrop,
+                            defaultWindowInsetsPadding = false,
                             modifier = Modifier.layout { measurable, constraints ->
                                 // BottomNavigator's four/five-item rule accounts for overlapping items
                                 // before deciding whether to use the compact 344dp wide-screen bar.
