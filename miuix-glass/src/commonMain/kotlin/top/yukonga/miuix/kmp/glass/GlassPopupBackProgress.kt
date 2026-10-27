@@ -19,9 +19,8 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 
 /**
- * A separate return track leaves the popup's existing opening/closing springs intact.
- * Completion retains the last gesture fraction through exit, avoiding a jump back to open. A
- * caller may keep it until the next opening when another element needs a seamless visual handoff.
+ * Predictive-back progress with independent cancellation recovery. Completed gestures retain
+ * their final fraction through exit, or until the next opening when requested.
  */
 @Composable
 internal fun rememberGlassPopupBackProgress(
@@ -38,7 +37,7 @@ internal fun rememberGlassPopupBackProgress(
         if (show || (!active && !retainWhenInactive)) progress.snapTo(0f)
     }
 
-    // Glass popups also work in standalone Box hosts without a navigation dispatcher.
+    // Standalone Box hosts may have no navigation dispatcher.
     if (LocalNavigationEventDispatcherOwner.current != null) {
         val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
         NavigationBackHandler(

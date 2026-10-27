@@ -22,24 +22,23 @@ import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.glass.internal.glassEffect
 
 /**
- * Renders this composable as a sheet of glass over [backdrop].
+ * Applies a glass surface over [backdrop].
  *
- * @param backdrop The content behind the glass. This composable must sit *outside* the subtree the
- *   backdrop records — inside it the two form a cycle.
- * @param shape The silhouette. Drives the clip, the [stroke] and the shader, so all three agree.
- * @param style The material. Pick one from [GlassStyles] or start from [GlassDefaults.style].
- * @param alpha Opacity multiplier for the colour layers, shading and stroke.
- * @param tint Overrides [GlassInner.tint]; its alpha replaces the style's tint strength.
- *   [Color.Unspecified] keeps the style's own tint.
- * @param material The panel's own body: a blur radius plus the colour layers over it. It overrides
- *   the blur radius [style] asks for. `null` leaves the blurred backdrop as the whole body.
- * @param noiseCoefficient Noise dithering for the backdrop blur, which prevents banding over large
- *   flat areas. 0 disables it.
- * @param stroke Optional bloom stroke along the rim. `null` skips it.
- * @param contentBlendMode How this composable's content composites over the glass.
- * @param enabled Whether the material is active. When false the content draws on its own.
- * @param shading Whether the surface refracts and shades what it stands on. `true` for a control,
- *   `false` for a bar or a menu whose body is [material] alone.
+ * @param backdrop Content behind the glass. This modifier must be outside the subtree recorded by
+ *   the backdrop; placing it inside creates a sampling cycle.
+ * @param shape Surface silhouette used for clipping, [stroke], and rendering geometry.
+ * @param style Glass appearance. Use a predefined style from [GlassStyles] or [GlassDefaults.Style].
+ * @param alpha Opacity multiplier for colour layers, shading, and stroke.
+ * @param tint Overrides [GlassInner.tint]. Its alpha replaces the style tint strength.
+ *   [Color.Unspecified] retains the style tint.
+ * @param material Surface body: blur radius and colour layers. Its blur radius overrides [style].
+ *   `null` uses the blurred backdrop as the body.
+ * @param noiseCoefficient Noise dithering coefficient for backdrop blur. 0 disables dithering.
+ * @param stroke Optional bloom stroke along the silhouette. `null` disables it.
+ * @param contentBlendMode Blend mode for content drawn over the glass.
+ * @param enabled Whether the glass effect is active. When false, content draws without it.
+ * @param shading Whether to refract and shade the backdrop. Use `false` for bars and menus whose
+ *   body is supplied by [material].
  */
 fun Modifier.glass(
     backdrop: Backdrop,
@@ -68,7 +67,7 @@ fun Modifier.glass(
     shading = shading,
 )
 
-/** Applies a child material over the action bar's already blurred and colour-treated surface. */
+/** Applies a child material over an action bar's blurred and colour-treated surface. */
 internal fun Modifier.glassOnActionBar(
     backdrop: Backdrop,
     shape: GlassShape,
@@ -131,11 +130,11 @@ private fun Modifier.glassImpl(
 )
 
 /**
- * Casts [shadow] under this composable, in the shape of [shape].
+ * Draws [shadow] beneath this composable using [shape].
  *
- * @param shape The silhouette casting the shadow. Use the same one [glass] gets.
- * @param shadow The shadow. Pick one from [GlassShadows]. `null` skips it.
- * @param alpha Opacity multiplier, to fade the shadow with the surface it belongs to.
+ * @param shape Shadow silhouette. Use the same shape as the corresponding [glass] surface.
+ * @param shadow Shadow configuration. Use a value from [GlassShadows], or `null` to disable it.
+ * @param alpha Opacity multiplier for the shadow.
  */
 fun Modifier.glassShadow(
     shape: GlassShape,

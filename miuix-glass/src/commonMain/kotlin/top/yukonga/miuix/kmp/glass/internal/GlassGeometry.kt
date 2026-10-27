@@ -5,10 +5,7 @@ package top.yukonga.miuix.kmp.glass.internal
 
 import kotlin.math.sqrt
 
-/**
- * Corner tile size as a multiple of the corner radius. The silhouette leaves the straight edge
- * this far from the box corner, which is what makes the corner continuous instead of circular.
- */
+/** Continuous-corner tile size as a multiple of the corner radius. */
 internal const val TILE_SCALE = 1.5286649465560913f
 
 internal const val FIT_4 = -0.7391197269f
@@ -17,13 +14,10 @@ internal const val FIT_2 = -2.4907319173f
 internal const val FIT_1 = 0.4768708960f
 internal const val FIT_0 = 0.4747847594f
 
-/** Below this radius the corner is a plain rounded box; the tile maths would divide by zero. */
+/** Minimum continuous-corner radius; smaller radii use circular corners to avoid division by zero. */
 internal const val MIN_SUPERCIRCLE_RADIUS = 0.5f
 
-/**
- * The quintic smoothing kernel the rim profile is built from. It maps `[0, 1]` onto `[0, 1]` with
- * a zero first and second derivative at both ends, so the rim never shows a crease.
- */
+/** Quintic smoothing function for the rim profile. */
 internal fun smooth5Map(t: Float): Float {
     val x = (0.5f + 0.5f * t).coerceIn(0f, 1f)
     val s = x * x * x * (x * (x * 6f - 15f) + 10f)
@@ -31,9 +25,7 @@ internal fun smooth5Map(t: Float): Float {
 }
 
 /**
- * The rim-depth value the surface reaches [band] pixels inside the silhouette. The shader fades
- * coverage up to this value, which keeps the anti-aliased band a fixed width in screen pixels
- * whatever the rim width is.
+ * Rim-depth threshold that keeps the anti-aliased band fixed in screen pixels.
  *
  * @param band Width of the anti-aliased band, in full-resolution pixels.
  * @param edgeFullPx Rim width, in full-resolution pixels.

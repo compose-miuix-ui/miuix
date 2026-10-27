@@ -13,7 +13,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.anim.folmeSpring
 
-/** The motion the glass surfaces animate with. */
+/** Animation specifications for glass surfaces and components. */
 object GlassMotion {
 
     /**
@@ -29,7 +29,7 @@ object GlassMotion {
         return folmeSpring(damping, response)
     }
 
-    /** A transform spring with Folme's `ValueTarget` settle threshold instead of Compose's. */
+/** Transform spring using the platform settle threshold. */
     @Stable
     private fun transformSpring(damping: Float, response: Float): SpringSpec<Float> = folmeSpring(
         damping = damping,
@@ -37,49 +37,45 @@ object GlassMotion {
         visibilityThreshold = TRANSFORM_VISIBILITY_THRESHOLD,
     )
 
-    /**
-     * The spring the leading edge of the bottom bar's capsule travels on. The trailing edge uses
-     * the slower [navIndicatorTrail], which is what stretches the capsule as it moves.
+/** Spring for the leading edge of the navigation indicator. The trailing edge uses the slower
+     *   [navIndicatorTrail] spring to stretch the capsule during travel.
      */
     @Stable
     fun <T> navIndicator(): SpringSpec<T> = springOf(0.7f, 0.4f)
 
-    /** The spring the trailing edge of the capsule travels on. Slower, so the capsule stretches. */
+/** Spring for the trailing edge of the navigation indicator. */
     @Stable
     fun <T> navIndicatorTrail(): SpringSpec<T> = springOf(0.75f, 0.5f)
 
-    /** The bottom indicator follows drag targets with a critically damped spring. */
+/** Critically damped spring for following navigation drag targets. */
     @Stable
     fun <T> navDragFollow(): SpringSpec<T> = springOf(1f, 0.15f)
 
-    /** [navIndicator] for the edge that leads the travel, [navIndicatorTrail] for the one behind. */
+/** Selects [navIndicator] for the leading edge and [navIndicatorTrail] for the trailing edge. */
     @Stable
     fun <T> edgeSpring(leading: Boolean): SpringSpec<T> = if (leading) navIndicator() else navIndicatorTrail()
 
-    /** The capsule's fill arriving under a finger. Critically damped, and quick. */
+/** Spring for the navigation indicator fill entering a press. */
     @Stable
     fun navPressEnter(): SpringSpec<Color> = springOf(1f, 0.2f)
 
-    /** The capsule's fill leaving on release. Slower than the press, so the lift reads as a fade. */
+/** Spring for the navigation indicator fill leaving a press. */
     @Stable
     fun navPressExit(): SpringSpec<Color> = springOf(0.95f, 0.35f)
 
-    /**
-     * A menu row's fill leaving on release. Shorter than the bar's, since a row is often gone
-     * before the bar's fade would finish.
-     */
+/** Spring for a menu-row press release. */
     @Stable
     fun popupPressExit(): SpringSpec<Color> = springOf(1f, 0.15f)
 
-    /** The spring the bottom bar shows and hides on. */
+/** Spring for showing and hiding the navigation bar. */
     @Stable
     fun <T> navShowHide(): SpringSpec<T> = springOf(1f, 0.3f)
 
-    /** The system's default spring, and the one its segmented tab indicator moves on. */
+/** Default spring used by the segmented tab indicator. */
     @Stable
     fun <T> default(): SpringSpec<T> = springOf(0.95f, 0.35f)
 
-    /** The default opening spring, and the explicit secondary collapse spring. */
+/** Opening and closing spring for a secondary popup. */
     @Stable
     fun secondaryPopup(expanding: Boolean): SpringSpec<Float> = if (expanding) {
         transformSpring(0.95f, 0.35f)
@@ -87,7 +83,7 @@ object GlassMotion {
         transformSpring(0.95f, 0.2f)
     }
 
-    /** The mask's own alpha track, with its own visibility threshold. */
+/** Alpha spring for the secondary popup mask. */
     @Stable
     internal fun secondaryPopupMask(expanding: Boolean): SpringSpec<Float> = folmeSpring(
         damping = 0.95f,
@@ -95,53 +91,53 @@ object GlassMotion {
         visibilityThreshold = POPUP_MASK_MIN_VISIBLE_CHANGE * 0.75f,
     )
 
-    /** The mask hides below one 8-bit alpha step. */
+/** Minimum visible alpha change for the popup mask. */
     internal const val POPUP_MASK_MIN_VISIBLE_CHANGE: Float = 1f / 256f
 
-    /** A top bar expanding back to its large title. */
+/** Spring for expanding a top bar to its large title. */
     @Stable
     fun <T> barExpand(): SpringSpec<T> = springOf(1f, 0.3f)
 
-    /** A top bar collapsing to its compact title. Deliberately quicker than the expansion. */
+/** Spring for collapsing a top bar to its compact title. */
     @Stable
     fun <T> barCollapse(): SpringSpec<T> = springOf(1f, 0.15f)
 
-    /** A large title tracking a scroll. Slow, so it trails the content rather than snapping. */
+/** Spring for a large title tracking scroll. */
     @Stable
     fun <T> barTrack(): SpringSpec<T> = springOf(1f, 0.6f)
 
-    /** The linear material transition of a floating action-bar button. */
+/** Linear transition for a floating action-bar button. */
     @Stable
     fun topBarButtonFloat(): FiniteAnimationSpec<Float> = tween(
         durationMillis = 350,
         easing = LinearEasing,
     )
 
-    /** The bar's overlay mask follows a separate 100ms linear transition. */
+/** Linear transition for the action-bar overlay mask. */
     @Stable
     fun topBarMask(): FiniteAnimationSpec<Float> = tween(durationMillis = 100, easing = LinearEasing)
 
-    /** A popup opening from its anchor. The only under-damped spring in the set — it overshoots. */
+/** Spring for popup entry. */
     @Stable
     fun <T> popupEnter(): SpringSpec<T> = springOf(0.8f, 0.28f)
 
-    /** A popup closing. */
+/** Spring for popup exit. */
     @Stable
     fun <T> popupExit(): SpringSpec<T> = springOf(0.95f, 0.2f)
 
-    /** A dialog entering. */
+/** Spring for dialog entry. */
     @Stable
     fun <T> dialogEnter(): SpringSpec<T> = springOf(0.95f, 0.35f)
 
-    /** A dialog leaving. */
+/** Spring for dialog exit. */
     @Stable
     fun <T> dialogExit(): SpringSpec<T> = springOf(0.95f, 0.15f)
 
-    /** A surface being pressed. */
+/** Spring for a pressed surface. */
     @Stable
     fun <T> pressDown(): SpringSpec<T> = springOf(0.99f, 0.15f)
 
-    /** A surface released from a press. Slower than the press, so the lift reads as a rebound. */
+/** Spring for releasing a pressed surface. */
     @Stable
     fun <T> pressUp(): SpringSpec<T> = springOf(0.99f, 0.3f)
 

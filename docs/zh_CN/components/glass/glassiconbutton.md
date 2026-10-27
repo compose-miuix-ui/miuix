@@ -1,13 +1,13 @@
 # GlassIconButton
 
-`GlassIconButton` 是用于工具栏控件和悬浮操作的圆形玻璃按钮。在 [GlassTopAppBar](./glasstopappbar) 中，它继承顶栏材质并共享材质过渡。
+`GlassIconButton` 是用于工具栏控件和悬浮操作的圆形玻璃按钮。在 [GlassTopAppBar](./glasstopappbar) 中，它继承顶栏的按钮表面。
 
 <div style="position: relative; height: 240px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassIconButton" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -18,9 +18,7 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 
 ## 基本用法
 
-没有可用的背景采样源时，按钮使用 `fill` 填充。
-
-`actionIcon` 是 `ImageVector`，`onAction` 是页面的操作回调：
+没有可用的背景采样源时，按钮使用 `fill`。内容居中显示，请在内容插槽中设置图标尺寸和颜色。
 
 ```kotlin
 GlassIconButton(
@@ -35,16 +33,6 @@ GlassIconButton(
 }
 ```
 
-内容居中显示。请按需设置图标尺寸和颜色，按钮不会强制设置这些值。
-
-## 组件状态
-
-### 按下状态
-
-按下时，按钮以动画显示覆盖色，并将内容透明度降低到 `0.6f`，不会应用按下缩放。组件没有 `enabled`、`holdDownState` 或 `interactionSource` 参数。
-
-`surfaceAlpha` 只影响表面，不影响图标或点击处理。设为零不会禁用或移除按钮。
-
 ## 属性
 
 ### GlassIconButton 属性
@@ -56,7 +44,7 @@ GlassIconButton(
 | onClick | () -> Unit | 点击时触发的回调 | - | 是 |
 | modifier | Modifier | 应用于按钮的修饰符 | Modifier | 否 |
 | backdrop | Backdrop? | 背景采样源；顶栏非空的采样源优先 | null | 否 |
-| surfaceAlpha | Float | 表面透明度乘数，与顶栏 alpha 相乘后限制到 0–1 | 1f | 否 |
+| surfaceAlpha | Float | 表面透明度乘数 | 1f | 否 |
 | style | GlassStyle | 渲染样式，不会替换按钮材质 | GlassDefaults.Style | 否 |
 | size | Dp | 按钮直径 | GlassTopAppBarDefaults.ButtonSize | 否 |
 | shape | GlassShape | 按钮形状 | GlassShape(size / 2) | 否 |
@@ -104,9 +92,7 @@ GlassTopAppBar(
 )
 ```
 
-在顶栏内，`style`、`size`、`shape`、`fill`、`stroke` 和 `shadow` 默认使用顶栏的值，也可以显式覆盖。顶栏的空描边或空阴影仍保持为空。按钮还共享顶栏的背景采样源、材质与过渡，阴影跟随顶栏的滚动渐变。保留 `surfaceAlpha = 1f` 即可使用共享过渡，不额外叠加透明度乘数。
-
-[GlassNavigationBar](./glassnavigationbar) 的尾部操作不会继承此材质，需要显式传入背景采样源和尺寸。
+在 `GlassTopAppBar` 内，按钮继承顶栏的外观和背景采样源。在顶栏外使用时（包括导航栏尾部操作），需显式传入背景采样源。
 
 ### 自定义按下缩放 {#按下反馈与-glasspress}
 
@@ -133,22 +119,13 @@ Text(
 )
 ```
 
-`Modifier.glassPress` 返回用于绘制缩放动画的 `Modifier`，不添加点击处理或玻璃材质。
+`Modifier.glassPress` 会为绘制应用缩放动画，不提供点击处理或玻璃材质。
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
 | interactionSource | InteractionSource | 按下交互的来源 | - | 是 |
 | enabled | Boolean | 是否应用缩放，不会禁用点击 | true | 否 |
 
-独立的 `glassPressScale` 方法返回表面按住时的 `Float` 缩放比例：
-
-| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
-| --- | --- | --- | --- | --- |
-| shorterSidePx | Float | 表面短边的像素值 | - | 是 |
-| density | Float | 每 dp 对应的像素数 | - | 是 |
-
-短边非正时返回 `1f`，否则返回 `max((shorterSidePx - 10f * density) / shorterSidePx, 0.9f)`。
-
 ### 作为弹窗锚点
 
-附加 `Modifier.glassPopupAnchor(anchor)`，即可向 [GlassTransformPopup](./glasstransformpopup#anchor-api) 的折叠表面共享按钮解析后的背景采样源和材质。
+通过 `Modifier.glassPopupAnchor(anchor, cornerRadius)` 将按钮连接到 [GlassTransformPopup](./glasstransformpopup#anchor-api)。

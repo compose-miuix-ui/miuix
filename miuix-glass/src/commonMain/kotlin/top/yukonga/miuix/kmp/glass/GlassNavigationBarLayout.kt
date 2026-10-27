@@ -12,16 +12,16 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 
 /**
- * Placement of a glass navigation capsule and an independent trailing action.
+ * Lays out a glass navigation capsule and an independent trailing action.
  *
- * The action owns its size and surface. Its measured width and [spacing] are reserved before
- * measuring [content], so the two fit within the same constraints and are centered as a group.
- * A null [trailingAction] reserves no space. Placement follows the current layout direction.
+ * The action's measured width and [spacing] are reserved before measuring [content], so both fit
+ * within the same constraints and are centered as a group. A null [trailingAction] reserves no
+ * space. Placement follows the current layout direction.
  *
- * @param modifier The modifier applied to the combined layout.
+ * @param modifier Modifier applied to the combined layout.
  * @param spacing Space between the capsule and the action.
  * @param trailingAction Optional independent action, such as an icon button.
- * @param content The navigation capsule, excluding outer margins and system bar insets.
+ * @param content Navigation capsule, excluding outer margins and system bar insets.
  */
 @Composable
 internal fun GlassNavigationBarLayout(

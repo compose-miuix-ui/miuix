@@ -28,8 +28,7 @@ private const val LIGHT_REF_X = 0.5f
 private const val LIGHT_REF_Y = 0.7f
 
 /**
- * Both overlay shaders are stateless between draws — every uniform is written immediately before
- * the draw that reads it — so one instance of each serves every glass surface in the process.
+ * Shared shader instances require every uniform to be set immediately before each draw.
  */
 private val maskShader: RuntimeShader? by lazy {
     if (isRuntimeShaderSupported()) RuntimeShader(GLASS_MASK_SHADER) else null
@@ -44,13 +43,13 @@ private val rimShader: RuntimeShader? by lazy {
 }
 
 /**
- * Draws the material's own rim light over the surface, at full resolution.
+ * Draws rim lighting at full resolution.
  *
- * @param shape The silhouette the rim follows.
+ * @param shape Surface shape.
  * @param layoutDirection Resolves the shape's start and end corners.
- * @param style The material whose rim geometry and lights this draws.
- * @param surface The material's own colour, standing in for what lies under the rim.
- * @param alpha The surface opacity, so the rim fades with the glass it belongs to.
+ * @param style Rim geometry and lighting.
+ * @param surface Surface color used beneath the rim.
+ * @param alpha Surface opacity multiplier.
  */
 internal fun DrawScope.drawGlassRim(
     shape: GlassShape,
@@ -86,10 +85,10 @@ internal fun DrawScope.drawGlassRim(
 /**
  * Draws the bloom stroke over the surface, at full resolution.
  *
- * @param shape The silhouette the stroke traces.
+ * @param shape Surface shape.
  * @param layoutDirection Resolves the shape's start and end corners.
  * @param stroke The stroke to draw.
- * @param alpha The surface opacity, so the rim fades with the glass it belongs to.
+ * @param alpha Surface opacity multiplier.
  */
 internal fun DrawScope.drawGlassStroke(
     shape: GlassShape,
@@ -100,8 +99,7 @@ internal fun DrawScope.drawGlassStroke(
     val shader = strokeShader ?: return
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
 
-    // setBloomStrokeConfig uses the scalar setBloomStrokeWithDp overload, which retains
-    // the half-pixel bias instead of rounding to an integer like the array overload.
+    // Preserve the half-pixel stroke-width bias without rounding to an integer.
     val width = (stroke.width * density + 0.5f)
         .coerceAtLeast(0.5f)
         .coerceAtMost(size.minDimension * 0.5f)
@@ -132,7 +130,7 @@ internal fun DrawScope.drawGlassMask(shape: GlassShape, layoutDirection: LayoutD
     drawRect(brush = shader.asBrush(), blendMode = BlendMode.DstIn)
 }
 
-/** Uploads the size, corner radii and smoothing that `GLASS_SDF_SOURCE` reads. */
+/** Sets the size, corner radii and smoothing uniforms for the shared distance field. */
 private fun RuntimeShader.setSilhouetteUniforms(
     shape: GlassShape,
     layoutDirection: LayoutDirection,
@@ -157,7 +155,7 @@ private fun RuntimeShader.setSilhouetteUniforms(
     setFloatUniform("in_smoothing", shape.smoothing.coerceIn(0f, 1f))
 }
 
-/** Turns a light's position into the unit direction and weight the stroke shader wants. */
+/** Converts light position to a unit direction and weight. */
 private fun RuntimeShader.setLightUniforms(
     directionName: String,
     colorName: String,
@@ -176,12 +174,12 @@ private val shadowShader: RuntimeShader? by lazy {
 }
 
 /**
- * Draws the shadow a surface casts, reaching past its own bounds.
+ * Draws a surface shadow beyond the shape bounds.
  *
  * @param shape The silhouette casting the shadow.
  * @param layoutDirection Resolves the shape's start and end corners.
  * @param shadow The shadow to cast.
- * @param alpha The surface opacity, so the shadow fades with the surface it belongs to.
+ * @param alpha Surface opacity multiplier.
  */
 internal fun DrawScope.drawGlassShadow(
     shape: GlassShape,

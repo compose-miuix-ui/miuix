@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
@@ -42,13 +41,10 @@ import top.yukonga.miuix.kmp.blur.Backdrop
 import kotlin.math.roundToInt
 
 /**
- * The control a [GlassTransformPopup] grows out of.
+ * Anchor geometry and appearance for a [GlassTransformPopup] or [GlassDropdownPopup].
  *
- * The panel starts as the control's own rectangle, place and corner radius, and travels and grows
- * out to where the menu belongs; the control's contents dissolve out as the panel's dissolve in.
- *
- * Hold one with [rememberGlassPopupAnchor], report the control with [glassPopupAnchor] and its
- * contents with [glassPopupAnchorContent], and hand it to [GlassTransformPopup].
+ * Create with [rememberGlassPopupAnchor], attach [glassPopupAnchor] to the control and optionally
+ * use [glassPopupAnchorContent] to identify the content copied during the transition.
  */
 @Stable
 class GlassPopupAnchor {
@@ -71,7 +67,7 @@ class GlassPopupAnchor {
     /** Expanded menu appearance shared with a secondary popup. */
     internal var popupVisuals: GlassPopupVisuals? by mutableStateOf(null)
 
-    /** Current button surface opacity and target state, independent of the legacy shadow ramp. */
+    /** Button surface progress, separate from shadow opacity. */
     internal var surfaceProgress: State<Float>? by mutableStateOf(null)
     internal var surfaceOpacity: Float by mutableFloatStateOf(1f)
     internal val surfaceAlpha: Float get() = surfaceOpacity * (surfaceProgress?.value ?: 1f)
@@ -80,33 +76,25 @@ class GlassPopupAnchor {
     /** The control's outer bounds, in the root's coordinate space. */
     internal var containerBounds: Rect by mutableStateOf(Rect.Zero)
 
-    /** The control's contents' bounds, in the root's coordinate space. */
+    /** Control content bounds in root coordinates. */
     internal var contentBounds: Rect by mutableStateOf(Rect.Zero)
 
     /** The dropdown's value and chevron bounds, in the root's coordinate space. */
     internal var dropdownValueBounds: Rect? by mutableStateOf(null)
 
-    /** The control's own corner radius. The panel's radius starts here and relaxes to its own. */
+    /** Control corner radius used at the collapsed endpoint. */
     internal var cornerRadius: Dp by mutableStateOf(0.dp)
 
-    /**
-     * Whether the control floats over its page rather than sitting in it. A floating control's
-     * panel is drawn at full strength for the whole journey; one that sits in the page has its
-     * panel fade with the icon instead.
-     */
+    /** Whether to keep the panel opaque during the transition instead of fading with the icon. */
     internal var floating: Boolean by mutableStateOf(false)
 
-    /**
-     * Whether the control is standing aside for the menu. [GlassTransformPopup] stands the whole
-     * control down; [GlassDropdownPopup] stands down only the value the row displays.
-     * [glassPopupAnchor] and [glassPopupAnchorValue] read this; a control never has to.
-     */
+    /** Hides the whole transform anchor, or only the dropdown value, while the popup is open. */
     internal var contentHidden: Boolean by mutableStateOf(false)
 
-    /** How far the row's displayed value has faded. [GlassDropdownPopup] drives it. */
+    /** Dropdown value opacity. */
     internal var valueAlpha: Float by mutableFloatStateOf(1f)
 
-    /** The displayed value reappears with the dropdown as it travels home. */
+    /** Value opacity during predictive-back collapse. */
     internal val dropdownValueAlpha: Float
         get() = dropdownBackProgressState?.value?.coerceIn(0f, 1f) ?: 0f
 }
@@ -125,10 +113,7 @@ internal data class GlassAnchorSurface(
 internal data class GlassPopupAnchorElement(val anchor: GlassPopupAnchor) : Modifier.Element
 
 /**
- * Remembers a [GlassPopupAnchor].
- *
- * The fade [glassPopupAnchorValue] draws with is animated here rather than inside the menu, which
- * stops composing exactly when the control is due to come back.
+ * Remembers a [GlassPopupAnchor] and its value fade, which must continue after the popup exits.
  */
 @Composable
 fun rememberGlassPopupAnchor(): GlassPopupAnchor {
@@ -143,15 +128,14 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
 }
 
 /**
- * Reports a control to [anchor], and stands it down while its menu is open.
+ * Reports a control's bounds to [anchor] and hides it while its menu is open.
  *
- * Put this on the control's outermost node — the pill, not the icon inside it, which the panel
- * replaces for the length of the animation. On [GlassIconButton] it also supplies the button's
- * backdrop, blur and colour treatment for [GlassTransformPopup]'s collapsed endpoint.
+ * Apply to the control's outermost node, not its icon. On [GlassIconButton], this also supplies
+ * the button's backdrop and surface appearance for the popup's collapsed endpoint.
  *
- * @param anchor The anchor to report to.
- * @param cornerRadius The control's own corner radius. Half the control's height, for a pill.
- * @param floating Whether the control floats over its page.
+ * @param anchor Popup anchor.
+ * @param cornerRadius Control corner radius; half its height for a pill shape.
+ * @param floating Whether the control floats above the page.
  */
 @Stable
 fun Modifier.glassPopupAnchor(
@@ -168,18 +152,18 @@ fun Modifier.glassPopupAnchor(
     .graphicsLayer { alpha = if (anchor.contentHidden) 0f else 1f }
 
 /**
- * Narrows what the menu copies to one part of a control.
+ * Identifies the content copied during a popup transition.
  *
- * Put this on the icon when the panel already takes over the control's background; copying the
- * pill as well would stack two of them. Left off, the menu copies the control whole.
+ * Apply to the icon when the popup supplies the control's background to avoid duplicating it.
+ * Without this modifier, the entire control is copied.
  *
- * @param anchor The anchor to report to.
+ * @param anchor Popup anchor.
  */
 @Stable
 fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.contentBounds = it.boundsInRoot() }
 
 /**
- * Reports a row to [anchor], for a [GlassDropdownPopup]. The row itself stays put.
+ * Reports row bounds for a [GlassDropdownPopup] without hiding the row.
  *
  * @param anchor The anchor to report to.
  */
@@ -189,9 +173,7 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
 /**
  * Reports a row's value bounds for dropdown positioning and fades it out while its choices are open.
  *
- * Put this on the value and the chevron beside it, not on the row: the list about to open *is*
- * that value's choices, so the value stands down as it opens and returns only once the list has
- * left.
+ * Apply to the value and chevron, not the whole row. The value fades back in after dismissal.
  *
  * @param anchor The anchor the row reported itself to.
  */
@@ -203,45 +185,30 @@ fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
     }
 
 /**
- * A menu that grows out of the control it belongs to, on glass.
+ * A glass menu that expands from an anchored control with a content crossfade.
  *
- * The second of the three openings, and the one a control that can take part gets. Four things move
- * at once, each on its own curve:
- *
- * - The **panel's rectangle** runs from the control's out to the menu's on one spring, carrying the
- *   corner radius with it.
- * - The **panel's centre** runs on a quicker spring, so it arrives before the panel has finished
- *   growing.
- * - The **control's contents** are copied, and the copy travels with the centre, grows with the
- *   panel, fades out and blurs *up*.
- * - The **panel's contents** scale with the panel's width, fade in and blur *down*, 50ms behind.
- *
- * Rows accept input while open unless a secondary menu is stacked above them. Predictive Back
- * follows the transform toward the anchor and springs back on cancellation; while [stacked] the
- * secondary menu handles Back instead.
+ * Place it in the same root [BoxScope] as the anchor and keep it composed through exit.
+ * Rows accept input while open unless [stacked]. Predictive Back previews collapse to the anchor
+ * and restores on cancellation; a stacked secondary menu handles Back instead.
  *
  * @param show Whether the menu is open.
- * @param onDismissRequest Called when a tap outside should close it.
- * @param anchor The control the menu grows out of.
+ * @param onDismissRequest Called when an outside tap or Back requests dismissal.
+ * @param anchor Control used as the collapsed endpoint.
  * @param backdrop Scene sampled by the expanded menu, including bars but excluding the popup.
  *   `null` falls back to the button's backdrop. The collapsed endpoint uses the button's surface.
- * @param anchorContent A copy of the control — its background as well as its icon, unless
- *   [glassPopupAnchorContent] named a smaller part.
+ * @param anchorContent Copy of the control, or the portion identified by [glassPopupAnchorContent].
  * @param modifier The modifier applied to the panel.
- * @param simplified Whether the control's contents stay out of the opening transform, so a compact
- *   glyph hands straight to the panel instead of growing to its width first. Overflow buttons use
- *   this. The contents still join the reverse transform.
- * @param stacked Whether a second menu stands in front of this one. It shrinks and takes a wash.
- * @param maskColor The wash laid over it while [stacked].
- * @param sizing How wide and tall the panel may be.
- * @param visuals The expanded panel's appearance. A [GlassIconButton] anchor supplies the
- *   collapsed endpoint, blended into this appearance along the existing geometry animation.
+ * @param simplified Whether to omit the anchor content from the opening transition. It still
+ *   appears during the closing transition.
+ * @param stacked Whether a secondary menu is open. Scales down this panel and applies [maskColor].
+ * @param maskColor Overlay color while [stacked].
+ * @param sizing Panel size limits and window margin.
+ * @param visuals Expanded panel appearance, blended from a [GlassIconButton] anchor's surface.
  * @param anchorAlpha Background opacity for anchors without a shared button surface.
- * @param cornerRadius Corner radius the panel settles at.
+ * @param cornerRadius Expanded panel corner radius.
  * @param gap Gap between the control and the panel.
  * @param contentPadding Padding around the items.
- * @param onMeasured Called with the size the panel settles at. A second menu opened from one of its
- *   rows is measured at least this wide.
+ * @param onMeasured Called with the final panel size. Use its width as the submenu's minimum width.
  * @param content The items.
  */
 @Composable
@@ -337,8 +304,7 @@ fun BoxScope.GlassTransformPopup(
     fun panelAlpha() = transformPanelAlpha(
         visualAlpha = visuals.alpha,
         floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceAlpha > 0f else anchor.floating,
-        // transformPanelAlpha multiplies by visualAlpha; the published surface alpha already
-        // includes the button's opacity, so remove that outer factor at the anchor endpoint.
+        // Remove visualAlpha here: the published button opacity already includes it.
         anchorAlpha = if (anchorSurface != null) {
             if (visuals.alpha > 0f) anchor.surfaceAlpha / visuals.alpha else 0f
         } else {
@@ -352,32 +318,9 @@ fun BoxScope.GlassTransformPopup(
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = menuBackdrop,
-        modifier = modifier,
         sizing = sizing,
         visuals = visuals.copy(alpha = 1f),
-        interactive = isTransformPopupInteractive(show, stacked),
-        surface = { shape ->
-            if (drawAnchorSurface && anchorSurface != null && anchorVisuals != null) {
-                GlassPopupBackground(
-                    backdrop = anchorSurface.backdrop,
-                    shape = shape,
-                    visuals = anchorVisuals,
-                    underlayMaterial = anchorSurface.underlayMaterial,
-                )
-            }
-            if (drawMenuSurface) {
-                GlassPopupBackground(
-                    backdrop = menuBackdrop,
-                    shape = shape,
-                    visuals = visuals.copy(alpha = 1f),
-                    modifier = Modifier.graphicsLayer {
-                        alpha = if (anchorSurface != null) materialProgress.value else 1f
-                    },
-                )
-            }
-        },
         contentPadding = contentPadding,
-        onMeasured = onMeasured,
         panelLayer = {
             alpha = panelAlpha()
             transformOrigin = TransformOrigin(
@@ -429,6 +372,29 @@ fun BoxScope.GlassTransformPopup(
             val blur = GlassMotion.TRANSFORM_BLUR_PX * (1f - fraction)
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
         },
+        modifier = modifier,
+        surface = { shape ->
+            if (drawAnchorSurface && anchorSurface != null && anchorVisuals != null) {
+                GlassPopupBackground(
+                    backdrop = anchorSurface.backdrop,
+                    shape = shape,
+                    visuals = anchorVisuals,
+                    underlayMaterial = anchorSurface.underlayMaterial,
+                )
+            }
+            if (drawMenuSurface) {
+                GlassPopupBackground(
+                    backdrop = menuBackdrop,
+                    shape = shape,
+                    visuals = visuals.copy(alpha = 1f),
+                    modifier = Modifier.graphicsLayer {
+                        alpha = if (anchorSurface != null) materialProgress.value else 1f
+                    },
+                )
+            }
+        },
+        onMeasured = onMeasured,
+        interactive = isTransformPopupInteractive(show, stacked),
         scrollable = true,
         content = content,
     )
@@ -471,7 +437,7 @@ fun BoxScope.GlassTransformPopup(
     }
 }
 
-/** A simplified anchor skips the outgoing copy, but still receives it on the way home. */
+/** Simplified anchors omit the opening copy but retain it during exit. */
 internal fun shouldRenderAnchorContent(simplified: Boolean, show: Boolean): Boolean = !simplified || !show
 
 /** Retained exit content is visual only, even before the transition starts its first exit frame. */
@@ -490,7 +456,7 @@ internal fun transformPanelAlpha(
     iconMaterial
 }
 
-/** The panel's rectangle partway from the control's own to the menu's. */
+/** Interpolates bounds from the anchor to the expanded menu. */
 private fun transformFrame(
     anchor: Rect,
     end: Size,
@@ -520,10 +486,8 @@ private fun transformFrame(
 }
 
 /**
- * How far the panel has travelled from the control, and how much bigger it is.
- *
- * Written during measurement and read at draw time by the copy of the control's contents, so the
- * two move as one. A plain holder, not snapshot state: the write happens mid-measure.
+ * Geometry written during measurement and read during drawing to align the anchor content.
+ * Not snapshot state: writes during measurement must not invalidate that pass.
  */
 private class TransformTravel {
     var endCenterX: Float = 0f

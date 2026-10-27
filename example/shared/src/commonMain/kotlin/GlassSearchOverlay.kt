@@ -81,8 +81,7 @@ import kotlin.math.sqrt
 
 private const val SEARCH_TOP_BAR_BLUR_RADIUS = 50f
 
-// EaseManager.SpringInterpolator (the nested legacy class) evaluates one second
-// across the 400ms animator. The standalone SpringInterpolator is a different API.
+// Map one second of spring motion onto the 400ms search transition.
 private val SearchModeEasing: Easing = run {
     val omega = 2.0 * PI / 0.75f
     val stiffness = (omega * omega).toFloat()
@@ -151,8 +150,7 @@ internal fun GlassSearchOverlay(
                 }
             },
     ) {
-        // A faded bar still participates in hit testing. Cover every gap around the search
-        // controls, including their outer padding, until the exit transition has finished.
+        // Block input through the faded bar and its padding until exit completes.
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -169,7 +167,6 @@ internal fun GlassSearchOverlay(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
-                    // Without a content anchor, native search animates only its top inset.
                     .graphicsLayer { translationY = -statusBarHeight * (1f - progress.value) },
             ) {
                 BasicTextField(

@@ -1,13 +1,13 @@
 # GlassNavigationBar
 
-`GlassNavigationBar` 是用于顶层目的地的悬浮玻璃导航栏。选中指示器跟随按下与拖动，可选的尾部操作位于导航胶囊之外。选中状态和页面导航由调用方管理。
+`GlassNavigationBar` 是用于主要页面切换的悬浮玻璃导航栏，支持独立尾部操作。选中状态和页面导航由调用方管理。
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassNavigationBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -20,9 +20,9 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 
 ## 基本用法
 
-必须提供非空的 `backdrop`，并将导航栏及尾部操作放在该背景采样范围之外。
+将导航栏及尾部操作放在背景采样范围之外。传入 `backdrop = null` 时使用主题的 `surfaceContainer` 填充色。
 
-`homeIcon` 和 `libraryIcon` 是页面提供的 `ImageVector` 图标。根据 `selectedIndex` 显示对应页面：
+`homeIcon` 和 `libraryIcon` 是页面提供的 `ImageVector` 图标：
 
 ```kotlin
 var selectedIndex by remember { mutableIntStateOf(0) }
@@ -40,9 +40,7 @@ GlassNavigationBar(
 )
 ```
 
-导航栏填满可用宽度，水平外边距由调用方提供。各目的地等宽，标签最多两行，可能使导航栏高度增加。
-
-`onSelect` 在指针按下和拖动进入其他目的地时调用，并非只在松手时调用；按下当前目的地也会触发回调。使用 Enter、NumPad Enter 或空格键激活时在按键松开时调用，无障碍激活则直接调用。纯图标项目应提供有意义的 `contentDescription`。
+各导航项等宽排列，标签最多两行。按下和拖动时更新选中项；纯图标项目应提供 `contentDescription`。
 
 ## 组件状态
 
@@ -58,9 +56,7 @@ GlassNavigationBar(
 )
 ```
 
-`showNavigation` 是调用方持有的 Boolean 状态。隐藏时，整个组合缩小、淡出并模糊；显示时有短暂延迟。隐藏不会移除布局占位。隐藏过渡结束后，目的地交互和语义被禁用，尾部操作不再被放置。
-
-`alpha` 只控制胶囊材质，不影响标签、图标和指示器。请使用 `visible` 隐藏整个组合。
+通过 `visible` 显示或隐藏导航栏，`alpha` 用于控制材质透明度。
 
 ## 属性
 
@@ -71,7 +67,7 @@ GlassNavigationBar(
 | items | List\<GlassNavigationItem> | 按顺序排列的目的地 | - | 是 |
 | selectedIndex | Int | 当前目的地索引 | - | 是 |
 | onSelect | (Int) -> Unit | 指针、键盘和无障碍选择的回调 | - | 是 |
-| backdrop | Backdrop | 背景采样源 | - | 是 |
+| backdrop | Backdrop? | 背景采样源；null 时使用主题纯色填充 | - | 是 |
 | modifier | Modifier | 应用于胶囊和尾部操作组合的修饰符 | Modifier | 否 |
 | defaultWindowInsetsPadding | Boolean | 是否应用默认窗口嵌入边距 | true | 否 |
 | style | GlassStyle | 渲染样式 | GlassDefaults.Style | 否 |
@@ -87,8 +83,6 @@ GlassNavigationBar(
 | selectedColor | Color | 选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
 | unselectedColor | Color | 未选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
 | trailingAction | (@Composable () -> Unit)? | 胶囊外部的独立操作 | null | 否 |
-
-`items` 为空时不渲染任何内容，包括尾部操作。越界的 `selectedIndex` 会在显示时限制到有效范围，不会修改调用方状态。`material = null` 不会移除指示器、描边或阴影。
 
 ### GlassNavigationItem 属性 {#glassnavigationitem}
 
@@ -129,7 +123,7 @@ GlassNavigationBar(
 
 ### 独立尾部操作
 
-尾部操作自行决定尺寸和材质，只共享整个组合的可见性过渡。此处的 `GlassIconButton` 不继承导航栏材质，因此需要显式传入背景采样源和尺寸。`searchIcon` 是 `ImageVector`，`openSearch` 是操作回调：
+在 `trailingAction` 中传入 `GlassIconButton`，并指定背景采样源和尺寸：
 
 ```kotlin
 import top.yukonga.miuix.kmp.glass.GlassIconButton
@@ -150,5 +144,3 @@ GlassNavigationBar(
     },
 )
 ```
-
-布局先测量尾部操作，预留其宽度和 `ActionSpacing` 后再测量胶囊。放置位置遵循布局方向。设为 `trailingAction = null` 会同时移除操作和间距；非空但内容为空的插槽仍会预留间距。

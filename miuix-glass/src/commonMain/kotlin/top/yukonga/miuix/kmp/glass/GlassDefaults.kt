@@ -8,39 +8,36 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 
-/** Default values for the glass material. */
+/** Default values for glass surfaces. */
 object GlassDefaults {
 
     /** Default corner radius of a glass surface. */
     val CornerRadius: Dp = 24.dp
 
-    /** Default corner smoothing. 1 draws the continuous corner. */
+/** Default corner smoothing. 1 uses the continuous corner profile. */
     val Smoothing: Float = 1f
 
-    /**
-     * Display density the [GlassStyle] and [GlassShadow] tokens are authored at, in pixels per dp.
-     * Their pixel values are rescaled by `density / SourceDensity`, so a rim keeps the same
-     * physical size on any screen.
+/**
+     * Density, in pixels per dp, at which [GlassStyle] and [GlassShadow] values are authored.
+     * Pixel values are scaled by `density / SourceDensity` to preserve physical size across screens.
      */
     val SourceDensity: Float = 3f
 
-    /** Default noise dithering coefficient for the backdrop blur. 0 disables noise. */
+/** Default noise dithering coefficient for backdrop blur. 0 disables dithering. */
     val NoiseCoefficient: Float = BlurDefaults.NoiseCoefficient
 
-    /**
-     * How far the material is drawn past its silhouette, in dp. A full-resolution mask pass trims
-     * the edge afterwards, so the material only has to reach beyond it.
+/**
+     * Distance, in dp, that the material extends beyond its silhouette before the final mask clips it.
      */
     val Overspill: Float = 3f
 
-    /** Default material. */
+/** Default glass style. */
     @Stable
     val Style: GlassStyle = GlassStyles.CommonMediumRegularLowLight
 
-    /**
-     * The default material for the current theme.
+/** Returns the default glass style for the selected theme.
      *
-     * @param isDark True to return the dark-theme material.
+     * @param isDark Whether to return the dark-theme style.
      */
     @Stable
     fun style(isDark: Boolean): GlassStyle = GlassStyles.forTheme(

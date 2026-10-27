@@ -1,13 +1,13 @@
 # GlassTopAppBar
 
-`GlassTopAppBar` displays collapsing titles, navigation controls and actions above scrolling content. A fading background band separates the bar from the page. Use [GlassIconButton](./glassiconbutton) in its slots to add glass button surfaces.
+`GlassTopAppBar` is a glass top bar with collapsing titles and action slots. Use [GlassIconButton](./glassiconbutton) for matching navigation and action buttons.
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -20,10 +20,6 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 ```
 
 ## Basic Usage
-
-When no backdrop is available, top-bar buttons use their fallback fill.
-
-`backIcon` is an `ImageVector` and `onBack` is the page's navigation callback:
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -67,12 +63,8 @@ Only the list is recorded into `backdrop`. The glass controls use the bar's back
 
 ### Content at the Top or Scrolled
 
-There are two overloads:
-
-- `GlassTopAppBar(title, scrollBehavior = …)` derives overlap from `scrollBehavior.state.contentOffset < 0f`. Without a scroll behavior, it keeps the material active.
-- `GlassTopAppBar(title, isContentScrolled = …)` accepts the actual page-overlap state. For a lazy list, pass `listState.canScrollBackward` so that returning to the top clears the material even if the large title remains collapsed.
-
-`scrollBehavior` controls title collapse and the scroll-distance shadow ramp. `isContentScrolled` controls the background band and button material transitions; title collapse alone does not determine page overlap.
+- Pass `scrollBehavior` to derive the material state from scrolling. Without it, the material stays visible.
+- Pass `isContentScrolled` for explicit control. For lazy lists, use `listState.canScrollBackward` so returning to the top clears the material independently of title collapse.
 
 ## Properties
 
@@ -140,13 +132,11 @@ The explicit-overlap overload adds one required parameter:
 
 ### Adding Tabs
 
-Place [GlassTabRow or GlassSegmentedTabRow](./glasstabrow) in `bottomContent`. They inherit the bar's backdrop and effective blur, but not its material-transition progress. Set their `surfaceAlpha` from page overlap rather than title expansion; see the [tab-row example](./glasstabrow#inside-glasstopappbar).
-
-Nested `GlassIconButton` controls share the bar's material transition. Leave their `surfaceAlpha` at its default. Explicit null strokes and shadows on the bar remain null when inherited.
+Place [GlassTabRow or GlassSegmentedTabRow](./glasstabrow#inside-glasstopappbar) in `bottomContent`. They inherit the backdrop and blur; set `surfaceAlpha` from page scroll state.
 
 ### Transforming the Foreground
 
-`contentModifier` leaves the background band stationary, while `titleAlpha` affects the compact and large titles and their subtitles, not action controls or `bottomContent`. Here `foregroundOffsetPx` and `titleOpacity` are page-owned transition values:
+Use `contentModifier` to transform foreground content without moving the background band, and `titleAlpha` to fade titles independently of controls:
 
 ```kotlin
 GlassTopAppBar(

@@ -72,9 +72,10 @@ class GlassPopupMaterialTest {
                             GlassPopupFrame(panel, 0.dp)
                         },
                         contentLayer = { _, _ -> },
-                    ) {
-                        Box(Modifier.size(160.dp, 100.dp))
-                    }
+                        content = {
+                            Box(Modifier.size(160.dp, 100.dp))
+                        },
+                    )
                 }
             }
         }

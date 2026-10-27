@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassDialog
 
-`GlassDialog` is a glass dialog component in Miuix for confirmations and input. It provides the layout, animation and dismissal behavior of `OverlayDialog`, with matching `GlassDialogButton` actions.
+`GlassDialog` is a glass dialog for confirmations and input. It provides layout, animation, dismissal, and `GlassDialogButton` actions.
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassDialog" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -40,7 +40,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## Basic Usage
 
-In this example, only the page `Box` is recorded; `Scaffold` hosts the overlay outside that recording.
+The page `Box` is recorded by `backdrop`; `Scaffold` hosts the overlay outside that recording.
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -80,7 +80,7 @@ Scaffold { padding ->
 
 When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
 
-If the overlay can cover page bars, include those bars in the backdrop, but exclude the popup host and its scrim. A null backdrop or unavailable runtime shaders uses `containerColor`; provide an opaque fallback color.
+Include any page bars that the overlay can cover in `backdrop`, but exclude the popup host and scrim. A null backdrop or unavailable runtime shaders uses `containerColor`; provide an opaque fallback color.
 
 ## Properties
 
@@ -113,7 +113,7 @@ If the overlay can cover page bars, include those bars in the backdrop, but excl
 
 ### GlassDialogButton Properties {#glassdialogbutton}
 
-`GlassDialogButton` draws an action over the dialog's material without a separate backdrop or blur. It provides `LocalContentColor`; use `MiuixTheme.textStyles.button` for labels. The caller controls the action-row widths. This button alone does not require `Scaffold`.
+`GlassDialogButton` draws an action over the dialog material without separate sampling or blur. It provides `LocalContentColor`; use `MiuixTheme.textStyles.button` for labels. The caller controls action-row widths, and the button alone does not require `Scaffold`.
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
@@ -138,11 +138,10 @@ If the overlay can cover page bars, include those bars in the backdrop, but excl
 | Primary | Theme primary fill and matching content color |
 | Destructive | Tonal fill with error-colored content |
 
-Disabled buttons use the disabled colors and do not respond to clicks. Press feedback covers the fill and content together, without a ripple or scale animation.
 
 ### glassDialogSurface Properties {#glassdialogsurface}
 
-`glassDialogSurface` returns `@Composable DialogSurfaceScope.() -> Modifier` for the `surface` slot of `OverlayDialog`. It uses the host's resolved corner radius, animated scrim and scale; it does not create a host or handle dismissal.
+`glassDialogSurface` returns `@Composable DialogSurfaceScope.() -> Modifier` for the `surface` slot of `OverlayDialog`. It uses the host's corner radius, scrim, and scale; it does not create a host or handle dismissal.
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
@@ -208,10 +207,10 @@ OverlayDialog(
 }
 ```
 
-The surface applies the host's animated dimming to the backdrop itself and keeps sampling aligned during scaling. Do not record the scrim into the backdrop. `enableWindowDim = false` removes both the visible and sampled dimming. Content remains sharp; this surface does not add refraction or a separate drop shadow.
+Do not record the scrim into `backdrop`. Set `enableWindowDim = false` to disable dimming.
 
 ### Dismissal and Insets
 
-Use `onDismissFinished` for work that must wait until the exit animation completes. It is not called if `show` returns to `true` before hiding finishes. Keep the dialog composed until then rather than wrapping it in `if (showDialog)`.
+Use `onDismissFinished` for work that waits until exit animation completes. It is not called if `show` returns to `true` before hiding finishes. Keep the dialog composed until then.
 
-With `defaultWindowInsetsPadding = true`, the host applies IME, navigation-bar and caption-bar padding. Set it to `false` when providing those insets yourself; the top safe inset (the maximum of status-bar, caption-bar and display-cutout top insets) still applies. In nested Scaffolds, `renderInRootScaffold = false` selects the current host; that host must also remain outside the supplied backdrop recording.
+With `defaultWindowInsetsPadding = true`, the host applies IME, navigation-bar, and caption-bar padding. Set it to `false` when providing those insets yourself; the top safe inset still applies. In nested Scaffolds, `renderInRootScaffold = false` selects the current host, which must remain outside `backdrop`.

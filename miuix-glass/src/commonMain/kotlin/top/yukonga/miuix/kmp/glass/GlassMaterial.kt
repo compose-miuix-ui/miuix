@@ -7,7 +7,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
-/** How one layer of a [GlassMaterial] combines with the backdrop beneath it. */
+/** How a [GlassMaterial] colour layer is composited with the backdrop. */
 enum class GlassColorBlendMode {
 
     /** The layer replaces the backdrop, in proportion to its own alpha. */
@@ -19,7 +19,7 @@ enum class GlassColorBlendMode {
     /** Additive lightening: `backdrop + layerAlpha * layer`, clamped at white. */
     PlusLighter,
 
-    /** A gentle dodge and burn. Never reaches pure black or pure white. */
+/** Applies a soft-light dodge-and-burn blend without reaching pure black or white. */
     SoftLight,
 
     /** [Overlay] with the layer and the backdrop swapped. The layer decides the contrast. */
@@ -39,10 +39,10 @@ enum class GlassColorBlendMode {
 }
 
 /**
- * One colour layer painted over the blurred backdrop.
+ * A colour layer composited over the blurred backdrop.
  *
- * @property color The layer's colour. Its alpha is how far the blend carries.
- * @property mode How it combines with everything already under it.
+ * @property color Layer colour; its alpha controls blend strength.
+ * @property mode Blend operation with content already below the layer.
  */
 @Immutable
 data class GlassColorLayer(
@@ -51,13 +51,12 @@ data class GlassColorLayer(
 )
 
 /**
- * A blur radius and the colour treatment that goes over it — the panel's own body.
+ * Backdrop blur and the ordered colour layers composited over it.
  *
- * @property blurRadius How far the backdrop blurs before the layers go on. It replaces the blur
- *   the [GlassStyle] would otherwise ask for.
- * @property first The layer nearest the backdrop. Always present.
- * @property second The layer over [first]. `null` ends the stack.
- * @property third The layer over [second]. `null` ends the stack.
+ * @property blurRadius Backdrop blur radius. It overrides the blur requested by [GlassStyle].
+ * @property first Layer nearest the backdrop. Always present.
+ * @property second Layer over [first]. `null` ends the layer stack.
+ * @property third Layer over [second]. `null` ends the layer stack.
  */
 @Immutable
 data class GlassMaterial(

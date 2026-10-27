@@ -52,17 +52,16 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
 /**
- * The colours one tab wears in each of its states.
+ * Colours used by a tab in each interaction state.
  *
- * @property selectedContainerColor Fill of the selected tab.
- * @property selectedContentColor Its label.
- * @property restingContainerColor Fill of every other tab before the material fades in.
- * @property containerColor Fill of every other tab once the material is up. [Color.Transparent]
- *   leaves the glass showing.
- * @property contentColor Their labels.
- * @property pressedOverlayColor Painted over whichever tab is under a finger, selected or not.
- * @property restingStrokeAlpha How much extra rim an unselected tab wears before the material comes
- *   up. Once material is active both states take the bloom stroke instead.
+ * @property selectedContainerColor Selected-tab fill.
+ * @property selectedContentColor Selected-tab label colour.
+ * @property restingContainerColor Unselected-tab fill before material appears.
+ * @property containerColor Unselected-tab fill after material appears. [Color.Transparent] shows
+ *   the glass body.
+ * @property contentColor Unselected-tab label colour.
+ * @property pressedOverlayColor Overlay for the tab under a finger.
+ * @property restingStrokeAlpha Additional rim alpha before material appears.
  */
 @Immutable
 data class GlassTabColors(
@@ -78,19 +77,19 @@ data class GlassTabColors(
 /** Default values for [GlassTabRow]. */
 object GlassTabRowDefaults {
 
-    /** Height of a tab: `filter_sort_tab_view2_min_height`. */
+    /** Tab height. */
     val Height: Dp = 40.dp
 
     /** The shorter height that [neutralColors] goes with. */
     val NeutralHeight: Dp = 35.dp
 
-    /** Gap between two tabs: `filter_sort_view2_tab_gap`. */
+    /** Gap between tabs. */
     val TabGap: Dp = 12.dp
 
-    /** Horizontal padding inside a tab: `filter_sort_tab_view2_padding_horizontal`. */
+    /** Horizontal padding inside a tab. */
     val TabPaddingHorizontal: Dp = 16.dp
 
-    /** Vertical padding inside a tab: `filter_sort_tab_view2_padding_vertical`. */
+    /** Vertical padding inside a tab. */
     val TabPaddingVertical: Dp = 6.dp
 
     /** How much white an unselected tab carries over a dark page, before the material comes up. */
@@ -106,7 +105,7 @@ object GlassTabRowDefaults {
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The middle bloom stroke declared by both selected and unselected tokens. */
+    /** Bloom stroke for selected and unselected tabs. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -339,13 +338,13 @@ object GlassSegmentedTabRowDefaults {
     /** Height of the track: a 34dp tab with [TrackPadding] above and below it. */
     val Height: Dp = 40.dp
 
-    /** Inset between the track's rim and the tabs: `filter_sort_view_padding`. */
+    /** Inset between the track rim and its tabs. */
     val TrackPadding: Dp = 3.dp
 
-    /** Gap between two tabs: `filter_sort_padding_between_tabs`. */
+    /** Gap between tabs. */
     val TabGap: Dp = 8.dp
 
-    /** Horizontal padding inside a tab: `filter_sort_tab_view_padding_horizontal`. */
+    /** Horizontal padding inside a tab. */
     val TabPaddingHorizontal: Dp = 16.dp
 
     /** The track is a pill, and so is the indicator inside it. */
@@ -358,7 +357,7 @@ object GlassSegmentedTabRowDefaults {
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The middle bloom stroke declared by the track token. */
+    /** Bloom stroke for the track. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,

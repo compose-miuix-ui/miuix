@@ -18,13 +18,12 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Chains the glass material onto the effect pipeline.
+ * Adds the glass material to the backdrop effect pipeline.
  *
- * @param style The material to render.
- * @param shape The silhouette. Its corner sizes and smoothing drive the shader's distance field.
- * @param alpha Opacity multiplier folded into the material's own opacity.
- * @param tint Overrides [top.yukonga.miuix.kmp.glass.GlassInner.tint] when specified. Its alpha
- *   replaces the style's tint strength.
+ * @param style Glass style.
+ * @param shape Surface shape.
+ * @param alpha Material opacity multiplier.
+ * @param tint Optional tint override; its alpha replaces the style's tint strength.
  */
 internal fun BackdropEffectScope.glassEffect(
     style: GlassStyle,
@@ -138,10 +137,10 @@ internal fun BackdropEffectScope.glassEffect(
 }
 
 /**
- * Chains a colour treatment onto the effect pipeline.
+ * Adds color blending to the backdrop effect pipeline.
  *
- * @param material The material whose layers to apply, nearest the backdrop first.
- * @param alpha Opacity multiplier folded into every material layer.
+ * @param material Ordered color layers, nearest the backdrop first.
+ * @param alpha Opacity multiplier for each layer.
  */
 internal fun BackdropEffectScope.colorBlendEffect(
     material: GlassMaterial,
@@ -168,7 +167,7 @@ internal fun BackdropEffectScope.colorBlendEffect(
     }
 }
 
-/** The id the shader's blend switch reads. Keep in step with `GLASS_COLOR_BLEND_SHADER`. */
+/** Blend-mode ID; must match the switch in `GLASS_COLOR_BLEND_SHADER`. */
 private val GlassColorBlendMode.id: Float
     get() = when (this) {
         GlassColorBlendMode.SrcOver -> 0f

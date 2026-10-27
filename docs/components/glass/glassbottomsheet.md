@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassBottomSheet
 
-`GlassBottomSheet` is a glass bottom sheet component in Miuix that slides up from the screen edge. It supports a header, swipe-to-dismiss, predictive Back and nested scrolling, while the material extends to the bottom edge.
+`GlassBottomSheet` is a glass sheet that slides up from the screen edge. It supports a header, dismissal gestures, predictive Back, and nested scrolling.
 
 <div style="position: relative; height: 480px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -37,7 +37,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## Basic Usage
 
-In this example, only the page `Box` is recorded; `Scaffold` hosts the overlay outside that recording.
+The page `Box` is recorded by `backdrop`; `Scaffold` hosts the overlay outside that recording.
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -73,9 +73,9 @@ Scaffold { padding ->
 
 When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
 
-If the overlay can cover page bars, include those bars in the backdrop, but exclude the popup host and its scrim. A null backdrop or unavailable runtime shaders uses `containerColor`; provide an opaque fallback color.
+Include any page bars that the overlay can cover in `backdrop`, but exclude the popup host and scrim. A null backdrop or unavailable runtime shaders uses `containerColor`; provide an opaque fallback color.
 
-The caller supplies scrolling and extra body spacing. Place navigation-bar padding **inside scrollable content** when the bottom spacing should scroll with it. The glass itself extends to the screen edge and also fills the extension exposed by upward overscroll.
+The caller supplies scrolling and extra body spacing. Place navigation-bar padding inside scrollable content when that spacing should scroll with it.
 
 ## Properties
 
@@ -101,7 +101,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | insideMargin | DpSize | Horizontal content padding uses `width`; bottom padding uses `height` | BottomSheetDefaults.insideMargin | No |
 | dragHandleColor | Color | Handle color before press opacity is applied | BottomSheetDefaults.dragHandleColor() | No |
 | material | GlassMaterial | Blur and ordered color layers | GlassBottomSheetDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke; omitted on the overscroll extension; null removes it | GlassBottomSheetDefaults.stroke() | No |
+| stroke | GlassStroke? | Bloom stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassBottomSheetDefaults.containerColor() | No |
 | dimColor | Color | Scrim color before animation progress is applied | GlassBottomSheetDefaults.ScrimColor | No |
 | onDismissFinished | (() -> Unit)? | Called after the hide animation completes, unless hiding is cancelled | null | No |
@@ -109,13 +109,13 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 
 ### glassBottomSheetSurface Properties {#glassbottomsheetsurface}
 
-`glassBottomSheetSurface` returns `@Composable BottomSheetSurfaceScope.() -> Modifier` for the `surface` slot of `OverlayBottomSheet`. The host still owns sizing, insets, the handle and gestures. The surface uses rounded top corners, square bottom corners and the host's animated scrim. Its overscroll extension uses the same material without a bloom stroke.
+`glassBottomSheetSurface` returns `@Composable BottomSheetSurfaceScope.() -> Modifier` for the `surface` slot of `OverlayBottomSheet`. The host owns sizing, insets, the handle, and gestures; the surface uses the host's corners and scrim.
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop? | Page backdrop excluding the sheet host and scrim; null uses the fallback | - | Yes |
 | material | GlassMaterial | Blur and ordered color layers | GlassBottomSheetDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke, omitted on the overscroll extension; null removes it | GlassBottomSheetDefaults.stroke() | No |
+| stroke | GlassStroke? | Bloom stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassBottomSheetDefaults.containerColor() | No |
 
 ### GlassBottomSheetDefaults Object
@@ -158,12 +158,12 @@ OverlayBottomSheet(
 }
 ```
 
-The surface samples at the sheet's translated screen coordinates and applies the animated dimming itself. Do not record the scrim into the backdrop. `enableWindowDim = false` removes both visible and sampled dimming. Content remains sharp; this surface does not add refraction or a separate drop shadow.
+Do not record the scrim into `backdrop`. Set `enableWindowDim = false` to disable dimming.
 
 ### Dismissal and Insets
 
-`allowDismiss = false` prevents outside taps, drags and Back gestures from dismissing the sheet; the caller can still update `show` directly. Leave `enableNestedScroll = true` when scrollable children should hand motion to sheet dragging.
+`allowDismiss = false` prevents outside taps, drags, and Back from dismissing the sheet; the caller can still update `show`. Keep `enableNestedScroll = true` when scrollable children should hand motion to the sheet.
 
-Use `onDismissFinished` for work that must wait until the exit animation completes. It is not called if hiding is cancelled by setting `show` back to `true`. Do not wrap the sheet in `if (showSheet)`.
+Use `onDismissFinished` for work that waits until exit animation completes. It is not called if hiding is cancelled by setting `show` back to `true`. Do not wrap the sheet in `if (showSheet)`.
 
-`defaultWindowInsetsPadding = true` adds IME padding; set it to `false` when providing that padding yourself. The sheet's height is still limited below the top safe inset (the maximum of status-bar, caption-bar and display-cutout top insets). Navigation-bar padding for the body remains the caller's responsibility. In nested Scaffolds, `renderInRootScaffold = false` selects the current host, which must also stay outside the supplied backdrop recording.
+`defaultWindowInsetsPadding = true` adds IME padding; set it to `false` when providing it yourself. The sheet remains below the top safe inset, and body navigation-bar padding is caller-owned. In nested Scaffolds, `renderInRootScaffold = false` selects the current host, which must remain outside `backdrop`.

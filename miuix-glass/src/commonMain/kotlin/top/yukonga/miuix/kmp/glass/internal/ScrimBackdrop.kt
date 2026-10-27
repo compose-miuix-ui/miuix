@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.Density
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 
-/** Decorates the clean scene in the existing padded GPU recording, before the blur pass. */
+/** Applies a scrim to the padded backdrop recording before blur. */
 @Stable
 internal class ScrimBackdrop(
     private val backdrop: Backdrop,
@@ -52,8 +52,7 @@ internal class ScrimBackdrop(
             } else {
                 padding
             }
-            // Recording has translated by padding. Cover that margin too, without filling pixels
-            // outside the scene: SrcAtop retains their alpha instead of creating a dark halo.
+            // Cover recording padding; SrcAtop preserves transparent scene pixels to prevent halos.
             drawRect(color, topLeft = Offset(-scaledPadding, -scaledPadding), size = size, blendMode = BlendMode.SrcAtop)
         }
     }

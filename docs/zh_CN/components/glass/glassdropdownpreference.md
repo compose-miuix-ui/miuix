@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassDropdownPreference
 
-`GlassDropdownPreference` 是 Miuix 中带有玻璃弹出菜单、标题和可选说明的下拉设置组件。它管理展开和关闭，调用方负责控制选中项。
+`GlassDropdownPreference` 是带玻璃下拉菜单的设置行。它管理展开和关闭，调用方负责维护选中索引。
 
 <div style="position: relative; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassDropdownPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -37,7 +37,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## 基本用法
 
-下例记录包含设置行的页面 `Column`，由 `Scaffold` 在采样范围之外承载弹窗。
+页面内容由 `backdrop` 记录，`Scaffold` 在该采样范围之外承载弹窗。
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -63,16 +63,16 @@ Scaffold { padding ->
 }
 ```
 
-浮层可能覆盖页面顶栏或底栏时，应将这些栏包含在背景采样中，但排除弹窗宿主及其遮罩。背景采样为空时，使用 `visuals.containerColor` 作为不透明回退，同时保留配置的描边与投影。
+浮层可能覆盖页面栏时，应将这些栏包含在 `backdrop` 中，但排除弹窗宿主及遮罩。backdrop 为 null 时使用 `visuals.containerColor` 作为不透明回退，同时保留描边和投影。
 
 ## 组件状态
 
-- **收起**：设置行显示选中值和下拉箭头，`showValue = false` 仅隐藏选中值。
-- **展开**：选中值和箭头淡出，设置行其余内容保持不动。选中菜单项显示勾选图标。选择选项后请求关闭并调用 `onSelectedIndexChange`，调用方须更新 `selectedIndex`。
+- **收起**：显示选中值和下拉箭头；`showValue = false` 仅隐藏选中值。
+- **展开**：选择选项后调用 `onSelectedIndexChange` 并关闭菜单；调用方应更新 `selectedIndex`。
 - **禁用**：`enabled = false` 或 `items` 为空时无法展开，已经展开的菜单也会关闭。
 - **未选中**：`selectedIndex` 越界时不显示选中值或勾选图标。
 
-展开和选择分别提供上下文点击与确认触觉反馈。点击外部或返回会关闭菜单；取消预测性返回手势后菜单会恢复。组件在内部保留离场内容，并在请求关闭时立即停止菜单行输入和无障碍操作。无需使用外部 `if (expanded)` 包裹，也无需手动测量锚点。
+关闭时保留组件组合，无需外部 `if (expanded)` 包裹或手动测量锚点。
 
 ## 属性
 
@@ -99,7 +99,7 @@ Scaffold { padding ->
 | visuals | GlassPopupVisuals | 菜单材质、描边、投影和回退色 | GlassPopupDefaults.visuals() | 否 |
 | onExpandedChange | ((Boolean) -> Unit)? | 通知目标展开状态变化，不表示动画完成 | null | 否 |
 
-设置行通过 `BasicComponentDefaults` 获取内边距及标题、说明颜色。菜单行使用 `GlassPopupItem`。`GlassPopupSizing()` 默认最小宽度为 `200.dp`、最大宽度为 `288.dp`、最大高度为 `416.dp`、安全边距为 `12.dp`。外观选项详见[共享弹窗默认值](./glasspopup#shared-defaults)。本组件不单独提供圆角参数。
+尺寸和外观选项见[共享弹窗默认值](./glasspopup#shared-defaults)。
 
 ## 进阶用法
 
@@ -120,11 +120,10 @@ GlassDropdownPreference(
 )
 ```
 
-菜单仍使用默认的主题材质和辉光描边。在嵌套 Scaffold 中，`renderInRootScaffold = false` 选择当前宿主，应确保该宿主同样位于传入背景采样的记录范围之外。
 
 ### 观察展开状态
 
-通过 `onExpandedChange` 更新辅助说明或协调附近界面。沿用基本示例的选中状态与背景采样，将以下状态及设置行放在背景采样页面内：
+通过 `onExpandedChange` 更新辅助说明或协调附近界面，将状态及设置行放在背景采样页面内：
 
 ```kotlin
 var expanded by remember { mutableStateOf(false) }
@@ -140,4 +139,3 @@ GlassDropdownPreference(
 )
 ```
 
-回调只观察展开变化，不会将展开状态改为外部控制。`false` 表示开始关闭，而非离场动画完成。展开、锚点测量与离场组合仍由组件管理。

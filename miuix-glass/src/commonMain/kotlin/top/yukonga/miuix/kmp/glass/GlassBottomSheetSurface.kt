@@ -17,17 +17,17 @@ import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/** Defaults for the launcher's attached bottom-sheet material. */
+/** Default values for [GlassBottomSheet] and [glassBottomSheetSurface]. */
 object GlassBottomSheetDefaults {
     val ScrimColor: Color = GlassDialogDefaults.ScrimColor
 
-    /** Native sheets and dialogs reference the same 60dp blur and three color layers. */
+    /** Bottom-sheet material for the current theme. */
     @Composable
     fun material(): GlassMaterial = GlassMaterials.dialogGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** Initial approximation; native sheet bloom uses a different config from dialogs. */
+    /** Bottom-sheet bloom stroke for the current theme. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -41,18 +41,16 @@ object GlassBottomSheetDefaults {
 }
 
 /**
- * A blur/blend material for OverlayBottomSheet's `surface` slot, with rounded top corners.
+ * A glass surface for OverlayBottomSheet's `surface` slot, with rounded top corners.
  *
- * The host keeps ownership of sizing, insets, the handle and gestures. The supplied clean [backdrop]
- * is dimmed locally before blur, and sampling follows the sheet's translated screen coordinates.
- * During upward overscroll the exposed bottom edge gets the same material without a stroke.
- * There is no refraction or additional drop shadow. Native blur-kernel conversion, scrim sampling
- * order and bloom still need visual calibration.
+ * The backdrop is dimmed before blur and sampled in the sheet's translated screen coordinates.
+ * Upward overscroll extends the material without a stroke. Content is not refracted, and no
+ * additional drop shadow is drawn.
  *
  * @param backdrop Page recording including bars, excluding the sheet host and its scrim.
  *   Null or unavailable runtime shaders use the opaque [containerColor] fallback.
  * @param material Shared dialog/sheet blur and ordered blend layers.
- * @param stroke Optional bloom approximation; omitted on the overscroll extension.
+ * @param stroke Optional bloom stroke, omitted on the overscroll extension.
  * @param containerColor Opaque fallback fill.
  */
 @Composable

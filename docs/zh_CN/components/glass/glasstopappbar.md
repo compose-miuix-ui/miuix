@@ -1,13 +1,13 @@
 # GlassTopAppBar
 
-`GlassTopAppBar` 在滚动内容上方显示可折叠标题、导航控件和操作按钮，使用渐变背景带分隔顶栏与页面。在插槽中使用 [GlassIconButton](./glassiconbutton) 即可添加玻璃按钮表面。
+`GlassTopAppBar` 是支持折叠标题和操作插槽的玻璃顶栏。使用 [GlassIconButton](./glassiconbutton) 为导航和操作按钮提供一致的样式。
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -20,10 +20,6 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 ```
 
 ## 基本用法
-
-没有可用的背景采样源时，顶栏按钮使用回退填充色。
-
-`backIcon` 是 `ImageVector`，`onBack` 是页面的导航回调：
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -67,12 +63,8 @@ Scaffold(
 
 ### 内容位于顶部或已滚动
 
-组件提供两个重载：
-
-- `GlassTopAppBar(title, scrollBehavior = …)` 通过 `scrollBehavior.state.contentOffset < 0f` 推导重叠状态。没有滚动行为时，保持材质显示。
-- `GlassTopAppBar(title, isContentScrolled = …)` 接收页面真实的重叠状态。Lazy 列表可以传入 `listState.canScrollBackward`，使列表返回顶部时清除材质，即使大标题仍处于折叠状态。
-
-`scrollBehavior` 控制标题折叠和基于滚动距离的阴影渐变。`isContentScrolled` 控制背景带和按钮材质过渡，不能仅根据标题折叠判断页面重叠状态。
+- 传入 `scrollBehavior`，根据滚动状态控制材质；未传入时材质保持显示。
+- 传入 `isContentScrolled` 可显式控制材质状态。Lazy 列表建议使用 `listState.canScrollBackward`，使返回顶部时清除材质，不受标题折叠状态影响。
 
 ## 属性
 
@@ -140,13 +132,11 @@ Scaffold(
 
 ### 添加标签栏
 
-将 [GlassTabRow 或 GlassSegmentedTabRow](./glasstabrow) 放入 `bottomContent`。它们继承顶栏的背景采样源和有效模糊半径，但不会继承材质过渡进度。请根据页面重叠状态而非标题展开状态设置 `surfaceAlpha`，详见[标签栏示例](./glasstabrow#inside-glasstopappbar)。
-
-内嵌的 `GlassIconButton` 会共享顶栏材质过渡，保留默认 `surfaceAlpha` 即可。顶栏显式传入的空描边和空阴影会保持为空。
+将 [GlassTabRow 或 GlassSegmentedTabRow](./glasstabrow#inside-glasstopappbar) 放入 `bottomContent`。它们继承背景采样源和模糊，请根据页面滚动状态设置 `surfaceAlpha`。
 
 ### 变换前景内容
 
-`contentModifier` 保持背景带不动，`titleAlpha` 影响大小标题及其副标题，不影响操作控件或 `bottomContent`。下例的 `foregroundOffsetPx` 和 `titleOpacity` 是页面持有的过渡值：
+使用 `contentModifier` 变换前景内容而保持背景带不动，通过 `titleAlpha` 独立控制标题透明度：
 
 ```kotlin
 GlassTopAppBar(

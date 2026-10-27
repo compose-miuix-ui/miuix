@@ -29,20 +29,17 @@ import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.blur.Backdrop
 
 /**
- * A secondary menu grown from a primary menu row, not an edge-revealed ordinary popup.
+ * A glass submenu that expands from a primary menu row, aligned to its start edge in LTR and RTL.
  *
- * The row plus [contentPadding] is the initial clip rectangle; all four edges travel to the
- * measured menu bounds while the rows keep their size and move with the clip. The start edge
- * aligns to the row, mirrored in RTL. Rows accept input while opening and stop the moment
- * dismissal is requested. Predictive Back previews the collapse, restores on cancellation and
- * dismisses on completion.
+ * Rows retain their size during the transition and stop accepting input as soon as dismissal is
+ * requested. Predictive Back previews collapse, restores on cancellation and dismisses on completion.
  *
  * @param show Whether the secondary menu is expanded. Keep this call composed during collapse.
  * @param onDismissRequest Called by a tap outside or Back to return to the primary menu.
  * @param anchorBounds Resting bounds of the trigger row, in the same root as this popup. Freeze
  *   these before setting the primary [GlassTransformPopup]'s `stacked` flag.
- * @param backdrop Background sampled behind this menu. Include the primary popup in this layer so
- *   its rendered content is blurred underneath. `null` uses the anchor's backdrop.
+ * @param backdrop Background sampled by the menu. Include the primary popup but exclude this
+ *   submenu. `null` uses the anchor's backdrop.
  * @param modifier Modifier applied to the panel.
  * @param materialAnchor The primary popup's button anchor. Passing the same anchor shares its
  *   expanded popup appearance across both levels.
@@ -110,11 +107,8 @@ fun BoxScope.GlassSecondaryPopup(
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop ?: source?.backdrop,
-        modifier = modifier,
         sizing = sizing,
         visuals = resolvedVisuals,
-        interactive = show,
-        scrollable = true,
         contentPadding = contentPadding,
         panelLayer = {},
         overlay = {},
@@ -132,6 +126,9 @@ fun BoxScope.GlassSecondaryPopup(
             )
         },
         contentLayer = { _, _ -> },
+        modifier = modifier,
+        interactive = show,
+        scrollable = true,
         content = content,
     )
 }

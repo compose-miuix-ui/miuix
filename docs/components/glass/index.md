@@ -22,41 +22,15 @@
 
 ## Setup
 
-Add the `miuix-glass` dependency to your project:
+See [Glass Material](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-glass-icons` module provides icons through `MiuixIcons.Glass`.
 
-```kotlin
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
-            // Optional: Glass icon set
-            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
-        }
-    }
-}
-```
+## Usage Requirements
 
-For Android-only projects:
+- Buttons, bars and tabs can be used directly in layouts.
+- Popup menus require a full-page `BoxScope` with anchors in the same coordinate space.
+- `GlassDialog`, `GlassBottomSheet` and `GlassDropdownPreference` require a Miuix [Scaffold](../basic/scaffold).
 
-```kotlin
-dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
-    // Optional: Glass icon set
-    implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
-}
-```
-
-`miuix-glass` includes `miuix-blur` and `miuix-ui` transitively. The optional `miuix-glass-icons` module provides the Glass icon set.
-
-See [Getting Started](/guide/getting-started) for complete project configuration and platform-specific dependencies.
-
-## Component Organization & Hosts
-
-- **Standalone Glass Controls** (`GlassIconButton`, `GlassTopAppBar`, `GlassNavigationBar`, `GlassTabRow`): Used directly in layouts, sampling background content via `backdrop` to render frosted blur, tint, and bloom strokes.
-- **Popup & Transform Menus** (`GlassPopup`, `GlassTransformPopup`, `GlassSecondaryPopup`, `GlassDropdownPopup`): Used in `BoxScope`, providing smooth transformation and cascading levels from measured anchors without requiring a `Scaffold`.
-- **Scaffold-Hosted Overlays** (`GlassDialog`, `GlassBottomSheet`, `GlassDropdownPreference`): Must be used within a Miuix [Scaffold](../basic/scaffold) to provide `MiuixPopupHost` for rendering scrims and overlay panels.
-
-When using background sampling, `backdrop` must record content behind the component and exclude the glass surface itself. Each component page details specific parameters, defaults, and usage.
+The sampled backdrop must exclude the glass surface itself. See [Background Sampling](/guide/glass#background-sampling).
 
 ## Related Documentation
 

@@ -1,13 +1,15 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:Suppress("ktlint:compose:multiple-emitters-check")
+
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +19,9 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -45,12 +49,12 @@ import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import kotlin.math.roundToInt
 
 /**
- * How wide and tall a menu may be, and how close to the page's edge it may come.
+ * Size limits and window margin for a glass popup.
  *
- * @property minWidth Narrowest the panel may be.
- * @property maxWidth Widest it may be.
- * @property maxHeight Tallest it may be, before the list inside scrolls.
- * @property safeMargin Gap the panel keeps from the edge of the page.
+ * @property minWidth Minimum panel width.
+ * @property maxWidth Maximum panel width.
+ * @property maxHeight Maximum panel height before content scrolls.
+ * @property safeMargin Minimum margin from the window edges.
  */
 @Immutable
 data class GlassPopupSizing(
@@ -61,15 +65,14 @@ data class GlassPopupSizing(
 )
 
 /**
- * What a menu's surface is made of.
+ * Surface appearance of a glass popup.
  *
- * @property style The glass style. Only its blur and rim are consulted — a menu is a material and
- *   not glass, so its shading is left off.
- * @property alpha Opacity multiplier for the material.
- * @property stroke Optional bloom stroke along the rim.
- * @property shadow The shadow the panel casts. `null` removes it.
- * @property material The panel's own body.
- * @property containerColor Opaque fill used when there is no backdrop; stroke and shadow remain.
+ * @property style Glass style supplying blur and rim geometry; glass shading is disabled.
+ * @property alpha Material opacity multiplier.
+ * @property stroke Optional bloom stroke.
+ * @property shadow Optional panel shadow.
+ * @property material Panel material.
+ * @property containerColor Opaque fill used without a backdrop; stroke and shadow remain.
  */
 @Immutable
 data class GlassPopupVisuals(
@@ -81,33 +84,25 @@ data class GlassPopupVisuals(
     val containerColor: Color,
 )
 
-/** The rectangle a menu's panel occupies at one moment, and the corner radius it wears there. */
+/** Panel bounds and corner radius for an animation frame. */
 @Immutable
 data class GlassPopupFrame(
     val rect: Rect,
     val cornerRadius: Dp,
 )
 
-/** Where a menu settles, and how far it has to move to stay on the page. */
+/** Final popup bounds and vertical anchor alignment. */
 @Immutable
 class GlassPopupPlacement internal constructor(
     val rect: Rect,
-    /** Whether the panel sits below the anchor. `false` means it had to open upward instead. */
+    /** Whether the panel aligns to the anchor's top rather than its bottom. */
     val alignTop: Boolean,
 )
 
 /**
- * Works out where a menu belongs: two of its edges on the anchor's, clamped to the page.
- *
- * An ordinary menu puts its end edge on the anchor's. The top edges meet unless there is no
- * room below and more above. Secondary menus use [placeGlassSecondaryPopup] instead: start-edge
- * alignment and upward shifting without flipping the opening direction.
- *
- * @param anchor The control or row the menu belongs to.
- * @param size The size the panel settles at.
- * @param margin Gap the panel keeps from the edge of the page.
- * @param page The page the panel sits on.
- * @param direction The ambient layout direction used to resolve the anchor's end edge.
+ * Aligns the popup to the anchor's end edge and clamps it to the page margins.
+ * Opens upward when there is insufficient space below and more space above.
+ * All bounds, sizes and margins use the same coordinate space and pixel units.
  */
 internal fun placeGlassPopup(
     anchor: Rect,
@@ -132,34 +127,29 @@ internal fun placeGlassPopup(
 }
 
 /**
- * The panel every glass menu is built on.
- *
- * It owns what the three openings share: the catcher that closes on a tap outside, the placement,
- * the shadow, the material, and the measurement that freezes the rows at the size the panel settles
- * at. Each opening supplies only its own geometry — [frame] and [contentLayer].
+ * Shared glass popup surface with outside-tap dismissal and fixed-size content during transitions.
  *
  * @param onDismissRequest Called when a tap outside should close the menu.
  * @param backdrop The [Backdrop] behind the glass. `null` uses [GlassPopupVisuals.containerColor]
  *   while retaining the configured bloom stroke and shadow.
  * @param modifier The modifier applied to the panel.
- * @param sizing How wide and tall the panel may be.
- * @param visuals What its surface is made of.
+ * @param sizing Panel size limits and window margin.
+ * @param visuals Panel surface appearance.
  * @param surface Optional background layers, drawn behind the rows inside the panel silhouette.
  * @param contentPadding Padding around the rows.
- * @param panelLayer Applied to the panel as a whole: its opacity, its blur, its scale.
+ * @param panelLayer Layer properties applied to the whole panel.
  * @param overlay Drawn over the panel and its rows, inside the silhouette.
- * @param frame The panel's rectangle and corner radius now, given the size it settles at and the
- *   page it sits on.
- * @param contentLayer Applied to the rows, given the size the panel settles at and where it is now.
- * @param reveal Clips the panel as it opens. A menu whose opening is the library's own passes
- *   [popupClipReveal] here; one that carries its own geometry leaves it empty.
- * @param onMeasured Called with the size the panel settles at, each time it is measured.
+ * @param frame Current panel bounds and corner radius, given the final panel size and page size.
+ * @param contentLayer Row layer properties, given the final panel size and current bounds.
+ * @param reveal Optional opening clip, such as [popupClipReveal].
+ * @param onMeasured Called with the final panel size on each measurement.
  * @param interactive Whether the panel's rows can receive input and accessibility actions.
- * @param scrollable Whether rows scroll within the safe-area-constrained secondary viewport.
+ * @param scrollable Whether rows scroll within the safe-area-constrained viewport.
  * @param content The rows.
  */
+// The full-page dismiss layer and positioned panel must be siblings in the popup host.
 @Composable
-internal fun BoxScope.GlassPopupSurface(
+internal fun GlassPopupSurface(
     onDismissRequest: () -> Unit,
     backdrop: Backdrop?,
     sizing: GlassPopupSizing,
@@ -177,10 +167,25 @@ internal fun BoxScope.GlassPopupSurface(
     scrollable: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable(interactionSource = null, indication = null) { onDismissRequest() },
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    down.consume()
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        change.consume()
+                        if (!change.pressed) {
+                            currentOnDismissRequest()
+                            break
+                        }
+                    }
+                }
+            },
     )
 
     val density = LocalDensity.current
@@ -203,8 +208,7 @@ internal fun BoxScope.GlassPopupSurface(
             }
             .graphicsLayer {
                 panelLayer()
-                // Alpha below one creates an offscreen buffer. Keep the shader shadow's
-                // external pixels inside it instead of clipping them to the panel rectangle.
+                // Include shadow pixels in the offscreen buffer used when alpha is below one.
                 outsets = shadowOutsets
             }
             .then(reveal)
@@ -237,7 +241,7 @@ internal fun BoxScope.GlassPopupSurface(
                     GlassPopupBackground(backdrop, shape, visuals)
                 }
             }
-            Column(
+            GlassPopupColumn(
                 modifier = Modifier
                     .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                     .graphicsLayer {
@@ -254,8 +258,13 @@ internal fun BoxScope.GlassPopupSurface(
         val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
         val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
         val width = measurables[1].maxIntrinsicWidth(tallest).coerceIn(narrowest, widest)
+        val viewportHeight = if (scrollable) {
+            measurables[1].minIntrinsicHeight(width).coerceAtMost(tallest)
+        } else {
+            tallest
+        }
         val foreground = measurables[1].measure(
-            Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = tallest),
+            Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = viewportHeight),
         )
         measured.end = Size(foreground.width.toFloat(), foreground.height.toFloat())
         onMeasured?.invoke(measured.end)
@@ -331,11 +340,8 @@ internal fun Density.popupShadowOutsets(shadow: GlassShadow?): LayerOutsets {
 }
 
 /**
- * The panel's measured size and current rectangle.
- *
- * Written during measurement and read back inside the same pass, by the layout wrapped around the
- * one that wrote it. Deliberately not snapshot state: a state written mid-measure either lags a
- * frame or invalidates the pass that wrote it.
+ * Geometry shared within the measurement pass. Not snapshot state: writes during measurement
+ * must not invalidate that pass or defer geometry updates to the next frame.
  */
 private class MeasuredPanel {
     var end: Size = Size.Zero
@@ -343,12 +349,7 @@ private class MeasuredPanel {
     var cornerRadius: Dp = 0.dp
 }
 
-/**
- * The panel's corner, resolved at the moment it is drawn.
- *
- * The radius travels with the panel, and a shape built during composition would be a frame behind
- * it.
- */
+/** Resolves the animated radius at draw time to avoid a one-frame delay. */
 private class MeasuredCorner(private val measured: MeasuredPanel) : CornerSize {
     override fun toPx(shapeSize: Size, density: Density): Float = with(density) { measured.cornerRadius.toPx() }
 

@@ -1,13 +1,13 @@
 # GlassTabRow
 
-`GlassTabRow` displays equal-width glass tab pills for content categories. It offers primary and neutral colors. `GlassSegmentedTabRow` joins the tabs into one track with a sliding selection indicator. Both components receive selection state and report changes through `onSelect`.
+`GlassTabRow` displays equal-width glass tabs with primary or neutral colors. `GlassSegmentedTabRow` uses a joined track and sliding indicator. Both use caller-owned selection state.
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTabRow" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -39,7 +39,7 @@ GlassTabRow(
 )
 ```
 
-The default primary colors use the theme's primary color for the selected pill. Each pill changes its own colors; no indicator moves between pills.
+Primary colors use the theme's primary color for the selected tab.
 
 ### Neutral Pills
 
@@ -69,15 +69,13 @@ GlassSegmentedTabRow(
 )
 ```
 
-Both layouts select on click, rather than navigation-bar-style dragging. Use distinct, short labels: labels are composition keys, occupy equal-width slots and display on one line with ellipsis. Rows are not horizontally scrollable and need bounded width.
+Provide bounded width and distinct labels. Tabs select on click, share the available width and truncate long labels.
 
 ## Component States
 
 ### Resting and Glass Surfaces
 
-With a resolved backdrop, `surfaceAlpha` is material progress, not whole-control opacity. At zero, selected fills, labels and the segmented indicator remain visible. Unselected pills use `restingContainerColor`; the segmented track uses `trackColor`. At one, material color layers, strokes and shadows are at full strength and unselected pills use `containerColor`. `GlassTabRow` still samples and blurs its backdrop at zero progress; `GlassSegmentedTabRow` disables background sampling at zero progress.
-
-Without a resolved backdrop, `GlassTabRow` uses `glassPanel`'s fallback: `alpha * surfaceAlpha` (with `surfaceAlpha` clamped to 0–1) multiplies the entire pill drawing, including its fill, label and pressed overlay. Setting `surfaceAlpha = 0f` therefore makes the pill invisible, not an opaque resting pill; it does not disable selection. A null backdrop does not reset progress automatically.
+`surfaceAlpha` controls material progress when a backdrop is present. Without a backdrop, it affects the whole tab; zero opacity does not disable clicks.
 
 ## Properties
 
@@ -120,8 +118,6 @@ Without a resolved backdrop, `GlassTabRow` uses `glassPanel`'s fallback: `alpha 
 | indicatorColor | Color | Sliding indicator fill | GlassSegmentedTabRowDefaults.indicatorColor() | No |
 | selectedContentColor | Color | Selected label color | MiuixTheme.colorScheme.onSurface | No |
 | contentColor | Color | Unselected label color | MiuixTheme.colorScheme.onSurface | No |
-
-Empty lists render nothing. Out-of-range indices are clamped for display without changing caller state. Heights are fixed; the segmented inner height is `height - 2 * TrackPadding`.
 
 ### GlassTabColors Properties {#glasstabcolors}
 
@@ -200,7 +196,7 @@ GlassTabRow(
 
 ### Inside GlassTopAppBar {#inside-glasstopappbar}
 
-Both layouts inherit a [GlassTopAppBar](./glasstopappbar)'s non-null backdrop and effective blur, but keep their own material colors and `surfaceAlpha`. A null material stays null. The following uses the list and backdrop from the top-bar example and the tab state above:
+Nested tabs inherit the top bar's backdrop and blur, but retain their own material colors and `surfaceAlpha`:
 
 ```kotlin
 val isContentScrolled = listState.canScrollBackward
@@ -223,4 +219,4 @@ GlassTopAppBar(
 )
 ```
 
-Drive tab material progress from page overlap, not title expansion. The row does not automatically share the top bar's material transition.
+Drive `surfaceAlpha` from page scroll state; tabs do not share the bar's material transition automatically.

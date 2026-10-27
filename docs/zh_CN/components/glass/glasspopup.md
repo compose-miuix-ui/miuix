@@ -4,7 +4,7 @@ title: GlassPopup
 
 # GlassPopup
 
-`GlassPopup` 从测量得到的普通控件展开菜单，不会变换控件本身。面板对齐锚点的末端边缘，在 RTL 中镜像；面板无法放入下方且上方空间更多时向上展开。
+`GlassPopup` 是以测量得到的控件为锚点的玻璃菜单。
 
 <div style="position: relative; height: 380px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -23,13 +23,9 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 
 ## 基本用法
 
-此组件是 `BoxScope` 扩展，不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行拦截外部点击。锚点坐标必须与弹窗所在 `Box` 的坐标系一致。
-
-使用下方 `boundsInRoot()` 示例时，弹窗 `Box` 的原点必须与坐标根原点重合。宿主存在偏移或内缩时，应将触发控件范围转换到该 Box 的局部坐标。弹窗不会自行应用系统栏或 IME insets；`safeMargin` 相对于宿主边缘计算。返回关闭需要 `LocalNavigationEventDispatcherOwner`；没有该 owner 时，外部点击仍可关闭。普通 `GlassPopup` 处理返回完成事件，但不会在手势过程中预览几何变化。
-
-关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
-
-与变换、二级和下拉弹窗不同，普通一级 `GlassPopup` 在保留的退场动画期间仍允许菜单行交互；`show = false` 本身不会禁用这些菜单行。
+- 将弹窗放在整页 `Box` 的最后，避免父级裁剪。锚点须使用该 Box 的坐标；宿主有偏移时需转换 `boundsInRoot()`。
+- 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
+- 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
 在与弹窗相同的坐标根中测量触发控件，并在菜单项中更新状态：
 
@@ -61,7 +57,7 @@ Box(Modifier.fillMaxSize()) {
 
 ### 菜单项（GlassPopupItem）
 
-`GlassPopupItem` 用于构建弹窗内的每个交互行，支持图标、副标题、选中勾选状态以及子菜单箭头：
+`GlassPopupItem` 用于构建交互菜单行，支持图标、摘要、选中勾选和子菜单箭头。
 
 ```kotlin
 GlassPopupItem(
@@ -70,7 +66,6 @@ GlassPopupItem(
     showArrow = true,
     onClick = { /* 打开二级菜单 */ },
 )
-}
 ```
 
 ## 属性
@@ -103,11 +98,12 @@ GlassPopupItem(
 | enabled | Boolean | 菜单行是否响应点击 | true | 否 |
 | selected | Boolean | 显示末尾勾；启用时标签和前置图标使用选中颜色 | false | 否 |
 | showArrow | Boolean | 显示末尾子菜单箭头 | false | 否 |
-| arrowRotation | () -> Float | 箭头旋转角度，在图层阶段读取 | { 0f } | 否 |
+| arrowRotation | () -> Float | 箭头旋转角度 | { 0f } | 否 |
 | contentColor | Color | 标签和图标颜色 | MiuixTheme.colorScheme.onSurfaceContainer | 否 |
 | summaryColor | Color | 摘要和箭头颜色 | MiuixTheme.colorScheme.onSurfaceContainerVariant | 否 |
 | selectedContentColor | Color | 已启用选中行的标签和前置图标颜色；选中勾在禁用时也使用此色 | MiuixTheme.colorScheme.primary | 否 |
 | pressedColor | Color | 按压时菜单行后的填充色 | GlassPopupDefaults.itemPressedColor() | 否 |
+
 ### GlassPopupSizing 属性
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
@@ -117,24 +113,25 @@ GlassPopupItem(
 | maxHeight | Dp | 面板最大高度，超过后菜单行滚动 | GlassPopupDefaults.MaxHeight | 否 |
 | safeMargin | Dp | 与页面边缘的最小距离 | GlassPopupDefaults.SafeMargin | 否 |
 
+
 ### GlassPopupVisuals 属性
 
-构造函数的全部字段均为必填。`GlassPopupDefaults.visuals()` 提供 `GlassDefaults.Style`、`1f` 透明度、`GlassShadows.Regular`，以及随主题选择的 `stroke()`、`material()` 和 `containerColor()` 默认值。
+`GlassPopupDefaults.visuals()` 提供按主题选择的样式、透明度、描边、投影、材质和回退色默认值。
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| style | GlassStyle | 材质未指定模糊半径时的模糊回退；不启用玻璃明暗着色或样式边缘效果 | - | 是 |
-| alpha | Float | 材质、辉光描边和投影的透明度乘数；GlassTransformPopup 还会将其应用于整个面板，包括菜单行和回退填充 | - | 是 |
+| style | GlassStyle | 材质未指定模糊半径时使用的模糊样式 | - | 是 |
+| alpha | Float | 表面透明度乘数；GlassTransformPopup 还将其应用于菜单内容 | - | 是 |
 | stroke | GlassStroke? | 辉光描边；null 移除描边 | - | 是 |
 | shadow | GlassShadow? | 面板投影；null 移除投影 | - | 是 |
 | material | GlassMaterial? | 面板颜色处理和可选模糊半径；null 移除颜色处理，而非背景采样或模糊 | - | 是 |
 | containerColor | Color | backdrop 为 null 时使用的不透明填充 | - | 是 |
 
-backdrop 非 null 时，有 `material.blurRadius` 就使用该半径，否则使用 `style.blur.small / GlassDefaults.SourceDensity`。`material = null` 仍保留基于样式的模糊、噪声、辉光描边和投影，不会改用 `containerColor`。仅在最终解析出的 backdrop 为 null 时使用回退填充，并保留描边和投影，但不进行背景采样。
+backdrop 非 null 时使用材质或样式模糊。`material = null` 会移除颜色处理，但不会移除采样、模糊、描边或投影。最终 backdrop 为 null 时使用 `containerColor`，同时保留描边和投影。
 
 ### GlassPopupDefaults 对象 {#shared-defaults}
 
-`GlassPopupDefaults` 提供弹窗尺寸、菜单行、表面和叠层共用 token。
+`GlassPopupDefaults` 提供弹窗尺寸、菜单行、表面和叠层的共用默认值。
 
 #### 常量
 
@@ -172,7 +169,7 @@ backdrop 非 null 时，有 `material.blurRadius` 就使用该半径，否则使
 | `itemPressedColor` | — | `Color` | 浅色主题为 `0.1f` 透明度的黑色，深色主题为同透明度白色 |
 | `maskColor` | — | `Color` | 浅色主题为 `0.4f` 透明度的白色，深色主题为同透明度黑色 |
 
-以上方法均为 `@Composable`。主题选择将 `MiuixTheme.colorScheme.background.luminance() < 0.5f` 视为深色。
+以上方法均为 `@Composable` 并使用当前主题。
 
 ### GlassDropdownDefaults 对象
 

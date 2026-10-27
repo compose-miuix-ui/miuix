@@ -7,7 +7,7 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.ui.geometry.Offset
 import kotlin.math.abs
 
-/** Unscaled drag target bounds, in pixels, before the indicator's existing press transform. */
+/** Unscaled drag-target bounds, in pixels, before the indicator's press transform. */
 internal data class NavigationDragTarget(
     val left: Float,
     val right: Float,
@@ -22,10 +22,10 @@ internal data class NavigationDragTarget(
 }
 
 /**
- * The same-item drag trail and the cross-item edge-spring targets.
+ * Computes same-item drag-trail and cross-item edge-spring targets.
  *
- * The 60px trail cap is deliberately not density-scaled. Raw spring targets may extend past the
- * container; [navigationIndicatorBounds] limits the rendered edges. Stretch is suppressed when the
+ * The 60px trail cap is intentionally not density-scaled. Raw spring targets may extend beyond the
+ * container; [navigationIndicatorBounds] limits rendered edges. Stretch is disabled when the
  * leading target reaches the container boundary.
  */
 internal fun navigationDragTarget(
@@ -46,7 +46,7 @@ internal fun navigationDragTarget(
     )
 }
 
-/** Limits each rendered edge to the outermost items without stopping the underlying spring. */
+/** Limits rendered edges to the outermost items without stopping the underlying spring. */
 internal fun navigationIndicatorBounds(left: Float, right: Float, containerWidth: Float, inset: Float): Offset {
     val min = inset.coerceIn(0f, containerWidth.coerceAtLeast(0f) / 2f)
     val max = (containerWidth - min).coerceAtLeast(min)

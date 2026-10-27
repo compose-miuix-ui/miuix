@@ -20,12 +20,12 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * How far a pressed surface shrinks.
+ * Returns the scale applied to a pressed surface.
  *
- * A fixed number of pixels comes off the surface rather than a fixed proportion, so a
- * small control shrinks proportionally more than a large one, down to a floor.
+ * The inset is a fixed pixel amount rather than a proportion, so smaller surfaces scale more,
+ * subject to a minimum scale.
  *
- * @param shorterSidePx The shorter of the surface's two sides, in pixels.
+ * @param shorterSidePx Shorter surface side, in pixels.
  * @param density Pixels per dp.
  */
 @Stable
@@ -36,10 +36,10 @@ fun glassPressScale(shorterSidePx: Float, density: Float): Float = if (shorterSi
 }
 
 /**
- * The press feedback every tappable surface gets.
+ * Applies press feedback to a tappable surface.
  *
- * @param interactionSource The interaction source whose press state drives the scale.
- * @param enabled Whether to react at all. When false the modifier adds nothing.
+ * @param interactionSource Interaction source that provides the press state.
+ * @param enabled Whether press feedback is enabled. When false, this modifier is unchanged.
  */
 @Composable
 fun Modifier.glassPress(

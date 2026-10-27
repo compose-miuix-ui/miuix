@@ -52,7 +52,7 @@ private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
 private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
-private val BlurStyleOptions = listOf("Gaussian", "Progressive")
+private val TopAppBarStyleOptions = listOf("Default", "Glass")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
@@ -207,12 +207,12 @@ private fun SettingsContent(
                         checked = appState.showTopAppBar,
                         onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
                     )
-                    AnimatedVisibility(visible = appState.showTopAppBar && appState.enableBlur && isRuntimeShaderSupported()) {
+                    AnimatedVisibility(visible = appState.showTopAppBar) {
                         OverlayDropdownPreference(
-                            title = "TopAppBar Blur Style",
-                            items = BlurStyleOptions,
-                            selectedIndex = appState.blurStyle,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(blurStyle = it) } },
+                            title = "TopAppBar Style",
+                            items = TopAppBarStyleOptions,
+                            selectedIndex = appState.topAppBarStyle,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(topAppBarStyle = it) } },
                         )
                     }
                     SwitchPreference(

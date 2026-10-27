@@ -1,9 +1,9 @@
 # 玻璃材质
 
-`miuix-glass` 是一个独立的 Compose Multiplatform 玻璃材质库。它通过 Modifier 扩展提供背景采样、模糊、颜色混合和边缘光照。支持 Android、Desktop (JVM)、iOS、macOS 和 Web (WasmJs/Js) 平台。
+`miuix-glass` 为 Compose Multiplatform 提供玻璃材质和组件，支持背景模糊、颜色混合与光照效果。
 
 ::: warning 注意
-`miuix-glass` 在 Android 端需要 `minSdk` 33（Android 13）或更高。运行时能力检测不能降低 Android 构件的最低 SDK 要求。
+Android 端需要 `minSdk` 33（Android 13）或更高。
 :::
 
 ## 配置
@@ -34,11 +34,7 @@ Glass 图标由可选的 `miuix-glass-icons` 模块提供，通过 `MiuixIcons.G
 
 ## 基本用法
 
-应用玻璃材质分为三步：
-
-1. 创建 `LayerBackdrop` 以捕获背景内容
-2. 在内容容器上应用 `Modifier.layerBackdrop()`
-3. 在玻璃表面上应用 `Modifier.glassPanel()`
+创建 backdrop，通过 `layerBackdrop` 记录背景，再对独立表面应用 `glassPanel`：
 
 ```kotlin
 import androidx.compose.ui.graphics.luminance
@@ -50,12 +46,11 @@ import top.yukonga.miuix.kmp.glass.GlassShape
 import top.yukonga.miuix.kmp.glass.GlassStrokes
 import top.yukonga.miuix.kmp.glass.glassPanel
 
-// 第 1 步：创建 LayerBackdrop
 val backdrop = rememberLayerBackdrop()
 val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
 
 Box(modifier = Modifier.fillMaxSize()) {
-    // 第 2 步：捕获背景内容
+    // 记录不透明背景，不包含玻璃面板。
     Box(
         modifier = Modifier
             .matchParentSize()
@@ -64,7 +59,6 @@ Box(modifier = Modifier.fillMaxSize()) {
     ) {
         Text("页面内容", modifier = Modifier.padding(24.dp))
     }
-    // 第 3 步：在叠加层上应用玻璃材质
     Box(
         modifier = Modifier
             .align(Alignment.Center)
@@ -86,17 +80,15 @@ Box(modifier = Modifier.fillMaxSize()) {
 
 ### 背景采样 {#background-sampling}
 
-`layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。请在采样范围内绘制不透明背景，并将玻璃面板放在该范围之外。
+`layerBackdrop` 仅记录自身 composable 的内容，不包含父级背景。采样区域应包含不透明背景，并排除玻璃表面，避免自采样。
 
-对话框和底部抽屉的背景采样应排除自身面板及遮罩，专用表面函数会应用宿主当前的动画遮罩。需要同时采样页面顶栏、底栏时，可记录页面 Scaffold，由外层 Scaffold 承载浮层。背景内容的记录方式见[背景采样 API](/zh_CN/guide/blur#基本用法)。
+对话框和底部抽屉还须排除自身遮罩，由表面函数自动应用。需要采样页面栏时，可记录页面 Scaffold，由外层 Scaffold 承载浮层。见[背景采样 API](/zh_CN/guide/blur#基本用法)。
 
 ## 材质配置
 
 ### GlassStyle
 
-`GlassStyle` 控制折射、反射、边缘光照和颜色处理。使用 `GlassDefaults.style(isDark)` 选择默认的浅色或深色样式，也可从 `GlassStyles` 的 `Common*`、`Bionic*`、`Tint*` 系列中选择预设。
-
-`GlassDefaults.Style` 固定为 `CommonMediumRegularLowLight`，不会读取当前主题。
+使用 `GlassDefaults.style(isDark)` 获取随主题切换的折射、反射和光照样式，或从 `GlassStyles` 选择预设。`GlassDefaults.Style` 固定为 `CommonMediumRegularLowLight`。
 
 ### GlassMaterial
 
@@ -109,7 +101,7 @@ Box(modifier = Modifier.fillMaxSize()) {
 | second | GlassColorLayer? | 第二层颜色 | null | 否 |
 | third | GlassColorLayer? | 第三层颜色，要求 second 非空 | null | 否 |
 
-每个 `GlassColorLayer` 包含 `color: Color` 和 `mode: GlassColorBlendMode`，颜色层按顺序应用。混合模式包括 `SrcOver`、`PlusDarker`、`PlusLighter`、`SoftLight`、`HardLight`、`Overlay`、`Luminosity`、`ColorDodge` 与 `ColorBurn`。
+每个 `GlassColorLayer` 指定 `Color` 和 `GlassColorBlendMode`，颜色层按顺序应用。
 
 `GlassMaterials` 提供随主题选择的预设：
 
@@ -143,7 +135,7 @@ val shape = GlassShape(
 
 起始端和结束端随布局方向变化。主构造函数还接受 `CornerSize`，可通过百分比圆角创建胶囊形状。
 
-`smoothing` 默认为 `1f`，在玻璃着色器中使用连续圆角；`0f` 使用圆形圆角。普通 Compose 轮廓与 `Modifier.clip` 仍使用圆角矩形。
+`smoothing` 控制着色器圆角（`1f`：连续圆角；`0f`：圆形圆角）。Compose 轮廓与裁剪使用圆角矩形。
 
 ### 描边与投影
 
@@ -167,9 +159,9 @@ val shape = GlassShape(
 | shading | Boolean | 是否应用折射与光照 | true | 否 |
 | fallback | Modifier | backdrop 为空时使用的表面 | Modifier.clip(shape) | 否 |
 
-`shading = true` 适合需要折射的控件，`false` 适合平面玻璃栏或菜单。关闭 shading 后，不应用样式中的折射、反射和边缘光照；独立的 `stroke` 仍控制辉光描边。默认的回退表面只裁剪，不绘制背景填色。
+平面玻璃栏和菜单可使用 `shading = false`，独立的 `stroke` 仍有效。默认 `fallback` 仅裁剪，不添加填色。
 
-背景采样非空时，`alpha` 不会关闭模糊，也不会淡出前景内容。背景采样为空时，它会淡出整个回退层，包括内容。
+有 backdrop 时，`alpha` 影响材质透明度，不影响模糊和前景内容；无 backdrop 时，它作用于整个回退层。
 
 ### glass
 
@@ -246,8 +238,6 @@ val surface = glassSurface(
 | --- | --- | --- |
 | style(isDark: Boolean) | GlassStyle | 选择 CommonMediumRegularLowLight 或 CommonMediumRegularDark |
 
-`GlassMotion` 提供 Glass 组件使用的动画预设。
-
 ## 进阶用法
 
 ### 自定义回退表面
@@ -272,5 +262,3 @@ Box(
     Text("回退表面")
 }
 ```
-
-该回退由空 backdrop 触发。具有运行时能力处理的组件还会提供各自的回退行为，具体见组件参数说明。

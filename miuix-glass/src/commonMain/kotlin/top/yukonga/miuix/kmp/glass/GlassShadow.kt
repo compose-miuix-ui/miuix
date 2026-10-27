@@ -8,14 +8,14 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
 /**
- * The shadow a glass surface casts.
+ * Defines the shadow cast by a glass surface.
  *
- * @property color The shadow's colour. Its alpha is the strength at full opacity.
+ * @property color Shadow colour; its alpha is the strength at full opacity.
  * @property offsetX Horizontal displacement.
- * @property offsetY Vertical displacement. Small and positive: the light is above.
- * @property radius How far the shadow reaches past the silhouette.
- * @property dispersion Shape of the falloff. Below 0.5 the shadow hugs the edge; above it, the
- *   darkening spreads further out and thins.
+ * @property offsetY Vertical displacement. Positive values place the shadow below the surface.
+ * @property radius Distance the shadow extends beyond the silhouette.
+ * @property dispersion Falloff distribution. Values below 0.5 keep the shadow near the edge;
+ *   higher values spread it farther and reduce its density.
  */
 @Immutable
 data class GlassShadow(
@@ -26,28 +26,28 @@ data class GlassShadow(
     val dispersion: Float,
 )
 
-/** The stock shadows. */
+/** Predefined glass shadows. */
 object GlassShadows {
 
     private val Black = Color(0f, 0f, 0f, 0.05f)
 
-    /** A surface resting on the page. */
+/** Low-elevation surface shadow. */
     @Stable
     val Low: GlassShadow = GlassShadow(Black, 0f, 0f, 44f, 0.5f)
 
-    /** The everyday panel. */
+/** Standard panel shadow. */
     @Stable
     val Regular: GlassShadow = GlassShadow(Black, 0f, 2f, 64f, 0.5f)
 
-    /** A surface lifted clear of the page. */
+/** Elevated surface shadow. */
     @Stable
     val High: GlassShadow = GlassShadow(Black, 0f, 4f, 80f, 0.5f)
 
-    /** A dialog over a dimmed page. */
+/** Dialog shadow over a dimmed page. */
     @Stable
     val ExtraHigh: GlassShadow = GlassShadow(Black, 0f, 70f, 96f, 0.5f)
 
-    /** A floating control. */
+/** Floating control shadow. */
     @Stable
     val Float: GlassShadow = GlassShadow(Black, 0f, 0f, 24f, 0.5f)
 }

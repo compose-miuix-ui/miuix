@@ -4,7 +4,7 @@ title: GlassSecondaryPopup
 
 # GlassSecondaryPopup
 
-`GlassSecondaryPopup` grows a second menu from a row in a primary menu. Its clip begins at the trigger row (including vertical `contentPadding`) and expands to the measured panel; the row size stays stable. The start edge aligns with the trigger, mirrors in RTL, and shifts upward when needed rather than flipping direction.
+`GlassSecondaryPopup` is a glass submenu anchored to a row in a primary menu.
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassSecondaryPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -30,11 +30,9 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## Basic Usage
 
-This component is a `BoxScope` extension and does not require `MiuixPopupHost`. Place it last in a full-page `Box`, outside clipping containers; it handles outside taps itself. Anchor coordinates must use the same coordinate space as the popup's `Box`.
-
-The `boundsInRoot()` example requires both popup Boxes to start at their shared coordinate root's origin. Convert explicit `anchorBounds` to the host Box's local coordinates for an offset host; a transforming primary still requires a root-origin host. System-bar and IME insets are not applied automatically; `safeMargin` is relative to the host. Back handling requires a `LocalNavigationEventDispatcherOwner`; outside-tap dismissal works without one.
-
-When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
+- Place both popups in full-page Boxes sharing the root origin, outside clipping containers.
+- Provide system/IME padding as needed and a `LocalNavigationEventDispatcherOwner` for Back handling.
+- Control visibility with `show`; do not wrap the calls in `if (show)`.
 
 The primary backdrop records the page. A second backdrop records that page plus the primary popup, and the secondary popup is drawn outside it:
 
@@ -115,19 +113,21 @@ Box(Modifier.fillMaxSize()) {
 | sizing | GlassPopupSizing | Panel limits; set minWidth to the primary panel width | GlassPopupSizing() | No |
 | visuals | GlassPopupVisuals | Fallback appearance; published expanded popup visuals take precedence even when their material is null | GlassPopupDefaults.visuals() | No |
 | cornerRadius | Dp | Panel corner radius during the transition | GlassPopupDefaults.CornerRadius (24.dp) | No |
-| contentPadding | PaddingValues | Padding around rows; only top and bottom padding expand the collapsed trigger clip | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
+| contentPadding | PaddingValues | Padding around menu rows | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
 | onDismissFinished | (() -> Unit)? | Called after collapse completes following an opening; not called for the initial closed state | null | No |
 | content | @Composable ColumnScope.() -> Unit | Header row followed by secondary choices | - | Yes |
 
 ### Defaults
 
-Sizing, visuals, and row tokens are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).
+Sizing and appearance options are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).
 
 ## Advanced Usage
 
+Use `GlassIconDropdownMenu` to manage grouped entries automatically. Set `collapseOnSelection = true` to close both menu levels when an option is selected, or `false` to keep the submenu open.
+
 ### Stacking and dismissal
 
-Freeze the trigger row before setting `stacked = true`; reading bounds from the shrinking primary menu moves the secondary panel away from its source. Measure the primary width with `onMeasured` and pass it as the secondary `minWidth`. Keep the primary stacked until `onDismissFinished`:
+Freeze the trigger row before setting `stacked = true`. Measure the primary width with `onMeasured` and pass it as `minWidth`. Keep the primary stacked until `onDismissFinished`:
 
 ```kotlin
 GlassSecondaryPopup(
@@ -143,7 +143,5 @@ GlassSecondaryPopup(
 }
 ```
 
-The secondary rows accept input while opening and stop accepting pointer and accessibility actions as soon as dismissal is requested. Predictive Back previews collapse, restores on cancellation, and dismisses on completion. See the [`GlassTransformPopup` anchor API](./glasstransformpopup#anchor-api) for `secondaryBackProgress`.
-
-Appearance resolution uses the primary anchor's published expanded popup visuals first, then `visuals`; backdrop resolution is the explicit `backdrop` first, then the anchor button's backdrop, then the resolved `containerColor` fill. The primary's explicit expanded-menu backdrop is not inherited through `materialAnchor`, so pass the secondary sampling layer explicitly. Sizing, `cornerRadius`, and `contentPadding` are not inherited. A null material removes its color treatment, not style-based blur when a backdrop remains; see [shared defaults](./glasspopup#shared-defaults).
+Pass the secondary backdrop explicitly; `materialAnchor` shares the primary's appearance, not its scene recording.
 

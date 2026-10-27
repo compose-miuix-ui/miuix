@@ -9,10 +9,7 @@ internal const val GLASS_SHADER_KEY = "MiuixGlass"
 /** Cache key for the compiled silhouette mask shader. */
 internal const val GLASS_MASK_SHADER_KEY = "MiuixGlassMask"
 
-/**
- * The silhouette, shared by the material shader and the mask shader so the two can never disagree
- * about where the surface ends.
- */
+/** Shared silhouette distance field for material and mask shaders. */
 private val GLASS_SDF_SOURCE: String = """
 uniform float2 in_size;         // component size
 uniform float4 in_radii;        // topLeft, topRight, bottomRight, bottomLeft
@@ -56,7 +53,7 @@ float silhouetteSdf(float2 local) {
 }
 """
 
-/** The rim: how the surface curves near the silhouette, and how the two directional lights catch it. */
+/** Rim curvature and directional lighting functions. */
 private val GLASS_RIM_SOURCE: String = """
 const float3 kLumaWeights = float3(0.2126, 0.7152, 0.0722);
 
@@ -161,7 +158,7 @@ float rimLighten(float3 normal, float4 lightDir, float2 amounts, float3 color) {
 const float kMaxBevelSlope = 1.7;
 """
 
-/** The rim light, at full resolution. */
+/** Full-resolution rim lighting shader. */
 internal val GLASS_RIM_SHADER: String = """
 $GLASS_SDF_SOURCE
 $GLASS_RIM_SOURCE
@@ -196,7 +193,7 @@ half4 main(float2 coord) {
 }
 """
 
-/** Cuts the surface to its silhouette, at full resolution. */
+/** Full-resolution silhouette mask shader. */
 internal val GLASS_MASK_SHADER: String = """
 $GLASS_SDF_SOURCE
 half4 main(float2 coord) {
@@ -205,7 +202,7 @@ half4 main(float2 coord) {
 }
 """
 
-/** The glass material, as one AGSL/SkSL pass over the blurred backdrop. */
+/** Glass material shader applied to the blurred backdrop. */
 internal val GLASS_SHADER: String = """
 uniform shader child;
 
@@ -414,7 +411,7 @@ half4 main(float2 coord) {
 /** Cache key for the compiled bloom stroke shader. */
 internal const val GLASS_STROKE_SHADER_KEY = "MiuixGlassStroke"
 
-/** The bloom stroke: the lit edge that traces the silhouette. */
+/** Bloom stroke shader following the surface silhouette. */
 internal val GLASS_STROKE_SHADER: String = """
 $GLASS_SDF_SOURCE
 uniform float2 in_halfViewFloor; // half size, floored, so the fold lands on a pixel boundary
@@ -490,7 +487,7 @@ half4 main(float2 coord) {
 /** Cache key for the compiled shadow shader. */
 internal const val GLASS_SHADOW_SHADER_KEY = "MiuixGlassShadow"
 
-/** The shadow a surface casts, drawn from the same distance field as the surface itself. */
+/** Shadow shader using the surface distance field. */
 internal val GLASS_SHADOW_SHADER: String = """
 $GLASS_SDF_SOURCE
 uniform float2 in_shadowOffset;  // displacement in pixels
@@ -510,7 +507,7 @@ half4 main(float2 coord) {
 
 internal const val GLASS_COLOR_BLEND_SHADER_KEY = "MiuixGlassColorBlend"
 
-/** The colour treatment a glass surface lays over its blurred backdrop. */
+/** Color blend shader applied to the blurred backdrop. */
 internal val GLASS_COLOR_BLEND_SHADER: String = """
 uniform shader child;
 

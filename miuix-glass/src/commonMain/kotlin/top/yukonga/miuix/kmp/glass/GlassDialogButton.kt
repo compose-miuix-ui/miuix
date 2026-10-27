@@ -37,7 +37,7 @@ import top.yukonga.miuix.kmp.basic.ButtonColors
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/** The native dialog's tonal, filled and alert action variants. */
+/** Visual roles for dialog actions. */
 enum class GlassDialogButtonRole {
     Normal,
     Primary,
@@ -45,11 +45,10 @@ enum class GlassDialogButtonRole {
 }
 
 /**
- * A dialog action drawn over the material supplied by [glassDialogSurface].
+ * A dialog action button for use over [glassDialogSurface].
  *
  * Normal and destructive actions use a translucent tint; primary actions use the theme's primary
- * fill. There is no separate backdrop or blur. Press feedback covers the fill and content together,
- * without a ripple, scale animation or color transition.
+ * fill. The button adds no backdrop blur. Press feedback overlays both the fill and content.
  *
  * @param onClick Called when the enabled action is clicked.
  * @param modifier Modifier applied to the action.
@@ -110,7 +109,7 @@ object GlassDialogButtonDefaults {
     val MinHeight = 50.dp
     val InsideMargin = PaddingValues(horizontal = 24.dp)
 
-    /** Theme colors with the native dialog's tonal and disabled opacities. */
+    /** Enabled and disabled action colors for the current theme. */
     @Composable
     fun buttonColors(role: GlassDialogButtonRole = GlassDialogButtonRole.Normal): ButtonColors {
         val scheme = MiuixTheme.colorScheme
@@ -133,7 +132,7 @@ object GlassDialogButtonDefaults {
         }
     }
 
-    /** Native foreground decoration: #1F000000 in light mode, #24FFFFFF in dark mode. */
+    /** Press overlay color for the current theme. */
     @Composable
     fun pressedColor(): Color {
         val scheme = MiuixTheme.colorScheme

@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassDropdownPreference
 
-`GlassDropdownPreference` is a dropdown preference component in Miuix with a glass popup, a title and optional supporting text. It manages expansion and dismissal, while the caller controls the selected option.
+`GlassDropdownPreference` is a preference row with a glass dropdown. It manages expansion and dismissal; the caller owns the selected index.
 
 <div style="position: relative; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassDropdownPreference" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -37,7 +37,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## Basic Usage
 
-In this example, the page `Column` includes the preference row; `Scaffold` hosts the popup outside that recording.
+The page content is recorded by `backdrop`, while `Scaffold` hosts the popup outside that recording.
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -63,16 +63,16 @@ Scaffold { padding ->
 }
 ```
 
-If the overlay can cover page bars, include those bars in the backdrop, but exclude the popup host and its scrim. A null backdrop uses `visuals.containerColor` as the opaque fallback, retaining the configured stroke and shadow.
+Include any page bars that the overlay can cover in `backdrop`, but exclude the popup host and scrim. A null backdrop uses `visuals.containerColor` as the opaque fallback, retaining stroke and shadow.
 
 ## Component States
 
-- **Collapsed**: The row shows the selected value and dropdown arrow. `showValue = false` hides only the value.
-- **Expanded**: The value and arrow fade out while the rest of the row stays in place. The selected popup item shows a tick. Choosing an option requests dismissal and calls `onSelectedIndexChange`; the caller must update `selectedIndex`.
-- **Disabled**: `enabled = false` or an empty `items` list prevents opening and closes an already open popup.
+- **Collapsed**: Shows the selected value and arrow; `showValue = false` hides only the value.
+- **Expanded**: Selecting an option calls `onSelectedIndexChange` and closes the menu; update `selectedIndex` in the callback.
+- **Disabled**: `enabled = false` or an empty `items` list prevents opening and closes an open popup.
 - **No selection**: An out-of-range `selectedIndex` shows no selected value or tick.
 
-Opening and selection provide context-click and confirmation haptics respectively. Outside taps and Back dismiss the popup; a cancelled predictive Back gesture restores it. The component retains exit content internally and stops popup-row input and accessibility actions as soon as dismissal is requested. No external `if (expanded)` wrapper or manual anchor measurement is needed.
+Keep the component composed during exit; no external `if (expanded)` wrapper or anchor measurement is needed.
 
 ## Properties
 
@@ -99,7 +99,7 @@ Opening and selection provide context-click and confirmation haptics respectivel
 | visuals | GlassPopupVisuals | Popup material, stroke, shadow and fallback color | GlassPopupDefaults.visuals() | No |
 | onExpandedChange | ((Boolean) -> Unit)? | Reports target expansion changes, not animation completion | null | No |
 
-The row uses `BasicComponentDefaults` for padding and title/summary colors. Popup rows use `GlassPopupItem`. `GlassPopupSizing()` defaults to a minimum width of `200.dp`, maximum width of `288.dp`, maximum height of `416.dp` and safe margin of `12.dp`. Appearance options are documented in [shared popup defaults](./glasspopup#shared-defaults). This component does not expose a separate corner-radius parameter.
+See [shared popup defaults](./glasspopup#shared-defaults) for sizing and appearance options.
 
 ## Advanced Usage
 
@@ -120,11 +120,10 @@ GlassDropdownPreference(
 )
 ```
 
-The popup still uses its default theme-aware material and bloom stroke. In nested Scaffolds, `renderInRootScaffold = false` selects the current host; make sure that host is also outside the supplied backdrop recording.
 
 ### Observing Expansion
 
-Use `onExpandedChange` to update supporting text or coordinate nearby UI. With the same selection and backdrop as the basic example, place this state and preference inside the recorded page:
+Use `onExpandedChange` to update supporting text or coordinate nearby UI. Place the state and preference inside the recorded page:
 
 ```kotlin
 var expanded by remember { mutableStateOf(false) }
@@ -140,4 +139,3 @@ GlassDropdownPreference(
 )
 ```
 
-The callback observes expansion; it does not make expansion externally controlled. A `false` value reports the start of dismissal, not completion of the exit animation. Expansion, anchor measurement and exit composition remain managed by the component.

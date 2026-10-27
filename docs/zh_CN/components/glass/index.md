@@ -22,41 +22,15 @@
 
 ## 配置
 
-在项目中添加 `miuix-glass` 依赖：
+依赖与背景采样配置见[玻璃材质](/zh_CN/guide/glass#配置)。可选的 `miuix-glass-icons` 模块通过 `MiuixIcons.Glass` 提供图标。
 
-```kotlin
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
-            // 可选：Glass 图标集
-            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
-        }
-    }
-}
-```
+## 使用要求
 
-Android 项目：
+- 按钮、顶栏、底栏与标签栏可直接用于页面布局。
+- 弹窗菜单需要整页 `BoxScope`，锚点与弹窗须使用相同坐标系。
+- `GlassDialog`、`GlassBottomSheet` 与 `GlassDropdownPreference` 需要 Miuix [Scaffold](../basic/scaffold)。
 
-```kotlin
-dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
-    // 可选：Glass 图标集
-    implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
-}
-```
-
-`miuix-glass` 会传递引入 `miuix-blur` 与 `miuix-ui`。Glass 图标集由可选的 `miuix-glass-icons` 提供。
-
-完整项目配置与平台依赖见[快速开始](/zh_CN/guide/getting-started)。
-
-## 组件组织与宿主
-
-- **独立玻璃控件**（`GlassIconButton`、`GlassTopAppBar`、`GlassNavigationBar`、`GlassTabRow`）：直接作为页面布局的一部分使用，通过 `backdrop` 采样下层背景并呈现半透明模糊磨砂与高光。
-- **弹窗与变换菜单**（`GlassPopup`、`GlassTransformPopup`、`GlassSecondaryPopup`、`GlassDropdownPopup`）：在 `BoxScope` 中使用，通过几何测量与锚点关联实现平滑变换和多级展开，不依赖 `Scaffold`。
-- **脚手架托管浮层**（`GlassDialog`、`GlassBottomSheet`、`GlassDropdownPreference`）：必须在 Miuix [Scaffold](../basic/scaffold) 中使用，由其提供 `MiuixPopupHost` 渲染遮罩和浮层面板。
-
-使用背景采样时，`backdrop` 应记录组件后方的内容，不能包含使用该采样的玻璃表面。各组件页列出了具体参数、默认值和平台约束。
+背景采样不能包含玻璃表面自身，见[背景采样](/zh_CN/guide/glass#background-sampling)。
 
 ## 相关文档
 

@@ -172,12 +172,7 @@ private const val MATERIAL_LIGHT = 7
 private const val MATERIAL_DARK = 9
 
 /**
- * The glass components on a flat page.
- *
- * The page is flat by default. A busy photograph flatters a refractive material and hides a rim
- * that is a pixel too wide, and a flat page is what the system's own settings pages actually are.
- * The wallpaper switch puts a photograph back for the opposite reason: over a flat page the blur
- * and the refraction have nothing to act on, so neither can be judged at all.
+ * Demonstrates glass components on solid or wallpaper backgrounds.
  *
  * @param padding Window padding supplied by the host scaffold.
  */
@@ -242,8 +237,7 @@ fun GlassPage(padding: PaddingValues) {
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
     val tabsInTopBar = tabPlacement == TABS_IN_TOP_BAR
-    // A tab row placed in the list sits inside the layer the bars sample, so it samples the page
-    // background instead — sampling its own layer would close the loop and take the renderer down.
+    // List tabs sample the wallpaper to avoid sampling their own recording layer.
     val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
     val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
         Column(modifier = tabModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -290,14 +284,12 @@ fun GlassPage(padding: PaddingValues) {
     }
 
     GlassPageHost(modifier = Modifier.fillMaxSize()) {
-        // Record the page and primary menu, including its scale and dimming mask.
-        // The secondary must stay outside this layer so it never samples itself.
+        // Record the page and primary menu; keep the secondary outside its sampled layer.
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(secondaryBackdrop)) {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    // Dialogs and the top-bar popup render outside this recording.
-                    // Capture the page's bars as well as its body, before the route scrim.
+                    // Include page bars, excluding overlays and the route scrim.
                     .layerBackdrop(pageBackdrop)
                     .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
                 bottomBar = {
@@ -316,8 +308,7 @@ fun GlassPage(padding: PaddingValues) {
                             backdrop = backdrop,
                             defaultWindowInsetsPadding = false,
                             modifier = Modifier.layout { measurable, constraints ->
-                                // BottomNavigator's four/five-item rule accounts for overlapping items
-                                // before deciding whether to use the compact 344dp wide-screen bar.
+                                // Account for item overlap before selecting the compact wide-screen width.
                                 val actionWidth = if (navigationSearchButton) {
                                     (GlassNavigationBarDefaults.Height + GlassNavigationBarDefaults.ActionSpacing).roundToPx()
                                 } else {
@@ -390,9 +381,7 @@ fun GlassPage(padding: PaddingValues) {
                                     .progressiveTextureBlur(
                                         backdrop = backdrop,
                                         shape = RectangleShape,
-                                        // Start sharpening early so the lower edge stays subtle at this radius.
                                         gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
-                                        // Xiaomi sigma 36 / Miuix's radius-to-sigma factor 0.45.
                                         blurRadius = 80f,
                                         colors = blurColors,
                                     ),

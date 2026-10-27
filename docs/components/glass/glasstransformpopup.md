@@ -4,7 +4,7 @@ title: GlassTransformPopup
 
 # GlassTransformPopup
 
-`GlassTransformPopup` grows a menu from a participating control. The control's surface and the expanded menu surface blend during the transform, while the anchor content is replaced by the menu content.
+`GlassTransformPopup` is a glass menu that transforms from an associated control.
 
 <div style="position: relative; height: 380px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTransformPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -27,13 +27,14 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## Basic Usage
 
-This component is a `BoxScope` extension and does not require `MiuixPopupHost`. Place it last in a full-page `Box`, outside clipping containers; it handles outside taps itself. Anchor coordinates must use the same coordinate space as the popup's `Box`.
+This `BoxScope` extension does not require `MiuixPopupHost`. Place it last in a full-page `Box`, outside clipping containers; it handles outside taps. Anchor coordinates must use the popup `Box`'s coordinate space.
 
-Anchor modifiers report `boundsInRoot()` without converting to the host Box. The popup Box must therefore start at the same coordinate root's origin; do not put it inside inset padding or an offset content area. System-bar and IME insets are not applied automatically; `safeMargin` is relative to this Box. Back handling requires a `LocalNavigationEventDispatcherOwner`; without one, outside taps still dismiss.
+Anchor modifiers report root bounds, so the popup Box must start at the root origin; do not place it inside inset padding or an offset area. System-bar and IME insets are not applied automatically; `safeMargin` is relative to this Box. Back handling requires `LocalNavigationEventDispatcherOwner`, while outside taps work without it.
 
-When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
+Keep the call in composition until exit animation completes; do not wrap it in `if (show)`.
 
-Use one remembered anchor for the control and its menu. Mark only the content that the popup should copy when the control has its own background:
+
+Use one remembered anchor for the control and menu. Mark only the content that the popup should copy when the control has its own background:
 
 ```kotlin
 val anchor = rememberGlassPopupAnchor()
@@ -60,7 +61,7 @@ Box(Modifier.fillMaxSize()) {
 }
 ```
 
-Without `glassPopupAnchorContent`, `anchorContent` represents the whole control. Keep `anchorContent` visually equivalent to the reported anchor content.
+Without `glassPopupAnchorContent`, `anchorContent` represents the whole control and should match the reported anchor content.
 
 ## Properties
 
@@ -88,12 +89,13 @@ Without `glassPopupAnchorContent`, `anchorContent` represents the whole control.
 
 ### Defaults
 
-Sizing, visuals, and token values are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults). Rows accept input while `show && !stacked`; retained closing rows are visual only. Predictive Back previews the reverse transform, restores on cancellation, and is owned by the secondary popup while `stacked`.
+Sizing and appearance options are documented in [GlassPopup shared defaults](./glasspopup#shared-defaults).
+
 ## Advanced Usage
 
 ### Anchor API {#anchor-api}
 
-`GlassPopupAnchor()` has a public no-argument constructor, but `rememberGlassPopupAnchor(): GlassPopupAnchor` also animates the dropdown value fade. Use this `@Composable` factory and one anchor for one control/menu relationship. The modifiers report root-coordinate bounds:
+Use the `@Composable` `rememberGlassPopupAnchor()` factory and one anchor for each control/menu relationship. The modifiers report root-coordinate bounds:
 
 ```kotlin
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorRow
@@ -109,7 +111,7 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 | Modifier.glassPopupAnchorValue(anchor) | Modifier | Reports and fades the dropdown value and chevron | - | anchor |
 | anchor.secondaryBackProgress | Float | Read-only secondary Back progress, including cancellation recovery and retained exit | 0f | No |
 
-Read `secondaryBackProgress` in a draw or layer callback when a submenu arrow should follow predictive Back:
+Use the anchor modifier to associate a control with its popup:
 
 ```kotlin
 val anchor = rememberGlassPopupAnchor()
@@ -121,5 +123,5 @@ GlassIconButton(
 }
 ```
 
-For an anchor without a shared button surface, `floating = true` blends panel opacity from `anchorAlpha` to full strength throughout the journey; an in-page panel instead follows the icon-material transition. A participating `GlassIconButton` publishes its resolved backdrop, style, material, underlay, stroke, fill, and surface opacity; those values form the collapsed endpoint and `anchorAlpha` does not replace them. With a shared surface, the popup determines floating behavior from the published button surface (`surfaceFloating || surfaceAlpha > 0f`), not the anchor modifier's `floating` flag. The expanded endpoint always uses `visuals`, and a null explicit backdrop first uses the published button backdrop before falling back to `visuals.containerColor`.
+When the explicit backdrop is null, the attached button backdrop is used before `visuals.containerColor`.
 

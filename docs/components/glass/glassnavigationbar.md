@@ -1,13 +1,13 @@
 # GlassNavigationBar
 
-`GlassNavigationBar` is a floating glass navigation bar for top-level destinations. Its selection indicator follows presses and drags, and an optional trailing action sits outside the navigation capsule. The caller owns selection and page navigation.
+`GlassNavigationBar` is a floating glass navigation bar for top-level destinations. The caller owns selection state and page navigation; an optional trailing action sits outside the capsule.
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassNavigationBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -20,9 +20,9 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 
 ## Basic Usage
 
-A non-null `backdrop` is required. Keep the navigation bar and trailing action outside its recording.
+Keep the navigation bar and trailing action outside the backdrop recording. Pass `backdrop = null` to use the theme's `surfaceContainer` fill instead of background sampling.
 
-`homeIcon` and `libraryIcon` are page-provided `ImageVector` icons. Use `selectedIndex` to display the corresponding page:
+`homeIcon` and `libraryIcon` are page-provided `ImageVector` icons:
 
 ```kotlin
 var selectedIndex by remember { mutableIntStateOf(0) }
@@ -40,9 +40,7 @@ GlassNavigationBar(
 )
 ```
 
-The bar fills the available width. Horizontal margins remain caller-owned. Destinations have equal widths; labels allow two lines and can increase the bar's height.
-
-`onSelect` runs on pointer down and when a drag enters another destination, not only on release; pressing the current destination also calls it. Keyboard activation with Enter, NumPad Enter or Space calls it on key up, and accessibility activation calls it directly. Give icon-only items a meaningful `contentDescription`.
+Destinations share the available width. Labels allow two lines. Selection updates on press and drag; provide `contentDescription` for icon-only items.
 
 ## Component States
 
@@ -58,9 +56,7 @@ GlassNavigationBar(
 )
 ```
 
-`showNavigation` is caller-owned Boolean state. The whole group scales, fades and blurs when hidden, and appears after a short delay when shown. Hiding does not remove its layout space. After the hide transition, destination interaction and semantics are disabled, and the trailing action is no longer placed.
-
-`alpha` only controls the capsule material, not its labels, icons or indicator. Use `visible` to hide the whole group.
+Use `visible` to show or hide the group. `alpha` controls material opacity.
 
 ## Properties
 
@@ -71,7 +67,7 @@ GlassNavigationBar(
 | items | List\<GlassNavigationItem> | Ordered destinations | - | Yes |
 | selectedIndex | Int | Current destination index | - | Yes |
 | onSelect | (Int) -> Unit | Callback for pointer, keyboard and accessibility selection | - | Yes |
-| backdrop | Backdrop | Background sampling source | - | Yes |
+| backdrop | Backdrop? | Background sampling source; null uses a solid theme fill | - | Yes |
 | modifier | Modifier | Modifier applied to the capsule and action group | Modifier | No |
 | defaultWindowInsetsPadding | Boolean | Apply default window insets padding | true | No |
 | style | GlassStyle | Rendering style | GlassDefaults.Style | No |
@@ -87,8 +83,6 @@ GlassNavigationBar(
 | selectedColor | Color | Selected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
 | unselectedColor | Color | Unselected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
 | trailingAction | (@Composable () -> Unit)? | Independent action outside the capsule | null | No |
-
-Empty `items` render nothing, including the trailing action. Out-of-range `selectedIndex` is clamped for display without changing caller state. Setting `material = null` does not remove the indicator, stroke or shadow.
 
 ### GlassNavigationItem Properties {#glassnavigationitem}
 
@@ -129,7 +123,7 @@ Empty `items` render nothing, including the trailing action. Out-of-range `selec
 
 ### Independent Trailing Action
 
-The action owns its size and material and shares only the group's visibility transition. A `GlassIconButton` here does not inherit navigation-bar material, so pass its backdrop and size explicitly. `searchIcon` is an `ImageVector` and `openSearch` is the action callback:
+Pass a `GlassIconButton` to `trailingAction`, specifying its backdrop and size:
 
 ```kotlin
 import top.yukonga.miuix.kmp.glass.GlassIconButton
@@ -150,5 +144,3 @@ GlassNavigationBar(
     },
 )
 ```
-
-The action is measured first; its width and `ActionSpacing` are reserved before the capsule is measured. Placement follows layout direction. Set `trailingAction = null` to remove both the action and its gap; an empty non-null slot still reserves a gap.

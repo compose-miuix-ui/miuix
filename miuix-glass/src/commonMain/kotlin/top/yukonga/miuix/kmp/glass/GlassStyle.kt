@@ -7,17 +7,17 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 /**
- * A complete glass material description.
+ * Complete description of a glass material.
  *
- * @property blend Luminance curve, saturation, brightness and shadow compression applied to the
- *   refracted backdrop.
- * @property inner Tint, inner glow and the final gamma of the glass body.
- * @property edge The rim geometry — how wide the lit band is and how the surface curves inside it.
- * @property reflect How much of the reflection ray mixes into the refraction ray.
- * @property light The two directional lights that shade the rim.
- * @property refract The index of refraction of the glass body.
- * @property background Treatment of the wide-blur backdrop that supplies the low-frequency colour.
- * @property blur The two backdrop blur radii the material samples.
+ * @property blend Luminance, saturation, brightness, and shadow treatment applied to the refracted
+ *   backdrop.
+ * @property inner Tint, inner glow, and final gamma of the glass body.
+ * @property edge Rim geometry, including lit-band width and curvature.
+ * @property reflect Reflection contribution mixed into the refraction result.
+ * @property light Directional lights used to shade the rim.
+ * @property refract Index of refraction for the glass body.
+ * @property background Wide-blur backdrop treatment supplying low-frequency colour.
+ * @property blur Backdrop blur radii sampled by the material.
  */
 @Immutable
 data class GlassStyle(
@@ -60,16 +60,15 @@ data class GlassBlend(
 )
 
 /**
- * The glass body itself.
+ * Colour and opacity treatment of the glass body.
  *
- * @property bottom Strength of the additive glow along the bottom edge.
- * @property tint The colour of the glass. Its own alpha is ignored — [tintStrength] carries it.
- * @property tintStrength How far the backdrop colour moves toward [tint]. Values above 1 are
- *   legal.
- * @property colorWhite How far the wide-blur backdrop moves toward white before it tints the glass.
- * @property colorMix How far the finished glass colour replaces the refracted backdrop.
- * @property colorPow Final gamma applied to the material. Above 1 darkens, below 1 lifts.
- * @property alpha Base opacity of the material.
+ * @property bottom Strength of additive glow along the bottom edge.
+ * @property tint Glass colour. Its alpha is ignored; [tintStrength] controls the amount.
+ * @property tintStrength Amount of backdrop colour moved toward [tint]. Values above 1 are valid.
+ * @property colorWhite Amount of wide-blur backdrop moved toward white before tinting.
+ * @property colorMix Amount of finished glass colour replacing the refracted backdrop.
+ * @property colorPow Final gamma. Values above 1 darken; values below 1 lift.
+ * @property alpha Base material opacity.
  */
 @Immutable
 data class GlassInner(
@@ -83,13 +82,13 @@ data class GlassInner(
 )
 
 /**
- * The rim geometry, in pixels.
+ * Rim geometry, in pixels.
  *
  * @property width Width of the rim band.
- * @property pow Curvature exponent of the rim profile. 1 is a soft dome; higher values keep the
- *   surface flat for longer and then turn sharply at the silhouette.
- * @property thickness Glass thickness. It scales how far the refraction ray moves.
- * @property reflectOffset How far the reflection ray moves. Large values pull in distant colour.
+ * @property pow Rim-profile curvature exponent. 1 is a soft dome; higher values keep the surface
+ *   flat longer before turning at the silhouette.
+ * @property thickness Glass thickness controlling refraction displacement.
+ * @property reflectOffset Reflection-ray displacement; larger values sample more distant colour.
  */
 @Immutable
 data class GlassEdge(
@@ -100,10 +99,10 @@ data class GlassEdge(
 )
 
 /**
- * The reflection ray.
+ * Reflection-ray parameters.
  *
- * @property lighten Additive strength of the reflection on top of the refraction.
- * @property strength How far the reflection mixes into the refraction at the silhouette.
+ * @property lighten Additive reflection strength.
+ * @property strength Reflection amount mixed into refraction at the silhouette.
  */
 @Immutable
 data class GlassReflect(
@@ -112,14 +111,13 @@ data class GlassReflect(
 )
 
 /**
- * The two directional lights that shade the rim. The second light points the opposite way in X
- * and Y, so one preset lights both sides of the shape.
+ * Directional lights used to shade the rim. The second light points opposite the first in X and Y.
  *
  * @property directionX X component of the main light direction.
  * @property directionY Y component of the main light direction.
  * @property directionZ Z component of the main light direction.
- * @property intensity Strength of the main light.
- * @property oppositeIntensity Strength of the opposite light.
+ * @property intensity Main light strength.
+ * @property oppositeIntensity Opposite light strength.
  * @property angleRange Angular falloff range as a multiple of pi.
  */
 @Immutable
@@ -133,8 +131,9 @@ data class GlassLight(
 )
 
 /**
+ * Index of refraction for the glass body.
  *
- * @property ior Index of refraction. 1 bends nothing; 1.5 is window glass.
+ * @property ior Index of refraction. 1 bends nothing; 1.5 approximates window glass.
  */
 @Immutable
 data class GlassRefract(
@@ -142,13 +141,12 @@ data class GlassRefract(
 )
 
 /**
- * Treatment of the wide-blur backdrop, which supplies the low-frequency colour of the glass.
+ * Treatment of the wide-blur backdrop supplying low-frequency glass colour.
  *
- * @property saturation Saturation multiplier of the wide-blur backdrop. 0 makes it grey.
- * @property brightness Additive brightness of the wide-blur backdrop.
- * @property burn Exponent of the colour-burn ratio. Values below 0.5 are raised to 0.5.
- * @property unShade How far the material collapses to a flat [GlassInner.tint]. 1 removes the
- *   material entirely and leaves a plain tinted shape.
+ * @property saturation Saturation multiplier. 0 produces grey.
+ * @property brightness Additive brightness.
+ * @property burn Colour-burn exponent. Values below 0.5 are raised to 0.5.
+ * @property unShade Amount collapsed to a flat [GlassInner.tint]. 1 removes material shading.
  */
 @Immutable
 data class GlassBackground(
@@ -159,11 +157,10 @@ data class GlassBackground(
 )
 
 /**
- * The two backdrop blur radii, in pixels at [GlassDefaults.SourceDensity].
+ * Backdrop blur radii, in pixels at [GlassDefaults.SourceDensity].
  *
- * @property small Radius of the refraction blur. It keeps structure, so the rim shows a
- *   recognisable bent image of the backdrop.
- * @property big Radius of the colour blur. It only supplies a low-frequency tint.
+ * @property small Refraction blur radius; it preserves structure for the rim's bent backdrop.
+ * @property big Colour blur radius; it supplies low-frequency tint.
  */
 @Immutable
 data class GlassBlur(

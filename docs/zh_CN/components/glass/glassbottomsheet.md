@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassBottomSheet
 
-`GlassBottomSheet` 是 Miuix 中从屏幕底部滑入的玻璃底部抽屉组件。它支持标题栏、滑动关闭、预测性返回和嵌套滚动，材质延伸至底部边缘。
+`GlassBottomSheet` 是从屏幕边缘滑入的玻璃底部抽屉。它支持标题栏、关闭手势、预测性返回和嵌套滚动。
 
 <div style="position: relative; height: 480px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -37,7 +37,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## 基本用法
 
-下例仅记录页面 `Box` 的内容，由 `Scaffold` 在采样范围之外承载浮层。
+页面 `Box` 由 `backdrop` 记录，`Scaffold` 在该采样范围之外承载浮层。
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -73,9 +73,9 @@ Scaffold { padding ->
 
 关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
 
-浮层可能覆盖页面顶栏或底栏时，应将这些栏包含在背景采样中，但排除弹窗宿主及其遮罩。背景采样为空或运行时着色器不可用时使用 `containerColor`，应提供不透明回退色。
+浮层可能覆盖页面栏时，应将这些栏包含在 `backdrop` 中，但排除弹窗宿主及遮罩。backdrop 为 null 或运行时着色器不可用时使用 `containerColor`，应提供不透明回退色。
 
-内容滚动与额外间距由调用方提供。若底部留白应随内容滚动，应将导航栏内边距放在**可滚动内容内部**。玻璃材质本身延伸至屏幕边缘，也会填充向上过度滚动时露出的延伸区域。
+内容滚动与额外间距由调用方提供。若底部留白应随内容滚动，应将导航栏内边距放在可滚动内容内部。
 
 ## 属性
 
@@ -101,7 +101,7 @@ Scaffold { padding ->
 | insideMargin | DpSize | `width` 用作水平内容内边距，`height` 用作底部内边距 | BottomSheetDefaults.insideMargin | 否 |
 | dragHandleColor | Color | 应用按压透明度之前的拖动手柄颜色 | BottomSheetDefaults.dragHandleColor() | 否 |
 | material | GlassMaterial | 模糊及有序颜色层 | GlassBottomSheetDefaults.material() | 否 |
-| stroke | GlassStroke? | 辉光描边；过度滚动延伸区不绘制；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
+| stroke | GlassStroke? | 辉光描边；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
 | containerColor | Color | 不透明回退填充色 | GlassBottomSheetDefaults.containerColor() | 否 |
 | dimColor | Color | 应用动画进度之前的遮罩颜色 | GlassBottomSheetDefaults.ScrimColor | 否 |
 | onDismissFinished | (() -> Unit)? | 隐藏动画完成后调用；隐藏被取消时不调用 | null | 否 |
@@ -109,13 +109,13 @@ Scaffold { padding ->
 
 ### glassBottomSheetSurface 属性 {#glassbottomsheetsurface}
 
-`glassBottomSheetSurface` 返回 `@Composable BottomSheetSurfaceScope.() -> Modifier`，用于 `OverlayBottomSheet` 的 `surface` 插槽。尺寸、系统内边距、拖动手柄和手势仍由宿主管理。表面使用圆形顶角、直角底角以及宿主的动画遮罩；过度滚动延伸区使用相同材质，但不绘制辉光描边。
+`glassBottomSheetSurface` 返回 `@Composable BottomSheetSurfaceScope.() -> Modifier`，用于 `OverlayBottomSheet` 的 `surface` 插槽。尺寸、内边距、拖动手柄和手势由宿主管理；表面使用宿主圆角和遮罩。
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop? | 排除抽屉宿主和遮罩的页面背景采样；null 使用回退 | - | 是 |
 | material | GlassMaterial | 模糊及有序颜色层 | GlassBottomSheetDefaults.material() | 否 |
-| stroke | GlassStroke? | 辉光描边，过度滚动延伸区不绘制；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
+| stroke | GlassStroke? | 辉光描边；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
 | containerColor | Color | 不透明回退填充色 | GlassBottomSheetDefaults.containerColor() | 否 |
 
 ### GlassBottomSheetDefaults 对象
@@ -158,12 +158,12 @@ OverlayBottomSheet(
 }
 ```
 
-表面按抽屉平移后的屏幕坐标进行背景采样，并自行应用动画遮罩。不要将遮罩记录到背景采样中。`enableWindowDim = false` 会同时移除显示和采样中的变暗效果。内容保持清晰，此表面不添加折射或额外投影。
+不要将遮罩记录到 `backdrop` 中。设置 `enableWindowDim = false` 可禁用变暗效果。
 
 ### 关闭与系统内边距
 
-`allowDismiss = false` 会阻止外部点击、拖动和返回手势关闭抽屉，调用方仍可直接更新 `show`。可滚动子内容需要向抽屉拖动传递位移时，应保留 `enableNestedScroll = true`。
+`allowDismiss = false` 会阻止外部点击、拖动和返回关闭抽屉，调用方仍可直接更新 `show`。可滚动子内容需要向抽屉传递位移时，应保留 `enableNestedScroll = true`。
 
 需要等待离场动画完成的操作可放入 `onDismissFinished`。若将 `show` 设回 `true` 取消隐藏，则不会调用。不要使用 `if (showSheet)` 包裹抽屉。
 
-`defaultWindowInsetsPadding = true` 时添加输入法内边距，自行提供时可设为 `false`。抽屉高度仍受顶部安全内边距限制（状态栏、标题栏和屏幕开孔顶部内边距的最大值）。主体内容的导航栏内边距仍由调用方负责。在嵌套 Scaffold 中，`renderInRootScaffold = false` 选择当前宿主，该宿主同样必须位于传入背景采样的记录范围之外。
+`defaultWindowInsetsPadding = true` 时添加输入法内边距，自行提供时可设为 `false`。抽屉仍受顶部安全内边距限制，主体内容的导航栏内边距由调用方负责。在嵌套 Scaffold 中，`renderInRootScaffold = false` 选择当前宿主，该宿主必须位于 `backdrop` 记录范围之外。

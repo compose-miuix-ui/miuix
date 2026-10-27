@@ -4,7 +4,7 @@ title: GlassSecondaryPopup
 
 # GlassSecondaryPopup
 
-`GlassSecondaryPopup` 从一级菜单中的一行生长出二级菜单。裁剪区域从触发行（包括垂直 `contentPadding`）开始，扩展到测量得到的面板；菜单行尺寸保持不变。起始边与触发行对齐，在 RTL 中镜像；空间不足时向上平移，而不是翻转展开方向。
+`GlassSecondaryPopup` 是以一级菜单中的菜单行为锚点的玻璃二级菜单。
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassSecondaryPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -30,11 +30,9 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## 基本用法
 
-此组件是 `BoxScope` 扩展，不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行拦截外部点击。锚点坐标必须与弹窗所在 `Box` 的坐标系一致。
-
-使用下方 `boundsInRoot()` 示例时，两级弹窗 Box 的原点必须与共享坐标根原点重合。宿主偏移时，显式 `anchorBounds` 应转换到宿主 Box 的局部坐标；变换中的一级菜单仍要求宿主原点与根重合。系统栏和 IME insets 不会自动应用；`safeMargin` 相对于宿主计算。返回处理需要 `LocalNavigationEventDispatcherOwner`；没有该 owner 时仍可通过外部点击关闭。
-
-关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
+- 将两级弹窗放在共享根原点的整页 Box 中，避免父级裁剪。
+- 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
+- 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
 第一个 backdrop 记录页面。第二个 backdrop 记录页面与一级菜单，二级菜单放在该采样层之外：
 
@@ -115,19 +113,21 @@ Box(Modifier.fillMaxSize()) {
 | sizing | GlassPopupSizing | 面板限制；minWidth 应设置为一级面板宽度 | GlassPopupSizing() | 否 |
 | visuals | GlassPopupVisuals | 仅在 materialAnchor 未发布展开弹窗外观时使用；已发布外观即使 material = null 也优先 | GlassPopupDefaults.visuals() | 否 |
 | cornerRadius | Dp | 变换期间的面板圆角 | GlassPopupDefaults.CornerRadius（24.dp） | 否 |
-| contentPadding | PaddingValues | 菜单行周围的内边距；仅上下内边距扩展收起端触发行裁剪区域 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
+| contentPadding | PaddingValues | 菜单行周围的内边距 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
 | onDismissFinished | (() -> Unit)? | 打开后收起动画完成时调用；初始关闭状态不调用 | null | 否 |
 | content | @Composable ColumnScope.() -> Unit | 请求收起的标题行及后续选项 | - | 是 |
 
 ### 默认值
 
-尺寸、外观和菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
+尺寸和外观选项见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
 
 ## 进阶用法
 
+使用 `GlassIconDropdownMenu` 可自动管理分组选项。设置 `collapseOnSelection = true` 可在选中选项后关闭两级菜单，设为 `false` 则保持子菜单打开。
+
 ### 叠层与关闭
 
-在设置 `stacked = true` 前冻结触发行；从缩小的一级菜单读取坐标会让二级面板偏离来源。使用 `onMeasured` 测量一级宽度，并将它传给二级 `minWidth`。在 `onDismissFinished` 前保持一级菜单 stacked：
+在设置 `stacked = true` 前冻结触发行。使用 `onMeasured` 测量一级宽度，并将它传给 `minWidth`。在 `onDismissFinished` 前保持一级菜单 stacked：
 
 ```kotlin
 GlassSecondaryPopup(
@@ -143,7 +143,5 @@ GlassSecondaryPopup(
 }
 ```
 
-二级菜单行在展开期间接受输入；请求关闭后立即停止指针输入与无障碍操作。预测性返回预览收起，取消后恢复，提交后关闭。`secondaryBackProgress` 的说明见 [`GlassTransformPopup` 锚点 API](./glasstransformpopup#anchor-api)。
-
-外观先使用一级锚点发布的展开弹窗外观，再回退到 `visuals`；背景先使用显式 `backdrop`，再尝试锚点按钮的 backdrop，最后使用解析后外观的 `containerColor` 填充。`materialAnchor` 不会继承一级菜单显式传入的展开背景，因此应显式传入二级背景采样层。尺寸、`cornerRadius` 和 `contentPadding` 不会继承。material 为 null 只移除其颜色处理，存在 backdrop 时仍有基于样式的模糊；见[共享默认值](./glasspopup#shared-defaults)。
+需显式传入二级背景采样源；`materialAnchor` 共享一级菜单的外观，不继承其场景采样。
 

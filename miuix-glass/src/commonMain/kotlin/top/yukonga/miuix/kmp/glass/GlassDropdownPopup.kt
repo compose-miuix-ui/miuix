@@ -31,33 +31,30 @@ import top.yukonga.miuix.kmp.blur.Backdrop
 /** Default values for [GlassDropdownPopup]. */
 object GlassDropdownDefaults {
 
-    /** Corner radius the panel settles at: `miuix_appcompat_drop_down_menu_radius`. */
+    /** Expanded panel corner radius. */
     val CornerRadius: Dp = 24.dp
 
-    /** Corner radius it opens from. */
+    /** Initial panel corner radius. */
     val StartCornerRadius: Dp = 4.dp
 }
 
 /**
- * A list of choices dropped from a settings row, on glass.
+ * A glass dropdown menu anchored to a settings row.
  *
- * The third of the three openings, and the only one that holds no edge still: the panel's size and
- * its centre run on two springs of different speeds, so it travels along an arc rather than
- * growing out of a pinned corner.
+ * Keep it composed until the exit animation finishes.
  *
  * @param show Whether the panel is open. Row input and accessibility actions stop immediately
  *   when this becomes false, while the exit animation finishes.
- * @param onDismissRequest Called when a tap outside should close it.
+ * @param onDismissRequest Called when an outside tap or Back requests dismissal.
  * @param anchorBounds The row's bounds, in this composable's own coordinate space.
- * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
- *   configured bloom stroke and Compose shadow.
+ * @param backdrop Background sampled by the panel. Exclude the popup itself. `null` uses an
+ *   opaque fill while retaining the configured bloom stroke and shadow.
  * @param modifier The modifier applied to the panel.
- * @param anchor Optional handle for the row. Given one, the panel stands the row's displayed value
- *   down while it is open and aligns horizontally to the value reported by
- *   [glassPopupAnchorValue]. Without a reported value, placement uses [anchorBounds].
- * @param sizing How wide and tall the panel may be.
- * @param visuals What its surface is made of.
- * @param cornerRadius Corner radius the panel settles at.
+ * @param anchor Optional row anchor. Hides the displayed value while open and aligns the panel
+ *   horizontally to bounds reported by [glassPopupAnchorValue], or [anchorBounds] if unavailable.
+ * @param sizing Panel size limits and window margin.
+ * @param visuals Panel surface appearance.
+ * @param cornerRadius Expanded panel corner radius.
  * @param contentPadding Padding around the rows.
  * @param content The rows. [GlassPopupItem] with `selected` shows a tick.
  */
@@ -107,8 +104,7 @@ internal fun BoxScope.GlassDropdownPopupContent(
     onDismissFinished: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // Scaffold content is first composed after the row has already requested opening.
-    // Retain a closed initial state so that first composition still has an enter transition.
+    // Scaffold hosts compose after opening is requested; start closed to retain the enter transition.
     val visibility = remember { MutableTransitionState(false) }
     LaunchedEffect(show) {
         visibility.targetState = show
@@ -170,10 +166,8 @@ internal fun BoxScope.GlassDropdownPopupContent(
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop,
-        modifier = modifier,
         sizing = sizing,
         visuals = visuals,
-        interactive = show,
         contentPadding = contentPadding,
         panelLayer = {
             alpha = if (show && geometryProgress() <= GlassMotion.ARC_VISIBLE_FRACTION) 0f else fadeProgress()
@@ -201,17 +195,14 @@ internal fun BoxScope.GlassDropdownPopupContent(
             scaleX = scale
             scaleY = scale
         },
+        modifier = modifier,
+        interactive = show,
         scrollable = true,
         content = content,
     )
 }
 
-/**
- * The panel's rectangle partway along the arc.
- *
- * Two fractions drive it, not one: the width and the aspect ratio follow [sizeFraction], while
- * the centre follows the quicker [positionFraction].
- */
+/** Interpolates size and center independently for the dropdown's curved motion. */
 private fun arcFrame(
     anchor: Rect,
     valueAnchor: Rect?,
@@ -266,7 +257,7 @@ internal fun placeGlassDropdownPopup(
     direction: LayoutDirection = LayoutDirection.Ltr,
 ): GlassPopupPlacement {
     if (valueAnchor == null) return placeGlassPopup(row, size, margin, page, direction)
-    // Spinner chooses the horizontal edge from the value's position in the container.
+    // Align to the value's nearest horizontal edge of the container.
     val wantedLeft = if (valueAnchor.center.x <= page.width / 2f) {
         valueAnchor.left
     } else {

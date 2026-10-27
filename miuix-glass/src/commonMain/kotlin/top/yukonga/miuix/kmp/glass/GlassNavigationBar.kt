@@ -9,6 +9,7 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -87,9 +88,9 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * One destination in a [GlassNavigationBar].
  *
- * @property icon The icon drawn for this destination.
- * @property label Optional caption under the icon.
- * @property contentDescription What a screen reader announces for it.
+ * @property icon Icon for this destination.
+ * @property label Optional caption below the icon.
+ * @property contentDescription Accessibility description announced by a screen reader.
  */
 @Immutable
 data class GlassNavigationItem(
@@ -172,7 +173,8 @@ object GlassNavigationBarDefaults {
  * @param items The destinations, in order.
  * @param selectedIndex The index of the current destination.
  * @param onSelect Called with the index under the finger, on press and while dragging.
- * @param backdrop The [Backdrop] supplying the content behind the glass.
+ * @param backdrop The [Backdrop] supplying the content behind the glass. `null` disables sampling
+ *   and fills the capsule with the theme's surfaceContainer color.
  * @param modifier The modifier applied to the bar.
  * @param defaultWindowInsetsPadding Whether to apply the default floating bottom margin and
  *   navigation/caption-bar insets to the whole group. Disable when the caller handles them.
@@ -184,8 +186,8 @@ object GlassNavigationBarDefaults {
  * @param stroke Optional bloom stroke along the rim.
  * @param shadow The shadow the floating capsule casts. `null` removes it.
  * @param height Minimum bar height. Content can grow for two-line or large-font captions.
- * @param material The bar's own body — the blur radius and the colour layers over it. `null`
- *   leaves the bar transparent.
+ * @param material The bar's own body when sampling a backdrop. `null` omits explicit material
+ *   layers; it does not disable sampling. Ignored when [backdrop] is `null`.
  * @param indicatorPressedColor Fill of the capsule while a finger is on it.
  * @param indicatorColor Fill of the capsule behind the selected destination.
  * @param selectedColor Tint of the selected icon and label.
@@ -199,7 +201,7 @@ fun GlassNavigationBar(
     items: List<GlassNavigationItem>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
-    backdrop: Backdrop,
+    backdrop: Backdrop?,
     modifier: Modifier = Modifier,
     defaultWindowInsetsPadding: Boolean = true,
     style: GlassStyle = GlassDefaults.Style,
@@ -358,6 +360,7 @@ fun GlassNavigationBar(
                     stroke = stroke,
                     shadow = shadow,
                     shading = false,
+                    fallback = Modifier.clip(shape).background(MiuixTheme.colorScheme.surfaceContainer),
                 )
                 .onSizeChanged { barWidth = it.width }
                 .then(

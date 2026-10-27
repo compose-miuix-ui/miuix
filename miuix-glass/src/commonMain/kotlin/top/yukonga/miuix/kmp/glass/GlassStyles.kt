@@ -6,10 +6,10 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
-/** The stock glass materials. */
+/** Predefined glass styles. */
 object GlassStyles {
 
-    /** The `Glass_Common_Small_Thin` token. */
+/** Small, thin common glass style. */
     @Stable
     val CommonSmallThin: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -58,7 +58,7 @@ object GlassStyles {
         blur = GlassBlur(small = 30.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Small_Normal` token. */
+/** Small, normal common glass style. */
     @Stable
     val CommonSmallNormal: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -107,7 +107,7 @@ object GlassStyles {
         blur = GlassBlur(small = 150.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Small_Regular` token. */
+/** Small, regular common glass style. */
     @Stable
     val CommonSmallRegular: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -156,7 +156,7 @@ object GlassStyles {
         blur = GlassBlur(small = 8.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Small_Semibold` token. */
+/** Small, semibold common glass style. */
     @Stable
     val CommonSmallSemibold: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -205,7 +205,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Small_Bold` token. */
+/** Small, bold common glass style. */
     @Stable
     val CommonSmallBold: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -254,7 +254,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Common_Medium_Thin_Low` token. */
+/** Medium, thin common glass style for low contrast. */
     @Stable
     val CommonMediumThinLow: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -303,7 +303,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Thin_High` token. */
+/** Medium, thin common glass style for high contrast. */
     @Stable
     val CommonMediumThinHigh: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -352,7 +352,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Regular_Low_Light` token. */
+/** Medium, regular common glass style for light themes. */
     @Stable
     val CommonMediumRegularLowLight: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -401,7 +401,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Regular_High_Light` token. */
+/** Medium, regular common glass style for high light contrast. */
     @Stable
     val CommonMediumRegularHighLight: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -450,7 +450,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Regular_Dark` token. */
+/** Medium, regular common glass style for dark themes. */
     @Stable
     val CommonMediumRegularDark: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -499,7 +499,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Bold_Light` token. */
+/** Medium, bold common glass style for light themes. */
     @Stable
     val CommonMediumBoldLight: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -548,7 +548,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Bold_Dark` token. */
+/** Medium, bold common glass style for dark themes. */
     @Stable
     val CommonMediumBoldDark: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -597,7 +597,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Medium_Bold_Low` token. */
+/** Medium, bold common glass style for low contrast. */
     @Stable
     val CommonMediumBoldLow: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -646,7 +646,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Large_Regular` token. */
+/** Large, regular common glass style. */
     @Stable
     val CommonLargeRegular: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -695,7 +695,7 @@ object GlassStyles {
         blur = GlassBlur(small = 80.0f, big = 500.0f),
     )
 
-    /** The `Glass_Common_Large_Demibold` token. */
+/** Large, demibold common glass style. */
     @Stable
     val CommonLargeDemibold: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -744,7 +744,7 @@ object GlassStyles {
         blur = GlassBlur(small = 50.0f, big = 500.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Thin` token. */
+/** Medium, thin bionic glass style. */
     @Stable
     val BionicMediumThin: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -793,7 +793,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Normal` token. */
+/** Medium, normal bionic glass style. */
     @Stable
     val BionicMediumNormal: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -842,7 +842,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Normal_Motion` token. */
+/** Medium, normal bionic glass style with motion treatment. */
     @Stable
     val BionicMediumNormalMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -891,7 +891,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Regular` token. */
+/** Medium, regular bionic glass style. */
     @Stable
     val BionicMediumRegular: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -940,7 +940,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Demibold_Motion` token. */
+/** Medium, demibold bionic glass style with motion treatment. */
     @Stable
     val BionicMediumDemiboldMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -989,7 +989,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Bionic_Medium_Semibold_Motion` token. */
+/** Medium, semibold bionic glass style with motion treatment. */
     @Stable
     val BionicMediumSemiboldMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1038,7 +1038,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Tint_Purple` token. */
+/** Purple-tinted glass style. */
     @Stable
     val TintPurple: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1087,7 +1087,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Orange` token. */
+/** Orange-tinted glass style. */
     @Stable
     val TintOrange: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1136,7 +1136,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Blue` token. */
+/** Blue-tinted glass style. */
     @Stable
     val TintBlue: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1185,7 +1185,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Yellow` token. */
+/** Yellow-tinted glass style. */
     @Stable
     val TintYellow: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1234,7 +1234,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Brown` token. */
+/** Brown-tinted glass style. */
     @Stable
     val TintBrown: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1283,7 +1283,7 @@ object GlassStyles {
         blur = GlassBlur(small = 36.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Black_Thin` token. */
+/** Thin black-tinted glass style. */
     @Stable
     val TintBlackThin: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1332,7 +1332,7 @@ object GlassStyles {
         blur = GlassBlur(small = 50.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Black_Normal` token. */
+/** Normal black-tinted glass style. */
     @Stable
     val TintBlackNormal: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1381,7 +1381,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Black_Regular` token. */
+/** Regular black-tinted glass style. */
     @Stable
     val TintBlackRegular: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1430,7 +1430,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Tint_Black_Demibold` token. */
+/** Demibold black-tinted glass style. */
     @Stable
     val TintBlackDemibold: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1479,7 +1479,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Black_Heavy` token. */
+/** Heavy black-tinted glass style. */
     @Stable
     val TintBlackHeavy: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1528,7 +1528,7 @@ object GlassStyles {
         blur = GlassBlur(small = 40.0f, big = 500.0f),
     )
 
-    /** The `Glass_Tint_Red_Motion` token. */
+/** Red-tinted glass style with motion treatment. */
     @Stable
     val TintRedMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1577,7 +1577,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Tint_Green_Motion` token. */
+/** Green-tinted glass style with motion treatment. */
     @Stable
     val TintGreenMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1626,7 +1626,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Tint_Blue_Motion` token. */
+/** Blue-tinted glass style with motion treatment. */
     @Stable
     val TintBlueMotion: GlassStyle = GlassStyle(
         blend = GlassBlend(
@@ -1675,7 +1675,7 @@ object GlassStyles {
         blur = GlassBlur(small = 120.0f, big = 120.0f),
     )
 
-    /** The `Glass_Tint_Blue_Normal` token. */
+/** Blue-tinted glass style with normal treatment. */
     @Stable
     val TintBlueNormal: GlassStyle = GlassStyle(
         blend = GlassBlend(

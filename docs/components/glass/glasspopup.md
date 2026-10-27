@@ -4,7 +4,7 @@ title: GlassPopup
 
 # GlassPopup
 
-`GlassPopup` opens a menu from a measured control without transforming the control. It aligns the panel to the anchor's end edge, mirrors that placement in RTL, and opens upward when the panel does not fit below and there is more room above.
+`GlassPopup` is a glass menu anchored to a measured control.
 
 <div style="position: relative; height: 380px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -23,13 +23,9 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 
 ## Basic Usage
 
-This component is a `BoxScope` extension and does not require `MiuixPopupHost`. Place it last in a full-page `Box`, outside clipping containers; it handles outside taps itself. Anchor coordinates must use the same coordinate space as the popup's `Box`.
-
-The `boundsInRoot()` example requires the popup `Box` to start at the coordinate root's origin. In an offset or inset host, convert the trigger bounds to that Box's local coordinates instead. The popup does not apply system-bar or IME insets itself; `safeMargin` is measured from the host's edges. Back dismissal requires a `LocalNavigationEventDispatcherOwner`; without one, outside-tap dismissal still works. Ordinary `GlassPopup` handles Back completion but does not preview its geometry during the gesture.
-
-When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
-
-Unlike the transforming, secondary, and dropdown variants, an ordinary primary `GlassPopup` leaves its rows interactive during the retained exit animation; `show = false` does not itself disable those rows.
+- Place the popup last in a full-page `Box`, outside clipping containers. Anchor bounds must use that Box's coordinates; convert `boundsInRoot()` for offset hosts.
+- Provide system/IME padding as needed and a `LocalNavigationEventDispatcherOwner` for Back handling.
+- Control visibility with `show`; do not wrap the call in `if (show)`.
 
 Measure the trigger in the same coordinate root as the popup and update the state from each item:
 
@@ -61,7 +57,7 @@ Box(Modifier.fillMaxSize()) {
 
 ### Menu Items (GlassPopupItem)
 
-`GlassPopupItem` builds each interactive row inside popup menus, supporting icons, subtitles, checkmarks, and submenu chevrons:
+`GlassPopupItem` builds an interactive menu row with optional icons, summaries, selection ticks, and submenu arrows.
 
 ```kotlin
 GlassPopupItem(
@@ -70,7 +66,6 @@ GlassPopupItem(
     showArrow = true,
     onClick = { /* Open submenu */ },
 )
-}
 ```
 
 ## Properties
@@ -103,11 +98,12 @@ GlassPopupItem(
 | enabled | Boolean | Whether the row responds to taps | true | No |
 | selected | Boolean | Shows a trailing tick; uses selected label and leading-icon color when enabled | false | No |
 | showArrow | Boolean | Shows a trailing submenu chevron | false | No |
-| arrowRotation | () -> Float | Chevron rotation in degrees, read during the layer phase | { 0f } | No |
+| arrowRotation | () -> Float | Chevron rotation in degrees | { 0f } | No |
 | contentColor | Color | Label and icon color | MiuixTheme.colorScheme.onSurfaceContainer | No |
 | summaryColor | Color | Summary and arrow color | MiuixTheme.colorScheme.onSurfaceContainerVariant | No |
 | selectedContentColor | Color | Enabled selected label and leading-icon color; selection tick color even when disabled | MiuixTheme.colorScheme.primary | No |
 | pressedColor | Color | Fill behind a pressed row | GlassPopupDefaults.itemPressedColor() | No |
+
 ### GlassPopupSizing Properties
 
 | Property Name | Type | Description | Default Value | Required |
@@ -117,24 +113,25 @@ GlassPopupItem(
 | maxHeight | Dp | Maximum panel height before rows scroll | GlassPopupDefaults.MaxHeight | No |
 | safeMargin | Dp | Minimum distance from the page edge | GlassPopupDefaults.SafeMargin | No |
 
+
 ### GlassPopupVisuals Properties
 
-All constructor fields are required. `GlassPopupDefaults.visuals()` supplies `GlassDefaults.Style`, an alpha of `1f`, `GlassShadows.Regular`, and the theme-selected `stroke()`, `material()` and `containerColor()` defaults.
+`GlassPopupDefaults.visuals()` supplies theme-aware style, opacity, stroke, shadow, material, and fallback color defaults.
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| style | GlassStyle | Blur fallback when material has no blur radius; glass shading and the style's rim are off | - | Yes |
-| alpha | Float | Material, bloom-stroke, and shadow opacity multiplier; GlassTransformPopup additionally applies it to the whole panel, including rows and fallback fill | - | Yes |
+| style | GlassStyle | Blur style used when material has no blur radius | - | Yes |
+| alpha | Float | Surface opacity multiplier; GlassTransformPopup also applies it to menu content | - | Yes |
 | stroke | GlassStroke? | Bloom stroke; null removes it | - | Yes |
 | shadow | GlassShadow? | Panel shadow; null removes it | - | Yes |
 | material | GlassMaterial? | Panel color treatment and optional blur radius; null removes color treatment, not background sampling or blur | - | Yes |
 | containerColor | Color | Opaque fill used when backdrop is null | - | Yes |
 
-With a non-null backdrop, blur uses `material.blurRadius` when present, otherwise `style.blur.small / GlassDefaults.SourceDensity`. Setting `material = null` retains that style-based blur, noise, bloom stroke, and shadow; it does not select `containerColor`. Only a null resolved backdrop selects the fallback fill, retaining stroke and shadow but not background sampling.
+With a non-null backdrop, the popup uses material or style blur. `material = null` removes color treatment but does not remove sampling, blur, stroke, or shadow. A null resolved backdrop uses `containerColor` while retaining stroke and shadow.
 
 ### GlassPopupDefaults Object {#shared-defaults}
 
-`GlassPopupDefaults` provides shared popup sizing, row, surface, and stacking tokens.
+`GlassPopupDefaults` provides shared sizing, row, surface, and stacking defaults.
 
 #### Constants
 
@@ -172,7 +169,7 @@ With a non-null backdrop, blur uses `material.blurRadius` when present, otherwis
 | `itemPressedColor` | — | `Color` | Black at `0.1f` alpha in light themes; white at `0.1f` in dark themes |
 | `maskColor` | — | `Color` | White at `0.4f` alpha in light themes; black at `0.4f` in dark themes |
 
-All these functions are `@Composable`. Theme selection treats `MiuixTheme.colorScheme.background.luminance() < 0.5f` as dark.
+All these functions are `@Composable` and use the current theme.
 
 ### GlassDropdownDefaults Object
 
@@ -185,7 +182,7 @@ All these functions are `@Composable`. Theme selection treats `MiuixTheme.colorS
 
 ## Advanced Usage
 
-Create shared sizing and visuals when several menus need the same limits or appearance. With no backdrop, stroke and shadow are still retained around the opaque fallback fill:
+Share sizing and visuals when several menus need the same limits or appearance. With no backdrop, stroke and shadow remain around the opaque fallback fill:
 
 ```kotlin
 val sizing = GlassPopupSizing(maxWidth = 320.dp, maxHeight = 480.dp)
@@ -207,5 +204,5 @@ GlassPopup(
 }
 ```
 
-For a submenu that inherits the expanded material and Back progress of a transforming primary menu, use [`GlassSecondaryPopup`](./glasssecondarypopup) instead of `secondary = true`.
+Use [`GlassSecondaryPopup`](./glasssecondarypopup) instead of `secondary = true` when a submenu must share a transforming primary menu's material and Back progress.
 

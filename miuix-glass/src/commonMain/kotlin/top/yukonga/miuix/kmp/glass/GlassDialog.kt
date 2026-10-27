@@ -13,16 +13,15 @@ import top.yukonga.miuix.kmp.layout.DialogDefaults
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 /**
- * A Scaffold-hosted dialog with the native dialog blur/blend material and animated scrim.
+ * A Scaffold-hosted glass dialog with an animated scrim and predictive-back support.
  *
- * The host handles sizing, title/summary, insets, opening/closing and predictive back. The supplied
- * [backdrop] must record the page and its bars outside the popup host, excluding the dialog and
- * its scrim. Null or unavailable runtime shaders use [containerColor]. Use [GlassDialogButton]
- * for actions sharing this material.
+ * The [backdrop] must include the page and bars but exclude the dialog host and its scrim.
+ * A `null` backdrop or unavailable runtime shaders use [containerColor]. Use [GlassDialogButton]
+ * for dialog actions.
  *
  * @param onDismissRequest Called on an outside tap or completed back gesture.
  * @param show Whether the dialog is shown.
- * @param backdrop Clean page recording; null selects the opaque fallback.
+ * @param backdrop Page backdrop; `null` uses an opaque fill.
  * @param modifier Modifier applied to the dialog panel.
  * @param enableWindowDim Whether to draw and sample the animated [dimColor].
  * @param defaultWindowInsetsPadding Whether the host applies default system/IME insets.
@@ -37,7 +36,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayDialog
  * @param outsideMargin Panel external margins.
  * @param insideMargin Panel content padding.
  * @param material Blur input and ordered color layers.
- * @param stroke Optional bloom approximation.
+ * @param stroke Optional bloom stroke.
  * @param containerColor Opaque fallback fill.
  * @param dimColor Scrim color before the host applies animation progress.
  * @param onDismissFinished Called after the hide animation completes.

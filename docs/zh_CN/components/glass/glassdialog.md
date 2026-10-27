@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassDialog
 
-`GlassDialog` 是 Miuix 中用于确认操作和输入内容的玻璃对话框组件。它保留 `OverlayDialog` 的布局、动画和关闭行为，并提供配套的 `GlassDialogButton` 操作按钮。
+`GlassDialog` 是用于确认操作和输入内容的玻璃对话框。它提供布局、动画、关闭行为和 `GlassDialogButton` 操作按钮。
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassDialog" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -40,7 +40,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 ## 基本用法
 
-下例仅记录页面 `Box` 的内容，由 `Scaffold` 在采样范围之外承载浮层。
+页面 `Box` 由 `backdrop` 记录，`Scaffold` 在该采样范围之外承载浮层。
 
 ```kotlin
 val backdrop = rememberLayerBackdrop()
@@ -80,7 +80,7 @@ Scaffold { padding ->
 
 关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
 
-浮层可能覆盖页面顶栏或底栏时，应将这些栏包含在背景采样中，但排除弹窗宿主及其遮罩。背景采样为空或运行时着色器不可用时使用 `containerColor`，应提供不透明回退色。
+浮层可能覆盖页面栏时，应将这些栏包含在 `backdrop` 中，但排除弹窗宿主及遮罩。backdrop 为 null 或运行时着色器不可用时使用 `containerColor`，应提供不透明回退色。
 
 ## 属性
 
@@ -113,7 +113,7 @@ Scaffold { padding ->
 
 ### GlassDialogButton 属性 {#glassdialogbutton}
 
-`GlassDialogButton` 在对话框材质上绘制操作按钮，不单独进行背景采样或模糊。它提供 `LocalContentColor`，文字可使用 `MiuixTheme.textStyles.button`。按钮行的宽度分配由调用方负责。单独使用此按钮不需要 `Scaffold`。
+`GlassDialogButton` 在对话框材质上绘制操作按钮，不单独进行背景采样或模糊。它提供 `LocalContentColor`，文字可使用 `MiuixTheme.textStyles.button`；按钮行宽度由调用方控制，单独使用此按钮不需要 `Scaffold`。
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
@@ -138,11 +138,10 @@ Scaffold { padding ->
 | Primary | 主题主色填充及配套内容颜色 |
 | Destructive | 色调填充搭配错误色内容 |
 
-禁用按钮使用禁用颜色且不响应点击。按压反馈统一覆盖填充与内容，不使用涟漪或缩放动画。
 
 ### glassDialogSurface 属性 {#glassdialogsurface}
 
-`glassDialogSurface` 返回 `@Composable DialogSurfaceScope.() -> Modifier`，用于 `OverlayDialog` 的 `surface` 插槽。它使用宿主解析后的圆角、动画遮罩与缩放，不创建宿主或处理关闭。
+`glassDialogSurface` 返回 `@Composable DialogSurfaceScope.() -> Modifier`，用于 `OverlayDialog` 的 `surface` 插槽。它使用宿主圆角、遮罩和缩放，不创建宿主或处理关闭。
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
@@ -208,10 +207,10 @@ OverlayDialog(
 }
 ```
 
-表面会自行将宿主的动画遮罩应用于背景采样，并在缩放时保持采样对齐。不要将遮罩记录到背景采样中。`enableWindowDim = false` 会同时移除显示和采样中的变暗效果。内容保持清晰，此表面不添加折射或额外投影。
+不要将遮罩记录到 `backdrop` 中。设置 `enableWindowDim = false` 可禁用变暗效果。
 
 ### 关闭与系统内边距
 
-需要等待离场动画完成的操作可放入 `onDismissFinished`。若隐藏完成前 `show` 重新变为 `true`，则不会调用。应保留对话框组合直到动画完成，不要使用 `if (showDialog)` 包裹调用。
+需要等待离场动画完成的操作可放入 `onDismissFinished`。若隐藏完成前 `show` 重新变为 `true`，则不会调用；应保留对话框组合直到动画完成。
 
-`defaultWindowInsetsPadding = true` 时，宿主应用输入法、导航栏和标题栏内边距。自行提供这些内边距时可设为 `false`，但顶部安全内边距（状态栏、标题栏和屏幕开孔顶部内边距的最大值）仍会保留。在嵌套 Scaffold 中，`renderInRootScaffold = false` 选择当前宿主，该宿主同样必须位于传入背景采样的记录范围之外。
+`defaultWindowInsetsPadding = true` 时，宿主应用输入法、导航栏和标题栏内边距。自行提供时可设为 `false`，但顶部安全内边距仍会保留。在嵌套 Scaffold 中，`renderInRootScaffold = false` 选择当前宿主，该宿主必须位于 `backdrop` 记录范围之外。

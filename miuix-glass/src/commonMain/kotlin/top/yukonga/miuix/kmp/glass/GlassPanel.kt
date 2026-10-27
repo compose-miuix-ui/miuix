@@ -11,22 +11,20 @@ import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 
 /**
- * Makes this composable a sheet of glass over [backdrop], with the shadow it casts.
+ * Applies a glass surface and shadow over [backdrop].
  *
- * A device without runtime shaders has no backdrop to sample, so [fallback] says what the surface
- * is instead.
+ * If runtime shaders are unavailable or [backdrop] is `null`, [fallback] defines the surface.
  *
- * @param backdrop The [Backdrop] behind the glass. `null` uses [fallback].
- * @param shape The silhouette. It drives the shadow, the clip and the shader alike.
- * @param style The material.
- * @param alpha Opacity multiplier for the whole surface, shadow included.
- * @param material The panel's own body. `null` leaves the blurred backdrop as the whole of it.
- * @param stroke Optional bloom stroke along the rim.
- * @param shadow The shadow. `null` removes it.
- * @param shading Whether the surface refracts and shades what it stands on. `true` for a control,
- *   `false` for a bar or a menu.
- * @param fallback What the surface is when there is no backdrop. The default clips to [shape] and
- *   leaves whatever the caller paints next as the body.
+ * @param backdrop Backdrop behind the glass. `null` uses [fallback].
+ * @param shape Surface silhouette used for the shadow, clip, and rendering geometry.
+ * @param style Glass appearance.
+ * @param alpha Opacity multiplier for the surface and shadow.
+ * @param material Surface body. `null` uses the blurred backdrop as the body.
+ * @param stroke Optional bloom stroke along the silhouette.
+ * @param shadow Shadow configuration. `null` disables the shadow.
+ * @param shading Whether to refract and shade the backdrop. Use `false` for bars and menus.
+ * @param fallback Surface modifier used without a backdrop. The default clips to [shape] and
+ *   leaves subsequent caller content as the body.
  */
 fun Modifier.glassPanel(
     backdrop: Backdrop?,

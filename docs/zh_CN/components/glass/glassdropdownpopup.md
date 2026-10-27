@@ -4,7 +4,7 @@ title: GlassDropdownPopup
 
 # GlassDropdownPopup
 
-`GlassDropdownPopup` 从设置行展示选项。面板尺寸和中心位置分别稳定，沿弧线移动。行/值锚点修饰符让整行保持原位，仅淡出显示值与箭头；记录值范围后，横向对齐取决于该值位于页面哪一侧。
+`GlassDropdownPopup` 是用于从设置行展示选项的玻璃下拉菜单。
 
 <div style="position: relative; height: 380px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassDropdownPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -26,11 +26,9 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 
 ## 基本用法
 
-此组件是 `BoxScope` 扩展，不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行拦截外部点击。锚点坐标必须与弹窗所在 `Box` 的坐标系一致。
-
-下方 `boundsInRoot()` 示例及 `glassPopupAnchorValue` 要求弹窗 Box 原点与坐标根原点重合。不使用值锚点时，偏移宿主可以改为接收转换到 Box 局部坐标的 `anchorBounds`。系统栏和 IME insets 不会自动应用；`safeMargin` 相对于该 Box 计算。返回处理需要 `LocalNavigationEventDispatcherOwner`；没有该 owner 时仍可通过外部点击关闭。
-
-关闭时仍须保留组件调用，直到离场动画完成。不要使用 `if (show)` 包裹调用。
+- 将弹窗放在坐标根处的整页 `Box` 最后，避免父级裁剪。
+- 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
+- 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
 记录整行以及值/箭头内容，协调下拉变换：
 
@@ -92,13 +90,13 @@ Box(Modifier.fillMaxSize()) {
 
 ### 默认值
 
-尺寸、外观和共享菜单行 token 见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
+尺寸和外观选项见 [GlassPopup 共享默认值](./glasspopup#shared-defaults)。
 
 ## 进阶用法
 
 ### 值对齐与自定义外观
 
-使用 `glassPopupAnchorValue` 记录值范围后，值中心位于页面左半侧时，弹窗左边缘对齐值的左边缘，否则右边缘对齐值的右边缘，并受 `safeMargin` 限制。垂直定位仍使用 `anchorBounds`。省略值修饰符时，回退到 `anchorBounds` 定位。菜单活动期间值会淡出，通常在退场后恢复；预测性返回可在返回手势中让值重新出现。`backdrop` 为 null 时直接使用 `visuals.containerColor`，不会尝试锚点的 backdrop。可传入共享尺寸和外观，使多个下拉菜单保持一致：
+使用 `glassPopupAnchorValue` 可让弹窗水平对齐显示值；垂直定位仍使用 `anchorBounds`。省略此修饰符时，水平和垂直定位均使用 `anchorBounds`。`backdrop` 为 null 时使用 `visuals.containerColor`。
 
 ```kotlin
 val sizing = GlassPopupSizing(maxWidth = 320.dp, maxHeight = 480.dp)
@@ -117,5 +115,5 @@ GlassDropdownPopup(
 }
 ```
 
-`GlassDropdownDefaults.CornerRadius` 为 `24.dp`，`StartCornerRadius` 为 `4.dp`。菜单列表会在可用视口与安全边距内滚动。预测性返回沿弧线预览，取消后恢复，提交后关闭。行和值修饰符见 [`GlassTransformPopup` 锚点 API](./glasstransformpopup#anchor-api)。
+行和值修饰符见 [`GlassTransformPopup` 锚点 API](./glasstransformpopup#anchor-api)。
 

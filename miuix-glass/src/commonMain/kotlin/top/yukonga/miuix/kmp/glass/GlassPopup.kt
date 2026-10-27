@@ -6,7 +6,6 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.BoxScope
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -36,7 +34,6 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,67 +51,64 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 /** Default values for [GlassPopup]. */
 object GlassPopupDefaults {
 
-    /** Narrowest a popup is allowed to be: `miuix_popup_window_min_width`. */
+    /** Minimum popup width. */
     val MinWidth: Dp = 200.dp
 
-    /** Widest: `miuix_popup_window_max_width`. */
+    /** Maximum popup width. */
     val MaxWidth: Dp = 288.dp
 
-    /** Tallest, before the list inside starts to scroll: `miuix_popup_window_max_height`. */
+    /** Maximum popup height before content scrolls. */
     val MaxHeight: Dp = 416.dp
 
-    /** Gap the popup keeps from the edge of the window: `miuix_popup_window_safe_margin`. */
+    /** Minimum margin from the window edges. */
     val SafeMargin: Dp = 12.dp
 
-    /** Padding above the first item and below the last: `miuix_popup_window_vertical_padding`. */
+    /** Vertical content padding. */
     val ContentPaddingVertical: Dp = 8.dp
 
-    /** Corner radius of an anchored menu: `miuix_theme_radius_demi_big`. */
+    /** Corner radius of an anchored menu. */
     val CornerRadius: Dp = 24.dp
 
-    /** Corner radius of a list dropdown: `miuix_theme_radius_demi_big`. */
+    /** Corner radius of a list dropdown. */
     val DropdownCornerRadius: Dp = 24.dp
 
-    /** Shortest an item is allowed to be: `miuix_appcompat_popup_menu_item_min_height`. */
+    /** Minimum menu item height. */
     val ItemMinHeight: Dp = 44.dp
 
-    /** Padding inside a menu item: `miuix_appcompat_popup_menu_item_padding_left`. */
+    /** Horizontal menu item padding. */
     val ItemPaddingHorizontal: Dp = 20.dp
 
-    /** Padding above and below an item's label: `miuix_appcompat_popup_menu_item_padding_vertical`. */
+    /** Vertical menu item padding. */
     val ItemPaddingVertical: Dp = 10.dp
 
-    /** Size of a row's leading icon: `miuix_appcompat_menu_icon_width`. */
+    /** Leading icon size. */
     val ItemIconSize: Dp = 24.dp
 
-    /** Gap between a row's label and anything beside it. */
+    /** Spacing between an item label and adjacent icons. */
     val ItemIconGap: Dp = 8.dp
 
-    /**
-     * Side inset of the line between two groups of rows: `popup_menu_divider_line`'s own inset.
-     * The line sits inside a 16dp block, which is what keeps the two groups apart.
-     */
+    /** Horizontal divider inset. */
     val DividerPaddingHorizontal: Dp = 20.dp
 
-    /** Space above and below that line, which is the rest of its 16dp block. */
+    /** Vertical divider padding. */
     val DividerPaddingVertical: Dp = 7.75.dp
 
-    /** Thickness of that line: the 0.5dp the block has left once its insets are taken. */
+    /** Divider thickness. */
     val DividerThickness: Dp = 0.5.dp
 
-    /** Size of the tick on the current row. */
+    /** Selected item checkmark size. */
     val ItemTickSize: Dp = 24.dp
 
-    /** Size of the chevron on a row that leads to a further menu. */
+    /** Submenu chevron size. */
     val ItemArrowSize: Dp = 16.dp
 
-    /** How far the block under a pressed row is held back from the panel's own edges. */
+    /** Horizontal inset of the pressed item background. */
     val ItemPressInset: Dp = 7.dp
 
-    /** Corner radius of the block behind a pressed row. */
+    /** Corner radius of the pressed item background. */
     val ItemPressRadius: Dp = 15.dp
 
-    /** Fill of the block behind a pressed row. */
+    /** Pressed item background color. */
     @Composable
     fun itemPressedColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color.White.copy(alpha = 0.1f)
@@ -122,11 +116,7 @@ object GlassPopupDefaults {
         Color.Black.copy(alpha = 0.1f)
     }
 
-    /**
-     * The wash laid over a menu while a second one stands in front of it: `hyperMenuMask`, white
-     * at 0.4 on a light theme and black at 0.4 on a dark one. It lightens rather than dims, because
-     * the menu behind has gone out of focus rather than away.
-     */
+    /** Overlay color for a primary menu behind a secondary menu. */
     @Composable
     fun maskColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color.Black.copy(alpha = 0.4f)
@@ -134,7 +124,7 @@ object GlassPopupDefaults {
         Color.White.copy(alpha = 0.4f)
     }
 
-    /** What a menu's surface is made of, with the stock tokens as the defaults. */
+    /** Creates the popup surface appearance. */
     @Composable
     fun visuals(
         style: GlassStyle = GlassDefaults.Style,
@@ -145,17 +135,17 @@ object GlassPopupDefaults {
         containerColor: Color = containerColor(),
     ): GlassPopupVisuals = GlassPopupVisuals(style, alpha, stroke, shadow, material, containerColor)
 
-    /** The popup's silhouette. */
+    /** Creates the popup shape. */
     @Composable
     fun shape(cornerRadius: Dp = CornerRadius): GlassShape = GlassShape(cornerRadius)
 
-    /** The popup's own body: `popupview-glass`, with its 60dp mask blur. */
+    /** Default popup material for the current theme. */
     @Composable
     fun material(): GlassMaterial = GlassMaterials.popupViewGlass(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    /** The small bloom stroke declared by `popupview-glass`. */
+    /** Default popup bloom stroke for the current theme. */
     @Composable
     fun stroke(): GlassStroke = GlassStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
@@ -163,10 +153,7 @@ object GlassPopupDefaults {
         dark = GlassStrokes.SmallDark,
     )
 
-    /**
-     * Fill behind the popup when it carries no material: `miuix_default_color_surface_highest`,
-     * white on a light theme and `#2C2C2C` on a dark one.
-     */
+    /** Opaque fallback color for the current theme. */
     @Composable
     fun containerColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color(0xFF2C2C2C)
@@ -176,29 +163,25 @@ object GlassPopupDefaults {
 }
 
 /**
- * A menu that opens at the corner of the control it belongs to, on glass.
+ * A glass menu anchored to a control, with an edge-reveal transition.
  *
- * The first of the three openings, and the one a plain control gets. Two edges of the panel never
- * move; the other two are interpolated, so the panel is wide and flat early on and lets its height
- * out afterwards.
- *
- * Put it at the root of the page, not beside the control — a bar clips its own contents.
+ * Place it in the page's root [BoxScope] to avoid clipping by the anchor's container.
+ * Keep it composed until the exit animation finishes.
  *
  * @param show Whether the popup is open.
- * @param onDismissRequest Called when a tap outside should close it.
- * @param anchorBounds The control's bounds, in this composable's own coordinate space. Bounds read
- *   out of a menu that is shrunk behind this one drag this one off it.
- * @param backdrop The [Backdrop] behind the glass. `null` uses an opaque fill while retaining the
- *   configured bloom stroke and Compose shadow.
- * @param modifier The modifier applied to the panel.
- * @param sizing How wide and tall the panel may be.
- * @param visuals What its surface is made of.
- * @param cornerRadius Corner radius the panel settles at.
- * @param secondary Whether this menu was opened from a row of another one. Delegates to
- *   [GlassSecondaryPopup]'s geometry; use that component directly to inherit the primary popup's
- *   expanded appearance through `materialAnchor`.
+ * @param onDismissRequest Called when an outside tap or Back requests dismissal.
+ * @param anchorBounds The control's bounds in this composable's coordinate space. Use resting
+ *   bounds when the anchor belongs to a scaled primary menu.
+ * @param backdrop Background sampled by the panel. Exclude the popup itself. `null` uses an
+ *   opaque fill while retaining the configured bloom stroke and shadow.
+ * @param modifier Modifier applied to the panel.
+ * @param sizing Panel size limits and window margin.
+ * @param visuals Panel surface appearance.
+ * @param cornerRadius Expanded panel corner radius.
+ * @param secondary Whether to use [GlassSecondaryPopup] geometry. Use that component directly
+ *   to share the primary popup's appearance through `materialAnchor`.
  * @param contentPadding Padding around the items.
- * @param content The items.
+ * @param content Menu items.
  */
 @Composable
 fun BoxScope.GlassPopup(
@@ -262,7 +245,6 @@ fun BoxScope.GlassPopup(
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = backdrop,
-        modifier = modifier,
         sizing = sizing,
         visuals = visuals,
         contentPadding = contentPadding,
@@ -281,12 +263,13 @@ fun BoxScope.GlassPopup(
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
             alpha = fade
         },
+        modifier = modifier,
         scrollable = true,
         content = content,
     )
 }
 
-/** The panel's rectangle partway through the opening, with two of its edges held still. */
+/** Interpolates the panel bounds while keeping two edges fixed. */
 private fun directionFrame(
     placement: GlassPopupPlacement,
     end: Size,
@@ -313,10 +296,7 @@ private fun directionFrame(
 }
 
 /**
- * One row of a [GlassPopup].
- *
- * Only [text] is required: the icon, the summary, the tick and the chevron each appear on their
- * own or together.
+ * A menu item with an optional icon, summary, selection checkmark and submenu chevron.
  *
  * @param text The label.
  * @param onClick Called when the row is tapped.
@@ -324,14 +304,14 @@ private fun directionFrame(
  * @param icon Optional icon before the label.
  * @param summary Optional second line under the label. Usually the row's current setting.
  * @param enabled Whether the row responds to a tap.
- * @param selected Whether this row is the current choice, which puts a tick at its end.
- * @param showArrow Whether the row leads to a further menu, which puts a chevron at its end.
- * @param arrowRotation How far that chevron is turned, in degrees. A row whose menu is open turns
- *   it by [CascadingPopupDefaults.arrowRotation].
+ * @param selected Whether to show a selection checkmark.
+ * @param showArrow Whether to show a submenu chevron.
+ * @param arrowRotation Chevron rotation in degrees. An open submenu uses
+ *   [CascadingPopupDefaults.arrowRotation].
  * @param contentColor Colour of the label and the icon.
  * @param summaryColor Colour of the second line.
  * @param selectedContentColor Colour of a selected row's label and its tick.
- * @param pressedColor Fill of the block behind the row under a finger.
+ * @param pressedColor Pressed background color.
  */
 @Composable
 fun GlassPopupItem(
@@ -413,16 +393,14 @@ fun GlassPopupItem(
                 )
             }
         }
-        if (selected) {
-            Icon(
-                imageVector = MiuixIcons.Basic.Check,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(start = GlassPopupDefaults.ItemIconGap)
-                    .size(GlassPopupDefaults.ItemTickSize),
-                tint = selectedContentColor,
-            )
-        }
+        Icon(
+            imageVector = MiuixIcons.Basic.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(start = GlassPopupDefaults.ItemIconGap)
+                .size(GlassPopupDefaults.ItemTickSize),
+            tint = if (selected) selectedContentColor else Color.Transparent,
+        )
         if (showArrow) {
             Icon(
                 imageVector = MiuixIcons.Basic.ArrowRight,

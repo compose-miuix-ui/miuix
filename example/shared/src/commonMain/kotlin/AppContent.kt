@@ -612,7 +612,7 @@ private fun NavigationBar(
             }
             Box(modifier = modifier) {
                 when (appState.floatingNavigationBarStyle) {
-                    1 if backdrop != null -> {
+                    1 -> {
                         val glassItems = remember(navigationItems) {
                             navigationItems.map { GlassNavigationItem(icon = it.icon, label = it.label) }
                         }
@@ -620,7 +620,7 @@ private fun NavigationBar(
                             items = glassItems,
                             selectedIndex = page,
                             onSelect = { mainPagerState.animateToPage(it) },
-                            backdrop = backdrop,
+                            backdrop = if (blurActive) backdrop else null,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 24.dp),

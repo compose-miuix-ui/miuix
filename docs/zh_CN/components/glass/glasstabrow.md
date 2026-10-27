@@ -1,13 +1,13 @@
 # GlassTabRow
 
-`GlassTabRow` 使用等宽的玻璃胶囊标签展示内容分类，提供 primary 和 neutral 配色。`GlassSegmentedTabRow` 将标签连接为一条轨道，并使用滑动指示器标识选中项。两者都接收选中状态，并通过 `onSelect` 报告变更。
+`GlassTabRow` 提供 primary 和 neutral 配色的等宽玻璃标签。`GlassSegmentedTabRow` 使用相连轨道和滑动指示器，两者的选中状态均由调用方管理。
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTabRow" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -39,7 +39,7 @@ GlassTabRow(
 )
 ```
 
-默认 primary 配色使用主题主色填充选中胶囊。各胶囊分别改变自身颜色，没有在胶囊之间移动的指示器。
+Primary 配色使用主题主色填充选中标签。
 
 ### Neutral 独立胶囊
 
@@ -69,15 +69,13 @@ GlassSegmentedTabRow(
 )
 ```
 
-两种布局均通过点击选择，不提供导航栏式的拖动选择。请使用互不相同的简短标签：标签文本作为组合键，等宽排列，单行显示，超出时省略。标签栏不可横向滚动，需要有界宽度。
+请提供有界宽度和互不相同的标签。标签通过点击选择，等宽排列，长文本显示省略号。
 
 ## 组件状态
 
 ### 静止表面与玻璃表面
 
-有可用背景采样源时，`surfaceAlpha` 表示材质进度，不是整个控件的透明度。零值时，选中填充、标签和分段指示器仍然可见。未选中胶囊使用 `restingContainerColor`，分段轨道使用 `trackColor`。值为一时，材质色层、描边和阴影达到完整强度，未选中胶囊使用 `containerColor`。`GlassTabRow` 在进度为零时仍会采样并模糊背景，`GlassSegmentedTabRow` 则会在进度为零时禁用背景采样。
-
-没有可用背景采样源时，`GlassTabRow` 使用 `glassPanel` 的回退路径：`alpha * surfaceAlpha`（其中 `surfaceAlpha` 限制到 0–1）会乘到整个胶囊的绘制透明度上，包括填充、标签和按下覆盖色。因此，`surfaceAlpha = 0f` 会使胶囊不可见，而不是显示不透明的静止胶囊；它不会禁用选择。空背景采样源不会自动重置进度。
+有背景采样源时，`surfaceAlpha` 控制材质进度；没有背景采样源时，它作用于整个标签。零透明度不会禁用点击。
 
 ## 属性
 
@@ -120,8 +118,6 @@ GlassSegmentedTabRow(
 | indicatorColor | Color | 滑动指示器填充色 | GlassSegmentedTabRowDefaults.indicatorColor() | 否 |
 | selectedContentColor | Color | 选中标签颜色 | MiuixTheme.colorScheme.onSurface | 否 |
 | contentColor | Color | 未选中标签颜色 | MiuixTheme.colorScheme.onSurface | 否 |
-
-空列表不渲染任何内容。越界索引会在显示时限制到有效范围，不会修改调用方状态。高度固定，分段轨道内部高度为 `height - 2 * TrackPadding`。
 
 ### GlassTabColors 属性 {#glasstabcolors}
 
@@ -200,7 +196,7 @@ GlassTabRow(
 
 ### 在 GlassTopAppBar 中使用 {#inside-glasstopappbar}
 
-两种布局均继承 [GlassTopAppBar](./glasstopappbar) 的非空背景采样源和有效模糊半径，但保留自身材质颜色和 `surfaceAlpha`。空材质仍为空。下例使用顶栏示例中的列表状态和背景采样源，以及上文的标签状态：
+内嵌标签栏继承顶栏的背景采样源和模糊，但保留自身的材质颜色和 `surfaceAlpha`：
 
 ```kotlin
 val isContentScrolled = listState.canScrollBackward
@@ -223,4 +219,4 @@ GlassTopAppBar(
 )
 ```
 
-请根据页面重叠状态驱动标签栏材质进度，不要根据标题展开状态驱动。标签栏不会自动共享顶栏的材质过渡。
+根据页面滚动状态设置 `surfaceAlpha`；标签栏不会自动共享顶栏的材质过渡。

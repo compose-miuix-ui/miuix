@@ -15,16 +15,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 
 /**
- * The silhouette of a glass surface.
+ * Defines the silhouette of a glass surface.
  *
  * @param topStart Corner size at the top-start corner.
  * @param topEnd Corner size at the top-end corner.
  * @param bottomEnd Corner size at the bottom-end corner.
  * @param bottomStart Corner size at the bottom-start corner.
- * @property smoothing 0 draws a circular corner, 1 the continuous corner; values between
- *   interpolate. Only the glass shaders read it. [Modifier.clip] and anything built on
- *   [createOutline] get a plain rounded rectangle, since the supercircle is a distance field with
- *   no exact path form.
+ * @property smoothing 0 uses a circular corner and 1 uses the continuous corner profile. Values
+ *   between them interpolate. The glass renderer uses this value; [Modifier.clip] and
+ *   [createOutline] use a plain rounded rectangle.
  */
 @Immutable
 class GlassShape(
@@ -88,10 +87,10 @@ class GlassShape(
 }
 
 /**
- * A [GlassShape] with the same radius on all four corners.
+ * Creates a [GlassShape] with the same radius at all four corners.
  *
- * @param cornerRadius The radius applied to every corner.
- * @param smoothing 0 draws a circular corner, 1 draws the continuous corner.
+ * @param cornerRadius Radius applied to every corner.
+ * @param smoothing 0 uses a circular corner and 1 uses the continuous corner profile.
  */
 fun GlassShape(cornerRadius: Dp, smoothing: Float = GlassDefaults.Smoothing): GlassShape = GlassShape(
     CornerSize(cornerRadius),
@@ -102,13 +101,14 @@ fun GlassShape(cornerRadius: Dp, smoothing: Float = GlassDefaults.Smoothing): Gl
 )
 
 /**
- * A [GlassShape] with a radius per corner. The order matches `RoundedCornerShape`.
+ * Creates a [GlassShape] with an individual radius for each corner, in the order used by
+ * `RoundedCornerShape`.
  *
- * @param topStart The radius of the top-start corner.
- * @param topEnd The radius of the top-end corner.
- * @param bottomEnd The radius of the bottom-end corner.
- * @param bottomStart The radius of the bottom-start corner.
- * @param smoothing 0 draws a circular corner, 1 draws the continuous corner.
+ * @param topStart Radius of the top-start corner.
+ * @param topEnd Radius of the top-end corner.
+ * @param bottomEnd Radius of the bottom-end corner.
+ * @param bottomStart Radius of the bottom-start corner.
+ * @param smoothing 0 uses a circular corner and 1 uses the continuous corner profile.
  */
 fun GlassShape(
     topStart: Dp,

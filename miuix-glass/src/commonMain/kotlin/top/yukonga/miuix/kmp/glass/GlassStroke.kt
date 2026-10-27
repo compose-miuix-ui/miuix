@@ -8,12 +8,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
 /**
- * A light shaping the bloom stroke.
+ * Defines a light used to shade a glass bloom stroke.
  *
  * @property x Horizontal position in `[0, 1]`.
  * @property y Vertical position in `[0, 1]`.
- * @property z Signed depth. Negative places the light behind the surface.
- * @property color The light's colour. Its alpha is the intensity.
+ * @property z Signed depth; negative values place the light behind the surface.
+ * @property color Light colour; its alpha controls intensity.
  */
 @Immutable
 data class GlassStrokeLight(
@@ -24,13 +24,13 @@ data class GlassStrokeLight(
 )
 
 /**
- * The lit edge along a glass silhouette.
+ * Defines the lit edge along a glass silhouette.
  *
  * @property width Width of the flat stroke band, in dp.
- * @property bevel Depth of the shaded bevel the lights ride, in dp.
- * @property color The flat stroke's colour. Its alpha is the strength.
- * @property primary The first light. Every stock stroke puts it up and to the left.
- * @property secondary The second light, opposite the first.
+ * @property bevel Depth of the shaded bevel, in dp.
+ * @property color Flat stroke colour; its alpha controls strength.
+ * @property primary First light direction.
+ * @property secondary Second light direction, opposite [primary].
  */
 @Immutable
 data class GlassStroke(
@@ -41,7 +41,7 @@ data class GlassStroke(
     val secondary: GlassStrokeLight,
 )
 
-/** The stock bloom strokes. */
+/** Predefined glass bloom strokes. */
 object GlassStrokes {
 
     /** The big light bloom stroke. */
