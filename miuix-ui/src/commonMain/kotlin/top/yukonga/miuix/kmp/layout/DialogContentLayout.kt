@@ -29,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -95,6 +97,8 @@ import top.yukonga.miuix.kmp.window.WindowDialog
  * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
  *   for the centered presentation, or derived from the screen corner radius (clamped to
  *   32dp..48dp) when bottom-attached.
+ * @param dimColor The unanimated dimming color.
+ * @param surface Optional replacement for the default surface.
  * @param content The content of the dialog.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -118,6 +122,8 @@ internal fun DialogContentLayout(
     maxWidth: Dp = DialogDefaults.MaxWidth,
     largeScreen: Boolean? = null,
     cornerRadius: Dp? = null,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    surface: (@Composable DialogSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -171,6 +177,24 @@ internal fun DialogContentLayout(
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
+    val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
+        derivedStateOf {
+            if (enableWindowDim) {
+                dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * dimProgress.value).coerceIn(0f, 1f))
+            } else {
+                Color.Transparent
+            }
+        }
+    }
+    val surfaceScale = remember(isLargeScreen, animationProgress, backProgress) {
+        derivedStateOf {
+            if (isLargeScreen) {
+                (0.8f + 0.2f * animationProgress.value) * (1f - 0.2f * backProgress.value)
+            } else {
+                1f
+            }
+        }
+    }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
     val windowInfo = LocalWindowInfo.current
@@ -216,12 +240,11 @@ internal fun DialogContentLayout(
         }
 
         if (enableWindowDim) {
-            val baseColor = MiuixTheme.colorScheme.windowDimming
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .drawBehind {
-                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * dimProgress.value))
+                        drawRect(scrimColor.value)
                     },
             )
         }
@@ -259,6 +282,9 @@ internal fun DialogContentLayout(
             topInset = topInset,
             maxWidth = maxWidth,
             cornerRadius = cornerRadius,
+            scrimColor = scrimColor,
+            surfaceScale = surfaceScale,
+            surface = surface,
             content = {
                 CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                     content()
@@ -268,7 +294,8 @@ internal fun DialogContentLayout(
     }
 }
 
-@Suppress("ktlint:compose:modifier-not-used-at-root")
+// These State parameters are deliberately read by the surface during drawing, not composition.
+@Suppress("ktlint:compose:modifier-not-used-at-root", "ktlint:compose:state-param-check")
 @Composable
 internal fun DialogContent(
     title: String?,
@@ -283,10 +310,13 @@ internal fun DialogContent(
     dialogHeightPx: MutableIntState,
     onDismissRequest: (() -> Unit)?,
     isLargeScreen: Boolean,
+    scrimColor: State<Color>,
+    surfaceScale: State<Float>,
     modifier: Modifier = Modifier,
     topInset: Dp? = null,
     maxWidth: Dp = DialogDefaults.MaxWidth,
     cornerRadius: Dp? = null,
+    surface: (@Composable DialogSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -306,6 +336,11 @@ internal fun DialogContent(
         }
     }
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
+    val surfaceScope = remember(resolvedCornerRadius, scrimColor, surfaceScale) {
+        DialogSurfaceScope(resolvedCornerRadius, scrimColor, surfaceScale)
+    }
+    val surfaceModifier = surface?.invoke(surfaceScope)
+        ?: Modifier.squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
 
     val calculatedTopInset = if (topInset != null) {
         topInset
@@ -355,7 +390,7 @@ internal fun DialogContent(
         .pointerInput(Unit) {
             detectTapGestures { /* Consume click */ }
         }
-        .squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
+        .then(surfaceModifier)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
     Box(

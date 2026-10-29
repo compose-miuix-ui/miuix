@@ -12,17 +12,24 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -32,9 +39,14 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassTopAppBar
+import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import kotlin.math.roundToInt
+
+val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 
 fun Modifier.pageScrollModifiers(
     enableScrollEndHaptic: Boolean,
@@ -82,33 +94,51 @@ fun AdaptiveTopAppBar(
     scrollBehavior: ScrollBehavior,
     subtitle: String = "",
     color: Color = MiuixTheme.colorScheme.surface,
+    titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    defaultWindowInsetsPadding: Boolean = !isWideScreen,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    if (showTopAppBar) {
-        if (isWideScreen) {
-            SmallTopAppBar(
-                title = title,
-                subtitle = subtitle,
-                color = color,
-                scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = false,
-                navigationIcon = navigationIcon,
-                actions = actions,
-                bottomContent = bottomContent,
-            )
-        } else {
-            TopAppBar(
-                title = title,
-                subtitle = subtitle,
-                color = color,
-                scrollBehavior = scrollBehavior,
-                navigationIcon = navigationIcon,
-                actions = actions,
-                bottomContent = bottomContent,
-            )
-        }
+    if (!showTopAppBar) return
+    if (LocalAppState.current.topAppBarStyle == 1) {
+        val backdrop = LocalTopAppBarBackdrop.current
+        GlassTopAppBar(
+            title = title,
+            subtitle = subtitle,
+            backdrop = backdrop,
+            scrollBehavior = scrollBehavior,
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            bandBrush = if (backdrop != null) SolidColor(Color.Transparent) else SolidColor(color),
+            bandOverhang = if (LocalAppState.current.enableBlur) GlassTopAppBarDefaults.BandOverhang else 0.dp,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            bottomContent = bottomContent,
+        )
+    } else if (isWideScreen) {
+        SmallTopAppBar(
+            title = title,
+            subtitle = subtitle,
+            color = color,
+            titleColor = titleColor,
+            scrollBehavior = scrollBehavior,
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            bottomContent = bottomContent,
+        )
+    } else {
+        TopAppBar(
+            title = title,
+            subtitle = subtitle,
+            color = color,
+            titleColor = titleColor,
+            scrollBehavior = scrollBehavior,
+            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            bottomContent = bottomContent,
+        )
     }
 }
 
@@ -129,34 +159,51 @@ fun BlurredBar(
     blurEnabled: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val progressive = LocalAppState.current.blurStyle == 1
+    val glassStyle = LocalAppState.current.topAppBarStyle == 1
     val blurActive = blurEnabled && backdrop != null
-    Box(
-        modifier = if (blurActive && !progressive) {
-            Modifier.textureBlur(
-                backdrop = backdrop,
-                shape = RectangleShape,
-                blurRadius = 25f,
-                colors = barBlurColors(),
-            )
-        } else {
-            Modifier
-        },
-    ) {
-        if (blurActive && progressive) {
+    val topBarWindowInsets = WindowInsets.statusBars
+    val density = LocalDensity.current
+    Box {
+        if (blurActive && glassStyle) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
+                    .layout { measurable, constraints ->
+                        val barHeight = topBarWindowInsets.getTop(this) +
+                            with(density) { TopAppBarDefaults.CollapsedHeight.toPx() }
+                        val blurHeight = with(density) {
+                            ((barHeight + 20.dp.toPx()) * 1.2f).roundToInt()
+                        }
+                        val placeable = measurable.measure(
+                            constraints.copy(minHeight = blurHeight, maxHeight = blurHeight),
+                        )
+                        layout(constraints.maxWidth, constraints.maxHeight) {
+                            placeable.placeRelative(0, 0)
+                        }
+                    }
                     .progressiveTextureBlur(
                         backdrop = backdrop,
                         shape = RectangleShape,
-                        gradient = ProgressiveBlur.Top.copy(curve = 2.2f),
-                        blurRadius = 10f,
+                        gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
+                        blurRadius = 80f,
                         colors = barBlurColors(progressive = true),
                     ),
             )
+        } else if (blurActive) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .textureBlur(
+                        backdrop = backdrop,
+                        shape = RectangleShape,
+                        blurRadius = 25f,
+                        colors = barBlurColors(),
+                    ),
+            )
         }
-        content()
+        CompositionLocalProvider(LocalTopAppBarBackdrop provides backdrop) {
+            content()
+        }
     }
 }
 

@@ -21,6 +21,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun OverlayDialogDemo() {
@@ -49,6 +50,7 @@ fun OverlayDialogDemo() {
                         title = "OverlayDialog Title",
                         summary = "This is a basic dialog example that can contain various content.",
                         show = showDialog,
+                        dimColor = MiuixTheme.colorScheme.windowDimming.copy(alpha = 0.2f),
                         onDismissRequest = { showDialog = false },
                     ) {
                         TextButton(

@@ -7,7 +7,9 @@ package component.liquid
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -327,12 +330,19 @@ internal fun IosLiquidGlassNavigationBar(
 
     val navBarBottomPadding = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
     val bottomPaddingValue = when (platform()) {
-        Platform.IOS -> 20.dp
+        Platform.IOS -> 36.dp
 
         else -> {
-            if (navBarBottomPadding != 0.dp) 8.dp + navBarBottomPadding else 36.dp
+            if (navBarBottomPadding != 0.dp) 16.dp + navBarBottomPadding else 32.dp
         }
     }
+    val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
+        .asPaddingValues().calculateBottomPadding()
+    val animatedCaptionBarHeight by animateDpAsState(
+        targetValue = captionBarBottom.coerceAtLeast(0.dp),
+        animationSpec = tween(durationMillis = 300),
+        label = "iosLiquidNavigationCaptionBarHeight",
+    )
 
     val tabsContent: @Composable RowScope.() -> Unit = {
         val tabScale = LocalIosTabScale.current
@@ -391,7 +401,7 @@ internal fun IosLiquidGlassNavigationBar(
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
-                .padding(bottom = bottomPaddingValue, start = 24.dp, end = 24.dp)
+                .padding(bottom = bottomPaddingValue + animatedCaptionBarHeight, start = 24.dp, end = 24.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {
