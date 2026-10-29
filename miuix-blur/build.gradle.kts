@@ -53,6 +53,14 @@ kotlin {
         commonMain.dependencies {
             api(projects.miuixShader)
             implementation(libs.jetbrains.compose.foundation)
+            implementation(libs.jetbrains.lifecycle.runtime)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
+        }
+        named("desktopTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(compose.desktop.currentOs)
+            }
         }
     }
 }
