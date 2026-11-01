@@ -205,6 +205,7 @@ fun BasicComponent(
 
                 val maxWidth = constraints.maxWidth
                 val maxHeight = constraints.maxHeight
+                val hasBoundedWidth = constraints.hasBoundedWidth
 
                 val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
@@ -217,14 +218,18 @@ fun BasicComponent(
                 val endHardCap = (widthAfterStart - spacerPx).coerceAtLeast(0) * 6 / 10
                 val endTargetWidth = endIntrinsicWidth.coerceAtMost(endHardCap)
                 val endPlaceable = endMeasurable?.measure(
-                    looseConstraints.copy(maxWidth = endTargetWidth),
+                    looseConstraints.copy(
+                        maxWidth = if (hasBoundedWidth) endTargetWidth else Constraints.Infinity,
+                    ),
                 )
                 val endActualWidth = endPlaceable?.width ?: 0
                 val endSpacerWidth = if (endActualWidth > 0) spacerPx else 0
 
                 val widthForCenter = (widthAfterStart - endActualWidth - endSpacerWidth).coerceAtLeast(0)
                 val centerPlaceable = centerMeasurable.measure(
-                    looseConstraints.copy(maxWidth = widthForCenter),
+                    looseConstraints.copy(
+                        maxWidth = if (hasBoundedWidth) widthForCenter else Constraints.Infinity,
+                    ),
                 )
 
                 val startHeight = startPlaceable?.height ?: 0
@@ -232,8 +237,14 @@ fun BasicComponent(
                 val rowHeight = maxOf(startHeight, centerPlaceable.height, endHeight)
                 val layoutHeight = rowHeight
                     .coerceIn(constraints.minHeight, maxHeight.takeIf { it != Constraints.Infinity } ?: rowHeight)
+                val layoutWidth = if (hasBoundedWidth) {
+                    maxWidth
+                } else {
+                    startWidth + startSpacerWidth + centerPlaceable.width +
+                        endSpacerWidth + endActualWidth
+                }
 
-                layout(width = maxWidth, height = layoutHeight) {
+                layout(width = layoutWidth, height = layoutHeight) {
                     val startTop = (rowHeight - startHeight).coerceAtLeast(0) / 2
                     val centerTop = (rowHeight - centerPlaceable.height) / 2
                     val endTop = (rowHeight - endHeight).coerceAtLeast(0) / 2
@@ -244,7 +255,7 @@ fun BasicComponent(
                     centerPlaceable.placeRelative(centerX, centerTop)
 
                     endPlaceable?.let {
-                        val endX = maxWidth - it.width
+                        val endX = layoutWidth - it.width
                         it.placeRelative(endX, endTop)
                     }
                 }
