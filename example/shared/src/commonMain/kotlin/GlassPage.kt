@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -187,6 +188,13 @@ fun GlassPage(padding: PaddingValues) {
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
     val pageBackdrop = rememberLayerBackdrop()
+    var topBarBackdropCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val topBarButtonBackdrop = rememberLayerBackdrop {
+        // Record the scene behind the buttons: page pixels, then the visible progressive band.
+        val coordinates = topBarBackdropCoordinates?.takeIf { it.isAttached }
+        with(backdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
+        drawContent()
+    }
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
@@ -375,6 +383,8 @@ fun GlassPage(padding: PaddingValues) {
                                             placeable.placeRelative(0, 0)
                                         }
                                     }
+                                    .onGloballyPositioned { topBarBackdropCoordinates = it }
+                                    .layerBackdrop(topBarButtonBackdrop)
                                     .graphicsLayer {
                                         this.alpha = (-scrollBehavior.state.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f) * searchBarAlpha.value
                                     }
@@ -402,7 +412,11 @@ fun GlassPage(padding: PaddingValues) {
                             style = style,
                             alpha = alpha,
                             navigationIcon = {
-                                GlassIconButton(onClick = { navigator.pop() }) {
+                                GlassIconButton(
+                                    onClick = { navigator.pop() },
+                                    inheritTopBarMaterial = !progressiveTopBarBlur,
+                                    backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
+                                ) {
                                     Icon(
                                         imageVector = MiuixIcons.Glass.ChevronBackward,
                                         contentDescription = "Back",
@@ -415,6 +429,8 @@ fun GlassPage(padding: PaddingValues) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     GlassIconButton(
                                         onClick = openSearch,
+                                        inheritTopBarMaterial = !progressiveTopBarBlur,
+                                        backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
                                     ) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Search,
@@ -433,6 +449,8 @@ fun GlassPage(padding: PaddingValues) {
                                             cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
                                             floating = contentUnderTopBar,
                                         ),
+                                        inheritTopBarMaterial = !progressiveTopBarBlur,
+                                        backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
                                     ) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Settings,

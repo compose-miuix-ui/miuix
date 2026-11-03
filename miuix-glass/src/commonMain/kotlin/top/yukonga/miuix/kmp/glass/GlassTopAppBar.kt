@@ -358,6 +358,8 @@ fun GlassTopAppBar(
  * @param backdrop Optional backdrop. Inside [GlassTopAppBar], the button inherits the bar backdrop;
  *   elsewhere `null` uses [fill].
  * @param modifier Modifier applied to the button.
+ * @param inheritTopBarMaterial Whether to inherit the bar's backdrop and underlay material. When
+ *   false, use the button's own material over [backdrop], falling back to the bar's backdrop.
  * @param surfaceAlpha Pill opacity.
  * @param style Glass style forwarded to the renderer.
  * @param size Button diameter.
@@ -370,6 +372,7 @@ fun GlassTopAppBar(
 fun GlassIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    inheritTopBarMaterial: Boolean = true,
     backdrop: Backdrop? = null,
     surfaceAlpha: Float = 1f,
     style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
@@ -383,16 +386,17 @@ fun GlassIconButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val topBarContext = LocalGlassTopAppBarContext.current
+    val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
     val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
     val topBarRamp = topBarContext?.ramp
     GlassButtonSurface(
-        backdrop = topBarContext?.backdrop ?: backdrop,
+        backdrop = materialContext?.backdrop ?: backdrop ?: topBarContext?.backdrop,
         floating = topBarContext?.floating ?: (surfaceAlpha > 0.01f),
         surfaceAlpha = resolvedSurfaceAlpha,
         shadowAlpha = { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) },
         style = style,
-        material = topBarContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
-        underlayMaterial = topBarContext?.underlayMaterial,
+        material = materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
+        underlayMaterial = materialContext?.underlayMaterial,
         shape = shape,
         size = size,
         fill = fill,
