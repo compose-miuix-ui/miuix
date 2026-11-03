@@ -63,11 +63,16 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
+import top.yukonga.miuix.kmp.glass.GlassDefaults
 import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.glass.GlassIconButton
+import top.yukonga.miuix.kmp.glass.GlassMaterial
+import top.yukonga.miuix.kmp.glass.GlassMaterials
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
@@ -76,11 +81,10 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
+import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassShadows
 import top.yukonga.miuix.kmp.glass.GlassStroke
 import top.yukonga.miuix.kmp.glass.GlassStrokes
-import top.yukonga.miuix.kmp.glass.GlassStyle
-import top.yukonga.miuix.kmp.glass.GlassStyles
 import top.yukonga.miuix.kmp.glass.GlassTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
@@ -107,32 +111,14 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import kotlin.math.roundToInt
 
-private val Materials: List<Pair<String, GlassStyle>> = listOf(
-    "Common Small Thin" to GlassStyles.CommonSmallThin,
-    "Common Small Normal" to GlassStyles.CommonSmallNormal,
-    "Common Small Regular" to GlassStyles.CommonSmallRegular,
-    "Common Small Semibold" to GlassStyles.CommonSmallSemibold,
-    "Common Small Bold" to GlassStyles.CommonSmallBold,
-    "Common Medium Thin Low" to GlassStyles.CommonMediumThinLow,
-    "Common Medium Thin High" to GlassStyles.CommonMediumThinHigh,
-    "Common Medium Regular Low Light" to GlassStyles.CommonMediumRegularLowLight,
-    "Common Medium Regular High Light" to GlassStyles.CommonMediumRegularHighLight,
-    "Common Medium Regular Dark" to GlassStyles.CommonMediumRegularDark,
-    "Common Medium Bold Light" to GlassStyles.CommonMediumBoldLight,
-    "Common Medium Bold Dark" to GlassStyles.CommonMediumBoldDark,
-    "Common Medium Bold Low" to GlassStyles.CommonMediumBoldLow,
-    "Common Large Regular" to GlassStyles.CommonLargeRegular,
-    "Common Large Demibold" to GlassStyles.CommonLargeDemibold,
-    "Bionic Medium Thin" to GlassStyles.BionicMediumThin,
-    "Bionic Medium Normal" to GlassStyles.BionicMediumNormal,
-    "Bionic Medium Regular" to GlassStyles.BionicMediumRegular,
-    "Tint Purple" to GlassStyles.TintPurple,
-    "Tint Orange" to GlassStyles.TintOrange,
-    "Tint Blue" to GlassStyles.TintBlue,
-    "Tint Yellow" to GlassStyles.TintYellow,
-    "Tint Brown" to GlassStyles.TintBrown,
-    "Tint Black Thin" to GlassStyles.TintBlackThin,
-    "Tint Black Regular" to GlassStyles.TintBlackRegular,
+private val Materials: List<Pair<String, GlassMaterial?>> = listOf(
+    "Component default" to null,
+    "Pured Thin Glass Light" to GlassMaterials.PuredThinGlassLight,
+    "Pured Thin Glass Dark" to GlassMaterials.PuredThinGlassDark,
+    "Popup View Glass Light" to GlassMaterials.PopupViewGlassLight,
+    "Popup View Glass Dark" to GlassMaterials.PopupViewGlassDark,
+    "Action Bar Mask Light" to GlassMaterials.ActionBarMaskLight,
+    "Action Bar Mask Dark" to GlassMaterials.ActionBarMaskDark,
 )
 
 private val Strokes: List<Pair<String, GlassStroke?>> = listOf(
@@ -156,8 +142,6 @@ private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Glass.Settings, "Settings"),
 )
 
-private val OverlayNames = listOf("None", "Popup", "Dialog", "Bottom Sheet")
-
 private val TabPlacements = listOf("Top bar", "List")
 private const val TABS_IN_TOP_BAR = 0
 private const val OVERLAY_NONE = 0
@@ -168,9 +152,6 @@ private const val OVERLAY_BOTTOM_SHEET = 3
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
 private val SortOrders = listOf("Updated", "Created", "Title")
-
-private const val MATERIAL_LIGHT = 7
-private const val MATERIAL_DARK = 9
 
 /**
  * Demonstrates glass components on solid or wallpaper backgrounds.
@@ -203,9 +184,7 @@ fun GlassPage(padding: PaddingValues) {
     }
     val tabSurfaceAlpha = if (contentUnderTopBar) 1f else 0f
 
-    var materialIndex by remember(isInDark) {
-        mutableIntStateOf(if (isInDark) MATERIAL_DARK else MATERIAL_LIGHT)
-    }
+    var materialIndex by remember { mutableIntStateOf(0) }
     var strokeIndex by remember { mutableIntStateOf(2) }
     var cornerRadius by remember { mutableFloatStateOf(26f) }
     var smoothing by remember { mutableFloatStateOf(1f) }
@@ -223,9 +202,15 @@ fun GlassPage(padding: PaddingValues) {
     val menuAnchor = rememberGlassPopupAnchor()
     var logLevel by remember { mutableIntStateOf(2) }
 
-    val style = Materials[materialIndex].second
+    val material = Materials[materialIndex].second
+    val style = GlassDefaults.style(isInDark)
     val stroke = if (isInDark) StrokesDark[strokeIndex] else Strokes[strokeIndex].second
-    val popupVisuals = GlassPopupDefaults.visuals(style = style, alpha = alpha, stroke = stroke)
+    val popupVisuals = GlassPopupDefaults.visuals(
+        style = style,
+        alpha = alpha,
+        stroke = stroke,
+        material = material ?: GlassPopupDefaults.material(),
+    )
     var searchExpanded by remember { mutableStateOf(false) }
     val searchBarAlpha = rememberGlassSearchBarAlpha(searchExpanded)
     var submenu by remember { mutableStateOf(false) }
@@ -258,6 +243,7 @@ fun GlassPage(padding: PaddingValues) {
                 alpha = alpha,
                 surfaceAlpha = 1f,
                 stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
             )
             GlassTabRow(
                 tabs = listOf("Home", "Widget", "Theme", "Paper"),
@@ -268,6 +254,7 @@ fun GlassPage(padding: PaddingValues) {
                 alpha = alpha,
                 surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
                 stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
                 height = GlassTabRowDefaults.NeutralHeight,
                 colors = GlassTabRowDefaults.neutralColors(),
             )
@@ -280,6 +267,7 @@ fun GlassPage(padding: PaddingValues) {
                 alpha = alpha,
                 surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
                 stroke = stroke,
+                material = material ?: GlassSegmentedTabRowDefaults.material(),
             )
         }
     }
@@ -334,6 +322,7 @@ fun GlassPage(padding: PaddingValues) {
                             style = style,
                             alpha = alpha,
                             stroke = stroke,
+                            material = material ?: GlassNavigationBarDefaults.material(),
                             trailingAction = if (navigationSearchButton) {
                                 {
                                     GlassIconButton(
@@ -341,6 +330,7 @@ fun GlassPage(padding: PaddingValues) {
                                         backdrop = backdrop,
                                         size = GlassNavigationBarDefaults.Height,
                                         style = style,
+                                        material = material,
                                         surfaceAlpha = alpha,
                                         stroke = stroke,
                                         shadow = GlassShadows.Float,
@@ -411,11 +401,13 @@ fun GlassPage(padding: PaddingValues) {
                             },
                             style = style,
                             alpha = alpha,
+                            stroke = stroke,
                             navigationIcon = {
                                 GlassIconButton(
                                     onClick = { navigator.pop() },
                                     inheritTopBarMaterial = !progressiveTopBarBlur,
                                     backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
+                                    material = material,
                                 ) {
                                     Icon(
                                         imageVector = MiuixIcons.Glass.ChevronBackward,
@@ -431,6 +423,7 @@ fun GlassPage(padding: PaddingValues) {
                                         onClick = openSearch,
                                         inheritTopBarMaterial = !progressiveTopBarBlur,
                                         backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
+                                        material = material,
                                     ) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Search,
@@ -451,6 +444,7 @@ fun GlassPage(padding: PaddingValues) {
                                         ),
                                         inheritTopBarMaterial = !progressiveTopBarBlur,
                                         backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
+                                        material = material,
                                     ) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Settings,
@@ -480,6 +474,8 @@ fun GlassPage(padding: PaddingValues) {
                     title = "Glass Dialog",
                     summary = "Blurred background with the dialog's own three-layer material.",
                     onDismissRequest = { overlayIndex = OVERLAY_NONE },
+                    material = material ?: GlassDialogDefaults.material(),
+                    stroke = stroke,
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         GlassDialogButton(
@@ -502,6 +498,8 @@ fun GlassPage(padding: PaddingValues) {
                     onDismissRequest = { overlayIndex = OVERLAY_NONE },
                     show = overlayIndex == OVERLAY_BOTTOM_SHEET,
                     backdrop = pageBackdrop,
+                    material = material ?: GlassBottomSheetDefaults.material(),
+                    stroke = stroke,
                 )
 
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
@@ -600,14 +598,6 @@ fun GlassPage(padding: PaddingValues) {
                                         items = Strokes.map { it.first },
                                         selectedIndex = strokeIndex,
                                         onSelectedIndexChange = { strokeIndex = it },
-                                        backdrop = backdrop,
-                                        visuals = popupVisuals,
-                                    )
-                                    GlassDropdownPreference(
-                                        title = "Overlay",
-                                        items = OverlayNames,
-                                        selectedIndex = overlayIndex,
-                                        onSelectedIndexChange = { overlayIndex = it },
                                         backdrop = backdrop,
                                         visuals = popupVisuals,
                                     )

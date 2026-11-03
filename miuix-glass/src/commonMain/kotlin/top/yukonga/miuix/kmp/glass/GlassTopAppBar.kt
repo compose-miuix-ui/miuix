@@ -66,9 +66,6 @@ object GlassTopAppBarDefaults {
     /** Icon opacity while an action-bar button is held. */
     val PressedContentAlpha: Float = 0.6f
 
-    private val NESTED_BLUR_LIGHT: Dp = 44.72.dp
-    private val NESTED_BLUR_DARK: Dp = 63.25.dp
-
     /**
      * How far a bar has collapsed, in `[0, 1]`.
      *
@@ -98,10 +95,6 @@ object GlassTopAppBarDefaults {
 /** Default material for action-bar buttons. */
     @Composable
     fun buttonMaterial(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
-
-/** Effective blur for the action-bar underlay and child button mask. */
-    @Composable
-    internal fun nestedMaterialBlurRadius(): Dp = if (isDarkTheme()) NESTED_BLUR_DARK else NESTED_BLUR_LIGHT
 
 /** Material applied beneath child buttons and tabs. */
     @Composable
@@ -293,12 +286,8 @@ fun GlassTopAppBar(
         derivedStateOf { floating || materialProgress.value > 0f }
     }
     val baseMaterial = GlassTopAppBarDefaults.buttonMaterial()
-    val material = if (keepMaterial && backdrop != null) {
-        baseMaterial.copy(blurRadius = GlassTopAppBarDefaults.nestedMaterialBlurRadius())
-    } else {
-        baseMaterial
-    }
     val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { keepMaterial && backdrop != null }
+    val material = baseMaterial.withUnderlayBlur(underlayMaterial)
     val buttonBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
 
     Box(modifier = modifier) {
@@ -362,6 +351,9 @@ fun GlassTopAppBar(
  *   false, use the button's own material over [backdrop], falling back to the bar's backdrop.
  * @param surfaceAlpha Pill opacity.
  * @param style Glass style forwarded to the renderer.
+ * @param material Explicit button material. `null` inherits the bar material when
+ *   [inheritTopBarMaterial] is true, otherwise uses [GlassTopAppBarDefaults.buttonMaterial].
+ *   An inherited bar underlay contributes its blur to an explicit material.
  * @param size Button diameter.
  * @param shape Button silhouette.
  * @param shadow Shadow beneath the button; `null` disables it.
@@ -376,6 +368,7 @@ fun GlassIconButton(
     backdrop: Backdrop? = null,
     surfaceAlpha: Float = 1f,
     style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
+    material: GlassMaterial? = null,
     size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
     shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: GlassShape(size / 2),
     fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
@@ -395,7 +388,8 @@ fun GlassIconButton(
         surfaceAlpha = resolvedSurfaceAlpha,
         shadowAlpha = { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) },
         style = style,
-        material = materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
+        material = material?.withUnderlayBlur(materialContext?.underlayMaterial)
+            ?: materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
         underlayMaterial = materialContext?.underlayMaterial,
         shape = shape,
         size = size,

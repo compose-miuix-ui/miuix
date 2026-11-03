@@ -17,8 +17,11 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
+import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.glass.GlassMaterial
+import top.yukonga.miuix.kmp.glass.GlassStroke
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** A sheet with transparent content, so the shared material remains visible while scrolling. */
@@ -28,6 +31,8 @@ internal fun GlassBottomSheetDemo(
     show: Boolean,
     backdrop: Backdrop?,
     modifier: Modifier = Modifier,
+    material: GlassMaterial = GlassBottomSheetDefaults.material(),
+    stroke: GlassStroke? = GlassBottomSheetDefaults.stroke(),
 ) {
     GlassBottomSheet(
         show = show,
@@ -35,6 +40,8 @@ internal fun GlassBottomSheetDemo(
         title = "Glass Bottom Sheet",
         backdrop = backdrop,
         onDismissRequest = onDismissRequest,
+        material = material,
+        stroke = stroke,
     ) {
         Column(
             modifier = Modifier

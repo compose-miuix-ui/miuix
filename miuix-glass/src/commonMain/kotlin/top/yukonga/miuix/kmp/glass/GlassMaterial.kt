@@ -6,6 +6,8 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import kotlin.math.sqrt
 
 /** How a [GlassMaterial] colour layer is composited with the backdrop. */
 enum class GlassColorBlendMode {
@@ -70,4 +72,11 @@ data class GlassMaterial(
             "A GlassMaterial cannot carry a third colour layer without a second"
         }
     }
+}
+
+/** Combines child and underlay blur variances for the shared single-pass backdrop filter. */
+internal fun GlassMaterial.withUnderlayBlur(underlay: GlassMaterial?): GlassMaterial = if (underlay == null) {
+    this
+} else {
+    copy(blurRadius = sqrt(blurRadius.value * blurRadius.value + underlay.blurRadius.value * underlay.blurRadius.value).dp)
 }
