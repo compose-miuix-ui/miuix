@@ -255,7 +255,7 @@ fun BoxScope.GlassPopup(
             directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection)
         },
         contentLayer = { _, _ ->
-            val t = progress.value.coerceIn(0f, 1f)
+            val t = progress.value.coerceAtLeast(0f)
             val scale = GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t
             scaleX = scale
             scaleY = scale
@@ -278,11 +278,12 @@ private fun directionFrame(
     endRadius: Dp,
     layoutDirection: androidx.compose.ui.unit.LayoutDirection,
 ): GlassPopupFrame {
-    val t = progress.coerceIn(0f, 1f)
+    // Keep the spring's overshoot so the silhouette and rows rebound together.
+    val t = progress.coerceAtLeast(0f)
     val width = end.width * (GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t)
     val endRatio = if (end.width > 0f) end.height / end.width else 1f
     val ratio = GlassMotion.POPUP_START_RATIO + (endRatio - GlassMotion.POPUP_START_RATIO) * t
-    val height = (width * ratio).coerceAtMost(end.height)
+    val height = width * ratio
     val left = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr) {
         placement.rect.right - width
     } else {

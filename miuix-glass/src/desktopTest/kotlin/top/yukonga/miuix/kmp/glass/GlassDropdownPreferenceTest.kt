@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import kotlin.test.Test
@@ -54,6 +55,37 @@ class GlassDropdownPreferenceTest {
             waitForIdle()
             onNodeWithText("Warn").assertDoesNotExist()
         }
+    }
+
+    @Test
+    fun openingContentFollowsReboundAndContinuesSettlingPastTheOldCutoff() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        setContent {
+            DialogTestHost {
+                GlassDropdownPreference(
+                    onSelectedIndexChange = {},
+                    items = listOf("Debug", "Warn", "Error"),
+                    selectedIndex = 0,
+                    title = "Log level",
+                    backdrop = null,
+                    sizing = GlassPopupSizing(minWidth = 200.dp, maxWidth = 200.dp),
+                    visuals = GlassPopupDefaults.visuals(stroke = null, shadow = null),
+                )
+            }
+        }
+        onNodeWithText("Log level").performClick()
+        // Allow the Scaffold popup host to mount before sampling the spring's rebound.
+        mainClock.advanceTimeBy(64)
+        onNodeWithText("Warn").assertExists()
+        mainClock.advanceTimeBy(320)
+        val rebound = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+        mainClock.advanceTimeBy(80)
+        val settling = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+        mainClock.advanceTimeBy(1000)
+        val settled = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+        assertTrue(rebound.width > settled.width + 0.5f, "Rows must keep following the panel past 100%: $rebound vs $settled")
+        assertTrue(settling.width > settled.width + 0.1f, "The tail must not snap to its target at the old 356ms cutoff: $settling vs $settled")
+        assertTrue(settling.width < rebound.width, "The panel must return smoothly from its widest point")
     }
 
     @Test

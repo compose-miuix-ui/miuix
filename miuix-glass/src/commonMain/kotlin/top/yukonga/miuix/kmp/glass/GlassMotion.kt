@@ -8,6 +8,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,14 @@ object GlassMotion {
     private fun transformSpring(damping: Float, response: Float): SpringSpec<Float> = folmeSpring(
         damping = damping,
         response = response,
+        visibilityThreshold = TRANSFORM_VISIBILITY_THRESHOLD,
+    )
+
+    /** Uses the Folme value threshold for normalized popup progress without changing its physics. */
+    @Stable
+    internal fun popupProgressSpring(spec: SpringSpec<Float>): SpringSpec<Float> = spring(
+        dampingRatio = spec.dampingRatio,
+        stiffness = spec.stiffness,
         visibilityThreshold = TRANSFORM_VISIBILITY_THRESHOLD,
     )
 

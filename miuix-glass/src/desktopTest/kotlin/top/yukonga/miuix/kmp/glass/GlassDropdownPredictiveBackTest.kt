@@ -1,0 +1,156 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.glass
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEvent
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalTestApi::class)
+class GlassDropdownPredictiveBackTest {
+    @Test
+    fun anchorValueNeverDimsAgainWhenACompletedGestureUnmountsThePopup() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val owner = TestNavigationOwner()
+        val show = mutableStateOf(true)
+        val mounted = mutableStateOf(true)
+        setContent {
+            DialogTestHost(owner) {
+                val anchor = rememberGlassPopupAnchor()
+                Box(Modifier.size(500.dp).background(Color.White)) {
+                    // Leave the value uncovered so the pixel measures only its displayed opacity.
+                    Box(
+                        Modifier.offset(20.dp, 20.dp).size(40.dp)
+                            .glassPopupAnchorValue(anchor)
+                            .background(Color.Red),
+                    )
+                    if (mounted.value) {
+                        GlassDropdownPopupContent(
+                            show = show.value,
+                            onDismissRequest = { show.value = false },
+                            anchorBounds = Rect(20f, 180f, 200f, 224f),
+                            anchor = anchor,
+                            backdrop = null,
+                            visuals = GlassPopupDefaults.visuals(stroke = null, shadow = null),
+                            onDismissFinished = { mounted.value = false },
+                        ) {
+                            GlassPopupItem(text = "Choice", onClick = {})
+                        }
+                    }
+                }
+            }
+        }
+        val sample = with(density) { 40.dp.roundToPx() }
+        fun valueOpacity(): Float = 1f - onRoot().captureToImage().toPixelMap()[sample, sample].green
+
+        mainClock.advanceTimeBy(1000)
+        assertEquals(0f, valueOpacity(), 0.02f)
+        runOnIdle { owner.input.backStarted(NavigationEvent(progress = 0f)) }
+        runOnIdle { owner.input.backProgressed(NavigationEvent(progress = 0.6f)) }
+        mainClock.advanceTimeByFrame()
+        assertEquals(0.6f, valueOpacity(), 0.02f)
+        runOnIdle { owner.input.backCancelled() }
+        mainClock.advanceTimeBy(1000)
+        assertEquals(0f, valueOpacity(), 0.02f, "Cancellation must hide the value again")
+
+        for (progress in listOf(0.6f, 0.3f)) {
+            runOnIdle { owner.input.backStarted(NavigationEvent(progress = 0f)) }
+            runOnIdle { owner.input.backProgressed(NavigationEvent(progress = progress)) }
+            mainClock.advanceTimeByFrame()
+            var previousOpacity = valueOpacity()
+            assertEquals(progress, previousOpacity, 0.02f)
+            runOnIdle { owner.input.backCompleted() }
+            repeat(32) { frame ->
+                mainClock.advanceTimeByFrame()
+                val opacity = valueOpacity()
+                assertTrue(opacity >= previousOpacity - 0.02f, "Value dimmed at frame $frame: $previousOpacity -> $opacity")
+                previousOpacity = opacity
+            }
+            assertTrue(!mounted.value)
+            mainClock.advanceTimeBy(1000)
+            assertEquals(1f, valueOpacity(), 0.02f)
+            runOnIdle {
+                mounted.value = true
+                show.value = true
+            }
+            mainClock.advanceTimeBy(1000)
+            assertEquals(0f, valueOpacity(), 0.02f, "Reopening must hide the value without retaining the old gesture")
+        }
+    }
+
+    @Test
+    fun systemTakeoverKeepsDropdownHeldUntilBackIsCancelledOrCompleted() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val owner = TestNavigationOwner()
+        val expansions = mutableListOf<Boolean>()
+        setContent {
+            DialogTestHost(owner) {
+                GlassDropdownPreference(
+                    onSelectedIndexChange = {},
+                    items = listOf("Debug", "Warn", "Error"),
+                    selectedIndex = 0,
+                    title = "Log level",
+                    backdrop = null,
+                    sizing = GlassPopupSizing(minWidth = 200.dp, maxWidth = 200.dp),
+                    visuals = GlassPopupDefaults.visuals(stroke = null, shadow = null),
+                    onExpandedChange = { expansions += it },
+                )
+            }
+        }
+        onNodeWithText("Log level").performClick()
+        mainClock.advanceTimeBy(1000)
+        val expanded = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+
+        // Android cancels the app's pointer stream when the system takes over an edge swipe.
+        onRoot().performTouchInput { down(Offset(1f, height * 0.75f)) }
+        runOnIdle { owner.input.backStarted(NavigationEvent(progress = 0f)) }
+        onRoot().performTouchInput { cancel() }
+        runOnIdle { assertEquals(listOf(true), expansions, "System takeover must not dismiss the menu") }
+        runOnIdle { owner.input.backProgressed(NavigationEvent(progress = 0.4f)) }
+        mainClock.advanceTimeByFrame()
+        val dragged = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+        assertTrue(dragged.width < expanded.width, "The dropdown must follow predictive-back progress")
+        mainClock.advanceTimeBy(500)
+        assertEquals(dragged, onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot, "Holding the gesture must hold the menu")
+
+        runOnIdle { owner.input.backProgressed(NavigationEvent(progress = 0.2f)) }
+        mainClock.advanceTimeByFrame()
+        val reversed = onNodeWithText("Warn").fetchSemanticsNode().boundsInRoot
+        assertTrue(reversed.width > dragged.width, "Dragging back must restore the menu proportionally")
+        runOnIdle { owner.input.backCancelled() }
+        mainClock.advanceTimeBy(1000)
+        val restored = onNodeWithText("Warn").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+        assertEquals(expanded.width, restored.width, 0.01f)
+        assertEquals(listOf(true), expansions)
+
+        runOnIdle { owner.input.backStarted(NavigationEvent(progress = 0f)) }
+        runOnIdle { owner.input.backProgressed(NavigationEvent(progress = 0.6f)) }
+        mainClock.advanceTimeByFrame()
+        assertEquals(listOf(true), expansions, "Progress alone must not dismiss")
+        runOnIdle { owner.input.backCompleted() }
+        mainClock.advanceTimeBy(1000)
+        onNodeWithText("Warn").assertDoesNotExist()
+        assertEquals(listOf(true, false), expansions)
+    }
+}

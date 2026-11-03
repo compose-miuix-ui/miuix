@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
@@ -178,9 +179,11 @@ internal fun GlassPopupSurface(
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        // System cancellation is a consumed up event, not an outside release.
+                        val released = change.changedToUp()
                         change.consume()
                         if (!change.pressed) {
-                            currentOnDismissRequest()
+                            if (released) currentOnDismissRequest()
                             break
                         }
                     }
@@ -244,10 +247,6 @@ internal fun GlassPopupSurface(
             GlassPopupColumn(
                 modifier = Modifier
                     .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                    .graphicsLayer {
-                        transformOrigin = TransformOrigin(0f, 0f)
-                        contentLayer(measured.end, measured.rect)
-                    }
                     .padding(contentPadding),
                 content = content,
             )
@@ -278,7 +277,13 @@ internal fun GlassPopupSurface(
         val background = measurables[0].measure(Constraints.fixed(panelWidth, panelHeight))
         layout(panelWidth, panelHeight) {
             background.place(0, 0)
-            foreground.place(0, 0)
+            foreground.placeWithLayer(0, 0) {
+                transformOrigin = TransformOrigin(0f, 0f)
+                contentLayer(measured.end, measured.rect)
+                // Use this frame's bounds, including the scroll viewport, without rounding its motion.
+                translationX = measured.rect.left - measured.rect.left.roundToInt()
+                translationY = measured.rect.top - measured.rect.top.roundToInt()
+            }
         }
     }
 }

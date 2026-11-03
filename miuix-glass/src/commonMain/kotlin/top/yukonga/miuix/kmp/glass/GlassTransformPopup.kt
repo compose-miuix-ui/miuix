@@ -54,6 +54,9 @@ class GlassPopupAnchor {
     /** Predictive-back progress published by an attached [GlassDropdownPopup]. */
     internal var dropdownBackProgressState: State<Float>? by mutableStateOf(null)
 
+    /** Keeps the restored value visible while its fade outlives the dropdown's popup host. */
+    internal var dropdownRetainedValueAlpha: Float by mutableFloatStateOf(0f)
+
     /**
      * Secondary predictive-back progress, including cancellation recovery and the retained exit
      * fraction. Read inside a draw/layer callback to make custom arrows follow the menu:
@@ -96,7 +99,7 @@ class GlassPopupAnchor {
 
     /** Value opacity during predictive-back collapse. */
     internal val dropdownValueAlpha: Float
-        get() = dropdownBackProgressState?.value?.coerceIn(0f, 1f) ?: 0f
+        get() = (dropdownBackProgressState?.value ?: dropdownRetainedValueAlpha).coerceIn(0f, 1f)
 }
 
 /** The button's sampling and colour treatment at the collapsed endpoint of its menu. */
@@ -173,7 +176,8 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
 /**
  * Reports a row's value bounds for dropdown positioning and fades it out while its choices are open.
  *
- * Apply to the value and chevron, not the whole row. The value fades back in after dismissal.
+ * Apply to the value and chevron, not the whole row. After predictive Back completes, the value
+ * keeps its restored opacity through popup disposal until its fade reaches full opacity.
  *
  * @param anchor The anchor the row reported itself to.
  */
@@ -364,7 +368,7 @@ fun BoxScope.GlassTransformPopup(
         },
         contentLayer = { end, _ ->
             val width = startRect.width + (end.width - startRect.width) * geometryProgress()
-            val scale = if (end.width > 0f) (width / end.width).coerceAtMost(1f) else 1f
+            val scale = if (end.width > 0f) (width / end.width).coerceAtLeast(0f) else 1f
             scaleX = scale
             scaleY = scale
             val fraction = popupFractionWithBack(contentMaterial.value, backProgress.value)

@@ -111,11 +111,11 @@ internal fun BoxScope.GlassDropdownPopupContent(
     }
     val transition = rememberTransition(visibility, label = "glassDropdown")
     val size = transition.animateFloat(
-        transitionSpec = { GlassMotion.arcBounds(targetState) },
+        transitionSpec = { GlassMotion.popupProgressSpring(GlassMotion.arcBounds(targetState)) },
         label = "glassDropdownSize",
     ) { if (it) 1f else 0f }
     val position by transition.animateFloat(
-        transitionSpec = { GlassMotion.arcPosition(targetState) },
+        transitionSpec = { GlassMotion.popupProgressSpring(GlassMotion.arcPosition(targetState)) },
         label = "glassDropdownPosition",
     ) { if (it) 1f else 0f }
     val fade by transition.animateFloat(
@@ -140,13 +140,16 @@ internal fun BoxScope.GlassDropdownPopupContent(
         active = active,
         enabled = show,
         retainWhenInactive = true,
-        resetSpec = GlassMotion.arcBounds(true),
+        resetSpec = GlassMotion.popupProgressSpring(GlassMotion.arcBounds(true)),
         onDismissRequest = onDismissRequest,
     )
     DisposableEffect(anchor, backProgress) {
         anchor?.dropdownBackProgressState = backProgress
+        anchor?.dropdownRetainedValueAlpha = 0f
         onDispose {
             if (anchor?.dropdownBackProgressState === backProgress) {
+                // The anchor's fade continues after the Scaffold removes this popup host.
+                anchor.dropdownRetainedValueAlpha = backProgress.value.coerceIn(0f, 1f)
                 anchor.dropdownBackProgressState = null
             }
         }
@@ -191,7 +194,7 @@ internal fun BoxScope.GlassDropdownPopupContent(
         },
         contentLayer = { _, _ ->
             val fraction = GlassMotion.ARC_START_WIDTH + (1f - GlassMotion.ARC_START_WIDTH) * geometryProgress()
-            val scale = fraction.coerceAtMost(1f)
+            val scale = fraction.coerceAtLeast(0f)
             scaleX = scale
             scaleY = scale
         },

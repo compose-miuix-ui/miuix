@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -36,7 +38,13 @@ class GlassPopupOutsideGestureTest {
     @Test
     fun outsideVerticalDragClosesOnReleaseWithoutScrollingParent() = checkOutsideGesture(Orientation.Vertical, drag = true)
 
-    private fun checkOutsideGesture(orientation: Orientation, drag: Boolean) = runComposeUiTest {
+    @Test
+    fun cancelledOutsideDragDoesNotDismiss() = checkOutsideGesture(Orientation.Horizontal, drag = true, cancelled = true)
+
+    @Test
+    fun consumedOutsideReleaseDoesNotDismiss() = checkOutsideGesture(Orientation.Horizontal, drag = true, consumedRelease = true)
+
+    private fun checkOutsideGesture(orientation: Orientation, drag: Boolean, cancelled: Boolean = false, consumedRelease: Boolean = false) = runComposeUiTest {
         val show = mutableStateOf(true)
         var dismissals = 0
         var scrollDistance = 0f
@@ -46,7 +54,22 @@ class GlassPopupOutsideGestureTest {
                     scrollDistance += delta
                     delta
                 }
-                Box(Modifier.size(500.dp).scrollable(scroll, orientation).testTag("scene")) {
+                Box(
+                    Modifier.size(500.dp)
+                        .pointerInput(consumedRelease) {
+                            if (consumedRelease) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        // Android represents cancellation as an already-consumed up event.
+                                        event.changes.forEach { if (!it.pressed) it.consume() }
+                                    }
+                                }
+                            }
+                        }
+                        .scrollable(scroll, orientation)
+                        .testTag("scene"),
+                ) {
                     GlassPopup(
                         show = show.value,
                         onDismissRequest = {
@@ -81,12 +104,19 @@ class GlassPopupOutsideGestureTest {
             assertEquals(0, dismissals)
             assertEquals(0f, scrollDistance, "The parent must not take over the drag")
         }
-        onNodeWithTag("scene").performTouchInput { up() }
+        onNodeWithTag("scene").performTouchInput {
+            if (cancelled) cancel() else up()
+        }
+        val keepOpen = cancelled || consumedRelease
         runOnIdle {
-            assertFalse(show.value)
-            assertEquals(1, dismissals)
+            if (keepOpen) assertTrue(show.value) else assertFalse(show.value)
+            assertEquals(if (keepOpen) 0 else 1, dismissals)
             assertEquals(0f, scrollDistance)
         }
-        onNodeWithText("Menu item").assertDoesNotExist()
+        if (keepOpen) {
+            onNodeWithText("Menu item").assertIsDisplayed()
+        } else {
+            onNodeWithText("Menu item").assertDoesNotExist()
+        }
     }
 }
