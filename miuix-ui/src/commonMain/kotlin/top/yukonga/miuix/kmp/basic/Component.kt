@@ -214,22 +214,24 @@ fun BasicComponent(
                 val startSpacerWidth = if (startWidth > 0) spacerPx else 0
                 val widthAfterStart = (maxWidth - startWidth - startSpacerWidth).coerceAtLeast(0)
 
-                val endIntrinsicWidth = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
-                val endHardCap = (widthAfterStart - spacerPx).coerceAtLeast(0) * 6 / 10
-                val endTargetWidth = endIntrinsicWidth.coerceAtMost(endHardCap)
-                val endPlaceable = endMeasurable?.measure(
-                    looseConstraints.copy(
-                        maxWidth = if (hasBoundedWidth) endTargetWidth else Constraints.Infinity,
-                    ),
-                )
+                val endPlaceable = if (hasBoundedWidth) {
+                    val endIntrinsicWidth = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
+                    val endHardCap = (widthAfterStart - spacerPx).coerceAtLeast(0) * 6 / 10
+                    val endTargetWidth = endIntrinsicWidth.coerceAtMost(endHardCap)
+                    endMeasurable?.measure(looseConstraints.copy(maxWidth = endTargetWidth))
+                } else {
+                    endMeasurable?.measure(looseConstraints)
+                }
                 val endActualWidth = endPlaceable?.width ?: 0
                 val endSpacerWidth = if (endActualWidth > 0) spacerPx else 0
 
-                val widthForCenter = (widthAfterStart - endActualWidth - endSpacerWidth).coerceAtLeast(0)
                 val centerPlaceable = centerMeasurable.measure(
-                    looseConstraints.copy(
-                        maxWidth = if (hasBoundedWidth) widthForCenter else Constraints.Infinity,
-                    ),
+                    if (hasBoundedWidth) {
+                        val widthForCenter = (widthAfterStart - endActualWidth - endSpacerWidth).coerceAtLeast(0)
+                        looseConstraints.copy(maxWidth = widthForCenter)
+                    } else {
+                        looseConstraints
+                    },
                 )
 
                 val startHeight = startPlaceable?.height ?: 0
@@ -240,8 +242,10 @@ fun BasicComponent(
                 val layoutWidth = if (hasBoundedWidth) {
                     maxWidth
                 } else {
-                    startWidth + startSpacerWidth + centerPlaceable.width +
-                        endSpacerWidth + endActualWidth
+                    (
+                        startWidth + startSpacerWidth + centerPlaceable.width +
+                            endSpacerWidth + endActualWidth
+                        ).coerceAtLeast(constraints.minWidth)
                 }
 
                 layout(width = layoutWidth, height = layoutHeight) {
