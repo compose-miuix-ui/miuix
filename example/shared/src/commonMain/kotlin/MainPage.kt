@@ -110,6 +110,7 @@ fun MainPage(
     }
 
     val backdrop = rememberBlurBackdrop()
+    val pageBackdrop = rememberBlurBackdrop()
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
 
@@ -216,6 +217,7 @@ fun MainPage(
 
     Box(Modifier.fillMaxSize()) {
         Scaffold(
+            modifier = if (pageBackdrop != null) Modifier.layerBackdrop(pageBackdrop) else Modifier,
             topBar = {
                 BlurredBar(backdrop, blurActive) {
                     AdaptiveTopAppBar(
@@ -380,7 +382,7 @@ fun MainPage(
                 anchor = optionsAnchor,
                 anchorContent = { Icon(MiuixIcons.Tune, contentDescription = null) },
                 entries = cascadingEntries,
-                backdrop = backdrop,
+                backdrop = pageBackdrop,
                 collapseOnSelection = cascadingCollapseOnSelection,
             )
             GlassIconDropdownMenu(
@@ -389,7 +391,7 @@ fun MainPage(
                 anchor = moreAnchor,
                 anchorContent = { Icon(MiuixIcons.More, contentDescription = null) },
                 entries = moreItems,
-                backdrop = backdrop,
+                backdrop = pageBackdrop,
                 collapseOnSelection = false,
             )
         }

@@ -208,12 +208,21 @@ private fun SettingsContent(
                         onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
                     )
                     AnimatedVisibility(visible = appState.showTopAppBar) {
-                        OverlayDropdownPreference(
-                            title = "TopAppBar Style",
-                            items = TopAppBarStyleOptions,
-                            selectedIndex = appState.topAppBarStyle,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(topAppBarStyle = it) } },
-                        )
+                        Column {
+                            OverlayDropdownPreference(
+                                title = "TopAppBar Style",
+                                items = TopAppBarStyleOptions,
+                                selectedIndex = appState.topAppBarStyle,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(topAppBarStyle = it) } },
+                            )
+                            AnimatedVisibility(visible = appState.topAppBarStyle == 1) {
+                                SwitchPreference(
+                                    title = "Glass Top Bar Progressive Blur",
+                                    checked = appState.glassTopBarProgressiveBlur,
+                                    onCheckedChange = { updateAppState { state -> state.copy(glassTopBarProgressiveBlur = it) } },
+                                )
+                            }
+                        }
                     }
                     SwitchPreference(
                         title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",

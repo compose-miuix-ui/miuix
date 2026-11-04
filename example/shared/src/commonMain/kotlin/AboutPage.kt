@@ -88,6 +88,7 @@ fun AboutPage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
     val lazyListState = rememberLazyListState()
+    val glassTopBar = LocalAppState.current.topAppBarStyle == 1
 
     val scrollProgress by remember {
         derivedStateOf {
@@ -119,9 +120,12 @@ fun AboutPage(
             } else {
                 if (collapsed) MiuixTheme.colorScheme.surface else Color.Transparent
             }
-            val titleColor = MiuixTheme.colorScheme.onSurface.copy(
-                alpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f),
-            )
+            val titleAlpha = { ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f) }
+            val titleColor = if (glassTopBar) {
+                MiuixTheme.colorScheme.onSurface
+            } else {
+                MiuixTheme.colorScheme.onSurface.copy(alpha = titleAlpha())
+            }
             BlurredBar(backdrop, blurActive) {
                 AdaptiveTopAppBar(
                     title = "About",
@@ -130,6 +134,9 @@ fun AboutPage(
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     titleColor = titleColor,
+                    titleAlpha = titleAlpha,
+                    // The hero background is behind the button even before the list scrolls.
+                    isContentScrolled = true,
                     defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         BackNavigationIcon(

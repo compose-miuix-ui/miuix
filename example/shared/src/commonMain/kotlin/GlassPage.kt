@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -31,12 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -46,6 +42,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import component.GlassBottomSheetDemo
+import component.GlassDemoDefaults
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -55,13 +52,8 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
-import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
 import top.yukonga.miuix.kmp.glass.GlassDefaults
@@ -71,8 +63,6 @@ import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
 import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.glass.GlassIconButton
-import top.yukonga.miuix.kmp.glass.GlassMaterial
-import top.yukonga.miuix.kmp.glass.GlassMaterials
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
@@ -83,8 +73,6 @@ import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassShadows
-import top.yukonga.miuix.kmp.glass.GlassStroke
-import top.yukonga.miuix.kmp.glass.GlassStrokes
 import top.yukonga.miuix.kmp.glass.GlassTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
@@ -109,31 +97,6 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
-import kotlin.math.roundToInt
-
-private val Materials: List<Pair<String, GlassMaterial?>> = listOf(
-    "Component default" to null,
-    "Pured Thin Glass Light" to GlassMaterials.PuredThinGlassLight,
-    "Pured Thin Glass Dark" to GlassMaterials.PuredThinGlassDark,
-    "Popup View Glass Light" to GlassMaterials.PopupViewGlassLight,
-    "Popup View Glass Dark" to GlassMaterials.PopupViewGlassDark,
-    "Action Bar Mask Light" to GlassMaterials.ActionBarMaskLight,
-    "Action Bar Mask Dark" to GlassMaterials.ActionBarMaskDark,
-)
-
-private val Strokes: List<Pair<String, GlassStroke?>> = listOf(
-    "None" to null,
-    "Small" to GlassStrokes.SmallLight,
-    "Middle" to GlassStrokes.MiddleLight,
-    "Big" to GlassStrokes.BigLight,
-)
-
-private val StrokesDark: List<GlassStroke?> = listOf(
-    null,
-    GlassStrokes.SmallDark,
-    GlassStrokes.MiddleDark,
-    GlassStrokes.BigDark,
-)
 
 private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Home, "Home"),
@@ -169,13 +132,6 @@ fun GlassPage(padding: PaddingValues) {
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
     val pageBackdrop = rememberLayerBackdrop()
-    var topBarBackdropCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val topBarButtonBackdrop = rememberLayerBackdrop {
-        // Record the scene behind the buttons: page pixels, then the visible progressive band.
-        val coordinates = topBarBackdropCoordinates?.takeIf { it.isAttached }
-        with(backdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
-        drawContent()
-    }
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
@@ -193,7 +149,6 @@ fun GlassPage(padding: PaddingValues) {
     var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var progressiveTopBarBlur by remember { mutableStateOf(false) }
     var navigationSearchButton by remember { mutableStateOf(true) }
-    val topBarWindowInsets = WindowInsets.statusBars
     var navIndex by remember { mutableIntStateOf(0) }
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
@@ -202,9 +157,9 @@ fun GlassPage(padding: PaddingValues) {
     val menuAnchor = rememberGlassPopupAnchor()
     var logLevel by remember { mutableIntStateOf(2) }
 
-    val material = Materials[materialIndex].second
+    val material = GlassDemoDefaults.material(materialIndex)
     val style = GlassDefaults.style(isInDark)
-    val stroke = if (isInDark) StrokesDark[strokeIndex] else Strokes[strokeIndex].second
+    val stroke = GlassDemoDefaults.stroke(strokeIndex, isInDark)
     val popupVisuals = GlassPopupDefaults.visuals(
         style = style,
         alpha = alpha,
@@ -350,122 +305,73 @@ fun GlassPage(padding: PaddingValues) {
                     }
                 },
                 topBar = {
-                    Box {
-                        if (progressiveTopBarBlur) {
-                            val blurColors = BlurDefaults.blurColors(
-                                blendColors = listOf(
-                                    BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(alpha = 0.3f)),
-                                ),
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .layout { measurable, constraints ->
-                                        // Demo tab rows have their own material; keep the band at toolbar height.
-                                        val barHeight = topBarWindowInsets.getTop(this) +
-                                            TopAppBarDefaults.CollapsedHeight.toPx()
-                                        val blurHeight = ((barHeight + 20.dp.toPx()) * 1.2f).roundToInt()
-                                        val placeable = measurable.measure(
-                                            constraints.copy(minHeight = blurHeight, maxHeight = blurHeight),
-                                        )
-                                        // Let the blur overhang without changing Scaffold's content inset.
-                                        layout(constraints.maxWidth, constraints.maxHeight) {
-                                            placeable.placeRelative(0, 0)
-                                        }
-                                    }
-                                    .onGloballyPositioned { topBarBackdropCoordinates = it }
-                                    .layerBackdrop(topBarButtonBackdrop)
-                                    .graphicsLayer {
-                                        this.alpha = (-scrollBehavior.state.contentOffset / 48.dp.toPx()).coerceIn(0f, 1f) * searchBarAlpha.value
-                                    }
-                                    .progressiveTextureBlur(
-                                        backdrop = backdrop,
-                                        shape = RectangleShape,
-                                        gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
-                                        blurRadius = 80f,
-                                        colors = blurColors,
-                                    ),
-                            )
-                        }
-                        GlassTopAppBar(
-                            title = "Glass",
-                            contentModifier = Modifier.glassSearchBarTransition(searchExpanded, barAlpha = { searchBarAlpha.value }),
-                            titleAlpha = rememberGlassSearchTitleAlpha(searchExpanded, scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit),
-                            isContentScrolled = contentUnderTopBar,
-                            backdrop = backdrop,
-                            scrollBehavior = scrollBehavior,
-                            bandBrush = if (progressiveTopBarBlur) {
-                                SolidColor(Color.Transparent)
-                            } else {
-                                GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface)
-                            },
-                            style = style,
-                            alpha = alpha,
-                            stroke = stroke,
-                            navigationIcon = {
+                    GlassTopAppBar(
+                        title = "Glass",
+                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded, barAlpha = { searchBarAlpha.value }),
+                        titleAlpha = rememberGlassSearchTitleAlpha(searchExpanded, scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit),
+                        isContentScrolled = contentUnderTopBar,
+                        backdrop = backdrop,
+                        scrollBehavior = scrollBehavior,
+                        progressiveBlur = progressiveTopBarBlur,
+                        material = material ?: GlassTopAppBarDefaults.buttonMaterial(),
+                        backgroundAlpha = { searchBarAlpha.value },
+                        style = style,
+                        alpha = alpha,
+                        stroke = stroke,
+                        navigationIcon = {
+                            GlassIconButton(
+                                onClick = { navigator.pop() },
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.Glass.ChevronBackward,
+                                    contentDescription = "Back",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MiuixTheme.colorScheme.onSurface,
+                                )
+                            }
+                        },
+                        actions = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 GlassIconButton(
-                                    onClick = { navigator.pop() },
-                                    inheritTopBarMaterial = !progressiveTopBarBlur,
-                                    backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
-                                    material = material,
+                                    onClick = openSearch,
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Glass.ChevronBackward,
-                                        contentDescription = "Back",
+                                        imageVector = MiuixIcons.Glass.Search,
+                                        contentDescription = "Search",
                                         modifier = Modifier.size(24.dp),
                                         tint = MiuixTheme.colorScheme.onSurface,
                                     )
                                 }
-                            },
-                            actions = {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    GlassIconButton(
-                                        onClick = openSearch,
-                                        inheritTopBarMaterial = !progressiveTopBarBlur,
-                                        backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
-                                        material = material,
-                                    ) {
-                                        Icon(
-                                            imageVector = MiuixIcons.Glass.Search,
-                                            contentDescription = "Search",
-                                            modifier = Modifier.size(24.dp),
-                                            tint = MiuixTheme.colorScheme.onSurface,
-                                        )
-                                    }
-                                    GlassIconButton(
-                                        onClick = {
-                                            submenu = false
-                                            overlayIndex = OVERLAY_POPUP
-                                        },
-                                        modifier = Modifier.glassPopupAnchor(
-                                            anchor = menuAnchor,
-                                            cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
-                                            floating = contentUnderTopBar,
-                                        ),
-                                        inheritTopBarMaterial = !progressiveTopBarBlur,
-                                        backdrop = topBarButtonBackdrop.takeIf { progressiveTopBarBlur },
-                                        material = material,
-                                    ) {
-                                        Icon(
-                                            imageVector = MiuixIcons.Glass.Settings,
-                                            contentDescription = "Sort",
-                                            modifier = Modifier.size(24.dp).glassPopupAnchorContent(menuAnchor),
-                                            tint = MiuixTheme.colorScheme.onSurface,
-                                        )
-                                    }
-                                }
-                            },
-                            bottomContent = {
-                                if (tabsInTopBar) {
-                                    tabRows(
-                                        Modifier
-                                            .padding(horizontal = horizontalPadding).padding(bottom = 6.dp)
-                                            .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
+                                GlassIconButton(
+                                    onClick = {
+                                        submenu = false
+                                        overlayIndex = OVERLAY_POPUP
+                                    },
+                                    modifier = Modifier.glassPopupAnchor(
+                                        anchor = menuAnchor,
+                                        cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
+                                        floating = contentUnderTopBar,
+                                    ),
+                                ) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Glass.Settings,
+                                        contentDescription = "Sort",
+                                        modifier = Modifier.size(24.dp).glassPopupAnchorContent(menuAnchor),
+                                        tint = MiuixTheme.colorScheme.onSurface,
                                     )
                                 }
-                            },
-                        )
-                    }
+                            }
+                        },
+                        bottomContent = {
+                            if (tabsInTopBar) {
+                                tabRows(
+                                    Modifier
+                                        .padding(horizontal = horizontalPadding).padding(bottom = 6.dp)
+                                        .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
+                                )
+                            }
+                        },
+                    )
                 },
             ) { innerPadding ->
                 GlassDialog(
@@ -587,7 +493,7 @@ fun GlassPage(padding: PaddingValues) {
                                 ) {
                                     GlassDropdownPreference(
                                         title = "Material",
-                                        items = Materials.map { it.first },
+                                        items = GlassDemoDefaults.MaterialNames,
                                         selectedIndex = materialIndex,
                                         onSelectedIndexChange = { materialIndex = it },
                                         backdrop = backdrop,
@@ -595,7 +501,7 @@ fun GlassPage(padding: PaddingValues) {
                                     )
                                     GlassDropdownPreference(
                                         title = "Bloom Stroke",
-                                        items = Strokes.map { it.first },
+                                        items = GlassDemoDefaults.StrokeNames,
                                         selectedIndex = strokeIndex,
                                         onSelectedIndexChange = { strokeIndex = it },
                                         backdrop = backdrop,
