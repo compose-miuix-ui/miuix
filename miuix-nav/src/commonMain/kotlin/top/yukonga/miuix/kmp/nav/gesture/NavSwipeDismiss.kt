@@ -303,6 +303,9 @@ internal fun Modifier.navSwipeDismissImpl(
                 }
                 velocityTracker.addPosition(change.uptimeMillis, change.position)
                 if (!change.pressed) {
+                    // Compose represents platform cancellation as an already-consumed release.
+                    // It must never commit, even before predictive back acquires the driver.
+                    forceCancel = change.isConsumed
                     event.changes.forEach { it.consume() }
                     break
                 }
