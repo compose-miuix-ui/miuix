@@ -118,6 +118,7 @@ private fun SuperBottomSheetDemo(
         show = show,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
+        dimColor = MiuixTheme.colorScheme.windowDimming.copy(alpha = 0.2f),
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         startAction = {

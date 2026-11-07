@@ -3,11 +3,10 @@
 `miuix-blur` is a standalone blur effect library for Compose Multiplatform. It provides backdrop blur, color blending, and texture effects via Modifier extensions. The library supports Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
 
 ::: warning
-On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. All
-effects (blur, blend, noise, highlight) rely on `RuntimeShader`, which is only
-available from API 33. Apps with a lower `minSdk` that still want to include
-this library should gate blur-related code paths with [the capability checks
-described below](#runtime-capability-checks).
+On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. Blur,
+blend, noise and highlight effects rely on `RuntimeShader`, which is available
+from API 33. Runtime capability checks do not lower the Android artifact's
+minimum SDK requirement.
 :::
 
 ## Setup
@@ -32,26 +31,11 @@ dependencies {
 }
 ```
 
-## Platform Support
+## Runtime capability checks
 
-| Platform      | Minimum Requirement |
-| ------------- | ------------------- |
-| Android       | API 33 (Android 13) |
-| Desktop (JVM) | Supported           |
-| iOS / macOS   | Supported           |
-| WasmJs / Js   | Supported           |
-
-Blur is implemented as a separable Gaussian `RuntimeShader` wrapped in a
-`RenderEffect`. On Android, `RuntimeShader` was introduced in API 33, so that
-is the hard floor for the entire library — including blend, noise, and
-highlight effects.
-
-### Runtime capability checks
-
-If your app has a lower `minSdk` than `miuix-blur` and you want to keep
-shipping a single APK, gate blur usage with the capability checks below.
-On Android they map to `Build.VERSION.SDK_INT` comparisons; on Skiko-based
-targets (Desktop, iOS, macOS, Web) they always return `true`.
+Use the checks below to inspect runtime effect support. On Android they map to
+`Build.VERSION.SDK_INT` comparisons; on Skiko-based targets (Desktop, iOS,
+macOS, Web) they always return `true`.
 
 ```kotlin
 import top.yukonga.miuix.kmp.shader.isRenderEffectSupported

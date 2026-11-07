@@ -112,6 +112,8 @@ import kotlin.math.abs
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param topInset Optional top inset override. If null, calculated from window insets.
+ * @param dimColor The unanimated dimming color.
+ * @param surface Optional replacement for the default surface, including the overscroll fill.
  * @param content The content of the bottom sheet.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -136,6 +138,8 @@ internal fun BottomSheetContentLayout(
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     topInset: Dp? = null,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -175,6 +179,18 @@ internal fun BottomSheetContentLayout(
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dimAlpha = remember { mutableFloatStateOf(1f) }
+    val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, animationProgress) {
+        derivedStateOf {
+            if (enableWindowDim) {
+                dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * animationProgress.value).coerceIn(0f, 1f))
+            } else {
+                Color.Transparent
+            }
+        }
+    }
+    val surfaceScope = remember(cornerRadius, scrimColor) {
+        BottomSheetSurfaceScope(cornerRadius, scrimColor, isOverscroll = false)
+    }
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
@@ -237,12 +253,11 @@ internal fun BottomSheetContentLayout(
         }
 
         if (enableWindowDim) {
-            val baseColor = MiuixTheme.colorScheme.windowDimming
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .drawBehind {
-                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * animationProgress.value))
+                        drawRect(scrimColor.value)
                     },
             )
         }
@@ -304,6 +319,13 @@ internal fun BottomSheetContentLayout(
                 modifier = sheetModifier,
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
+                surface = surface?.let { sheetSurface -> { sheetSurface(surfaceScope) } },
+                overscrollSurface = surface?.let { sheetSurface ->
+                    {
+                        val scope = remember(scrimColor) { BottomSheetSurfaceScope(0.dp, scrimColor, isOverscroll = true) }
+                        sheetSurface(scope)
+                    }
+                },
                 startAction = startAction?.let { action ->
                     { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
                 },
@@ -342,6 +364,8 @@ internal fun BottomSheetContent(
     enableNestedScroll: Boolean = true,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
+    surface: (@Composable () -> Modifier)? = null,
+    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -567,6 +591,8 @@ internal fun BottomSheetContent(
         onSettle = performSettle,
         onUpdateAlpha = updateDimAlpha,
         modifier = modifier,
+        surface = surface,
+        overscrollSurface = overscrollSurface,
         content = content,
     )
 }
@@ -596,6 +622,8 @@ private fun BottomSheetColumn(
     onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    surface: (@Composable () -> Modifier)? = null,
+    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -610,6 +638,7 @@ private fun BottomSheetColumn(
             sheetMaxWidth = sheetMaxWidth,
             outsideMargin = outsideMargin,
             backgroundColor = backgroundColor,
+            surface = overscrollSurface,
         )
 
         Column(
@@ -630,12 +659,14 @@ private fun BottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .squircleSurface(
-                    color = backgroundColor,
-                    topStart = cornerRadius,
-                    topEnd = cornerRadius,
-                    bottomEnd = 0.dp,
-                    bottomStart = 0.dp,
+                .then(
+                    surface?.invoke() ?: Modifier.squircleSurface(
+                        color = backgroundColor,
+                        topStart = cornerRadius,
+                        topEnd = cornerRadius,
+                        bottomEnd = 0.dp,
+                        bottomStart = 0.dp,
+                    ),
                 )
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
@@ -674,6 +705,7 @@ private fun BoxScope.OverscrollBackground(
     sheetMaxWidth: Dp,
     outsideMargin: DpSize,
     backgroundColor: Color,
+    surface: (@Composable () -> Modifier)? = null,
 ) {
     val density = LocalDensity.current
     val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
@@ -685,7 +717,7 @@ private fun BoxScope.OverscrollBackground(
                 .fillMaxWidth()
                 .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
                 .padding(horizontal = outsideMargin.width)
-                .background(backgroundColor),
+                .then(surface?.invoke() ?: Modifier.background(backgroundColor)),
         )
     }
 }

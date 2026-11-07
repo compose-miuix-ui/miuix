@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
+import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 
 /**
@@ -41,6 +43,9 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
  *   for the centered presentation, or derived from the screen corner radius (clamped to
  *   32dp..48dp) when bottom-attached.
+ * @param dimColor The dimming color before the host's animation is applied.
+ * @param surface Optional surface replacing the default background and clip. It receives the
+ *   resolved radius and animated scrim/scale state; apply its modifier before content padding.
  * @param content The [Composable] content of the [OverlayDialog].
  */
 @Composable
@@ -62,6 +67,8 @@ fun OverlayDialog(
     maxWidth: Dp = DialogDefaults.MaxWidth,
     largeScreen: Boolean? = null,
     cornerRadius: Dp? = null,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    surface: (@Composable DialogSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     DialogContentLayout(
@@ -95,6 +102,8 @@ fun OverlayDialog(
         maxWidth = maxWidth,
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
+        dimColor = dimColor,
+        surface = surface,
         content = content,
     )
 }
