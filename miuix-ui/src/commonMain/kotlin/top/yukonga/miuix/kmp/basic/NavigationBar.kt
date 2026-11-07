@@ -290,7 +290,7 @@ fun FloatingNavigationBar(
         Platform.IOS -> 36.dp
 
         else -> {
-            if (navBarBottomPadding != 0.dp) 26.dp + navBarBottomPadding else 36.dp
+            if (navBarBottomPadding != 0.dp) 16.dp + navBarBottomPadding else 32.dp
         }
     }
 
@@ -525,12 +525,6 @@ object FloatingNavigationBarDefaults {
 
     /** The padding around the icon in [FloatingNavigationBar]. */
     val IconPadding = 10.dp
-
-    /** The alpha value for the selected item when pressed. */
-    val SelectedPressedAlpha = 0.5f
-
-    /** The alpha value for an unselected item when pressed. */
-    val UnselectedPressedAlpha = 0.6f
 
     /** The alpha value for an unselected item. */
     val UnselectedAlpha = 0.4f

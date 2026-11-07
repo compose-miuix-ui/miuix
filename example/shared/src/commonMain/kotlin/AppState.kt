@@ -15,6 +15,8 @@ data class AppState(
     // UI
     val showFPSMonitor: Boolean = false,
     val showTopAppBar: Boolean = true,
+    val topAppBarStyle: Int = 0,
+    val glassTopBarProgressiveBlur: Boolean = true,
     val showNavigationBar: Boolean = true,
     val showNavigationBarBadge: Boolean = false,
     val navigationBarMode: Int = 0,
@@ -38,7 +40,6 @@ data class AppState(
     val enableSquircle: Boolean = true,
     // Blur
     val enableBlur: Boolean = true,
-    val blurStyle: Int = 0,
 )
 
 val LocalAppState = compositionLocalOf<AppState> {

@@ -21,11 +21,14 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.captionBarPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -99,6 +102,8 @@ import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassNavigationBar
+import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -186,6 +191,7 @@ fun AppContent(
     MainScreenBackHandler(mainPagerState, navigator)
 
     val isWideScreen = shouldShowSplitPane()
+    val hasNavigationRail = isWideScreen && appState.showNavigationBar
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
@@ -249,7 +255,7 @@ fun AppContent(
         // Keep NavDisplay at one composition location while adaptive chrome changes around it.
         // Otherwise switching between the compact and wide branches recreates the current route.
         Row(modifier = Modifier.fillMaxSize()) {
-            if (isWideScreen && appState.showNavigationBar) {
+            if (hasNavigationRail) {
                 PersistentNavigationRail(
                     navigationItems = navigationItems,
                     mainPagerState = mainPagerState,
@@ -259,6 +265,19 @@ fun AppContent(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    // The sibling rail already offsets this pane past the start-side safe area.
+                    // Share that consumption so page bars do not add the same inset again.
+                    .then(
+                        if (hasNavigationRail) {
+                            Modifier.consumeWindowInsets(
+                                WindowInsets.displayCutout
+                                    .union(WindowInsets.navigationBars)
+                                    .only(WindowInsetsSides.Start),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
                     // Wide-screen transition layers must not draw over the navigation rail.
                     .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
             ) {
@@ -338,6 +357,9 @@ private fun AppNavHost(
         }
         entry<Route.OverscrollLoadMore>(swipeDismiss = swipeBackDirection) {
             OverscrollLoadMorePage(padding = padding)
+        }
+        entry<Route.Glass>(swipeDismiss = swipeBackDirection) {
+            GlassPage(padding = padding)
         }
     }
 }
@@ -589,44 +611,63 @@ private fun NavigationBar(
                 if (isDark) Highlight.GlassStrokeMiddleDark else Highlight.GlassStrokeMiddleLight
             }
             Box(modifier = modifier) {
-                if (appState.floatingNavigationBarStyle == 1) {
-                    IosLiquidGlassNavigationBar(
-                        items = navigationItems,
-                        selectedIndex = page,
-                        onItemClick = { mainPagerState.animateToPage(it) },
-                        backdrop = backdrop,
-                        isBlurActive = blurActive,
-                        badge = { navigationItemBadge(it, appState.showNavigationBarBadge) },
-                    )
-                } else {
-                    FloatingNavigationBar(
-                        modifier = if (blurActive) {
-                            Modifier.textureBlur(
-                                backdrop = backdrop,
-                                shape = floatingBarShape,
-                                blurRadius = 25f,
-                                colors = BlurDefaults.blurColors(
-                                    blendColors = listOf(
-                                        BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                when (appState.floatingNavigationBarStyle) {
+                    1 -> {
+                        val glassItems = remember(navigationItems) {
+                            navigationItems.map { GlassNavigationItem(icon = it.icon, label = it.label) }
+                        }
+                        GlassNavigationBar(
+                            items = glassItems,
+                            selectedIndex = page,
+                            onSelect = { mainPagerState.animateToPage(it) },
+                            backdrop = if (blurActive) backdrop else null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                        )
+                    }
+
+                    2 -> {
+                        IosLiquidGlassNavigationBar(
+                            items = navigationItems,
+                            selectedIndex = page,
+                            onItemClick = { mainPagerState.animateToPage(it) },
+                            backdrop = backdrop,
+                            isBlurActive = blurActive,
+                            badge = { navigationItemBadge(it, appState.showNavigationBarBadge) },
+                        )
+                    }
+
+                    else -> {
+                        FloatingNavigationBar(
+                            modifier = if (blurActive) {
+                                Modifier.textureBlur(
+                                    backdrop = backdrop,
+                                    shape = floatingBarShape,
+                                    blurRadius = 25f,
+                                    colors = BlurDefaults.blurColors(
+                                        blendColors = listOf(
+                                            BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                                        ),
                                     ),
-                                ),
-                                highlight = floatingHighlight,
-                            )
-                        } else {
-                            Modifier
-                        },
-                        color = floatingBarColor,
-                        horizontalAlignment = FloatingNavigationBarAlignment.fromInt(appState.floatingNavigationBarPosition)
-                            .toAlignment(),
-                    ) {
-                        navigationItems.forEachIndexed { index, item ->
-                            FloatingNavigationBarItem(
-                                selected = page == index,
-                                onClick = { mainPagerState.animateToPage(index) },
-                                icon = item.icon,
-                                label = item.label,
-                                badge = navigationItemBadge(index, appState.showNavigationBarBadge),
-                            )
+                                    highlight = floatingHighlight,
+                                )
+                            } else {
+                                Modifier
+                            },
+                            color = floatingBarColor,
+                            horizontalAlignment = FloatingNavigationBarAlignment.fromInt(appState.floatingNavigationBarPosition)
+                                .toAlignment(),
+                        ) {
+                            navigationItems.forEachIndexed { index, item ->
+                                FloatingNavigationBarItem(
+                                    selected = page == index,
+                                    onClick = { mainPagerState.animateToPage(index) },
+                                    icon = item.icon,
+                                    label = item.label,
+                                    badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+                                )
+                            }
                         }
                     }
                 }

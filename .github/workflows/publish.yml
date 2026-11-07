@@ -10,6 +10,8 @@ on:
       - "miuix-preference/**"
       - "miuix-shader/**"
       - "miuix-blur/**"
+      - "miuix-glass/**"
+      - "miuix-glass-icons/**"
       - "miuix-squircle/**"
       - "miuix-icons/**"
       - "miuix-nav/**"
