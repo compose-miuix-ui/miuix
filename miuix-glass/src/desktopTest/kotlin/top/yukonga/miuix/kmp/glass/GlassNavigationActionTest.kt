@@ -42,6 +42,39 @@ import kotlin.test.assertTrue
 class GlassNavigationActionTest {
 
     @Test
+    fun actionRemovalAnimatesReservedWidthAndCanReverse() = runComposeUiTest {
+        val showAction = mutableStateOf(true)
+        setContent {
+            GlassNavigationBarLayout(
+                modifier = Modifier.width(360.dp),
+                trailingAction = if (showAction.value) {
+                    { Box(Modifier.size(54.dp).testTag("animated-action")) }
+                } else {
+                    null
+                },
+            ) {
+                Box(Modifier.size(360.dp, 54.dp).testTag("animated-capsule"))
+            }
+        }
+        fun capsuleWidth() = onNodeWithTag("animated-capsule").fetchSemanticsNode().boundsInRoot.width
+        val initial = capsuleWidth()
+        mainClock.autoAdvance = false
+        runOnIdle { showAction.value = false }
+        mainClock.advanceTimeByFrame()
+        mainClock.advanceTimeBy(80)
+        val middle = capsuleWidth()
+        assertTrue(middle > initial, "The capsule must expand during action exit")
+        onNodeWithTag("animated-action").assertDoesNotExist()
+        runOnIdle { showAction.value = true }
+        mainClock.advanceTimeBy(1500)
+        assertEquals(initial, capsuleWidth(), 1f)
+        runOnIdle { showAction.value = false }
+        mainClock.advanceTimeBy(1500)
+        assertTrue(capsuleWidth() > middle, "The capsule must finish expanding after exit")
+        onNodeWithTag("animated-action").assertDoesNotExist()
+    }
+
+    @Test
     fun windowInsetPaddingMovesTheWholeGroupWithoutStretchingItsSurfaces() = runComposeUiTest {
         val applyInsets = mutableStateOf(true)
         setContent {

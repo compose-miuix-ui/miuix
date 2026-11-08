@@ -82,7 +82,7 @@ GlassNavigationBar(
 | indicatorPressedColor | Color | 按下时的指示器填充色 | GlassNavigationBarDefaults.indicatorPressedColor() | 否 |
 | selectedColor | Color | 选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
 | unselectedColor | Color | 未选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
-| trailingAction | (@Composable () -> Unit)? | 胶囊外部的独立操作 | null | 否 |
+| trailingAction | (@Composable () -> Unit)? | 胶囊外的独立操作；添加或移除时平滑调整缩放、透明度、胶囊宽度和间距 | null | 否 |
 
 ### GlassNavigationItem 属性 {#glassnavigationitem}
 
@@ -100,7 +100,7 @@ GlassNavigationBar(
 | --- | --- | --- | --- |
 | Height | Dp | 胶囊最小高度 | 54.dp |
 | ActionSpacing | Dp | 胶囊与尾部操作之间的间距 | 12.dp |
-| IconSize | Dp | 目的地图标尺寸 | 28.dp |
+| IconSize | Dp | 目的地图标尺寸 | 25.dp |
 | LabelSize | Dp | 按当前密度转换为 sp 的标签字号 | 11.dp |
 | LargeLabelSize | Dp | 字体缩放至少为 1.6 时的标签字号 | 16.dp |
 | ContentPaddingVertical | Dp | 图标与标签组合的垂直内边距 | 6.dp |
