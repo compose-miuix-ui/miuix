@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.Filter: ImageVector
         if (_filterLight != null) return _filterLight!!
         _filterLight = ImageVector.Builder(
             name = "Filter.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(583.0f, 146.1f),
@@ -126,13 +126,13 @@ val MiuixIcons.Glass.Normal.Filter: ImageVector
         if (_filterNormal != null) return _filterNormal!!
         _filterNormal = ImageVector.Builder(
             name = "Filter.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(596.7f, 142.5f),
@@ -232,13 +232,13 @@ val MiuixIcons.Glass.Regular.Filter: ImageVector
         if (_filterRegular != null) return _filterRegular!!
         _filterRegular = ImageVector.Builder(
             name = "Filter.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(602.9f, 140.9f),
@@ -338,13 +338,13 @@ val MiuixIcons.Glass.Medium.Filter: ImageVector
         if (_filterMedium != null) return _filterMedium!!
         _filterMedium = ImageVector.Builder(
             name = "Filter.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(611.1f, 140.8f),
@@ -444,13 +444,13 @@ val MiuixIcons.Glass.Demibold.Filter: ImageVector
         if (_filterDemibold != null) return _filterDemibold!!
         _filterDemibold = ImageVector.Builder(
             name = "Filter.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(616.8f, 140.7f),

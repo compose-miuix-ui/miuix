@@ -86,7 +86,7 @@ fun GlassTransformPopupDemo() {
                         Icon(
                             imageVector = MiuixIcons.Glass.More,
                             contentDescription = "Change library view",
-                            modifier = Modifier.size(24.dp).glassPopupAnchorContent(anchor),
+                            modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
                             tint = MiuixTheme.colorScheme.onBackground,
                         )
                     }
@@ -103,7 +103,7 @@ fun GlassTransformPopupDemo() {
                 Icon(
                     imageVector = MiuixIcons.Glass.More,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = MiuixTheme.colorScheme.onBackground,
                 )
             },

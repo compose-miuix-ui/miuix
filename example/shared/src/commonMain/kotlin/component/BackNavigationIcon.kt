@@ -34,7 +34,7 @@ fun BackNavigationIcon(
     button {
         Icon(
             modifier = Modifier
-                .then(if (glassStyle) Modifier.size(24.dp) else Modifier)
+                .then(if (glassStyle) Modifier.size(28.dp) else Modifier)
                 .graphicsLayer {
                     if (layoutDirection == LayoutDirection.Rtl) scaleX = -1f
                 },

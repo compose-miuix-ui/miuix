@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.FileDownloads: ImageVector
         if (_fileDownloadsLight != null) return _fileDownloadsLight!!
         _fileDownloadsLight = ImageVector.Builder(
             name = "FileDownloads.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(939.3f, 137.2f),
@@ -97,13 +97,13 @@ val MiuixIcons.Glass.Normal.FileDownloads: ImageVector
         if (_fileDownloadsNormal != null) return _fileDownloadsNormal!!
         _fileDownloadsNormal = ImageVector.Builder(
             name = "FileDownloads.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(944.2f, 127.7f),
@@ -174,13 +174,13 @@ val MiuixIcons.Glass.Regular.FileDownloads: ImageVector
         if (_fileDownloadsRegular != null) return _fileDownloadsRegular!!
         _fileDownloadsRegular = ImageVector.Builder(
             name = "FileDownloads.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(946.4f, 123.4f),
@@ -251,13 +251,13 @@ val MiuixIcons.Glass.Medium.FileDownloads: ImageVector
         if (_fileDownloadsMedium != null) return _fileDownloadsMedium!!
         _fileDownloadsMedium = ImageVector.Builder(
             name = "FileDownloads.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(950.2f, 116.1f),
@@ -328,13 +328,13 @@ val MiuixIcons.Glass.Demibold.FileDownloads: ImageVector
         if (_fileDownloadsDemibold != null) return _fileDownloadsDemibold!!
         _fileDownloadsDemibold = ImageVector.Builder(
             name = "FileDownloads.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(952.9f, 111.0f),

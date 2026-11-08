@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.ChevronBackward: ImageVector
         if (_chevronBackwardLight != null) return _chevronBackwardLight!!
         _chevronBackwardLight = ImageVector.Builder(
             name = "ChevronBackward.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = true,
         ).apply {
-            group(scaleY = -1.0f, translationX = -85.7f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 9.5417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(313.6f, 555.2f),
@@ -64,13 +64,13 @@ val MiuixIcons.Glass.Normal.ChevronBackward: ImageVector
         if (_chevronBackwardNormal != null) return _chevronBackwardNormal!!
         _chevronBackwardNormal = ImageVector.Builder(
             name = "ChevronBackward.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = true,
         ).apply {
-            group(scaleY = -1.0f, translationX = -85.7f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 9.5417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(305.4f, 552.6f),
@@ -108,13 +108,13 @@ val MiuixIcons.Glass.Regular.ChevronBackward: ImageVector
         if (_chevronBackwardRegular != null) return _chevronBackwardRegular!!
         _chevronBackwardRegular = ImageVector.Builder(
             name = "ChevronBackward.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = true,
         ).apply {
-            group(scaleY = -1.0f, translationX = -85.7f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 9.5417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(301.7f, 551.4f),
@@ -152,13 +152,13 @@ val MiuixIcons.Glass.Medium.ChevronBackward: ImageVector
         if (_chevronBackwardMedium != null) return _chevronBackwardMedium!!
         _chevronBackwardMedium = ImageVector.Builder(
             name = "ChevronBackward.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = true,
         ).apply {
-            group(scaleY = -1.0f, translationX = -85.7f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 9.5417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(296.0f, 545.8f),
@@ -196,13 +196,13 @@ val MiuixIcons.Glass.Demibold.ChevronBackward: ImageVector
         if (_chevronBackwardDemibold != null) return _chevronBackwardDemibold!!
         _chevronBackwardDemibold = ImageVector.Builder(
             name = "ChevronBackward.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = true,
         ).apply {
-            group(scaleY = -1.0f, translationX = -85.7f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 9.5417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(292.0f, 541.9f),

@@ -199,7 +199,7 @@ internal fun GlassSearchOverlay(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(24.dp), tint = colors.disabledOnSurface)
+                            Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = colors.disabledOnSurface)
                             Box(Modifier.weight(1f)) {
                                 if (query.isEmpty()) Text("Search", color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
                                 field()
@@ -209,7 +209,7 @@ internal fun GlassSearchOverlay(
                                     query = ""
                                     focusRequester.requestFocus()
                                 }, modifier = Modifier.size(24.dp)) {
-                                    Icon(MiuixIcons.Glass.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = colors.disabledOnSurface)
+                                    Icon(MiuixIcons.Glass.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp * (7f / 6f)), tint = colors.disabledOnSurface)
                                 }
                             }
                         }
@@ -233,7 +233,7 @@ internal fun GlassSearchOverlay(
                         enabled = expanded,
                         modifier = Modifier.size(44.dp).background(colors.surfaceContainerHigh, CircleShape),
                     ) {
-                        Icon(MiuixIcons.Glass.Close, contentDescription = "Cancel", modifier = Modifier.size(24.dp), tint = colors.onSurface)
+                        Icon(MiuixIcons.Glass.Close, contentDescription = "Cancel", modifier = Modifier.size(28.dp), tint = colors.onSurface)
                     }
                 }
             }

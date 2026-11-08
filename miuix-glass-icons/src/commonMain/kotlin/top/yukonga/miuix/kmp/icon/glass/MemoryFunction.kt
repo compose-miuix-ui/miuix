@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.MemoryFunction: ImageVector
         if (_memoryFunctionLight != null) return _memoryFunctionLight!!
         _memoryFunctionLight = ImageVector.Builder(
             name = "MemoryFunction.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(639.1f, 984.5f),
@@ -162,13 +162,13 @@ val MiuixIcons.Glass.Normal.MemoryFunction: ImageVector
         if (_memoryFunctionNormal != null) return _memoryFunctionNormal!!
         _memoryFunctionNormal = ImageVector.Builder(
             name = "MemoryFunction.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(620.8f, 1005.3f),
@@ -304,13 +304,13 @@ val MiuixIcons.Glass.Regular.MemoryFunction: ImageVector
         if (_memoryFunctionRegular != null) return _memoryFunctionRegular!!
         _memoryFunctionRegular = ImageVector.Builder(
             name = "MemoryFunction.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(612.4f, 1014.7f),
@@ -446,13 +446,13 @@ val MiuixIcons.Glass.Medium.MemoryFunction: ImageVector
         if (_memoryFunctionMedium != null) return _memoryFunctionMedium!!
         _memoryFunctionMedium = ImageVector.Builder(
             name = "MemoryFunction.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(608.9f, 1024.8f),
@@ -588,13 +588,13 @@ val MiuixIcons.Glass.Demibold.MemoryFunction: ImageVector
         if (_memoryFunctionDemibold != null) return _memoryFunctionDemibold!!
         _memoryFunctionDemibold = ImageVector.Builder(
             name = "MemoryFunction.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(606.5f, 1031.8f),

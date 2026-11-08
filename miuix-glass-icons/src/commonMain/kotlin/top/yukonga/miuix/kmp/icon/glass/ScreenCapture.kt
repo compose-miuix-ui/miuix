@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.ScreenCapture: ImageVector
         if (_screenCaptureLight != null) return _screenCaptureLight!!
         _screenCaptureLight = ImageVector.Builder(
             name = "ScreenCapture.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(197.1f, 590.7f),
@@ -161,13 +161,13 @@ val MiuixIcons.Glass.Normal.ScreenCapture: ImageVector
         if (_screenCaptureNormal != null) return _screenCaptureNormal!!
         _screenCaptureNormal = ImageVector.Builder(
             name = "ScreenCapture.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(206.3f, 594.6f),
@@ -302,13 +302,13 @@ val MiuixIcons.Glass.Regular.ScreenCapture: ImageVector
         if (_screenCaptureRegular != null) return _screenCaptureRegular!!
         _screenCaptureRegular = ImageVector.Builder(
             name = "ScreenCapture.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(210.4f, 596.4f),
@@ -443,13 +443,13 @@ val MiuixIcons.Glass.Medium.ScreenCapture: ImageVector
         if (_screenCaptureMedium != null) return _screenCaptureMedium!!
         _screenCaptureMedium = ImageVector.Builder(
             name = "ScreenCapture.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(213.1f, 595.8f),
@@ -584,13 +584,13 @@ val MiuixIcons.Glass.Demibold.ScreenCapture: ImageVector
         if (_screenCaptureDemibold != null) return _screenCaptureDemibold!!
         _screenCaptureDemibold = ImageVector.Builder(
             name = "ScreenCapture.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(215.0f, 595.3f),

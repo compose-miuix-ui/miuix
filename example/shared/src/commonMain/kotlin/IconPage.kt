@@ -202,7 +202,7 @@ fun IconsPage(
                                     imageVector = regularIcons[index],
                                     contentDescription = iconNames[index],
                                     tint = colorScheme.onBackground,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(if (glass) 28.dp else 24.dp),
                                 )
                             },
                             onClick = {
@@ -315,7 +315,7 @@ fun IconsPage(
                                 imageVector = regularIcons[index],
                                 contentDescription = iconNames[index],
                                 tint = colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(if (glass) 28.dp else 24.dp),
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                             Icon(
@@ -341,7 +341,7 @@ fun IconsPage(
                                             imageVector = icons[index],
                                             contentDescription = "${iconNames[index]} ($label)",
                                             tint = colorScheme.onBackground,
-                                            modifier = Modifier.size(28.dp),
+                                            modifier = Modifier.size(if (glass) 28.dp * (7f / 6f) else 28.dp),
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Text(

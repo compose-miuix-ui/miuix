@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.SearchDevice: ImageVector
         if (_searchDeviceLight != null) return _searchDeviceLight!!
         _searchDeviceLight = ImageVector.Builder(
             name = "SearchDevice.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(923.5f, 220.1f),
@@ -93,13 +93,13 @@ val MiuixIcons.Glass.Normal.SearchDevice: ImageVector
         if (_searchDeviceNormal != null) return _searchDeviceNormal!!
         _searchDeviceNormal = ImageVector.Builder(
             name = "SearchDevice.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(929.8f, 213.7f),
@@ -166,13 +166,13 @@ val MiuixIcons.Glass.Regular.SearchDevice: ImageVector
         if (_searchDeviceRegular != null) return _searchDeviceRegular!!
         _searchDeviceRegular = ImageVector.Builder(
             name = "SearchDevice.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(932.6f, 210.8f),
@@ -239,13 +239,13 @@ val MiuixIcons.Glass.Medium.SearchDevice: ImageVector
         if (_searchDeviceMedium != null) return _searchDeviceMedium!!
         _searchDeviceMedium = ImageVector.Builder(
             name = "SearchDevice.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(943.3f, 210.7f),
@@ -312,13 +312,13 @@ val MiuixIcons.Glass.Demibold.SearchDevice: ImageVector
         if (_searchDeviceDemibold != null) return _searchDeviceDemibold!!
         _searchDeviceDemibold = ImageVector.Builder(
             name = "SearchDevice.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(950.8f, 210.6f),

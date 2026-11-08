@@ -72,14 +72,14 @@ import top.yukonga.miuix.kmp.icon.glass.Search
 Icon(
     imageVector = MiuixIcons.Glass.Search,
     contentDescription = "Search",
-    modifier = Modifier.size(24.dp)
+    modifier = Modifier.size(28.dp)
 )
 
 // Use a specific weight (e.g., Light)
 Icon(
     imageVector = MiuixIcons.Glass.Light.Close,
     contentDescription = "Close (Light)",
-    modifier = Modifier.size(24.dp)
+    modifier = Modifier.size(28.dp)
 )
 ```
 
@@ -105,6 +105,10 @@ Two names are worth calling out:
 - Directional icons such as `ChevronBackward`, `ChevronForward` and the reply arrows mirror automatically in RTL layouts.
 
 The icons are cached `ImageVector`s with no runtime font dependency. Tinting and press feedback belong to the consuming button.
+
+Glass icons use a **28 dp canvas**, preserving the native 21 dp symbol font size while leaving room for tall and wide outlines. Use their intrinsic size, or `Modifier.size(28.dp)`, inside a standard 44 dp glass toolbar button. The original icon family continues to use a 24 dp canvas.
+
+When migrating existing Glass icons, replace `Modifier.size(24.dp)` with `Modifier.size(28.dp)` to retain the previous glyph scale and reveal clipped edges. For other explicit sizes, multiply by `28f / 24f` to retain the previous glyph scale. Keeping an explicit 24 dp size now renders a smaller, complete glyph.
 
 ## Available Icons
 

@@ -147,7 +147,7 @@ backdrop 非 null 时使用材质或样式模糊。`material = null` 会移除�
 | `ItemMinHeight` | `Dp` | 菜单行最小高度 | `44.dp` |
 | `ItemPaddingHorizontal` | `Dp` | 菜单行水平内边距 | `20.dp` |
 | `ItemPaddingVertical` | `Dp` | 菜单行垂直内边距 | `10.dp` |
-| `ItemIconSize` | `Dp` | 前置图标大小 | `24.dp` |
+| `ItemIconSize` | `Dp` | 前置图标的最小尺寸，保留更大的固有尺寸 | `24.dp` |
 | `ItemIconGap` | `Dp` | 菜单行图标间距 | `8.dp` |
 | `ItemTickSize` | `Dp` | 选中勾大小 | `24.dp` |
 | `ItemArrowSize` | `Dp` | 子菜单箭头大小 | `16.dp` |

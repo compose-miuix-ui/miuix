@@ -28,10 +28,11 @@ GlassIconButton(
     Icon(
         imageVector = actionIcon,
         contentDescription = "Search",
-        modifier = Modifier.size(24.dp),
     )
 }
 ```
+
+Glass icons use a 28 dp canvas. Omit the icon size modifier to use its intrinsic size, or specify `Modifier.size(28.dp)`; the button diameter remains 44 dp. Original icons retain their 24 dp default.
 
 ## Properties
 

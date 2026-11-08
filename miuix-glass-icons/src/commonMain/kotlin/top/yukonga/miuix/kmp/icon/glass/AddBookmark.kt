@@ -20,13 +20,13 @@ val MiuixIcons.Glass.Light.AddBookmark: ImageVector
         if (_addBookmarkLight != null) return _addBookmarkLight!!
         _addBookmarkLight = ImageVector.Builder(
             name = "AddBookmark.Glass.Light",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(444.0f, 154.9f),
@@ -138,13 +138,13 @@ val MiuixIcons.Glass.Normal.AddBookmark: ImageVector
         if (_addBookmarkNormal != null) return _addBookmarkNormal!!
         _addBookmarkNormal = ImageVector.Builder(
             name = "AddBookmark.Glass.Normal",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(448.8f, 147.5f),
@@ -256,13 +256,13 @@ val MiuixIcons.Glass.Regular.AddBookmark: ImageVector
         if (_addBookmarkRegular != null) return _addBookmarkRegular!!
         _addBookmarkRegular = ImageVector.Builder(
             name = "AddBookmark.Glass.Regular",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(450.9f, 144.1f),
@@ -374,13 +374,13 @@ val MiuixIcons.Glass.Medium.AddBookmark: ImageVector
         if (_addBookmarkMedium != null) return _addBookmarkMedium!!
         _addBookmarkMedium = ImageVector.Builder(
             name = "AddBookmark.Glass.Medium",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(455.0f, 137.1f),
@@ -492,13 +492,13 @@ val MiuixIcons.Glass.Demibold.AddBookmark: ImageVector
         if (_addBookmarkDemibold != null) return _addBookmarkDemibold!!
         _addBookmarkDemibold = ImageVector.Builder(
             name = "AddBookmark.Glass.Demibold",
-            defaultWidth = 24.0f.dp,
-            defaultHeight = 24.0f.dp,
-            viewportWidth = 1142.9f,
-            viewportHeight = 1142.9f,
+            defaultWidth = 28.0f.dp,
+            defaultHeight = 28.0f.dp,
+            viewportWidth = 1333.3833f,
+            viewportHeight = 1333.3833f,
             autoMirror = false,
         ).apply {
-            group(scaleY = -1.0f, translationX = 0.0f, translationY = 1142.9f) {
+            group(scaleY = -1.0f, translationX = 95.2417f, translationY = 1238.1417f) {
                 addPath(
                     pathData = listOf(
                         PathNode.MoveTo(457.8f, 132.2f),

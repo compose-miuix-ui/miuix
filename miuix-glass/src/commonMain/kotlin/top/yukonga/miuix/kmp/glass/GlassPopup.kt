@@ -371,7 +371,10 @@ fun GlassPopupItem(
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = GlassPopupDefaults.ItemIconGap)
-                    .size(GlassPopupDefaults.ItemIconSize),
+                    .size(
+                        width = maxOf(GlassPopupDefaults.ItemIconSize, icon.defaultWidth),
+                        height = maxOf(GlassPopupDefaults.ItemIconSize, icon.defaultHeight),
+                    ),
                 tint = color,
             )
         }

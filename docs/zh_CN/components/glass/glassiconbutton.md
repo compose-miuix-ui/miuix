@@ -28,10 +28,11 @@ GlassIconButton(
     Icon(
         imageVector = actionIcon,
         contentDescription = "搜索",
-        modifier = Modifier.size(24.dp),
     )
 }
 ```
+
+Glass 图标使用 28 dp 画布。省略图标的尺寸修饰符即可采用固有尺寸，也可指定 `Modifier.size(28.dp)`；按钮直径仍为 44 dp。原有图标默认尺寸仍为 24 dp。
 
 ## 属性
 

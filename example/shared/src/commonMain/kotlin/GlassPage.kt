@@ -293,7 +293,7 @@ fun GlassPage(padding: PaddingValues) {
                                         Icon(
                                             imageVector = MiuixIcons.Glass.Search,
                                             contentDescription = "Search",
-                                            modifier = Modifier.size(24.dp),
+                                            modifier = Modifier.size(28.dp),
                                             tint = MiuixTheme.colorScheme.onSurface,
                                         )
                                     }
@@ -325,7 +325,7 @@ fun GlassPage(padding: PaddingValues) {
                                 Icon(
                                     imageVector = MiuixIcons.Glass.ChevronBackward,
                                     contentDescription = "Back",
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(28.dp),
                                     tint = MiuixTheme.colorScheme.onSurface,
                                 )
                             }
@@ -338,7 +338,7 @@ fun GlassPage(padding: PaddingValues) {
                                     Icon(
                                         imageVector = MiuixIcons.Glass.Search,
                                         contentDescription = "Search",
-                                        modifier = Modifier.size(24.dp),
+                                        modifier = Modifier.size(28.dp),
                                         tint = MiuixTheme.colorScheme.onSurface,
                                     )
                                 }
@@ -356,7 +356,7 @@ fun GlassPage(padding: PaddingValues) {
                                     Icon(
                                         imageVector = MiuixIcons.Glass.Settings,
                                         contentDescription = "Sort",
-                                        modifier = Modifier.size(24.dp).glassPopupAnchorContent(menuAnchor),
+                                        modifier = Modifier.size(28.dp).glassPopupAnchorContent(menuAnchor),
                                         tint = MiuixTheme.colorScheme.onSurface,
                                     )
                                 }
@@ -580,7 +580,7 @@ fun GlassPage(padding: PaddingValues) {
                     Icon(
                         imageVector = MiuixIcons.Glass.Settings,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = MiuixTheme.colorScheme.onSurface,
                     )
                 },

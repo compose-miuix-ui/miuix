@@ -147,7 +147,7 @@ With a non-null backdrop, the popup uses material or style blur. `material = nul
 | `ItemMinHeight` | `Dp` | Minimum row height | `44.dp` |
 | `ItemPaddingHorizontal` | `Dp` | Row horizontal padding | `20.dp` |
 | `ItemPaddingVertical` | `Dp` | Row vertical padding | `10.dp` |
-| `ItemIconSize` | `Dp` | Leading icon size | `24.dp` |
+| `ItemIconSize` | `Dp` | Minimum leading icon size; larger intrinsic dimensions are preserved | `24.dp` |
 | `ItemIconGap` | `Dp` | Gap around row icons | `8.dp` |
 | `ItemTickSize` | `Dp` | Selection tick size | `24.dp` |
 | `ItemArrowSize` | `Dp` | Submenu arrow size | `16.dp` |

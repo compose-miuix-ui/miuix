@@ -72,14 +72,14 @@ import top.yukonga.miuix.kmp.icon.glass.Search
 Icon(
     imageVector = MiuixIcons.Glass.Search,
     contentDescription = "Search",
-    modifier = Modifier.size(24.dp)
+    modifier = Modifier.size(28.dp)
 )
 
 // 使用特定粗细 (例如 Light)
 Icon(
     imageVector = MiuixIcons.Glass.Light.Close,
     contentDescription = "Close (Light)",
-    modifier = Modifier.size(24.dp)
+    modifier = Modifier.size(28.dp)
 )
 ```
 
@@ -105,6 +105,10 @@ Glass 图标使用同样的五种粗细，只是多一层命名空间：`MiuixIc
 - `ChevronBackward`、`ChevronForward` 以及回复类箭头等方向性图标会在 RTL 布局中自动镜像。
 
 这些图标是带缓存的 `ImageVector`，没有运行时字体依赖。着色和按压反馈由使用它的按钮负责。
+
+Glass 图标使用 **28 dp 画布**，保持原生 21 dp 字号对应的图形大小，并为较高、较宽的轮廓留出空间。在标准 44 dp 玻璃顶栏按钮中，请使用图标固有尺寸，或指定 `Modifier.size(28.dp)`。原有图标系列仍使用 24 dp 画布。
+
+迁移已有 Glass 图标时，将 `Modifier.size(24.dp)` 改为 `Modifier.size(28.dp)`，可保持原有图形比例并显示此前被裁切的边缘。其他显式尺寸可乘以 `28f / 24f` 保持原有图形大小。继续指定 24 dp 会得到缩小但完整的图形。
 
 ## 可用图标
 
