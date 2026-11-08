@@ -10,6 +10,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -58,7 +59,7 @@ internal fun GlassNavigationBarLayout(
             Box(propagateMinConstraints = true) { content() }
             if (presentedAction != null) {
                 Box(
-                    Modifier.graphicsLayer {
+                    Modifier.focusProperties { canFocus = trailingAction != null }.graphicsLayer {
                         // Preserve the icon button shadow outside the offscreen alpha layer.
                         outsets = shadowOutsets
                         val fraction = actionProgress.value.coerceIn(0f, 1f)
