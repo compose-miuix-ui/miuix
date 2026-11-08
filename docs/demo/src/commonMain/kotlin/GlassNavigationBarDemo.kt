@@ -80,17 +80,21 @@ fun GlassNavigationBarDemo() {
                             modifier = Modifier
                                 .padding(16.dp)
                                 .fillMaxWidth(),
-                            trailingAction = {
-                                GlassIconButton(
-                                    onClick = { searchCount++ },
-                                    backdrop = backdrop,
-                                ) {
-                                    Icon(
-                                        imageVector = MiuixIcons.Glass.Search,
-                                        contentDescription = "Search current page",
-                                        tint = MiuixTheme.colorScheme.onBackground,
-                                    )
+                            trailingAction = if (selectedIndex != 2) {
+                                {
+                                    GlassIconButton(
+                                        onClick = { searchCount++ },
+                                        backdrop = backdrop,
+                                    ) {
+                                        Icon(
+                                            imageVector = MiuixIcons.Glass.Search,
+                                            contentDescription = "Search current page",
+                                            tint = MiuixTheme.colorScheme.onBackground,
+                                        )
+                                    }
                                 }
+                            } else {
+                                null
                             },
                         )
                     },
