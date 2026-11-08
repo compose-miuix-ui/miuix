@@ -6,9 +6,6 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -27,14 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -56,8 +46,6 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -194,7 +182,7 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param bandBrush Gradient that dims content passing beneath the bar.
  * @param bandOverhang Distance the gradient extends beyond the bar.
  * @param style Glass style forwarded to the renderer.
- * @param alpha Opacity multiplier for button pills.
+ * @param alpha Opacity multiplier for button colour layers and stroke.
  * @param buttonShape Button-pill silhouette.
  * @param buttonSize Button-pill diameter.
  * @param buttonShadow Shadow beneath button pills; `null` disables it.
@@ -418,218 +406,6 @@ fun GlassTopAppBar(
                 actions = actions,
                 bottomContent = bottomContent,
             )
-        }
-    }
-}
-
-/**
- * A round glass button for a top-bar leading or trailing control.
- *
- * @param onClick Called when the button is tapped.
- * @param backdrop Optional backdrop. Inside [GlassTopAppBar], the button inherits the bar backdrop;
- *   elsewhere `null` uses [fill].
- * @param modifier Modifier applied to the button.
- * @param inheritTopBarMaterial Whether to inherit the bar's backdrop and underlay material. When
- *   false, use the button's own material over [backdrop], falling back to the bar's backdrop.
- * @param surfaceAlpha Pill opacity.
- * @param style Glass style forwarded to the renderer.
- * @param material Explicit button material. `null` inherits the bar material when
- *   [inheritTopBarMaterial] is true, otherwise uses [GlassTopAppBarDefaults.buttonMaterial].
- *   An inherited bar underlay contributes its blur to an explicit material.
- * @param size Button diameter.
- * @param shape Button silhouette.
- * @param shadow Shadow beneath the button; `null` disables it.
- * @param stroke Optional bloom stroke.
- * @param content Button content.
- */
-@Composable
-fun GlassIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    inheritTopBarMaterial: Boolean = true,
-    backdrop: Backdrop? = null,
-    surfaceAlpha: Float = 1f,
-    style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
-    material: GlassMaterial? = null,
-    size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
-    shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: GlassShape(size / 2),
-    fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
-    shadow: GlassShadow? = LocalGlassTopAppBarContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
-    content: @Composable () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
-    val topBarContext = LocalGlassTopAppBarContext.current
-    val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
-    val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
-    val topBarRamp = topBarContext?.ramp
-    GlassButtonSurface(
-        backdrop = materialContext?.buttonBackdrop ?: backdrop ?: topBarContext?.buttonBackdrop,
-        floating = topBarContext?.floating ?: (surfaceAlpha > 0.01f),
-        surfaceAlpha = resolvedSurfaceAlpha,
-        shadowAlpha = { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) },
-        style = style,
-        material = material?.withUnderlayBlur(materialContext?.buttonUnderlayMaterial)
-            ?: materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
-        underlayMaterial = materialContext?.buttonUnderlayMaterial,
-        shape = shape,
-        size = size,
-        fill = fill,
-        stroke = stroke,
-        shadow = shadow,
-        sharedProgress = topBarContext?.materialProgress,
-        sharedKeepMaterial = topBarContext?.keepMaterial,
-        pressed = pressed,
-        modifier = modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-            ),
-        content = content,
-    )
-}
-
-/** The surface and press feedback used by [GlassIconButton] in either top-bar slot. */
-@Composable
-// foldIn only reads the anchor marker; the modifier is still applied to exactly one root Box.
-@Suppress("ktlint:compose:modifier-reused-check", "ktlint:compose:state-param-check")
-private fun GlassButtonSurface(
-    backdrop: Backdrop?,
-    floating: Boolean,
-    surfaceAlpha: Float,
-    shadowAlpha: () -> Float,
-    style: GlassStyle,
-    material: GlassMaterial,
-    underlayMaterial: GlassMaterial?,
-    fill: Color,
-    shape: GlassShape,
-    size: Dp,
-    stroke: GlassStroke?,
-    shadow: GlassShadow?,
-    modifier: Modifier = Modifier,
-    pressed: Boolean = false,
-    // Retain State for draw-phase reads; the bar owns the shared animation clock.
-    sharedProgress: State<Float>? = null,
-    sharedKeepMaterial: Boolean? = null,
-    content: @Composable () -> Unit,
-) {
-    val popupAnchor = modifier.foldIn<GlassPopupAnchor?>(null) { found, element ->
-        if (element is GlassPopupAnchorElement) element.anchor else found
-    }
-    DisposableEffect(popupAnchor) {
-        onDispose { popupAnchor?.surface = null }
-    }
-    val progress = sharedProgress ?: run {
-        val floatingTransition = updateTransition(targetState = floating, label = "glassTopBarButtonFloat")
-        floatingTransition.animateFloat(
-            transitionSpec = { GlassMotion.topBarButtonFloat() },
-            label = "glassTopBarButtonMaterial",
-        ) { active ->
-            if (active) 1f else 0f
-        }
-    }
-    val ownKeepMaterial by remember(floating, progress) {
-        derivedStateOf { floating || progress.value > 0f }
-    }
-    val keepMaterial = sharedKeepMaterial ?: ownKeepMaterial
-    val opacity = surfaceAlpha.coerceIn(0f, 1f)
-    val anchorSurface = remember(backdrop, style, material, underlayMaterial, stroke, fill) {
-        GlassAnchorSurface(backdrop, style, material, underlayMaterial, stroke, fill)
-    }
-    SideEffect {
-        val anchor = popupAnchor ?: return@SideEffect
-        anchor.surface = anchorSurface
-        anchor.surfaceProgress = progress
-        anchor.surfaceOpacity = opacity
-        anchor.surfaceFloating = floating
-    }
-    val pressTransition = updateTransition(targetState = pressed, label = "glassTopBarButtonPress")
-    val contentAlpha = pressTransition.animateFloat(
-        transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
-        label = "glassTopBarButtonContentAlpha",
-    ) { down ->
-        if (down) GlassTopAppBarDefaults.PressedContentAlpha else 1f
-    }
-    val overlayAlpha = pressTransition.animateFloat(
-        transitionSpec = { if (targetState) GlassMotion.pressDown() else GlassMotion.pressUp() },
-        label = "glassTopBarButtonOverlayAlpha",
-    ) { down ->
-        if (down) 1f else 0f
-    }
-    val pressedOverlay = GlassTopAppBarDefaults.buttonPressedOverlay()
-
-    Box(
-        modifier = modifier
-            .size(size)
-            .glassShadow(shape, shadow, shadowAlpha),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer { alpha = opacity * progress.value }
-                .then(
-                    if (backdrop != null) {
-                        if (underlayMaterial != null) {
-                            Modifier.glassOnActionBar(
-                                backdrop = backdrop,
-                                shape = shape,
-                                style = style,
-                                alpha = 1f,
-                                material = material,
-                                underlayMaterial = underlayMaterial,
-                                stroke = stroke.takeIf { keepMaterial },
-                                enabled = keepMaterial,
-                            )
-                        } else {
-                            Modifier.glass(
-                                backdrop = backdrop,
-                                shape = shape,
-                                style = style,
-                                // Fade the resolved surface as one layer: colour-layer alpha alone
-                                // cannot hide the opaque backdrop image when shading is disabled.
-                                alpha = 1f,
-                                material = material,
-                                stroke = stroke.takeIf { keepMaterial },
-                                enabled = keepMaterial,
-                                shading = false,
-                            )
-                        }
-                    } else {
-                        Modifier
-                            .then(
-                                if (isRuntimeShaderSupported()) {
-                                    Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                } else {
-                                    Modifier.clip(shape)
-                                },
-                            )
-                            .background(fill)
-                            .drawWithContent {
-                                drawContent()
-                                if (stroke != null && keepMaterial) {
-                                    drawGlassStroke(shape, layoutDirection, stroke, 1f)
-                                }
-                                drawGlassMask(shape, layoutDirection)
-                            }
-                    },
-                ),
-        )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(shape)
-                .drawBehind {
-                    drawRect(pressedOverlay.copy(alpha = pressedOverlay.alpha * overlayAlpha.value.coerceIn(0f, 1f)))
-                },
-        )
-        Box(
-            modifier = Modifier.graphicsLayer { alpha = contentAlpha.value.coerceIn(0f, 1f) },
-            contentAlignment = Alignment.Center,
-        ) {
-            content()
         }
     }
 }

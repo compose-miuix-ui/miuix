@@ -6,7 +6,9 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,6 +44,54 @@ class GlassMaterialSelectionTest {
 
     @Test
     fun topBarSegmentedTabsRespectChangesToTheirOwnBlurRadius() = assertTabBlurUpdates(segmented = true)
+
+    @Test
+    fun standaloneButtonKeepsBlurWhenMaterialAlphaIsReduced() = runComposeUiTest {
+        val alpha = mutableFloatStateOf(1f)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    val material = GlassMaterial(30.dp, GlassColorLayer(Color.Red, GlassColorBlendMode.SrcOver))
+                    Box(Modifier.size(200.dp, 250.dp)) {
+                        Canvas(Modifier.matchParentSize().layerBackdrop(backdrop)) {
+                            drawRect(Color.Black)
+                            drawRect(Color.White, Offset(55.dp.toPx(), 0f), Size(10.dp.toPx(), size.height))
+                        }
+                        GlassIconButton(
+                            onClick = {},
+                            backdrop = backdrop,
+                            modifier = Modifier.offset(40.dp, 40.dp).testTag("button"),
+                            surfaceAlpha = alpha.value,
+                            size = 40.dp,
+                            material = material,
+                            stroke = null,
+                            shadow = null,
+                        ) { }
+                        Box(
+                            Modifier.offset(40.dp, 140.dp).size(40.dp)
+                                .glass(
+                                    backdrop = backdrop,
+                                    shape = GlassShape(20.dp),
+                                    alpha = alpha.value,
+                                    material = material,
+                                    shading = false,
+                                ).testTag("reference"),
+                        )
+                    }
+                }
+            }
+        }
+        fun center(tag: String): Color {
+            val pixels = onNodeWithTag(tag).captureToImage().toPixelMap()
+            return pixels[pixels.width / 2, pixels.height / 2]
+        }
+        assertColorNear(Color.Red, center("button"))
+        for (value in listOf(0.25f, 0f, 1f)) {
+            runOnIdle { alpha.value = value }
+            assertColorNear(center("reference"), center("button"))
+        }
+    }
 
     private fun assertButtonUpdates(inheritTopBarMaterial: Boolean) = runComposeUiTest {
         val material = mutableStateOf<GlassMaterial?>(null)

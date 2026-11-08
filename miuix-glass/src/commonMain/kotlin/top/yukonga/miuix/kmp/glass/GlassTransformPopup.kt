@@ -72,8 +72,8 @@ class GlassPopupAnchor {
 
     /** Button surface progress, separate from shadow opacity. */
     internal var surfaceProgress: State<Float>? by mutableStateOf(null)
-    internal var surfaceOpacity: Float by mutableFloatStateOf(1f)
-    internal val surfaceAlpha: Float get() = surfaceOpacity * (surfaceProgress?.value ?: 1f)
+    internal var surfaceMaterialAlpha: Float by mutableFloatStateOf(1f)
+    internal val surfaceVisibility: Float get() = surfaceProgress?.value ?: 1f
     internal var surfaceFloating: Boolean by mutableStateOf(false)
 
     /** The control's outer bounds, in the root's coordinate space. */
@@ -284,7 +284,13 @@ fun BoxScope.GlassTransformPopup(
 
     val anchorSurface = anchor.surface
     val anchorVisuals = anchorSurface?.let {
-        visuals.copy(style = it.style, material = it.material, stroke = it.stroke, containerColor = it.fill, alpha = 1f)
+        visuals.copy(
+            style = it.style,
+            material = it.material,
+            stroke = it.stroke,
+            containerColor = it.fill.copy(alpha = it.fill.alpha * anchor.surfaceMaterialAlpha),
+            alpha = anchor.surfaceMaterialAlpha,
+        )
     }
     val menuBackdrop = backdrop ?: anchorSurface?.backdrop
     val materialProgress = remember(bounds, backProgress) {
@@ -306,11 +312,9 @@ fun BoxScope.GlassTransformPopup(
     fun iconProgress() = popupFractionWithBack(iconMaterial.value, backProgress.value)
     fun stackedProgress() = popupFractionWithBack(pushedBack.value, anchor.secondaryBackProgress)
     fun panelAlpha() = transformPanelAlpha(
-        visualAlpha = visuals.alpha,
-        floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceAlpha > 0f else anchor.floating,
-        // Remove visualAlpha here: the published button opacity already includes it.
+        floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceVisibility > 0f else anchor.floating,
         anchorAlpha = if (anchorSurface != null) {
-            if (visuals.alpha > 0f) anchor.surfaceAlpha / visuals.alpha else 0f
+            anchor.surfaceVisibility
         } else {
             anchorAlpha
         },
@@ -323,7 +327,7 @@ fun BoxScope.GlassTransformPopup(
         onDismissRequest = onDismissRequest,
         backdrop = menuBackdrop,
         sizing = sizing,
-        visuals = visuals.copy(alpha = 1f),
+        visuals = visuals,
         contentPadding = contentPadding,
         panelLayer = {
             alpha = panelAlpha()
@@ -390,7 +394,7 @@ fun BoxScope.GlassTransformPopup(
                 GlassPopupBackground(
                     backdrop = menuBackdrop,
                     shape = shape,
-                    visuals = visuals.copy(alpha = 1f),
+                    visuals = visuals,
                     modifier = Modifier.graphicsLayer {
                         alpha = if (anchorSurface != null) materialProgress.value else 1f
                     },
@@ -447,14 +451,13 @@ internal fun shouldRenderAnchorContent(simplified: Boolean, show: Boolean): Bool
 /** Retained exit content is visual only, even before the transition starts its first exit frame. */
 internal fun isTransformPopupInteractive(show: Boolean, stacked: Boolean): Boolean = show && !stacked
 
-/** The floating alpha applies to the popup's whole container, not to the panel alone. */
+/** Visibility follows the anchor and motion independently of material colour-layer opacity. */
 internal fun transformPanelAlpha(
-    visualAlpha: Float,
     floating: Boolean,
     anchorAlpha: Float,
     geometryProgress: Float,
     iconMaterial: Float,
-): Float = visualAlpha * if (floating) {
+): Float = if (floating) {
     lerp(anchorAlpha, 1f, geometryProgress.coerceIn(0f, 1f))
 } else {
     iconMaterial

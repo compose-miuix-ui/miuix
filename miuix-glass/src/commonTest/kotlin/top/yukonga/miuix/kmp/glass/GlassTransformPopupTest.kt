@@ -43,29 +43,28 @@ class GlassTransformPopupTest {
     }
 
     @Test
-    fun sharedAnchorOpacityTracksAnimationWithoutRepublishingSurface() {
+    fun sharedAnchorVisibilityTracksAnimationIndependentlyOfMaterialAlpha() {
         val progress = mutableFloatStateOf(1f)
         val anchor = GlassPopupAnchor().apply {
             surfaceProgress = progress
-            surfaceOpacity = 0.5f
+            surfaceMaterialAlpha = 0.5f
         }
-        assertEquals(0.5f, anchor.surfaceAlpha)
+        assertEquals(1f, anchor.surfaceVisibility)
 
         // A frame updates the animation state without recomposing the button's surface publisher.
         progress.floatValue = 0.25f
-        assertEquals(0.125f, anchor.surfaceAlpha)
+        assertEquals(0.25f, anchor.surfaceVisibility)
         assertEquals(
-            anchor.surfaceAlpha,
+            anchor.surfaceVisibility,
             transformPanelAlpha(
-                visualAlpha = 0.5f,
                 floating = true,
-                anchorAlpha = anchor.surfaceAlpha / 0.5f,
+                anchorAlpha = anchor.surfaceVisibility,
                 geometryProgress = 0f,
                 iconMaterial = 0f,
             ),
         )
         progress.floatValue = 0f
-        assertEquals(0f, anchor.surfaceAlpha)
+        assertEquals(0f, anchor.surfaceVisibility)
     }
 
     @Test
@@ -88,7 +87,6 @@ class GlassTransformPopupTest {
         assertEquals(
             0f,
             transformPanelAlpha(
-                visualAlpha = 1f,
                 floating = false,
                 anchorAlpha = 1f,
                 geometryProgress = 0.5f,
@@ -96,9 +94,8 @@ class GlassTransformPopupTest {
             ),
         )
         assertEquals(
-            0.4f,
+            0.5f,
             transformPanelAlpha(
-                visualAlpha = 0.8f,
                 floating = false,
                 anchorAlpha = 1f,
                 geometryProgress = 0.5f,
@@ -112,7 +109,6 @@ class GlassTransformPopupTest {
         assertEquals(
             1f,
             transformPanelAlpha(
-                visualAlpha = 1f,
                 floating = true,
                 anchorAlpha = 1f,
                 geometryProgress = 0f,
@@ -122,7 +118,6 @@ class GlassTransformPopupTest {
         assertEquals(
             0f,
             transformPanelAlpha(
-                visualAlpha = 1f,
                 floating = true,
                 anchorAlpha = 0f,
                 geometryProgress = 0f,
@@ -132,7 +127,6 @@ class GlassTransformPopupTest {
         assertEquals(
             0.5f,
             transformPanelAlpha(
-                visualAlpha = 1f,
                 floating = true,
                 anchorAlpha = 0f,
                 geometryProgress = 0.5f,

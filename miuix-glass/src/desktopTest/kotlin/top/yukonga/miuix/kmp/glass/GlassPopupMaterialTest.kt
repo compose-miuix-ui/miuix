@@ -50,6 +50,27 @@ class GlassPopupMaterialTest {
     )
 
     @Test
+    fun lowAlphaMenuKeepsItsSampledBackdrop() = assertExpandedAppearance(
+        menuColor = Color.Transparent,
+        expected = Color.Red,
+        alpha = 0.25f,
+    )
+
+    @Test
+    fun zeroAlphaMenuKeepsItsSampledBackdrop() = assertExpandedAppearance(
+        menuColor = Color.Transparent,
+        expected = Color.Red,
+        alpha = 0f,
+    )
+
+    @Test
+    fun lowAlphaMenuAppliesOpacityToItsOwnColourLayers() = assertExpandedAppearance(
+        menuColor = Color.Green,
+        expected = Color(0.75f, 0.25f, 0f),
+        alpha = 0.25f,
+    )
+
+    @Test
     fun materialRimFollowsTheShrinkingPanelWhileRowsKeepTheirSize() = runComposeUiTest {
         var panel = Rect.Zero
         setContent {
@@ -86,7 +107,7 @@ class GlassPopupMaterialTest {
         assertColorNear(Color.White, pixels[panel.center.x.roundToInt(), panel.bottom.roundToInt() - 2])
     }
 
-    private fun assertExpandedAppearance(menuColor: Color, expected: Color, secondary: Boolean = false) = runComposeUiTest {
+    private fun assertExpandedAppearance(menuColor: Color, expected: Color, secondary: Boolean = false, alpha: Float = 1f) = runComposeUiTest {
         val show = mutableStateOf(false)
         val showSecondary = mutableStateOf(false)
         setContent {
@@ -96,13 +117,16 @@ class GlassPopupMaterialTest {
                 val anchor = rememberGlassPopupAnchor()
                 Box(Modifier.size(500.dp)) {
                     Box(Modifier.fillMaxSize().layerBackdrop(buttonBackdrop).background(Color.Blue))
-                    Box(Modifier.fillMaxSize().layerBackdrop(pageBackdrop).background(Color.Red)) {
+                    Box(Modifier.fillMaxSize().layerBackdrop(pageBackdrop).background(Color.Red))
+                    // The visible page differs from the sampled scene, exposing whole-panel fades.
+                    Box(Modifier.fillMaxSize().background(Color.Blue)) {
                         GlassIconButton(
                             onClick = { show.value = true },
                             backdrop = buttonBackdrop,
                             modifier = Modifier.offset(350.dp, 60.dp)
                                 .glassPopupAnchor(anchor, 20.dp)
                                 .testTag("button"),
+                            surfaceAlpha = alpha,
                             stroke = null,
                             shadow = null,
                         ) { }
@@ -115,6 +139,7 @@ class GlassPopupMaterialTest {
                         anchorContent = {},
                         stacked = showSecondary.value,
                         visuals = GlassPopupDefaults.visuals(
+                            alpha = alpha,
                             material = GlassMaterial(0.dp, GlassColorLayer(menuColor, GlassColorBlendMode.SrcOver)),
                             stroke = null,
                             shadow = null,
