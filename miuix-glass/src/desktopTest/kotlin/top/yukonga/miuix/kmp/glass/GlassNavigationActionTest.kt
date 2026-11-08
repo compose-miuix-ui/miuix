@@ -13,7 +13,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -34,6 +36,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -197,6 +200,135 @@ class GlassNavigationActionTest {
         onNodeWithContentDescription("Home").assertIsSelected()
         onNodeWithTag("action").performTouchInput { click() }
         assertEquals(2, searches)
+    }
+
+    @Test
+    fun draggedIndicatorSettlesAfterProfileAddsAnAction() = assertDragResizes(LayoutDirection.Ltr, 0, 2)
+
+    @Test
+    fun draggedIndicatorSettlesAfterLeavingProfileRemovesAnAction() = assertDragResizes(LayoutDirection.Ltr, 2, 0)
+
+    @Test
+    fun draggedIndicatorSettlesAfterProfileAddsAnActionInRtl() = assertDragResizes(LayoutDirection.Rtl, 0, 2)
+
+    @Test
+    fun draggedIndicatorSettlesAfterLeavingProfileRemovesAnActionInRtl() = assertDragResizes(LayoutDirection.Rtl, 2, 0)
+
+    private fun assertDragResizes(direction: LayoutDirection, from: Int, to: Int) = runComposeUiTest {
+        val selected = mutableIntStateOf(from)
+        val labels = listOf("Home", "Files", "Profile")
+        setContent {
+            DialogTestHost {
+                CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                    Box(Modifier.size(410.dp, 150.dp).background(Color.White)) {
+                        GlassNavigationBar(
+                            items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                            selectedIndex = selected.intValue,
+                            onSelect = { selected.intValue = it },
+                            backdrop = null,
+                            defaultWindowInsetsPadding = false,
+                            indicatorColor = Color.Magenta,
+                            indicatorPressedColor = Color.Magenta,
+                            stroke = null,
+                            shadow = null,
+                            trailingAction = if (selected.intValue == 2) {
+                                { Box(Modifier.size(GlassNavigationBarDefaults.Height).background(Color.Green)) }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        val start = onNodeWithContentDescription(labels[from]).fetchSemanticsNode().boundsInRoot.center
+        val middle = onNodeWithContentDescription(labels[1]).fetchSemanticsNode().boundsInRoot.center
+        val end = onNodeWithContentDescription(labels[to]).fetchSemanticsNode().boundsInRoot.center
+        onRoot().performTouchInput {
+            down(start)
+            moveTo(middle)
+            moveTo(end)
+        }
+        waitForIdle()
+        assertEquals(to, selected.intValue)
+        // Keep the pointer held while the selected page changes the capsule's measured width.
+        onRoot().performTouchInput { up() }
+        waitForIdle()
+        val destination = onNodeWithContentDescription(labels[to]).fetchSemanticsNode().boundsInRoot
+        val pixels = onRoot().captureToImage().toPixelMap()
+        val row = destination.center.y.roundToInt()
+        val indicatorPixels = (0 until pixels.width).filter {
+            val color = pixels[it, row]
+            color.red > 0.9f && color.blue > 0.9f && color.green < 0.1f
+        }
+        assertTrue(indicatorPixels.isNotEmpty(), "The selection indicator must remain visible")
+        val center = (indicatorPixels.first() + indicatorPixels.last()) / 2f
+        assertEquals(destination.center.x, center, 2f, "The released indicator must align with the resized destination")
+    }
+
+    @Test
+    fun profileBoundaryStaysStableWhenDraggingFromHistory() = assertBoundaryStable(LayoutDirection.Ltr, 4, 3)
+
+    @Test
+    fun historyBoundaryStaysStableWhenDraggingFromProfile() = assertBoundaryStable(LayoutDirection.Ltr, 3, 4)
+
+    @Test
+    fun profileBoundaryStaysStableWhenDraggingFromHistoryInRtl() = assertBoundaryStable(LayoutDirection.Rtl, 4, 3)
+
+    @Test
+    fun historyBoundaryStaysStableWhenDraggingFromProfileInRtl() = assertBoundaryStable(LayoutDirection.Rtl, 3, 4)
+
+    private fun assertBoundaryStable(direction: LayoutDirection, from: Int, to: Int) = runComposeUiTest {
+        val selected = mutableIntStateOf(from)
+        val selections = mutableListOf<Int>()
+        val labels = listOf("Home", "Files", "Search", "Profile", "History")
+        setContent {
+            DialogTestHost {
+                CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                    Box(Modifier.size(410.dp, 150.dp)) {
+                        GlassNavigationBar(
+                            items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                            selectedIndex = selected.intValue,
+                            onSelect = {
+                                selected.intValue = it
+                                selections.add(it)
+                            },
+                            backdrop = null,
+                            defaultWindowInsetsPadding = false,
+                            trailingAction = if (selected.intValue == 3) {
+                                { Box(Modifier.size(GlassNavigationBarDefaults.Height)) }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        val bar = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup)).fetchSemanticsNode().boundsInRoot
+        val start = onNodeWithContentDescription(labels[from]).fetchSemanticsNode().boundsInRoot.center
+        val inset = with(density) { GlassNavigationBarDefaults.ContentPaddingHorizontal.toPx() }
+        val actionSpace = with(density) { (GlassNavigationBarDefaults.Height + GlassNavigationBarDefaults.ActionSpacing).toPx() }
+        val wide = bar.width + if (from == 3) actionSpace else 0f
+        val narrow = wide - actionSpace
+        // Between the wide and narrow Profile/History boundaries: resizing alone used to
+        // switch destinations on every subsequent pointer event, repeatedly toggling the action.
+        val logicalX = inset + ((wide + narrow) / 2f - inset * 2f) * 4f / 5f
+        val boundary = Offset(if (direction == LayoutDirection.Ltr) bar.left + logicalX else bar.right - logicalX, start.y)
+        onRoot().performTouchInput {
+            down(start)
+            moveTo(boundary)
+        }
+        waitForIdle()
+        assertEquals(to, selected.intValue)
+        repeat(8) { step ->
+            onRoot().performTouchInput { moveTo(boundary + Offset(if (step % 2 == 0) 0.5f else -0.5f, 0f)) }
+            waitForIdle()
+            assertEquals(to, selected.intValue, "A layout change must not move the finger across the selection boundary")
+        }
+        assertEquals(listOf(from, to), selections, "The trailing action must not cause repeated destination changes")
+        onRoot().performTouchInput { up() }
+        onNodeWithContentDescription(labels[to]).assertIsSelected()
     }
 
     @Test
