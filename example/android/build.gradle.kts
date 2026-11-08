@@ -31,7 +31,7 @@ android {
         applicationId = BuildConfig.APPLICATION_ID
         minSdk = BuildConfig.MIN_SDK
         targetSdk = BuildConfig.TARGET_SDK
-        versionName = BuildConfig.APPLICATION_VERSION_NAME
+        versionName = BuildConfig.APPLICATION_VERSION_NAME + "." + getGitHashShort()
         versionCode = getGitVersionCode()
     }
     experimentalProperties["android.experimental.r8.dex-startup-optimization"] = true
@@ -69,6 +69,7 @@ android {
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
+            applicationIdSuffix = ".debug"
         }
         create("nonMinifiedRelease") {
             signingConfig = signingConfigs.getByName("debug")
