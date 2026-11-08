@@ -148,8 +148,8 @@ fun GlassPage(padding: PaddingValues) {
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
     var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var progressiveTopBarBlur by remember { mutableStateOf(false) }
-    var navigationSearchButton by remember { mutableStateOf(true) }
     var navIndex by remember { mutableIntStateOf(0) }
+    var navigationSearchButton by remember(navIndex) { mutableStateOf(navIndex == 0 || navIndex == 2) }
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
     var joinedTab by remember { mutableIntStateOf(0) }
