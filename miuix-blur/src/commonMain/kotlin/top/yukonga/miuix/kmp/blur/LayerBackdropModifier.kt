@@ -6,12 +6,16 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
+import top.yukonga.miuix.kmp.shader.internal.graphicsResourceLifecycle
 
 /**
  * Captures the content of this composable into the given [LayerBackdrop]'s graphics layer.
@@ -28,11 +32,7 @@ private class LayerBackdropElement(
     override fun create(): LayerBackdropNode = LayerBackdropNode(backdrop)
 
     override fun update(node: LayerBackdropNode) {
-        if (node.backdrop !== backdrop) {
-            node.backdrop.layerCoordinates = null
-            node.backdrop = backdrop
-        }
-        node.invalidateDraw()
+        node.updateBackdrop(backdrop)
     }
 
     override fun InspectorInfo.inspectableProperties() {
@@ -53,7 +53,35 @@ private class LayerBackdropNode(
     var backdrop: LayerBackdrop,
 ) : Modifier.Node(),
     DrawModifierNode,
-    GlobalPositionAwareModifierNode {
+    GlobalPositionAwareModifierNode,
+    CompositionLocalConsumerModifierNode {
+
+    private var lifecycle: Lifecycle? = null
+    private var lifecycleObserver: LifecycleEventObserver? = null
+    private var coordinates: LayoutCoordinates? = null
+
+    fun updateBackdrop(backdrop: LayerBackdrop) {
+        if (this.backdrop !== backdrop) {
+            this.backdrop.layerCoordinates = null
+            this.backdrop = backdrop
+            backdrop.layerCoordinates = coordinates
+        }
+        invalidateDraw()
+    }
+
+    override fun onAttach() {
+        val ownerLifecycle = graphicsResourceLifecycle() ?: return
+        lifecycle = ownerLifecycle
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Force recordLayer to capture a fresh recording after the platform graphics
+                // resources were invalidated while the app was paused.
+                invalidateDraw()
+            }
+        }
+        lifecycleObserver = observer
+        ownerLifecycle.addObserver(observer)
+    }
 
     override fun ContentDrawScope.draw() {
         drawContent()
@@ -62,11 +90,16 @@ private class LayerBackdropNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
+            this.coordinates = coordinates
             backdrop.layerCoordinates = coordinates
         }
     }
 
     override fun onDetach() {
+        lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
+        lifecycleObserver = null
+        lifecycle = null
+        coordinates = null
         backdrop.layerCoordinates = null
     }
 }
