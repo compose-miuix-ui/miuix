@@ -39,13 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.LayerOutsets
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -57,6 +59,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
@@ -74,6 +77,7 @@ import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
@@ -257,12 +261,11 @@ internal fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
 @Composable
 internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -> Float): Modifier {
     val density = LocalDensity.current
-    val layerOutsets = remember(density) {
+    val layerOutset = remember(density) {
         val shadow = GlassShadows.Regular
         val shadowOutset = ((shadow.radius + maxOf(abs(shadow.offsetX), abs(shadow.offsetY))) / GlassDefaults.SourceDensity).dp
         // Keep a fixed halo for the shadows and maximum blur throughout the offscreen fade.
-        val outset = shadowOutset + with(density) { (SEARCH_TOP_BAR_BLUR_RADIUS * 3f).toDp() }
-        LayerOutsets(left = outset, top = outset, right = outset, bottom = outset)
+        with(density) { shadowOutset.toPx() } + SEARCH_TOP_BAR_BLUR_RADIUS * 3f
     }
     val transition = updateTransition(expanded, label = "glassSearchTopBar")
     val scale = transition.animateFloat(
@@ -273,12 +276,31 @@ internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -
         transitionSpec = { tween(if (targetState) 150 else 120, easing = LinearEasing) },
         label = "glassSearchTopBarBlur",
     ) { if (it) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
-    return graphicsLayer {
-        outsets = layerOutsets
-        scaleX = scale.value
-        scaleY = scale.value
-        alpha = barAlpha()
-        renderEffect = if (blur.value > 0.5f) BlurEffect(blur.value, blur.value, TileMode.Decal) else null
+    return drawWithCache {
+        val layer = obtainGraphicsLayer()
+        val halo = ceil(layerOutset).toInt()
+        val layerSize = IntSize(size.width.toInt() + halo * 2, size.height.toInt() + halo * 2)
+        onDrawWithContent {
+            val opacity = barAlpha().coerceIn(0f, 1f)
+            val currentScale = scale.value
+            val currentBlur = blur.value
+            if (opacity > 0f) {
+                if (opacity == 1f && currentScale == 1f && currentBlur == 0f) {
+                    drawContent()
+                } else {
+                    // Keep the halo in the recorded bounds: Skiko can replay nested layers with
+                    // LayerOutsets without applying their opacity or render effect.
+                    layer.record(density = this@drawWithCache, size = layerSize) {
+                        translate(halo.toFloat(), halo.toFloat()) { this@record.drawContent() }
+                    }
+                    layer.alpha = opacity
+                    layer.scaleX = currentScale
+                    layer.scaleY = currentScale
+                    layer.renderEffect = if (currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
+                    translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
+                }
+            }
+        }
     }
 }
 

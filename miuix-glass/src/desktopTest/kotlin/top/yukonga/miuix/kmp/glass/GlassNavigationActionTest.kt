@@ -45,6 +45,84 @@ import kotlin.test.assertTrue
 class GlassNavigationActionTest {
 
     @Test
+    fun glassBarSwitchAnimatesCapsuleWidth() = runComposeUiTest {
+        val showSearch = mutableStateOf(true)
+        setContent {
+            DialogTestHost {
+                val backdrop = rememberLayerBackdrop()
+                Box(Modifier.size(410.dp, 150.dp)) {
+                    Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
+                    GlassNavigationBar(
+                        items = listOf(
+                            GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
+                            GlassNavigationItem(MiuixIcons.Basic.Search, "Gallery"),
+                        ),
+                        selectedIndex = 0,
+                        onSelect = {},
+                        backdrop = backdrop,
+                        defaultWindowInsetsPadding = false,
+                        trailingAction = if (showSearch.value) {
+                            {
+                                GlassIconButton(
+                                    onClick = {},
+                                    backdrop = backdrop,
+                                    size = GlassNavigationBarDefaults.Height,
+                                ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                            }
+                        } else {
+                            null
+                        },
+                    )
+                }
+            }
+        }
+        fun width() = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
+            .fetchSemanticsNode().boundsInRoot.width
+        val initial = width()
+        mainClock.autoAdvance = false
+        runOnIdle { showSearch.value = false }
+        mainClock.advanceTimeByFrame()
+        mainClock.advanceTimeBy(80)
+        val middle = width()
+        mainClock.advanceTimeBy(1500)
+        val final = width()
+        assertTrue(initial < middle && middle < final, "The capsule must expand through an intermediate width")
+    }
+
+    @Test
+    fun actionRemovalAnimatesReservedWidthAndCanReverse() = runComposeUiTest {
+        val showAction = mutableStateOf(true)
+        setContent {
+            GlassNavigationBarLayout(
+                modifier = Modifier.width(360.dp),
+                trailingAction = if (showAction.value) {
+                    { Box(Modifier.size(54.dp).testTag("animated-action")) }
+                } else {
+                    null
+                },
+            ) {
+                Box(Modifier.size(360.dp, 54.dp).testTag("animated-capsule"))
+            }
+        }
+        fun capsuleWidth() = onNodeWithTag("animated-capsule").fetchSemanticsNode().boundsInRoot.width
+        val initial = capsuleWidth()
+        mainClock.autoAdvance = false
+        runOnIdle { showAction.value = false }
+        mainClock.advanceTimeByFrame()
+        mainClock.advanceTimeBy(80)
+        val middle = capsuleWidth()
+        assertTrue(middle > initial, "The capsule must expand during action exit")
+        onNodeWithTag("animated-action").assertDoesNotExist()
+        runOnIdle { showAction.value = true }
+        mainClock.advanceTimeBy(1500)
+        assertEquals(initial, capsuleWidth(), 1f)
+        runOnIdle { showAction.value = false }
+        mainClock.advanceTimeBy(1500)
+        assertTrue(capsuleWidth() > middle, "The capsule must finish expanding after exit")
+        onNodeWithTag("animated-action").assertDoesNotExist()
+    }
+
+    @Test
     fun windowInsetPaddingMovesTheWholeGroupWithoutStretchingItsSurfaces() = runComposeUiTest {
         val applyInsets = mutableStateOf(true)
         setContent {

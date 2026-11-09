@@ -148,8 +148,8 @@ fun GlassPage(padding: PaddingValues) {
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
     var tabPlacement by remember { mutableIntStateOf(TABS_IN_TOP_BAR) }
     var progressiveTopBarBlur by remember { mutableStateOf(false) }
-    var navigationSearchButton by remember { mutableStateOf(true) }
     var navIndex by remember { mutableIntStateOf(0) }
+    var navigationSearchButton by remember(navIndex) { mutableStateOf(navIndex == 0 || navIndex == 2) }
     var primaryTab by remember { mutableIntStateOf(0) }
     var neutralTab by remember { mutableIntStateOf(0) }
     var joinedTab by remember { mutableIntStateOf(0) }
@@ -260,11 +260,8 @@ fun GlassPage(padding: PaddingValues) {
                             defaultWindowInsetsPadding = false,
                             modifier = Modifier.layout { measurable, constraints ->
                                 // Account for item overlap before selecting the compact wide-screen width.
-                                val actionWidth = if (navigationSearchButton) {
-                                    (GlassNavigationBarDefaults.Height + GlassNavigationBarDefaults.ActionSpacing).roundToPx()
-                                } else {
-                                    0
-                                }
+                                // Keep the group width stable while the action animates inside it.
+                                val actionWidth = (GlassNavigationBarDefaults.Height + GlassNavigationBarDefaults.ActionSpacing).roundToPx()
                                 val available = constraints.maxWidth - actionWidth + (10.dp * (NavItems.size - 1) - 6.dp).roundToPx()
                                 val width = if (constraints.hasBoundedWidth && available > 400.dp.roundToPx()) {
                                     constraints.constrainWidth(344.dp.roundToPx() + actionWidth)

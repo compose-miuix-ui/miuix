@@ -3,10 +3,20 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -16,7 +26,8 @@ import androidx.compose.ui.unit.constrainWidth
  *
  * The action's measured width and [spacing] are reserved before measuring [content], so both fit
  * within the same constraints and are centered as a group. A null [trailingAction] reserves no
- * space. Placement follows the current layout direction.
+ * space after its exit animation completes. Width, spacing, scale and opacity animate together.
+ * Placement follows the current layout direction.
  *
  * @param modifier Modifier applied to the combined layout.
  * @param spacing Space between the capsule and the action.
@@ -30,19 +41,49 @@ internal fun GlassNavigationBarLayout(
     trailingAction: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
+    val density = LocalDensity.current
+    val shadowOutsets = remember(density) { with(density) { popupShadowOutsets(GlassShadows.Regular) } }
+    val retainedAction = remember { mutableStateOf(trailingAction) }
+    val actionProgress = animateFloatAsState(
+        targetValue = if (trailingAction != null) 1f else 0f,
+        animationSpec = GlassMotion.navShowHide(),
+        label = "glassNavigationAction",
+    )
+    SideEffect {
+        if (trailingAction != null || actionProgress.value == 0f) retainedAction.value = trailingAction
+    }
+    val presentedAction = trailingAction ?: retainedAction.value.takeIf { actionProgress.value > 0f }
     Layout(
         modifier = modifier,
         content = {
             Box(propagateMinConstraints = true) { content() }
-            if (trailingAction != null) {
-                Box { trailingAction() }
+            if (presentedAction != null) {
+                Box(
+                    Modifier.focusProperties { canFocus = trailingAction != null }.graphicsLayer {
+                        // Preserve the icon button shadow outside the offscreen alpha layer.
+                        outsets = shadowOutsets
+                        val fraction = actionProgress.value.coerceIn(0f, 1f)
+                        scaleX = fraction
+                        scaleY = fraction
+                        alpha = fraction
+                    }.then(
+                        if (trailingAction == null) {
+                            Modifier.clearAndSetSemantics { }.pointerInput(Unit) {
+                                awaitPointerEventScope { while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() } }
+                            }
+                        } else {
+                            Modifier
+                        },
+                    ),
+                ) { presentedAction() }
             }
         },
     ) { measurables, constraints ->
         val action = measurables.getOrNull(1)?.measure(constraints.copy(minWidth = 0, minHeight = 0))
-        val actionWidth = action?.width ?: 0
+        val fraction = actionProgress.value.coerceIn(0f, 1f)
+        val actionWidth = ((action?.width ?: 0) * fraction).toInt()
         val gap = if (action != null) {
-            spacing.roundToPx().coerceIn(0, (constraints.maxWidth - actionWidth).coerceAtLeast(0))
+            (spacing.toPx() * fraction).toInt().coerceIn(0, (constraints.maxWidth - actionWidth).coerceAtLeast(0))
         } else {
             0
         }
@@ -62,7 +103,7 @@ internal fun GlassNavigationBarLayout(
         layout(width, height) {
             val start = (width - groupWidth) / 2
             bar.placeRelative(start, (height - bar.height) / 2)
-            action?.placeRelative(start + bar.width + gap, (height - action.height) / 2)
+            action?.placeRelative(start + bar.width + gap + (actionWidth - action.width) / 2, (height - action.height) / 2)
         }
     }
 }

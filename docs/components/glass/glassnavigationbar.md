@@ -82,7 +82,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | indicatorPressedColor | Color | Pressed indicator fill | GlassNavigationBarDefaults.indicatorPressedColor() | No |
 | selectedColor | Color | Selected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
 | unselectedColor | Color | Unselected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
-| trailingAction | (@Composable () -> Unit)? | Independent action outside the capsule | null | No |
+| trailingAction | (@Composable () -> Unit)? | Independent action outside the capsule; adding or removing it animates scale, opacity, capsule width and spacing | null | No |
 
 ### GlassNavigationItem Properties {#glassnavigationitem}
 
@@ -100,7 +100,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | --- | --- | --- | --- |
 | Height | Dp | Minimum capsule height | 54.dp |
 | ActionSpacing | Dp | Capsule-to-action gap | 12.dp |
-| IconSize | Dp | Destination icon size | 28.dp |
+| IconSize | Dp | Destination icon size | 25.dp |
 | LabelSize | Dp | Caption size converted to sp using current density | 11.dp |
 | LargeLabelSize | Dp | Caption size when font scale is at least 1.6 | 16.dp |
 | ContentPaddingVertical | Dp | Vertical padding around icon and caption | 6.dp |
