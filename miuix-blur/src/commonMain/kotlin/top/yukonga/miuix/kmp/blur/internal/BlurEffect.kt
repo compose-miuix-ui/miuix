@@ -46,8 +46,8 @@ private val BLUR_V_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
 /**
  * Builds the separable Blur [RenderEffect] (H then V) for an EXPLICIT [downScale] level using the
  * per-axis variances already compensated for that level's box prefilter (see [adjustedVarianceForExp]).
- * The shader cache keys carry [downScale] so the H/V passes and the cross-fade lo/hi levels each
- * build from a separate shader instance and never alias each other's uniform arrays.
+ * The shader cache keys carry [downScale] so each level builds from a separate shader instance and
+ * never aliases another level's uniform arrays.
  */
 internal fun createBlurEffect(
     radiusX: Float,
@@ -75,7 +75,7 @@ internal fun createBlurEffect(
     var effect: RenderEffect? = null
 
     // H / V use distinct cache keys so each pass builds from its own shader instance; the
-    // _d$downScale suffix additionally isolates the cross-fade lo/hi levels from one another.
+    // _d$downScale suffix additionally isolates one downscale level from another.
     if (radiusX > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
         if (n > 0) {
@@ -498,37 +498,6 @@ internal fun downScaleExpFor(sigmaSquared: Float): Int = when {
 internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float {
     val ds = (1 shl exp).toFloat()
     return ((sigmaSquared - IMPLIED_BOX_VARIANCE[exp]) / (ds * ds)).coerceAtLeast(0.1f)
-}
-
-/**
- * Bracket of two adjacent downscale levels to cross-fade between, plus a smoothstep [blend]
- * weight of the higher level. Outside any transition band [expLo] == [expHi] and [blend] is 0.
- */
-internal data class DownScaleBlend(val expLo: Int, val expHi: Int, val blend: Float)
-
-/** Sigma at each downscale boundary (= √ of the σ² thresholds in [downScaleExpFor]). */
-private val BOUNDARY_SIGMA = floatArrayOf(3.5496478f, 9.5f, 20f, 44.10215f)
-
-/** Half-width of each cross-fade transition band, as a fraction of the boundary radius/sigma. */
-private const val BLEND_BAND_FRACTION = 0.12f
-
-/**
- * Within ±[BLEND_BAND_FRACTION] of a downscale boundary, returns the two bracketing levels and a
- * smoothstep blend weight (0 at the band's lower edge → 1 at the upper edge); elsewhere returns a
- * single level with `blend == 0`. Cross-fading the two fully-rendered levels across the band turns
- * the otherwise-instant downscale switch into a continuous transition, hiding the "pop".
- */
-internal fun computeDownScaleBlend(sigma: Float): DownScaleBlend {
-    for (b in BOUNDARY_SIGMA.indices) {
-        val lo = BOUNDARY_SIGMA[b] * (1f - BLEND_BAND_FRACTION)
-        val hi = BOUNDARY_SIGMA[b] * (1f + BLEND_BAND_FRACTION)
-        if (sigma > lo && sigma < hi) {
-            val tRaw = ((sigma - lo) / (hi - lo)).coerceIn(0f, 1f)
-            return DownScaleBlend(expLo = b, expHi = b + 1, blend = tRaw * tRaw * (3f - 2f * tRaw))
-        }
-    }
-    val exp = downScaleExpFor(sigma * sigma)
-    return DownScaleBlend(expLo = exp, expHi = exp, blend = 0f)
 }
 
 /**

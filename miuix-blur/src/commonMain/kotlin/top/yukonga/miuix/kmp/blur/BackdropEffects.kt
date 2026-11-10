@@ -16,7 +16,6 @@ import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
 import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.chain
-import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
@@ -51,17 +50,10 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
 
-    // Pick the downscale exponent: forced for the cross-fade lo/hi passes, otherwise the adaptive
-    // choice — which also records the transition-band bracket for the node to read and cross-fade.
-    val exp = if (scope.forcedDownscaleExp >= 0) {
-        scope.forcedDownscaleExp
-    } else {
-        val bracket = computeDownScaleBlend(maxOf(sigmaX, sigmaY))
-        scope.blurBlendExpLo = bracket.expLo
-        scope.blurBlendExpHi = bracket.expHi
-        scope.blurBlendFactor = bracket.blend
-        bracket.expLo
-    }
+    // One level for every radius: the kernel absorbs the variance difference, so the level only
+    // trades resolution for reach.
+    val sigma = maxOf(sigmaX, sigmaY)
+    val exp = downScaleExpFor(sigma * sigma)
     val sf = 1 shl exp
 
     // Padding covers the kernel reach in source pixels so recording size stays

@@ -185,7 +185,7 @@ internal abstract class BackdropEffectScopeImpl :
     // blendColors()/colorControls() build RenderEffects that don't depend on the animating radius,
     // so cache them: a fixed tint/adjustment rebuilds once, not per frame. A RenderEffect captures
     // its shader's uniforms when created, so a built effect is unaffected by later re-sets of the
-    // tree-shared RuntimeShader — reuse across frames and both cross-fade passes is safe.
+    // tree-shared RuntimeShader — reuse across frames is safe.
     internal var cachedBlendColors: BlurColors? = null
     internal var cachedBlendResult: RenderEffect? = null
     internal var cachedColorBrightness: Float = Float.NaN
@@ -239,18 +239,6 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedNoiseChainCoeff: Float = Float.NaN
     internal var cachedNoiseChainResult: RenderEffect? = null
 
-    /**
-     * When >= 0, [blur] builds at this exact downscale exponent instead of the adaptive choice.
-     * The node sets it for the cross-fade lo/hi passes; -1 means auto. Internal — not exposed on
-     * the public [BackdropEffectScope] interface.
-     */
-    internal var forcedDownscaleExp: Int = -1
-
-    // Cross-fade bracket discovered by the auto [blur] pass (see computeDownScaleBlend).
-    internal var blurBlendExpLo: Int = 0
-    internal var blurBlendExpHi: Int = 0
-    internal var blurBlendFactor: Float = 0f
-
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
 
     fun update(scope: DrawScope): Boolean {
@@ -281,11 +269,6 @@ internal abstract class BackdropEffectScopeImpl :
         noiseCoefficient = 0f
         blurBuiltPaddedW = Float.NaN
         blurBuiltPaddedH = Float.NaN
-        // Cleared before each pass so a frame that runs only progressiveBlur (which never sets a
-        // cross-fade bracket) can't inherit a stale bracket from a previous blur()-based frame.
-        blurBlendExpLo = 0
-        blurBlendExpHi = 0
-        blurBlendFactor = 0f
         // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
         progressivePreEffect = null
         progressivePostBlend = null
@@ -309,10 +292,6 @@ internal abstract class BackdropEffectScopeImpl :
             noiseCoefficient = 0f
             blurBuiltPaddedW = Float.NaN
             blurBuiltPaddedH = Float.NaN
-            // Re-run from the same reset state as the first pass (see above).
-            blurBlendExpLo = 0
-            blurBlendExpHi = 0
-            blurBlendFactor = 0f
             progressivePreEffect = null
             progressivePostBlend = null
             if (progressiveCompositeActive) {
@@ -364,10 +343,6 @@ internal abstract class BackdropEffectScopeImpl :
         cachedNoiseChainInput = null
         cachedNoiseChainCoeff = Float.NaN
         cachedNoiseChainResult = null
-        forcedDownscaleExp = -1
-        blurBlendExpLo = 0
-        blurBlendExpHi = 0
-        blurBlendFactor = 0f
     }
 }
 
