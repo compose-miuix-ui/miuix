@@ -12,26 +12,34 @@ internal fun edgeStrokeShaderKey(peak: EdgePeak): String = "MiuixEdgeStroke" + p
 /** AGSL source of the edge-stroke shader for [peak]. */
 internal fun edgeStrokeShaderSource(peak: EdgePeak): String = buildEdgeStrokeShader(peak)
 
-/**
- * Builds the edge-stroke shader: a flat stroke band hugging the silhouette plus a hemispheric rim
- * normal lit by two directional lights. The silhouette comes from [MaterialAgsl.SilhouetteSdf], so
- * `in_smoothing = 0` compiles the superellipse branch away. [EdgePeak] picks the gate.
- *
- * Light directions are pre-normalized on the CPU side and `in_light*.w` carries the intensity; under
- * [EdgePeak.Axial] the gate is signed and the *product* is clamped, not either dot separately.
- *
- * Output is premultiplied: the alpha carries the light's own magnitude, so additive channels are
- * never clamped away by a lower alpha.
- */
-internal fun buildEdgeStrokeShader(peak: EdgePeak): String {
-    val axisUniforms = if (peak == EdgePeak.Axial) {
-        """
-uniform float2 axis1;
-uniform float2 axis2;
+/** Bevel normal along the edge stroke, as AGSL source. */
+internal fun edgeStrokeNormalSource(): String = """
+float3 rimNormal(float2 coord, float2 half2d, float sdf, float radius, float inner) {
+    float2 offset = coord - in_halfViewFloor;
+    float2 folded = abs(offset);
+    // Lift the point off the surface. Depth is measured in the rim band, height in pixels.
+    float depth = smoothstep(-inner, 0.0, sdf);
+    float3 point = float3(folded, -sqrt(max(inner * inner - depth * depth, 0.0)));
+
+    float bevel = max(radius, inner);
+    float2 reference = half2d - bevel;
+    reference.x = min(reference.x, folded.x);
+    reference.y = min(reference.y, folded.y);
+    float2 toPoint = point.xy - reference;
+    float len = length(toPoint);
+    reference += ((len > 0.0001) ? toPoint / len : float2(0.0, 1.0)) * (bevel - inner);
+
+    // Inside the reference the surface is flat and faces straight away from the lights.
+    if (folded.x < reference.x || folded.y < reference.y) return float3(0.0, 0.0, -1.0);
+
+    float3 normal = normalize(point - float3(reference, 0.0));
+    normal.xy *= sign(offset);
+    return normal;
+}
 """
-    } else {
-        ""
-    }
+
+/** Directional lights of the edge stroke, as AGSL source. */
+internal fun edgeStrokeLightsSource(peak: EdgePeak): String {
     val lightBlock = when (peak) {
         EdgePeak.Vertical ->
             """
@@ -60,6 +68,35 @@ uniform float2 axis2;
 """
     }
     return """
+float3 edgeStrokeLights(float3 normal) {
+    float3 rgb = float3(0.0);
+$lightBlock
+    return rgb;
+}
+"""
+}
+
+/**
+ * Builds the edge-stroke shader: a flat stroke band hugging the silhouette plus a hemispheric rim
+ * normal lit by two directional lights. The silhouette comes from [MaterialAgsl.SilhouetteSdf], so
+ * `in_smoothing = 0` compiles the superellipse branch away. [EdgePeak] picks the gate.
+ *
+ * Light directions are pre-normalized on the CPU side and `in_light*.w` carries the intensity; under
+ * [EdgePeak.Axial] the gate is signed and the *product* is clamped, not either dot separately.
+ *
+ * Output is premultiplied: the alpha carries the light's own magnitude, so additive channels are
+ * never clamped away by a lower alpha.
+ */
+internal fun buildEdgeStrokeShader(peak: EdgePeak): String {
+    val axisUniforms = if (peak == EdgePeak.Axial) {
+        """
+uniform float2 axis1;
+uniform float2 axis2;
+"""
+    } else {
+        ""
+    }
+    return """
 ${MaterialAgsl.SilhouetteSdf}
 uniform float2 in_halfViewFloor; // half size, floored, so the fold lands on a pixel boundary
 uniform float2 in_strokeBand;    // stroke width, bevel
@@ -70,31 +107,8 @@ uniform float4 in_light1Color;   // colour rgb, unused
 uniform float4 in_light2;        // direction xyz, intensity
 uniform float4 in_light2Color;   // colour rgb, unused
 $axisUniforms
-// The bevel normal. Folded into one quadrant, built there, then unfolded by the sign of the
-// offset — the rim is symmetric, so only a quarter of it has to be reasoned about.
-float3 rimNormal(float2 coord, float2 half2d, float sdf, float radius, float inner) {
-    float2 offset = coord - in_halfViewFloor;
-    float2 folded = abs(offset);
-    // Lift the point off the surface. Depth is measured in the rim band, height in pixels.
-    float depth = smoothstep(-inner, 0.0, sdf);
-    float3 point = float3(folded, -sqrt(max(inner * inner - depth * depth, 0.0)));
-
-    float bevel = max(radius, inner);
-    float2 reference = half2d - bevel;
-    reference.x = min(reference.x, folded.x);
-    reference.y = min(reference.y, folded.y);
-    float2 toPoint = point.xy - reference;
-    float len = length(toPoint);
-    reference += ((len > 0.0001) ? toPoint / len : float2(0.0, 1.0)) * (bevel - inner);
-
-    // Inside the reference the surface is flat and faces straight away from the lights.
-    if (folded.x < reference.x || folded.y < reference.y) return float3(0.0, 0.0, -1.0);
-
-    float3 normal = normalize(point - float3(reference, 0.0));
-    normal.xy *= sign(offset);
-    return normal;
-}
-
+${edgeStrokeNormalSource()}
+${edgeStrokeLightsSource(peak)}
 half4 main(float2 coord) {
     float2 half2d = in_size * 0.5;
     float2 folded = abs(coord - half2d);
@@ -110,9 +124,8 @@ half4 main(float2 coord) {
     float width = max(in_strokeBand.x, 0.75);
     float band = smoothstep(-width, -width + 1.0, sdf);
     float3 rgb = in_strokeColor.rgb * (in_strokeColor.a * band * band);
-
     float3 normal = rimNormal(coord, half2d, sdf, radius, inner);
-$lightBlock
+    rgb += edgeStrokeLights(normal);
     // Light only: alpha stays at zero so a transparent surface never gains opacity from the rim.
     float coverage = clamp(0.5 - sdf, 0.0, 1.0);
     float3 light = rgb * (in_strokeAlpha * coverage);

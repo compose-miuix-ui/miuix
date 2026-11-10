@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.material.internal
 
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.Density
 import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.EdgeLightSource
 import top.yukonga.miuix.kmp.material.EdgePeak
@@ -47,40 +48,72 @@ internal fun DrawScope.drawEdgeStrokeShape(
         edgeStrokeShaderKey(stroke.peak),
         edgeStrokeShaderSource(stroke.peak),
     )
+    shader.setEdgeStrokeUniforms(
+        topLeft = topLeft,
+        topRight = topRight,
+        bottomRight = bottomRight,
+        bottomLeft = bottomLeft,
+        smoothing = smoothing,
+        widthPx = widthPx,
+        heightPx = heightPx,
+        stroke = stroke,
+        alpha = alpha,
+        density = this,
+    )
+
+    drawRect(brush = shader.asBrush(), blendMode = stroke.blendMode)
+}
+
+/**
+ * Sets the uniforms every edge-stroke program reads — silhouette, band, colour, the two lights —
+ * so the standalone pass and the fused rim + stroke pass describe the stroke identically.
+ */
+internal fun RuntimeShader.setEdgeStrokeUniforms(
+    topLeft: Float,
+    topRight: Float,
+    bottomRight: Float,
+    bottomLeft: Float,
+    smoothing: Float,
+    widthPx: Float,
+    heightPx: Float,
+    stroke: EdgeStroke,
+    alpha: Float,
+    density: Density,
+) {
     val halfW = widthPx * 0.5f
     val halfH = heightPx * 0.5f
     val maxRadius = halfW.coerceAtMost(halfH)
-    shader.setFloatUniform("in_size", widthPx, heightPx)
-    shader.setFloatUniform("in_halfViewFloor", floor(halfW), floor(halfH))
-    shader.setFloatUniform(
+    setFloatUniform("in_size", widthPx, heightPx)
+    setFloatUniform("in_halfViewFloor", floor(halfW), floor(halfH))
+    setFloatUniform(
         "in_radii",
         topLeft.coerceIn(0f, maxRadius),
         topRight.coerceIn(0f, maxRadius),
         bottomRight.coerceIn(0f, maxRadius),
         bottomLeft.coerceIn(0f, maxRadius),
     )
-    shader.setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
+    setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
+    val band = with(density) { stroke.width.toPx() }
+    val bevel = with(density) { stroke.bevel.toPx() }
     // Preserve the half-pixel stroke-width bias without rounding to an integer.
-    shader.setFloatUniform(
+    setFloatUniform(
         "in_strokeBand",
-        (stroke.width.toPx() + 0.5f).coerceAtMost(maxRadius),
-        stroke.bevel.toPx() + 0.5f,
+        (band + 0.5f).coerceAtMost(maxRadius),
+        bevel + 0.5f,
     )
     val color = stroke.color
-    shader.setFloatUniform("in_strokeColor", color.red, color.green, color.blue, color.alpha)
-    shader.setFloatUniform("in_strokeAlpha", alpha)
-    shader.setEdgeLightUniform("in_light1", "in_light1Color", stroke.primary)
-    shader.setEdgeLightUniform("in_light2", "in_light2Color", stroke.secondary)
+    setFloatUniform("in_strokeColor", color.red, color.green, color.blue, color.alpha)
+    setFloatUniform("in_strokeAlpha", alpha)
+    setEdgeLightUniform("in_light1", "in_light1Color", stroke.primary)
+    setEdgeLightUniform("in_light2", "in_light2Color", stroke.secondary)
     when (stroke.peak) {
         EdgePeak.Vertical, EdgePeak.Dual -> Unit
 
         EdgePeak.Axial -> {
-            shader.setEdgeAxisUniform("axis1", stroke.primary, -1f)
-            shader.setEdgeAxisUniform("axis2", stroke.secondary, 1f)
+            setEdgeAxisUniform("axis1", stroke.primary, -1f)
+            setEdgeAxisUniform("axis2", stroke.secondary, 1f)
         }
     }
-
-    drawRect(brush = shader.asBrush(), blendMode = stroke.blendMode)
 }
 
 /** Converts a light's UV position into a unit direction and folds its intensity into `w`. */
@@ -104,7 +137,7 @@ internal fun RuntimeShader.setEdgeLightUniform(
 }
 
 /** Sets the projected XY gate of an axial light, falling back to a vertical axis. */
-private fun RuntimeShader.setEdgeAxisUniform(name: String, light: EdgeLightSource, fallbackY: Float) {
+internal fun RuntimeShader.setEdgeAxisUniform(name: String, light: EdgeLightSource, fallbackY: Float) {
     val dx = light.x - LIGHT_REF_X
     val dy = light.y - LIGHT_REF_Y
     val length = sqrt(dx * dx + dy * dy)

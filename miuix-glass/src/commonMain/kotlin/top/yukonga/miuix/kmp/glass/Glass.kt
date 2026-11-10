@@ -26,6 +26,7 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.GlassStyles
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassEdge
 import top.yukonga.miuix.kmp.material.drawGlassMask
 import top.yukonga.miuix.kmp.material.drawGlassRim
 import top.yukonga.miuix.kmp.material.drawGlassShadow
@@ -128,10 +129,26 @@ private fun Modifier.glassImpl(
         if (shading) glassEffect(style, shape, alpha, tint)
     },
     onDrawFront = {
-        if (stroke != null) drawEdgeStroke(shape, stroke, alpha)
-        drawGlassMask(shape)
-        if (shading) {
-            drawGlassRim(shape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+        // Stroke and rim are additive light along the same silhouette: one pass draws both, then the
+        // mask trims. A stroke that draws nothing or composites differently keeps its own pass.
+        val fuse = stroke != null && shading &&
+            stroke.width.value > 0f &&
+            stroke.blendMode == BlendMode.Plus
+        if (fuse) {
+            drawGlassEdge(
+                shape = shape,
+                stroke = stroke,
+                style = style,
+                surface = if (tint.isSpecified) tint else style.inner.tint,
+                alpha = alpha,
+            )
+            drawGlassMask(shape)
+        } else {
+            if (stroke != null) drawEdgeStroke(shape, stroke, alpha)
+            drawGlassMask(shape)
+            if (shading) {
+                drawGlassRim(shape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+            }
         }
     },
     contentBlendMode = contentBlendMode,
