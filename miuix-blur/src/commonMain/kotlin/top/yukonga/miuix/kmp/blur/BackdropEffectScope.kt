@@ -19,10 +19,7 @@ import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
-/**
- * Scope for applying effects to a backdrop layer.
- * Effects are chained via [renderEffect] and applied to the backdrop's [GraphicsLayer].
- */
+/** Scope for chaining effects onto a backdrop layer via [renderEffect]. */
 sealed interface BackdropEffectScope :
     Density,
     RuntimeShaderCache {
@@ -32,37 +29,36 @@ sealed interface BackdropEffectScope :
     val shape: Shape
 
     /**
-     * Extra padding to extend the backdrop layer to accommodate blur overflow. Effects may only
-     * raise it. Prefer raising it before any effect that reads it — a raise after [blur] still
-     * works, but re-runs the effect block once with the final value.
+     * Extra padding for blur overflow; effects may only raise it. Raise it before the effect that
+     * reads it — a raise after [blur] works but re-runs the block once.
      */
     var padding: Float
 
     /** The accumulated render effect chain. */
     var renderEffect: RenderEffect?
 
-    /** Downscale factor for the backdrop layer recording. 1 = full resolution, 4 = 1/16 area. */
-    var downscaleFactor: Int
+    /**
+     * Downscale level for the backdrop layer recording: 1 = full resolution, 4 = 1/16 area.
+     * Fractional, snapped to a 1/4-octave grid.
+     */
+    var downscaleFactor: Float
 
     /**
-     * Noise dithering coefficient. When [downscaleFactor] > 1, noise is applied at full
-     * resolution after upscaling rather than in the RenderEffect chain, so that each screen
-     * pixel gets independent noise. The progressive composite additionally folds an anti-banding
-     * dither into the downscaled stack, and skips the full-resolution pass while the coefficient
-     * is low enough that the grain itself is imperceptible.
+     * Noise dithering coefficient. When [downscaleFactor] > 1 the noise is applied at full
+     * resolution after upscaling, so each screen pixel dithers independently. The progressive
+     * composite folds its own dither into the downscaled stack and skips that pass while the
+     * coefficient is low enough for the grain to be imperceptible.
      */
     var noiseCoefficient: Float
 }
 
 /**
- * Applies brightness, contrast, and saturation adjustments to the backdrop.
+ * Applies brightness, contrast and saturation. Brightness works in linear (gamma 2.2) space via a
+ * runtime shader — a linear `ColorMatrix` offset would shift hue.
  *
- * Brightness is applied in linear (gamma 2.2) space via a runtime shader to avoid
- * the hue shift a linear `ColorMatrix` offset would introduce.
- *
- * @param brightness Brightness adjustment applied in linear space. 0 (default) leaves brightness unchanged.
- * @param contrast Contrast multiplier. 1 (default) leaves contrast unchanged.
- * @param saturation Saturation multiplier. 1 (default) leaves saturation unchanged.
+ * @param brightness Brightness in linear space; 0 leaves it unchanged.
+ * @param contrast Contrast multiplier; 1 leaves it unchanged.
+ * @param saturation Saturation multiplier; 1 leaves it unchanged.
  */
 fun BackdropEffectScope.colorControls(
     brightness: Float = 0f,
@@ -98,30 +94,23 @@ fun BackdropEffectScope.colorControls(
     renderEffect = renderEffect.chain(effect)
 }
 
-/**
- * Chains an arbitrary [RenderEffect] onto the backdrop effect pipeline.
- *
- * @param effect The [RenderEffect] to chain onto [BackdropEffectScope.renderEffect].
- */
+/** Chains an arbitrary [RenderEffect] onto [BackdropEffectScope.renderEffect]. */
 fun BackdropEffectScope.effect(effect: RenderEffect) {
     renderEffect = renderEffect.chain(effect)
 }
 
 /**
- * Applies a custom runtime shader effect to the backdrop.
+ * Applies a custom runtime shader effect.
  *
- * **Pixel-space uniforms must be scaled by [BackdropEffectScope.downscaleFactor].** When chained
- * after [blur] (or any effect that raises [BackdropEffectScope.downscaleFactor]), the backdrop
- * layer is recorded at `1 / downscaleFactor` resolution, and the shader receives `coord` values
- * in the downscaled layer's pixel space. Any uniform that describes a pixel-space distance
- * (size, padding/offset, corner radii, refraction band, …) must be divided by
- * [BackdropEffectScope.downscaleFactor] inside [block], otherwise the geometry will sit far
- * outside the downscaled layer's bounds and every sample will land on transparent black.
+ * **Pixel-space uniforms must be divided by [BackdropEffectScope.downscaleFactor].** After [blur]
+ * (or any effect raising it) the layer is recorded at `1 / downscaleFactor`, and the shader gets
+ * `coord` in that downscaled space — size, padding, corner radii, band widths etc. must follow,
+ * or the geometry lands outside the layer and samples transparent black.
  *
  * @param key Cache key for the compiled shader.
  * @param shaderString The AGSL/SkSL shader source code.
- * @param uniformShaderName The name of the shader uniform that receives the input image.
- * @param block Lambda to set uniforms on the shader before rendering.
+ * @param uniformShaderName The uniform that receives the input image.
+ * @param block Sets uniforms on the shader before rendering.
  */
 fun BackdropEffectScope.runtimeShaderEffect(
     key: String,
@@ -147,7 +136,7 @@ internal abstract class BackdropEffectScopeImpl :
     override var layoutDirection: LayoutDirection = LayoutDirection.Ltr
     override var padding: Float = 0f
     override var renderEffect: RenderEffect? = null
-    override var downscaleFactor: Int = 1
+    override var downscaleFactor: Float = 1f
     override var noiseCoefficient: Float = 0f
 
     var runtimeShaderCache: RuntimeShaderCache = DefaultRuntimeShaderCache()
@@ -179,13 +168,11 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedBlurRadiusY: Float = Float.NaN
     internal var cachedBlurSizeW: Float = Float.NaN
     internal var cachedBlurSizeH: Float = Float.NaN
-    internal var cachedBlurExp: Int = -1
+    internal var cachedBlurScale: Float = -1f
     internal var cachedBlurResult: RenderEffect? = null
 
-    // blendColors()/colorControls() build RenderEffects that don't depend on the animating radius,
-    // so cache them: a fixed tint/adjustment rebuilds once, not per frame. A RenderEffect captures
-    // its shader's uniforms when created, so a built effect is unaffected by later re-sets of the
-    // tree-shared RuntimeShader — reuse across frames is safe.
+    // blendColors()/colorControls() don't depend on the animating radius, so cache them: a fixed
+    // tint rebuilds once. A built effect captured its uniforms, so sharing the RuntimeShader is safe.
     internal var cachedBlendColors: BlurColors? = null
     internal var cachedBlendResult: RenderEffect? = null
     internal var cachedColorBrightness: Float = Float.NaN
@@ -207,30 +194,23 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgResult: RenderEffect? = null
 
     /**
-     * True while the draw path renders the gradient ramp via the multi-level composite:
-     * [progressiveBlur] then only records radii and skips building its (never drawn) loop-shader
-     * effect. Cleared when the composite is unsupported so the fallback gets a full build.
+     * True while the draw path renders the ramp as a multi-level composite: [progressiveBlur] then
+     * only records radii and skips its (never drawn) effect. Cleared when the composite is
+     * unsupported, so the fallback builds fully.
      */
     internal var progressiveCompositeActive: Boolean = false
 
-    /**
-     * Effects chained before [progressiveBlur] while [progressiveCompositeActive] — the composite's
-     * pre-blur chain; what's chained after stays in [renderEffect] as the post-blur chain.
-     */
+    /** Effects chained before [progressiveBlur] in composite mode; later ones stay post-blur. */
     internal var progressivePreEffect: RenderEffect? = null
 
     /**
-     * A [blendColors] call directly following [progressiveBlur] while [progressiveCompositeActive],
-     * recorded instead of built: the composite folds it into the stack's ramp-weighted single
-     * pass — the SrcOver branch form would re-evaluate the whole level stack for its second
-     * reference (platform filter caches don't dedupe shared instances).
+     * A [blendColors] call directly after [progressiveBlur] in composite mode, recorded instead of
+     * built: the composite folds it into the stack's single ramp-weighted pass, where the SrcOver
+     * branch form would evaluate the level stack twice.
      */
     internal var progressivePostBlend: BlurColors? = null
 
-    /**
-     * Platform scratch for progressiveCompositeEffect's radius-independent caches (Android keeps
-     * its gradient band masks here). Opaque to common code; dropped on [reset].
-     */
+/** Platform scratch for the composite's radius-independent caches; dropped on [reset]. */
     internal var progressiveMaskScratch: Any? = null
 
     // Full-res noise pass cache, keyed on chain input identity + coefficient: keeps the chained
@@ -265,7 +245,7 @@ internal abstract class BackdropEffectScopeImpl :
     fun apply(effects: BackdropEffectScope.() -> Unit) {
         padding = 0f
         renderEffect = null
-        downscaleFactor = 1
+        downscaleFactor = 1f
         noiseCoefficient = 0f
         blurBuiltPaddedW = Float.NaN
         blurBuiltPaddedH = Float.NaN
@@ -279,16 +259,15 @@ internal abstract class BackdropEffectScopeImpl :
             cachedProgRadiusY = Float.NaN
         }
         effects()
-        // blur() bakes its sampling clamp from the padding at its call site; if a later effect
-        // raised the padding, re-run once with the final value preset (padding only grows, so
-        // one pass converges). Otherwise the clamp sits inside the recording and its bottom/right
-        // edge smears.
+        // blur() bakes its sampling clamp from the padding at its call site. If a later effect
+        // raised the padding, re-run once (padding only grows, so one pass converges) — otherwise
+        // the clamp sits inside the recording and the bottom/right edge smears.
         if (!blurBuiltPaddedW.isNaN() &&
             (blurBuiltPaddedW != size.width + padding * 2f || blurBuiltPaddedH != size.height + padding * 2f)
         ) {
             val finalPadding = padding
             renderEffect = null
-            downscaleFactor = 1
+            downscaleFactor = 1f
             noiseCoefficient = 0f
             blurBuiltPaddedW = Float.NaN
             blurBuiltPaddedH = Float.NaN
@@ -310,7 +289,7 @@ internal abstract class BackdropEffectScopeImpl :
         layoutDirection = LayoutDirection.Ltr
         padding = 0f
         renderEffect = null
-        downscaleFactor = 1
+        downscaleFactor = 1f
         noiseCoefficient = 0f
         blurBuiltPaddedW = Float.NaN
         blurBuiltPaddedH = Float.NaN
@@ -318,7 +297,7 @@ internal abstract class BackdropEffectScopeImpl :
         cachedBlurRadiusY = Float.NaN
         cachedBlurSizeW = Float.NaN
         cachedBlurSizeH = Float.NaN
-        cachedBlurExp = -1
+        cachedBlurScale = -1f
         cachedBlurResult = null
         cachedBlendColors = null
         cachedBlendResult = null

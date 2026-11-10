@@ -39,29 +39,20 @@ internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 
-private const val PROGRESSIVE_MAX_DOWNSCALE_EXP = 4
-
 /**
- * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
- * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps
- * are merged into one bilinear fetch at their weight-averaged fractional offset (the per-pixel-σ
- * analogue of [buildBlurShader]'s static pair merge; child sampling is bilinear on both
- * platforms), sampled as symmetric ± pairs with the center hoisted out — halving the texture
- * fetches. The loop bound [maxTap] must be an EVEN compile-time constant (AGSL) — pick it via
- * [progressiveLoopTapBound] so a small max radius doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP]
- * unrolled iterations per fragment.
+ * Builds the separable **progressive** Blur shader: each fragment derives its radius from the
+ * two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps merge
+ * into one bilinear fetch at their weight-averaged offset (per-pixel-σ form of [buildBlurShader]'s
+ * pair merge), sampled as symmetric ± pairs with the center hoisted out. [maxTap] must be an even
+ * compile-time constant (AGSL); pick it via [progressiveLoopTapBound].
  *
- * The outermost tap feathers in over its last pixel of reach (`clamp(radius − i + 1, 0, 1)`),
- * keeping the kernel — its normalization AND the merged offsets — continuous in radius: a hard
- * cutoff drops taps with weight up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer
- * offsets, which reads as equal-radius stripes along the gradient. The feather also makes the
- * kernel collapse smoothly to identity at radius 0, so the early-exit is a pure fast path for
- * the clear plateau, not a visible switch.
+ * The outermost tap feathers in over its last pixel (`clamp(radius − i + 1, 0, 1)`), keeping
+ * normalization and offsets continuous in radius — a hard cutoff drops taps of weight up to
+ * `e⁻² ≈ 0.135`, which reads as equal-radius stripes along the gradient — and collapsing the kernel
+ * smoothly at radius 0, so the early exit is a fast path, not a visible switch.
  *
- * With [masked], the sharp overlay's clear-end cross-fade weight (`smoothstep(clamp(3·raw′ − 2))`
- * over its own `in_maskBand`/`in_maskCurve`) is folded into the output, saving the separate
- * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments (the band bbox's reach margin,
- * where the radius is at its most expensive) skip the kernel outright.
+ * With [masked], the sharp end's cross-fade weight is folded in, saving the separate
+ * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments skip the kernel outright.
  */
 internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
@@ -145,21 +136,24 @@ internal fun progressiveBlurShaderForTap(tapBound: Int, masked: Boolean = false)
 }
 
 /**
- * Compile-time loop bound for [maxRadius]: the next multiple of 4 covering it, capped at
- * [PROGRESSIVE_BLUR_MAX_TAP]. Quantizing keeps the shader-variant count small (and an animating
- * radius from recompiling per frame) while a small radius skips most of the unrolled iterations
- * the full bound would cost per fragment.
+ * Compile-time loop bound for [maxRadius]: the next multiple of 4, capped at
+ * [PROGRESSIVE_BLUR_MAX_TAP]. Quantizing bounds the shader-variant count (an animating radius must
+ * not recompile per frame) while a small radius still skips most unrolled iterations.
  */
 internal fun progressiveLoopTapBound(maxRadius: Float): Int {
     val needed = kotlin.math.ceil(maxRadius).toInt()
     return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
 }
 
+/**
+ * Loop-shader keys `[axis][bucket][tap]`. The progressive path only passes ladder levels (buckets
+ * 0/4/8/12/16), so most slots stay empty; sharing the chain's bucket scheme avoids a second one.
+ */
 private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
-    Array(PROGRESSIVE_MAX_DOWNSCALE_EXP + 1) { exp ->
+    Array(LEVEL_BUCKETS) { bucket ->
         Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
             if (tap > 0 && tap % 4 == 0) {
-                "LMPGaussLoop_${if (axis == 0) 'H' else 'V'}_d${1 shl exp}_t$tap"
+                "LMPGaussLoop_${if (axis == 0) 'H' else 'V'}_b${bucket}_t$tap"
             } else {
                 ""
             }
@@ -167,7 +161,7 @@ private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<String>>> = Array(2) { axis
     }
 }
 
-internal fun progressiveLoopShaderKey(axis: Int, downScale: Int, tap: Int): String = PROGRESSIVE_LOOP_KEYS[axis][downScale.countTrailingZeroBits()][tap]
+internal fun progressiveLoopShaderKey(axis: Int, downScale: Float, tap: Int): String = PROGRESSIVE_LOOP_KEYS[axis][levelBucket(downScale)][tap]
 
 private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
     Array(2) { masked ->
@@ -189,18 +183,15 @@ internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
 internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
 
 /**
- * Multi-level progressive composite (Skiko multi-child runtime shader): three graduated Gaussian
- * levels ([blur0] strongest … [blur2] lightest) interpolated along the gradient so the blur
- * strength itself ramps — graduated levels are what make the ramp read as progressive rather than
- * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
- * lightest level (degenerating the last mix segment; the true sharp end is a separate
- * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]) — except at full resolution,
- * where [clearChild] binds the source and the blend to sharp completes in-stack. Android builds
- * the identical image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
- * walk's derivative kinks at the segment stops otherwise read as Mach-band stripes, and zeroing
- * the slope at the stops removes them without spatial noise (which would scale with the
- * downscale's texel size). Must stay in lockstep with [PROGRESSIVE_LEVEL_MASK_SHADER]'s weight
- * smoothstep — `s(1 − x) = 1 − s(x)` is what keeps the Android DAG identical to this mix chain.
+ * Multi-level progressive composite (Skiko multi-child shader): three graduated Gaussian levels
+ * ([blur0] strongest … [blur2] lightest) interpolated along the gradient, so the blur strength
+ * itself ramps — that is what reads as progressive rather than one blur cross-faded with sharp.
+ * Runs on the downscaled layer with [clearChild] bound to the lightest level, degenerating the last
+ * mix segment (the sharp end is a separate full-resolution overlay) — except at exp 0, where
+ * [clearChild] binds the source and the blend to sharp completes in-stack. Android builds the same
+ * image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped:
+ * without it the walk's derivative kinks at the stops read as Mach-band stripes. Keep in lockstep
+ * with [PROGRESSIVE_LEVEL_MASK_SHADER]'s smoothstep (`s(1 − x) = 1 − s(x)`).
  */
 internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader clearChild;
@@ -242,10 +233,9 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
 """
 
 /**
- * Renormalizes a premultiplied blur result to opaque — [buildBlurShader]'s unpremul terminator as
- * a standalone pass. Chained after the Android progressive stack's unmasked base blur, the one
- * level whose alpha nothing else renormalizes (masked levels get it inline from
- * [PROGRESSIVE_LEVEL_MASK_SHADER]; the Skiko composite applies it as its own terminator).
+ * Renormalizes a premultiplied blur to opaque — [buildBlurShader]'s terminator as its own pass, for
+ * the Android stack's unmasked base level (masked levels get it inline; the Skiko composite applies
+ * its own).
  */
 internal const val UNPREMUL_SHADER = """
     uniform shader child;
@@ -260,18 +250,14 @@ internal const val UNPREMUL_SHADER = """
 """
 
 /**
- * Band mask for the progressive composite: weight `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
- * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
- * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
- * rising `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end (the full-resolution overlay, or the
- * Android stack's native source level at full resolution). The clamped
- * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
- * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
- * platforms zero the walk's derivative at the segment stops alike. The child is renormalized to
- * opaque before weighting — this is the Android masked levels' unpremul terminator (their native
- * blurs mix in the padding ring's transparency), folded in here to save a pass; a no-op for the
- * already-opaque children of the other mask uses.
+ * Band mask for the progressive composite: `clamp(in_level − in_slope·raw, 0, 1)` of the
+ * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2}: the Android stack DAG's level stops
+ * (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1`: the continuous
+ * `1 − raw` ramp for the post chain; `in_level = −2`, `in_slope = −3`: the rising
+ * `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
+ * complementary to the mix chain (`s(1 − x) = 1 − s(x)`), so both platforms zero the walk's
+ * derivative at the stops alike. The child is renormalized to opaque before weighting — the
+ * unpremul terminator for the Android masked levels, folded in to save a pass and a no-op elsewhere.
  */
 internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;
@@ -392,21 +378,16 @@ internal const val DOWNSAMPLE_4X_SHADER = """
 """
 
 /**
- * Builds the multi-layer blend mode shader, optionally including the extended-mode helpers.
+ * Builds the multi-layer blend mode shader.
  *
- * - `includeExtended = false` (all layers have `mode <= 28`): emits only the Porter-Duff /
- *   separable / non-separable HSL functions + `doBlend` dispatch + a flat `main` loop. The
- *   Lab color-space helpers, `pow()`-heavy conversions and the `getBlendModeColor` dispatch
- *   are omitted entirely, shrinking the program and freeing the register budget the driver
- *   would otherwise reserve for the longest path.
- * - `includeExtended = true` (any layer has `mode > 28`): emits the full set, identical to
- *   the prior monolithic shader.
- * - `rampMix = true`: the progressive composite's folded post pass — the blend chain runs on a
- *   single child eval and the result is ramp-mixed over the untouched source, replacing the
- *   SrcOver branch form that evaluates the stack below twice.
- *
- * The standard family is the common case — keeping it lean lifts move-GPU occupancy on
- * Adreno / Mali where Lab path register pressure otherwise capped warp parallelism.
+ * - `includeExtended = false` (all modes ≤ 28): only the Porter-Duff / separable / non-separable HSL
+ *   functions, the `doBlend` dispatch and a flat `main`. Dropping the Lab helpers and the
+ *   `getBlendModeColor` dispatch shrinks the program and frees the register budget the driver would
+ *   reserve for the longest path — this is the common case, and keeping it lean lifts occupancy on
+ *   Adreno / Mali.
+ * - `includeExtended = true` (any mode > 28): the full set.
+ * - `rampMix = true`: the progressive composite's folded post pass — one child eval, ramp-mixed over
+ *   the untouched source instead of the SrcOver branch form that evaluates the stack twice.
  */
 internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = false): String = buildString {
     append(BLEND_MODE_SHADER_HEADER)

@@ -378,7 +378,7 @@ Box(
 | `shape` | Shape | 当前裁剪形状 |
 | `padding` | Float | 模糊溢出的额外内边距 |
 | `renderEffect` | RenderEffect? | 累积的效果链 |
-| `downscaleFactor` | Int | 降采样系数（1、2、4、8、16） |
+| `downscaleFactor` | Float | 降采样档位（1…16，1/4 八度栅格） |
 | `noiseCoefficient` | Float | 噪声抖动系数 |
 
 ## 属性

@@ -14,45 +14,58 @@ import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.exp
+import kotlin.math.ln
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
 /** Conversion factor from blur radius in pixels to Blur sigma. */
 internal const val BLUR_RADIUS_TO_SIGMA = 0.45f
 
-/**
- * Max kernel reach in downsampled pixels: the outermost merged tap pair tops out just below offset
- * 12.5, where bilinear sampling reaches texel 13 — so 13 exactly covers the kernel, no darkening.
- */
+/** Kernel reach in level texels: the outermost tap pair tops out below 12.5, bilinear reaches 13. */
 internal const val BLUR_KERNEL_REACH = 13
 
 private const val WEIGHT_THRESHOLD = 0.002
 
-/** Highest downscale exponent (downScale = 1 shl exp); covers 1/2/4/8/16. */
-private const val MAX_DOWNSCALE_EXP = 4
+/** ln(2), for converting a natural log back to an octave count. */
+private const val LN2 = 0.6931472f
+
+/** Minimum σ a level carries, i.e. `level = σ / MIN_LEVEL_SIGMA`; the ladder's thresholds sit where
+ * that ratio crosses a power of two. */
+private const val MIN_LEVEL_SIGMA = 2.5f
 
 /**
- * Pre-built Gaussian shader-cache keys, indexed `[tapCount][exp]` (exp = log2(downScale)), so
- * the per-frame rebuild path in [createBlurEffect] avoids allocating a key string per axis.
+ * Level grid, 1/4 octave: snapping keeps the recording's size and sampling phase stable between
+ * steps (~19% in scale, a fifth of the old 2× jump). A per-radius level resamples every frame.
+ */
+private const val BUCKETS_PER_OCTAVE = 4
+
+/** Number of levels on the 1/4-octave grid, i.e. log2(16) × [BUCKETS_PER_OCTAVE] + 1. */
+internal const val LEVEL_BUCKETS = 17
+
+/**
+ * Gaussian shader-cache keys, `[tapCount][bucket]`: the bucket separates levels live in the same
+ * frame without giving every level value its own shader instance.
  */
 private val BLUR_H_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
-    Array(MAX_DOWNSCALE_EXP + 1) { exp -> "LMGauss${n}_H_d${1 shl exp}" }
+    Array(LEVEL_BUCKETS) { b -> "LMGauss${n}_H_b$b" }
 }
 private val BLUR_V_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
-    Array(MAX_DOWNSCALE_EXP + 1) { exp -> "LMGauss${n}_V_d${1 shl exp}" }
+    Array(LEVEL_BUCKETS) { b -> "LMGauss${n}_V_b$b" }
 }
 
+/** Cache-key bucket for a level: log2(scale) in [BUCKETS_PER_OCTAVE]-ths, i.e. the grid index. */
+internal fun levelBucket(scale: Float): Int = ((ln(scale.coerceIn(1f, 16f)) / LN2) * BUCKETS_PER_OCTAVE).roundToInt().coerceIn(0, LEVEL_BUCKETS - 1)
+
 /**
- * Builds the separable Blur [RenderEffect] (H then V) for an EXPLICIT [downScale] level using the
- * per-axis variances already compensated for that level's box prefilter (see [adjustedVarianceForExp]).
- * The shader cache keys carry [downScale] so each level builds from a separate shader instance and
- * never aliases another level's uniform arrays.
+ * Builds the separable Blur [RenderEffect] (H then V) at [downScale] from variances already
+ * box-compensated for that level (see [adjustedVarianceForScale]).
  */
 internal fun createBlurEffect(
     radiusX: Float,
     radiusY: Float,
-    downScale: Int,
+    downScale: Float,
     adjustedVarianceX: Float,
     adjustedVarianceY: Float,
     size: Size,
@@ -60,17 +73,16 @@ internal fun createBlurEffect(
 ): RenderEffect? {
     if (radiusX <= 0f && radiusY <= 0f) return null
 
-    // Texture size uses the same integer arithmetic as drawBackdropLayer
-    // to match the actual recording dimensions (size includes padding).
-    val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
-    val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
+    // `size / downScale` is the recording's texel space, which is the space the shader samples in;
+    // the clamp sits just inside it.
+    val texW = (size.width / downScale).coerceAtLeast(1f)
+    val texH = (size.height / downScale).coerceAtLeast(1f)
 
     val rawScratch = scope.blurRawWeights
     val paramOffsets = scope.blurParamOffsets
     val paramWeights = scope.blurParamWeights
 
-    // exp = log2(downScale); downScale is always a power of two in 1..16.
-    val exp = downScale.countTrailingZeroBits()
+    val bucket = levelBucket(downScale)
 
     var effect: RenderEffect? = null
 
@@ -87,7 +99,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val hShader = scope.obtainRuntimeShader(
-                BLUR_H_KEYS[n][exp],
+                BLUR_H_KEYS[n][bucket],
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
@@ -109,7 +121,7 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
             }
             val vShader = scope.obtainRuntimeShader(
-                BLUR_V_KEYS[n][exp],
+                BLUR_V_KEYS[n][bucket],
                 BLUR_SHADER_BY_TAP[n],
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
@@ -125,16 +137,14 @@ internal fun createBlurEffect(
 }
 
 /**
- * Builds the separable **progressive** Blur [RenderEffect] (H then V): a variable-radius Gaussian
- * whose radius ramps from full to zero along [angleDeg], at the same adaptive [downScale] as
- * [createBlurEffect]. The gradient axis/band ([startFraction]/[endFraction] of the component's
- * projected extent) are converted here into the downscaled, padded layer's coordinate space;
- * [size] is the padded layer size, [compW]/[compH] the unpadded component in full-resolution px.
+ * Builds the separable **progressive** Blur [RenderEffect]: radius ramps to zero along [angleDeg] at
+ * [downScale]. The gradient band is converted here into the downscaled, padded layer's space; [size]
+ * is that padded size, [compW]/[compH] the unpadded component in full-resolution px.
  */
 internal fun createProgressiveBlurEffect(
     radiusX: Float,
     radiusY: Float,
-    downScale: Int,
+    downScale: Float,
     adjustedVarianceX: Float,
     adjustedVarianceY: Float,
     size: Size,
@@ -149,8 +159,8 @@ internal fun createProgressiveBlurEffect(
 ): RenderEffect? {
     if (radiusX <= 0f && radiusY <= 0f) return null
 
-    val texW = (size.width.toInt() / downScale).coerceAtLeast(1).toFloat()
-    val texH = (size.height.toInt() / downScale).coerceAtLeast(1).toFloat()
+    val texW = (size.width / downScale).coerceAtLeast(1f)
+    val texH = (size.height / downScale).coerceAtLeast(1f)
 
     // Gradient axis + band in the downscaled, padded layer's coordinate space.
     val rad = angleDeg * (PI / 180.0)
@@ -213,18 +223,13 @@ internal fun createProgressiveBlurEffect(
 }
 
 /**
- * Converts radii + gradient into the [progressiveStackEffect] inputs: per-level box-compensated
- * sigmas in the downscaled layer's space and the band in downscaled, padded px. Zero radii are
- * valid — the levels collapse to identity while the pre/post chains keep riding the ramp;
- * returning null instead would poison the caller's supported flag.
+ * Converts radii + gradient into [progressiveStackEffect] inputs: per-level box-compensated sigmas
+ * in the downscaled layer's space, the band in downscaled padded px. Zero radii are valid (levels
+ * collapse to identity, the pre/post chains keep riding the ramp); at `exp == 0` the stack binds its
+ * clear end to the native source and the caller skips the sharp overlay.
  *
- * At `exp == 0` the levels run at full resolution and the stack binds its clear end to the
- * native source (`nativeSharpEnd`, see [progressiveStackEffect]) — the caller skips the sharp
- * overlay entirely.
- *
- * [postBlend] is the recorded blend-only post chain, folded in as a single ramp-mixing pass
- * chained after the stack ([buildRampBlendColorsEffect]) so the stack is evaluated exactly once;
- * [postEffect] is the general branch form and at most one of the two is non-null.
+ * [postBlend] is the recorded blend-only post chain folded into one ramp-mixing pass
+ * ([buildRampBlendColorsEffect]); [postEffect] is the general branch, and at most one is non-null.
  */
 internal fun createProgressiveStackEffect(
     radiusX: Float,
@@ -242,7 +247,7 @@ internal fun createProgressiveStackEffect(
     postBlend: BlurColors?,
     scope: BackdropEffectScopeImpl,
 ): RenderEffect? {
-    val downScale = 1 shl exp
+    val downScale = (1 shl exp).toFloat()
     val sigmaX = radiusX.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA
 
@@ -262,7 +267,7 @@ internal fun createProgressiveStackEffect(
     fun levelSigma(sigma: Float, fraction: Float): Float {
         val target = sigma * fraction
         if (target <= 0f) return 0f
-        val residual = (target * target - IMPLIED_BOX_VARIANCE[exp]) / (downScale * downScale)
+        val residual = (target * target - impliedBoxVarianceForScale(downScale)) / (downScale * downScale)
         return if (residual > 0.01f) sqrt(residual) else 0f
     }
 
@@ -292,15 +297,13 @@ internal fun createProgressiveStackEffect(
 }
 
 /**
- * Blur radius (loop-shader convention, `radius = 2σ − 1`) matching `blur2`'s total effective
- * Gaussian at downscale [exp] — the larger of its target sigma ([PROGRESSIVE_LEVEL_FRACTION_2])
- * and the downscale cascade's box-prefilter floor, which the downscaled layer can never render below.
- * Capped at the loop shader's constant tap bound. This is what the sharp overlay's variable blur
- * must start from for a seamless handoff (see [createProgressiveSharpOverlayEffect]).
+ * Loop-shader radius (`2σ − 1`) of `blur2`'s effective Gaussian at [exp]: the larger of its target
+ * sigma and the cascade's box floor, capped at the tap bound. The sharp overlay starts here so the
+ * handoff is seamless.
  */
 internal fun progressiveSharpLoopRadius(radius: Float, exp: Int): Float {
     val sigma = radius.coerceAtLeast(0f) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_2
-    val effSigma = sqrt(maxOf(sigma * sigma, IMPLIED_BOX_VARIANCE[exp]))
+    val effSigma = sqrt(maxOf(sigma * sigma, impliedBoxVarianceForScale((1 shl exp).toFloat())))
     return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
 }
 
@@ -312,21 +315,13 @@ private fun progressiveSharpRawThreshold(curve: Float): Float {
 }
 
 /**
- * Full effect for the full-resolution sharp overlay: an optional variable-radius loop blur
- * (H then V) with the ramp's clear-end cross-fade mask (`clamp(3·raw − 2, 0, 1)`) folded into
- * the last pass ([PROGRESSIVE_LEVEL_MASK_SHADER] runs standalone only when no axis blurs).
+ * Full-resolution sharp overlay: an optional variable loop blur (H then V) with the ramp's clear-end
+ * mask (`clamp(3·raw − 2, 0, 1)`) folded into the last pass. The radius ramps from
+ * [progressiveSharpLoopRadius] at the band's onset to zero at the clear end, so the handoff reads as
+ * one continuous blur instead of sharp content alpha-faded over a still-blurred base.
  *
- * The loop blur makes the handoff read as one continuous blur instead of a double exposure:
- * alpha-fading pixel-sharp content over the stack's `blur2` would superimpose crisp edges on a
- * still-blurred base. The overlay's own radius instead ramps from [progressiveSharpLoopRadius]
- * (matching `blur2`, downscale floor included) at the band's onset down to zero at the clear
- * end — at the cross-fade the two images are equally blurred, and the visible sharpening comes
- * from the continuous ramp alone.
- *
- * Band in unpadded component px; [originX]/[originY] — the overlay layer's top-left in component
- * space (it records only the band's bbox, see [progressiveSharpBandBounds]) — is folded into the
- * band so layer-local coords line up; [bandW]/[bandH] is that layer's size, for the sampling
- * clamp. [exp] is the level stack's downscale exponent.
+ * [originX]/[originY] place the band-only layer in component space (see
+ * [progressiveSharpBandBounds]), [bandW]/[bandH] clamp its sampling, [exp] is the stack's exponent.
  */
 internal fun createProgressiveSharpOverlayEffect(
     radiusX: Float,
@@ -413,12 +408,9 @@ internal fun createProgressiveSharpOverlayEffect(
 }
 
 /**
- * Component-space bounding box of the region where [createProgressiveSharpOverlayEffect]'s mask is
- * non-zero (`pow(smoothstep(raw), curve) > 2/3`, inverted analytically to a threshold line on the
- * gradient projection, clipped to the component rect with a [margin] against rounding and the
- * overlay loop blur's tap reach). The sharp overlay records and draws only this sub-rect instead
- * of the whole component. Null = the band lies entirely outside the component and the overlay
- * can be skipped outright.
+ * Component-space bbox of the region where the overlay mask is non-zero (`smoothstep(raw)^curve >
+ * 2/3`, inverted to a threshold line on the gradient, clipped with a [margin] for rounding and tap
+ * reach). Only this sub-rect is recorded; null means the band misses the component.
  */
 internal fun progressiveSharpBandBounds(
     compW: Float,
@@ -478,14 +470,13 @@ internal fun progressiveSharpBandBounds(
 }
 
 /**
- * Implied box-prefilter variance (full-resolution px²) absorbed by the downsample at each level;
- * index = log2(downScale). The separable Gaussian only supplies the remaining variance:
- * `adjustedVariance = (σ² - impliedBox) / downScale²`. These values reproduce the original
- * branch/halving constants exactly, and are calibrated against the pop-free 4×→8× boundary.
+ * Box-prefilter variance (source px²) the downscale absorbs, anchored at 1/2/4/8/16 and interpolated
+ * in log2 between them. The kernel supplies the rest: `adjusted = (σ² − implied) / level²`. Values
+ * reproduce the original branch/halving constants, calibrated on the pop-free 4×→8× boundary.
  */
 private val IMPLIED_BOX_VARIANCE = floatArrayOf(0f, 3.0265f, 7.5625f, 9.0f, 202.696f)
 
-/** Downscale exponent (downScale = `1 shl exp`, i.e. 1/2/4/8/16) chosen for a given σ². */
+/** Downscale exponent (downScale = `1 shl exp`) of the power-of-two ladder used by the progressive stack. */
 internal fun downScaleExpFor(sigmaSquared: Float): Int = when {
     sigmaSquared >= 1945f -> 4
     sigmaSquared > 400f -> 3
@@ -494,20 +485,31 @@ internal fun downScaleExpFor(sigmaSquared: Float): Int = when {
     else -> 0
 }
 
-/** Box-compensated Gaussian variance (in downscaled px²) for [sigmaSquared] at downscale [exp]. */
-internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float {
-    val ds = (1 shl exp).toFloat()
-    return ((sigmaSquared - IMPLIED_BOX_VARIANCE[exp]) / (ds * ds)).coerceAtLeast(0.1f)
+/** Level for a blur of variance [sigmaSquared]: `σ / [MIN_LEVEL_SIGMA]`, clamped to 1..16. */
+private fun levelScaleFor(sigmaSquared: Float): Float = (sqrt(sigmaSquared.coerceAtLeast(0f)) / MIN_LEVEL_SIGMA).coerceIn(1f, 16f)
+
+/** Recording level for [sigmaSquared], snapped to the grid in [BUCKETS_PER_OCTAVE] (17 levels). */
+internal fun quantizedLevelScale(sigmaSquared: Float): Float = 2f.pow(levelBucket(levelScaleFor(sigmaSquared)).toFloat() / BUCKETS_PER_OCTAVE)
+
+/** Implied box-prefilter variance (source px²) at level [scale]. */
+internal fun impliedBoxVarianceForScale(scale: Float): Float {
+    val pos = (ln(scale.coerceIn(1f, 16f)) / LN2).coerceIn(0f, 4f)
+    val index = pos.toInt().coerceAtMost(3)
+    val t = pos - index
+    return IMPLIED_BOX_VARIANCE[index] + (IMPLIED_BOX_VARIANCE[index + 1] - IMPLIED_BOX_VARIANCE[index]) * t
 }
 
+/** Box-compensated Gaussian variance (in level px²) for [sigmaSquared] at level [scale]. */
+internal fun adjustedVarianceForScale(sigmaSquared: Float, scale: Float): Float = ((sigmaSquared - impliedBoxVarianceForScale(scale)) / (scale * scale)).coerceAtLeast(0.1f)
+
+/** [adjustedVarianceForScale] at a ladder level (the progressive stack's route). */
+internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float = adjustedVarianceForScale(sigmaSquared, (1 shl exp).toFloat())
+
 /**
- * Generates a 27-tap discrete kernel (-13..+13) from [variance], normalizes, then merges
- * adjacent pairs (0,1), (2,3), …, (12,13) via linear interpolation into [outOffsets] /
- * [outWeights] (writes the first [MAX_BLUR_TAPS] slots), and returns the actual tap count.
- *
- * Returns 0 (no taps produced) when [variance] is too small to contribute or when no pair
- * survives the weight threshold. Caller-provided scratch arrays let this run with zero
- * heap allocation across observe-driven invocations.
+ * Generates a 27-tap discrete kernel (-13..+13) from [variance], normalizes it, and merges adjacent
+ * pairs into [outOffsets]/[outWeights] (first [MAX_BLUR_TAPS] slots), returning the tap count.
+ * Returns 0 when the variance is too small or no pair survives the weight threshold. Scratch arrays
+ * keep the observe-driven path allocation-free.
  */
 internal fun computeBlurParamsInto(
     variance: Float,
@@ -531,10 +533,7 @@ internal fun computeBlurParamsInto(
 
     var tapCount = 0
 
-    // 3. Pair 0: merge center (offset 0) with offset 1.
-    //    In symmetric sampling, the center pixel is sampled twice (at +ε and -ε),
-    //    so its effective per-sample weight is halved.
-    //    Combined offset = w[1] / (w[0]/2 + w[1])
+    // Pair 0: the center is sampled twice (±ε), so its per-sample weight is halved.
     val halfCenter = rawScratch[0] * 0.5
     val w1 = rawScratch[1]
     if (halfCenter + w1 > 1e-6) {

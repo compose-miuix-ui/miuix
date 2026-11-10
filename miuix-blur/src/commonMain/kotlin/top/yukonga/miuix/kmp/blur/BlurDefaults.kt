@@ -11,15 +11,15 @@ import top.yukonga.miuix.kmp.material.GlassDefaults
 import kotlin.jvm.JvmInline
 
 /**
- * Color configuration applied after blur processing.
+ * Color configuration applied after blur.
  *
- * Compose treats [List] as unstable, so the `@Immutable` annotation alone does not stabilize
- * callers — prefer the remembered [BlurDefaults.blurColors] factory over direct construction.
+ * [List] is unstable to Compose, so `@Immutable` alone does not stabilize callers — prefer the
+ * remembered [BlurDefaults.blurColors] factory over direct construction.
  *
  * @param blendColors Colors blended over the blurred backdrop, drawn in order.
- * @param brightness Brightness adjustment in range [-1, 1]. 0 means no change.
- * @param contrast Contrast multiplier. 1 means no change.
- * @param saturation Saturation multiplier. 1 means no change.
+ * @param brightness Brightness in [-1, 1]; 0 means no change.
+ * @param contrast Contrast multiplier; 1 means no change.
+ * @param saturation Saturation multiplier; 1 means no change.
  */
 @Immutable
 data class BlurColors(
@@ -30,11 +30,8 @@ data class BlurColors(
 )
 
 /**
- * A single color blend entry applied over the blurred backdrop.
- *
- * Supports both standard SkBlendMode values (0-29, handled by GPU hardware)
- * and custom modes (100-121, 200-203, handled by runtime shader).
- * See [BlurBlendMode] for all available constants.
+ * One color blend entry over the blurred backdrop: standard SkBlendMode values (0-29, GPU hardware)
+ * or custom modes (100-121, 200-203, runtime shader). See [BlurBlendMode].
  *
  * @param color The color to blend.
  * @param mode The blend mode. Defaults to [BlurBlendMode.SrcOver].
@@ -46,12 +43,10 @@ data class BlendColorEntry(
 )
 
 /**
- * Blend mode for blur color blending.
+ * Blend mode for blur color blending: SkBlendMode ordinals (0-31) plus extended modes (100-121,
+ * 200-203) for Lab-space and linear-light operations.
  *
- * Wraps standard SkBlendMode values (0-31) plus extended modes (100-121, 200-203)
- * implementing Lab color space operations, linear light blending, and more.
- *
- * @property value The raw blend mode identifier; standard SkBlendMode ordinals (0-31) or extended custom codes.
+ * @property value The raw identifier (SkBlendMode ordinal or extended code).
  */
 @JvmInline
 value class BlurBlendMode(val value: Int) {
@@ -160,12 +155,12 @@ object BlurDefaults {
     val MaxBlurRadius: Float = 150f
 
     /**
-     * Creates a [BlurColors] instance with the given parameters.
+     * Remembers a [BlurColors] (see the type's doc for why the factory).
      *
      * @param blendColors Colors blended over the blurred backdrop, drawn in order.
-     * @param brightness Brightness adjustment in range [-1, 1]. 0 means no change.
-     * @param contrast Contrast multiplier. 1 means no change.
-     * @param saturation Saturation multiplier. 1 means no change.
+     * @param brightness Brightness in [-1, 1]; 0 means no change.
+     * @param contrast Contrast multiplier; 1 means no change.
+     * @param saturation Saturation multiplier; 1 means no change.
      */
     @Composable
     fun blurColors(

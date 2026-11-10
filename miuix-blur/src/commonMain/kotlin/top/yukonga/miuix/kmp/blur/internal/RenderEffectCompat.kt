@@ -13,40 +13,31 @@ import top.yukonga.miuix.kmp.material.RuntimeShader
  */
 internal expect fun RenderEffect?.chain(other: RenderEffect): RenderEffect
 
-/**
- * Creates a [RenderEffect] from a [RuntimeShader] that reads its input image
- * from the uniform named [uniformShaderName].
- */
+/** Creates a [RenderEffect] whose [RuntimeShader] reads its input from [uniformShaderName]. */
 internal expect fun runtimeShaderEffect(
     runtimeShader: RuntimeShader,
     uniformShaderName: String,
 ): RenderEffect
 
 /**
- * Builds the downscaled progressive **level stack** [RenderEffect]: the lightest Gaussian level as
- * an unmasked base with the two stronger levels band-masked and SrcOver-stacked on top ≡ the first
- * two mix segments of [PROGRESSIVE_COMPOSITE_SHADER]; the ramp's final blend to sharp is drawn
- * separately as a full-resolution overlay (see `createProgressiveSharpOverlayEffect`) so only that
- * band pays full-res cost. Skiko mixes the levels in one multi-child runtime shader; Android
- * builds the equivalent blend-mode DAG.
+ * Builds the downscaled progressive **level stack** [RenderEffect]: the lightest level as an
+ * unmasked base with the two stronger ones band-masked and SrcOver-stacked on top (≡ the first two
+ * mix segments of [PROGRESSIVE_COMPOSITE_SHADER]); the final blend to sharp is a separate
+ * full-resolution overlay, so only that band pays full-res cost. Skiko mixes the levels in one
+ * multi-child shader; Android builds the equivalent blend-mode DAG.
  *
- * Per-level sigmas are box-compensated, in the downscaled layer's space (0 skips that level's
- * blur); the band is in downscaled, padded px. [preEffect] wraps each level's input
- * (`pre → blur`); [postEffect] applies to the stack output, faded by the continuous `1 − raw`
- * ramp — weighting it per level instead would hold it flat for two thirds of the band (a visible
- * knee). The sharp overlay stays untouched, so every effect fades out with the blur.
+ * Per-level sigmas are box-compensated in the downscaled layer's space (0 skips a level), the band
+ * is in downscaled padded px. [preEffect] wraps each level's input; [postEffect] applies to the
+ * stack output faded by the continuous `1 − raw` ramp (weighting it per level would hold it flat for
+ * two thirds of the band — a visible knee). The sharp overlay stays untouched, so every effect fades
+ * out with the blur.
  *
- * [nativeSharpEnd] binds the ramp's clear end to the (pre-chained) source instead of leaving the
- * last mix segment degenerate: at full resolution (exp == 0) the source is already native pixels,
- * so the blend to sharp completes in-stack and the caller skips the sharp overlay. Implementations
- * must keep the stack's exact profile (same masks, same segment stops) — an approximate profile
- * visibly pops when an animating radius crosses the downscale boundary.
+ * [nativeSharpEnd] binds the clear end to the pre-chained source, so at exp 0 the blend to sharp
+ * completes in-stack and the caller skips the overlay. Implementations must keep the stack's exact
+ * profile (masks and segment stops): an approximate one pops when an animating radius crosses the
+ * downscale boundary. Returns null only where the platform can't express the stack.
  *
- * Returns null only where the platform cannot express the stack; callers then fall back to the
- * uniform draw path.
- *
- * [scope] supplies the shader cache plus [BackdropEffectScopeImpl.progressiveMaskScratch] for
- * radius-independent platform caches.
+ * [scope] supplies the shader cache plus [BackdropEffectScopeImpl.progressiveMaskScratch].
  */
 internal expect fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,

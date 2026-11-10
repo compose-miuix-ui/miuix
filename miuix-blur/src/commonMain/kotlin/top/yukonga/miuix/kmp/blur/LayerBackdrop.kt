@@ -26,13 +26,11 @@ import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
 private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
 
 /**
- * Creates and remembers a [LayerBackdrop] that captures content from a [GraphicsLayer].
+ * Creates and remembers a [LayerBackdrop] over [graphicsLayer].
  *
- * Use [Modifier.layerBackdrop][layerBackdrop] on the content container to capture its
- * rendered output, then pass this [LayerBackdrop] to blur modifiers.
- *
- * The instance is keyed only on [graphicsLayer]; [onDraw] is read via [rememberUpdatedState]
- * so a fresh lambda each frame does not rebuild the backdrop and reset its layer coordinates.
+ * Mark the content with [Modifier.layerBackdrop][layerBackdrop], then pass this backdrop to the blur
+ * modifiers. Keyed only on [graphicsLayer]; [onDraw] is read via [rememberUpdatedState] (a fresh
+ * lambda each frame does not reset the layer coordinates), so it may close over state.
  *
  * @param graphicsLayer The graphics layer to record content into.
  * @param onDraw Custom draw logic for the layer content.
@@ -49,8 +47,7 @@ fun rememberLayerBackdrop(
 }
 
 /**
- * A [Backdrop] that draws from a captured [GraphicsLayer].
- * The layer content is captured via [Modifier.layerBackdrop][layerBackdrop].
+ * A [Backdrop] drawing from a captured [GraphicsLayer].
  *
  * @property graphicsLayer The [GraphicsLayer] holding the captured content drawn as the backdrop.
  */
@@ -75,7 +72,7 @@ class LayerBackdrop internal constructor(
         density: Density,
         coordinates: LayoutCoordinates?,
         layerBlock: (GraphicsLayerScope.() -> Unit)?,
-        downscaleFactor: Int,
+        downscaleFactor: Float,
     ) {
         val coordinates = coordinates ?: return
         val layerCoordinates = layerCoordinates ?: return
@@ -92,7 +89,7 @@ class LayerBackdrop internal constructor(
             if (layerBlock != null) {
                 with(obtainInverseLayerScope()) { inverseTransform(density, consumerSize, layerBlock) }
             }
-            if (downscaleFactor > 1) {
+            if (downscaleFactor > 1f) {
                 val inv = 1f / downscaleFactor
                 val scaledX = offset.x * inv
                 val scaledY = offset.y * inv

@@ -27,7 +27,7 @@ internal class ScrimBackdrop(
         density: Density,
         coordinates: LayoutCoordinates?,
         layerBlock: (GraphicsLayerScope.() -> Unit)?,
-        downscaleFactor: Int,
+        downscaleFactor: Float,
     ) {
         with(backdrop) {
             drawBackdrop(

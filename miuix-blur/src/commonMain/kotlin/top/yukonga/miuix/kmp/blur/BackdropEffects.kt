@@ -15,10 +15,12 @@ import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
 import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
+import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForScale
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
+import top.yukonga.miuix.kmp.blur.internal.quantizedLevelScale
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
@@ -27,22 +29,16 @@ import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeS
 internal const val MAX_BLEND_LAYERS = 8
 
 /**
- * Chains a separable Blur into the scope's [BackdropEffectScope.renderEffect],
- * adjusts [BackdropEffectScope.padding] to cover the kernel reach, and updates
+ * Chains a separable Blur into [BackdropEffectScope.renderEffect], raises
+ * [BackdropEffectScope.padding] to the kernel reach and sets
  * [BackdropEffectScope.downscaleFactor]. Non-positive radii skip that axis.
  *
- * Raising [BackdropEffectScope.padding] after [blur] is safe (the effect block re-runs once
- * with the final padding), but raising it beforehand avoids the rebuild.
- *
- * Typical use:
- * ```
- * Modifier.drawBackdrop(backdrop, shape = { shape }, effects = {
- *     blur(20f * density)
- * })
+ * ```kotlin
+ * Modifier.drawBackdrop(backdrop, shape = { shape }, effects = { blur(20f * density) })
  * ```
  *
  * @param radiusX Horizontal blur radius in pixels.
- * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX] for isotropic blur.
+ * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX].
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     if (!isRuntimeShaderSupported()) return
@@ -50,15 +46,13 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
 
-    // One level for every radius: the kernel absorbs the variance difference, so the level only
-    // trades resolution for reach.
+    // 1/4-octave grid: a step is ~19% in scale (a fifth of the old 2× jump), while size and
+    // sampling phase hold between steps — a per-radius level resampled every frame.
     val sigma = maxOf(sigmaX, sigmaY)
-    val exp = downScaleExpFor(sigma * sigma)
-    val sf = 1 shl exp
+    val scale = quantizedLevelScale(sigma * sigma)
 
-    // Padding covers the kernel reach in source pixels so recording size stays
-    // stable across radius changes within the same downscale level.
-    val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+    // Padding covers the kernel reach in source pixels, so the recorded size follows the level.
+    val kernelPadding = BLUR_KERNEL_REACH * scale
     if (kernelPadding > padding) {
         padding = kernelPadding
     }
@@ -75,16 +69,16 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
         scope.cachedBlurRadiusY == radiusY &&
         scope.cachedBlurSizeW == paddedW &&
         scope.cachedBlurSizeH == paddedH &&
-        scope.cachedBlurExp == exp
+        scope.cachedBlurScale == scale
     ) {
         scope.cachedBlurResult
     } else {
         createBlurEffect(
             radiusX,
             radiusY,
-            sf,
-            adjustedVarianceForExp(sigmaX * sigmaX, exp),
-            adjustedVarianceForExp(sigmaY * sigmaY, exp),
+            scale,
+            adjustedVarianceForScale(sigmaX * sigmaX, scale),
+            adjustedVarianceForScale(sigmaY * sigmaY, scale),
             Size(paddedW, paddedH),
             scope,
         ).also {
@@ -92,25 +86,21 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
             scope.cachedBlurRadiusY = radiusY
             scope.cachedBlurSizeW = paddedW
             scope.cachedBlurSizeH = paddedH
-            scope.cachedBlurExp = exp
+            scope.cachedBlurScale = scale
             scope.cachedBlurResult = it
         }
     } ?: return
 
-    downscaleFactor = sf
+    downscaleFactor = scale
     renderEffect = renderEffect?.chain(effect) ?: effect
 }
 
 /**
- * Chains a separable **progressive** (gradient) Blur into the scope's
- * [BackdropEffectScope.renderEffect]: a true variable-radius blur whose radius ramps continuously
- * from full to zero along [gradient]. It uses the same adaptive downscale as [blur], so it never
- * blocks/aliases at large radii — but that single downscale also means the `intensity → 0` end
- * samples the downscaled backdrop (soft, not pixel-sharp).
+ * Chains a **progressive** (gradient) Blur: radius ramps from full to zero along [gradient], on the
+ * same adaptive downscale as [blur] (so the clear end stays soft — no pixel-sharp pass).
  *
  * Paired with `drawBackdrop`'s `progressiveGradient` (as [Modifier.progressiveTextureBlur] wires),
- * the draw path renders the multi-level composite instead — a downscaled level stack plus a
- * genuinely sharp full-resolution clear end — and this call only records the target radii and
+ * the draw path renders the multi-level composite instead, and this only records the radii and
  * downscale for it.
  *
  * @param radiusX Horizontal blur radius in pixels at full strength.
@@ -125,20 +115,18 @@ fun BackdropEffectScope.progressiveBlur(
     if (!isRuntimeShaderSupported()) return
     val scope = impl
     if (scope.progressiveCompositeActive) {
-        // Composite mode: the level stack renders on the downscaled layer and is assembled after
-        // the effects block (once the post chain is known); the sharp end is a separate full-res
-        // overlay (in-stack at full resolution). Record radii + downscale here and split the
-        // chain. Radius 0 stays (levels collapse to identity, effects keep riding the ramp).
+        // Composite mode: record radii + downscale and split the chain at this point — the stack is
+        // assembled after the effects block, the sharp end draws as a separate overlay. Radius 0
+        // stays (levels collapse to identity, effects keep riding the ramp).
         val rX = radiusX.coerceAtLeast(0f)
         val rY = radiusY.coerceAtLeast(0f)
-        // Size the downscale for the MIDDLE level: the lightest level's variance then stays above
-        // the pyramid's implied box variance at common radii (box compensation keeps its total
-        // variance exact), while every stack pass runs on 1/sf² pixels. The sharp end never rides
-        // this layer, so it doesn't constrain sf.
+        // Sized for the middle level: the lightest level's variance then stays above the pyramid's
+        // box floor at common radii, and every stack pass runs on 1/scale² pixels. The sharp end
+        // doesn't ride this layer, so it doesn't constrain the scale.
         val sigma1 = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_1
         val exp = downScaleExpFor(sigma1 * sigma1)
-        val sf = 1 shl exp
-        val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+        val scale = (1 shl exp).toFloat()
+        val kernelPadding = BLUR_KERNEL_REACH * scale
         if (kernelPadding > padding) {
             padding = kernelPadding
         }
@@ -156,19 +144,20 @@ fun BackdropEffectScope.progressiveBlur(
         // Split the effects block here: chained-so-far → pre-blur, what follows → post-blur.
         scope.progressivePreEffect = renderEffect
         renderEffect = null
-        downscaleFactor = sf
+        downscaleFactor = scale
         return
     }
     if (radiusX <= 0f && radiusY <= 0f) return
     val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
 
-    // Same adaptive downscale as blur(): the box prefilter at each level is what keeps the fixed
-    // 7-tap kernel from aliasing (blocky banding) at large radii. Capping it would defeat that.
+    // Same adaptive downscale as blur(), on the power-of-two ladder: the stack's levels are built
+    // from the recorded layer, so the box prefilter at each level is what keeps the fixed 7-tap
+    // kernel from aliasing (blocky banding) at large radii.
     val exp = downScaleExpFor(maxOf(sigmaX * sigmaX, sigmaY * sigmaY))
-    val sf = 1 shl exp
+    val scale = (1 shl exp).toFloat()
 
-    val kernelPadding = (BLUR_KERNEL_REACH * sf).toFloat()
+    val kernelPadding = BLUR_KERNEL_REACH * scale
     if (kernelPadding > padding) {
         padding = kernelPadding
     }
@@ -198,7 +187,7 @@ fun BackdropEffectScope.progressiveBlur(
         createProgressiveBlurEffect(
             radiusX,
             radiusY,
-            sf,
+            scale,
             adjustedVarianceForExp(sigmaX * sigmaX, exp),
             adjustedVarianceForExp(sigmaY * sigmaY, exp),
             Size(paddedW, paddedH),
@@ -224,17 +213,15 @@ fun BackdropEffectScope.progressiveBlur(
         }
     } ?: return
 
-    downscaleFactor = sf
+    downscaleFactor = scale
     renderEffect = renderEffect?.chain(effect) ?: effect
 }
 
 /**
- * Registers a noise dither pass with the given [coefficient]. Non-positive values are ignored.
- * Noise is applied at full resolution after upscaling so each screen pixel gets independent
- * dithering, which prevents banding visible at low blur radii.
+ * Registers a noise dither pass. Applied at full resolution after upscaling, so each screen pixel
+ * dithers independently.
  *
- * @param coefficient The noise dithering strength stored in [BackdropEffectScope.noiseCoefficient].
- *   Values at or below 0 are ignored.
+ * @param coefficient Dither strength stored in [BackdropEffectScope.noiseCoefficient]; ≤ 0 is ignored.
  */
 fun BackdropEffectScope.noiseDither(coefficient: Float) {
     if (coefficient <= 0f) return
@@ -242,13 +229,10 @@ fun BackdropEffectScope.noiseDither(coefficient: Float) {
 }
 
 /**
- * Chains all blend color layers from [colors] as a single runtime shader pass. Up to
- * [MAX_BLEND_LAYERS] entries are honored. Brightness and saturation in [colors] are
- * folded into the blend shader's uniforms (separate from any [colorControls] you may
- * have already chained).
+ * Chains all blend layers of [colors] as one runtime shader pass (≤ [MAX_BLEND_LAYERS] entries).
+ * Its brightness/saturation go into the same pass, independent of any [colorControls].
  *
- * @param colors The [BlurColors] whose blend layers and brightness/saturation drive the shader.
- *   An empty blend-layer list is a no-op.
+ * @param colors Blend layers plus brightness/saturation; an empty layer list is a no-op.
  */
 fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (colors.blendColors.isEmpty()) return
@@ -267,11 +251,7 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
     renderEffect = renderEffect.chain(obtainBlendColorsEffect(scope, colors))
 }
 
-/**
- * Returns the blend-layer [RenderEffect] for [colors], cached on an unchanged config — a hit
- * skips the color conversions, uniform uploads and effect creation. Keyed on the BlurColors
- * value, so callers that rebuild it (or its list) each frame still hit.
- */
+/** Blend-layer [RenderEffect] for [colors], cached by value so per-frame rebuilds still hit. */
 internal fun obtainBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: BlurColors): RenderEffect {
     val cached = scope.cachedBlendResult
     if (cached != null && scope.cachedBlendColors == colors) return cached
@@ -289,10 +269,9 @@ internal fun obtainBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: Blu
 }
 
 /**
- * The progressive composite's folded post pass: [obtainBlendColorsEffect]'s blend chain with the
- * result ramp-mixed over the untouched source inside the same pass, so the stack below is
- * evaluated exactly once. Band inputs are in the stack's downscaled, padded space. Uncached —
- * the caller's stack cache holds the assembled effect.
+ * Folded post pass for the progressive composite: the blend chain ramp-mixed over the untouched
+ * source in one pass, so the stack below is evaluated once. Band inputs are in the stack's
+ * downscaled padded space. Uncached — the caller caches the assembled stack.
  */
 internal fun buildRampBlendColorsEffect(
     scope: BackdropEffectScopeImpl,
@@ -359,20 +338,11 @@ private fun RuntimeShader.setBlendLayerUniforms(scope: BackdropEffectScopeImpl, 
 }
 
 /**
- * Runs the standard texture-blur preset chain inside a custom [drawBackdrop] effect block.
+ * The standard texture-blur chain ([Modifier.textureBlur]'s internals) for a custom `drawBackdrop`
+ * block: [noiseDither] → [colorControls] (linear space) → [blur] → [blendColors].
  *
- * Equivalent to what [Modifier.textureBlur] applies internally:
- * 1. [noiseDither] for anti-banding
- * 2. [colorControls] for brightness/contrast/saturation in linear (gamma 2.2) space
- * 3. [blur] with the given radii in dp (multiplied by [BackdropEffectScope.density])
- * 4. [blendColors] for the layered tinting
- *
- * Use this to compose the standard preset with additional custom effects:
- * ```
- * Modifier.drawBackdrop(backdrop, shape = { shape }, effects = {
- *     textureBlurEffect(blurRadius = 30f, colors = colors)
- *     // ...then chain your own effect on top
- * })
+ * ```kotlin
+ * effects = { textureBlurEffect(blurRadius = 30f, colors = colors); /* chain more */ }
  * ```
  *
  * @param blurRadiusX Horizontal blur radius in dp.
@@ -395,13 +365,9 @@ fun BackdropEffectScope.textureBlurEffect(
 }
 
 /**
- * Runs the progressive (gradient) texture-blur preset chain inside a custom [drawBackdrop] effect
- * block: like [textureBlurEffect] but with [progressiveBlur] in place of [blur], so the blur radius
- * ramps from full to zero along [gradient].
- *
- * Pair this with `drawBackdrop`'s `progressiveGradient` (same [gradient]) so the draw path renders
- * the multi-level composite with a genuinely sharp full-resolution clear end —
- * [Modifier.progressiveTextureBlur] wires both together.
+ * [textureBlurEffect] with [progressiveBlur] in place of [blur], so the radius ramps to zero along
+ * [gradient]. Pair it with `drawBackdrop`'s `progressiveGradient` (same [gradient]) to get the
+ * multi-level composite with a sharp full-resolution clear end.
  *
  * @param blurRadiusX Horizontal blur radius in dp at full strength.
  * @param blurRadiusY Vertical blur radius in dp at full strength. Defaults to [blurRadiusX].
