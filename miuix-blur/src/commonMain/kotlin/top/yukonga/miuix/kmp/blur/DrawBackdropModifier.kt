@@ -338,7 +338,6 @@ private class DrawBackdropNode(
 
     private val primary = LevelTarget()
     private val secondary = LevelTarget()
-    private var crossfadeResultLayer: GraphicsLayer? = null
 
     /** True when the radius sits in a transition band and [primary] (lo) + [secondary] (hi) cross-fade. */
     private var blending: Boolean by mutableStateOf(false)
@@ -378,8 +377,8 @@ private class DrawBackdropNode(
         }
     }
 
-    /** Renders [target]'s blurred backdrop (record → cascade downsample → upscale) into this DrawScope. */
-    private fun DrawScope.renderBlurInto(target: LevelTarget) {
+    /** Renders [target]'s blurred backdrop (record → cascade downsample → upscale) into this DrawScope at [alpha]. */
+    private fun DrawScope.renderBlurInto(target: LevelTarget, alpha: Float = 1f) {
         val layer = target.mainLayer ?: return
         val currentPadding = target.padding
         val scaleFactor = target.downscaleFactor
@@ -395,7 +394,9 @@ private class DrawBackdropNode(
                 } else {
                     IntOffset.Zero
                 }
+            layer.alpha = alpha
             drawLayer(layer)
+            layer.alpha = 1f
         } else if (scaleFactor <= 2) {
             target.cascadeFirstStepScale = 2
             val w = (fullWidth / 2).coerceAtLeast(1)
@@ -411,6 +412,7 @@ private class DrawBackdropNode(
                 backdrop.offsetResidualY,
                 fullWidth,
                 fullHeight,
+                alpha,
             )
         } else {
             // Multistep cascade, single-pass wider filter when possible:
@@ -506,6 +508,7 @@ private class DrawBackdropNode(
                 backdrop.offsetResidualY,
                 fullWidth,
                 fullHeight,
+                alpha,
             )
         }
     }
@@ -596,21 +599,15 @@ private class DrawBackdropNode(
     private var sharpBandOffset = IntOffset.Zero
     private var sharpBandSize = IntSize.Zero
 
-    /** Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level. */
+    /**
+     * Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level
+     * on top of it at `alpha = blendFactor`: source-over of a uniformly alpha-scaled level is
+     * exactly the cross-fade of two premultiplied levels, so no scratch layer is needed.
+     */
     private fun DrawScope.drawBlurredBackdrop() {
         renderBlurInto(primary)
         if (blending) {
-            // Cross-fade band: composite the higher level on top of the lower one with alpha = blendFactor.
-            val result = crossfadeResultLayer
-                ?: graphicsContext.createGraphicsLayer().also { crossfadeResultLayer = it }
-            recordLayer(
-                result,
-                size = IntSize(size.width.toInt().coerceAtLeast(1), size.height.toInt().coerceAtLeast(1)),
-            ) {
-                renderBlurInto(secondary)
-            }
-            result.alpha = blendFactor
-            drawLayer(result)
+            renderBlurInto(secondary, blendFactor)
         }
     }
 
@@ -1003,6 +1000,7 @@ private class DrawBackdropNode(
         residualY: Float,
         fullWidth: Int,
         fullHeight: Int,
+        alpha: Float = 1f,
     ) {
         val noiseCoeff = if (stackDitherChained) 0f else effectScope.noiseCoefficient
         if (noiseCoeff > 0f) {
@@ -1023,7 +1021,10 @@ private class DrawBackdropNode(
                 } else {
                     IntOffset.Zero
                 }
+            // Applies the cross-fade weight to the level's finished pixels (upscale + grain).
+            noiseL.alpha = alpha
             translate(-residualX, -residualY) { drawLayer(noiseL) }
+            noiseL.alpha = 1f
             noiseL.renderEffect = null
         } else {
             layer.topLeft =
@@ -1032,9 +1033,11 @@ private class DrawBackdropNode(
                 } else {
                     IntOffset.Zero
                 }
+            layer.alpha = alpha
             translate(-residualX, -residualY) {
                 scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
             }
+            layer.alpha = 1f
         }
     }
 
@@ -1074,8 +1077,6 @@ private class DrawBackdropNode(
     fun releaseGraphicsLayers() {
         primary.release()
         secondary.release()
-        crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
-        crossfadeResultLayer = null
         releaseCompositeResources()
         blending = false
         effectScope.reset()
