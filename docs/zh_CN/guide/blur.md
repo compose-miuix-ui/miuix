@@ -3,8 +3,8 @@
 `miuix-blur` 是一个独立的 Compose Multiplatform 模糊效果库。它通过 Modifier 扩展提供背景模糊、颜色混合和纹理效果。支持 Android、Desktop (JVM)、iOS、macOS 和 Web (WasmJs/Js) 平台。
 
 ::: warning 注意
-`miuix-blur` 在 Android 端需要 `minSdk` 33（Android 13）或更高。模糊、混合、
-噪点和高光效果依赖 API 33 起提供的 `RuntimeShader`。运行时能力检测不能降低
+`miuix-blur` 在 Android 端需要 `minSdk` 33（Android 13）或更高。模糊、混合和
+噪点效果依赖 API 33 起提供的 `RuntimeShader`。运行时能力检测不能降低
 Android 构件的最低 SDK 要求。
 :::
 
@@ -36,8 +36,8 @@ dependencies {
 判断，Skiko 系（Desktop / iOS / macOS / Web）始终返回 `true`。
 
 ```kotlin
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
-import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 // API 32+（以及所有非 Android 目标）为 true。仅需要背景采样支架时（例如
 // 通过 `colorFilter(...)` 链一个 ColorFilter）适用。
@@ -45,7 +45,7 @@ val backdropScaffoldSupported = isRenderEffectSupported()
 
 // API 33+（以及所有非 Android 目标）为 true。任何调用 `blur(...)`、
 // `blendColors(...)`、`noiseDither(...)`、`Modifier.textureBlur(...)`、
-// 高光样式、或自行构造 `RuntimeShader` 的路径都应被它门控。
+// 或自行构造 `RuntimeShader` 的路径都应被它门控。
 val blurAndBlendSupported = isRuntimeShaderSupported()
 ```
 
@@ -394,7 +394,6 @@ Box(
 | blurRadiusY | Float | 垂直模糊半径（dp，独立半径重载） | - | 是* |
 | noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0.0045f | 否 |
 | colors | BlurColors | 模糊后应用的颜色调整和混合图层 | BlurColors() | 否 |
-| highlight | Highlight? | 可选的边缘高光，绘制在内容之上。`null` 时跳过 | null | 否 |
 | contentBlendMode | BlendMode? | 内容在模糊上方合成的混合模式 | null | 否 |
 | enabled | Boolean | 是否启用模糊，为 false 时跳过效果并正常绘制内容 | true | 否 |
 
@@ -412,7 +411,6 @@ Box(
 | gradient | ProgressiveBlur | 控制模糊满强度与清晰位置的方向和区间 | ProgressiveBlur.Top | 否 |
 | noiseCoefficient | Float | 抗条纹噪声抖动系数，0 表示禁用 | 0f | 否 |
 | colors | BlurColors | 颜色调整和混合图层，随模糊一起淡出 | BlurColors() | 否 |
-| highlight | Highlight? | 可选的边缘高光，绘制在内容之上。`null` 时跳过 | null | 否 |
 | contentBlendMode | BlendMode | 内容在模糊上方合成的混合模式 | SrcOver | 否 |
 | enabled | Boolean | 是否启用模糊，为 false 时跳过效果并正常绘制内容 | true | 否 |
 
@@ -450,171 +448,14 @@ Box(
 | --- | --- | --- |
 | blurColors() | BlurColors | 创建被 remember 的 BlurColors 实例 |
 
-## 边缘高光
+## 边缘描边
 
-`Highlight` 沿圆角形状绘制一条带两路定向光的玻璃质感边缘。它通过 `Modifier.textureBlur` / `Modifier.textureEffect` 的 `highlight` 参数（恒定场景）或 `Modifier.drawBackdrop` 的 `highlight` 参数（响应式场景，与 `BackdropEffectScope` 共享）绘制。配合模糊背景可营造"模糊背景上的发光边缘"效果。
-
-### 配合 textureBlur（恒定）
+边缘描边属于 `miuix-material`：`EdgeStroke` 以及 `EdgeStrokes`、`GlassEdgeStrokes` 两个预设对象。它作为独立修饰符追加在背景之后，而不再是 `textureBlur` / `drawBackdrop` 的参数：
 
 ```kotlin
-import androidx.compose.foundation.shape.RoundedCornerShape
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-
-Box(
-    modifier = Modifier
-        .size(200.dp, 100.dp)
-        .textureBlur(
-            backdrop = backdrop,
-            shape = RoundedCornerShape(24.dp),
-            highlight = Highlight.GlassStrokeMiddleLight,
-        ),
-)
+Modifier
+    .drawBackdrop(backdrop, shape = { shape }, effects = { blur(20.dp.toPx()) })
+    .edgeStroke(shape = shape, stroke = EdgeStrokes.MiddleLight, alpha = 1f)
 ```
 
-### 配合 drawBackdrop（响应式）
-
-`highlight` lambda 与 `effects` 共用同一个 `BackdropEffectScope`，其返回值可随状态变化（如按压进度），并自动复用当前的 `size` / `shape`。
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.drawBackdrop
-import top.yukonga.miuix.kmp.blur.blur
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-
-Box(
-    modifier = Modifier
-        .size(200.dp, 100.dp)
-        .drawBackdrop(
-            backdrop = backdrop,
-            shape = { RoundedCornerShape(24.dp) },
-            effects = { blur(20.dp.toPx()) },
-            highlight = { Highlight.GlassStrokeMiddleLight.copy(alpha = pressProgress) },
-        ),
-)
-```
-
-传 `null`（或 `width = 0.dp` 的 `Highlight`）即可禁用。
-
-::: warning 注意
-边缘高光需要 `isRuntimeShaderSupported()` 支持。在不支持的平台或 API 级别上，将静默跳过绘制。
-:::
-
-### 内置预设
-
-提供六个预设，按卡片尺寸和主题选用：
-
-| 预设 | innerBlurRadius | 视觉特征 |
-| --- | --- | --- |
-| `Highlight.GlassStrokeBigLight` | 3.5 dp | halo 最厚最柔 — 亮模式大卡片 |
-| `Highlight.GlassStrokeMiddleLight` | 2.8 dp | 标准亮模式卡片（默认） |
-| `Highlight.GlassStrokeSmallLight` | 2.6 dp | 紧凑、更锐利的亮模式卡片 |
-| `Highlight.GlassStrokeBigDark` | 1.7 dp | halo 最薄 — 暗模式大卡片 |
-| `Highlight.GlassStrokeMiddleDark` | 2.0 dp | 标准暗模式卡片 |
-| `Highlight.GlassStrokeSmallDark` | 2.3 dp | 紧凑、最锐利的暗模式卡片 |
-
-`Highlight.Default` 等价于 `GlassStrokeMiddleLight`。
-
-### 自定义 BloomStroke
-
-可基于 token 覆盖单个字段，或从零构建 `BloomStroke`：
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.highlight.BloomStroke
-import top.yukonga.miuix.kmp.blur.highlight.LightPosition
-import top.yukonga.miuix.kmp.blur.highlight.LightSource
-
-val custom = Highlight(
-    width = 1.dp,
-    alpha = 0.8f,
-    style = BloomStroke(
-        color = Color.White.copy(alpha = 0.05f),
-        innerBlurRadius = 3.dp,
-        primaryLight = LightSource(
-            position = LightPosition(0.5f, 0.4f, -0.5f),
-            intensity = 0.4f,
-        ),
-        secondaryLight = LightSource(
-            position = LightPosition(0.5f, 0.85f, -0.5f),
-            intensity = 0.3f,
-        ),
-    ),
-)
-```
-
-`LightPosition` 使用归一化 UV 坐标，参考原点为 `(0.5, 0.7, 0)`。Shader 将 `(x − 0.5, y − 0.7, z)` 归一化后作为 3D 方向向量。负 `z` 把光放在表面平面之后（从内向外照亮边缘）— 所有内置预设均使用 `z < 0`。
-
-两路光在 shader 中被限制到相反的半球：`primaryLight` 照亮圆角矩形上半部，`secondaryLight` 照亮下半部。`y < 0.7` 让光偏上；`y > 0.7` 让光偏下。
-
-### 传感器驱动的视差
-
-`rememberTiltLight` 通过设备旋转传感器实时偏移基准位置。Android 上会产生跟随设备倾斜的视差边缘；Desktop / iOS / macOS / Web 上 tilt 始终为零，光斑保持静止。
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.highlight.rememberTiltLight
-
-val baseStyle = Highlight.GlassStrokeMiddleLight.style as BloomStroke
-
-val tiltPrimary = rememberTiltLight(
-    basePosition = baseStyle.primaryLight.position,
-    intensity = baseStyle.primaryLight.intensity,
-    sensitivity = 0.15f,
-)
-val tiltSecondary = rememberTiltLight(
-    basePosition = baseStyle.secondaryLight.position,
-    intensity = baseStyle.secondaryLight.intensity,
-    sensitivity = 0.12f,
-)
-
-val highlight = Highlight.GlassStrokeMiddleLight.copy(
-    style = baseStyle.copy(
-        primaryLight = tiltPrimary,
-        secondaryLight = tiltSecondary,
-    ),
-)
-```
-
-`sensitivity` 控制每弧度倾斜对应的 UV 偏移量 — `0.1f` 表示在 1 rad 倾斜下光位置移动 10%。提高数值会放大视差幅度。
-
-### 边缘高光属性
-
-#### Highlight
-
-| 属性 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| width | Dp | 用 `style.color` 绘制的描边带宽度 | 0.8.dp |
-| alpha | Float | 整体不透明度倍数，范围 [0, 1] | 1f |
-| style | HighlightStyle | 着色模型（通常是 `BloomStroke`） | `HighlightStyle.Default` |
-
-#### BloomStroke
-
-| 属性 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| color | Color | 描边带的基础颜色；alpha 驱动描边亮度 | `White.copy(alpha = 0.05f)` |
-| blendMode | BlendMode | 高光叠加层的合成模式 | `BlendMode.Plus` |
-| innerBlurRadius | Dp | 光晕从圆角向内延伸的深度 — 决定 halo 的厚度与柔度 | 2.8.dp |
-| primaryLight | LightSource | 上半球定向光 | `LightPosition(0.5f, 0.5f, -0.5f)`，intensity 0.4 |
-| secondaryLight | LightSource | 下半球定向光 | `LightPosition(0.5f, 0.8f, -0.5f)`，intensity 0.25 |
-
-#### LightSource
-
-| 属性 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| position | LightPosition | 光的 UV 位置 | - |
-| color | Color | 光颜色（颜色 alpha 折入贡献缩放） | `White` |
-| intensity | Float | 亮度缩放，≥ 0 | 1f |
-
-#### LightPosition
-
-| 属性 | 类型 | 说明 |
-| --- | --- | --- |
-| x | Float | 归一化 UV x（参考原点：0.5） |
-| y | Float | 归一化 UV y（参考原点：0.7） |
-| z | Float | 有符号深度；负值把光放在表面之后 |
-
-#### rememberTiltLight 参数
-
-| 参数 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| basePosition | LightPosition | 零倾斜时的位置 | - |
-| color | Color | 光颜色 | `White` |
-| intensity | Float | 亮度缩放 | 1f |
-| sensitivity | Float | 每弧度倾斜对应的 UV 偏移量 | 0.1f |
+属性、预设与倾斜光见[边缘描边](/zh_CN/guide/material#边缘描边)。

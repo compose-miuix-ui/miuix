@@ -31,9 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.blend.ColorBlendToken
+import component.edge.EdgeStrokeConfig
+import component.edge.rememberContainerEdgeStroke
 import component.effect.BgEffectBackground
-import component.highlight.HighlightConfig
-import component.highlight.rememberContainerHighlight
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -43,11 +43,12 @@ import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.material.edgeStroke
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
@@ -233,11 +234,12 @@ private fun BlurDemo() {
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
 
     var tiltDriven by remember { mutableStateOf(true) }
-    val containers = HighlightConfig.Container.entries
+    val containers = EdgeStrokeConfig.Container.entries
     val containerItems = remember { containers.map { it.displayName } }
-    var containerIndex by remember { mutableIntStateOf(HighlightConfig.Container.Small.ordinal) }
+    var containerIndex by remember { mutableIntStateOf(EdgeStrokeConfig.Container.Small.ordinal) }
     val currentContainer = containers[containerIndex]
-    val highlight = rememberContainerHighlight(
+    val blurShape = RoundedCornerShape(24.dp)
+    val containerStroke = rememberContainerEdgeStroke(
         container = currentContainer,
         isDark = isInDark,
         tiltDriven = tiltDriven,
@@ -291,7 +293,7 @@ private fun BlurDemo() {
                         .align(Alignment.Center)
                         .textureBlur(
                             backdrop = backdrop,
-                            shape = RoundedCornerShape(24.dp),
+                            shape = blurShape,
                             blurRadiusX = blurRadiusX,
                             blurRadiusY = blurRadiusY,
                             noiseCoefficient = noiseCoefficient,
@@ -301,7 +303,13 @@ private fun BlurDemo() {
                                 contrast = contrast,
                                 saturation = saturation,
                             ),
-                            highlight = highlight,
+                        )
+                        .then(
+                            if (containerStroke != null) {
+                                Modifier.edgeStroke(shape = blurShape, stroke = containerStroke)
+                            } else {
+                                Modifier
+                            },
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -328,7 +336,7 @@ private fun BlurDemo() {
             )
 
             OverlayDropdownPreference(
-                title = "Highlight",
+                title = "Edge Stroke",
                 items = containerItems,
                 selectedIndex = containerIndex,
                 onSelectedIndexChange = { containerIndex = it },

@@ -7,7 +7,7 @@
 </div>
 
 ::: warning Background Sampling
-Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
+Record an opaque background without the glass surface itself. See [Glass Surfaces](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -50,7 +50,7 @@ The defaults below apply outside `GlassTopAppBar`.
 | size | Dp | Button diameter | GlassTopAppBarDefaults.ButtonSize | No |
 | shape | GlassShape | Button shape | GlassShape(size / 2) | No |
 | fill | Color | Fill used without a backdrop | GlassTopAppBarDefaults.buttonFill() | No |
-| stroke | GlassStroke? | Surface stroke; null removes it | GlassTopAppBarDefaults.buttonStroke() | No |
+| stroke | EdgeStroke? | Surface stroke; null removes it | GlassTopAppBarDefaults.buttonStroke() | No |
 | shadow | GlassShadow? | Button shadow; null removes it | GlassShadows.Regular | No |
 | content | @Composable () -> Unit | Centered button content | - | Yes |
 
@@ -73,7 +73,7 @@ The button requests a square of `size` and adds no separate minimum touch target
 | --- | --- | --- |
 | buttonFill() | Color | White in light mode; `#FF2C2C2C` in dark mode |
 | buttonMaterial() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
-| buttonStroke() | GlassStroke | `GlassStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
+| buttonStroke() | EdgeStroke | `GlassEdgeStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
 | buttonPressedOverlay() | Color | Black at 0.10 alpha in light mode; white at 0.14 alpha in dark mode |
 
 ## Advanced Usage

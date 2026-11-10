@@ -98,7 +98,6 @@ import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -113,6 +112,9 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.EdgeStrokes
+import top.yukonga.miuix.kmp.material.edgeStroke
 import top.yukonga.miuix.kmp.nav.core.NavBackStack
 import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
@@ -607,8 +609,8 @@ private fun NavigationBar(
             val floatingBarColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer
             val floatingBarShape = RoundedCornerShape(FloatingToolbarDefaults.CornerRadius)
             val isDark = isInDarkTheme()
-            val floatingHighlight = remember(isDark) {
-                if (isDark) Highlight.GlassStrokeMiddleDark else Highlight.GlassStrokeMiddleLight
+            val floatingStroke: EdgeStroke = remember(isDark) {
+                if (isDark) EdgeStrokes.MiddleDark else EdgeStrokes.MiddleLight
             }
             Box(modifier = modifier) {
                 when (appState.floatingNavigationBarStyle) {
@@ -641,17 +643,21 @@ private fun NavigationBar(
                     else -> {
                         FloatingNavigationBar(
                             modifier = if (blurActive) {
-                                Modifier.textureBlur(
-                                    backdrop = backdrop,
-                                    shape = floatingBarShape,
-                                    blurRadius = 25f,
-                                    colors = BlurDefaults.blurColors(
-                                        blendColors = listOf(
-                                            BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                                Modifier
+                                    .textureBlur(
+                                        backdrop = backdrop,
+                                        shape = floatingBarShape,
+                                        blurRadius = 25f,
+                                        colors = BlurDefaults.blurColors(
+                                            blendColors = listOf(
+                                                BlendColorEntry(color = MiuixTheme.colorScheme.surfaceContainer.copy(0.6f)),
+                                            ),
                                         ),
-                                    ),
-                                    highlight = floatingHighlight,
-                                )
+                                    )
+                                    .edgeStroke(
+                                        shape = floatingBarShape,
+                                        stroke = floatingStroke,
+                                    )
                             } else {
                                 Modifier
                             },
@@ -820,6 +826,7 @@ fun AppPager(
         },
         verticalAlignment = Alignment.Top,
         flingBehavior = flingBehavior,
+        beyondViewportPageCount = 4,
         pageContent = { page ->
             when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(snackbarHostState = snackbarHostState, padding = padding)

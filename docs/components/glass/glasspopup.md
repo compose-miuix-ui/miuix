@@ -11,7 +11,7 @@ title: GlassPopup
 </div>
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Surfaces](/guide/glass#background-sampling) for setup.
 :::
 
 ## Import
@@ -122,7 +122,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | style | GlassStyle | Blur style used when material has no blur radius | - | Yes |
 | alpha | Float | Surface opacity multiplier; GlassTransformPopup also applies it to menu content | - | Yes |
-| stroke | GlassStroke? | Bloom stroke; null removes it | - | Yes |
+| stroke | EdgeStroke? | Edge stroke; null removes it | - | Yes |
 | shadow | GlassShadow? | Panel shadow; null removes it | - | Yes |
 | material | GlassMaterial? | Panel color treatment and optional blur radius; null removes color treatment, not background sampling or blur | - | Yes |
 | containerColor | Color | Opaque fill used when backdrop is null | - | Yes |
@@ -161,10 +161,10 @@ With a non-null backdrop, the popup uses material or style blur. `material = nul
 
 | Method Name | Parameters | Return Type | Description |
 | --- | --- | --- | --- |
-| `visuals` | `style: GlassStyle = GlassDefaults.Style`, `alpha: Float = 1f`, `stroke: GlassStroke? = stroke()`, `shadow: GlassShadow? = GlassShadows.Regular`, `material: GlassMaterial? = material()`, `containerColor: Color = containerColor()` | `GlassPopupVisuals` | Creates popup visuals from theme-aware defaults |
+| `visuals` | `style: GlassStyle = GlassDefaults.Style`, `alpha: Float = 1f`, `stroke: EdgeStroke? = stroke()`, `shadow: GlassShadow? = GlassShadows.Regular`, `material: GlassMaterial? = material()`, `containerColor: Color = containerColor()` | `GlassPopupVisuals` | Creates popup visuals from theme-aware defaults |
 | `shape` | `cornerRadius: Dp = CornerRadius` | `GlassShape` | Creates the popup silhouette |
 | `material` | — | `GlassMaterial` | Returns the theme-aware popup material |
-| `stroke` | — | `GlassStroke` | Returns the theme-aware bloom stroke |
+| `stroke` | — | `EdgeStroke` | Returns the theme-aware edge stroke |
 | `containerColor` | — | `Color` | White in light themes; `Color(0xFF2C2C2C)` in dark themes |
 | `itemPressedColor` | — | `Color` | Black at `0.1f` alpha in light themes; white at `0.1f` in dark themes |
 | `maskColor` | — | `Color` | White at `0.4f` alpha in light themes; black at `0.4f` in dark themes |

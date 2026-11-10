@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
-import top.yukonga.miuix.kmp.glass.GlassColorBlendMode
-import top.yukonga.miuix.kmp.glass.GlassDefaults
-import top.yukonga.miuix.kmp.glass.GlassMaterial
-import top.yukonga.miuix.kmp.glass.GlassShape
-import top.yukonga.miuix.kmp.glass.GlassStyle
+import top.yukonga.miuix.kmp.material.GlassColorBlendMode
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min

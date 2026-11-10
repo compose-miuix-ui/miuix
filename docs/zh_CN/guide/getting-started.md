@@ -33,12 +33,14 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-preference` | Preference 组件（SwitchPreference、CheckboxPreference 等），依赖 `miuix-ui` |
 | `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix-ui` 同时使用（自动包含 `miuix-core`） |
 | `miuix-glass-icons` | Glass 图标库，可独立使用 |
-| `miuix-shader` | 底层运行时着色器 / 渲染效果抽象，已由 `miuix-blur` / `miuix-squircle` 传递包含 |
-| `miuix-blur` | 模糊效果库，可独立使用，Android 端需要 minSdk 33 |
+| `miuix-material` | 渲染原语与材质定义 |
+| `miuix-blur` | 模糊效果库，可独立使用 |
 | `miuix-squircle` | 平滑圆角形状，可独立使用（已由 `miuix-ui` 传递包含） |
-| `miuix-glass` | 柔光玻璃材质与组件库，Android 端需要 minSdk 33 |
+| `miuix-glass` | 玻璃表面与组件库 |
 | `miuix-nav` | 自包含导航库，可独立使用 |
 | `miuix-window` | 桌面端窗口与自绘标题栏样式库（仅支持 Desktop JVM） |
+
+`miuix-blur` 与 `miuix-glass` 的 Android 端需要 `minSdk` 33。
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
@@ -53,11 +55,13 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // 可选：添加 miuix-glass-icons 以获取 Glass 图标
             implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
+            // 可选：添加 miuix-material 以获取渲染原语与材质定义
+            implementation("top.yukonga.miuix.kmp:miuix-material:<version>")
             // 可选：添加 miuix-blur 以获取模糊效果（Android 端需要 minSdk 33）
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // 可选：添加 miuix-squircle 以获取平滑圆角形状
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // 可选：添加 miuix-glass 以获取柔光玻璃材质与组件（Android 端需要 minSdk 33）
+            // 可选：添加 miuix-glass 以获取玻璃表面与组件（Android 端需要 minSdk 33）
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // 可选：添加 miuix-nav 以获取导航支持
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
@@ -81,11 +85,13 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // 可选：添加 miuix-glass-icons 以获取 Glass 图标
     implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
+            // 可选：添加 miuix-material 以获取渲染原语与材质定义
+    implementation("top.yukonga.miuix.kmp:miuix-material-android:<version>")
     // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 33）
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // 可选：添加 miuix-squircle 以获取平滑圆角形状
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // 可选：添加 miuix-glass 以获取柔光玻璃材质与组件（需要 minSdk 33）
+    // 可选：添加 miuix-glass 以获取玻璃表面与组件（需要 minSdk 33）
     implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
     // 可选：添加 miuix-nav 以获取导航支持
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")
@@ -122,6 +128,13 @@ implementation("top.yukonga.miuix.kmp:miuix-glass-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-js:<version>")
+// 可选：添加 miuix-material
+implementation("top.yukonga.miuix.kmp:miuix-material-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-wasm-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-js:<version>")
 // 可选：添加 miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")

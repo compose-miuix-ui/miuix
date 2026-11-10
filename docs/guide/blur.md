@@ -4,7 +4,7 @@
 
 ::: warning
 On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. Blur,
-blend, noise and highlight effects rely on `RuntimeShader`, which is available
+blend and noise effects rely on `RuntimeShader`, which is available
 from API 33. Runtime capability checks do not lower the Android artifact's
 minimum SDK requirement.
 :::
@@ -38,8 +38,8 @@ Use the checks below to inspect runtime effect support. On Android they map to
 macOS, Web) they always return `true`.
 
 ```kotlin
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
-import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 // True on API 32+ (and all non-Android targets). Useful when you only need
 // the backdrop scaffold (e.g. a chained ColorFilter via `colorFilter(...)`).
@@ -47,8 +47,7 @@ val backdropScaffoldSupported = isRenderEffectSupported()
 
 // True on API 33+ (and all non-Android targets). Gate any code path that
 // applies `blur(...)`, `blendColors(...)`, `noiseDither(...)`,
-// `Modifier.textureBlur(...)`, the highlight styles, or any `RuntimeShader`
-// you build yourself.
+// `Modifier.textureBlur(...)`, or any `RuntimeShader` you build yourself.
 val blurAndBlendSupported = isRuntimeShaderSupported()
 ```
 
@@ -397,7 +396,6 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | blurRadiusY | Float | Vertical blur radius in dp (independent radii overload) | - | Yes* |
 | noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0.0045f | No |
 | colors | BlurColors | Color adjustments and blend layers applied after blur | BlurColors() | No |
-| highlight | Highlight? | Optional edge highlight painted on top of the content. `null` skips drawing | null | No |
 | contentBlendMode | BlendMode? | Blend mode for compositing content over the blur | null | No |
 | enabled | Boolean | Whether blur is active, when false the effect is skipped and content draws normally | true | No |
 
@@ -415,7 +413,6 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | gradient | ProgressiveBlur | Direction and band controlling where the blur is full vs zero | ProgressiveBlur.Top | No |
 | noiseCoefficient | Float | Noise dithering coefficient for anti-banding, 0 disables | 0f | No |
 | colors | BlurColors | Color adjustments and blend layers, fading out with the blur | BlurColors() | No |
-| highlight | Highlight? | Optional edge highlight painted on top of the content. `null` skips drawing | null | No |
 | contentBlendMode | BlendMode | Blend mode for compositing content over the blur | SrcOver | No |
 | enabled | Boolean | Whether blur is active, when false the effect is skipped and content draws normally | true | No |
 
@@ -453,171 +450,14 @@ Presets: `ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` cover the four edge
 | --- | --- | --- |
 | blurColors() | BlurColors | Creates a remembered BlurColors instance |
 
-## Edge Highlight
+## Edge Stroke
 
-A `Highlight` paints a thin glassy edge with two directional lights along a rounded shape. It is drawn through the `highlight` parameter on `Modifier.textureBlur` / `Modifier.textureEffect` (constant case) or on `Modifier.drawBackdrop` (reactive case, sharing the `BackdropEffectScope`). Combined with the blurred backdrop this produces a "lit edge over blurred backdrop" look.
-
-### With textureBlur (constant)
+Edge strokes are part of `miuix-material`: `EdgeStroke` plus the `EdgeStrokes` and `GlassEdgeStrokes` preset objects. They are applied as their own modifier after the backdrop, not through a `textureBlur` / `drawBackdrop` parameter:
 
 ```kotlin
-import androidx.compose.foundation.shape.RoundedCornerShape
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-
-Box(
-    modifier = Modifier
-        .size(200.dp, 100.dp)
-        .textureBlur(
-            backdrop = backdrop,
-            shape = RoundedCornerShape(24.dp),
-            highlight = Highlight.GlassStrokeMiddleLight,
-        ),
-)
+Modifier
+    .drawBackdrop(backdrop, shape = { shape }, effects = { blur(20.dp.toPx()) })
+    .edgeStroke(shape = shape, stroke = EdgeStrokes.MiddleLight, alpha = 1f)
 ```
 
-### With drawBackdrop (reactive)
-
-The `highlight` lambda runs inside the same `BackdropEffectScope` as `effects`, so its return value can change with state (e.g. press progress) and pick up the current `size` / `shape` automatically.
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.drawBackdrop
-import top.yukonga.miuix.kmp.blur.blur
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-
-Box(
-    modifier = Modifier
-        .size(200.dp, 100.dp)
-        .drawBackdrop(
-            backdrop = backdrop,
-            shape = { RoundedCornerShape(24.dp) },
-            effects = { blur(20.dp.toPx()) },
-            highlight = { Highlight.GlassStrokeMiddleLight.copy(alpha = pressProgress) },
-        ),
-)
-```
-
-Pass `null` (or a `Highlight` with `width = 0.dp`) to disable.
-
-::: warning
-Edge highlight requires `isRuntimeShaderSupported()`. On unsupported platforms or API levels, the highlight is skipped silently.
-:::
-
-### Built-in Tokens
-
-Six presets are provided. Pick by card size and theme:
-
-| Token | innerBlurRadius | Visual |
-| --- | --- | --- |
-| `Highlight.GlassStrokeBigLight` | 3.5 dp | Thickest, softest halo — large light-mode cards |
-| `Highlight.GlassStrokeMiddleLight` | 2.8 dp | Standard light-mode card (default) |
-| `Highlight.GlassStrokeSmallLight` | 2.6 dp | Compact, sharper light-mode card |
-| `Highlight.GlassStrokeBigDark` | 1.7 dp | Thinnest halo — large dark-mode card |
-| `Highlight.GlassStrokeMiddleDark` | 2.0 dp | Standard dark-mode card |
-| `Highlight.GlassStrokeSmallDark` | 2.3 dp | Compact, sharpest dark-mode card |
-
-`Highlight.Default` aliases `GlassStrokeMiddleLight`.
-
-### Custom BloomStroke
-
-Override individual fields on a token, or build a `BloomStroke` from scratch:
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.highlight.BloomStroke
-import top.yukonga.miuix.kmp.blur.highlight.LightPosition
-import top.yukonga.miuix.kmp.blur.highlight.LightSource
-
-val custom = Highlight(
-    width = 1.dp,
-    alpha = 0.8f,
-    style = BloomStroke(
-        color = Color.White.copy(alpha = 0.05f),
-        innerBlurRadius = 3.dp,
-        primaryLight = LightSource(
-            position = LightPosition(0.5f, 0.4f, -0.5f),
-            intensity = 0.4f,
-        ),
-        secondaryLight = LightSource(
-            position = LightPosition(0.5f, 0.85f, -0.5f),
-            intensity = 0.3f,
-        ),
-    ),
-)
-```
-
-`LightPosition` is in normalized UV with the reference origin at `(0.5, 0.7, 0)`. The shader normalizes `(x − 0.5, y − 0.7, z)` into a 3D unit direction. Negative `z` places the light behind the surface plane, illuminating the inward-facing edge — all built-in tokens use `z < 0`.
-
-The two lights are restricted to opposite hemispheres by the shader: `primaryLight` lights the upper half of the rounded rect, `secondaryLight` lights the lower half. Position `y < 0.7` biases a light upward; `y > 0.7` biases it downward.
-
-### Sensor-driven Tilt Parallax
-
-`rememberTiltLight` shifts a base position in real time using the device rotation sensor. On Android, this produces a parallax-like edge that follows device tilt; on Desktop / iOS / macOS / Web the tilt is always zero, so the lights stay anchored.
-
-```kotlin
-import top.yukonga.miuix.kmp.blur.highlight.rememberTiltLight
-
-val baseStyle = Highlight.GlassStrokeMiddleLight.style as BloomStroke
-
-val tiltPrimary = rememberTiltLight(
-    basePosition = baseStyle.primaryLight.position,
-    intensity = baseStyle.primaryLight.intensity,
-    sensitivity = 0.15f,
-)
-val tiltSecondary = rememberTiltLight(
-    basePosition = baseStyle.secondaryLight.position,
-    intensity = baseStyle.secondaryLight.intensity,
-    sensitivity = 0.12f,
-)
-
-val highlight = Highlight.GlassStrokeMiddleLight.copy(
-    style = baseStyle.copy(
-        primaryLight = tiltPrimary,
-        secondaryLight = tiltSecondary,
-    ),
-)
-```
-
-`sensitivity` controls how far the UV position shifts per radian of tilt — `0.1f` shifts the light by 10% of the bounds at 1 rad. Higher values amplify the parallax.
-
-### Edge Highlight Properties
-
-#### Highlight
-
-| Property | Type | Description | Default |
-| --- | --- | --- | --- |
-| width | Dp | Stroke band width painted with `style.color` | 0.8.dp |
-| alpha | Float | Overall opacity multiplier, range [0, 1] | 1f |
-| style | HighlightStyle | Shading model (typically a `BloomStroke`) | `HighlightStyle.Default` |
-
-#### BloomStroke
-
-| Property | Type | Description | Default |
-| --- | --- | --- | --- |
-| color | Color | Base color of the stroke band; alpha drives stroke brightness | `White.copy(alpha = 0.05f)` |
-| blendMode | BlendMode | Compositing mode for the highlight overlay | `BlendMode.Plus` |
-| innerBlurRadius | Dp | Depth the lighting reaches inward from the rounded edge — controls halo softness and thickness | 2.8.dp |
-| primaryLight | LightSource | Upper-hemisphere light | `LightPosition(0.5f, 0.5f, -0.5f)`, intensity 0.4 |
-| secondaryLight | LightSource | Lower-hemisphere light | `LightPosition(0.5f, 0.8f, -0.5f)`, intensity 0.25 |
-
-#### LightSource
-
-| Property | Type | Description | Default |
-| --- | --- | --- | --- |
-| position | LightPosition | UV position of the light | - |
-| color | Color | Light color (color alpha is folded into the contribution scale) | `White` |
-| intensity | Float | Brightness scalar, ≥ 0 | 1f |
-
-#### LightPosition
-
-| Property | Type | Description |
-| --- | --- | --- |
-| x | Float | Normalized UV x (reference origin: 0.5) |
-| y | Float | Normalized UV y (reference origin: 0.7) |
-| z | Float | Signed depth; negative places the light behind the surface |
-
-#### rememberTiltLight Parameters
-
-| Parameter | Type | Description | Default |
-| --- | --- | --- | --- |
-| basePosition | LightPosition | Position at zero tilt | - |
-| color | Color | Light color | `White` |
-| intensity | Float | Brightness scalar | 1f |
-| sensitivity | Float | UV offset applied per radian of tilt | 0.1f |
+See [Edge Stroke](/guide/material#edge-stroke) for the properties, presets and tilt-driven lights.

@@ -1,6 +1,6 @@
-# Glass Material
+# Glass Surfaces
 
-`miuix-glass` provides glass materials and components for Compose Multiplatform, with background blur, color blending and lighting effects.
+`miuix-glass` provides the glass surfaces and components for Compose Multiplatform: `glassPanel`, `glass`, `glassShadow` and `glassSurface` on top of the [material definitions](/guide/material), with background blur, color blending and lighting effects.
 
 ::: warning
 Android requires `minSdk` 33 (Android 13) or higher.
@@ -28,7 +28,7 @@ dependencies {
 }
 ```
 
-`miuix-glass` includes `miuix-blur` and `miuix-ui` transitively.
+`miuix-glass` includes `miuix-material`, `miuix-blur` and `miuix-ui` transitively.
 
 The optional `miuix-glass-icons` module provides the Glass icon set, reached through `MiuixIcons.Glass`; see [Icon System](/guide/icons).
 
@@ -40,11 +40,11 @@ Create a backdrop, record the background with `layerBackdrop`, then apply `glass
 import androidx.compose.ui.graphics.luminance
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.glass.GlassDefaults
-import top.yukonga.miuix.kmp.glass.GlassMaterials
-import top.yukonga.miuix.kmp.glass.GlassShape
-import top.yukonga.miuix.kmp.glass.GlassStrokes
 import top.yukonga.miuix.kmp.glass.glassPanel
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShape
 
 val backdrop = rememberLayerBackdrop()
 val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
@@ -68,7 +68,7 @@ Box(modifier = Modifier.fillMaxSize()) {
                 shape = GlassShape(24.dp),
                 style = GlassDefaults.style(isDark),
                 material = GlassMaterials.puredThinGlass(isDark),
-                stroke = GlassStrokes.forTheme(isDark),
+                stroke = GlassEdgeStrokes.forTheme(isDark),
                 shading = false,
             )
             .padding(24.dp),
@@ -86,60 +86,7 @@ For dialogs and bottom sheets, also exclude their scrims; the surface helpers ap
 
 ## Material Configuration
 
-### GlassStyle
-
-Use `GlassDefaults.style(isDark)` for theme-aware refraction, reflection and lighting, or select a preset from `GlassStyles`. `GlassDefaults.Style` is the fixed `CommonMediumRegularLowLight` preset.
-
-### GlassMaterial
-
-`GlassMaterial` controls the blurred body and its color layers. A non-null material replaces the blur radius requested by `GlassStyle`.
-
-| Property Name | Type | Description | Default Value | Required |
-| --- | --- | --- | --- | --- |
-| blurRadius | Dp | Backdrop blur radius | - | Yes |
-| first | GlassColorLayer | First color layer, nearest the backdrop | - | Yes |
-| second | GlassColorLayer? | Second color layer | null | No |
-| third | GlassColorLayer? | Third color layer; requires a non-null second layer | null | No |
-
-Each `GlassColorLayer` specifies a `Color` and `GlassColorBlendMode`; layers are applied in order.
-
-`GlassMaterials` provides theme-aware presets:
-
-| Function Name | Return Type | Description | Blur Radius |
-| --- | --- | --- | --- |
-| puredThinGlass(isDark) | GlassMaterial | Floating bar material | 20.dp |
-| popupViewGlass(isDark) | GlassMaterial | Expanded popup material | 60.dp |
-| dialogGlass(isDark) | GlassMaterial | Dialog and attached bottom-sheet material | 60.dp |
-| actionBarMask(isDark) | GlassMaterial | Top-bar masking band | 40.dp light / 60.dp dark |
-
-Each preset also has corresponding `*Light` and `*Dark` values. To adjust a preset, use `copy`:
-
-```kotlin
-val material = GlassMaterials.puredThinGlass(isDark).copy(
-    blurRadius = 32.dp,
-)
-```
-
-### GlassShape
-
-Use `GlassShape(cornerRadius)` for equal corners, or supply all four radii for an asymmetric surface:
-
-```kotlin
-val shape = GlassShape(
-    topStart = 24.dp,
-    topEnd = 24.dp,
-    bottomEnd = 0.dp,
-    bottomStart = 0.dp,
-)
-```
-
-Start/end corners follow layout direction. The primary constructor also accepts `CornerSize` values, including percentage corners for capsules.
-
-`smoothing` controls shader corners (`1f`: continuous; `0f`: circular). Compose outlines and clipping use rounded rectangles.
-
-### Stroke and Shadow
-
-Use `GlassStrokes.forTheme(isDark)` for a theme-matched rim. Set `stroke = null` to remove it. `GlassShadows` provides `Low`, `Regular`, `High`, `ExtraHigh` and `Float` presets; `shadow = null` removes the shadow.
+`GlassStyle`, `GlassStyles`, `GlassMaterial`, `GlassMaterials`, `GlassShape`, `GlassShadow`, `GlassShadows` and `GlassDefaults` live in `miuix-material` (`top.yukonga.miuix.kmp.material`). See [Material definitions](/guide/material#material-definitions) for their properties and presets, and [Edge Stroke](/guide/material#edge-stroke) for the rim stroke.
 
 ## Modifier API
 
@@ -154,7 +101,7 @@ Use `GlassStrokes.forTheme(isDark)` for a theme-matched rim. Set `stroke = null`
 | style | GlassStyle | Optical treatment | GlassDefaults.Style | No |
 | alpha | Float | Color-layer, shading, stroke and shadow opacity multiplier | 1f | No |
 | material | GlassMaterial? | Blur and body color layers; null keeps style-based blur without GlassMaterial color layers | null | No |
-| stroke | GlassStroke? | Rim stroke | null | No |
+| stroke | EdgeStroke? | Rim stroke (`width`/`bevel` in `Dp`) | null | No |
 | shadow | GlassShadow? | Drop shadow | GlassShadows.Regular | No |
 | shading | Boolean | Whether to apply refraction and shading | true | No |
 | fallback | Modifier | Surface used when backdrop is null | Modifier.clip(shape) | No |
@@ -176,7 +123,7 @@ With a backdrop, `alpha` affects material opacity, not blur or foreground conten
 | tint | Color | Overrides the style tint; alpha controls tint strength | Color.Unspecified | No |
 | material | GlassMaterial? | Blur and body color layers; null keeps style-based blur without GlassMaterial color layers | null | No |
 | noiseCoefficient | Float | Blur dithering; 0f disables it | GlassDefaults.NoiseCoefficient | No |
-| stroke | GlassStroke? | Rim stroke | null | No |
+| stroke | EdgeStroke? | Rim stroke (`width`/`bevel` in `Dp`) | null | No |
 | contentBlendMode | BlendMode | Foreground content blend mode | BlendMode.SrcOver | No |
 | enabled | Boolean | Whether to draw the glass effect | true | No |
 | shading | Boolean | Whether to apply refraction and shading | true | No |
@@ -219,24 +166,7 @@ For hosts with an animated scrim or scale, use [glassDialogSurface](/components/
 
 ## GlassDefaults Object
 
-### Constants
-
-| Constant Name | Type | Description | Default Value |
-| --- | --- | --- | --- |
-| CornerRadius | Dp | Default corner radius | 24.dp |
-| Smoothing | Float | Default corner smoothing | 1f |
-| SourceDensity | Float | Source density for pixel-based style and shadow tokens | 3f |
-| NoiseCoefficient | Float | Blur dithering coefficient | BlurDefaults.NoiseCoefficient |
-| Overspill | Float | Material overspill before masking | 3f |
-| Style | GlassStyle | Default optical preset | GlassStyles.CommonMediumRegularLowLight |
-
-Pixel-based style and shadow values scale by `density / SourceDensity`.
-
-### Functions
-
-| Function Name | Return Type | Description |
-| --- | --- | --- |
-| style(isDark: Boolean) | GlassStyle | Selects CommonMediumRegularLowLight or CommonMediumRegularDark |
+`GlassDefaults` is part of `miuix-material`; its constants (`CornerRadius`, `Smoothing`, `SourceDensity`, `NoiseCoefficient`, `Overspill`, `Style`) and the `style(isDark)` helper are listed under [GlassDefaults](/guide/material#glassdefaults-object).
 
 ## Advanced Usage
 

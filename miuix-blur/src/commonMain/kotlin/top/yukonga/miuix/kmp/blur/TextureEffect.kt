@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 /**
@@ -20,7 +19,6 @@ import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
  *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
@@ -32,7 +30,6 @@ fun Modifier.textureBlur(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
@@ -41,7 +38,6 @@ fun Modifier.textureBlur(
     blurRadius = blurRadius,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
-    highlight = highlight,
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
@@ -57,7 +53,6 @@ fun Modifier.textureBlur(
  *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
@@ -70,7 +65,6 @@ fun Modifier.textureBlur(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
@@ -80,7 +74,6 @@ fun Modifier.textureBlur(
     blurRadiusY = blurRadiusY,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
-    highlight = highlight,
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
@@ -95,7 +88,6 @@ fun Modifier.textureBlur(
  *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
@@ -107,7 +99,6 @@ fun Modifier.textureEffect(
     blurRadius: Float = BlurDefaults.BlurRadius,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = textureEffect(
@@ -117,7 +108,6 @@ fun Modifier.textureEffect(
     blurRadiusY = blurRadius,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
-    highlight = highlight,
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
@@ -134,7 +124,6 @@ fun Modifier.textureEffect(
  *   Clamped to [0, [BlurDefaults.MaxBlurRadius]].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  *   Use [ComposeBlendMode.DstIn] for foreground blur (content alpha masks the blur).
  *   null means content draws normally on top.
@@ -147,7 +136,6 @@ fun Modifier.textureEffect(
     blurRadiusY: Float,
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = this.drawBackdrop(
@@ -161,11 +149,6 @@ fun Modifier.textureEffect(
             colors = colors,
         )
     },
-    highlight = if (highlight != null) {
-        { highlight }
-    } else {
-        null
-    },
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
@@ -173,9 +156,8 @@ fun Modifier.textureEffect(
 /**
  * Applies a **progressive (gradient) backdrop blur**: the blur strength ramps from full to zero
  * along [gradient]'s direction — a genuine medium blur in the middle of the ramp, a pixel-sharp
- * full-resolution clear end. Ideal for navigation bars and edge fades. Same color / blend / noise /
- * highlight pipeline as [textureBlur], applied so the effects fade out with the blur.
- *
+ * full-resolution clear end. Ideal for navigation bars and edge fades. Same color / blend / noise
+ * pipeline as [textureBlur], applied so the effects fade out with the blur.
  * Costs more than [textureBlur]: on top of the downscaled level stack, the pixel-sharp clear end
  * adds a full-resolution overlay pass per frame. Prefer it for bars and edge bands over large
  * fills.
@@ -188,7 +170,6 @@ fun Modifier.textureEffect(
  *   [ProgressiveBlur.Top].
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 (the default) disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  * @param enabled Whether blur is active. When false, the effect is skipped and content draws normally.
  */
@@ -199,7 +180,6 @@ fun Modifier.progressiveTextureBlur(
     gradient: ProgressiveBlur = ProgressiveBlur.Top,
     noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = progressiveTextureBlur(
@@ -210,7 +190,6 @@ fun Modifier.progressiveTextureBlur(
     gradient = gradient,
     noiseCoefficient = noiseCoefficient,
     colors = colors,
-    highlight = highlight,
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
@@ -227,7 +206,6 @@ fun Modifier.progressiveTextureBlur(
  * @param gradient Direction and band controlling where the blur is full vs zero.
  * @param noiseCoefficient Noise dithering coefficient for anti-banding. 0 (the default) disables noise.
  * @param colors Color adjustments and blend layers applied after blur.
- * @param highlight Optional edge highlight painted on top of the content. `null` skips drawing.
  * @param contentBlendMode Optional [ComposeBlendMode] for compositing content over the blur.
  * @param enabled Whether blur is active. When false, the effect is skipped and content draws normally.
  */
@@ -239,7 +217,6 @@ fun Modifier.progressiveTextureBlur(
     gradient: ProgressiveBlur = ProgressiveBlur.Top,
     noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
-    highlight: Highlight? = null,
     contentBlendMode: ComposeBlendMode = ComposeBlendMode.SrcOver,
     enabled: Boolean = true,
 ): Modifier = this.drawBackdrop(
@@ -253,11 +230,6 @@ fun Modifier.progressiveTextureBlur(
             noiseCoefficient = noiseCoefficient,
             colors = colors,
         )
-    },
-    highlight = if (highlight != null) {
-        { highlight }
-    } else {
-        null
     },
     contentBlendMode = contentBlendMode,
     progressiveGradient = gradient,

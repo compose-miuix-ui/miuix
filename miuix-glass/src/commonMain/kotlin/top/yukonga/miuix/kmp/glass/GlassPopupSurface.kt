@@ -46,7 +46,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassShadow
 import kotlin.math.roundToInt
 
 /**
@@ -79,7 +86,7 @@ data class GlassPopupSizing(
 data class GlassPopupVisuals(
     val style: GlassStyle,
     val alpha: Float,
-    val stroke: GlassStroke?,
+    val stroke: EdgeStroke?,
     val shadow: GlassShadow?,
     val material: GlassMaterial?,
     val containerColor: Color,
@@ -302,7 +309,7 @@ internal fun BoxScope.GlassPopupBackground(
             if (backdrop == null) {
                 Modifier.background(visuals.containerColor).drawWithContent {
                     drawContent()
-                    visuals.stroke?.let { drawGlassStroke(shape, layoutDirection, it, visuals.alpha) }
+                    visuals.stroke?.let { drawEdgeStroke(shape, it, visuals.alpha) }
                 }
             } else if (underlayMaterial != null) {
                 Modifier.glassOnActionBar(

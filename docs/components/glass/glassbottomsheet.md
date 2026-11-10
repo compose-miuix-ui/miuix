@@ -22,7 +22,7 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 :::
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Surfaces](/guide/glass#background-sampling) for setup.
 :::
 
 ## Import
@@ -101,7 +101,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | insideMargin | DpSize | Horizontal content padding uses `width`; bottom padding uses `height` | BottomSheetDefaults.insideMargin | No |
 | dragHandleColor | Color | Handle color before press opacity is applied | BottomSheetDefaults.dragHandleColor() | No |
 | material | GlassMaterial | Blur and ordered color layers | GlassBottomSheetDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
+| stroke | EdgeStroke? | Edge stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassBottomSheetDefaults.containerColor() | No |
 | dimColor | Color | Scrim color before animation progress is applied | GlassBottomSheetDefaults.ScrimColor | No |
 | onDismissFinished | (() -> Unit)? | Called after the hide animation completes, unless hiding is cancelled | null | No |
@@ -115,7 +115,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop? | Page backdrop excluding the sheet host and scrim; null uses the fallback | - | Yes |
 | material | GlassMaterial | Blur and ordered color layers | GlassBottomSheetDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
+| stroke | EdgeStroke? | Edge stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassBottomSheetDefaults.containerColor() | No |
 
 ### GlassBottomSheetDefaults Object
@@ -131,7 +131,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-aware `GlassMaterials.dialogGlass`, shared with GlassDialog |
-| stroke() | GlassStroke | Theme-aware `GlassStrokes.MiddleLight` or `MiddleDark` bloom stroke |
+| stroke() | EdgeStroke | Theme-aware `GlassEdgeStrokes.MiddleLight` or `MiddleDark` edge stroke |
 | containerColor() | Color | Theme background color for the opaque fallback |
 
 ## Advanced Usage

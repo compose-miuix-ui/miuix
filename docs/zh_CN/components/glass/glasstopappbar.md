@@ -7,7 +7,7 @@
 </div>
 
 ::: warning 背景采样
-采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -89,7 +89,7 @@ Scaffold(
 | buttonSize | Dp | 内嵌玻璃按钮的默认直径 | GlassTopAppBarDefaults.ButtonSize | 否 |
 | buttonShape | GlassShape | 内嵌玻璃按钮的默认形状 | GlassShape(buttonSize / 2) | 否 |
 | fill | Color | 按钮回退填充色 | GlassTopAppBarDefaults.buttonFill() | 否 |
-| stroke | GlassStroke? | 按钮描边，null 表示不绘制 | GlassTopAppBarDefaults.buttonStroke() | 否 |
+| stroke | EdgeStroke? | 按钮描边，null 表示不绘制 | GlassTopAppBarDefaults.buttonStroke() | 否 |
 | buttonShadow | GlassShadow? | 按钮阴影，null 表示不绘制 | GlassShadows.Regular | 否 |
 | defaultWindowInsetsPadding | Boolean | 是否添加横向刘海和导航栏内边距；顶部系统栏内边距始终添加 | true | 否 |
 | titleAlpha | () -> Float | 大小标题及副标题在绘制阶段使用的透明度乘数 | { 1f } | 否 |
@@ -124,7 +124,7 @@ Scaffold(
 | collapseRamp(scrollBehavior: ScrollBehavior?) | State\<Float> | 从 RampStart 开始，在 RampDistance 内生成 0 到 1 的阴影进度；行为为 null 时返回 1f |
 | buttonFill() | Color | 浅色模式为白色，深色模式为 `#FF2C2C2C` |
 | buttonMaterial() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
-| buttonStroke() | GlassStroke | 浅色模式为 `GlassStrokes.SmallLight`，深色模式为 `SmallDark` |
+| buttonStroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.SmallLight`，深色模式为 `SmallDark` |
 | buttonPressedOverlay() | Color | 浅色模式为透明度 0.10 的黑色，深色模式为透明度 0.14 的白色 |
 | bandBrush(color: Color) | Brush | 使用页面颜色创建纵向渐变，顶部不透明，底部透明 |
 

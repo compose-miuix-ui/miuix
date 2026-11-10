@@ -12,9 +12,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Default values for [GlassBottomSheet] and [glassBottomSheetSurface]. */
@@ -29,10 +34,10 @@ object GlassBottomSheetDefaults {
 
     /** Bottom-sheet bloom stroke for the current theme. */
     @Composable
-    fun stroke(): GlassStroke = GlassStrokes.forTheme(
+    fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
-        light = GlassStrokes.MiddleLight,
-        dark = GlassStrokes.MiddleDark,
+        light = GlassEdgeStrokes.MiddleLight,
+        dark = GlassEdgeStrokes.MiddleDark,
     )
 
     /** Opaque fallback when no scene or runtime shader support is available. */
@@ -57,7 +62,7 @@ object GlassBottomSheetDefaults {
 fun glassBottomSheetSurface(
     backdrop: Backdrop?,
     material: GlassMaterial = GlassBottomSheetDefaults.material(),
-    stroke: GlassStroke? = GlassBottomSheetDefaults.stroke(),
+    stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
     containerColor: Color = GlassBottomSheetDefaults.containerColor(),
 ): @Composable BottomSheetSurfaceScope.() -> Modifier = {
     val effectiveBackdrop = if (backdrop != null && isRuntimeShaderSupported()) {

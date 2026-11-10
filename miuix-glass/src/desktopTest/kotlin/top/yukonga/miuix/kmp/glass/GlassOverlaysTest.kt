@@ -12,8 +12,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassRim
 import kotlin.test.Test
 
 class GlassOverlaysTest {
@@ -23,7 +26,6 @@ class GlassOverlaysTest {
         forEachSize {
             drawGlassRim(
                 shape = GlassShape(16.dp),
-                layoutDirection = layoutDirection,
                 style = GlassDefaults.Style,
                 surface = Color.White,
                 alpha = 1f,
@@ -34,10 +36,9 @@ class GlassOverlaysTest {
     @Test
     fun bloomStrokeDrawsAtOnePixelAndSubpixelSizes() {
         forEachSize {
-            drawGlassStroke(
+            drawEdgeStroke(
                 shape = GlassShape(16.dp),
-                layoutDirection = layoutDirection,
-                stroke = GlassStrokes.SmallLight,
+                stroke = GlassEdgeStrokes.SmallLight,
                 alpha = 1f,
             )
         }

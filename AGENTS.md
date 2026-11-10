@@ -25,24 +25,25 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 
 ## Repository Structure
 
-| Directory            | Purpose                                                                    |
-| :------------------- | :------------------------------------------------------------------------- |
-| `miuix-core/`        | Utilities + MiuixIcons base (depended on by `ui` and `icons`)              |
-| `miuix-ui/`          | Main UI library                                                            |
-| `miuix-preference/`  | Preference / menu / popup components                                       |
-| `miuix-icons/`       | Extended icon resources                                                    |
-| `miuix-glass-icons/` | Glass icon set, `MiuixIcons.Glass` (depends on `miuix-core`)               |
-| `miuix-shader/`      | Runtime shader / render effect abstraction (used by `blur` and `squircle`) |
-| `miuix-blur/`        | Blur effects (Android minSdk=33; depends on `miuix-shader`)                |
-| `miuix-squircle/`    | Squircle corner shapes (depends on `miuix-shader`)                         |
-| `miuix-glass/`       | Glass material + components (Android minSdk=33; depends on `miuix-blur`)   |
-| `miuix-nav/`         | Navigation runtime (depends on `miuix-squircle`)                           |
-| `miuix-window/`      | Desktop window & caption bar styling (Desktop JVM)                         |
-| `example/`           | Demo app                                                                   |
-| `baselineprofile/`   | Android baseline profile generation                                        |
-| `docs/`              | VitePress documentation site                                               |
-| `build-logic/`       | Custom Gradle plugins                                                      |
-| `gradle/`            | Version catalog + wrapper                                                  |
+| Directory            | Purpose                                                       |
+| :------------------- | :------------------------------------------------------------ |
+| Directory            | Purpose                                                       |
+| `miuix-core/`        | Utilities + MiuixIcons base (depended on by `ui` and `icons`) |
+| `miuix-ui/`          | Main UI library                                               |
+| `miuix-preference/`  | Preference / menu / popup components                          |
+| `miuix-icons/`       | Extended icon resources                                       |
+| `miuix-glass-icons/` | Glass icon set, `MiuixIcons.Glass` (depends on `miuix-core`)  |
+| `miuix-material/`    | Render primitives + material definitions (`EdgeStroke`)       |
+| `miuix-blur/`        | Background sampling + blur stack (Android minSdk=33)          |
+| `miuix-squircle/`    | Squircle corner shapes                                        |
+| `miuix-glass/`       | Glass surfaces + components (Android minSdk=33)               |
+| `miuix-nav/`         | Navigation runtime (depends on `miuix-squircle`)              |
+| `miuix-window/`      | Desktop window & caption bar styling (Desktop JVM)            |
+| `example/`           | Demo app                                                      |
+| `baselineprofile/`   | Android baseline profile generation                           |
+| `docs/`              | VitePress documentation site                                  |
+| `build-logic/`       | Custom Gradle plugins                                         |
+| `gradle/`            | Version catalog + wrapper                                     |
 
 ### Component Source Layout
 
@@ -69,12 +70,21 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `menu/`       | Dropdown menus (Overlay/Window variants, cascading)             |
 | `popup/`      | Dropdown popup primitives shared by menus                       |
 
+`miuix-material/src/commonMain/kotlin/top/yukonga/miuix/kmp/material/`:
+
+| Subdir      | Contents                                                                                  |
+| :---------- | :---------------------------------------------------------------------------------------- |
+| (root)      | `RuntimeShader` / `RenderEffect` abstractions, `RuntimeShaderCache`, `EdgeStroke` + presets, `GlassStyle(s)` / `GlassMaterial(s)` / `GlassShape` / `GlassShadow(s)` / `GlassDefaults`, glass overlay drawing |
+| `agsl/`     | `MaterialAgsl` — AGSL fragments shared by the material shaders                              |
+| `internal/` | Shader sources, uniform packing, edge-stroke drawing internals                              |
+| `sensor/`   | `rememberDeviceTilt` (expect/actual)                                                        |
+
 `miuix-glass/src/commonMain/kotlin/top/yukonga/miuix/kmp/`:
 
-| Subdir            | Contents                                                              |
-| :---------------- | :-------------------------------------------------------------------- |
-| `glass/`          | Glass material + components (GlassPanel, GlassDialog, GlassTabRow, …) |
-| `glass/internal/` | Backdrop sampling / shader internals                                  |
+| Subdir            | Contents                                                          |
+| :---------------- | :---------------------------------------------------------------- |
+| `glass/`          | Glass surfaces + components (GlassPanel, GlassDialog, GlassTabRow, …) |
+| `glass/internal/` | Refraction / colour-blend shaders and their uniform packing       |
 
 `miuix-glass-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon/` is a flat `glass/` icon set — one file per icon, reached through `MiuixIcons.Glass`.
 

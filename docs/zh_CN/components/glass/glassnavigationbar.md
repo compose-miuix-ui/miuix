@@ -7,7 +7,7 @@
 </div>
 
 ::: warning 背景采样
-采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -74,7 +74,7 @@ GlassNavigationBar(
 | shape | GlassShape | 胶囊形状 | GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)) | 否 |
 | alpha | Float | 胶囊材质透明度乘数 | 1f | 否 |
 | visible | Boolean | 整个组合的目标可见状态 | true | 否 |
-| stroke | GlassStroke? | 胶囊描边，null 表示不绘制 | GlassNavigationBarDefaults.stroke() | 否 |
+| stroke | EdgeStroke? | 胶囊描边，null 表示不绘制 | GlassNavigationBarDefaults.stroke() | 否 |
 | shadow | GlassShadow? | 胶囊阴影，null 表示不绘制 | GlassShadows.Float | 否 |
 | height | Dp | 胶囊最小高度 | GlassNavigationBarDefaults.Height | 否 |
 | material | GlassMaterial? | 胶囊主体，null 表示不使用显式材质色层 | GlassNavigationBarDefaults.material() | 否 |
@@ -115,7 +115,7 @@ GlassNavigationBar(
 | 方法名 | 返回类型 | 说明 |
 | --- | --- | --- |
 | material() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | 浅色模式为 `GlassStrokes.MiddleLight`，深色模式为 `MiddleDark` |
+| stroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.MiddleLight`，深色模式为 `MiddleDark` |
 | indicatorColor() | Color | 浅色模式为透明度 0.06 的黑色，深色模式为透明度 0.12 的白色 |
 | indicatorPressedColor() | Color | 浅色模式为透明度 0.16 的黑色，深色模式为透明度 0.26 的白色 |
 

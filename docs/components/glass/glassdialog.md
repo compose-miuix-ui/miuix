@@ -22,7 +22,7 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 :::
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Surfaces](/guide/glass#background-sampling) for setup.
 :::
 
 ## Import
@@ -105,7 +105,7 @@ Include any page bars that the overlay can cover in `backdrop`, but exclude the 
 | outsideMargin | DpSize | External margins | DialogDefaults.outsideMargin | No |
 | insideMargin | DpSize | Content padding | DialogDefaults.insideMargin | No |
 | material | GlassMaterial | Blur and ordered color layers | GlassDialogDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke; null removes it | GlassDialogDefaults.stroke() | No |
+| stroke | EdgeStroke? | Edge stroke; null removes it | GlassDialogDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassDialogDefaults.containerColor() | No |
 | dimColor | Color | Scrim color before animation progress is applied | GlassDialogDefaults.ScrimColor | No |
 | onDismissFinished | (() -> Unit)? | Called after the hide animation completes, unless hiding is cancelled | null | No |
@@ -147,7 +147,7 @@ Include any page bars that the overlay can cover in `backdrop`, but exclude the 
 | --- | --- | --- | --- | --- |
 | backdrop | Backdrop? | Page backdrop excluding the dialog host and scrim; null uses the fallback | - | Yes |
 | material | GlassMaterial | Blur and ordered color layers | GlassDialogDefaults.material() | No |
-| stroke | GlassStroke? | Bloom stroke; null removes it | GlassDialogDefaults.stroke() | No |
+| stroke | EdgeStroke? | Edge stroke; null removes it | GlassDialogDefaults.stroke() | No |
 | containerColor | Color | Opaque fallback fill | GlassDialogDefaults.containerColor() | No |
 
 ### GlassDialogDefaults Object
@@ -163,7 +163,7 @@ Include any page bars that the overlay can cover in `backdrop`, but exclude the 
 | Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-aware `GlassMaterials.dialogGlass` material |
-| stroke() | GlassStroke | Theme-aware `GlassStrokes.SmallLight` or `SmallDark` bloom stroke |
+| stroke() | EdgeStroke | Theme-aware `GlassEdgeStrokes.SmallLight` or `SmallDark` edge stroke |
 | containerColor() | Color | Theme background color for the opaque fallback |
 
 ### GlassDialogButtonDefaults Object

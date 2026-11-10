@@ -13,6 +13,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.blur.internal.COLOR_CONTROLS_SHADER
 import top.yukonga.miuix.kmp.blur.internal.MAX_BLUR_TAPS
 import top.yukonga.miuix.kmp.blur.internal.chain
+import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.RuntimeShaderCache
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /**
@@ -146,7 +150,7 @@ internal abstract class BackdropEffectScopeImpl :
     override var downscaleFactor: Int = 1
     override var noiseCoefficient: Float = 0f
 
-    var runtimeShaderCache: RuntimeShaderCache = RuntimeShaderCacheImpl()
+    var runtimeShaderCache: RuntimeShaderCache = DefaultRuntimeShaderCache()
 
     // Scratch reused across updateEffects(); X / Y axes are sequential and share buffers.
     internal val blurRawWeights: DoubleArray = DoubleArray(14)

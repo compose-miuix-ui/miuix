@@ -31,6 +31,9 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.material.GlassColorBlendMode
+import top.yukonga.miuix.kmp.material.GlassColorLayer
+import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme

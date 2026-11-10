@@ -7,7 +7,7 @@
 </div>
 
 ::: warning Background Sampling
-Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
+Record an opaque background without the glass surface itself. See [Glass Surfaces](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -74,7 +74,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | shape | GlassShape | Capsule shape | GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)) | No |
 | alpha | Float | Capsule material opacity multiplier | 1f | No |
 | visible | Boolean | Target visibility of the whole group | true | No |
-| stroke | GlassStroke? | Capsule stroke; null removes it | GlassNavigationBarDefaults.stroke() | No |
+| stroke | EdgeStroke? | Capsule stroke; null removes it | GlassNavigationBarDefaults.stroke() | No |
 | shadow | GlassShadow? | Capsule shadow; null removes it | GlassShadows.Float | No |
 | height | Dp | Minimum capsule height | GlassNavigationBarDefaults.Height | No |
 | material | GlassMaterial? | Capsule body; null omits explicit material layers | GlassNavigationBarDefaults.material() | No |
@@ -115,7 +115,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | Method Name | Return Type | Description |
 | --- | --- | --- |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | `GlassStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
+| stroke() | EdgeStroke | `GlassEdgeStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
 | indicatorColor() | Color | Black at 0.06 alpha in light mode; white at 0.12 alpha in dark mode |
 | indicatorPressedColor() | Color | Black at 0.16 alpha in light mode; white at 0.26 alpha in dark mode |
 

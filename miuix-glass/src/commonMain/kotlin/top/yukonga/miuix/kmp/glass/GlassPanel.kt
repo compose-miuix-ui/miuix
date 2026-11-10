@@ -8,7 +8,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.graphicsLayer
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
 
 /**
  * Applies a glass surface and shadow over [backdrop].
@@ -32,7 +39,7 @@ fun Modifier.glassPanel(
     style: GlassStyle = GlassDefaults.Style,
     alpha: Float = 1f,
     material: GlassMaterial? = null,
-    stroke: GlassStroke? = null,
+    stroke: EdgeStroke? = null,
     shadow: GlassShadow? = GlassShadows.Regular,
     shading: Boolean = true,
     fallback: Modifier = Modifier.clip(shape),
@@ -43,7 +50,7 @@ fun Modifier.glassPanel(
         .then(fallback)
         .drawWithContent {
             drawContent()
-            stroke?.let { drawGlassStroke(shape, layoutDirection, it, 1f) }
+            stroke?.let { drawEdgeStroke(shape, it, 1f) }
         }
 } else {
     this

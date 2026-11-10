@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
+import top.yukonga.miuix.kmp.material.GlassShadows
 
 /**
  * Lays out a glass navigation capsule and an independent trailing action.

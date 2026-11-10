@@ -65,6 +65,7 @@ kotlin {
             dependencies {
                 api(projects.miuixUi)
                 api(projects.miuixPreference)
+                api(projects.miuixMaterial)
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.miuixBlur)
                 implementation(projects.miuixGlass)

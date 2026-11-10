@@ -15,11 +15,20 @@ import top.yukonga.miuix.kmp.blur.drawBackdrop
 import top.yukonga.miuix.kmp.blur.noiseDither
 import top.yukonga.miuix.kmp.glass.internal.GLASS_COLOR_BLEND_SHADER_KEY
 import top.yukonga.miuix.kmp.glass.internal.colorBlendEffect
-import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
-import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
-import top.yukonga.miuix.kmp.glass.internal.drawGlassShadow
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
 import top.yukonga.miuix.kmp.glass.internal.glassEffect
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassInner
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.GlassStyles
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassMask
+import top.yukonga.miuix.kmp.material.drawGlassRim
+import top.yukonga.miuix.kmp.material.drawGlassShadow
 
 /**
  * Applies a glass surface over [backdrop].
@@ -48,7 +57,7 @@ fun Modifier.glass(
     tint: Color = Color.Unspecified,
     material: GlassMaterial? = null,
     noiseCoefficient: Float = GlassDefaults.NoiseCoefficient,
-    stroke: GlassStroke? = null,
+    stroke: EdgeStroke? = null,
     contentBlendMode: BlendMode = BlendMode.SrcOver,
     enabled: Boolean = true,
     shading: Boolean = true,
@@ -75,7 +84,7 @@ internal fun Modifier.glassOnActionBar(
     alpha: Float,
     material: GlassMaterial?,
     underlayMaterial: GlassMaterial,
-    stroke: GlassStroke?,
+    stroke: EdgeStroke?,
     enabled: Boolean = true,
 ): Modifier = glassImpl(
     backdrop = backdrop,
@@ -101,7 +110,7 @@ private fun Modifier.glassImpl(
     material: GlassMaterial?,
     underlayMaterial: GlassMaterial?,
     noiseCoefficient: Float,
-    stroke: GlassStroke?,
+    stroke: EdgeStroke?,
     contentBlendMode: BlendMode,
     enabled: Boolean,
     shading: Boolean,
@@ -119,10 +128,10 @@ private fun Modifier.glassImpl(
         if (shading) glassEffect(style, shape, alpha, tint)
     },
     onDrawFront = {
-        if (stroke != null) drawGlassStroke(shape, layoutDirection, stroke, alpha)
-        drawGlassMask(shape, layoutDirection)
+        if (stroke != null) drawEdgeStroke(shape, stroke, alpha)
+        drawGlassMask(shape)
         if (shading) {
-            drawGlassRim(shape, layoutDirection, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+            drawGlassRim(shape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
         }
     },
     contentBlendMode = contentBlendMode,
@@ -149,5 +158,5 @@ internal fun Modifier.glassShadow(
 ): Modifier = if (shadow == null) {
     this
 } else {
-    this.drawBehind { drawGlassShadow(shape, layoutDirection, shadow, alpha()) }
+    this.drawBehind { drawGlassShadow(shape, shadow, alpha()) }
 }

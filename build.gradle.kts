@@ -6,7 +6,23 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
+    alias(libs.plugins.dokka)
     id("module.spotless")
+}
+
+// One documentation site covering every published Miuix module.
+dependencies {
+    dokka(project(":miuix-core"))
+    dokka(project(":miuix-ui"))
+    dokka(project(":miuix-preference"))
+    dokka(project(":miuix-icons"))
+    dokka(project(":miuix-glass-icons"))
+    dokka(project(":miuix-material"))
+    dokka(project(":miuix-blur"))
+    dokka(project(":miuix-squircle"))
+    dokka(project(":miuix-glass"))
+    dokka(project(":miuix-nav"))
+    dokka(project(":miuix-window"))
 }
 
 plugins.withType<YarnPlugin> {

@@ -42,8 +42,6 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-import top.yukonga.miuix.kmp.blur.highlight.drawHighlight
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
@@ -56,6 +54,9 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
+import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -79,8 +80,6 @@ private const val NOISE_GRAIN_THRESHOLD = 0.005f
  *   animated shape stays current.
  * @param effects The effect pipeline applied to the captured backdrop, configured against a
  *   [BackdropEffectScope] (e.g. [blur], [blendColors], [colorControls]).
- * @param highlight Optional edge highlight resolved against the [BackdropEffectScope] and painted
- *   on top of the content; returning `null` skips drawing.
  * @param layerBlock Optional graphics layer transformation applied to this composable and inverted
  *   on the backdrop sampling so the backdrop stays screen-aligned; safe to animate.
  * @param onDrawBehind Optional draw callback invoked before the blurred backdrop, behind it.
@@ -88,7 +87,7 @@ private const val NOISE_GRAIN_THRESHOLD = 0.005f
  *   recorded content; defaults to invoking it directly.
  * @param onDrawSurface Optional draw callback invoked after the blurred backdrop and before the
  *   composable's own content.
- * @param onDrawFront Optional draw callback invoked last, on top of the content and highlight.
+ * @param onDrawFront Optional draw callback invoked last, on top of the content.
  * @param contentBlendMode The [BlendMode] used to composite the composable's content over the blur.
  *   [BlendMode.DstIn] masks the blur by the content alpha (foreground blur).
  * @param progressiveGradient When non-null, renders the backdrop as a multi-level progressive
@@ -104,7 +103,6 @@ fun Modifier.drawBackdrop(
     backdrop: Backdrop,
     shape: () -> Shape,
     effects: BackdropEffectScope.() -> Unit,
-    highlight: (BackdropEffectScope.() -> Highlight?)? = null,
     layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
     onDrawBehind: (DrawScope.() -> Unit)? = null,
     onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit = DefaultOnDrawBackdrop,
@@ -114,7 +112,7 @@ fun Modifier.drawBackdrop(
     progressiveGradient: ProgressiveBlur? = null,
     enabled: Boolean = true,
 ): Modifier {
-    // The effect pipeline (blur / blend / highlight / custom passes) is built on RuntimeShader.
+    // The effect pipeline (blur / blend / custom passes) is built on RuntimeShader.
     val effectiveEnabled = enabled && isRuntimeShaderSupported()
     return this
         .then(
@@ -125,7 +123,6 @@ fun Modifier.drawBackdrop(
                 backdrop = backdrop,
                 shape = shape,
                 effects = effects,
-                highlight = highlight,
                 layerBlock = layerBlock,
                 onDrawBehind = onDrawBehind,
                 onDrawBackdrop = onDrawBackdrop,
@@ -142,7 +139,6 @@ private class DrawBackdropElement(
     val backdrop: Backdrop,
     val shape: () -> Shape,
     val effects: BackdropEffectScope.() -> Unit,
-    val highlight: (BackdropEffectScope.() -> Highlight?)?,
     val layerBlock: (GraphicsLayerScope.() -> Unit)?,
     val onDrawBehind: (DrawScope.() -> Unit)?,
     val onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
@@ -157,7 +153,6 @@ private class DrawBackdropElement(
         backdrop = backdrop,
         shape = shape,
         effects = effects,
-        highlight = highlight,
         layerBlock = layerBlock,
         onDrawBehind = onDrawBehind,
         onDrawBackdrop = onDrawBackdrop,
@@ -174,7 +169,6 @@ private class DrawBackdropElement(
         node.backdrop = backdrop
         node.updateShape(shape)
         node.effects = effects
-        node.highlight = highlight
         node.layerBlock = layerBlock
         node.onDrawBehind = onDrawBehind
         node.onDrawBackdrop = onDrawBackdrop
@@ -207,7 +201,6 @@ private class DrawBackdropElement(
         if (backdrop != other.backdrop) return false
         if (shape != other.shape) return false
         if (effects != other.effects) return false
-        if (highlight != other.highlight) return false
         if (layerBlock != other.layerBlock) return false
         if (onDrawBehind != other.onDrawBehind) return false
         if (onDrawBackdrop != other.onDrawBackdrop) return false
@@ -223,7 +216,6 @@ private class DrawBackdropElement(
         var result = backdrop.hashCode()
         result = 31 * result + shape.hashCode()
         result = 31 * result + effects.hashCode()
-        result = 31 * result + (highlight?.hashCode() ?: 0)
         result = 31 * result + (layerBlock?.hashCode() ?: 0)
         result = 31 * result + (onDrawBehind?.hashCode() ?: 0)
         result = 31 * result + onDrawBackdrop.hashCode()
@@ -240,7 +232,6 @@ private class DrawBackdropNode(
     var backdrop: Backdrop,
     val shape: () -> Shape,
     var effects: BackdropEffectScope.() -> Unit,
-    var highlight: (BackdropEffectScope.() -> Highlight?)?,
     var layerBlock: (GraphicsLayerScope.() -> Unit)?,
     var onDrawBehind: (DrawScope.() -> Unit)?,
     var onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
@@ -534,7 +525,6 @@ private class DrawBackdropNode(
     }
 
     private val contentPaint = Paint()
-    private val highlightPaint = Paint()
 
     // Reused saveLayer bounds for the non-SrcOver content path (DstIn / foreground blur): Rect is a
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
@@ -682,17 +672,6 @@ private class DrawBackdropNode(
             drawContext.canvas.saveLayer(bounds, contentPaint)
             drawContent()
             drawContext.canvas.restore()
-        }
-
-        highlight?.invoke(effectScope)?.let { resolved ->
-            drawHighlight(
-                highlight = resolved,
-                shape = effectScope.shape,
-                // onAttach cached this from LocalRuntimeShaderCache (a staticCompositionLocalOf, so
-                // its identity is stable) — read the field instead of a per-frame currentValueOf.
-                runtimeShaderCache = effectScope.runtimeShaderCache,
-                paint = highlightPaint,
-            )
         }
 
         onDrawFront?.invoke(this)

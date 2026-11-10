@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import top.yukonga.miuix.kmp.material.GlassDefaults
 import kotlin.jvm.JvmInline
 
 /**
@@ -150,7 +151,7 @@ object BlurDefaults {
     val BlurRadius: Float = 20f
 
     /** Default noise dithering coefficient for anti-banding. 0 disables noise. */
-    val NoiseCoefficient: Float = 0.0045f
+    val NoiseCoefficient: Float = GlassDefaults.NoiseCoefficient
 
     /** Default noise dithering coefficient for progressive blur. 0 disables noise. */
     val ProgressiveNoiseCoefficient: Float = 0f

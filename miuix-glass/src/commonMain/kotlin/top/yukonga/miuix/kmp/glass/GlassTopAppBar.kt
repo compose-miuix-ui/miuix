@@ -42,10 +42,20 @@ import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -112,10 +122,10 @@ object GlassTopAppBarDefaults {
 
     /** The small bloom stroke paired with [buttonMaterial]. */
     @Composable
-    fun buttonStroke(): GlassStroke = GlassStrokes.forTheme(
+    fun buttonStroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = isDarkTheme(),
-        light = GlassStrokes.SmallLight,
-        dark = GlassStrokes.SmallDark,
+        light = GlassEdgeStrokes.SmallLight,
+        dark = GlassEdgeStrokes.SmallDark,
     )
 
     /** The state overlay painted behind a held action-bar icon. */
@@ -162,7 +172,7 @@ internal data class GlassTopAppBarContext(
     val size: Dp,
     val shape: GlassShape,
     val fill: Color,
-    val stroke: GlassStroke?,
+    val stroke: EdgeStroke?,
     val shadow: GlassShadow?,
 )
 
@@ -218,7 +228,7 @@ fun GlassTopAppBar(
     buttonSize: Dp = GlassTopAppBarDefaults.ButtonSize,
     buttonShape: GlassShape = GlassShape(buttonSize / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
+    stroke: EdgeStroke? = GlassTopAppBarDefaults.buttonStroke(),
     buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
     titleAlpha: () -> Float = { 1f },
@@ -287,7 +297,7 @@ fun GlassTopAppBar(
     buttonSize: Dp = GlassTopAppBarDefaults.ButtonSize,
     buttonShape: GlassShape = GlassShape(buttonSize / 2),
     fill: Color = GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = GlassTopAppBarDefaults.buttonStroke(),
+    stroke: EdgeStroke? = GlassTopAppBarDefaults.buttonStroke(),
     buttonShadow: GlassShadow? = GlassShadows.Regular,
     defaultWindowInsetsPadding: Boolean = true,
     titleAlpha: () -> Float = { 1f },

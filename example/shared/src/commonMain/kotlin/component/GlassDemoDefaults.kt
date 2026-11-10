@@ -3,10 +3,10 @@
 
 package component
 
-import top.yukonga.miuix.kmp.glass.GlassMaterial
-import top.yukonga.miuix.kmp.glass.GlassMaterials
-import top.yukonga.miuix.kmp.glass.GlassStroke
-import top.yukonga.miuix.kmp.glass.GlassStrokes
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
 
 /** Preview choices for the glass component demo. */
 internal object GlassDemoDefaults {
@@ -25,10 +25,10 @@ internal object GlassDemoDefaults {
 
     fun material(index: Int): GlassMaterial? = materials.getOrNull(index)?.second
 
-    fun stroke(index: Int, isDark: Boolean): GlassStroke? = when (index) {
-        1 -> if (isDark) GlassStrokes.SmallDark else GlassStrokes.SmallLight
-        2 -> if (isDark) GlassStrokes.MiddleDark else GlassStrokes.MiddleLight
-        3 -> if (isDark) GlassStrokes.BigDark else GlassStrokes.BigLight
+    fun stroke(index: Int, isDark: Boolean): EdgeStroke? = when (index) {
+        1 -> if (isDark) GlassEdgeStrokes.SmallDark else GlassEdgeStrokes.SmallLight
+        2 -> if (isDark) GlassEdgeStrokes.MiddleDark else GlassEdgeStrokes.MiddleLight
+        3 -> if (isDark) GlassEdgeStrokes.BigDark else GlassEdgeStrokes.BigLight
         else -> null
     }
 }

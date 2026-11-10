@@ -22,7 +22,7 @@
 
 ## Setup
 
-See [Glass Material](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-glass-icons` module provides icons through `MiuixIcons.Glass`.
+See [Glass Surfaces](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-glass-icons` module provides icons through `MiuixIcons.Glass`.
 
 ## Usage Requirements
 
@@ -34,5 +34,6 @@ The sampled backdrop must exclude the glass surface itself. See [Background Samp
 
 ## Related Documentation
 
-- [Glass Material](/guide/glass): material configuration and background sampling.
+- [Material](/guide/material): render primitives, material definitions and the edge stroke.
+- [Glass Surfaces](/guide/glass): surfaces, modifiers and background sampling.
 - [Icon System](/guide/icons): Glass icon imports and weights.

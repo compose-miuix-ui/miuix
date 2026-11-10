@@ -7,7 +7,7 @@
 </div>
 
 ::: warning Background Sampling
-Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
+Record an opaque background without the glass surface itself. See [Glass Surfaces](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -91,7 +91,7 @@ Provide bounded width and distinct labels. Tabs select on click, share the avail
 | style | GlassStyle | Blur style when material is null | GlassDefaults.Style | No |
 | alpha | Float | Material color-layer, stroke and shadow opacity multiplier; without a backdrop, multiplies the entire pill drawing | 1f | No |
 | surfaceAlpha | Float | Material progress, clamped to 0–1; without a backdrop, also multiplies the entire pill drawing | 1f | No |
-| stroke | GlassStroke? | Stroke on each pill; null removes it | GlassTabRowDefaults.stroke() | No |
+| stroke | EdgeStroke? | Stroke on each pill; null removes it | GlassTabRowDefaults.stroke() | No |
 | shadow | GlassShadow? | Shadow on each pill; null removes it | GlassShadows.Float | No |
 | material | GlassMaterial? | Pill material; null uses style-based blur | GlassTabRowDefaults.material() | No |
 | height | Dp | Fixed pill height | GlassTabRowDefaults.Height | No |
@@ -110,7 +110,7 @@ Provide bounded width and distinct labels. Tabs select on click, share the avail
 | style | GlassStyle | Blur style when material is null | GlassDefaults.Style | No |
 | alpha | Float | Material color-layer, stroke and shadow opacity multiplier | 1f | No |
 | surfaceAlpha | Float | Material progress, clamped to 0–1 | 1f | No |
-| stroke | GlassStroke? | Track stroke; null removes it | GlassSegmentedTabRowDefaults.stroke() | No |
+| stroke | EdgeStroke? | Track stroke; null removes it | GlassSegmentedTabRowDefaults.stroke() | No |
 | shadow | GlassShadow? | Track shadow; null removes it | GlassShadows.Float | No |
 | material | GlassMaterial? | Track material; null uses style-based blur | GlassSegmentedTabRowDefaults.material() | No |
 | height | Dp | Fixed track height | GlassSegmentedTabRowDefaults.Height | No |
@@ -151,7 +151,7 @@ All constructor fields are required. Use a defaults factory and `copy` when cust
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | Capsule with radius height / 2 and smoothing 0f |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | `GlassStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
+| stroke() | EdgeStroke | `GlassEdgeStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
 | primaryColors(selectedContainerColor: Color = MiuixTheme.colorScheme.primary, containerColor: Color = Color.Transparent) | GlassTabColors | Accented palette; arguments set the selected and material-active unselected fills |
 | neutralColors() | GlassTabColors | Neutral palette; selected fill is `#FF383838` in light mode or `#FFE6E6E6` in dark mode; material-active unselected fill is transparent |
 
@@ -172,7 +172,7 @@ All constructor fields are required. Use a defaults factory and `copy` when cust
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | Capsule with radius height / 2 and smoothing 0f |
 | material() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | `GlassStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
+| stroke() | EdgeStroke | `GlassEdgeStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
 | restingTrackColor() | Color | White in light mode; white at 0.133 alpha composited over surface in dark mode |
 | indicatorColor() | Color | Black at 0.06 alpha in light mode; white at 0.133 alpha in dark mode |
 

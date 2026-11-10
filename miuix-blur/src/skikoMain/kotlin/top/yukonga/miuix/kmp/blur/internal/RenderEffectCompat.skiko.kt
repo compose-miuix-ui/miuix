@@ -10,8 +10,8 @@ import org.jetbrains.skia.BlendMode
 import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.ImageFilter
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
-import top.yukonga.miuix.kmp.shader.RuntimeShader
-import top.yukonga.miuix.kmp.shader.asSkikoRuntimeShader
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.asSkikoRuntimeShader
 
 internal actual fun RenderEffect?.chain(other: RenderEffect): RenderEffect = if (this != null) {
     ImageFilter.makeCompose(

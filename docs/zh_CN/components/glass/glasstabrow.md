@@ -7,7 +7,7 @@
 </div>
 
 ::: warning 背景采样
-采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -91,7 +91,7 @@ GlassSegmentedTabRow(
 | style | GlassStyle | material 为 null 时使用的模糊样式 | GlassDefaults.Style | 否 |
 | alpha | Float | 材质色层、描边和阴影的透明度乘数；无背景采样源时作用于整个胶囊绘制 | 1f | 否 |
 | surfaceAlpha | Float | 材质进度，限制到 0–1；无背景采样源时还会乘到整个胶囊的绘制透明度上 | 1f | 否 |
-| stroke | GlassStroke? | 每个胶囊的描边，null 表示不绘制 | GlassTabRowDefaults.stroke() | 否 |
+| stroke | EdgeStroke? | 每个胶囊的描边，null 表示不绘制 | GlassTabRowDefaults.stroke() | 否 |
 | shadow | GlassShadow? | 每个胶囊的阴影，null 表示不绘制 | GlassShadows.Float | 否 |
 | material | GlassMaterial? | 胶囊材质，null 时使用样式提供的模糊 | GlassTabRowDefaults.material() | 否 |
 | height | Dp | 胶囊固定高度 | GlassTabRowDefaults.Height | 否 |
@@ -110,7 +110,7 @@ GlassSegmentedTabRow(
 | style | GlassStyle | material 为 null 时使用的模糊样式 | GlassDefaults.Style | 否 |
 | alpha | Float | 材质色层、描边和阴影的透明度乘数 | 1f | 否 |
 | surfaceAlpha | Float | 材质进度，限制到 0–1 | 1f | 否 |
-| stroke | GlassStroke? | 轨道描边，null 表示不绘制 | GlassSegmentedTabRowDefaults.stroke() | 否 |
+| stroke | EdgeStroke? | 轨道描边，null 表示不绘制 | GlassSegmentedTabRowDefaults.stroke() | 否 |
 | shadow | GlassShadow? | 轨道阴影，null 表示不绘制 | GlassShadows.Float | 否 |
 | material | GlassMaterial? | 轨道材质，null 时使用样式提供的模糊 | GlassSegmentedTabRowDefaults.material() | 否 |
 | height | Dp | 轨道固定高度 | GlassSegmentedTabRowDefaults.Height | 否 |
@@ -151,7 +151,7 @@ GlassSegmentedTabRow(
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | 半径为 height / 2、smoothing 为 0f 的胶囊 |
 | material() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | 浅色模式为 `GlassStrokes.MiddleLight`，深色模式为 `MiddleDark` |
+| stroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.MiddleLight`，深色模式为 `MiddleDark` |
 | primaryColors(selectedContainerColor: Color = MiuixTheme.colorScheme.primary, containerColor: Color = Color.Transparent) | GlassTabColors | 强调色配色，参数设置选中填充和材质激活后的未选中填充 |
 | neutralColors() | GlassTabColors | 中性配色，选中填充在浅色模式为 `#FF383838`，深色模式为 `#FFE6E6E6`；材质激活后的未选中填充为透明色 |
 
@@ -172,7 +172,7 @@ GlassSegmentedTabRow(
 | --- | --- | --- |
 | shape(height: Dp = Height) | GlassShape | 半径为 height / 2、smoothing 为 0f 的胶囊 |
 | material() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
-| stroke() | GlassStroke | 浅色模式为 `GlassStrokes.MiddleLight`，深色模式为 `MiddleDark` |
+| stroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.MiddleLight`，深色模式为 `MiddleDark` |
 | restingTrackColor() | Color | 浅色模式为白色；深色模式为透明度 0.133 的白色叠加到 surface |
 | indicatorColor() | Color | 浅色模式为透明度 0.06 的黑色，深色模式为透明度 0.133 的白色 |
 

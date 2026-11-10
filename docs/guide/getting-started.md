@@ -27,18 +27,20 @@ repositories {
 
 Miuix is composed of several modules that can be used independently:
 
-| Module              | Description                                                                   |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `miuix-ui`          | Core UI component library                                                     |
-| `miuix-preference`  | Preference components library, depends on `miuix-ui`                          |
-| `miuix-icons`       | Extended icon library, can be used independently                              |
-| `miuix-glass-icons` | Glass icon library, can be used independently                                 |
-| `miuix-shader`      | Low-level runtime shader / render effect abstraction                          |
-| `miuix-blur`        | Blur effect library, can be used independently; requires minSdk 33 on Android |
-| `miuix-squircle`    | Squircle shapes library, can be used independently                            |
-| `miuix-glass`       | Glass material and components, requires minSdk 33 on Android                  |
-| `miuix-nav`         | Navigation library, can be used independently                                 |
-| `miuix-window`      | Desktop window & caption bar styling library (Desktop JVM)                    |
+| Module              | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
+| `miuix-ui`          | Core UI component library                                  |
+| `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
+| `miuix-icons`       | Extended icon library, can be used independently           |
+| `miuix-glass-icons` | Glass icon library, can be used independently              |
+| `miuix-material`    | Render primitives and material definitions                 |
+| `miuix-blur`        | Blur effect library, can be used independently             |
+| `miuix-squircle`    | Squircle shapes library, can be used independently         |
+| `miuix-glass`       | Glass surfaces and components library                      |
+| `miuix-nav`         | Navigation library, can be used independently              |
+| `miuix-window`      | Desktop window & caption bar styling library (Desktop JVM) |
+
+`miuix-blur` and `miuix-glass` require `minSdk` 33 on Android.
 
 - For Compose Multiplatform projects:
 
@@ -53,11 +55,13 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // Optional: Add miuix-glass-icons for the Glass icon set
             implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
+            // Optional: Add miuix-material for render primitives and material definitions
+            implementation("top.yukonga.miuix.kmp:miuix-material:<version>")
             // Optional: Add miuix-blur for blur effects (requires minSdk 33 on Android)
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-glass for the glass material and components (requires minSdk 33 on Android)
+            // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33 on Android)
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
@@ -81,11 +85,13 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // Optional: Add miuix-glass-icons for the Glass icon set
     implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
+            // Optional: Add miuix-material for render primitives and material definitions
+    implementation("top.yukonga.miuix.kmp:miuix-material-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 33)
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // Optional: Add miuix-glass for the glass material and components (requires minSdk 33)
+    // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33)
     implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
     // Optional: Add miuix-nav for navigation
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")
@@ -122,6 +128,13 @@ implementation("top.yukonga.miuix.kmp:miuix-glass-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-glass-icons-js:<version>")
+// Optional: Add miuix-material
+implementation("top.yukonga.miuix.kmp:miuix-material-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-wasm-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-material-js:<version>")
 // Optional: Add miuix-blur
 implementation("top.yukonga.miuix.kmp:miuix-blur-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-blur-iossimulatorarm64:<version>")

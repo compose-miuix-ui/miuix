@@ -11,7 +11,7 @@ title: GlassDropdownPopup
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入

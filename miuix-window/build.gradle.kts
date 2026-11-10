@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
     id("module.kotlin-jvm-toolchain")
     id("module.publication")

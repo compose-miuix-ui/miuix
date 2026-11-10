@@ -8,7 +8,7 @@ on:
       - "miuix-core/**"
       - "miuix-ui/**"
       - "miuix-preference/**"
-      - "miuix-shader/**"
+      - "miuix-material/**"
       - "miuix-blur/**"
       - "miuix-glass/**"
       - "miuix-glass-icons/**"

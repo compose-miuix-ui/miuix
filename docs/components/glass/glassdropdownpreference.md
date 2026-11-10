@@ -22,7 +22,7 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 :::
 
 ::: warning Background Sampling
-When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Material](/guide/glass#background-sampling) for setup.
+When using background sampling, `backdrop` must record opaque content behind the component and exclude the glass surface that samples it. See [Glass Surfaces](/guide/glass#background-sampling) for setup.
 :::
 
 ## Import

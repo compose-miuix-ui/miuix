@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
     id("module.kotlin-jvm-toolchain")
     id("module.publication")
@@ -52,6 +53,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.miuixBlur)
+            api(projects.miuixMaterial)
             api(projects.miuixUi)
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.androidx.navigationevent)

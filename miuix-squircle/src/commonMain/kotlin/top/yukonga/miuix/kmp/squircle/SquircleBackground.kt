@@ -27,9 +27,9 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import top.yukonga.miuix.kmp.shader.RuntimeShader
-import top.yukonga.miuix.kmp.shader.asComposeShader
-import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.asComposeShader
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
 import top.yukonga.miuix.kmp.squircle.internal.makeLinearShader

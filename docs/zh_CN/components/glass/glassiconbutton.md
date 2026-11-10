@@ -7,7 +7,7 @@
 </div>
 
 ::: warning 背景采样
-采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+采样区域应包含不透明背景，并排除玻璃表面自身。见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -50,7 +50,7 @@ Glass 图标使用 28 dp 画布。省略图标的尺寸修饰符即可采用固�
 | size | Dp | 按钮直径 | GlassTopAppBarDefaults.ButtonSize | 否 |
 | shape | GlassShape | 按钮形状 | GlassShape(size / 2) | 否 |
 | fill | Color | 没有背景采样源时使用的填充色 | GlassTopAppBarDefaults.buttonFill() | 否 |
-| stroke | GlassStroke? | 表面描边，null 表示不绘制 | GlassTopAppBarDefaults.buttonStroke() | 否 |
+| stroke | EdgeStroke? | 表面描边，null 表示不绘制 | GlassTopAppBarDefaults.buttonStroke() | 否 |
 | shadow | GlassShadow? | 按钮阴影，null 表示不绘制 | GlassShadows.Regular | 否 |
 | content | @Composable () -> Unit | 居中显示的按钮内容 | - | 是 |
 
@@ -73,7 +73,7 @@ Glass 图标使用 28 dp 画布。省略图标的尺寸修饰符即可采用固�
 | --- | --- | --- |
 | buttonFill() | Color | 浅色模式为白色，深色模式为 `#FF2C2C2C` |
 | buttonMaterial() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
-| buttonStroke() | GlassStroke | 浅色模式为 `GlassStrokes.SmallLight`，深色模式为 `SmallDark` |
+| buttonStroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.SmallLight`，深色模式为 `SmallDark` |
 | buttonPressedOverlay() | Color | 浅色模式为透明度 0.10 的黑色，深色模式为透明度 0.14 的白色 |
 
 ## 进阶用法

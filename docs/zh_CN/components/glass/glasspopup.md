@@ -11,7 +11,7 @@ title: GlassPopup
 </div>
 
 ::: warning 背景采样
-使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃材质](/zh_CN/guide/glass#background-sampling)。
+使用背景采样时，`backdrop` 应记录组件后方的不透明内容，不能包含使用该采样的玻璃表面。配置方式见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 引入
@@ -122,7 +122,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | style | GlassStyle | 材质未指定模糊半径时使用的模糊样式 | - | 是 |
 | alpha | Float | 表面透明度乘数；GlassTransformPopup 还将其应用于菜单内容 | - | 是 |
-| stroke | GlassStroke? | 辉光描边；null 移除描边 | - | 是 |
+| stroke | EdgeStroke? | 辉光描边；null 移除描边 | - | 是 |
 | shadow | GlassShadow? | 面板投影；null 移除投影 | - | 是 |
 | material | GlassMaterial? | 面板颜色处理和可选模糊半径；null 移除颜色处理，而非背景采样或模糊 | - | 是 |
 | containerColor | Color | backdrop 为 null 时使用的不透明填充 | - | 是 |
@@ -161,10 +161,10 @@ backdrop 非 null 时使用材质或样式模糊。`material = null` 会移除�
 
 | 方法名 | 参数 | 返回类型 | 说明 |
 | --- | --- | --- | --- |
-| `visuals` | `style: GlassStyle = GlassDefaults.Style`、`alpha: Float = 1f`、`stroke: GlassStroke? = stroke()`、`shadow: GlassShadow? = GlassShadows.Regular`、`material: GlassMaterial? = material()`、`containerColor: Color = containerColor()` | `GlassPopupVisuals` | 使用按主题选择的默认值创建弹窗外观 |
+| `visuals` | `style: GlassStyle = GlassDefaults.Style`、`alpha: Float = 1f`、`stroke: EdgeStroke? = stroke()`、`shadow: GlassShadow? = GlassShadows.Regular`、`material: GlassMaterial? = material()`、`containerColor: Color = containerColor()` | `GlassPopupVisuals` | 使用按主题选择的默认值创建弹窗外观 |
 | `shape` | `cornerRadius: Dp = CornerRadius` | `GlassShape` | 创建弹窗轮廓 |
 | `material` | — | `GlassMaterial` | 返回按主题选择的弹窗材质 |
-| `stroke` | — | `GlassStroke` | 返回按主题选择的辉光描边 |
+| `stroke` | — | `EdgeStroke` | 返回按主题选择的辉光描边 |
 | `containerColor` | — | `Color` | 浅色主题为白色，深色主题为 `Color(0xFF2C2C2C)` |
 | `itemPressedColor` | — | `Color` | 浅色主题为 `0.1f` 透明度的黑色，深色主题为同透明度白色 |
 | `maskColor` | — | `Color` | 浅色主题为 `0.4f` 透明度的白色，深色主题为同透明度黑色 |

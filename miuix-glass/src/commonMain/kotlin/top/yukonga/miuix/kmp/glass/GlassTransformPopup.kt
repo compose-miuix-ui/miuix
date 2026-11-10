@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassStyle
 import kotlin.math.roundToInt
 
 /**
@@ -108,7 +111,7 @@ internal data class GlassAnchorSurface(
     val style: GlassStyle,
     val material: GlassMaterial,
     val underlayMaterial: GlassMaterial?,
-    val stroke: GlassStroke?,
+    val stroke: EdgeStroke?,
     val fill: Color,
 )
 

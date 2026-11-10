@@ -30,10 +30,10 @@ A UI library for Compose Multiplatform.
 | `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
 | `miuix-icons`       | Extended icon library, can be used independently           |
 | `miuix-glass-icons` | Glass icon library, can be used independently              |
-| `miuix-shader`      | Low-level runtime shader / render effect abstraction       |
+| `miuix-material`    | Render primitives and material definitions                 |
 | `miuix-blur`        | Blur effect library, can be used independently             |
 | `miuix-squircle`    | Squircle shapes library, can be used independently         |
-| `miuix-glass`       | Glass material and components library                      |
+| `miuix-glass`       | Glass surfaces and components library                      |
 | `miuix-nav`         | Navigation library, can be used independently              |
 | `miuix-window`      | Desktop window & caption bar styling library (Desktop JVM) |
 
@@ -54,7 +54,7 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-glass for the glass material and components (requires minSdk 33 on Android)
+            // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33 on Android)
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")

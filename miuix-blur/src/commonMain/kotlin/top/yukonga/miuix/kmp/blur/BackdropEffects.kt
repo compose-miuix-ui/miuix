@@ -20,6 +20,8 @@ import top.yukonga.miuix.kmp.blur.internal.computeDownScaleBlend
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */

@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.material.GlassShape
 
 /**
  * A sheet of glass, in the form the library's own components ask for their surface in.

@@ -25,6 +25,12 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassColorBlendMode
+import top.yukonga.miuix.kmp.material.GlassColorLayer
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import kotlin.math.roundToInt
@@ -95,7 +101,7 @@ class GlassMaterialSelectionTest {
 
     private fun assertButtonUpdates(inheritTopBarMaterial: Boolean) = runComposeUiTest {
         val material = mutableStateOf<GlassMaterial?>(null)
-        val stroke = mutableStateOf<GlassStroke?>(null)
+        val stroke = mutableStateOf<EdgeStroke?>(null)
         setContent {
             DialogTestHost {
                 MiuixTheme(colors = lightColorScheme()) {
@@ -133,7 +139,7 @@ class GlassMaterialSelectionTest {
         assertColorNear(Color.Red, centerColor())
         runOnIdle { material.value = GlassMaterial(60.dp, GlassColorLayer(Color.Green, GlassColorBlendMode.SrcOver)) }
         assertColorNear(Color.Green, centerColor())
-        runOnIdle { stroke.value = GlassStrokes.SmallLight.copy(width = 6f, color = Color.Magenta) }
+        runOnIdle { stroke.value = GlassEdgeStrokes.SmallLight.copy(width = 6.dp, color = Color.Magenta) }
         val rim = onNodeWithTag("button").captureToImage().toPixelMap()
         assertTrue(rim[2, rim.height / 2].blue > 0.5f, "Changing the bar stroke must update the button rim")
         runOnIdle {

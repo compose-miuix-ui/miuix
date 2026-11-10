@@ -7,7 +7,7 @@
 </div>
 
 ::: warning Background Sampling
-Record an opaque background without the glass surface itself. See [Glass Material](/guide/glass#background-sampling).
+Record an opaque background without the glass surface itself. See [Glass Surfaces](/guide/glass#background-sampling).
 :::
 
 ## Import
@@ -89,7 +89,7 @@ These parameters are shared by both overloads:
 | buttonSize | Dp | Default diameter for nested glass buttons | GlassTopAppBarDefaults.ButtonSize | No |
 | buttonShape | GlassShape | Default shape for nested glass buttons | GlassShape(buttonSize / 2) | No |
 | fill | Color | Button fallback fill | GlassTopAppBarDefaults.buttonFill() | No |
-| stroke | GlassStroke? | Button stroke; null removes it | GlassTopAppBarDefaults.buttonStroke() | No |
+| stroke | EdgeStroke? | Button stroke; null removes it | GlassTopAppBarDefaults.buttonStroke() | No |
 | buttonShadow | GlassShadow? | Button shadow; null removes it | GlassShadows.Regular | No |
 | defaultWindowInsetsPadding | Boolean | Whether to apply horizontal display-cutout and navigation-bar insets; top system-bar insets are always applied | true | No |
 | titleAlpha | () -> Float | Draw-phase opacity multiplier for compact and large titles and subtitles | { 1f } | No |
@@ -124,7 +124,7 @@ The explicit-overlap overload adds one required parameter:
 | collapseRamp(scrollBehavior: ScrollBehavior?) | State\<Float> | Shadow progress from 0 to 1 over RampDistance after RampStart; null behavior returns 1f |
 | buttonFill() | Color | White in light mode; `#FF2C2C2C` in dark mode |
 | buttonMaterial() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
-| buttonStroke() | GlassStroke | `GlassStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
+| buttonStroke() | EdgeStroke | `GlassEdgeStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
 | buttonPressedOverlay() | Color | Black at 0.10 alpha in light mode; white at 0.14 alpha in dark mode |
 | bandBrush(color: Color) | Brush | Vertical page-color gradient, solid at the top and transparent at the bottom |
 

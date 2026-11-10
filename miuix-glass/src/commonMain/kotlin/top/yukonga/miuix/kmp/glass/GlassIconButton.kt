@@ -28,9 +28,17 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
-import top.yukonga.miuix.kmp.glass.internal.drawGlassMask
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassMask
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.withUnderlayBlur
 
 /**
  * A round glass icon button that inherits material and motion inside [GlassTopAppBar].
@@ -64,7 +72,7 @@ fun GlassIconButton(
     size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
     shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: GlassShape(size / 2),
     fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
-    stroke: GlassStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
+    stroke: EdgeStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
     shadow: GlassShadow? = LocalGlassTopAppBarContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
     content: @Composable () -> Unit,
 ) {
@@ -116,7 +124,7 @@ private fun GlassButtonSurface(
     fill: Color,
     shape: GlassShape,
     size: Dp,
-    stroke: GlassStroke?,
+    stroke: EdgeStroke?,
     shadow: GlassShadow?,
     modifier: Modifier = Modifier,
     pressed: Boolean = false,
@@ -218,9 +226,9 @@ private fun GlassButtonSurface(
                             .drawWithContent {
                                 drawContent()
                                 if (stroke != null && keepMaterial) {
-                                    drawGlassStroke(shape, layoutDirection, stroke, opacity)
+                                    drawEdgeStroke(shape, stroke, opacity)
                                 }
-                                drawGlassMask(shape, layoutDirection)
+                                drawGlassMask(shape)
                             }
                     },
                 ),

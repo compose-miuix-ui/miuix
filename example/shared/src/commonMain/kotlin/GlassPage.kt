@@ -52,11 +52,9 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
-import top.yukonga.miuix.kmp.glass.GlassDefaults
 import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
@@ -72,7 +70,6 @@ import top.yukonga.miuix.kmp.glass.GlassPopupSizing
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
-import top.yukonga.miuix.kmp.glass.GlassShadows
 import top.yukonga.miuix.kmp.glass.GlassTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
@@ -90,6 +87,9 @@ import top.yukonga.miuix.kmp.icon.glass.Image
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.Settings
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference

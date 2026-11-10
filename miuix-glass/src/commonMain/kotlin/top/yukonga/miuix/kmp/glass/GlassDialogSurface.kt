@@ -11,9 +11,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
 import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Default values for [GlassDialog] and [glassDialogSurface]. */
@@ -30,10 +35,10 @@ object GlassDialogDefaults {
 
     /** Dialog bloom stroke for the current theme. */
     @Composable
-    fun stroke(): GlassStroke = GlassStrokes.forTheme(
+    fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
-        light = GlassStrokes.SmallLight,
-        dark = GlassStrokes.SmallDark,
+        light = GlassEdgeStrokes.SmallLight,
+        dark = GlassEdgeStrokes.SmallDark,
     )
 
     /** Opaque fill used when there is no backdrop or runtime shader support. */
@@ -57,7 +62,7 @@ object GlassDialogDefaults {
 fun glassDialogSurface(
     backdrop: Backdrop?,
     material: GlassMaterial = GlassDialogDefaults.material(),
-    stroke: GlassStroke? = GlassDialogDefaults.stroke(),
+    stroke: EdgeStroke? = GlassDialogDefaults.stroke(),
     containerColor: Color = GlassDialogDefaults.containerColor(),
 ): @Composable DialogSurfaceScope.() -> Modifier = {
     val effectiveBackdrop = if (backdrop != null && isRuntimeShaderSupported()) {

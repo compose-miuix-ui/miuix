@@ -46,8 +46,18 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.glass.internal.drawGlassRim
-import top.yukonga.miuix.kmp.glass.internal.drawGlassStroke
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassRim
+import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 
@@ -107,7 +117,7 @@ object GlassTabRowDefaults {
 
     /** Bloom stroke for selected and unselected tabs. */
     @Composable
-    fun stroke(): GlassStroke = GlassStrokes.forTheme(
+    fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
@@ -207,7 +217,7 @@ fun GlassTabRow(
     style: GlassStyle = GlassDefaults.Style,
     alpha: Float = 1f,
     surfaceAlpha: Float = 1f,
-    stroke: GlassStroke? = GlassTabRowDefaults.stroke(),
+    stroke: EdgeStroke? = GlassTabRowDefaults.stroke(),
     shadow: GlassShadow? = GlassShadows.Float,
     material: GlassMaterial? = GlassTabRowDefaults.material(),
     height: Dp = GlassTabRowDefaults.Height,
@@ -295,9 +305,9 @@ fun GlassTabRow(
                             val restingRim = alpha * (1f - ramp) * rim.value
                             if (restingRim > 0.001f) {
                                 if (stroke != null) {
-                                    drawGlassStroke(shape, layoutDirection, stroke, restingRim)
+                                    drawEdgeStroke(shape, stroke, restingRim)
                                 }
-                                drawGlassRim(shape, layoutDirection, style, containerColor(), restingRim)
+                                drawGlassRim(shape, style, containerColor(), restingRim)
                             }
                         }
                         .selectable(
@@ -357,7 +367,7 @@ object GlassSegmentedTabRowDefaults {
 
     /** Bloom stroke for the track. */
     @Composable
-    fun stroke(): GlassStroke = GlassStrokes.forTheme(
+    fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
@@ -422,7 +432,7 @@ fun GlassSegmentedTabRow(
     style: GlassStyle = GlassDefaults.Style,
     alpha: Float = 1f,
     surfaceAlpha: Float = 1f,
-    stroke: GlassStroke? = GlassSegmentedTabRowDefaults.stroke(),
+    stroke: EdgeStroke? = GlassSegmentedTabRowDefaults.stroke(),
     shadow: GlassShadow? = GlassShadows.Float,
     material: GlassMaterial? = GlassSegmentedTabRowDefaults.material(),
     height: Dp = GlassSegmentedTabRowDefaults.Height,

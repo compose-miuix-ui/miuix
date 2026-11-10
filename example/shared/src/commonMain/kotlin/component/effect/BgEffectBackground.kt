@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.shouldShowSplitPane

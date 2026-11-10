@@ -24,6 +24,10 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.GlassColorBlendMode
+import top.yukonga.miuix.kmp.material.GlassColorLayer
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
@@ -82,7 +86,7 @@ class GlassPopupMaterialTest {
                         sizing = GlassPopupSizing(),
                         visuals = GlassPopupDefaults.visuals(
                             containerColor = Color.Green,
-                            stroke = GlassStrokes.SmallLight.copy(width = 4f, color = Color.White),
+                            stroke = GlassEdgeStrokes.SmallLight.copy(width = 4.dp, color = Color.White),
                             shadow = null,
                         ),
                         contentPadding = PaddingValues(0.dp),

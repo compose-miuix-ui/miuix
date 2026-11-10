@@ -22,7 +22,7 @@
 
 ## 配置
 
-依赖与背景采样配置见[玻璃材质](/zh_CN/guide/glass#配置)。可选的 `miuix-glass-icons` 模块通过 `MiuixIcons.Glass` 提供图标。
+依赖与背景采样配置见[玻璃表面](/zh_CN/guide/glass#配置)。可选的 `miuix-glass-icons` 模块通过 `MiuixIcons.Glass` 提供图标。
 
 ## 使用要求
 
@@ -34,5 +34,6 @@
 
 ## 相关文档
 
-- [玻璃材质](/zh_CN/guide/glass)：材质配置与背景采样。
+- [材质](/zh_CN/guide/material)：渲染原语、材质定义与边缘描边。
+- [玻璃表面](/zh_CN/guide/glass)：表面、修饰符与背景采样。
 - [图标系统](/zh_CN/guide/icons)：Glass 图标的引入与字重。

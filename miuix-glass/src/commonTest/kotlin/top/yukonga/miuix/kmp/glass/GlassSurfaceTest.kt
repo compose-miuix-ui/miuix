@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.material.GlassShape
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
