@@ -93,7 +93,7 @@ fun BoxScope.GlassIconDropdownMenu(
                     density: Density,
                     coordinates: LayoutCoordinates?,
                     layerBlock: (GraphicsLayerScope.() -> Unit)?,
-                    downscaleFactor: Int,
+                    downscaleFactor: Float,
                 ) {
                     with(scene) { drawBackdrop(density, coordinates, layerBlock, downscaleFactor) }
                     with(primaryBackdrop) { drawBackdrop(density, coordinates, layerBlock, downscaleFactor) }

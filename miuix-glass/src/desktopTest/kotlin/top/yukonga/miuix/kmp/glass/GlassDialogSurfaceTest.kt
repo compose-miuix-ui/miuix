@@ -101,8 +101,9 @@ class GlassDialogSurfaceTest {
             mainClock.advanceTimeByFrame()
             onRoot().captureToImage().toPixelMap()[250, 220].blue
         }
-        // Small phase/interpolation differences are expected while the sampling window moves;
-        // a one-pixel rebound must not jump an entire downsample-grid cell.
+        // Small phase differences are expected while the sampling window moves; the steps measured
+        // here are 2 LSB (the level snap adds a comparable margin), while a rebound that moved the
+        // sampling a whole downsample cell lands an order of magnitude above this bound.
         val largestStep = samples.zipWithNext { before, after -> kotlin.math.abs(after - before) }.max()
         assertTrue(largestStep < 0.015f, "One-pixel rebounds must not flash: $samples")
     }

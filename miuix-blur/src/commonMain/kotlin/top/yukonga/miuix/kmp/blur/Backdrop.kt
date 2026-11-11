@@ -21,9 +21,8 @@ interface Backdrop {
     val isCoordinatesDependent: Boolean
 
     /**
-     * Sub-pixel offset residual from rounding, in full-resolution pixels.
-     * Used by the drawing step to compensate for rounding, ensuring smooth
-     * final positioning while the recording content remains pixel-grid-stable.
+     * Sub-pixel offset residual from rounding, in full-resolution px, compensated when drawing so
+     * the recorded content can stay on a stable pixel grid.
      */
     val offsetResidualX: Float get() = 0f
 
@@ -31,19 +30,18 @@ interface Backdrop {
     val offsetResidualY: Float get() = 0f
 
     /**
-     * Draws the backdrop content into the given [DrawScope].
+     * Draws the backdrop content into [DrawScope].
      *
      * @param density The current density for unit conversion.
-     * @param coordinates The layout coordinates of the blur surface, used for positioning.
+     * @param coordinates The blur surface's layout coordinates, used for positioning.
      * @param layerBlock Optional graphics layer transformation.
-     * @param downscaleFactor Scale factor for downsampled recording. 1 = full resolution.
-     *   When > 1, the backdrop should scale its drawing by 1/downscaleFactor to fit
-     *   into a smaller recording surface.
+     * @param downscaleFactor Recording scale: 1 = full resolution, `> 1` means draw at
+     *   `1 / downscaleFactor`. Fractional, snapped to a 1/4-octave grid.
      */
     fun DrawScope.drawBackdrop(
         density: Density,
         coordinates: LayoutCoordinates?,
         layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
-        downscaleFactor: Int = 1,
+        downscaleFactor: Float = 1f,
     )
 }

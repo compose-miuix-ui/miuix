@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.material.internal
 
+import androidx.compose.ui.graphics.BlendMode
+import top.yukonga.miuix.kmp.material.EdgePeak
 import top.yukonga.miuix.kmp.material.agsl.MaterialAgsl
 
 internal const val GLASS_RIM_SHADER_KEY = "MiuixGlassRim"
@@ -41,6 +43,100 @@ half4 main(float2 coord) {
     return half4(half3(light), half(clamp(max(max(light.r, light.g), light.b), 0.0, 1.0)));
 }
 """
+
+internal const val GLASS_EDGE_SHADER_KEY = "MiuixGlassEdge"
+
+/** Cache key of the fused edge pass for [peak]. */
+internal fun glassEdgeShaderKey(peak: EdgePeak): String = GLASS_EDGE_SHADER_KEY + peak.name
+
+/**
+ * Rim light and edge stroke in one pass, as AGSL source.
+ *
+ * Both are additive light along the silhouette read from the same distance field, so one pass does
+ * the work of two. [BlendMode.Plus] on both.
+ *
+ * The mask still runs after this pass, so the rim picks up its coverage here instead of after: a
+ * sub-pixel difference confined to the anti-aliased ring.
+ */
+internal fun glassEdgeShaderSource(peak: EdgePeak): String {
+    val axisUniforms = if (peak == EdgePeak.Axial) {
+        """
+uniform float2 axis1;
+uniform float2 axis2;
+"""
+    } else {
+        ""
+    }
+    return """
+${MaterialAgsl.SilhouetteSdf}
+${MaterialAgsl.RimLighting}
+uniform float2 in_halfViewFloor; // half size, floored, so the fold lands on a pixel boundary
+uniform float2 in_strokeBand;    // stroke width, bevel
+uniform float4 in_strokeColor;   // stroke rgb, stroke opacity
+uniform float in_strokeAlpha;    // stroke opacity multiplier
+uniform float4 in_light1;        // direction xyz, intensity
+uniform float4 in_light1Color;   // colour rgb, unused
+uniform float4 in_light2;        // direction xyz, intensity
+uniform float4 in_light2Color;   // colour rgb, unused
+$axisUniforms
+uniform float4 in_rimEdge;      // edge width, edge pow, surface opacity, unused
+uniform float4 in_lightDir;     // direction xyz, angle range * pi
+uniform float4 in_lightAmt;     // intensity, opposite intensity, unused, unused
+uniform float4 in_surface;      // the material's own colour, standing in for what is underneath
+
+${edgeStrokeNormalSource()}
+${edgeStrokeLightsSource(peak)}
+
+half4 main(float2 coord) {
+    float d = silhouetteSdf(coord);
+    float cov = clamp(0.5 - d, 0.0, 1.0);
+
+    float2 half2d = in_size * 0.5;
+    float2 folded = abs(coord - half2d);
+    float radius = pickRadius(coord, half2d);
+    float inner = max(in_strokeBand.y, 0.5);
+    float bevel = max(radius, inner);
+    float edge = max(in_rimEdge.x * kRimBandFraction, 1.0);
+
+    // The stroke lights the band and a ring outside it, the rim a hairline of the band; everything
+    // else is the flat interior.
+    bool strokeInterior = folded.x < half2d.x - bevel && folded.y < half2d.y - bevel;
+    bool rimInterior = d > 0.5 || -d >= edge * 0.85;
+    if (strokeInterior && rimInterior) return half4(0.0);
+
+    float3 rgb = float3(0.0);
+    float alpha = 0.0;
+
+    if (!strokeInterior) {
+        float width = max(in_strokeBand.x, 0.75);
+        float band = smoothstep(-width, -width + 1.0, d);
+        float3 base = in_strokeColor.rgb * (in_strokeColor.a * band * band);
+        float3 normal = rimNormal(coord, half2d, d, radius, inner);
+        // One cov: the mask supplies the other, as the standalone stroke pass did.
+        float3 light = (base + edgeStrokeLights(normal)) * (in_strokeAlpha * cov);
+        rgb += light;
+        alpha += clamp(max(max(light.r, light.g), light.b), 0.0, 1.0);
+    }
+
+    if (!rimInterior) {
+        float2 gradient = sdfGradient(coord);
+        if (length(gradient) >= 0.5) {
+            float depth = clamp(-d / edge, 0.0, 1.0);
+            float slope = min(edgeCurveSlope(depth, in_rimEdge.y), kMaxBevelSlope);
+            float3 normal = normalize(float3(gradient * slope, 1.0));
+            float lighten = rimLighten(normal, in_lightDir, in_lightAmt.xy, in_surface.rgb);
+            float3 added = max(liftToward(in_surface.rgb, lighten) - in_surface.rgb, float3(0.0));
+            float3 light = added * (in_rimEdge.z * cov);
+            rgb += light;
+            alpha += clamp(max(max(light.r, light.g), light.b), 0.0, 1.0);
+        }
+    }
+
+    // Premultiplied; the alpha carries the sum of both lights, as the two passes did.
+    return half4(half3(rgb), half(clamp(alpha, 0.0, 1.0)));
+}
+"""
+}
 
 internal const val GLASS_MASK_SHADER_KEY = "MiuixGlassMask"
 

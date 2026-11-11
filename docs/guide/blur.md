@@ -380,7 +380,7 @@ When `runtimeShaderEffect` is chained after `blur` (or any other effect that rai
 | `shape` | Shape | Current clip shape |
 | `padding` | Float | Extra padding for blur overflow |
 | `renderEffect` | RenderEffect? | Accumulated effect chain |
-| `downscaleFactor` | Int | Downsampling factor (1, 2, 4, 8, 16) |
+| `downscaleFactor` | Float | Downsampling level (1…16, 1/4-octave grid) |
 | `noiseCoefficient` | Float | Noise dithering coefficient |
 
 ## Properties

@@ -55,12 +55,16 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
-import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.roundToInt
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
+
+/** Float tolerance for "a box step lands exactly on the level". */
+private const val LEVEL_EPS = 1e-3f
 
 // The stack dither exists to break quantization staircases, which ~1 LSB (≈ 0.008 peak-to-peak)
 // already does; anything above only adds downscale-texel-sized grain that grows with the radius.
@@ -216,13 +220,13 @@ private class DrawBackdropElement(
         var result = backdrop.hashCode()
         result = 31 * result + shape.hashCode()
         result = 31 * result + effects.hashCode()
-        result = 31 * result + (layerBlock?.hashCode() ?: 0)
-        result = 31 * result + (onDrawBehind?.hashCode() ?: 0)
+        result = 31 * result + layerBlock.hashCode()
+        result = 31 * result + onDrawBehind.hashCode()
         result = 31 * result + onDrawBackdrop.hashCode()
-        result = 31 * result + (onDrawSurface?.hashCode() ?: 0)
-        result = 31 * result + (onDrawFront?.hashCode() ?: 0)
+        result = 31 * result + onDrawSurface.hashCode()
+        result = 31 * result + onDrawFront.hashCode()
         result = 31 * result + contentBlendMode.hashCode()
-        result = 31 * result + (progressiveGradient?.hashCode() ?: 0)
+        result = 31 * result + progressiveGradient.hashCode()
         result = 31 * result + enabled.hashCode()
         return result
     }
@@ -262,21 +266,20 @@ private class DrawBackdropNode(
     /** The node's graphics context; the (necessarily `inner`) [LevelTarget] reaches it through here. */
     private val graphicsContext get() = requireGraphicsContext()
 
-    /** Layers + level parameters for rendering one downscale level (primary = lo, secondary = hi). */
+    /** Layers + level parameters for rendering one downscale level. */
     private inner class LevelTarget {
         var mainLayer: GraphicsLayer? = null
         val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
         var noiseLayer: GraphicsLayer? = null
-        var downscaleFactor: Int = 1
+        var downscaleFactor: Float = 1f
         var padding: Float by mutableFloatStateOf(0f)
 
-        /** First step downscale for cascade (backdrop draw uses this, not the total factor). */
-        var cascadeFirstStepScale: Int = 1
+        /** Scale of the first (bilinear) record step: the level, or 2 for the ½ cascade below it. */
+        var cascadeFirstStepScale: Float = 1f
 
-        // Draw-path RenderEffects cached for reuse while the source size / noise coefficient hold.
-        // A RenderEffect captures its shader's uniforms when created, so a built instance is
-        // unaffected by later re-sets of the tree-shared RuntimeShader — reuse is safe and saves a
-        // native allocation per frame. Two slots cover the deepest cascade (sf=16).
+        // Draw-path RenderEffects cached while source size / noise coefficient hold: a built effect
+        // captured its uniforms, so later re-sets of the shared RuntimeShader can't affect it.
+        // Two slots cover the deepest cascade.
         val dsKeys = arrayOf("", "")
         val dsW = intArrayOf(-1, -1)
         val dsH = intArrayOf(-1, -1)
@@ -295,9 +298,14 @@ private class DrawBackdropNode(
         }
 
         /**
-         * Returns the cached downsample [RenderEffect] for [slot] when its [key]/[w]/[h] are
-         * unchanged, otherwise builds it via [build] (setting the shader uniforms) and caches it.
+         * Drops step filters left by earlier frames: these layers swap between a step's source and
+         * its destination, and a stale filter would be applied twice (ghosted, clipped blur).
          */
+        fun clearStepFilters() {
+            for (i in cascadeLayers.indices) cascadeLayers[i].renderEffect = null
+        }
+
+        /** Cached downsample effect for [slot]; rebuilt via [build] when [key]/[w]/[h] change. */
         inline fun downsampleEffect(slot: Int, key: String, w: Int, h: Int, build: () -> RenderEffect): RenderEffect {
             val cached = dsEffects[slot]
             if (cached != null && dsKeys[slot] == key && dsW[slot] == w && dsH[slot] == h) return cached
@@ -337,14 +345,6 @@ private class DrawBackdropNode(
     }
 
     private val primary = LevelTarget()
-    private val secondary = LevelTarget()
-    private var crossfadeResultLayer: GraphicsLayer? = null
-
-    /** True when the radius sits in a transition band and [primary] (lo) + [secondary] (hi) cross-fade. */
-    private var blending: Boolean by mutableStateOf(false)
-
-    /** Smoothstep weight of the higher (secondary) level while [blending]. */
-    private var blendFactor: Float by mutableFloatStateOf(0f)
 
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
@@ -357,13 +357,9 @@ private class DrawBackdropNode(
     private fun DrawScope.recordBackdrop(target: LevelTarget) {
         val currentPadding = target.padding
         val scaleFactor = target.cascadeFirstStepScale
-        val scaledPadding = if (currentPadding == 0f) {
-            0f
-        } else if (scaleFactor > 1) {
-            (currentPadding / scaleFactor).toInt().toFloat()
-        } else {
-            currentPadding
-        }
+        // Exact (fractional) padding: snapping it shifts the recording by up to a texel whenever
+        // `reach × level` crosses an integer.
+        val scaledPadding = if (currentPadding == 0f) 0f else currentPadding / scaleFactor
         translate(scaledPadding, scaledPadding) {
             onDrawBackdrop {
                 with(backdrop) {
@@ -378,136 +374,113 @@ private class DrawBackdropNode(
         }
     }
 
-    /** Renders [target]'s blurred backdrop (record → cascade downsample → upscale) into this DrawScope. */
+    /**
+     * Renders [target]'s blurred backdrop: record at `1 / level` (½ first, then box steps while they
+     * fit, then a prefiltered remainder), filter with [LevelTarget.mainLayer]'s effect, upscale.
+     */
     private fun DrawScope.renderBlurInto(target: LevelTarget) {
         val layer = target.mainLayer ?: return
         val currentPadding = target.padding
-        val scaleFactor = target.downscaleFactor
+        val level = target.downscaleFactor
         val fullWidth = (size.width + currentPadding * 2).toInt()
         val fullHeight = (size.height + currentPadding * 2).toInt()
 
-        if (scaleFactor <= 1) {
-            target.cascadeFirstStepScale = 1
+        // Texel size of the padded region recorded at [scale].
+        fun recordedSize(scale: Float): IntSize = IntSize(
+            (fullWidth / scale).roundToInt().coerceAtLeast(1),
+            (fullHeight / scale).roundToInt().coerceAtLeast(1),
+        )
+
+        // Filters from an earlier frame must not survive into this one: the cascade layers are
+        // reused across frames and swap between destination and source roles.
+        target.clearStepFilters()
+
+        if (level <= 1.001f) {
+            target.cascadeFirstStepScale = 1f
             recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
-            layer.topLeft =
-                if (currentPadding != 0f) {
-                    IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
-                } else {
-                    IntOffset.Zero
-                }
-            drawLayer(layer)
-        } else if (scaleFactor <= 2) {
-            target.cascadeFirstStepScale = 2
-            val w = (fullWidth / 2).coerceAtLeast(1)
-            val h = (fullHeight / 2).coerceAtLeast(1)
-            recordLayer(layer, size = IntSize(w, h)) { recordBackdrop(target) }
-            drawUpscaledLayer(
-                target,
-                layer,
-                scaleFactor.toFloat(),
-                currentPadding,
-                scaleFactor,
-                backdrop.offsetResidualX,
-                backdrop.offsetResidualY,
-                fullWidth,
-                fullHeight,
+            drawShiftedLayer(layer, currentPadding, 1f)
+            return
+        }
+
+        if (level <= 2.001f) {
+            // Half or finer: a single bilinear record straight to the level.
+            target.cascadeFirstStepScale = level
+            recordLayer(layer, size = recordedSize(level)) { recordBackdrop(target) }
+            drawUpscaledLayer(target, layer, level, currentPadding, fullWidth, fullHeight)
+            return
+        }
+
+        // Step 0: record the backdrop at half size (GPU bilinear, no shader).
+        target.cascadeFirstStepScale = 2f
+        var source = target.obtainCascade(0)
+        var sourceSize = recordedSize(2f)
+        recordLayer(source, size = sourceSize) { recordBackdrop(target) }
+
+        var covered = 2f
+        var step = 0
+
+        // 4× box steps while a full 4× reduction still fits inside the level (one pass instead of two).
+        while (covered * 4f <= level + LEVEL_EPS) {
+            val after = covered * 4f
+            val dest = if (abs(after - level) < LEVEL_EPS) layer else target.obtainCascade(step + 1)
+            val destSize = recordedSize(after)
+            applyDownsampleStep(
+                target = target,
+                slot = step,
+                source = source,
+                sourceSize = sourceSize,
+                dest = dest,
+                destSize = destSize,
+                scale = 0.25f,
+                shaderKey = "Downsample4x",
+                shaderSrc = DOWNSAMPLE_4X_SHADER,
             )
-        } else {
-            // Multistep cascade, single-pass wider filter when possible:
-            //   sf =  4: backdrop ½ → 2x box → ¼                     (1 cascade layer)
-            //   sf =  8: backdrop ½ → 4x box → ⅛                     (1 cascade layer)
-            //   sf = 16: backdrop ½ → 4x box → ⅛ → 2x box → 1/16     (2 cascade layers)
-            target.cascadeFirstStepScale = 2
-            val firstW = (fullWidth / 2).coerceAtLeast(1)
-            val firstH = (fullHeight / 2).coerceAtLeast(1)
+            source = dest
+            sourceSize = destSize
+            covered = after
+            step++
+        }
 
-            // Step 0: record backdrop at ½ size (GPU bilinear, no shader).
-            val firstCascade = target.obtainCascade(0)
-            recordLayer(firstCascade, size = IntSize(firstW, firstH)) { recordBackdrop(target) }
+        // One 2× box step when a halving still fits.
+        if (covered * 2f <= level + LEVEL_EPS) {
+            val after = covered * 2f
+            val dest = if (abs(after - level) < LEVEL_EPS) layer else target.obtainCascade(step + 1)
+            val destSize = recordedSize(after)
+            applyDownsampleStep(
+                target = target,
+                slot = step,
+                source = source,
+                sourceSize = sourceSize,
+                dest = dest,
+                destSize = destSize,
+                scale = 0.5f,
+                shaderKey = "Downsample2x",
+                shaderSrc = DOWNSAMPLE_2X_SHADER,
+            )
+            source = dest
+            sourceSize = destSize
+            covered = after
+            // Fresh slot: the remainder step would otherwise evict this 2x effect every frame.
+            step++
+        }
 
-            when (scaleFactor) {
-                4 -> {
-                    // Single 2× box step: ½ → ¼
-                    applyDownsampleStep(
-                        target = target,
-                        slot = 0,
-                        source = firstCascade,
-                        sourceW = firstW,
-                        sourceH = firstH,
-                        dest = layer,
-                        destW = (firstW / 2).coerceAtLeast(1),
-                        destH = (firstH / 2).coerceAtLeast(1),
-                        scale = 0.5f,
-                        shaderKey = "Downsample2x",
-                        shaderSrc = DOWNSAMPLE_2X_SHADER,
-                    )
-                }
-
-                8 -> {
-                    // Single 4× box step: ½ → ⅛
-                    applyDownsampleStep(
-                        target = target,
-                        slot = 0,
-                        source = firstCascade,
-                        sourceW = firstW,
-                        sourceH = firstH,
-                        dest = layer,
-                        destW = (firstW / 4).coerceAtLeast(1),
-                        destH = (firstH / 4).coerceAtLeast(1),
-                        scale = 0.25f,
-                        shaderKey = "Downsample4x",
-                        shaderSrc = DOWNSAMPLE_4X_SHADER,
-                    )
-                }
-
-                16 -> {
-                    // 4× then 2× cascade: ½ → ⅛ → 1/16
-                    val midW = (firstW / 4).coerceAtLeast(1)
-                    val midH = (firstH / 4).coerceAtLeast(1)
-                    val midCascade = target.obtainCascade(1)
-                    applyDownsampleStep(
-                        target = target,
-                        slot = 0,
-                        source = firstCascade,
-                        sourceW = firstW,
-                        sourceH = firstH,
-                        dest = midCascade,
-                        destW = midW,
-                        destH = midH,
-                        scale = 0.25f,
-                        shaderKey = "Downsample4x",
-                        shaderSrc = DOWNSAMPLE_4X_SHADER,
-                    )
-                    applyDownsampleStep(
-                        target = target,
-                        slot = 1,
-                        source = midCascade,
-                        sourceW = midW,
-                        sourceH = midH,
-                        dest = layer,
-                        destW = (midW / 2).coerceAtLeast(1),
-                        destH = (midH / 2).coerceAtLeast(1),
-                        scale = 0.5f,
-                        shaderKey = "Downsample2x",
-                        shaderSrc = DOWNSAMPLE_2X_SHADER,
-                    )
-                }
-
-                else -> error("Unsupported scaleFactor: $scaleFactor (must be 1/2/4/8/16)")
-            }
-
-            drawUpscaledLayer(
-                target,
-                layer,
-                scaleFactor.toFloat(),
-                currentPadding,
-                scaleFactor,
-                backdrop.offsetResidualX,
-                backdrop.offsetResidualY,
-                fullWidth,
-                fullHeight,
+        // Remainder step: same 2× box prefilter, only the decimation shrunk — so the filter
+        // character doesn't change where a full box step enters the chain.
+        if (abs(covered - level) > LEVEL_EPS) {
+            applyDownsampleStep(
+                target = target,
+                slot = step,
+                source = source,
+                sourceSize = sourceSize,
+                dest = layer,
+                destSize = recordedSize(level),
+                scale = covered / level,
+                shaderKey = "Downsample2x",
+                shaderSrc = DOWNSAMPLE_2X_SHADER,
             )
         }
+
+        drawUpscaledLayer(target, layer, level, currentPadding, fullWidth, fullHeight)
     }
 
     override fun MeasureScope.measure(
@@ -530,20 +503,15 @@ private class DrawBackdropNode(
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
     private var contentBoundsRect: Rect? = null
 
-    // Progressive (gradient) blur, split by resolution: the level stack renders through the
-    // downscaled [primary] machinery, and [sharpLayer] overlays the full-resolution backdrop
-    // through the overlay effect (variable loop blur + ramp mask) on the ramp's clear end — the
-    // only band that needs native pixels. At full resolution the stack completes the sharp end
-    // itself (nativeSharpEnd) and the overlay stays inactive. The supported flags gate platforms
-    // whose progressiveStackEffect() returns null.
+    // Progressive blur split by resolution: the level stack runs through the downscaled [primary]
+    // machinery, [sharpLayer] overlays the ramp's clear end at full resolution (skipped while the
+    // stack renders it natively). Flags gate platforms without a stack effect.
     private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
     private var sharpOverlayActive = false
 
-    // Downscaled level-stack effect, cached on its inputs; pre/post chains compared by identity
-    // (the scope's per-effect caches keep the references stable while their inputs hold), the
-    // recorded post blend by value.
+    // Level-stack effect cached on its inputs: chains by identity, the recorded blend by value.
     private var cachedStackEffect: RenderEffect? = null
     private var cachedStackRadiusX = Float.NaN
     private var cachedStackRadiusY = Float.NaN
@@ -555,20 +523,16 @@ private class DrawBackdropNode(
     private var cachedStackPostBlend: BlurColors? = null
     private var cachedStackDither = Float.NaN
 
-    // Dither/noise pass chained after the assembled stack, cached on its coefficient. exp > 0:
-    // pre-quantization dither at min(2 × coefficient, [STACK_DITHER_MAX]) — the stack's smooth
-    // ramps band when first written to the 8-bit layer, and a noise pass after that write can
-    // only mask the staircase (the default 0.0045 alone is ≈ ±0.6 LSB, short of the ~1 LSB the
-    // staircase needs; grain lands at downscale-texel size but stays invisible at this
-    // amplitude). exp == 0: the same pass carries the full coefficient, already per screen pixel.
+    // Dither chained after the assembled stack, cached on its coefficient. exp > 0: dither before
+    // the 8-bit write at min(2 × coefficient, [STACK_DITHER_MAX]) — dithering after it only masks
+    // the staircase, and the default alone is ~±0.6 LSB against the ~1 LSB it needs. exp == 0: the
+    // same pass carries the full coefficient, already per screen pixel.
     private var stackDitherEffect: RenderEffect? = null
     private var stackDitherCoeff = Float.NaN
 
-    // True while the stack's pre-quantization dither fully covers the noise duty (coefficient at
-    // or below [NOISE_GRAIN_THRESHOLD]): the noise rides the upscale, so the full-resolution
-    // noise layer round-trip (record + noise pass) is skipped — quantization of the final write
-    // is dithered by the noise the signal carries. Deliberate visible grain keeps the full-res
-    // pass so its size stays one screen pixel at every radius.
+    // True while the stack dither covers the noise duty (coefficient ≤ [NOISE_GRAIN_THRESHOLD]):
+    // the full-resolution noise round-trip is skipped. Deliberate grain keeps that pass, so grain
+    // size stays one screen pixel.
     private var stackDitherChained = false
 
     private fun obtainStackDitherEffect(coeff: Float): RenderEffect {
@@ -582,10 +546,8 @@ private class DrawBackdropNode(
         }
     }
 
-    // Sharp overlay effect (variable loop blur + ramp mask) + band bbox (the only region paying
-    // full-resolution cost), cached on gradient + size + radii/exp (the loop blur's handoff radius
-    // tracks blur2). A null effect with matching cache keys means the band lies outside the
-    // component and the overlay is skipped entirely.
+    // Sharp overlay effect + band bbox (the only full-resolution region), cached on gradient, size
+    // and radii/exp. A null effect with matching keys means the band misses the component.
     private var sharpOverlayEffect: RenderEffect? = null
     private var sharpOverlayGradient: ProgressiveBlur? = null
     private var sharpOverlayW = Float.NaN
@@ -596,30 +558,13 @@ private class DrawBackdropNode(
     private var sharpBandOffset = IntOffset.Zero
     private var sharpBandSize = IntSize.Zero
 
-    /** Renders the blurred backdrop into [primary] and, in a cross-fade band, the [secondary] level. */
     private fun DrawScope.drawBlurredBackdrop() {
         renderBlurInto(primary)
-        if (blending) {
-            // Cross-fade band: composite the higher level on top of the lower one with alpha = blendFactor.
-            val result = crossfadeResultLayer
-                ?: graphicsContext.createGraphicsLayer().also { crossfadeResultLayer = it }
-            recordLayer(
-                result,
-                size = IntSize(size.width.toInt().coerceAtLeast(1), size.height.toInt().coerceAtLeast(1)),
-            ) {
-                renderBlurInto(secondary)
-            }
-            result.alpha = blendFactor
-            drawLayer(result)
-        }
     }
 
     /**
-     * Records the backdrop at full resolution into [sharpLayer] — only the band bbox where the
-     * ramp mask is non-zero — and draws it over the upscaled level stack through the overlay
-     * effect: a variable loop blur ramping from blur2's strength to zero, masked to the ramp's
-     * clear-end cross-fade. Renders the composite's `mix(blur2, clear, …)` segment as one
-     * continuous sharpening with a genuinely sharp native end.
+     * Records the backdrop's ramp band into [sharpLayer] at full resolution and draws the overlay
+     * over the level stack: a loop blur ramping to zero, so the composite ends genuinely sharp.
      */
     private fun DrawScope.drawSharpOverlay() {
         val bandSize = sharpBandSize
@@ -634,7 +579,7 @@ private class DrawBackdropNode(
                             density = effectScope,
                             coordinates = layoutCoordinates,
                             layerBlock = layerBlock,
-                            downscaleFactor = 1,
+                            downscaleFactor = 1f,
                         )
                     }
                 }
@@ -711,9 +656,6 @@ private class DrawBackdropNode(
         effectScope.progressiveCompositeActive =
             progressiveGradient != null && !(compositeAttempted && !compositeSupported)
 
-        // Pass 1 (auto): build the lower bracket level into [primary]; blur() also stashes the
-        // cross-fade bracket (computeDownScaleBlend) on the scope for us to read below.
-        effectScope.forcedDownscaleExp = -1
         effectScope.apply(effects)
         if (effectScope.progressiveCompositeActive) {
             // Noise is finalize's duty here — chained after the assembled stack, not into the
@@ -726,38 +668,13 @@ private class DrawBackdropNode(
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
         primary.padding = effectScope.padding
-        primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
-
-        val expLo = effectScope.blurBlendExpLo
-        val expHi = effectScope.blurBlendExpHi
-        val factor = effectScope.blurBlendFactor
-
-        if (expLo == expHi || factor <= 0.001f) {
-            blending = false
-            return
-        }
-
-        // Pass 2: build the higher bracket level into [secondary]; draw() cross-fades the two.
-        secondary.ensureMain()
-        effectScope.forcedDownscaleExp = expHi
-        effectScope.apply(effects)
-        chainFullResNoiseIfNeeded()
-        secondary.mainLayer?.renderEffect = effectScope.renderEffect
-        secondary.padding = effectScope.padding
-        secondary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1)
-        effectScope.forcedDownscaleExp = -1
-
-        blendFactor = factor
-        blending = true
+        primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1f)
     }
 
     /**
-     * Composite mode: progressiveBlur() recorded the level radii + downscale and split the
-     * effects chain; assemble the downscaled level-stack effect (pre → levels → folded ramp
-     * blend or ramp-masked post branch → dither/noise) into [BackdropEffectScope.renderEffect]
-     * for [primary], and the full-res overlay effect (variable loop blur + ramp mask) with its
-     * band bbox for [sharpLayer]. Re-runs the effects uniformly when the platform can't express
-     * the stack.
+     * Composite mode: progressiveBlur() recorded the radii + downscale and split the chain; this
+     * assembles the level-stack effect for [primary] and the full-res overlay for [sharpLayer].
+     * Falls back to running the effects uniformly when the platform can't express the stack.
      */
     private fun finalizeProgressiveComposite() {
         val scope = effectScope
@@ -915,17 +832,13 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Full-res path: chains noise into the RenderEffect. The downscaled path defers it to
-     * [drawUpscaledLayer] so each screen pixel still gets independent dithering — unless the
-     * composite stack carries the duty itself ([stackDitherChained]). Composite pass 1 skips
-     * this: [finalizeProgressiveComposite] chains noise after the assembled stack instead.
-     *
-     * Cached on input identity + coefficient so repeated [updateEffects] runs don't allocate a
-     * fresh native effect per pass.
+     * Full-res path: chains noise into the RenderEffect; the downscaled path defers it to
+     * [drawUpscaledLayer] so each screen pixel dithers independently (unless [stackDitherChained]).
+     * Cached on input identity + coefficient, so repeated [updateEffects] runs don't allocate.
      */
     private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
-        if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1) {
+        if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1f) {
             val input = effectScope.renderEffect
             if (effectScope.cachedNoiseChainResult != null &&
                 effectScope.cachedNoiseChainInput === input &&
@@ -956,92 +869,99 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Sets the downsample effect (cached per [target]/[slot]) on [source], records [dest] at
-     * ([destW], [destH]) by drawing [source] with [scale], then clears [source]'s render effect
-     * so it does not leak to the next pass.
+     * Sets [source]'s downsample effect (cached per [target]/[slot]) and records [dest] at
+     * [destSize] with [source] drawn at [scale]. The filter stays attached — the recorded
+     * destination references the layer, so detaching skips the prefilter — and
+     * [LevelTarget.clearStepFilters] drops it next frame.
      */
     private fun DrawScope.applyDownsampleStep(
         target: LevelTarget,
         slot: Int,
         source: GraphicsLayer,
-        sourceW: Int,
-        sourceH: Int,
+        sourceSize: IntSize,
         dest: GraphicsLayer,
-        destW: Int,
-        destH: Int,
+        destSize: IntSize,
         scale: Float,
         shaderKey: String,
         shaderSrc: String,
     ) {
-        source.renderEffect = target.downsampleEffect(slot, shaderKey, sourceW, sourceH) {
+        source.renderEffect = target.downsampleEffect(slot, shaderKey, sourceSize.width, sourceSize.height) {
             runtimeShaderEffect(
                 runtimeShader = effectScope.obtainRuntimeShader(shaderKey, shaderSrc).apply {
-                    setFloatUniform("maxCoord", sourceW - 0.5f, sourceH - 0.5f)
+                    setFloatUniform("maxCoord", sourceSize.width - 0.5f, sourceSize.height - 0.5f)
                 },
                 uniformShaderName = "child",
             )
         }
-        recordLayer(dest, size = IntSize(destW, destH)) {
+        recordLayer(dest, size = destSize) {
             scale(scale, scale, Offset.Zero) { drawLayer(source) }
         }
-        // drawLayer records a reference, not a flattened bitmap. Keep the filter attached
-        // until the recorded destination is rendered; clearing it here skips prefiltering.
     }
 
     /**
-     * Upscales [layer] to full resolution. When noise dithering is active — and not already
-     * carried by the composite stack ([stackDitherChained]) — the upscaled content is staged in
-     * [target]'s noise layer first so noise lands per screen pixel instead of per scaled block.
+     * Upscales [layer] (recorded at [texelScale] texels per surface px) to full resolution. With
+     * noise active — and not carried by the stack ([stackDitherChained]) — the result is staged in
+     * [target]'s noise layer first, so noise lands per screen pixel rather than per scaled block.
      */
     private fun DrawScope.drawUpscaledLayer(
         target: LevelTarget,
         layer: GraphicsLayer,
-        scaleUp: Float,
+        texelScale: Float,
         currentPadding: Float,
-        scaleFactor: Int,
-        residualX: Float,
-        residualY: Float,
         fullWidth: Int,
         fullHeight: Int,
     ) {
         val noiseCoeff = if (stackDitherChained) 0f else effectScope.noiseCoefficient
+        val residualX = backdrop.offsetResidualX
+        val residualY = backdrop.offsetResidualY
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
             val noiseL = target.noiseLayer
                 ?: graphicsContext.createGraphicsLayer().also { target.noiseLayer = it }
             recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
-                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
+                scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
             }
             noiseL.renderEffect = target.noiseRenderEffect(noiseCoeff) {
                 val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
                 noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
                 runtimeShaderEffect(noiseShader, "child")
             }
-            noiseL.topLeft =
-                if (currentPadding != 0f) {
-                    IntOffset(-currentPadding.toInt(), -currentPadding.toInt())
-                } else {
-                    IntOffset.Zero
-                }
-            translate(-residualX, -residualY) { drawLayer(noiseL) }
+            drawShiftedLayer(noiseL, currentPadding, 1f, residualX, residualY)
             noiseL.renderEffect = null
         } else {
-            layer.topLeft =
-                if (currentPadding != 0f) {
-                    IntOffset(-(currentPadding / scaleFactor).toInt(), -(currentPadding / scaleFactor).toInt())
-                } else {
-                    IntOffset.Zero
-                }
-            translate(-residualX, -residualY) {
-                scale(scaleUp, scaleUp, Offset.Zero) { drawLayer(layer) }
-            }
+            drawShiftedLayer(layer, currentPadding / texelScale, texelScale, residualX, residualY)
         }
     }
 
     /**
-     * Drops the composite layer and its caches. Called when [progressiveGradient] is cleared on a
-     * live node so the full-resolution offscreen layer doesn't outlive the gradient mode; the
-     * supported flags survive (platform capability doesn't change).
+     * Draws [layer] with its content origin exactly [padding] layer-texels before this surface's
+     * origin: the integral part via [GraphicsLayer.topLeft], the fraction via a draw-time
+     * translate. Snapping the fraction moved the picture a pixel every time the padding's integer
+     * part changed — a stepping shimmer during a radius sweep.
+     */
+    private fun DrawScope.drawShiftedLayer(
+        layer: GraphicsLayer,
+        padding: Float,
+        texelScale: Float,
+        residualX: Float = 0f,
+        residualY: Float = 0f,
+    ) {
+        val whole = floor(padding)
+        layer.topLeft =
+            if (padding != 0f) {
+                IntOffset(-whole.toInt(), -whole.toInt())
+            } else {
+                IntOffset.Zero
+            }
+        val fraction = (padding - whole) * texelScale
+        translate(-residualX - fraction, -residualY - fraction) {
+            scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
+        }
+    }
+
+    /**
+     * Drops the composite layer and its caches when [progressiveGradient] is cleared, so the
+     * full-resolution offscreen layer doesn't outlive the gradient mode.
      */
     fun releaseCompositeResources() {
         sharpLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
@@ -1073,11 +993,7 @@ private class DrawBackdropNode(
 
     fun releaseGraphicsLayers() {
         primary.release()
-        secondary.release()
-        crossfadeResultLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
-        crossfadeResultLayer = null
         releaseCompositeResources()
-        blending = false
         effectScope.reset()
     }
 

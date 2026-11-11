@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.material
 
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -16,6 +17,9 @@ import top.yukonga.miuix.kmp.material.internal.GLASS_RIM_SHADER
 import top.yukonga.miuix.kmp.material.internal.GLASS_RIM_SHADER_KEY
 import top.yukonga.miuix.kmp.material.internal.GLASS_SHADOW_SHADER
 import top.yukonga.miuix.kmp.material.internal.GLASS_SHADOW_SHADER_KEY
+import top.yukonga.miuix.kmp.material.internal.glassEdgeShaderKey
+import top.yukonga.miuix.kmp.material.internal.glassEdgeShaderSource
+import top.yukonga.miuix.kmp.material.internal.setEdgeStrokeUniforms
 import top.yukonga.miuix.kmp.material.internal.sharedShaderCache
 import kotlin.math.PI
 import kotlin.math.floor
@@ -42,18 +46,66 @@ fun DrawScope.drawGlassRim(
         .coerceAtMost(size.minDimension * 0.5f)
 
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
-    shader.setFloatUniform("in_rimEdge", edge, style.edge.pow.coerceAtLeast(0.01f), alpha, 0f)
-    shader.setFloatUniform(
+    shader.setRimUniforms(style, surface, alpha, edge)
+
+    drawRect(brush = shader.asBrush(), blendMode = BlendMode.Plus)
+}
+
+/**
+ * Draws the rim light and the edge stroke in one pass, replacing [drawEdgeStroke] + [drawGlassRim]:
+ * both are additive light along the silhouette. [drawGlassMask] still runs after it.
+ */
+fun DrawScope.drawGlassEdge(
+    shape: GlassShape,
+    stroke: EdgeStroke,
+    style: GlassStyle,
+    surface: Color,
+    alpha: Float,
+) {
+    if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
+    if (!isRuntimeShaderSupported()) return
+    val shader = sharedShaderCache.obtainRuntimeShader(
+        glassEdgeShaderKey(stroke.peak),
+        glassEdgeShaderSource(stroke.peak),
+    )
+
+    shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
+    shader.setEdgeStrokeUniforms(
+        stroke = stroke,
+        alpha = alpha,
+        density = this,
+        widthPx = size.width,
+        heightPx = size.height,
+    )
+    // Tiny surfaces take precedence over the nominal minimum band width.
+    val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
+        .coerceAtLeast(1f)
+        .coerceAtMost(size.minDimension * 0.5f)
+    shader.setRimUniforms(style, surface, alpha, edge)
+
+    drawRect(brush = shader.asBrush(), blendMode = BlendMode.Plus)
+}
+
+/** Sets the rim-light uniforms the glass rim programs read. */
+private fun RuntimeShader.setRimUniforms(
+    style: GlassStyle,
+    surface: Color,
+    alpha: Float,
+    edge: Float,
+) {
+    // A fully unshaded style renders no rim; zero the light instead of dropping the whole pass, so
+    // the stroke still draws.
+    val rimAlpha = if (style.background.unShade >= 0.999f) 0f else alpha
+    setFloatUniform("in_rimEdge", edge, style.edge.pow.coerceAtLeast(0.01f), rimAlpha, 0f)
+    setFloatUniform(
         "in_lightDir",
         style.light.directionX,
         style.light.directionY,
         style.light.directionZ,
         style.light.angleRange * PI.toFloat(),
     )
-    shader.setFloatUniform("in_lightAmt", style.light.intensity, style.light.oppositeIntensity, 0f, 0f)
-    shader.setFloatUniform("in_surface", surface.red, surface.green, surface.blue, 1f)
-
-    drawRect(brush = shader.asBrush(), blendMode = BlendMode.Plus)
+    setFloatUniform("in_lightAmt", style.light.intensity, style.light.oppositeIntensity, 0f, 0f)
+    setFloatUniform("in_surface", surface.red, surface.green, surface.blue, 1f)
 }
 
 /** Trims the surface to [shape] at full resolution. */
@@ -99,12 +151,36 @@ fun DrawScope.drawGlassShadow(
     )
 }
 
-/** Sets the size, corner radii and smoothing uniforms for the shared distance field. */
-private fun RuntimeShader.setSilhouetteUniforms(
+/**
+ * Sets the size, corner radii and smoothing uniforms of the shared distance field for a silhouette
+ * drawn at [scale] (1 = full resolution; > 1 = a downscaled layer, where every pixel-space value
+ * divides by the level). Rim, edge stroke, mask, shadow and the refraction shader in `miuix-glass`
+ * all resolve them here: start/end swap under RTL, radii clamp to half the smaller side, smoothing
+ * to 0..1.
+ */
+fun RuntimeShader.setSilhouetteUniforms(
     shape: GlassShape,
     layoutDirection: LayoutDirection,
     size: Size,
     density: Density,
+    scale: Float = 1f,
+) = setSilhouetteUniforms(
+    shape = shape,
+    layoutDirection = layoutDirection,
+    size = size,
+    density = density,
+    smoothing = shape.smoothing,
+    scale = scale,
+)
+
+/** [setSilhouetteUniforms] for any rounded-corner shape; [smoothing] is 0 for circular corners. */
+internal fun RuntimeShader.setSilhouetteUniforms(
+    shape: CornerBasedShape,
+    layoutDirection: LayoutDirection,
+    size: Size,
+    density: Density,
+    smoothing: Float,
+    scale: Float = 1f,
 ) {
     val halfMin = min(size.width, size.height) * 0.5f
     val isLtr = layoutDirection == LayoutDirection.Ltr
@@ -113,13 +189,13 @@ private fun RuntimeShader.setSilhouetteUniforms(
     val bottomEnd = shape.bottomEnd.toPx(size, density)
     val bottomStart = shape.bottomStart.toPx(size, density)
 
-    setFloatUniform("in_size", size.width, size.height)
+    setFloatUniform("in_size", size.width / scale, size.height / scale)
     setFloatUniform(
         "in_radii",
-        (if (isLtr) start else end).coerceIn(0f, halfMin),
-        (if (isLtr) end else start).coerceIn(0f, halfMin),
-        (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin),
-        (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin),
+        (if (isLtr) start else end).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) end else start).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin) / scale,
     )
-    setFloatUniform("in_smoothing", shape.smoothing.coerceIn(0f, 1f))
+    setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
 }

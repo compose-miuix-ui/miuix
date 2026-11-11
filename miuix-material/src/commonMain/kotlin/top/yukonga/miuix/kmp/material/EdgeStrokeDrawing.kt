@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.material.internal.drawEdgeStrokeShape
 
 /**
@@ -26,16 +25,8 @@ fun DrawScope.drawEdgeStroke(
     if (stroke.width.value <= 0f || alpha <= 0f) return
     if (shape is CutCornerShape) return
     val cornerShape = shape as? CornerBasedShape ?: return
-    val isLtr = layoutDirection == LayoutDirection.Ltr
-    val topStart = cornerShape.topStart.toPx(size, this)
-    val topEnd = cornerShape.topEnd.toPx(size, this)
-    val bottomEnd = cornerShape.bottomEnd.toPx(size, this)
-    val bottomStart = cornerShape.bottomStart.toPx(size, this)
     drawEdgeStrokeShape(
-        topLeft = if (isLtr) topStart else topEnd,
-        topRight = if (isLtr) topEnd else topStart,
-        bottomRight = if (isLtr) bottomEnd else bottomStart,
-        bottomLeft = if (isLtr) bottomStart else bottomEnd,
+        shape = cornerShape,
         smoothing = (shape as? GlassShape)?.smoothing ?: 0f,
         stroke = stroke,
         alpha = alpha,

@@ -27,7 +27,7 @@ internal class ScrimBackdrop(
         density: Density,
         coordinates: LayoutCoordinates?,
         layerBlock: (GraphicsLayerScope.() -> Unit)?,
-        downscaleFactor: Int,
+        downscaleFactor: Float,
     ) {
         with(backdrop) {
             drawBackdrop(
@@ -47,11 +47,8 @@ internal class ScrimBackdrop(
         val color = scrimColor.value
         if (color.alpha > 0f) {
             val padding = (density as? BackdropEffectScope)?.padding ?: 0f
-            val scaledPadding = if (downscaleFactor > 1) {
-                (padding / downscaleFactor).toInt().toFloat()
-            } else {
-                padding
-            }
+            // Exact padding: the recording offsets by `padding / level`, so rounding leaves a strip.
+            val scaledPadding = padding / downscaleFactor
             // Cover recording padding; SrcAtop preserves transparent scene pixels to prevent halos.
             drawRect(color, topLeft = Offset(-scaledPadding, -scaledPadding), size = size, blendMode = BlendMode.SrcAtop)
         }
