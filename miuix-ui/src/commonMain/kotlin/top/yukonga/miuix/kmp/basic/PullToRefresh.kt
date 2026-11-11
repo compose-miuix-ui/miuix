@@ -759,7 +759,7 @@ private fun RefreshHeader(
                 RefreshState.Refreshing -> ((pullToRefreshState.visualProgress - 0.5f) * 2f).coerceIn(0f, 1f)
 
                 RefreshState.RefreshComplete -> {
-                    (1f - pullToRefreshState.refreshCompleteAnimProgress * 1.95f).coerceAtLeast(0f)
+                    1f - pullToRefreshState.refreshCompleteAnimProgress
                 }
             }
         }
