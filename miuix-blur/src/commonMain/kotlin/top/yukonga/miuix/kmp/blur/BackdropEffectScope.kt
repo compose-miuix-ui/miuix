@@ -7,7 +7,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.blur.internal.COLOR_CONTROLS_SHADER
@@ -210,7 +209,7 @@ internal abstract class BackdropEffectScopeImpl :
      */
     internal var progressivePostBlend: BlurColors? = null
 
-/** Platform scratch for the composite's radius-independent caches; dropped on [reset]. */
+    /** Platform scratch for the composite's radius-independent caches; dropped on [reset]. */
     internal var progressiveMaskScratch: Any? = null
 
     // Full-res noise pass cache, keyed on chain input identity + coefficient: keeps the chained
