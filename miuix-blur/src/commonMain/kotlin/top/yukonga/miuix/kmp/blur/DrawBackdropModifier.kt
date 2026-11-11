@@ -460,6 +460,8 @@ private class DrawBackdropNode(
             source = dest
             sourceSize = destSize
             covered = after
+            // Fresh slot: the remainder step would otherwise evict this 2x effect every frame.
+            step++
         }
 
         // Remainder step: same 2× box prefilter, only the decimation shrunk — so the filter

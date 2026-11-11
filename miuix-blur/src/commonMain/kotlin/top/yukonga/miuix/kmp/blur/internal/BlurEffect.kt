@@ -86,8 +86,8 @@ internal fun createBlurEffect(
 
     var effect: RenderEffect? = null
 
-    // H / V use distinct cache keys so each pass builds from its own shader instance; the
-    // _d$downScale suffix additionally isolates one downscale level from another.
+    // H / V keep separate keys (each pass owns its shader instance); the bucket splits the levels
+    // that can share a frame.
     if (radiusX > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
         if (n > 0) {
@@ -488,7 +488,10 @@ internal fun downScaleExpFor(sigmaSquared: Float): Int = when {
 /** Level for a blur of variance [sigmaSquared]: `σ / [MIN_LEVEL_SIGMA]`, clamped to 1..16. */
 private fun levelScaleFor(sigmaSquared: Float): Float = (sqrt(sigmaSquared.coerceAtLeast(0f)) / MIN_LEVEL_SIGMA).coerceIn(1f, 16f)
 
-/** Recording level for [sigmaSquared], snapped to the grid in [BUCKETS_PER_OCTAVE] (17 levels). */
+/**
+ * Recording level for [sigmaSquared], snapped to the 1/4-octave grid. The first step (1.19×) stays:
+ * one full-resolution noise layer is still ~0.4 ms cheaper than the full-resolution blur.
+ */
 internal fun quantizedLevelScale(sigmaSquared: Float): Float = 2f.pow(levelBucket(levelScaleFor(sigmaSquared)).toFloat() / BUCKETS_PER_OCTAVE)
 
 /** Implied box-prefilter variance (source px²) at level [scale]. */

@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.material.internal
 
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
 import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
@@ -12,6 +13,7 @@ import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.asBrush
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.setSilhouetteUniforms
 import kotlin.math.floor
 import kotlin.math.sqrt
 
@@ -26,14 +28,10 @@ internal const val LIGHT_REF_X = 0.5f
 internal const val LIGHT_REF_Y = 0.7f
 
 /**
- * Paints [stroke] with already-resolved corner radii, in pixels, ordered top-left, top-right,
- * bottom-right, bottom-left. [smoothing] of `0` keeps circular corners.
+ * Paints [stroke] along [shape]'s silhouette, sharing [setSilhouetteUniforms] with the mask.
  */
 internal fun DrawScope.drawEdgeStrokeShape(
-    topLeft: Float,
-    topRight: Float,
-    bottomRight: Float,
-    bottomLeft: Float,
+    shape: CornerBasedShape,
     smoothing: Float,
     stroke: EdgeStroke,
     alpha: Float,
@@ -48,12 +46,8 @@ internal fun DrawScope.drawEdgeStrokeShape(
         edgeStrokeShaderKey(stroke.peak),
         edgeStrokeShaderSource(stroke.peak),
     )
+    shader.setSilhouetteUniforms(shape, layoutDirection, size, this, smoothing)
     shader.setEdgeStrokeUniforms(
-        topLeft = topLeft,
-        topRight = topRight,
-        bottomRight = bottomRight,
-        bottomLeft = bottomLeft,
-        smoothing = smoothing,
         widthPx = widthPx,
         heightPx = heightPx,
         stroke = stroke,
@@ -65,34 +59,18 @@ internal fun DrawScope.drawEdgeStrokeShape(
 }
 
 /**
- * Sets the uniforms every edge-stroke program reads — silhouette, band, colour, the two lights —
- * so the standalone pass and the fused rim + stroke pass describe the stroke identically.
+ * Sets the stroke's own uniforms — band, colour, the two lights. The silhouette comes from
+ * `setSilhouetteUniforms`, which must run first.
  */
 internal fun RuntimeShader.setEdgeStrokeUniforms(
-    topLeft: Float,
-    topRight: Float,
-    bottomRight: Float,
-    bottomLeft: Float,
-    smoothing: Float,
     widthPx: Float,
     heightPx: Float,
     stroke: EdgeStroke,
     alpha: Float,
     density: Density,
 ) {
-    val halfW = widthPx * 0.5f
-    val halfH = heightPx * 0.5f
-    val maxRadius = halfW.coerceAtMost(halfH)
-    setFloatUniform("in_size", widthPx, heightPx)
-    setFloatUniform("in_halfViewFloor", floor(halfW), floor(halfH))
-    setFloatUniform(
-        "in_radii",
-        topLeft.coerceIn(0f, maxRadius),
-        topRight.coerceIn(0f, maxRadius),
-        bottomRight.coerceIn(0f, maxRadius),
-        bottomLeft.coerceIn(0f, maxRadius),
-    )
-    setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
+    val maxRadius = (widthPx * 0.5f).coerceAtMost(heightPx * 0.5f)
+    setFloatUniform("in_halfViewFloor", floor(widthPx * 0.5f), floor(heightPx * 0.5f))
     val band = with(density) { stroke.width.toPx() }
     val bevel = with(density) { stroke.bevel.toPx() }
     // Preserve the half-pixel stroke-width bias without rounding to an integer.

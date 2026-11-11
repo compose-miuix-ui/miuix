@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.material
 
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -68,30 +69,13 @@ fun DrawScope.drawGlassEdge(
         glassEdgeShaderSource(stroke.peak),
     )
 
-    val halfMin = min(size.width, size.height) * 0.5f
-    val isLtr = layoutDirection == LayoutDirection.Ltr
-    val start = shape.topStart.toPx(size, this)
-    val end = shape.topEnd.toPx(size, this)
-    val bottomEnd = shape.bottomEnd.toPx(size, this)
-    val bottomStart = shape.bottomStart.toPx(size, this)
-    val smoothing = shape.smoothing.coerceIn(0f, 1f)
-    val topLeft = (if (isLtr) start else end).coerceIn(0f, halfMin)
-    val topRight = (if (isLtr) end else start).coerceIn(0f, halfMin)
-    val bottomRight = (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin)
-    val bottomLeft = (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin)
-
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
     shader.setEdgeStrokeUniforms(
-        topLeft = topLeft,
-        topRight = topRight,
-        bottomRight = bottomRight,
-        bottomLeft = bottomLeft,
-        smoothing = smoothing,
-        widthPx = size.width,
-        heightPx = size.height,
         stroke = stroke,
         alpha = alpha,
         density = this,
+        widthPx = size.width,
+        heightPx = size.height,
     )
     // Tiny surfaces take precedence over the nominal minimum band width.
     val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
@@ -167,12 +151,36 @@ fun DrawScope.drawGlassShadow(
     )
 }
 
-/** Sets the size, corner radii and smoothing uniforms for the shared distance field. */
-private fun RuntimeShader.setSilhouetteUniforms(
+/**
+ * Sets the size, corner radii and smoothing uniforms of the shared distance field for a silhouette
+ * drawn at [scale] (1 = full resolution; > 1 = a downscaled layer, where every pixel-space value
+ * divides by the level). Rim, edge stroke, mask, shadow and the refraction shader in `miuix-glass`
+ * all resolve them here: start/end swap under RTL, radii clamp to half the smaller side, smoothing
+ * to 0..1.
+ */
+fun RuntimeShader.setSilhouetteUniforms(
     shape: GlassShape,
     layoutDirection: LayoutDirection,
     size: Size,
     density: Density,
+    scale: Float = 1f,
+) = setSilhouetteUniforms(
+    shape = shape,
+    layoutDirection = layoutDirection,
+    size = size,
+    density = density,
+    smoothing = shape.smoothing,
+    scale = scale,
+)
+
+/** [setSilhouetteUniforms] for any rounded-corner shape; [smoothing] is 0 for circular corners. */
+internal fun RuntimeShader.setSilhouetteUniforms(
+    shape: CornerBasedShape,
+    layoutDirection: LayoutDirection,
+    size: Size,
+    density: Density,
+    smoothing: Float,
+    scale: Float = 1f,
 ) {
     val halfMin = min(size.width, size.height) * 0.5f
     val isLtr = layoutDirection == LayoutDirection.Ltr
@@ -181,13 +189,13 @@ private fun RuntimeShader.setSilhouetteUniforms(
     val bottomEnd = shape.bottomEnd.toPx(size, density)
     val bottomStart = shape.bottomStart.toPx(size, density)
 
-    setFloatUniform("in_size", size.width, size.height)
+    setFloatUniform("in_size", size.width / scale, size.height / scale)
     setFloatUniform(
         "in_radii",
-        (if (isLtr) start else end).coerceIn(0f, halfMin),
-        (if (isLtr) end else start).coerceIn(0f, halfMin),
-        (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin),
-        (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin),
+        (if (isLtr) start else end).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) end else start).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin) / scale,
     )
-    setFloatUniform("in_smoothing", shape.smoothing.coerceIn(0f, 1f))
+    setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
 }

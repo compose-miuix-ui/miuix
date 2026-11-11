@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.glass.internal
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.unit.LayoutDirection
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.GlassColorBlendMode
@@ -13,6 +12,7 @@ import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.setSilhouetteUniforms
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
@@ -35,22 +35,11 @@ internal fun BackdropEffectScope.glassEffect(
     val height = size.height
     if (width <= 0f || height <= 0f) return
 
-    val scale = downscaleFactor.toFloat()
+    val scale = downscaleFactor
     val paddedWidth = width + padding * 2f
     val paddedHeight = height + padding * 2f
     val textureWidth = (paddedWidth / downscaleFactor).coerceAtLeast(1f)
     val textureHeight = (paddedHeight / downscaleFactor).coerceAtLeast(1f)
-
-    val halfMin = min(width, height) * 0.5f
-    val isLtr = layoutDirection == LayoutDirection.Ltr
-    val start = shape.topStart.toPx(size, this)
-    val end = shape.topEnd.toPx(size, this)
-    val bottomEnd = shape.bottomEnd.toPx(size, this)
-    val bottomStart = shape.bottomStart.toPx(size, this)
-    val topLeft = (if (isLtr) start else end).coerceIn(0f, halfMin) / scale
-    val topRight = (if (isLtr) end else start).coerceIn(0f, halfMin) / scale
-    val bottomRight = (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin) / scale
-    val bottomLeft = (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin) / scale
 
     val sourceScale = density / GlassDefaults.SourceDensity
     val edgeFullPx = (style.edge.width * sourceScale).coerceAtLeast(1f)
@@ -64,11 +53,9 @@ internal fun BackdropEffectScope.glassEffect(
         .coerceIn(0f, 1f)
 
     runtimeShaderEffect(GLASS_SHADER_KEY, GLASS_SHADER, "child") {
-        setFloatUniform("in_size", width / scale, height / scale)
+        setSilhouetteUniforms(shape, layoutDirection, size, this@glassEffect, scale)
         setFloatUniform("in_pad", padding / scale, padding / scale)
         setFloatUniform("in_maxCoord", textureWidth - 0.5f, textureHeight - 0.5f)
-        setFloatUniform("in_radii", topLeft, topRight, bottomRight, bottomLeft)
-        setFloatUniform("in_smoothing", shape.smoothing.coerceIn(0f, 1f))
         setFloatUniform(
             "in_alphaEdge",
             (style.inner.alpha * alpha).coerceIn(0f, 1f),

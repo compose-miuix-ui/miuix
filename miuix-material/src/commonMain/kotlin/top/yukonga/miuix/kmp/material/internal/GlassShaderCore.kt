@@ -112,7 +112,8 @@ half4 main(float2 coord) {
         float band = smoothstep(-width, -width + 1.0, d);
         float3 base = in_strokeColor.rgb * (in_strokeColor.a * band * band);
         float3 normal = rimNormal(coord, half2d, d, radius, inner);
-        float3 light = (base + edgeStrokeLights(normal)) * (in_strokeAlpha * cov) * cov;
+        // One cov: the mask supplies the other, as the standalone stroke pass did.
+        float3 light = (base + edgeStrokeLights(normal)) * (in_strokeAlpha * cov);
         rgb += light;
         alpha += clamp(max(max(light.r, light.g), light.b), 0.0, 1.0);
     }
