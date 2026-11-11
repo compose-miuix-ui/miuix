@@ -26,7 +26,7 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 
 ## 基本用法
 
-- 将弹窗放在坐标根处的整页 `Box` 最后，避免父级裁剪。
+- 将弹窗放在整页 `Box` 的最后，避免父级裁剪。行与值范围使用窗口坐标（`boundsInWindow()`）；弹窗会减去自身宿主的窗口偏移。
 - 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
 - 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
@@ -44,7 +44,7 @@ Box(Modifier.fillMaxSize()) {
         modifier = Modifier
             .fillMaxWidth()
             .glassPopupAnchorRow(anchor)
-            .onGloballyPositioned { rowBounds = it.boundsInRoot() }
+            .onGloballyPositioned { rowBounds = it.boundsInWindow() }
             .clickable { show = true }
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -78,7 +78,7 @@ Box(Modifier.fillMaxSize()) {
 | --- | --- | --- | --- | --- |
 | show | Boolean | 面板是否打开；为 false 时立即停止菜单行输入与无障碍操作 | - | 是 |
 | onDismissRequest | () -> Unit | 外部点击或返回请求时调用 | - | 是 |
-| anchorBounds | Rect | 设置行在当前弹窗 Box 坐标系中的范围 | - | 是 |
+| anchorBounds | Rect | 设置行在窗口坐标中的范围（`boundsInWindow()`） | - | 是 |
 | backdrop | Backdrop? | 面板背后的场景；null 使用保留描边与投影的不透明填充 | - | 是 |
 | modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
 | anchor | GlassPopupAnchor? | 可选的值对齐与淡出协调锚点；不提供 anchorBounds、backdrop 或外观 | null | 否 |

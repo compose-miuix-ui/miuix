@@ -36,8 +36,8 @@ import top.yukonga.miuix.kmp.blur.Backdrop
  *
  * @param show Whether the secondary menu is expanded. Keep this call composed during collapse.
  * @param onDismissRequest Called by a tap outside or Back to return to the primary menu.
- * @param anchorBounds Resting bounds of the trigger row, in the same root as this popup. Freeze
- *   these before setting the primary [GlassTransformPopup]'s `stacked` flag.
+ * @param anchorBounds Resting trigger-row bounds in window coordinates (`boundsInWindow()`).
+ *   Freeze them before setting the primary [GlassTransformPopup]'s `stacked` flag.
  * @param backdrop Background sampled by the menu. Include the primary popup but exclude this
  *   submenu. `null` uses the anchor's backdrop.
  * @param modifier Modifier applied to the panel.
@@ -112,8 +112,8 @@ fun BoxScope.GlassSecondaryPopup(
         contentPadding = contentPadding,
         panelLayer = {},
         overlay = {},
-        frame = { end, page ->
-            val settled = placeGlassSecondaryPopup(anchorBounds, end, sizing.safeMargin.toPx(), page, direction)
+        frame = { end, windowBounds ->
+            val settled = placeGlassSecondaryPopup(anchorBounds, end, sizing.safeMargin.toPx(), windowBounds, direction)
             GlassPopupFrame(
                 secondaryPopupRect(
                     anchorBounds,
@@ -133,13 +133,15 @@ fun BoxScope.GlassSecondaryPopup(
     )
 }
 
-/** Start-edge alignment, then a shift upward to fit. */
-internal fun placeGlassSecondaryPopup(anchor: Rect, size: Size, margin: Float, page: Size, direction: LayoutDirection): Rect {
-    val width = size.width.coerceAtMost((page.width - margin * 2f).coerceAtLeast(0f))
-    val height = size.height.coerceAtMost((page.height - margin * 2f).coerceAtLeast(0f))
+/** Start-edge alignment, then a shift upward to fit the window's safe area. */
+internal fun placeGlassSecondaryPopup(anchor: Rect, size: Size, margin: Float, window: Rect, direction: LayoutDirection): Rect {
+    val width = size.width.coerceAtMost((window.width - margin * 2f).coerceAtLeast(0f))
+    val height = size.height.coerceAtMost((window.height - margin * 2f).coerceAtLeast(0f))
     val x = if (direction == LayoutDirection.Ltr) anchor.left else anchor.right - width
-    val left = x.coerceIn(margin, (page.width - margin - width).coerceAtLeast(margin))
-    val top = anchor.top.coerceIn(margin, (page.height - margin - height).coerceAtLeast(margin))
+    val minLeft = window.left + margin
+    val left = x.coerceIn(minLeft, (window.right - margin - width).coerceAtLeast(minLeft))
+    val minTop = window.top + margin
+    val top = anchor.top.coerceIn(minTop, (window.bottom - margin - height).coerceAtLeast(minTop))
     return Rect(left, top, left + width, top + height)
 }
 

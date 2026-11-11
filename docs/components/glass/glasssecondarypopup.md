@@ -30,7 +30,7 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## Basic Usage
 
-- Place both popups in full-page Boxes sharing the root origin, outside clipping containers.
+- Place both popups in full-page Boxes outside clipping containers; anchors are compared in window coordinates.
 - Provide system/IME padding as needed and a `LocalNavigationEventDispatcherOwner` for Back handling.
 - Control visibility with `show`; do not wrap the calls in `if (show)`.
 
@@ -72,7 +72,7 @@ Box(Modifier.fillMaxSize()) {
                 showArrow = true,
                 arrowRotation = { if (stacked) 90f * (1f - anchor.secondaryBackProgress) else 0f },
                 modifier = Modifier.onGloballyPositioned {
-                    if (!stacked) rowBounds = it.boundsInRoot()
+                    if (!stacked) rowBounds = it.boundsInWindow()
                 },
                 onClick = {
                     frozenBounds = rowBounds
@@ -106,7 +106,7 @@ Box(Modifier.fillMaxSize()) {
 | --- | --- | --- | --- | --- |
 | show | Boolean | Whether the secondary menu is open; keep the call composed during collapse | - | Yes |
 | onDismissRequest | () -> Unit | Called for outside tap or Back to return to the primary menu | - | Yes |
-| anchorBounds | Rect | Frozen resting trigger-row bounds in this popup's coordinate root | - | Yes |
+| anchorBounds | Rect | Frozen resting trigger-row bounds in window coordinates | - | Yes |
 | backdrop | Backdrop? | Scene containing the page and primary popup, excluding this popup; null tries materialAnchor's button backdrop, then the resolved visuals' containerColor | - | Yes |
 | modifier | Modifier | Modifier applied to the panel | Modifier | No |
 | materialAnchor | GlassPopupAnchor? | Primary anchor whose expanded appearance and Back progress are shared | null | No |

@@ -69,7 +69,7 @@ object GlassPopupDefaults {
     /** Maximum popup height before content scrolls. */
     val MaxHeight: Dp = 416.dp
 
-    /** Minimum margin from the window edges. */
+    /** Minimum margin from the window's safe area and the popup host edges. */
     val SafeMargin: Dp = 12.dp
 
     /** Vertical content padding. */
@@ -179,7 +179,7 @@ object GlassPopupDefaults {
  *
  * @param show Whether the popup is open.
  * @param onDismissRequest Called when an outside tap or Back requests dismissal.
- * @param anchorBounds The control's bounds in this composable's coordinate space. Use resting
+ * @param anchorBounds Trigger bounds in window coordinates (`boundsInWindow()`); use resting
  *   bounds when the anchor belongs to a scaled primary menu.
  * @param backdrop Background sampled by the panel. Exclude the popup itself. `null` uses an
  *   opaque fill while retaining the configured bloom stroke and shadow.
@@ -259,8 +259,8 @@ fun BoxScope.GlassPopup(
         contentPadding = contentPadding,
         panelLayer = {},
         overlay = {},
-        frame = { end, page ->
-            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), page, layoutDirection)
+        frame = { end, windowBounds ->
+            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), windowBounds, layoutDirection)
             directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection)
         },
         contentLayer = { _, _ ->

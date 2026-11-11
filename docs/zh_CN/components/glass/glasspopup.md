@@ -23,11 +23,11 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 
 ## 基本用法
 
-- 将弹窗放在整页 `Box` 的最后，避免父级裁剪。锚点须使用该 Box 的坐标；宿主有偏移时需转换 `boundsInRoot()`。
+- 将弹窗放在整页 `Box` 的最后，避免父级裁剪。锚点使用窗口坐标（`boundsInWindow()`）；弹窗会减去自身宿主的窗口偏移，因此放在带 inset 内边距或侧栏偏移的面板中也成立。
 - 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
 - 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
-在与弹窗相同的坐标根中测量触发控件，并在菜单项中更新状态：
+在窗口坐标中测量触发控件，并在菜单项中更新状态：
 
 ```kotlin
 var show by remember { mutableStateOf(false) }
@@ -38,7 +38,7 @@ Box(Modifier.fillMaxSize()) {
         text = "操作",
         onClick = { show = true },
         modifier = Modifier.onGloballyPositioned {
-            anchorBounds = it.boundsInRoot()
+            anchorBounds = it.boundsInWindow()
         },
     )
     GlassPopup(
@@ -76,7 +76,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | show | Boolean | 菜单是否打开；退场期间仍须保留调用 | - | 是 |
 | onDismissRequest | () -> Unit | 外部点击或返回请求时调用 | - | 是 |
-| anchorBounds | Rect | 控件在当前弹窗 Box 坐标系中的范围 | - | 是 |
+| anchorBounds | Rect | 控件在窗口坐标中的范围（`boundsInWindow()`） | - | 是 |
 | backdrop | Backdrop? | 面板背后的场景；null 使用不透明回退填充 | - | 是 |
 | modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
 | sizing | GlassPopupSizing | 宽度、高度和安全边距限制 | GlassPopupSizing() | 否 |
@@ -111,7 +111,7 @@ GlassPopupItem(
 | minWidth | Dp | 面板最小宽度 | GlassPopupDefaults.MinWidth | 否 |
 | maxWidth | Dp | 面板最大宽度 | GlassPopupDefaults.MaxWidth | 否 |
 | maxHeight | Dp | 面板最大高度，超过后菜单行滚动 | GlassPopupDefaults.MaxHeight | 否 |
-| safeMargin | Dp | 与页面边缘的最小距离 | GlassPopupDefaults.SafeMargin | 否 |
+| safeMargin | Dp | 与窗口安全区及弹窗宿主边缘的最小距离 | GlassPopupDefaults.SafeMargin | 否 |
 
 
 ### GlassPopupVisuals 属性
@@ -140,7 +140,7 @@ backdrop 非 null 时使用材质或样式模糊。`material = null` 会移除�
 | `MinWidth` | `Dp` | 面板最小宽度 | `200.dp` |
 | `MaxWidth` | `Dp` | 面板最大宽度 | `288.dp` |
 | `MaxHeight` | `Dp` | 菜单行开始滚动前的高度 | `416.dp` |
-| `SafeMargin` | `Dp` | 页面边缘安全边距 | `12.dp` |
+| `SafeMargin` | `Dp` | 窗口/宿主边缘安全边距 | `12.dp` |
 | `ContentPaddingVertical` | `Dp` | 面板垂直内边距 | `8.dp` |
 | `CornerRadius` | `Dp` | 普通弹窗圆角 | `24.dp` |
 | `DropdownCornerRadius` | `Dp` | 下拉弹窗圆角 | `24.dp` |

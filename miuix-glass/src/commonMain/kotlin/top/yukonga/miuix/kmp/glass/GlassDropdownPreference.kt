@@ -19,12 +19,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -109,7 +107,7 @@ fun GlassDropdownPreference(
     }
 
     BasicComponent(
-        modifier = modifier.onGloballyPositioned { rowBounds = it.boundsInRoot() },
+        modifier = modifier.onGloballyPositioned { rowBounds = it.boundsInWindow() },
         title = title,
         titleColor = titleColor,
         summary = summary,
@@ -154,8 +152,8 @@ fun GlassDropdownPreference(
         exitTransition = ExitTransition.None,
         renderInRootScaffold = renderInRootScaffold,
     ) {
-        var hostOrigin by remember { mutableStateOf(Offset.Zero) }
-        Box(modifier = Modifier.fillMaxSize().onGloballyPositioned { hostOrigin = it.positionInRoot() }) {
+        // Box for the dropdown's full-page dismiss layer.
+        Box(modifier = Modifier.fillMaxSize()) {
             GlassDropdownPopupContent(
                 show = expanded && actualEnabled,
                 onDismissRequest = { setExpanded(false) },
@@ -164,7 +162,6 @@ fun GlassDropdownPreference(
                 anchor = anchor,
                 sizing = sizing,
                 visuals = visuals,
-                coordinateOrigin = hostOrigin,
                 onDismissFinished = { mounted.value = false },
             ) {
                 items.forEachIndexed { index, item ->

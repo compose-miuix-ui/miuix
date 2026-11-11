@@ -26,7 +26,7 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorValue
 
 ## Basic Usage
 
-- Place the popup last in a full-page `Box` at the coordinate root, outside clipping containers.
+- Place the popup last in a full-page `Box`, outside clipping containers. Row and value bounds use window coordinates (`boundsInWindow()`); the popup subtracts its host's window offset.
 - Provide system/IME padding as needed and a `LocalNavigationEventDispatcherOwner` for Back handling.
 - Control visibility with `show`; do not wrap the call in `if (show)`.
 
@@ -44,7 +44,7 @@ Box(Modifier.fillMaxSize()) {
         modifier = Modifier
             .fillMaxWidth()
             .glassPopupAnchorRow(anchor)
-            .onGloballyPositioned { rowBounds = it.boundsInRoot() }
+            .onGloballyPositioned { rowBounds = it.boundsInWindow() }
             .clickable { show = true }
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -78,7 +78,7 @@ Box(Modifier.fillMaxSize()) {
 | --- | --- | --- | --- | --- |
 | show | Boolean | Whether the panel is open; row input and accessibility actions stop immediately when false | - | Yes |
 | onDismissRequest | () -> Unit | Called for an outside tap or Back request | - | Yes |
-| anchorBounds | Rect | Settings-row bounds in this popup Box's coordinate space | - | Yes |
+| anchorBounds | Rect | Settings-row bounds in window coordinates (`boundsInWindow()`) | - | Yes |
 | backdrop | Backdrop? | Scene behind the panel; null uses opaque fill with stroke and shadow | - | Yes |
 | modifier | Modifier | Modifier applied to the panel | Modifier | No |
 | anchor | GlassPopupAnchor? | Optional value alignment and fade coordination anchor; does not supply anchorBounds, backdrop, or visuals | null | No |

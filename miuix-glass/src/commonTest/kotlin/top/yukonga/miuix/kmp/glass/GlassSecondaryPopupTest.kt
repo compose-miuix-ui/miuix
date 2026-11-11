@@ -10,30 +10,30 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GlassSecondaryPopupTest {
-    private val page = Size(400f, 800f)
+    private val window = Rect(0f, 0f, 400f, 800f)
     private val row = Rect(120f, 200f, 320f, 260f)
 
     @Test
     fun ltrAlignsStartRatherThanEndWhenSecondaryIsWider() {
-        val result = placeGlassSecondaryPopup(row, Size(240f, 300f), 12f, page, LayoutDirection.Ltr)
+        val result = placeGlassSecondaryPopup(row, Size(240f, 300f), 12f, window, LayoutDirection.Ltr)
         assertEquals(Rect(120f, 200f, 360f, 500f), result)
     }
 
     @Test
     fun rtlAlignsTheOppositeStartEdge() {
-        val result = placeGlassSecondaryPopup(row, Size(240f, 300f), 12f, page, LayoutDirection.Rtl)
+        val result = placeGlassSecondaryPopup(row, Size(240f, 300f), 12f, window, LayoutDirection.Rtl)
         assertEquals(Rect(80f, 200f, 320f, 500f), result)
     }
 
     @Test
     fun bottomOverflowShiftsUpInsteadOfOpeningAboveAnchor() {
-        val result = placeGlassSecondaryPopup(Rect(120f, 650f, 320f, 710f), Size(200f, 300f), 12f, page, LayoutDirection.Ltr)
+        val result = placeGlassSecondaryPopup(Rect(120f, 650f, 320f, 710f), Size(200f, 300f), 12f, window, LayoutDirection.Ltr)
         assertEquals(Rect(120f, 488f, 320f, 788f), result)
     }
 
     @Test
     fun oversizedMenuFitsTheSafeViewport() {
-        val result = placeGlassSecondaryPopup(row, Size(500f, 900f), 12f, page, LayoutDirection.Ltr)
+        val result = placeGlassSecondaryPopup(row, Size(500f, 900f), 12f, window, LayoutDirection.Ltr)
         assertEquals(Rect(12f, 12f, 388f, 788f), result)
     }
 

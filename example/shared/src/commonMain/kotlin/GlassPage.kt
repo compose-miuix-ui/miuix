@@ -33,7 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -603,7 +603,7 @@ fun GlassPage(padding: PaddingValues) {
                         }
                     },
                     modifier = Modifier.onGloballyPositioned {
-                        if (!submenuPresent) submenuAnchor = it.boundsInRoot()
+                        if (!submenuPresent) submenuAnchor = it.boundsInWindow()
                     },
                     icon = MiuixIcons.Glass.Edit,
                     summary = SortOrders[sortOrder],

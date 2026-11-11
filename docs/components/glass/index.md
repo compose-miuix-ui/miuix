@@ -27,7 +27,7 @@ See [Glass Surfaces](/guide/glass#setup) for dependencies and background samplin
 ## Usage Requirements
 
 - Buttons, bars and tabs can be used directly in layouts.
-- Popup menus require a full-page `BoxScope` with anchors in the same coordinate space.
+- Popup menus require a full-page `BoxScope`; anchors are reported in window coordinates and the popup subtracts its host's window offset.
 - `GlassDialog`, `GlassBottomSheet` and `GlassDropdownPreference` require a Miuix [Scaffold](../basic/scaffold).
 
 The sampled backdrop must exclude the glass surface itself. See [Background Sampling](/guide/glass#background-sampling).

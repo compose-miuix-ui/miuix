@@ -27,9 +27,9 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## 基本用法
 
-此 `BoxScope` 扩展不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行处理外部点击。锚点坐标必须与弹窗 `Box` 的坐标系一致。
+此 `BoxScope` 扩展不依赖 `MiuixPopupHost`。应将其放在整页 `Box` 的最后，并置于裁剪容器之外；组件自行处理外部点击。锚点与摆放均使用窗口坐标，弹窗会减去自身宿主的窗口偏移，因此放在带 inset 内边距或侧栏偏移的面板中也能对齐。
 
-锚点修饰符记录根坐标范围，因此弹窗 Box 原点必须与坐标根原点重合，不应放在带 inset 内边距或偏移的内容区。系统栏和 IME insets 不会自动应用；`safeMargin` 相对于该 Box 计算。返回处理需要 `LocalNavigationEventDispatcherOwner`，没有该 owner 时外部点击仍可关闭。
+锚点修饰符上报窗口范围。系统栏和 IME insets 不会自动应用；`safeMargin` 相对窗口安全区（显示缺口与系统栏）及弹窗宿主边缘计算。返回处理需要 `LocalNavigationEventDispatcherOwner`，没有该 owner 时外部点击仍可关闭。
 
 关闭时仍须保留组件调用，直到离场动画完成；不要使用 `if (show)` 包裹调用。
 

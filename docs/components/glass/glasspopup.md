@@ -23,11 +23,11 @@ import top.yukonga.miuix.kmp.glass.GlassPopupItem
 
 ## Basic Usage
 
-- Place the popup last in a full-page `Box`, outside clipping containers. Anchor bounds must use that Box's coordinates; convert `boundsInRoot()` for offset hosts.
+- Place the popup last in a full-page `Box`, outside clipping containers. Anchor bounds use window coordinates (`boundsInWindow()`); the popup subtracts its own window offset, so it also works inside inset padding or a rail-offset pane.
 - Provide system/IME padding as needed and a `LocalNavigationEventDispatcherOwner` for Back handling.
 - Control visibility with `show`; do not wrap the call in `if (show)`.
 
-Measure the trigger in the same coordinate root as the popup and update the state from each item:
+Measure the trigger in window coordinates and update the state from each item:
 
 ```kotlin
 var show by remember { mutableStateOf(false) }
@@ -38,7 +38,7 @@ Box(Modifier.fillMaxSize()) {
         text = "Actions",
         onClick = { show = true },
         modifier = Modifier.onGloballyPositioned {
-            anchorBounds = it.boundsInRoot()
+            anchorBounds = it.boundsInWindow()
         },
     )
     GlassPopup(
@@ -76,7 +76,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | show | Boolean | Whether the menu is open; keep the call composed during exit | - | Yes |
 | onDismissRequest | () -> Unit | Called for an outside tap or Back request | - | Yes |
-| anchorBounds | Rect | Trigger bounds in this popup Box's coordinate space | - | Yes |
+| anchorBounds | Rect | Trigger bounds in window coordinates (`boundsInWindow()`) | - | Yes |
 | backdrop | Backdrop? | Scene behind the panel; null uses the opaque fallback | - | Yes |
 | modifier | Modifier | Modifier applied to the panel | Modifier | No |
 | sizing | GlassPopupSizing | Width, height, and safe-margin limits | GlassPopupSizing() | No |
@@ -111,7 +111,7 @@ GlassPopupItem(
 | minWidth | Dp | Narrowest panel width | GlassPopupDefaults.MinWidth | No |
 | maxWidth | Dp | Widest panel width | GlassPopupDefaults.MaxWidth | No |
 | maxHeight | Dp | Maximum panel height before rows scroll | GlassPopupDefaults.MaxHeight | No |
-| safeMargin | Dp | Minimum distance from the page edge | GlassPopupDefaults.SafeMargin | No |
+| safeMargin | Dp | Minimum distance from the window safe area and the popup host edges | GlassPopupDefaults.SafeMargin | No |
 
 
 ### GlassPopupVisuals Properties
@@ -140,7 +140,7 @@ With a non-null backdrop, the popup uses material or style blur. `material = nul
 | `MinWidth` | `Dp` | Narrowest popup width | `200.dp` |
 | `MaxWidth` | `Dp` | Widest popup width | `288.dp` |
 | `MaxHeight` | `Dp` | Height before rows scroll | `416.dp` |
-| `SafeMargin` | `Dp` | Page-edge margin | `12.dp` |
+| `SafeMargin` | `Dp` | Window/host edge margin | `12.dp` |
 | `ContentPaddingVertical` | `Dp` | Vertical panel padding | `8.dp` |
 | `CornerRadius` | `Dp` | Anchored popup radius | `24.dp` |
 | `DropdownCornerRadius` | `Dp` | Dropdown popup radius | `24.dp` |

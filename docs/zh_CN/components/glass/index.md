@@ -27,7 +27,7 @@
 ## 使用要求
 
 - 按钮、顶栏、底栏与标签栏可直接用于页面布局。
-- 弹窗菜单需要整页 `BoxScope`，锚点与弹窗须使用相同坐标系。
+- 弹窗菜单需要整页 `BoxScope`；锚点上报窗口坐标，弹窗会减去自身宿主的窗口偏移。
 - `GlassDialog`、`GlassBottomSheet` 与 `GlassDropdownPreference` 需要 Miuix [Scaffold](../basic/scaffold)。
 
 背景采样不能包含玻璃表面自身，见[背景采样](/zh_CN/guide/glass#background-sampling)。

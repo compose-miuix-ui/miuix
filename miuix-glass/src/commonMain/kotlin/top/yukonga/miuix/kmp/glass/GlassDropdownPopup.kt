@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
@@ -46,7 +45,7 @@ object GlassDropdownDefaults {
  * @param show Whether the panel is open. Row input and accessibility actions stop immediately
  *   when this becomes false, while the exit animation finishes.
  * @param onDismissRequest Called when an outside tap or Back requests dismissal.
- * @param anchorBounds The row's bounds, in this composable's own coordinate space.
+ * @param anchorBounds Row bounds in window coordinates (`boundsInWindow()`).
  * @param backdrop Background sampled by the panel. Exclude the popup itself. `null` uses an
  *   opaque fill while retaining the configured bloom stroke and shadow.
  * @param modifier The modifier applied to the panel.
@@ -87,7 +86,7 @@ fun BoxScope.GlassDropdownPopup(
     )
 }
 
-/** Shared dropdown renderer; Scaffold hosts supply their origin in root coordinates. */
+/** Shared dropdown renderer; the surface maps window bounds into the host. */
 @Composable
 internal fun BoxScope.GlassDropdownPopupContent(
     show: Boolean,
@@ -100,7 +99,6 @@ internal fun BoxScope.GlassDropdownPopupContent(
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     cornerRadius: Dp = GlassDropdownDefaults.CornerRadius,
     contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
-    coordinateOrigin: Offset = Offset.Zero,
     onDismissFinished: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -178,12 +176,12 @@ internal fun BoxScope.GlassDropdownPopupContent(
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
         },
         overlay = {},
-        frame = { end, page ->
+        frame = { end, windowBounds ->
             arcFrame(
-                anchorBounds.translate(-coordinateOrigin),
-                anchor?.dropdownValueBounds?.translate(-coordinateOrigin),
+                anchorBounds,
+                anchor?.dropdownValueBounds,
                 end,
-                page,
+                windowBounds,
                 sizing.safeMargin.toPx(),
                 geometryProgress(),
                 positionProgress(),
@@ -210,7 +208,7 @@ private fun arcFrame(
     anchor: Rect,
     valueAnchor: Rect?,
     end: Size,
-    page: Size,
+    window: Rect,
     margin: Float,
     sizeFraction: Float,
     positionFraction: Float,
@@ -218,7 +216,7 @@ private fun arcFrame(
     endRadius: Dp,
     layoutDirection: LayoutDirection,
 ): GlassPopupFrame {
-    val placement = placeGlassDropdownPopup(anchor, valueAnchor, end, margin, page, layoutDirection)
+    val placement = placeGlassDropdownPopup(anchor, valueAnchor, end, margin, window, layoutDirection)
     val startWidth = end.width * GlassMotion.ARC_START_WIDTH
     val startHeight = startWidth * GlassMotion.ARC_START_RATIO
     val width = startWidth + (end.width - startWidth) * sizeFraction
@@ -226,7 +224,7 @@ private fun arcFrame(
     val ratio = GlassMotion.ARC_START_RATIO + (endRatio - GlassMotion.ARC_START_RATIO) * sizeFraction
     val height = ratio * width
 
-    val alignLeft = valueAnchor?.let { it.center.x <= page.width / 2f } ?: (layoutDirection == LayoutDirection.Rtl)
+    val alignLeft = valueAnchor?.let { it.center.x <= window.center.x } ?: (layoutDirection == LayoutDirection.Rtl)
     val startCenterX = if (alignLeft) {
         placement.rect.left + startWidth / 2f
     } else {
@@ -256,18 +254,19 @@ internal fun placeGlassDropdownPopup(
     valueAnchor: Rect?,
     size: Size,
     margin: Float,
-    page: Size,
+    window: Rect,
     direction: LayoutDirection = LayoutDirection.Ltr,
 ): GlassPopupPlacement {
-    if (valueAnchor == null) return placeGlassPopup(row, size, margin, page, direction)
-    // Align to the value's nearest horizontal edge of the container.
-    val wantedLeft = if (valueAnchor.center.x <= page.width / 2f) {
+    if (valueAnchor == null) return placeGlassPopup(row, size, margin, window, direction)
+    // Align to the value's nearest horizontal edge of the window.
+    val wantedLeft = if (valueAnchor.center.x <= window.center.x) {
         valueAnchor.left
     } else {
         valueAnchor.right - size.width
     }
-    val left = wantedLeft.coerceIn(margin, (page.width - size.width - margin).coerceAtLeast(margin))
-    val verticalPlacement = placeGlassPopup(row, size, margin, page, LayoutDirection.Ltr)
+    val minLeft = window.left + margin
+    val left = wantedLeft.coerceIn(minLeft, (window.right - size.width - margin).coerceAtLeast(minLeft))
+    val verticalPlacement = placeGlassPopup(row, size, margin, window, LayoutDirection.Ltr)
     return GlassPopupPlacement(
         rect = Rect(left, verticalPlacement.rect.top, left + size.width, verticalPlacement.rect.bottom),
         alignTop = verticalPlacement.alignTop,

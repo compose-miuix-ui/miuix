@@ -19,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -85,7 +85,7 @@ fun GlassPopupDemo() {
                                         text = sortOrder,
                                         onClick = { show = true },
                                         modifier = Modifier.onGloballyPositioned {
-                                            val b = it.boundsInRoot()
+                                            val b = it.boundsInWindow()
                                             val gapPx = with(density) { 6.dp.toPx() }
                                             anchorBounds = Rect(b.left, b.bottom + gapPx, b.right, b.bottom + gapPx)
                                         },

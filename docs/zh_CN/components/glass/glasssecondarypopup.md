@@ -30,7 +30,7 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 
 ## 基本用法
 
-- 将两级弹窗放在共享根原点的整页 Box 中，避免父级裁剪。
+- 将两级弹窗放在整页 Box 中，避免父级裁剪；锚点按窗口坐标比较。
 - 按需提供系统栏和输入法内边距；返回处理需要 `LocalNavigationEventDispatcherOwner`。
 - 用 `show` 控制显隐，不要用 `if (show)` 包裹调用。
 
@@ -72,7 +72,7 @@ Box(Modifier.fillMaxSize()) {
                 showArrow = true,
                 arrowRotation = { if (stacked) 90f * (1f - anchor.secondaryBackProgress) else 0f },
                 modifier = Modifier.onGloballyPositioned {
-                    if (!stacked) rowBounds = it.boundsInRoot()
+                    if (!stacked) rowBounds = it.boundsInWindow()
                 },
                 onClick = {
                     frozenBounds = rowBounds
@@ -106,7 +106,7 @@ Box(Modifier.fillMaxSize()) {
 | --- | --- | --- | --- | --- |
 | show | Boolean | 二级菜单是否打开；收起期间仍须保留调用 | - | 是 |
 | onDismissRequest | () -> Unit | 外部点击或返回时调用，回到一级菜单 | - | 是 |
-| anchorBounds | Rect | 当前弹窗坐标根中冻结的触发行静止范围 | - | 是 |
+| anchorBounds | Rect | 冻结的触发行静止范围（窗口坐标） | - | 是 |
 | backdrop | Backdrop? | 包含页面和一级菜单但排除本菜单的场景；null 先尝试 materialAnchor 的按钮 backdrop，仍不存在时使用解析后外观的 containerColor | - | 是 |
 | modifier | Modifier | 作用于面板的修饰符 | Modifier | 否 |
 | materialAnchor | GlassPopupAnchor? | 共享一级锚点的展开外观与返回进度 | null | 否 |
