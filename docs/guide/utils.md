@@ -290,7 +290,6 @@ Choose an interaction with the modifier's `mode` parameter:
 | :-------------------- | :---------------------------------------------------------------------------------------- |
 | `CrossAxis` (default) | Switch pages while a list is scrolling or bouncing back.                                  |
 | `Native`              | Use Compose's native pager gestures.                                                      |
-| `TapToHalt`           | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
 
 To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
 

@@ -290,7 +290,6 @@ HorizontalPager(
 | :------------------ | :----------------------------------------------- |
 | `CrossAxis`（默认） | 列表滚动或回弹时，仍可横滑切页。                 |
 | `Native`            | 使用 Compose 原生 Pager 手势。                   |
-| `TapToHalt`         | 列表惯性滚动时，首次横滑停止列表，再次横滑切页。 |
 
 禁用滑动切页时，将修饰符的 `enabled` 和 Pager 的 `userScrollEnabled` 都设为 `false`。
 

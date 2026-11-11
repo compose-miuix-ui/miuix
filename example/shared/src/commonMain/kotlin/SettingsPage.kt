@@ -56,7 +56,7 @@ private val TopAppBarStyleOptions = listOf("Default", "Glass")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }
-private val PagerGestureModeOptions = listOf("Default", "Cross-Axis", "iOS-like")
+private val PagerGestureModeOptions = listOf("Default", "Cross-Axis")
 
 @Composable
 fun SettingsPage(

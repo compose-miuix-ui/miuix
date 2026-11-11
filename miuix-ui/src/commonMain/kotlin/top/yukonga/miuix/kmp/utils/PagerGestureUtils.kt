@@ -14,27 +14,18 @@ import androidx.compose.foundation.gestures.DragGestureNode
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollScope
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -53,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -75,11 +65,6 @@ enum class PagerInterceptionMode(val title: String) {
      * Lets horizontal swipes interrupt page transitions and child scrolling.
      */
     CrossAxis("Cross-Axis"),
-
-    /**
-     * While a child is flinging, the first horizontal swipe stops it without paging.
-     */
-    TapToHalt("iOS-like"),
 }
 
 /**
@@ -163,7 +148,6 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  * @param flingBehavior the same [FlingBehavior] passed to [HorizontalPager].
  * @param mode the interception mode; [PagerInterceptionMode.CrossAxis] is the default.
  * @param enabled when false the modifier is a no-op.
- * @param flingTracker required by [PagerInterceptionMode.TapToHalt] only.
  * @param onTriggered called when the pager takes over an input.
  */
 fun Modifier.pagerGestureOverride(
@@ -171,23 +155,11 @@ fun Modifier.pagerGestureOverride(
     flingBehavior: FlingBehavior,
     mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxis,
     enabled: Boolean = true,
-    flingTracker: PagerFlingTrackerConnection? = null,
     onTriggered: (() -> Unit)? = null,
 ): Modifier = when (mode) {
     PagerInterceptionMode.CrossAxis ->
         if (enabled) {
             pagerNonTouchScroll(pagerState, flingBehavior).then(PagerPageGestureElement(pagerState, onTriggered))
-        } else {
-            this
-        }
-
-    PagerInterceptionMode.TapToHalt ->
-        if (enabled && flingTracker != null) {
-            iosStyleMomentumHalt(
-                flingTracker = flingTracker,
-                enabled = true,
-                onHalted = onTriggered,
-            )
         } else {
             this
         }
@@ -203,40 +175,14 @@ fun Modifier.pagerGestureOverride(
     flingBehavior: FlingBehavior,
     mode: Int,
     enabled: Boolean = true,
-    flingTracker: PagerFlingTrackerConnection? = null,
     onTriggered: (() -> Unit)? = null,
 ): Modifier = pagerGestureOverride(
     pagerState = pagerState,
     flingBehavior = flingBehavior,
     mode = PagerInterceptionMode.entries.getOrElse(mode) { PagerInterceptionMode.Native },
     enabled = enabled,
-    flingTracker = flingTracker,
     onTriggered = onTriggered,
 )
-
-/**
- * Applies [mode] to a [HorizontalPager] with a remembered [PagerFlingTrackerConnection].
- *
- * See the [FlingBehavior] overload for the pager configuration this requires.
- */
-@Composable
-fun Modifier.pagerGestureOverride(
-    pagerState: PagerState,
-    flingBehavior: FlingBehavior,
-    mode: PagerInterceptionMode = PagerInterceptionMode.CrossAxis,
-    enabled: Boolean = true,
-    onTriggered: (() -> Unit)? = null,
-): Modifier {
-    val flingTracker = remember { PagerFlingTrackerConnection() }
-    return pagerGestureOverride(
-        pagerState = pagerState,
-        flingBehavior = flingBehavior,
-        mode = mode,
-        enabled = enabled,
-        flingTracker = flingTracker,
-        onTriggered = onTriggered,
-    )
-}
 
 private data class PagerPageGestureElement(
     val pagerState: PagerState,
@@ -641,94 +587,6 @@ private class PagerPageMotion(
                 else -> position.roundToInt()
             }
             state.animateToPage(this, target, signedVelocity)
-        }
-    }
-}
-
-/**
- * Tracks child vertical flings and coordinates [PagerInterceptionMode.TapToHalt] requests.
- */
-class PagerFlingTrackerConnection : NestedScrollConnection {
-    var isChildFlinging by mutableStateOf(false)
-        internal set
-
-    var haltFling by mutableStateOf(false)
-        internal set
-
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        if (source == NestedScrollSource.UserInput && available.y != 0f) {
-            // A new drag supersedes the pending halt.
-            haltFling = false
-            isChildFlinging = false
-        } else if (source == NestedScrollSource.SideEffect && available.y != 0f && isChildFlinging && haltFling) {
-            isChildFlinging = false
-            // Cancel the fling; consuming its delta would only hide a frame.
-            throw CancellationException("Child fling halted by pager gesture")
-        }
-        return Offset.Zero
-    }
-
-    override suspend fun onPreFling(available: Velocity): Velocity {
-        // The pending halt applies only to the previous fling.
-        haltFling = false
-        isChildFlinging = available.y != 0f
-        return Velocity.Zero
-    }
-
-    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        // Keep halted momentum from reaching an ancestor.
-        val haltedVelocity = if (haltFling) Velocity(0f, available.y) else Velocity.Zero
-        isChildFlinging = false
-        haltFling = false
-        return haltedVelocity
-    }
-}
-
-/**
- * Requests a child fling halt on touch down and consumes that gesture's horizontal drag.
- * When no child fling is active, leaves horizontal swipes to the native pager.
- */
-fun Modifier.iosStyleMomentumHalt(
-    flingTracker: PagerFlingTrackerConnection,
-    enabled: Boolean = true,
-    onHalted: (() -> Unit)? = null,
-): Modifier = if (!enabled) {
-    this
-} else {
-    this.nestedScroll(flingTracker).pointerInput(flingTracker, enabled, onHalted) {
-        val touchSlop = viewConfiguration.touchSlop
-
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-            val downPos = down.position
-            val hadMomentum = flingTracker.isChildFlinging
-            if (!hadMomentum) {
-                return@awaitEachGesture
-            }
-
-            flingTracker.haltFling = true
-            onHalted?.invoke()
-            var isHalting = false
-
-            while (true) {
-                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
-                if (!change.pressed) break
-
-                val totalDx = abs(change.position.x - downPos.x)
-                val totalDy = abs(change.position.y - downPos.y)
-
-                if (!isHalting && totalDx > touchSlop && totalDx > totalDy * 2f) {
-                    isHalting = true
-                }
-
-                if (isHalting) {
-                    change.consume()
-                } else if (totalDy > touchSlop && totalDy > totalDx) {
-                    flingTracker.haltFling = false
-                    break
-                }
-            }
         }
     }
 }
