@@ -96,7 +96,7 @@ Box(Modifier.fillMaxSize()) {
 
 ### 值对齐与自定义外观
 
-使用 `glassPopupAnchorValue` 可让弹窗水平对齐显示值；垂直定位仍使用 `anchorBounds`。省略此修饰符时，水平和垂直定位均使用 `anchorBounds`。`backdrop` 为 null 时使用 `visuals.containerColor`。
+使用 `glassPopupAnchorValue` 可让弹窗在水平和垂直方向都对齐显示值，与 MIUI 下拉偏好一致。省略此修饰符时，水平和垂直定位均使用 `anchorBounds`。`backdrop` 为 null 时使用 `visuals.containerColor`。
 
 ```kotlin
 val sizing = GlassPopupSizing(maxWidth = 320.dp, maxHeight = 480.dp)

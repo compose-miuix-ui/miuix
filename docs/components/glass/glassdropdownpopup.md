@@ -96,7 +96,7 @@ Sizing and appearance options are documented in [GlassPopup shared defaults](./g
 
 ### Value alignment and custom appearance
 
-Use `glassPopupAnchorValue` for horizontal alignment to the displayed value; vertical placement still uses `anchorBounds`. Without this modifier, both axes use `anchorBounds`. A null `backdrop` uses `visuals.containerColor`.
+Use `glassPopupAnchorValue` to place the popup against the displayed value on both axes, as MIUI's dropdown preference does. Without this modifier, both axes use `anchorBounds`. A null `backdrop` uses `visuals.containerColor`.
 
 ```kotlin
 val sizing = GlassPopupSizing(maxWidth = 320.dp, maxHeight = 480.dp)

@@ -50,7 +50,7 @@ object GlassDropdownDefaults {
  *   opaque fill while retaining the configured bloom stroke and shadow.
  * @param modifier The modifier applied to the panel.
  * @param anchor Optional row anchor. Hides the displayed value while open and aligns the panel
- *   horizontally to bounds reported by [glassPopupAnchorValue], or [anchorBounds] if unavailable.
+ *   to bounds reported by [glassPopupAnchorValue], or [anchorBounds] if unavailable.
  * @param sizing Panel size limits and window margin.
  * @param visuals Panel surface appearance.
  * @param cornerRadius Expanded panel corner radius.
@@ -258,7 +258,7 @@ internal fun placeGlassDropdownPopup(
     direction: LayoutDirection = LayoutDirection.Ltr,
 ): GlassPopupPlacement {
     if (valueAnchor == null) return placeGlassPopup(row, size, margin, window, direction)
-    // Align to the value's nearest horizontal edge of the window.
+    // Like the MIUI Spinner, anchor to the value on both axes, aligned to its nearest window edge.
     val wantedLeft = if (valueAnchor.center.x <= window.center.x) {
         valueAnchor.left
     } else {
@@ -266,7 +266,7 @@ internal fun placeGlassDropdownPopup(
     }
     val minLeft = window.left + margin
     val left = wantedLeft.coerceIn(minLeft, (window.right - size.width - margin).coerceAtLeast(minLeft))
-    val verticalPlacement = placeGlassPopup(row, size, margin, window, LayoutDirection.Ltr)
+    val verticalPlacement = placeGlassPopup(valueAnchor, size, margin, window, LayoutDirection.Ltr)
     return GlassPopupPlacement(
         rect = Rect(left, verticalPlacement.rect.top, left + size.width, verticalPlacement.rect.bottom),
         alignTop = verticalPlacement.alignTop,
