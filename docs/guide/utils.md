@@ -78,10 +78,15 @@ Scope the rule to the Compose container, not the entire page. Browser-native tou
 ### Vertical Overscroll
 
 ```kotlin
+val scrollState = scrollBehavior.state
+val onOverscrollChanged: (Float) -> Unit = remember(scrollState) {
+    { scrollState.overscrollOffset = it }
+}
+
 LazyColumn(
     modifier = Modifier
         // Add overscroll effect
-        .overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })
+        .overScrollVertical(onOffsetChanged = onOverscrollChanged)
         // If you want to bind the TopAppBar scroll behavior, please add it after the overscroll effect
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {

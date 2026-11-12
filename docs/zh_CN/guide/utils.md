@@ -78,10 +78,15 @@ Miuix 提供了易于使用的越界回弹效果修饰符，让滚动体验更�
 ### 垂直越界回弹
 
 ```kotlin
+val scrollState = scrollBehavior.state
+val onOverscrollChanged: (Float) -> Unit = remember(scrollState) {
+    { scrollState.overscrollOffset = it }
+}
+
 LazyColumn(
     modifier = Modifier
         // 添加越界回弹效果
-        .overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })
+        .overScrollVertical(onOffsetChanged = onOverscrollChanged)
         // 如需绑定 TopAppBar 滚动事件，则应在越界回弹效果之后添加
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {

@@ -69,7 +69,7 @@ Only the list is recorded into `backdrop`. The glass controls use the bar's back
 
 - Pass `scrollBehavior` to derive the material state from scrolling. Without it, the material stays visible.
 - Pass `isContentScrolled` for explicit control. For lazy lists, use `listState.canScrollBackward` so returning to the top clears the material independently of title collapse.
-- To include elastic movement on short pages, bind `overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })` before `.nestedScroll(...)`. Glass treatments read `state.visualContentOffset`, the sum of real scroll and transient displacement, so they follow spring rebound instead of remaining active after release. Omit the explicit `isContentScrolled`, or derive it from `visualContentOffset < 0f`. See [Overscroll](/guide/utils#vertical-overscroll).
+- For elastic effects, bind a remembered callback to `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)`, as shown in [Overscroll](/guide/utils#vertical-overscroll). Omit `isContentScrolled` or derive it from `state.visualContentOffset < 0f` so the effects follow spring rebound.
 - Programmatic list jumps do not have to dispatch nested-scroll deltas. Supply `visualContentOffset` from the scrollable's position when using `scrollToItem` / `animateScrollToItem`: negative pixels mean upward scrolling. This source drives progressive blur, button material, and shadows without mutating the title's `ScrollBehavior`. Include overscroll displacement in the provider if elastic motion should affect the visuals. For lazy lists, the existing `rememberScrollBarAdapter(listState).scrollOffset` provides a layout-based estimate; negate it for this parameter.
 
 ## Properties

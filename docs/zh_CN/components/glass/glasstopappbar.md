@@ -69,7 +69,7 @@ Scaffold(
 
 - 传入 `scrollBehavior`，根据滚动状态控制材质；未传入时材质保持显示。
 - 传入 `isContentScrolled` 可显式控制材质状态。Lazy 列表建议使用 `listState.canScrollBackward`，使返回顶部时清除材质，不受标题折叠状态影响。
-- 如需短页面的弹性位移也驱动效果，在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })`。Glass 效果读取 `state.visualContentOffset`（实际滚动与临时越界位移之和），随弹簧回弹恢复，而不会在松手后残留。此时省略显式的 `isContentScrolled`，或通过 `visualContentOffset < 0f` 计算它。见[越界回弹](/zh_CN/guide/utils#垂直越界回弹)。
+- 如需效果跟随越界回弹，在 `.nestedScroll(...)` 前通过 `overScrollVertical(onOffsetChanged = ...)` 绑定已缓存的回调，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。省略 `isContentScrolled`，或通过 `state.visualContentOffset < 0f` 计算它。
 - 程序化定位不一定派发 nested-scroll 位移。使用 `scrollToItem` / `animateScrollToItem` 时，可通过 `visualContentOffset` 提供滚动容器的位置（向上滚动为负像素）。渐进模糊、按钮材质及阴影直接读取该位置，不修改标题的 `ScrollBehavior`。如需跟随弹性回弹，在回调中加上越界位移。对于 Lazy 列表，可以将现有的 `rememberScrollBarAdapter(listState).scrollOffset` 布局位置估计值取负后传入。
 
 ## 属性
