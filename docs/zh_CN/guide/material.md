@@ -207,7 +207,6 @@ val primary = rememberTiltLight(
 
 ### 行为说明
 
-- 描边依赖 `isRuntimeShaderSupported()`；不支持的平台上静默跳过。
 - 着色器输出预乘的光强：alpha 与光本身的大小一致，因此叠加通道不会被更低的 alpha 裁掉，再由 `BlendMode.Plus` 加到表面上。
 - 平直描边带带半像素偏置，因此极小的 `width` 仍至少得到一个抗锯齿像素。
 

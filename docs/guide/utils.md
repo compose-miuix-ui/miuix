@@ -81,13 +81,15 @@ Scope the rule to the Compose container, not the entire page. Browser-native tou
 LazyColumn(
     modifier = Modifier
         // Add overscroll effect
-        .overScrollVertical()
+        .overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })
         // If you want to bind the TopAppBar scroll behavior, please add it after the overscroll effect
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {
     // List content
 }
 ```
+
+Keep the app bar connection after the overscroll modifier: `contentOffset` records actual list scrolling, while `overscrollOffset` tracks damped displacement through dragging and spring rebound. Glass app bars use `visualContentOffset` (their sum) for progressive blur and button treatments. Do not accumulate overscroll consumption into `contentOffset`: spring rebound does not generate inverse scroll events. When the list already owns the app bar connection, do not also pass the same behavior to an enclosing `PullToRefresh`.
 
 ### Horizontal Overscroll
 
@@ -118,6 +120,7 @@ LazyColumn(
 **Parameter Explanations:**
 
 - `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+- `onOffsetChanged`: Optional `(Float) -> Unit` callback for the damped displacement in pixels along the scroll axis. Receives drag and spring updates, and zero on reset or detach. Default: `null`. Applies to vertical, horizontal, and generic overscroll modifiers.
 - `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
 
 ### Via OverscrollFactory (Theme-Level Integration)

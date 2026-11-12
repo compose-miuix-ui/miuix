@@ -16,6 +16,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /**
  * Applies a glass surface and shadow over [backdrop].
@@ -43,7 +44,7 @@ fun Modifier.glassPanel(
     shadow: GlassShadow? = GlassShadows.Regular,
     shading: Boolean = true,
     fallback: Modifier = Modifier.clip(shape),
-): Modifier = if (backdrop == null) {
+): Modifier = if (backdrop == null || !isRuntimeShaderSupported()) {
     this
         .graphicsLayer { this.alpha = alpha }
         .glassShadow(shape, shadow)

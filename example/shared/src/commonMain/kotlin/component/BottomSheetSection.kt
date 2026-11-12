@@ -53,7 +53,6 @@ fun LazyListScope.bottomSheetSection() {
         var bottomSheetDropdownSelectedOption by remember { mutableIntStateOf(0) }
         var bottomSheetSuperSwitchState by remember { mutableStateOf(true) }
 
-        SmallTitle(text = "BottomSheet")
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)

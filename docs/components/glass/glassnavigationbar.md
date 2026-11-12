@@ -40,7 +40,7 @@ GlassNavigationBar(
 )
 ```
 
-Destinations share the available width. Labels allow two lines. Selection updates on press and drag; provide `contentDescription` for icon-only items.
+Destinations share the available width. Labels allow two lines. Pressing and dragging only preview the indicator; `onSelect` fires once with the final destination on release. Cancellation restores the current selection without a callback. Keyboard and accessibility activation still select immediately. Provide `contentDescription` for icon-only items.
 
 ## Component States
 

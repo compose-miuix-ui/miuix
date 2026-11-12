@@ -221,6 +221,8 @@ MiuixScrollBehavior is a configuration object used to control the scroll behavio
 
 Used to create and remember TopAppBarState:
 
+`contentOffset` stores actual content scrolling. For elastic visual effects, update the transient `overscrollOffset` from the overscroll modifier's `onOffsetChanged` callback; `visualContentOffset` is their sum. The transient displacement is not saved/restored and does not change title collapse. Glass top bars use it to follow both dragging and spring rebound.
+
 ```kotlin
 val scrollBehavior = MiuixScrollBehavior(
     state = rememberTopAppBarState(),

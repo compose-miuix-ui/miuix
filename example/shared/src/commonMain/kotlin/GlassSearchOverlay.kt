@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -107,6 +108,8 @@ internal fun GlassSearchOverlay(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
+    label: String = "Search",
+    content: @Composable ColumnScope.(String) -> Unit = {},
 ) {
     val transition = updateTransition(expanded, label = "glassSearch")
     val progress = transition.animateFloat(
@@ -205,7 +208,7 @@ internal fun GlassSearchOverlay(
                         ) {
                             Icon(MiuixIcons.Glass.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = colors.disabledOnSurface)
                             Box(Modifier.weight(1f)) {
-                                if (query.isEmpty()) Text("Search", color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
+                                if (query.isEmpty()) Text(label, color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
                                 field()
                             }
                             if (query.isNotEmpty()) {
@@ -241,6 +244,7 @@ internal fun GlassSearchOverlay(
                     }
                 }
             }
+            content(query)
         }
     }
 }

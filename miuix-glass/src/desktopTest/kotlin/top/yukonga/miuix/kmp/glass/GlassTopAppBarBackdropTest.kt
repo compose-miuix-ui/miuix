@@ -38,6 +38,110 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class GlassTopAppBarBackdropTest {
     @Test
+    fun gradientFadesSmoothlyAcrossSubtitleBarEdge() = assertGradientCoverage(withBottomContent = false)
+
+    @Test
+    fun gradientFadesSmoothlyAcrossDynamicBottomContentEdge() = assertGradientCoverage(withBottomContent = true)
+
+    private fun assertGradientCoverage(withBottomContent: Boolean) = runComposeUiTest {
+        val state = TopAppBarState(-1000f, 0f, -1000f)
+        val contentHeight = mutableFloatStateOf(40f)
+        val opacity = mutableFloatStateOf(1f)
+        setContent {
+            DialogTestHost {
+                Box(Modifier.size(400.dp, 400.dp).background(Color.Blue)) {
+                    GlassTopAppBar(
+                        title = "Title",
+                        subtitle = if (withBottomContent) "" else "Subtitle",
+                        modifier = Modifier.testTag("gradient-bar"),
+                        isContentScrolled = true,
+                        scrollBehavior = MiuixScrollBehavior(state),
+                        bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),
+                        backgroundAlpha = { opacity.floatValue },
+                        bottomContent = {
+                            if (withBottomContent) Box(Modifier.size(200.dp, contentHeight.floatValue.dp))
+                        },
+                    )
+                }
+            }
+        }
+        fun assertCoverage() {
+            val bottom = onNodeWithTag("gradient-bar").fetchSemanticsNode().boundsInRoot.bottom.roundToInt()
+            val overhang = with(density) { GlassTopAppBarDefaults.BandOverhang.roundToPx() }
+            val fadeInset = with(density) { 12.dp.roundToPx() }
+            runOnIdle { opacity.floatValue = 1f }
+            val pixels = onRoot().captureToImage().toPixelMap()
+            assertColorNear(Color.White, pixels[5, bottom - fadeInset - 2])
+            val inside = pixels[5, bottom - fadeInset / 2].red
+            val edge = pixels[5, bottom].red
+            val outside = pixels[5, bottom + overhang / 2].red
+            assertTrue(inside > edge && edge > outside && outside > 0f, "The fade must span both sides of the bar edge")
+            assertTrue(inside > 0.95f, "The lower subtitle and bottom-content area must remain covered")
+            assertTrue(edge in 0.8f..0.98f, "The fade must protect the bar edge without extending an opaque shelf")
+            assertColorNear(Color.Blue, pixels[5, bottom + overhang + 2])
+            runOnIdle { opacity.floatValue = 0.99f }
+            val almostOpaque = onRoot().captureToImage().toPixelMap()
+            assertTrue(abs(almostOpaque[5, bottom + overhang / 2].red - outside) < 0.02f, "The fade must not pop in when the alpha layer becomes opaque")
+            runOnIdle { opacity.floatValue = 0.5f }
+            val halfOpaque = onRoot().captureToImage().toPixelMap()
+            assertTrue(abs(halfOpaque[5, bottom + overhang / 2].red - outside * 0.5f) < 0.015f, "Offscreen compositing must retain the fade outside the foreground bounds")
+        }
+        assertCoverage()
+        runOnIdle { state.heightOffset = state.heightOffsetLimit }
+        assertCoverage()
+        if (withBottomContent) {
+            runOnIdle { contentHeight.floatValue = 80f }
+            assertCoverage()
+        }
+    }
+
+    @Test
+    fun gradientFollowsFastScrollWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = false)
+
+    @Test
+    fun gradientFollowsProgrammaticVisualOffsetWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = true)
+
+    private fun assertImmediateGradient(useVisualOffset: Boolean) = runComposeUiTest {
+        val offset = mutableFloatStateOf(0f)
+        val opacity = mutableFloatStateOf(1f)
+        val state = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                Box(Modifier.size(400.dp, 200.dp).background(Color.Blue)) {
+                    GlassTopAppBar(
+                        title = "",
+                        isContentScrolled = offset.floatValue < 0f,
+                        scrollBehavior = MiuixScrollBehavior(state),
+                        visualContentOffset = if (useVisualOffset) ({ offset.floatValue }) else null,
+                        bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),
+                        backgroundAlpha = { opacity.floatValue },
+                        defaultWindowInsetsPadding = false,
+                    )
+                }
+            }
+        }
+        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
+        mainClock.autoAdvance = false
+        runOnIdle {
+            offset.floatValue = -1000f
+            state.contentOffset = -1000f
+            state.heightOffset = state.heightOffsetLimit
+        }
+        mainClock.advanceTimeByFrame()
+        assertColorNear(Color.White, onRoot().captureToImage().toPixelMap()[5, 5])
+        runOnIdle { opacity.floatValue = 0.5f }
+        mainClock.advanceTimeByFrame()
+        assertColorNear(Color(0.5f, 0.5f, 1f), onRoot().captureToImage().toPixelMap()[5, 5])
+        runOnIdle {
+            offset.floatValue = 0f
+            state.contentOffset = 0f
+            state.heightOffset = 0f
+        }
+        mainClock.advanceTimeByFrame()
+        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
+    }
+
+    @Test
     fun explicitOverlapKeepsTheButtonMaterialOverAnUnscrolledHero() = runComposeUiTest {
         val overlapping = mutableStateOf(true)
         val scrollState = TopAppBarState(-1000f, 0f, 0f)

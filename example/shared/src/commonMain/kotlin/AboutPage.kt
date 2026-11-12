@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
+import component.liquid.rememberCombinedBackdrop
 import misc.VersionInfo
 import navigation.Route
 import org.jetbrains.compose.resources.painterResource
@@ -59,16 +60,18 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassBottomSheet
+import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
@@ -108,6 +111,9 @@ fun AboutPage(
     }
 
     val backdrop = rememberBlurBackdrop()
+    val barBackdrop = if (backdrop != null) rememberLayerBackdrop() else null
+    // Capture content and the bar separately so overlays never sample their own host or scrim.
+    val overlayBackdrop = if (backdrop != null && barBackdrop != null) rememberCombinedBackdrop(backdrop, barBackdrop) else null
     // Defer the frame-rate scroll read out of composition: these booleans only flip at the
     // single 1f threshold, so derivedStateOf recomposes the bar on flip rather than every frame.
     val collapsed by remember { derivedStateOf { scrollProgress == 1f } }
@@ -126,24 +132,24 @@ fun AboutPage(
             } else {
                 MiuixTheme.colorScheme.onSurface.copy(alpha = titleAlpha())
             }
-            BlurredBar(backdrop, blurActive) {
-                AdaptiveTopAppBar(
-                    title = "About",
-                    showTopAppBar = true,
-                    isWideScreen = LocalIsWideScreen.current,
-                    scrollBehavior = topAppBarScrollBehavior,
-                    color = barColor,
-                    titleColor = titleColor,
-                    titleAlpha = titleAlpha,
-                    // The hero background is behind the button even before the list scrolls.
-                    isContentScrolled = true,
-                    defaultWindowInsetsPadding = false,
-                    navigationIcon = {
-                        BackNavigationIcon(
-                            onClick = { navigator.pop() },
-                        )
-                    },
-                )
+            Box(modifier = if (barBackdrop != null) Modifier.layerBackdrop(barBackdrop) else Modifier) {
+                BlurredBar(backdrop, blurActive) {
+                    AdaptiveTopAppBar(
+                        title = "About",
+                        showTopAppBar = true,
+                        isWideScreen = LocalIsWideScreen.current,
+                        scrollBehavior = topAppBarScrollBehavior,
+                        color = barColor,
+                        titleColor = titleColor,
+                        titleAlpha = titleAlpha,
+                        defaultWindowInsetsPadding = false,
+                        navigationIcon = {
+                            BackNavigationIcon(
+                                onClick = { navigator.pop() },
+                            )
+                        },
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -156,6 +162,7 @@ fun AboutPage(
                 topAppBarScrollBehavior = topAppBarScrollBehavior,
                 lazyListState = lazyListState,
                 scrollProgressProvider = { scrollProgress },
+                overlayBackdrop = overlayBackdrop,
             )
         }
     }
@@ -167,9 +174,11 @@ private fun AboutContent(
     topAppBarScrollBehavior: ScrollBehavior,
     lazyListState: LazyListState,
     scrollProgressProvider: () -> Float,
+    overlayBackdrop: Backdrop?,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
+    val shaderSupported = isRuntimeShaderSupported()
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
 
@@ -198,7 +207,7 @@ private fun AboutContent(
     )
 
     val isInDark = isInDarkTheme()
-    val dynamicBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
+    val dynamicBackground = remember { mutableStateOf(shaderSupported) }
     val isFullScreenBackground = remember { mutableStateOf(true) }
 
     val cardBlend = if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light
@@ -329,11 +338,17 @@ private fun AboutContent(
                         .height(
                             logoHeightDp + 52.dp + logoPadding.calculateTopPadding() - scrollPadding.calculateTopPadding() + 126.dp,
                         )
-                        .pointerInput(Unit) {
-                            detectTapGestures {
-                                showTextureSet = true
-                            }
-                        },
+                        .then(
+                            if (shaderSupported) {
+                                Modifier.pointerInput(Unit) {
+                                    detectTapGestures {
+                                        showTextureSet = true
+                                    }
+                                }
+                            } else {
+                                Modifier
+                            },
+                        ),
                     contentAlignment = Alignment.TopCenter,
                     content = { },
                 )
@@ -452,7 +467,10 @@ private fun AboutContent(
         )
     }
 
-    OverlayBottomSheet(
+    if (!shaderSupported) return
+
+    GlassBottomSheet(
+        backdrop = overlayBackdrop,
         show = showTextureSet,
         title = "Background Effect",
         onDismissRequest = {
@@ -463,7 +481,8 @@ private fun AboutContent(
         LazyColumn {
             item {
                 val effectVariantOptions = listOf("OS2", "OS3")
-                OverlayDropdownPreference(
+                GlassDropdownPreference(
+                    backdrop = overlayBackdrop,
                     title = "Effect Variant",
                     items = effectVariantOptions,
                     selectedIndex = if (isOs3Effect) 1 else 0,

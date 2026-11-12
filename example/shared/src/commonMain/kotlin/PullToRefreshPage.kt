@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import component.liquid.rememberCombinedBackdrop
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -45,9 +47,12 @@ import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
@@ -55,7 +60,6 @@ import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.pageContentPadding
@@ -80,6 +84,8 @@ fun PullToRefreshPage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
     val backdrop = rememberBlurBackdrop()
+    val barBackdrop = if (backdrop != null) rememberLayerBackdrop() else null
+    val pageBackdrop = if (backdrop != null && barBackdrop != null) rememberCombinedBackdrop(backdrop, barBackdrop) else null
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
 
@@ -97,40 +103,44 @@ fun PullToRefreshPage(
 
     Scaffold(
         topBar = {
-            BlurredBar(backdrop, blurActive) {
-                AdaptiveTopAppBar(
-                    title = "Popup",
-                    showTopAppBar = appState.showTopAppBar,
-                    isWideScreen = isWideScreen,
-                    scrollBehavior = topAppBarScrollBehavior,
-                    color = barColor,
-                    navigationIcon = {
-                        BackNavigationIcon(
-                            onClick = { navigator.pop() },
-                        )
-                    },
-                    actions = {
-                        if (appState.topAppBarStyle == 1) {
-                            GlassIconButton(onClick = { isRefreshing = true }) {
-                                Icon(
-                                    imageVector = MiuixIcons.Refresh,
-                                    contentDescription = "Refresh",
-                                    tint = MiuixTheme.colorScheme.onBackground,
-                                )
+            Box(modifier = if (barBackdrop != null) Modifier.layerBackdrop(barBackdrop) else Modifier) {
+                BlurredBar(backdrop, blurActive) {
+                    AdaptiveTopAppBar(
+                        title = "PullToRefresh",
+                        showTopAppBar = appState.showTopAppBar,
+                        isWideScreen = isWideScreen,
+                        scrollBehavior = topAppBarScrollBehavior,
+                        color = barColor,
+                        navigationIcon = {
+                            BackNavigationIcon(
+                                onClick = { navigator.pop() },
+                            )
+                        },
+                        actions = {
+                            if (appState.topAppBarStyle == 1) {
+                                GlassIconButton(onClick = { isRefreshing = true }) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Glass.Refresh,
+                                        contentDescription = "Refresh",
+                                        modifier = Modifier.size(28.dp),
+                                        tint = MiuixTheme.colorScheme.onBackground,
+                                    )
+                                }
+                            } else {
+                                IconButton(
+                                    onClick = { isRefreshing = true },
+                                ) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Refresh,
+                                        contentDescription = "Refresh",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = MiuixTheme.colorScheme.onBackground,
+                                    )
+                                }
                             }
-                        } else {
-                            IconButton(
-                                onClick = { isRefreshing = true },
-                            ) {
-                                Icon(
-                                    imageVector = MiuixIcons.Refresh,
-                                    contentDescription = "Refresh",
-                                    tint = MiuixTheme.colorScheme.onBackground,
-                                )
-                            }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -148,7 +158,7 @@ fun PullToRefreshPage(
                 isRefreshing = isRefreshing,
                 onRefresh = { isRefreshing = true },
                 pullToRefreshState = pullToRefreshState,
-                topAppBarScrollBehavior = if (appState.showTopAppBar) topAppBarScrollBehavior else null,
+                // pageScrollModifiers owns the app bar connection; do not feed it twice.
                 contentPadding = contentPadding,
                 onPullProgress = { currentPullProgress = it },
             ) {
@@ -167,7 +177,8 @@ fun PullToRefreshPage(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp)
+                                    .padding(bottom = 8.dp),
                                 cornerRadius = 12.dp,
                                 insideMargin = PaddingValues(16.dp),
                                 colors = CardDefaults.defaultColors(
@@ -237,39 +248,40 @@ fun PullToRefreshPage(
                 }
             }
         }
-    }
 
-    WindowBottomSheet(
-        title = "PullToRefresh Settings",
-        show = showSettings,
-        onDismissRequest = { showSettings = false },
-    ) {
-        Card(
-            insideMargin = PaddingValues(),
-            colors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.secondaryContainer,
-            ),
+        GlassBottomSheet(
+            title = "PullToRefresh Settings",
+            show = showSettings,
+            backdrop = pageBackdrop,
+            onDismissRequest = { showSettings = false },
         ) {
-            SliderPreference(
-                title = "Refresh Threshold",
-                summary = if (thresholdValue == 0f) {
-                    "Any pull triggers refresh."
-                } else {
-                    "Pull ${(thresholdValue * 100).toInt()}% of the drag range to refresh."
-                },
-                value = thresholdValue,
-                onValueChange = { thresholdValue = it },
-                valueRange = 0f..1f,
-                steps = 99,
-                showKeyPoints = true,
-                keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+            Card(
+                insideMargin = PaddingValues(),
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.secondaryContainer,
+                ),
+            ) {
+                SliderPreference(
+                    title = "Refresh Threshold",
+                    summary = if (thresholdValue == 0f) {
+                        "Any pull triggers refresh."
+                    } else {
+                        "Pull ${(thresholdValue * 100).toInt()}% of the drag range to refresh."
+                    },
+                    value = thresholdValue,
+                    onValueChange = { thresholdValue = it },
+                    valueRange = 0f..1f,
+                    steps = 99,
+                    showKeyPoints = true,
+                    keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+                )
+            }
+            Spacer(
+                Modifier.padding(
+                    bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                ),
             )
         }
-        Spacer(
-            Modifier.padding(
-                bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
-            ),
-        )
     }
 }

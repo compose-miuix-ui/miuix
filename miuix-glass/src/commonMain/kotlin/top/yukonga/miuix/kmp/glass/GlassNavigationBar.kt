@@ -55,6 +55,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
@@ -184,7 +185,7 @@ object GlassNavigationBarDefaults {
  *
  * @param items The destinations, in order.
  * @param selectedIndex The index of the current destination.
- * @param onSelect Called with the index under the finger, on press and while dragging.
+ * @param onSelect Called once with the final index on pointer release, or on keyboard/accessibility activation. Cancelled gestures do not select.
  * @param backdrop The [Backdrop] supplying the content behind the glass. `null` disables sampling
  *   and fills the capsule with the theme's surfaceContainer color.
  * @param modifier The modifier applied to the bar.
@@ -373,7 +374,9 @@ fun GlassNavigationBar(
                     stroke = stroke,
                     shadow = shadow,
                     shading = false,
-                    fallback = Modifier.clip(shape).background(MiuixTheme.colorScheme.surfaceContainer),
+                    fallback = Modifier
+                        .clip(shape)
+                        .background(MiuixTheme.colorScheme.surfaceContainer),
                 )
                 .onSizeChanged { barWidth = it.width }
                 .then(
@@ -383,32 +386,35 @@ fun GlassNavigationBar(
                                 val down = awaitFirstDown(requireUnconsumed = false)
                                 val selectionWidth = size.width.toFloat()
                                 if (selectionWidth <= contentInset * 2f) return@awaitEachGesture
-                                // Freeze hit regions for this gesture: changing a destination can
-                                // resize the capsule, which must not select another destination.
+                                // Freeze hit regions until release; only the indicator previews selection.
+                                val selectionSlot = (selectionWidth - contentInset * 2f) / items.size
                                 fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) size.width - x else x
-                                fun indexAt(x: Float): Int {
-                                    val span = (selectionWidth - contentInset * 2f) / items.size
-                                    return if (span <= 0f) {
-                                        0
-                                    } else {
-                                        ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
-                                    }
-                                }
+                                fun indexAt(x: Float): Int = ((x - contentInset) / selectionSlot).toInt().coerceIn(0, items.lastIndex)
 
                                 val minLeft = contentInset - overhang
                                 val downX = logicalX(down.position.x)
                                 var selectionX = downX
                                 var current = indexAt(downX)
                                 pressedIndex = current
-                                onSelectState(current)
+                                dragging.value = true
+                                val pressedLeft = minLeft + current * selectionSlot
+                                animateIndicator(pressedLeft, pressedLeft + selectionSlot + overhang * 2f)
                                 var grabOffset = Float.NaN
                                 try {
                                     while (true) {
                                         val event = awaitPointerEvent()
                                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                        if (!change.pressed || change.isConsumed) break
-                                        // A destination can add or remove the trailing action while
-                                        // this gesture is still active. Read its current geometry.
+                                        if (change.isConsumed) break
+                                        if (!change.pressed) {
+                                            if (change.changedToUp()) {
+                                                val releaseDelta = change.position.x - change.previousPosition.x
+                                                selectionX += if (layoutDirection == LayoutDirection.Rtl) -releaseDelta else releaseDelta
+                                                onSelectState(indexAt(selectionX))
+                                                change.consume()
+                                            }
+                                            break
+                                        }
+                                        // The layout can still resize externally while a pointer is held.
                                         val width = size.width.toFloat()
                                         val chipW = (width - contentInset * 2f) / items.size + overhang * 2f
                                         val maxLeft = (width - chipW).coerceAtLeast(0f)
@@ -425,24 +431,19 @@ fun GlassNavigationBar(
                                             }
                                             val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
                                             grabOffset = x - bounds.x
-                                            dragging.value = true
                                         }
                                         val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
                                         val next = indexAt(selectionX)
                                         val target = navigationDragTarget(chipLeft, chipW, width, delta, next != current)
                                         animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
-                                        if (next != current) {
-                                            current = next
-                                            onSelectState(next)
-                                        }
+                                        current = next
                                         pressedIndex = next
                                         change.consume()
                                     }
                                 } finally {
                                     pressedIndex = -1
                                     dragging.value = false
-                                    // Releasing restarts the selection effect using the latest size.
-                                    // Do not settle against geometry captured at pointer down.
+                                    // Settle through the selection effect, which reads the latest size.
                                 }
                             }
                         }

@@ -37,7 +37,7 @@ internal fun GlassBottomSheetDemo(
     GlassBottomSheet(
         show = show,
         modifier = modifier,
-        title = "Glass Bottom Sheet",
+        title = "Glass BottomSheet",
         backdrop = backdrop,
         onDismissRequest = onDismissRequest,
         material = material,

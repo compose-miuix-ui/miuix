@@ -413,6 +413,17 @@ class TopAppBarState(
      */
     var contentOffset by mutableFloatStateOf(initialContentOffset)
 
+    /**
+     * Temporary, damped vertical overscroll displacement in pixels. Update this from
+     * `overScrollVertical(onOffsetChanged = ...)`, including spring frames and reset to zero.
+     * It affects visual treatments, not title collapse or saved scroll position.
+     */
+    var overscrollOffset by mutableFloatStateOf(0f)
+
+    /** Content position used by scroll-dependent visual treatments, including elastic motion. */
+    val visualContentOffset: Float
+        get() = contentOffset + overscrollOffset
+
     internal var pinnedBySmallTopAppBar by mutableStateOf(false)
 
     /**

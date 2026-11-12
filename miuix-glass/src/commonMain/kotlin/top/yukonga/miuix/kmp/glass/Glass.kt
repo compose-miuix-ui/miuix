@@ -5,6 +5,8 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
@@ -30,6 +32,7 @@ import top.yukonga.miuix.kmp.material.drawGlassEdge
 import top.yukonga.miuix.kmp.material.drawGlassMask
 import top.yukonga.miuix.kmp.material.drawGlassRim
 import top.yukonga.miuix.kmp.material.drawGlassShadow
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /**
  * Applies a glass surface over [backdrop].
@@ -174,6 +177,21 @@ internal fun Modifier.glassShadow(
     alpha: () -> Float,
 ): Modifier = if (shadow == null) {
     this
-} else {
+} else if (isRuntimeShaderSupported()) {
     this.drawBehind { drawGlassShadow(shape, shadow, alpha()) }
+} else {
+    fallbackGlassShadow(shape, shadow, alpha)
+}
+
+/** Draw-based fallback; the blur kernel differs from the shader's dispersion curve. */
+internal fun Modifier.fallbackGlassShadow(
+    shape: GlassShape,
+    shadow: GlassShadow,
+    alpha: () -> Float,
+): Modifier = dropShadow(shape) {
+    val sourceScale = density / GlassDefaults.SourceDensity
+    radius = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    offset = Offset(shadow.offsetX * sourceScale, shadow.offsetY * sourceScale)
+    color = shadow.color
+    this.alpha = alpha().coerceIn(0f, 1f)
 }

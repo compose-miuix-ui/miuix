@@ -66,6 +66,7 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.drawGlassShadow
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.roundToInt
 
 /**
@@ -364,7 +365,7 @@ internal fun BoxScope.GlassPopupBackground(
 ) {
     Box(
         modifier = Modifier.matchParentSize().then(modifier).then(
-            if (backdrop == null) {
+            if (backdrop == null || !isRuntimeShaderSupported()) {
                 Modifier.background(visuals.containerColor).drawWithContent {
                     drawContent()
                     visuals.stroke?.let { drawEdgeStroke(shape, it, visuals.alpha) }

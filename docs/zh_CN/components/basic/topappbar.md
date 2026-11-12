@@ -221,6 +221,8 @@ MiuixScrollBehavior 是用于控制顶部栏滚动行为的配置对象。
 
 用于创建和记住 TopAppBarState：
 
+`contentOffset` 保存内容实际滚动量。需要弹性视觉效果时，通过越界修饰符的 `onOffsetChanged` 回调更新临时的 `overscrollOffset`；`visualContentOffset` 为二者之和。临时位移不参与状态保存和恢复，也不改变标题折叠。Glass 顶栏据此同时跟随拖动和弹簧回弹。
+
 ```kotlin
 val scrollBehavior = MiuixScrollBehavior(
     state = rememberTopAppBarState(),

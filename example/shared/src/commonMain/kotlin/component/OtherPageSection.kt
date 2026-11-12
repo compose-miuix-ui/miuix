@@ -23,13 +23,6 @@ fun LazyListScope.otherPageSection() {
                 .padding(horizontal = 12.dp),
         ) {
             ArrowPreference(
-                title = "PullToRefresh Test",
-                summary = "Navigate to a PullToRefresh Page",
-                onClick = {
-                    navigator.push(Route.PullToRefresh)
-                },
-            )
-            ArrowPreference(
                 title = "Navigation test",
                 summary = "Navigate to a Navigation Page",
                 onClick = { navigator.push(Route.Navigation(Random.nextLong().toString())) },

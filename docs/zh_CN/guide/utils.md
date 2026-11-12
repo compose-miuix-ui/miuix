@@ -81,13 +81,15 @@ Miuix 提供了易于使用的越界回弹效果修饰符，让滚动体验更�
 LazyColumn(
     modifier = Modifier
         // 添加越界回弹效果
-        .overScrollVertical()
+        .overScrollVertical(onOffsetChanged = { scrollBehavior.state.overscrollOffset = it })
         // 如需绑定 TopAppBar 滚动事件，则应在越界回弹效果之后添加
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {
     // 列表内容
 }
 ```
+
+将顶栏连接放在越界修饰符之后：`contentOffset` 记录列表实际滚动，`overscrollOffset` 跟踪拖动及弹簧回弹过程中的阻尼位移。Glass 顶栏使用两者之和 `visualContentOffset` 驱动渐进模糊和按钮效果。不要将越界消耗量累加进 `contentOffset`：弹簧回弹不会产生反向滚动事件。列表已绑定顶栏连接时，不要再将同一个滚动行为传给外层 `PullToRefresh`。
 
 ### 水平越界回弹
 
@@ -118,6 +120,7 @@ LazyColumn(
 **参数说明:**
 
 - `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
+- `onOffsetChanged`：可选的 `(Float) -> Unit` 回调，报告滚动轴上的阻尼位移（像素），包含拖动和弹簧回弹帧，重置或移除修饰符时回到零。默认：`null`。适用于垂直、水平和通用越界修饰符。
 - `isEnabled`：Lambda，是否启用越界回弹。默认：全平台启用。
 
 ### 通过 OverscrollFactory（主题级集成）

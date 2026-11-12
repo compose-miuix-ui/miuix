@@ -3,9 +3,7 @@
 `miuix-blur` 是一个独立的 Compose Multiplatform 模糊效果库。它通过 Modifier 扩展提供背景模糊、颜色混合和纹理效果。支持 Android、Desktop (JVM)、iOS、macOS 和 Web (WasmJs/Js) 平台。
 
 ::: warning 注意
-`miuix-blur` 在 Android 端需要 `minSdk` 33（Android 13）或更高。模糊、混合和
-噪点效果依赖 API 33 起提供的 `RuntimeShader`。运行时能力检测不能降低
-Android 构件的最低 SDK 要求。
+`miuix-blur` 在 Android 端需要 `minSdk` 33（Android 13）或更高。模糊、混合和噪点效果依赖 API 33 起提供的 `RuntimeShader`。
 :::
 
 ## 配置

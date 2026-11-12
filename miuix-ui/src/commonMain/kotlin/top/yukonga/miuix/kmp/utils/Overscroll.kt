@@ -50,10 +50,12 @@ import kotlin.math.sign
 @Stable
 fun Modifier.overScrollVertical(
     nestedScrollToParent: Boolean = true,
+    onOffsetChanged: ((Float) -> Unit)? = null,
     isEnabled: () -> Boolean = { true },
 ): Modifier = overScrollOutOfBound(
     isVertical = true,
     nestedScrollToParent = nestedScrollToParent,
+    onOffsetChanged = onOffsetChanged,
     isEnabled = isEnabled,
 )
 
@@ -63,10 +65,12 @@ fun Modifier.overScrollVertical(
 @Stable
 fun Modifier.overScrollHorizontal(
     nestedScrollToParent: Boolean = true,
+    onOffsetChanged: ((Float) -> Unit)? = null,
     isEnabled: () -> Boolean = { true },
 ): Modifier = overScrollOutOfBound(
     isVertical = false,
     nestedScrollToParent = nestedScrollToParent,
+    onOffsetChanged = onOffsetChanged,
     isEnabled = isEnabled,
 )
 
@@ -81,12 +85,16 @@ fun Modifier.overScrollHorizontal(
  * @param nestedScrollToParent Whether to dispatch nested scroll events to parent. Pass-through
  * deltas (non-gesture sources such as mouse wheel, and while pull-to-refresh is active) are
  * forwarded to ancestors regardless of this flag.
+ * @param onOffsetChanged Receives the damped displacement in pixels along the scroll axis,
+ * including every spring frame and zero when the effect resets or detaches. This is a visual
+ * displacement, not consumed scroll distance; keep it separate from persistent content offsets.
  * @param isEnabled Whether the overscroll effect is enabled.
  */
 @Stable
 fun Modifier.overScrollOutOfBound(
     isVertical: Boolean = true,
     nestedScrollToParent: Boolean = true,
+    onOffsetChanged: ((Float) -> Unit)? = null,
     isEnabled: () -> Boolean = { true },
 ): Modifier {
     if (!isEnabled()) return this
@@ -97,6 +105,7 @@ fun Modifier.overScrollOutOfBound(
             OverscrollElement(
                 isVertical = isVertical,
                 nestedScrollToParent = nestedScrollToParent,
+                onOffsetChanged = onOffsetChanged,
             ),
         )
 }
@@ -104,16 +113,19 @@ fun Modifier.overScrollOutOfBound(
 private data class OverscrollElement(
     val isVertical: Boolean,
     val nestedScrollToParent: Boolean,
+    val onOffsetChanged: ((Float) -> Unit)?,
 ) : ModifierNodeElement<OverscrollNode>() {
     override fun create(): OverscrollNode = OverscrollNode(
         isVertical = isVertical,
         nestedScrollToParent = nestedScrollToParent,
+        onOffsetChanged = onOffsetChanged,
     )
 
     override fun update(node: OverscrollNode) {
         node.update(
             isVertical = isVertical,
             nestedScrollToParent = nestedScrollToParent,
+            onOffsetChanged = onOffsetChanged,
         )
         node.invalidatePlacement()
     }
@@ -122,12 +134,14 @@ private data class OverscrollElement(
         name = "overScrollOutOfBound"
         properties["isVertical"] = isVertical
         properties["nestedScrollToParent"] = nestedScrollToParent
+        properties["onOffsetChanged"] = onOffsetChanged
     }
 }
 
 private class OverscrollNode(
     var isVertical: Boolean,
     var nestedScrollToParent: Boolean,
+    var onOffsetChanged: ((Float) -> Unit)?,
 ) : DelegatingNode(),
     CompositionLocalConsumerModifierNode,
     LayoutModifierNode,
@@ -181,6 +195,7 @@ private class OverscrollNode(
         private set(value) {
             if (field != value) {
                 field = value
+                onOffsetChanged?.invoke(value)
                 // Placement rounds to pixels, so invalidate only when the rounded offset changes.
                 val rounded = round(value)
                 if (rounded != lastPlacedOffset) {
@@ -210,6 +225,7 @@ private class OverscrollNode(
     fun update(
         isVertical: Boolean,
         nestedScrollToParent: Boolean,
+        onOffsetChanged: ((Float) -> Unit)?,
     ) {
         var rangeChanged = false
         if (this.isVertical != isVertical) {
@@ -218,6 +234,11 @@ private class OverscrollNode(
 
         this.isVertical = isVertical
         this.nestedScrollToParent = nestedScrollToParent
+        if (this.onOffsetChanged !== onOffsetChanged) {
+            this.onOffsetChanged?.invoke(0f)
+            this.onOffsetChanged = onOffsetChanged
+            onOffsetChanged?.invoke(offset)
+        }
 
         if (rangeChanged && isAttached) {
             updateScrollRange()

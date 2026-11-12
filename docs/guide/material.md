@@ -207,7 +207,6 @@ val primary = rememberTiltLight(
 
 ### Behaviour notes
 
-- Strokes require `isRuntimeShaderSupported()`; elsewhere they are skipped silently.
 - The shader outputs premultiplied light: the alpha carries the light's own magnitude, so additive channels are not clamped by a lower alpha. `BlendMode.Plus` then adds it onto the surface.
 - The flat band is drawn with a half-pixel bias, so a very small `width` still yields at least one anti-aliased pixel.
 

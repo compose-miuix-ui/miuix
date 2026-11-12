@@ -328,10 +328,11 @@ class GlassNavigationActionTest {
             moveTo(end)
         }
         waitForIdle()
-        assertEquals(to, selected.intValue)
-        // Keep the pointer held while the selected page changes the capsule's measured width.
+        assertEquals(from, selected.intValue, "Dragging must not navigate before release")
+        // Release commits selection; the indicator must settle after the resulting resize.
         onRoot().performTouchInput { up() }
         waitForIdle()
+        assertEquals(to, selected.intValue)
         val destination = onNodeWithContentDescription(labels[to]).fetchSemanticsNode().boundsInRoot
         val pixels = onRoot().captureToImage().toPixelMap()
         val row = destination.center.y.roundToInt()
@@ -398,15 +399,44 @@ class GlassNavigationActionTest {
             moveTo(boundary)
         }
         waitForIdle()
-        assertEquals(to, selected.intValue)
+        assertEquals(from, selected.intValue)
         repeat(8) { step ->
             onRoot().performTouchInput { moveTo(boundary + Offset(if (step % 2 == 0) 0.5f else -0.5f, 0f)) }
             waitForIdle()
-            assertEquals(to, selected.intValue, "A layout change must not move the finger across the selection boundary")
+            assertEquals(from, selected.intValue, "Pointer movement must not commit selection")
         }
-        assertEquals(listOf(from, to), selections, "The trailing action must not cause repeated destination changes")
+        assertTrue(selections.isEmpty(), "No destination callbacks are allowed while held")
         onRoot().performTouchInput { up() }
+        assertEquals(listOf(to), selections, "Release must commit exactly one destination")
         onNodeWithContentDescription(labels[to]).assertIsSelected()
+    }
+
+    @Test
+    fun cancelledDragDoesNotNavigate() = runComposeUiTest {
+        val selections = mutableListOf<Int>()
+        setContent {
+            DialogTestHost {
+                Box(Modifier.size(400.dp, 100.dp)) {
+                    GlassNavigationBar(
+                        items = listOf("Home", "Files", "Profile").map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                        selectedIndex = 0,
+                        onSelect = { selections.add(it) },
+                        backdrop = null,
+                        defaultWindowInsetsPadding = false,
+                    )
+                }
+            }
+        }
+        val start = onNodeWithContentDescription("Home").fetchSemanticsNode().boundsInRoot.center
+        val end = onNodeWithContentDescription("Profile").fetchSemanticsNode().boundsInRoot.center
+        onRoot().performTouchInput {
+            down(start)
+            moveTo(end)
+        }
+        assertTrue(selections.isEmpty())
+        onRoot().performTouchInput { cancel() }
+        assertTrue(selections.isEmpty(), "Cancelling must not commit the previewed destination")
+        onNodeWithContentDescription("Home").assertIsSelected()
     }
 
     @Test
