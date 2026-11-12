@@ -5,9 +5,6 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
@@ -33,7 +30,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -249,7 +245,7 @@ internal fun GlassSearchOverlay(
     }
 }
 
-/** Share the existing bar fade with its independently rendered progressive-blur background. */
+/** Shared page opacity keeps content and its sampled top-bar background in sync. */
 @Composable
 internal fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
     val transition = updateTransition(expanded, label = "glassSearchTopBarOpacity")
@@ -306,26 +302,4 @@ internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -
             }
         }
     }
-}
-
-/** ActionBarView reveals the title container after exit progress crosses 0.8. */
-@Composable
-internal fun rememberGlassSearchTitleAlpha(expanded: Boolean, collapsed: Boolean): () -> Float {
-    val transition = updateTransition(expanded, label = "glassSearchTitlePhase")
-    val progress = transition.animateFloat(
-        transitionSpec = { tween(400, easing = SearchModeEasing) },
-        label = "glassSearchTitleExitProgress",
-    ) { if (it) 0f else 1f }
-    val reveal by remember(expanded, progress) { derivedStateOf { expanded || progress.value > 0.8f } }
-    val response = if (collapsed) 0.15f else 0.6f
-    val titleAlpha = animateFloatAsState(
-        targetValue = if (reveal) 1f else 0f,
-        animationSpec = if (reveal && !expanded) {
-            spring(dampingRatio = 1f, stiffness = (2 * PI / response).let { (it * it).toFloat() }, visibilityThreshold = 0.001f)
-        } else {
-            snap()
-        },
-        label = "glassSearchTitleAlpha",
-    )
-    return remember(titleAlpha) { { titleAlpha.value } }
 }

@@ -239,6 +239,7 @@ fun GlassPage(padding: PaddingValues) {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
+                    .graphicsLayer { this.alpha = searchBarAlpha.value }
                     // Include page bars, excluding overlays and the route scrim.
                     .layerBackdrop(pageBackdrop)
                     .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
@@ -246,8 +247,7 @@ fun GlassPage(padding: PaddingValues) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin)
-                            .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
+                            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -301,14 +301,12 @@ fun GlassPage(padding: PaddingValues) {
                 topBar = {
                     GlassTopAppBar(
                         title = "Glass Component",
-                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded, barAlpha = { searchBarAlpha.value }),
-                        titleAlpha = rememberGlassSearchTitleAlpha(searchExpanded, scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit),
+                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f },
                         isContentScrolled = contentUnderTopBar,
                         backdrop = backdrop,
                         scrollBehavior = scrollBehavior,
                         progressiveBlur = topAppBarProgressiveBlur,
                         material = material ?: GlassTopAppBarDefaults.buttonMaterial(),
-                        backgroundAlpha = { searchBarAlpha.value },
                         style = style,
                         alpha = alpha,
                         stroke = stroke,
@@ -360,8 +358,7 @@ fun GlassPage(padding: PaddingValues) {
                             if (tabsInTopBar) {
                                 tabRows(
                                     Modifier
-                                        .padding(horizontal = horizontalPadding).padding(top = 6.dp, bottom = 12.dp)
-                                        .graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f },
+                                        .padding(horizontal = horizontalPadding).padding(top = 6.dp, bottom = 12.dp),
                                 )
                             }
                         },
@@ -402,145 +399,143 @@ fun GlassPage(padding: PaddingValues) {
                     stroke = stroke,
                 )
 
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = if (searchExpanded) 0f else 1f }) {
-                    Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .layerBackdrop(wallpaperBackdrop)
-                                .background(MiuixTheme.colorScheme.surface),
-                        ) {
-                            if (wallpaper) {
-                                Image(
-                                    painter = painterResource(Res.drawable.blur_test),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop,
+                Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .layerBackdrop(wallpaperBackdrop)
+                            .background(MiuixTheme.colorScheme.surface),
+                    ) {
+                        if (wallpaper) {
+                            Image(
+                                painter = painterResource(Res.drawable.blur_test),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                    }
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding(),
+                            bottom = innerPadding.calculateBottomPadding(),
+                        ),
+                    ) {
+                        if (!tabsInTopBar) {
+                            item(key = "glass-tabs-title") { SmallTitle(text = "TabRow") }
+                            item(key = "glass-tabs") {
+                                tabRows(Modifier.padding(horizontal = horizontalPadding).padding(bottom = 12.dp))
+                            }
+                        }
+                        item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
+                        item(key = "glass-dropdown") {
+                            Card(
+                                modifier = Modifier
+                                    .padding(horizontal = horizontalPadding)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                GlassDropdownPreference(
+                                    title = "Bluetooth stack log",
+                                    items = LogLevels,
+                                    selectedIndex = logLevel,
+                                    onSelectedIndexChange = { logLevel = it },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
                                 )
                             }
                         }
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .nestedScroll(scrollBehavior.nestedScrollConnection),
-                            contentPadding = PaddingValues(
-                                top = innerPadding.calculateTopPadding(),
-                                bottom = innerPadding.calculateBottomPadding(),
-                            ),
-                        ) {
-                            if (!tabsInTopBar) {
-                                item(key = "glass-tabs-title") { SmallTitle(text = "TabRow") }
-                                item(key = "glass-tabs") {
-                                    tabRows(Modifier.padding(horizontal = horizontalPadding).padding(bottom = 12.dp))
-                                }
+                        item(key = "layout-title") { SmallTitle(text = "Layout") }
+                        item(key = "layout") {
+                            Card(
+                                modifier = Modifier
+                                    .padding(horizontal = horizontalPadding)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                SwitchPreference(
+                                    title = "TopAppBar progressive blur",
+                                    checked = topAppBarProgressiveBlur,
+                                    onCheckedChange = { topAppBarProgressiveBlur = it },
+                                )
+                                SwitchPreference(
+                                    title = "NavigationBar search button",
+                                    checked = navigationBarSearchButton,
+                                    onCheckedChange = { navigationBarSearchButton = it },
+                                )
+                                GlassDropdownPreference(
+                                    title = "TabRow placement",
+                                    items = TabRowPlacements,
+                                    selectedIndex = tabRowPlacement,
+                                    onSelectedIndexChange = { tabRowPlacement = it },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
+                                )
                             }
-                            item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
-                            item(key = "glass-dropdown") {
-                                Card(
-                                    modifier = Modifier
-                                        .padding(horizontal = horizontalPadding)
-                                        .padding(bottom = 12.dp),
-                                ) {
-                                    GlassDropdownPreference(
-                                        title = "Bluetooth stack log",
-                                        items = LogLevels,
-                                        selectedIndex = logLevel,
-                                        onSelectedIndexChange = { logLevel = it },
-                                        backdrop = backdrop,
-                                        visuals = popupVisuals,
-                                    )
-                                }
-                            }
-                            item(key = "layout-title") { SmallTitle(text = "Layout") }
-                            item(key = "layout") {
-                                Card(
-                                    modifier = Modifier
-                                        .padding(horizontal = horizontalPadding)
-                                        .padding(bottom = 12.dp),
-                                ) {
-                                    SwitchPreference(
-                                        title = "TopAppBar progressive blur",
-                                        checked = topAppBarProgressiveBlur,
-                                        onCheckedChange = { topAppBarProgressiveBlur = it },
-                                    )
-                                    SwitchPreference(
-                                        title = "NavigationBar search button",
-                                        checked = navigationBarSearchButton,
-                                        onCheckedChange = { navigationBarSearchButton = it },
-                                    )
-                                    GlassDropdownPreference(
-                                        title = "TabRow placement",
-                                        items = TabRowPlacements,
-                                        selectedIndex = tabRowPlacement,
-                                        onSelectedIndexChange = { tabRowPlacement = it },
-                                        backdrop = backdrop,
-                                        visuals = popupVisuals,
-                                    )
-                                }
-                            }
-                            item(key = "controls-title") { SmallTitle(text = "Material") }
-                            item(key = "controls") {
-                                Card(
-                                    modifier = Modifier
-                                        .padding(horizontal = horizontalPadding)
-                                        .padding(bottom = 12.dp),
-                                ) {
-                                    GlassDropdownPreference(
-                                        title = "Material",
-                                        items = GlassDemoDefaults.MaterialNames,
-                                        selectedIndex = materialIndex,
-                                        onSelectedIndexChange = { materialIndex = it },
-                                        backdrop = backdrop,
-                                        visuals = popupVisuals,
-                                    )
-                                    GlassDropdownPreference(
-                                        title = "Bloom Stroke",
-                                        items = GlassDemoDefaults.StrokeNames,
-                                        selectedIndex = strokeIndex,
-                                        onSelectedIndexChange = { strokeIndex = it },
-                                        backdrop = backdrop,
-                                        visuals = popupVisuals,
-                                    )
-                                    SwitchPreference(
-                                        title = "Wallpaper",
-                                        checked = wallpaper,
-                                        onCheckedChange = { wallpaper = it },
-                                    )
-                                    ArrowPreference(
-                                        title = "Show Dialog",
-                                        onClick = {
-                                            overlayIndex = OVERLAY_DIALOG
-                                        },
-                                    )
-                                    ArrowPreference(
-                                        title = "Show BottomSheet",
-                                        onClick = {
-                                            overlayIndex = OVERLAY_BOTTOM_SHEET
-                                        },
-                                    )
-                                    HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
-                                    SliderPreference(
-                                        title = "Corner Radius",
-                                        valueText = "${cornerRadius.toInt()}",
-                                        value = cornerRadius / 64f,
-                                        onValueChange = { cornerRadius = it * 64f },
-                                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-                                    )
-                                    SliderPreference(
-                                        title = "Corner Smoothing",
-                                        valueText = "${(smoothing * 100).toInt() / 100f}",
-                                        value = smoothing,
-                                        onValueChange = { smoothing = it },
-                                        insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
-                                    )
-                                    SliderPreference(
-                                        title = "Alpha",
-                                        valueText = "${(alpha * 100).toInt() / 100f}",
-                                        value = alpha,
-                                        onValueChange = { alpha = it },
-                                    )
-                                }
+                        }
+                        item(key = "controls-title") { SmallTitle(text = "Material") }
+                        item(key = "controls") {
+                            Card(
+                                modifier = Modifier
+                                    .padding(horizontal = horizontalPadding)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                GlassDropdownPreference(
+                                    title = "Material",
+                                    items = GlassDemoDefaults.MaterialNames,
+                                    selectedIndex = materialIndex,
+                                    onSelectedIndexChange = { materialIndex = it },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
+                                )
+                                GlassDropdownPreference(
+                                    title = "Bloom Stroke",
+                                    items = GlassDemoDefaults.StrokeNames,
+                                    selectedIndex = strokeIndex,
+                                    onSelectedIndexChange = { strokeIndex = it },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
+                                )
+                                SwitchPreference(
+                                    title = "Wallpaper",
+                                    checked = wallpaper,
+                                    onCheckedChange = { wallpaper = it },
+                                )
+                                ArrowPreference(
+                                    title = "Show Dialog",
+                                    onClick = {
+                                        overlayIndex = OVERLAY_DIALOG
+                                    },
+                                )
+                                ArrowPreference(
+                                    title = "Show BottomSheet",
+                                    onClick = {
+                                        overlayIndex = OVERLAY_BOTTOM_SHEET
+                                    },
+                                )
+                                HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+                                SliderPreference(
+                                    title = "Corner Radius",
+                                    valueText = "${cornerRadius.toInt()}",
+                                    value = cornerRadius / 64f,
+                                    onValueChange = { cornerRadius = it * 64f },
+                                    insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                                )
+                                SliderPreference(
+                                    title = "Corner Smoothing",
+                                    valueText = "${(smoothing * 100).toInt() / 100f}",
+                                    value = smoothing,
+                                    onValueChange = { smoothing = it },
+                                    insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+                                )
+                                SliderPreference(
+                                    title = "Alpha",
+                                    valueText = "${(alpha * 100).toInt() / 100f}",
+                                    value = alpha,
+                                    onValueChange = { alpha = it },
+                                )
                             }
                         }
                     }

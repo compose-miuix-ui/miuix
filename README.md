@@ -22,12 +22,6 @@ A UI library for Compose Multiplatform.
 [![Web](https://img.shields.io/badge/Demo-Web-4285F4?logo=googlechrome&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
 [![Other](https://img.shields.io/badge/Demo-Other-2088FF?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
 
-The example app's Home page combines inline basic controls with dedicated demo pages grouped by module. The Preferences page includes Overlay and Window menu, popup, and dialog variants; the Glass entry opens the glass showcase. Navigation, scaffold, and load-more tests are grouped under Other.
-
-TopAppBar Style switches header controls, tabs, menus, and search between Default and Glass. App settings and the dedicated Glass showcase are independent of this setting.
-
-The Glass showcase starts with progressive TopAppBar blur enabled and tabs placed in the list's TabRow section.
-
 ### Modules
 
 | Module              | Description                                                |
