@@ -63,4 +63,11 @@ class GlassDropdownPopupTest {
             assertEquals(original.alignTop, result.alignTop)
         }
     }
+
+    @Test
+    fun topEdgeAnchorUsesItsPositionInsideTheSafeMargin() {
+        val anchor = Rect(100f, 4f, 200f, 44f)
+        val result = placeGlassPopup(anchor, Size(100f, 200f), 12f, window, LayoutDirection.Ltr)
+        assertEquals(4f, result.rect.top)
+    }
 }
