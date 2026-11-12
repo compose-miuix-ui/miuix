@@ -429,8 +429,8 @@ fun GlassNavigationBar(
                                                 pressedIndex = indexAt(selectionX)
                                                 continue
                                             }
-                                            val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
-                                            grabOffset = x - bounds.x
+                                            // Preserve the press anchor, not the unfinished animation's lag.
+                                            grabOffset = downX - pressedLeft
                                         }
                                         val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
                                         val next = indexAt(selectionX)
