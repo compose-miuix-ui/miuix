@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.isSpecified
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
+import top.yukonga.miuix.kmp.blur.BackdropPipeline
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
@@ -108,17 +109,41 @@ internal fun Modifier.glassOnActionBar(
     shading = false,
 )
 
-/** Shape provider with value equality: `drawBackdrop` compares callback identity. */
-private class GlassShapeCallback(private val value: GlassShape) : () -> Shape {
-    override fun invoke(): Shape = value
+private fun Modifier.glassImpl(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle,
+    alpha: Float,
+    tint: Color,
+    material: GlassMaterial?,
+    underlayMaterial: GlassMaterial?,
+    noiseCoefficient: Float,
+    stroke: EdgeStroke?,
+    contentBlendMode: BlendMode,
+    enabled: Boolean,
+    shading: Boolean,
+): Modifier = drawBackdrop(
+    backdrop = backdrop,
+    pipeline = GlassPipeline(
+        glassShape = shape,
+        style = style,
+        alpha = alpha,
+        tint = tint,
+        material = material,
+        underlayMaterial = underlayMaterial,
+        noiseCoefficient = noiseCoefficient,
+        stroke = stroke,
+        shading = shading,
+    ),
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+)
 
-    override fun equals(other: Any?): Boolean = other is GlassShapeCallback && other.value == value
-
-    override fun hashCode(): Int = value.hashCode()
-}
-
-/** Effect pipeline with value equality; see [GlassShapeCallback]. */
-private class GlassEffectsCallback(
+/**
+ * Glass pipeline as a value: equal inputs keep the backdrop node, so a recomposition no longer
+ * rebuilds the blur, colour and shading passes.
+ */
+private class GlassPipeline(
     private val glassShape: GlassShape,
     private val style: GlassStyle,
     private val alpha: Float,
@@ -126,10 +151,14 @@ private class GlassEffectsCallback(
     private val material: GlassMaterial?,
     private val underlayMaterial: GlassMaterial?,
     private val noiseCoefficient: Float,
+    private val stroke: EdgeStroke?,
     private val shading: Boolean,
-) : Function1<BackdropEffectScope, Unit> {
-    override fun invoke(p1: BackdropEffectScope) {
-        with(p1) {
+) : BackdropPipeline {
+
+    override val shape: Shape get() = glassShape
+
+    override fun configureEffects(scope: BackdropEffectScope) {
+        with(scope) {
             noiseDither(noiseCoefficient)
             val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
             blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
@@ -141,40 +170,8 @@ private class GlassEffectsCallback(
         }
     }
 
-    override fun equals(other: Any?): Boolean = other is GlassEffectsCallback &&
-        other.glassShape == glassShape &&
-        other.style == style &&
-        other.alpha == alpha &&
-        other.tint == tint &&
-        other.material == material &&
-        other.underlayMaterial == underlayMaterial &&
-        other.noiseCoefficient == noiseCoefficient &&
-        other.shading == shading
-
-    override fun hashCode(): Int {
-        var result = glassShape.hashCode()
-        result = 31 * result + style.hashCode()
-        result = 31 * result + alpha.hashCode()
-        result = 31 * result + tint.hashCode()
-        result = 31 * result + (material?.hashCode() ?: 0)
-        result = 31 * result + (underlayMaterial?.hashCode() ?: 0)
-        result = 31 * result + noiseCoefficient.hashCode()
-        result = 31 * result + shading.hashCode()
-        return result
-    }
-}
-
-/** Foreground stroke, mask and rim pass with value equality; see [GlassShapeCallback]. */
-private class GlassFrontCallback(
-    private val glassShape: GlassShape,
-    private val stroke: EdgeStroke?,
-    private val style: GlassStyle,
-    private val tint: Color,
-    private val alpha: Float,
-    private val shading: Boolean,
-) : Function1<DrawScope, Unit> {
-    override fun invoke(p1: DrawScope) {
-        with(p1) {
+    override fun drawFront(scope: DrawScope) {
+        with(scope) {
             // Stroke and rim share one silhouette pass; the mask trims it afterwards.
             val current = stroke
             val fuse = current != null && shading &&
@@ -199,62 +196,30 @@ private class GlassFrontCallback(
         }
     }
 
-    override fun equals(other: Any?): Boolean = other is GlassFrontCallback &&
+    override fun equals(other: Any?): Boolean = other is GlassPipeline &&
         other.glassShape == glassShape &&
-        other.stroke == stroke &&
         other.style == style &&
-        other.tint == tint &&
         other.alpha == alpha &&
+        other.tint == tint &&
+        other.material == material &&
+        other.underlayMaterial == underlayMaterial &&
+        other.noiseCoefficient == noiseCoefficient &&
+        other.stroke == stroke &&
         other.shading == shading
 
     override fun hashCode(): Int {
         var result = glassShape.hashCode()
-        result = 31 * result + (stroke?.hashCode() ?: 0)
         result = 31 * result + style.hashCode()
-        result = 31 * result + tint.hashCode()
         result = 31 * result + alpha.hashCode()
+        result = 31 * result + tint.hashCode()
+        result = 31 * result + material.hashCode()
+        result = 31 * result + underlayMaterial.hashCode()
+        result = 31 * result + noiseCoefficient.hashCode()
+        result = 31 * result + stroke.hashCode()
         result = 31 * result + shading.hashCode()
         return result
     }
 }
-
-private fun Modifier.glassImpl(
-    backdrop: Backdrop,
-    shape: GlassShape,
-    style: GlassStyle,
-    alpha: Float,
-    tint: Color,
-    material: GlassMaterial?,
-    underlayMaterial: GlassMaterial?,
-    noiseCoefficient: Float,
-    stroke: EdgeStroke?,
-    contentBlendMode: BlendMode,
-    enabled: Boolean,
-    shading: Boolean,
-): Modifier = this.drawBackdrop(
-    backdrop = backdrop,
-    shape = GlassShapeCallback(shape),
-    effects = GlassEffectsCallback(
-        glassShape = shape,
-        style = style,
-        alpha = alpha,
-        tint = tint,
-        material = material,
-        underlayMaterial = underlayMaterial,
-        noiseCoefficient = noiseCoefficient,
-        shading = shading,
-    ),
-    onDrawFront = GlassFrontCallback(
-        glassShape = shape,
-        stroke = stroke,
-        style = style,
-        tint = tint,
-        alpha = alpha,
-        shading = shading,
-    ),
-    contentBlendMode = contentBlendMode,
-    enabled = enabled,
-)
 
 /**
  * Draws [shadow] beneath this composable using [shape].

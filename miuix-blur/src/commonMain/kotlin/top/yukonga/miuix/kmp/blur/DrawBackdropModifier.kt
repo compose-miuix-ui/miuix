@@ -139,6 +139,106 @@ fun Modifier.drawBackdrop(
         )
 }
 
+/**
+ * A backdrop pipeline described as values.
+ *
+ * [Modifier.drawBackdrop] compares callbacks by identity, so a pipeline assembled from lambdas is
+ * rebuilt whenever the caller recomposes. Implement this interface instead to describe the same
+ * pipeline with a value type: the modifier node is kept while two instances compare equal.
+ */
+interface BackdropPipeline {
+    /** Silhouette read on each draw, so an animated shape stays current. */
+    val shape: Shape
+
+    /** Configures the blur, colour and shading passes. */
+    fun configureEffects(scope: BackdropEffectScope)
+
+    /** Draws above the content, such as a rim or mask. */
+    fun drawFront(scope: DrawScope) {}
+}
+
+/** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
+fun Modifier.drawBackdrop(
+    backdrop: Backdrop,
+    pipeline: BackdropPipeline,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
+    enabled: Boolean = true,
+): Modifier {
+    val effectiveEnabled = enabled && isRuntimeShaderSupported()
+    return this.then(
+        BackdropPipelineElement(
+            backdrop = backdrop,
+            pipeline = pipeline,
+            contentBlendMode = contentBlendMode,
+            enabled = effectiveEnabled,
+        ),
+    )
+}
+
+private class BackdropPipelineElement(
+    val backdrop: Backdrop,
+    val pipeline: BackdropPipeline,
+    val contentBlendMode: BlendMode,
+    val enabled: Boolean,
+) : ModifierNodeElement<DrawBackdropNode>() {
+
+    override fun create(): DrawBackdropNode = DrawBackdropNode(
+        backdrop = backdrop,
+        shape = { pipeline.shape },
+        effects = { pipeline.configureEffects(this) },
+        layerBlock = null,
+        onDrawBehind = null,
+        onDrawBackdrop = DefaultOnDrawBackdrop,
+        onDrawSurface = null,
+        onDrawFront = { pipeline.drawFront(this) },
+        contentBlendMode = contentBlendMode,
+        progressiveGradient = null,
+        enabled = enabled,
+    )
+
+    override fun update(node: DrawBackdropNode) {
+        val enabledChanged = node.enabled != enabled
+        node.backdrop = backdrop
+        node.updateShape { pipeline.shape }
+        node.effects = { pipeline.configureEffects(this) }
+        node.onDrawFront = { pipeline.drawFront(this) }
+        node.contentBlendMode = contentBlendMode
+        node.enabled = enabled
+        if (enabledChanged) {
+            if (!enabled) {
+                node.releaseGraphicsLayers()
+            }
+            node.invalidateMeasurement()
+        }
+        node.invalidateDrawCache()
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "drawBackdrop"
+        properties["backdrop"] = backdrop
+        properties["pipeline"] = pipeline
+        properties["enabled"] = enabled
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BackdropPipelineElement) return false
+        if (backdrop != other.backdrop) return false
+        if (pipeline != other.pipeline) return false
+        if (contentBlendMode != other.contentBlendMode) return false
+        if (enabled != other.enabled) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = backdrop.hashCode()
+        result = 31 * result + pipeline.hashCode()
+        result = 31 * result + contentBlendMode.hashCode()
+        result = 31 * result + enabled.hashCode()
+        return result
+    }
+}
+
 private class DrawBackdropElement(
     val backdrop: Backdrop,
     val shape: () -> Shape,
