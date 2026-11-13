@@ -325,15 +325,13 @@ fun MainPage(
                             }
                         }
                     }
-                    if (runtimeShaderSupported) {
-                        item(key = "miuix-glass") {
-                            SmallTitle(text = "miuix-glass")
-                            Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                                ArrowPreference(
-                                    title = "Glass Component",
-                                    onClick = { navigator.push(Route.Glass) },
-                                )
-                            }
+                    item(key = "miuix-glass") {
+                        SmallTitle(text = "miuix-glass")
+                        Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                            ArrowPreference(
+                                title = "Glass Component",
+                                onClick = { navigator.push(Route.Glass) },
+                            )
                         }
                     }
                     otherPageSection()

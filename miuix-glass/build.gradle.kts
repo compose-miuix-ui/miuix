@@ -29,7 +29,7 @@ kotlin {
                     minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
                 }
         }
-        minSdk = 33
+        minSdk = BuildConfig.MIN_SDK
         namespace = "${BuildConfig.LIBRARY_ID}.glass"
         withHostTest {}
     }

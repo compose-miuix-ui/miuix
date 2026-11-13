@@ -226,13 +226,6 @@ fun GlassPage(padding: PaddingValues) {
         }
     }
 
-    if (!isRuntimeShaderSupported()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "This device has no runtime shader support.")
-        }
-        return
-    }
-
     GlassPageHost(modifier = Modifier.fillMaxSize()) {
         // Record the page and primary menu; keep the secondary outside its sampled layer.
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(secondaryBackdrop)) {
@@ -455,11 +448,13 @@ fun GlassPage(padding: PaddingValues) {
                                     .padding(horizontal = horizontalPadding)
                                     .padding(bottom = 12.dp),
                             ) {
-                                SwitchPreference(
-                                    title = "TopAppBar progressive blur",
-                                    checked = topAppBarProgressiveBlur,
-                                    onCheckedChange = { topAppBarProgressiveBlur = it },
-                                )
+                                if (isRuntimeShaderSupported()) {
+                                    SwitchPreference(
+                                        title = "TopAppBar progressive blur",
+                                        checked = topAppBarProgressiveBlur,
+                                        onCheckedChange = { topAppBarProgressiveBlur = it },
+                                    )
+                                }
                                 SwitchPreference(
                                     title = "NavigationBar search button",
                                     checked = navigationBarSearchButton,
