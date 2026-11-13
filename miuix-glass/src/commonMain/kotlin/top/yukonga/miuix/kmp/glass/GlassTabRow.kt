@@ -269,7 +269,9 @@ fun GlassTabRow(
                     return if (selected) settled else lerp(colors.restingContainerColor, settled, if (resolvedBackdrop != null) ramp else 0f)
                 }
                 val materialSurface = if (resolvedBackdrop == null) {
-                    Modifier.clip(shape)
+                    Modifier
+                        .glassShadow(shape, shadow, alpha)
+                        .clip(shape)
                 } else if (underlayMaterial != null) {
                     Modifier
                         .glassShadow(shape, shadow, alpha * ramp)
@@ -446,9 +448,10 @@ fun GlassSegmentedTabRow(
 ) {
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
-    val ramp = if (isRuntimeShaderSupported()) surfaceAlpha.coerceIn(0f, 1f) else 0f
+    val runtimeShaderSupported = isRuntimeShaderSupported()
+    val ramp = if (runtimeShaderSupported) surfaceAlpha.coerceIn(0f, 1f) else 0f
     val topBarContext = LocalGlassTopAppBarContext.current
-    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop).takeIf { isRuntimeShaderSupported() }
+    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop).takeIf { runtimeShaderSupported }
     val underlayMaterial = topBarContext?.underlayMaterial
     val resolvedMaterial = material?.withUnderlayBlur(underlayMaterial)
     val trackShape = GlassSegmentedTabRowDefaults.shape(height)
@@ -503,7 +506,11 @@ fun GlassSegmentedTabRow(
     Box(
         modifier = modifier
             .height(height)
-            .glassShadow(trackShape, shadow, alpha * ramp)
+            .glassShadow(
+                trackShape,
+                shadow,
+                alpha * if (runtimeShaderSupported) ramp else 1f,
+            )
             .clip(trackShape)
             .then(materialSurface)
             .background(trackColor.copy(alpha = trackColor.alpha * (1f - ramp)))
