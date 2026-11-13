@@ -35,7 +35,6 @@ android {
         versionName = BuildConfig.APPLICATION_VERSION_NAME + "." + getGitHashShort()
         versionCode = getGitVersionCode()
     }
-    experimentalProperties["android.experimental.r8.dex-startup-optimization"] = true
     namespace = BuildConfig.APPLICATION_ID
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
