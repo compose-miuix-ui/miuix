@@ -164,7 +164,6 @@ fun TabRow(
                 .fillMaxSize()
                 .nestedScroll(nestedScrollConnection)
                 .overScrollHorizontal(
-                    nestedScrollToParent = false,
                     isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
                 ),
         ) {
@@ -319,7 +318,6 @@ fun TabRowWithContour(
                 .padding(contourPadding)
                 .nestedScroll(nestedScrollConnection)
                 .overScrollHorizontal(
-                    nestedScrollToParent = false,
                     isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
                 ),
         ) {

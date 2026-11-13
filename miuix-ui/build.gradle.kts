@@ -57,6 +57,13 @@ kotlin {
             implementation(kotlin("test"))
         }
 
+        named("desktopTest") {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.jetbrains.compose.ui.test)
+            }
+        }
+
         commonMain.dependencies {
             api(projects.miuixCore)
             api(projects.miuixSquircle)

@@ -61,7 +61,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        val desktopTest by getting {
+        named("desktopTest") {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)

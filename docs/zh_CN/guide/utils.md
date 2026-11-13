@@ -113,7 +113,6 @@ LazyRow(
 ```kotlin
 LazyColumn(
     modifier = Modifier.overScrollVertical(
-        nestedScrollToParent = true, // 是否分发嵌套滚动事件到父级，默认 true
         isEnabled = { true },        // 是否启用效果，默认全平台启用
     ),
     overscrollEffect = null // 建议将此参数设置为 null，禁用默认效果
@@ -124,7 +123,6 @@ LazyColumn(
 
 **参数说明:**
 
-- `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
 - `onOffsetChanged`：可选的 `(Float) -> Unit` 回调，报告滚动轴上的阻尼位移（像素）。回调按像素合并（舍入后的像素变化时才报告最新 Float），包含拖动和弹簧回弹帧，并在重置或移除修饰符时报告精确的零值。默认：`null`。适用于垂直、水平和通用越界修饰符。
 - `isEnabled`：Lambda，是否启用越界回弹。默认：全平台启用。
 
@@ -264,7 +262,7 @@ Box(
 
 ## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
 
-`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在列表惯性滚动或回弹期间横滑切页。
+`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在惯性滚动及撞到顶部或底部后的回弹期间横滑切页，竖滑仍由列表处理。
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(

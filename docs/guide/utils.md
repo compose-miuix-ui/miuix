@@ -113,7 +113,6 @@ You can customize the overscroll effect parameters as needed:
 ```kotlin
 LazyColumn(
     modifier = Modifier.overScrollVertical(
-        nestedScrollToParent = true, // Dispatch nested scroll events to parent, default true
         isEnabled = { true },        // Whether the effect is enabled, default true on all platforms
     ),
     overscrollEffect = null // It is recommended to set this parameter to null to disable the default effect
@@ -124,7 +123,6 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-- `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
 - `onOffsetChanged`: Optional `(Float) -> Unit` callback for the damped displacement in pixels along the scroll axis. It is pixel-coalesced (the latest Float is delivered when its rounded pixel changes), includes drag and spring updates, and receives exact zero on reset or detach. Default: `null`. Applies to vertical, horizontal, and generic overscroll modifiers.
 - `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
 
@@ -264,7 +262,7 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 
 ## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
 
-Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
+Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists. Horizontal swipes can switch pages during inertial scrolling and after the list reaches either edge and rebounds; vertical swipes continue scrolling the list.
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(
