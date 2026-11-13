@@ -36,7 +36,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-material/`    | Render primitives + material definitions (`EdgeStroke`)       |
 | `miuix-blur/`        | Background sampling + blur stack (Android minSdk=33)          |
 | `miuix-squircle/`    | Squircle corner shapes                                        |
-| `miuix-glass/`       | Glass surfaces + components (Android minSdk=33)               |
+| `miuix-glass/`       | Glass surfaces + components                                   |
 | `miuix-nav/`         | Navigation runtime (depends on `miuix-squircle`)              |
 | `miuix-window/`      | Desktop window & caption bar styling (Desktop JVM)            |
 | `example/`           | Demo app                                                      |
@@ -72,19 +72,19 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 
 `miuix-material/src/commonMain/kotlin/top/yukonga/miuix/kmp/material/`:
 
-| Subdir      | Contents                                                                                  |
-| :---------- | :---------------------------------------------------------------------------------------- |
+| Subdir      | Contents                                                                                                                                                                                                     |
+| :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | (root)      | `RuntimeShader` / `RenderEffect` abstractions, `RuntimeShaderCache`, `EdgeStroke` + presets, `GlassStyle(s)` / `GlassMaterial(s)` / `GlassShape` / `GlassShadow(s)` / `GlassDefaults`, glass overlay drawing |
-| `agsl/`     | `MaterialAgsl` — AGSL fragments shared by the material shaders                              |
-| `internal/` | Shader sources, uniform packing, edge-stroke drawing internals                              |
-| `sensor/`   | `rememberDeviceTilt` (expect/actual)                                                        |
+| `agsl/`     | `MaterialAgsl` — AGSL fragments shared by the material shaders                                                                                                                                               |
+| `internal/` | Shader sources, uniform packing, edge-stroke drawing internals                                                                                                                                               |
+| `sensor/`   | `rememberDeviceTilt` (expect/actual)                                                                                                                                                                         |
 
 `miuix-glass/src/commonMain/kotlin/top/yukonga/miuix/kmp/`:
 
-| Subdir            | Contents                                                          |
-| :---------------- | :---------------------------------------------------------------- |
+| Subdir            | Contents                                                              |
+| :---------------- | :-------------------------------------------------------------------- |
 | `glass/`          | Glass surfaces + components (GlassPanel, GlassDialog, GlassTabRow, …) |
-| `glass/internal/` | Refraction / colour-blend shaders and their uniform packing       |
+| `glass/internal/` | Refraction / colour-blend shaders and their uniform packing           |
 
 `miuix-glass-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon/` is a flat `glass/` icon set — one file per icon, reached through `MiuixIcons.Glass`.
 

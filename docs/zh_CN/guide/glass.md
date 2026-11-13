@@ -2,7 +2,7 @@
 
 `miuix-glass` 为 Compose Multiplatform 提供玻璃表面与组件：在[材质定义](/zh_CN/guide/material)之上实现 `glassPanel`、`glass`、`glassShadow`、`glassSurface`，支持背景模糊、颜色混合与光照效果。
 
-::: note 说明
+::: tip 说明
 `miuix-glass` 的 Android 端 `minSdk` 为 24。玻璃效果依赖 `RuntimeShader`（Android 13 及以上）；低于该版本时表面退化为不透明的 `containerColor`，见[运行时能力检测](/zh_CN/guide/material#运行时能力检测)。
 
 注意 `miuix-glass` 依赖 `miuix-blur`，后者自身仍声明 `minSdk` 33：低于 API 33 的应用需要在清单中加入 `tools:overrideLibrary="top.yukonga.miuix.kmp.blur"`，并且不要期望模糊层生效。
