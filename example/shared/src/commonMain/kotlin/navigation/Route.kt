@@ -16,6 +16,9 @@ sealed interface Route : NavKey {
     data object Main : Route
 
     @Serializable
+    data class Component(val demo: ComponentDemo) : Route
+
+    @Serializable
     data object PullToRefresh : Route
 
     @Serializable

@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -87,6 +88,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
+
+internal interface BottomSheetNestedScrollConnection : NestedScrollConnection {
+    fun canConsumePostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Boolean
+}
+
+internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<BottomSheetNestedScrollConnection?> { null }
 
 /**
  * Internal shared layout logic for [OverlayBottomSheet] and [WindowBottomSheet].
@@ -422,10 +429,7 @@ internal fun BottomSheetContent(
             settlingJob.value = coroutineScope.launch {
                 val currentOffset = dragOffsetY.value
                 val dismissThresholdPx = with(density) { 150.dp.toPx() }
-                // Velocity comes from gesture pipeline as px/s; the threshold is intentionally
-                // expressed as a dp value converted to px so the trigger feels equivalent across
-                // densities (higher-density screens both demand and produce proportionally larger
-                // px/s values, which roughly cancels out).
+                // Convert the density-independent threshold to gesture velocity units (px/s).
                 val velocityThresholdPx = with(density) { 800.dp.toPx() }
                 val windowHeightPx = with(density) { currentWindowHeight.toPx() }
 
@@ -480,7 +484,10 @@ internal fun BottomSheetContent(
 
     // Nested scroll logic
     val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density) {
-        object : NestedScrollConnection {
+        object : BottomSheetNestedScrollConnection {
+            override fun canConsumePostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Boolean = enableNestedScroll && allowDismiss && source == NestedScrollSource.UserInput && available.y > 0f &&
+                if (isNestedScrollGestureStarted.value) canDragSheetFromNestedScroll.value else abs(consumed.y) < 0.5f
+
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (!enableNestedScroll || source != NestedScrollSource.UserInput) return Offset.Zero
 
@@ -513,9 +520,7 @@ internal fun BottomSheetContent(
                     canDragSheetFromNestedScroll.value = delta > 0 && abs(consumed.y) < 0.5f
                 }
 
-                if (delta > 0 && canDragSheetFromNestedScroll.value) {
-                    if (!allowDismiss) return Offset.Zero
-
+                if (canConsumePostScroll(consumed, available, source)) {
                     if (isSettling.value) {
                         settlingJob.value?.cancel()
                         isSettling.value = false
@@ -593,7 +598,11 @@ internal fun BottomSheetContent(
         modifier = modifier,
         surface = surface,
         overscrollSurface = overscrollSurface,
-        content = content,
+        content = {
+            CompositionLocalProvider(LocalBottomSheetNestedScrollConnection provides nestedScrollConnection) {
+                content()
+            }
+        },
     )
 }
 

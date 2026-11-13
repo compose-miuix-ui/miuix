@@ -40,7 +40,7 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-nav`         | Navigation library, can be used independently              |
 | `miuix-window`      | Desktop window & caption bar styling library (Desktop JVM) |
 
-`miuix-blur` and `miuix-glass` require `minSdk` 33 on Android.
+`miuix-blur` requires `minSdk` 33 on Android; `miuix-glass` targets 24 and falls back to opaque surfaces below API 33.
 
 - For Compose Multiplatform projects:
 
@@ -61,7 +61,7 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33 on Android)
+            // Optional: Add miuix-glass for the glass surfaces and components
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
@@ -91,7 +91,7 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33)
+    // Optional: Add miuix-glass for the glass surfaces and components
     implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
     // Optional: Add miuix-nav for navigation
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")

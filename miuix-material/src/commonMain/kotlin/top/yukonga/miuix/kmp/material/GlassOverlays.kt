@@ -17,8 +17,7 @@ import top.yukonga.miuix.kmp.material.internal.GLASS_RIM_SHADER
 import top.yukonga.miuix.kmp.material.internal.GLASS_RIM_SHADER_KEY
 import top.yukonga.miuix.kmp.material.internal.GLASS_SHADOW_SHADER
 import top.yukonga.miuix.kmp.material.internal.GLASS_SHADOW_SHADER_KEY
-import top.yukonga.miuix.kmp.material.internal.glassEdgeShaderKey
-import top.yukonga.miuix.kmp.material.internal.glassEdgeShaderSource
+import top.yukonga.miuix.kmp.material.internal.glassEdgeShader
 import top.yukonga.miuix.kmp.material.internal.setEdgeStrokeUniforms
 import top.yukonga.miuix.kmp.material.internal.sharedShaderCache
 import kotlin.math.PI
@@ -64,10 +63,8 @@ fun DrawScope.drawGlassEdge(
 ) {
     if (alpha <= 0f || size.width <= 0f || size.height <= 0f) return
     if (!isRuntimeShaderSupported()) return
-    val shader = sharedShaderCache.obtainRuntimeShader(
-        glassEdgeShaderKey(stroke.peak),
-        glassEdgeShaderSource(stroke.peak),
-    )
+    val source = glassEdgeShader(stroke.peak)
+    val shader = sharedShaderCache.obtainRuntimeShader(source.key, source.source)
 
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this)
     shader.setEdgeStrokeUniforms(

@@ -32,8 +32,11 @@ import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.TraversableNode.Companion.TraverseDescendantsAction
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.requireDensity
+import androidx.compose.ui.node.requireLayoutCoordinates
+import androidx.compose.ui.node.traverseDescendants
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -44,10 +47,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastForEach
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -128,7 +135,7 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  * installs, so it has to be configured like this:
  *
  * ```kotlin
- * val flingBehavior = PagerDefaults.flingBehavior(pagerState, PagerNavigationSpringSpec)
+ * val flingBehavior = PagerDefaults.flingBehavior(pagerState, snapAnimationSpec = PagerNavigationSpringSpec)
  * HorizontalPager(
  *     state = pagerState,
  *     modifier = Modifier.pagerGestureOverride(pagerState, flingBehavior),
@@ -143,6 +150,8 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  * With `userScrollEnabled = false` the pager keeps no touch recognizer of its own. This modifier
  * then restores the input that is not touch: wheel, Shift+wheel and trackpad events, driven with
  * the pager's own [flingBehavior] so the snapping matches a native pager.
+ * Rebound takeover supports Miuix overscroll modifiers and [MiuixOverscrollFactory]; other
+ * overscroll implementations use ordinary gesture arbitration after their fling completes.
  *
  * @param pagerState the pager being configured.
  * @param flingBehavior the same [FlingBehavior] passed to [HorizontalPager].
@@ -200,19 +209,7 @@ private data class PagerPageGestureElement(
     }
 }
 
-/**
- * The pager's touch drag recognizer, installed by `Modifier.pagerGestureOverride`.
- *
- * It is a Foundation [DragGestureNode] on the pager's horizontal axis, so the framework's own angle
- * based arbitration decides between it and the page's children: a horizontal child the drag is
- * aligned with wins, and a drag aligned with the pager, or one that starts outside such a child, is
- * taken here.
- *
- * [startDragImmediately] is the escape hatch for a child that is flinging or overscrolling. Such a
- * child keeps claiming every touch for as long as its animation runs, so the pager has to take the
- * down on the [PointerEventPass.Initial] pass, which ancestors see first, and stop the child.
- * Whether a descendant is in motion is learned from the nested scroll traffic the child leaves over.
- */
+/** Arbitrates page drags and horizontal takeover while a child is moving. */
 private class PagerPageGestureNode(
     private var pagerState: PagerState,
     private var onIntercepted: (() -> Unit)?,
@@ -225,16 +222,20 @@ private class PagerPageGestureNode(
 
     init {
         motion.childMotion = childMotion
-        // Must be delegated to register childMotion into Compose's nested scroll tree.
-        // Called directly in init without storing a val property to avoid IDE "unused property" warnings.
+        // Delegated rather than stored: the connection must join Compose's nested scroll tree.
         delegate(nestedScrollModifierNode(childMotion, null))
     }
 
-    // CompositionLocal reads have to happen while the node is attached, and the pager's layout
-    // direction can change after that, so both are refreshed from the node's callbacks.
+    // CompositionLocal reads and layout direction are only authoritative while attached.
     override fun onAttach() {
         motion.nodeScope = coroutineScope
         refreshEnvironment()
+    }
+
+    override fun onDetach() {
+        motion.detach()
+        takeoverNode.reset()
+        childMotion.stop()
     }
 
     override fun onLayoutDirectionChange() = refreshEnvironment()
@@ -255,22 +256,43 @@ private class PagerPageGestureNode(
         }
     }
 
-    private val dragNode = delegate(PagerPageDragNode(motion))
-    private val takeoverNode = delegate(PagerPageTakeoverNode(motion, childMotion))
+    private fun childMotionAt(position: Offset): PagerChildMotion {
+        if (childMotion.direction == Orientation.Horizontal) return PagerChildMotion.Horizontal
+        val coordinates = requireLayoutCoordinates()
+        var vertical = childMotion.direction == Orientation.Vertical
+        var horizontal = false
+        traverseDescendants(OverscrollMotionNode.Key) { descendant ->
+            if (descendant is OverscrollMotionNode &&
+                coordinates.localBoundingBoxOf(descendant.requireLayoutCoordinates()).contains(position)
+            ) {
+                vertical = vertical || descendant.isVerticallyRebounding
+                horizontal = horizontal || descendant.isHorizontallyRebounding
+            }
+            if (horizontal) TraverseDescendantsAction.CancelTraversal else TraverseDescendantsAction.ContinueTraversal
+        }
+        return when {
+            horizontal -> PagerChildMotion.Horizontal
+            vertical -> PagerChildMotion.Vertical
+            else -> PagerChildMotion.Idle
+        }
+    }
+
+    private var dragNode = delegate(PagerPageDragNode(motion))
+    private val takeoverNode = delegate(PagerPageTakeoverNode(motion, childMotion, ::childMotionAt))
 
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
         if (pointerEvent.changes.fastAll { it.type == PointerType.Mouse }) {
             return
         }
-        // Takeover must own the complete pointer cycle. Feeding that same cycle to the Foundation
-        // drag node would start a second UserInput mutation; reset the Foundation node when a
-        // takeover claims a down so its previous child-owned cycle cannot remain latched.
-        val takeoverWasTrackingPointer = takeoverNode.isTrackingPointer
-        if (takeoverNode.willTrackPointer(pointerEvent, pass)) {
-            dragNode.onCancelPointerInput()
+        if (pass == PointerEventPass.Initial && pointerEvent.changes.fastAny { it.changedToDownIgnoreConsumed() }) {
+            // reverseLayout is only authoritative after measurement.
+            refreshEnvironment()
         }
+        // Takeover owns a whole pointer cycle; Foundation only sees the cycles it does not own.
+        val takeoverWasTrackingPointer = takeoverNode.isTrackingPointer
+        takeoverNode.prepareDown(pointerEvent, pass)
         takeoverNode.onPointerEvent(pointerEvent, pass, bounds)
-        if (takeoverWasTrackingPointer && !takeoverNode.isTrackingPointer) {
+        if (takeoverWasTrackingPointer != takeoverNode.isTrackingPointer) {
             dragNode.onCancelPointerInput()
         }
         if (!takeoverWasTrackingPointer && !takeoverNode.isTrackingPointer) {
@@ -284,78 +306,103 @@ private class PagerPageGestureNode(
     }
 
     fun update(state: PagerState, onIntercepted: (() -> Unit)?) {
-        motion.update(state, onIntercepted)
+        if (pagerState !== state) {
+            // A queued stop from the old Foundation recognizer must never settle the new state.
+            motion.cancel()
+            takeoverNode.reset()
+            undelegate(dragNode)
+            pagerState = state
+            motion.update(state, onIntercepted)
+            dragNode = delegate(PagerPageDragNode(motion))
+            childMotion.stop()
+        } else {
+            motion.update(state, onIntercepted)
+        }
         refreshEnvironment()
     }
 }
 
+private enum class PagerChildMotion { Idle, Vertical, Horizontal }
+
 /**
  * Takes a touch away from a child that is flinging or overscrolling.
  *
- * The child latched its own drag on the very first down, and because [PointerEventPass.Main] walks
- * children before their parents, it keeps consuming the movement there. Consuming on
- * [PointerEventPass.Initial] — parents first — is the only pass where an ancestor can still take
- * the gesture, so this node drives the pager itself while the child is in motion.
- *
- * It stays out of the way for a fresh gesture, which [PagerPageDragNode] and Compose's angle
- * arbitration handle.
+ * The child latched its own drag on the first down and keeps consuming it on
+ * [PointerEventPass.Main], where children run first, so only [PointerEventPass.Initial] can still
+ * take the gesture. Only motion the child already owns is taken over; a fresh gesture, including
+ * one on an incoming page mid-settle, is arbitrated on the Main pass.
  */
 private class PagerPageTakeoverNode(
     private val motion: PagerPageMotion,
     private val childMotion: PagerChildMotionConnection,
+    private val childMotionAt: (Offset) -> PagerChildMotion,
 ) : Modifier.Node(),
     PointerInputModifierNode {
     private var pointerId: PointerId? = null
-    private var dragged = false
     private var accumulated = Offset.Zero
     private val velocityTracker = VelocityTracker()
-
-    var isHandlingPointer: Boolean = false
-        private set
+    private var takeOverOnDown = false
+    private var ignoreUntilAllUp = false
+    private var isHandlingPointer = false
 
     val isTrackingPointer: Boolean
-        get() = pointerId != null
+        get() = pointerId != null || ignoreUntilAllUp
 
-    fun willTrackPointer(pointerEvent: PointerEvent, pass: PointerEventPass): Boolean = pass == PointerEventPass.Initial &&
-        pointerId == null &&
-        (childMotion.isInMotion || motion.isSettling) &&
-        pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() && it.type != PointerType.Mouse } != null
+    fun prepareDown(pointerEvent: PointerEvent, pass: PointerEventPass) {
+        if (pass != PointerEventPass.Initial || isTrackingPointer) return
+        val down = pointerEvent.changes.fastFirstOrNull {
+            it.changedToDownIgnoreConsumed() && !it.isConsumed && it.type != PointerType.Mouse
+        } ?: return
+        // Only owned motion is taken over; a fresh gesture stays with the child's Main-pass arbitration.
+        takeOverOnDown = childMotionAt(down.position) == PagerChildMotion.Vertical
+    }
+
     override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
         if (pass != PointerEventPass.Initial) return
+        if (ignoreUntilAllUp) {
+            ignoreUntilAllUp = pointerEvent.changes.fastAny { it.pressed }
+            return
+        }
+        // On Initial, ancestors run first: a consumed change is theirs, even mid-takeover.
+        if (pointerEvent.changes.fastAny { it.isConsumed }) {
+            onCancelPointerInput()
+            ignoreUntilAllUp = pointerEvent.changes.fastAny { it.pressed }
+            return
+        }
         val tracked = pointerId
         if (tracked == null) {
-            val down = pointerEvent.changes.fastFirstOrNull { it.changedToDownIgnoreConsumed() && it.type != PointerType.Mouse } ?: return
-            val shouldTakeover = childMotion.isInMotion || motion.isSettling
-            if (!shouldTakeover) return
+            val down = pointerEvent.changes.fastFirstOrNull {
+                it.changedToDownIgnoreConsumed() && it.type != PointerType.Mouse
+            } ?: return
+            if (!takeOverOnDown) return
+            takeOverOnDown = false
             pointerId = down.id
-            isHandlingPointer = false
-            dragged = false
             accumulated = Offset.Zero
             velocityTracker.resetTracking()
             velocityTracker.addPointerInputChange(down)
-            if (childMotion.isInMotion) {
-                motion.stopChildMotion()
-            }
+            if (childMotion.isInMotion) motion.stopChildMotion()
             return
         }
         val change = pointerEvent.changes.fastFirstOrNull { it.id == tracked } ?: return
+        velocityTracker.addPointerInputChange(change)
         if (!change.pressed) {
-            if (!isHandlingPointer) {
-                pointerId = null
-                accumulated = Offset.Zero
-                motion.stopChildMotion()
+            val replacement = pointerEvent.changes.fastFirstOrNull { it.pressed && it.type != PointerType.Mouse }
+            if (replacement != null) {
+                pointerId = replacement.id
+                // Fingers have unrelated coordinates; neither slop nor velocity may include
+                // the jump between them. Preserve accumulated movement, but seed a new tracker.
+                velocityTracker.resetTracking()
+                velocityTracker.addPointerInputChange(replacement)
+                if (isHandlingPointer) pointerEvent.changes.fastForEach { it.consume() }
                 return
             }
-            change.consume()
-            val velocity = if (dragged) velocityTracker.calculateVelocity().x else 0f
-            pointerId = null
-            isHandlingPointer = false
-            dragged = false
-            accumulated = Offset.Zero
-            motion.finishTakeoverDrag(Velocity(velocity, 0f))
+            if (isHandlingPointer) {
+                pointerEvent.changes.fastForEach { it.consume() }
+                motion.finishTakeoverDrag(Velocity(velocityTracker.calculateVelocity().x, 0f))
+            }
+            reset()
             return
         }
-        velocityTracker.addPointerInputChange(change)
         val delta = change.position - change.previousPosition
         if (!isHandlingPointer) {
             accumulated += delta
@@ -363,30 +410,35 @@ private class PagerPageTakeoverNode(
             val y = abs(accumulated.y)
             if (x > motion.touchSlop && x > y) {
                 isHandlingPointer = true
-                dragged = true
                 motion.onDragStarted()
                 motion.stopChildMotion()
                 motion.startTakeoverDrag()
-                change.consume()
+                pointerEvent.changes.fastForEach { it.consume() }
                 val overSlop = accumulated.x - if (accumulated.x >= 0f) motion.touchSlop else -motion.touchSlop
                 motion.dragBy(overSlop)
             } else if (y > motion.touchSlop && y > x) {
-                pointerId = null
-                accumulated = Offset.Zero
+                reset()
+                ignoreUntilAllUp = true
                 motion.stopChildMotion()
             }
             return
         }
-        change.consume()
+        pointerEvent.changes.fastForEach { it.consume() }
         motion.dragBy(delta.x)
     }
 
-    override fun onCancelPointerInput() {
+    fun reset() {
         pointerId = null
         isHandlingPointer = false
-        dragged = false
         accumulated = Offset.Zero
-        motion.cancelTakeoverDrag()
+        takeOverOnDown = false
+        ignoreUntilAllUp = false
+        velocityTracker.resetTracking()
+    }
+
+    override fun onCancelPointerInput() {
+        if (isHandlingPointer) motion.finishTakeoverDrag(Velocity.Zero)
+        reset()
     }
 }
 
@@ -398,77 +450,60 @@ private class PagerPageDragNode(
     interactionSource = null,
     orientation = Orientation.Horizontal,
 ) {
+    private var gesture = -1L
+
     override fun startDragImmediately(): Boolean = false
 
     override fun onDragStarted(startedPosition: Offset) {
-        motion.onDragStarted()
+        gesture = motion.onDragStarted()
     }
 
     override suspend fun drag(forEachDelta: suspend ((DragEvent.DragDelta) -> Unit) -> Unit) {
-        motion.drag(forEachDelta)
+        motion.drag(gesture, forEachDelta)
     }
 
     override fun onDragStopped(event: DragEvent.DragStopped) {
-        motion.onDragStopped(event.velocity)
+        if (isAttached) motion.onDragStopped(gesture, event.velocity)
     }
 }
 
-/**
- * Reports whether a descendant scrollable is still flinging or overscrolling.
- *
- * `onPreFling` sees the velocity a child leaves over and `onPostFling` runs once the child's
- * animation, rebound included, is done. In between the child holds the gesture, so a new touch has
- * to take it back.
- */
+/** Tracks the nested fling; independent rebound jobs are queried on pointer down. */
 private class PagerChildMotionConnection : NestedScrollConnection {
-    var isInMotion: Boolean = false
+    var direction: Orientation? = null
         private set
 
-    /**
-     * Whether the [onPreFling] that opened the current motion came with velocity. A child that ends
-     * a drag at its boundary still opens a settling animation with no velocity of its own, and that
-     * animation is what has to be interruptible too.
-     */
-    private var flingHadVelocity = false
+    val isInMotion: Boolean
+        get() = direction != null
 
-    /**
-     * A pager takeover can cancel more than one child scrollable. Their cancelled drags can each
-     * dispatch a zero-velocity [onPreFling] afterwards, so ignore fling callbacks until the next
-     * real user scroll instead of treating a later callback as a fresh settling animation.
-     */
+    // Ignore cancelled child gestures until the next user scroll.
     private var suppressMotionUntilUserScroll = false
 
     fun stop() {
-        isInMotion = false
-        flingHadVelocity = false
+        direction = null
         suppressMotionUntilUserScroll = true
     }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        // A new user drag supersedes any leftover motion flag.
         if (source == NestedScrollSource.UserInput) {
-            isInMotion = false
-            flingHadVelocity = false
+            direction = null
             suppressMotionUntilUserScroll = false
         }
         return Offset.Zero
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
-        if (suppressMotionUntilUserScroll) return Velocity.Zero
-        flingHadVelocity = available.x != 0f || available.y != 0f
-        isInMotion = true
+        if (!suppressMotionUntilUserScroll) {
+            direction = when {
+                abs(available.y) > abs(available.x) -> Orientation.Vertical
+                available.x != 0f -> Orientation.Horizontal
+                else -> null
+            }
+        }
         return Velocity.Zero
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        if (suppressMotionUntilUserScroll) return Velocity.Zero
-        // A settling animation runs inside this call, so the flag has to outlive it. Only a fling
-        // that carried velocity is done here; an overscroll rebound keeps animating afterwards.
-        if (flingHadVelocity) {
-            isInMotion = false
-            flingHadVelocity = false
-        }
+        if (!suppressMotionUntilUserScroll) direction = null
         return Velocity.Zero
     }
 }
@@ -477,8 +512,7 @@ private class PagerChildMotionConnection : NestedScrollConnection {
  * Drives one pager drag and its settling snap.
  *
  * The drag runs under `MutatePriority.UserInput` and the settle under `MutatePriority.Default`, the
- * split a scrollable uses: a new touch cancels the settle and takes over from the displayed
- * position, while the settle is interrupted only by real user input.
+ * split a scrollable uses: a new touch cancels the settle, which only real user input interrupts.
  */
 private class PagerPageMotion(
     private var pagerState: PagerState,
@@ -486,97 +520,112 @@ private class PagerPageMotion(
 ) {
     private var settleJob: Job? = null
     private var takeoverJob: Job? = null
+    private var dragJob: Job? = null
     private var takeoverChannel: Channel<Float>? = null
+    private var releaseVelocity = Velocity.Zero
+    private var generation = 0L
     var childMotion: PagerChildMotionConnection? = null
-    lateinit var nodeScope: CoroutineScope
+    var nodeScope: CoroutineScope? = null
     var minimumVelocity: Float = 0f
     var touchSlop: Float = 0f
     var directionSign: Float = -1f
 
-    val isSettling: Boolean
-        get() = settleJob?.isActive == true
     fun update(state: PagerState, intercepted: (() -> Unit)?) {
         pagerState = state
         onIntercepted = intercepted
     }
 
-    fun onDragStarted() {
+    fun cancel() {
+        generation++
         settleJob?.cancel()
         settleJob = null
+        takeoverChannel?.cancel()
+        takeoverChannel = null
+        takeoverJob?.cancel()
+        takeoverJob = null
+        dragJob?.cancel()
+        dragJob = null
+    }
+
+    fun detach() {
+        nodeScope = null
+        cancel()
+    }
+
+    fun onDragStarted(): Long {
+        cancel()
         onIntercepted?.invoke()
+        return generation
     }
 
     fun stopChildMotion() {
         childMotion?.stop()
     }
 
-    /** Starts one continuous mutation for the takeover gesture. */
+    /** One job owns both the mutation and its release, with no asynchronous join-to-snap gap. */
     fun startTakeoverDrag() {
-        cancelTakeoverDrag()
+        val scope = nodeScope ?: return
+        val state = pagerState
+        val sign = directionSign
+        val gesture = generation
         val channel = Channel<Float>(Channel.UNLIMITED)
         takeoverChannel = channel
-        takeoverJob = nodeScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        takeoverJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
             try {
-                pagerState.scroll(MutatePriority.UserInput) {
-                    for (delta in channel) {
-                        scrollBy(delta * directionSign)
-                    }
+                state.scroll(MutatePriority.UserInput) {
+                    for (delta in channel) scrollBy(delta * sign)
                 }
+                // Cancellation by another state mutation exits above, without snapping over it.
+                if (gesture == generation) settle(state, sign, releaseVelocity)
             } finally {
                 channel.cancel()
             }
         }
     }
 
-    /** Queues one delta into the takeover mutation. */
     fun dragBy(deltaX: Float) {
         takeoverChannel?.trySend(deltaX)
     }
 
-    /** Closes the takeover stream after all queued deltas, then starts the snap. */
+    /** Flushes the queued deltas, then the drag settles with [velocity]. */
     fun finishTakeoverDrag(velocity: Velocity) {
-        val channel = takeoverChannel
-        val job = takeoverJob
+        val channel = takeoverChannel ?: return
+        releaseVelocity = velocity
         takeoverChannel = null
+        settleJob = takeoverJob
         takeoverJob = null
-        if (channel == null) {
-            onDragStopped(velocity)
-            return
-        }
-
         channel.close()
-        settleJob?.cancel()
-        settleJob = nodeScope.launch {
-            job?.join()
-            settle(velocity)
-        }
     }
 
-    /** Cancels an interrupted takeover without leaving a live pager mutation behind. */
-    fun cancelTakeoverDrag() {
-        takeoverChannel?.cancel()
-        takeoverChannel = null
-        takeoverJob?.cancel()
-        takeoverJob = null
-    }
-
-    suspend fun drag(forEachDelta: suspend ((DragEvent.DragDelta) -> Unit) -> Unit) {
-        val sign = directionSign
-        pagerState.scroll(MutatePriority.UserInput) {
-            forEachDelta { dragDelta ->
-                scrollBy(dragDelta.delta.x * sign)
-            }
-        }
-    }
-
-    fun onDragStopped(velocity: Velocity) {
-        settleJob?.cancel()
-        settleJob = nodeScope.launch { settle(velocity) }
-    }
-
-    private suspend fun settle(velocity: Velocity) {
+    suspend fun drag(gesture: Long, forEachDelta: suspend ((DragEvent.DragDelta) -> Unit) -> Unit) = coroutineScope {
+        if (gesture != generation) return@coroutineScope
         val state = pagerState
         val sign = directionSign
+        val job = currentCoroutineContext()[Job]
+        dragJob = job
+        try {
+            state.scroll(MutatePriority.UserInput) {
+                forEachDelta { dragDelta -> scrollBy(dragDelta.delta.x * sign) }
+            }
+        } catch (cancelled: CancellationException) {
+            // DragStopped(Zero) also arrives for mutation cancellation; only a normal return snaps.
+            if (gesture == generation) generation++
+            throw cancelled
+        } finally {
+            if (dragJob === job) dragJob = null
+        }
+    }
+
+    fun onDragStopped(gesture: Long, velocity: Velocity) {
+        if (gesture != generation) return
+        val scope = nodeScope ?: return
+        val state = pagerState
+        val sign = directionSign
+        settleJob?.cancel()
+        settleJob = scope.launch(start = CoroutineStart.UNDISPATCHED) { settle(state, sign, velocity) }
+    }
+
+    private suspend fun settle(state: PagerState, sign: Float, velocity: Velocity) {
         val minimum = minimumVelocity
         state.scroll(MutatePriority.Default) {
             val position = state.currentPage + state.currentPageOffsetFraction

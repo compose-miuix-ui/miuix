@@ -139,6 +139,106 @@ fun Modifier.drawBackdrop(
         )
 }
 
+/**
+ * A backdrop pipeline described as values.
+ *
+ * [Modifier.drawBackdrop] compares callbacks by identity, so a pipeline assembled from lambdas is
+ * rebuilt whenever the caller recomposes. Implement this interface instead to describe the same
+ * pipeline with a value type: the modifier node is kept while two instances compare equal.
+ */
+interface BackdropPipeline {
+    /** Silhouette read on each draw, so an animated shape stays current. */
+    val shape: Shape
+
+    /** Configures the blur, colour and shading passes. */
+    fun configureEffects(scope: BackdropEffectScope)
+
+    /** Draws above the content, such as a rim or mask. */
+    fun drawFront(scope: DrawScope) {}
+}
+
+/** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
+fun Modifier.drawBackdrop(
+    backdrop: Backdrop,
+    pipeline: BackdropPipeline,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
+    enabled: Boolean = true,
+): Modifier {
+    val effectiveEnabled = enabled && isRuntimeShaderSupported()
+    return this.then(
+        BackdropPipelineElement(
+            backdrop = backdrop,
+            pipeline = pipeline,
+            contentBlendMode = contentBlendMode,
+            enabled = effectiveEnabled,
+        ),
+    )
+}
+
+private class BackdropPipelineElement(
+    val backdrop: Backdrop,
+    val pipeline: BackdropPipeline,
+    val contentBlendMode: BlendMode,
+    val enabled: Boolean,
+) : ModifierNodeElement<DrawBackdropNode>() {
+
+    override fun create(): DrawBackdropNode = DrawBackdropNode(
+        backdrop = backdrop,
+        shape = { pipeline.shape },
+        effects = { pipeline.configureEffects(this) },
+        layerBlock = null,
+        onDrawBehind = null,
+        onDrawBackdrop = DefaultOnDrawBackdrop,
+        onDrawSurface = null,
+        onDrawFront = { pipeline.drawFront(this) },
+        contentBlendMode = contentBlendMode,
+        progressiveGradient = null,
+        enabled = enabled,
+    )
+
+    override fun update(node: DrawBackdropNode) {
+        val enabledChanged = node.enabled != enabled
+        node.backdrop = backdrop
+        node.updateShape { pipeline.shape }
+        node.effects = { pipeline.configureEffects(this) }
+        node.onDrawFront = { pipeline.drawFront(this) }
+        node.contentBlendMode = contentBlendMode
+        node.enabled = enabled
+        if (enabledChanged) {
+            if (!enabled) {
+                node.releaseGraphicsLayers()
+            }
+            node.invalidateMeasurement()
+        }
+        node.invalidateDrawCache()
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "drawBackdrop"
+        properties["backdrop"] = backdrop
+        properties["pipeline"] = pipeline
+        properties["enabled"] = enabled
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BackdropPipelineElement) return false
+        if (backdrop != other.backdrop) return false
+        if (pipeline != other.pipeline) return false
+        if (contentBlendMode != other.contentBlendMode) return false
+        if (enabled != other.enabled) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = backdrop.hashCode()
+        result = 31 * result + pipeline.hashCode()
+        result = 31 * result + contentBlendMode.hashCode()
+        result = 31 * result + enabled.hashCode()
+        return result
+    }
+}
+
 private class DrawBackdropElement(
     val backdrop: Backdrop,
     val shape: () -> Shape,
@@ -509,6 +609,9 @@ private class DrawBackdropNode(
     private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
+
+    // Set once updateEffects() has run with a measured size, i.e. the effect observer is live.
+    private var effectsSized = false
     private var sharpOverlayActive = false
 
     // Level-stack effect cached on its inputs: chains by identity, the recorded blend by value.
@@ -517,6 +620,9 @@ private class DrawBackdropNode(
     private var cachedStackRadiusY = Float.NaN
     private var cachedStackW = Float.NaN
     private var cachedStackH = Float.NaN
+    private var cachedStackPad = Float.NaN
+    private var cachedStackCompW = Float.NaN
+    private var cachedStackCompH = Float.NaN
     private var cachedStackGradient: ProgressiveBlur? = null
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
@@ -552,6 +658,7 @@ private class DrawBackdropNode(
     private var sharpOverlayGradient: ProgressiveBlur? = null
     private var sharpOverlayW = Float.NaN
     private var sharpOverlayH = Float.NaN
+    private var sharpOverlayPad = Float.NaN
     private var sharpRadiusX = Float.NaN
     private var sharpRadiusY = Float.NaN
     private var sharpExp = -1
@@ -596,7 +703,8 @@ private class DrawBackdropNode(
             return
         }
         if (effectScope.update(this)) {
-            updateEffects()
+            // Attach skipped construction for lack of a size; re-observe with real geometry.
+            if (effectsSized) updateEffects() else observeEffects()
         }
         onDrawBehind?.invoke(this)
 
@@ -643,7 +751,12 @@ private class DrawBackdropNode(
     }
 
     private fun observeEffects() {
-        observeReads { updateEffects() }
+        observeReads {
+            // No size at attach time: building here would create an effect from NaN dimensions.
+            if (effectScope.size.width.isNaN() || effectScope.size.height.isNaN()) return@observeReads
+            updateEffects()
+            effectsSized = true
+        }
     }
 
     private fun updateEffects() {
@@ -713,6 +826,9 @@ private class DrawBackdropNode(
             cachedStackRadiusY == rY &&
             cachedStackW == paddedW &&
             cachedStackH == paddedH &&
+            cachedStackPad == scope.padding &&
+            cachedStackCompW == scope.size.width &&
+            cachedStackCompH == scope.size.height &&
             cachedStackGradient == gradient &&
             cachedStackPre === pre &&
             cachedStackPost === post &&
@@ -744,6 +860,9 @@ private class DrawBackdropNode(
                 cachedStackRadiusY = rY
                 cachedStackW = paddedW
                 cachedStackH = paddedH
+                cachedStackPad = scope.padding
+                cachedStackCompW = scope.size.width
+                cachedStackCompH = scope.size.height
                 cachedStackGradient = gradient
                 cachedStackPre = pre
                 cachedStackPost = post
@@ -775,6 +894,7 @@ private class DrawBackdropNode(
             return
         }
         if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
+            sharpOverlayPad != scope.padding ||
             sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
         ) {
             // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
@@ -824,6 +944,7 @@ private class DrawBackdropNode(
             sharpOverlayGradient = gradient
             sharpOverlayW = sw
             sharpOverlayH = sh
+            sharpOverlayPad = scope.padding
             sharpRadiusX = rX
             sharpRadiusY = rY
             sharpExp = exp
@@ -972,6 +1093,9 @@ private class DrawBackdropNode(
         cachedStackRadiusY = Float.NaN
         cachedStackW = Float.NaN
         cachedStackH = Float.NaN
+        cachedStackPad = Float.NaN
+        cachedStackCompW = Float.NaN
+        cachedStackCompH = Float.NaN
         cachedStackGradient = null
         cachedStackPre = null
         cachedStackPost = null
@@ -1000,5 +1124,6 @@ private class DrawBackdropNode(
     override fun onDetach() {
         releaseGraphicsLayers()
         layoutCoordinates = null
+        effectsSized = false
     }
 }

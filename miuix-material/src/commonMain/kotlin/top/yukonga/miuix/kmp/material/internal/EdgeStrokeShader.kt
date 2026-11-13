@@ -6,11 +6,16 @@ package top.yukonga.miuix.kmp.material.internal
 import top.yukonga.miuix.kmp.material.EdgePeak
 import top.yukonga.miuix.kmp.material.agsl.MaterialAgsl
 
-/** Cache key of the compiled edge-stroke shader for [peak]. */
-internal fun edgeStrokeShaderKey(peak: EdgePeak): String = "MiuixEdgeStroke" + peak.name
+/** Compiled-shader key and AGSL source for one [EdgePeak]. */
+internal class EdgeStrokeShader(val key: String, val source: String)
 
-/** AGSL source of the edge-stroke shader for [peak]. */
-internal fun edgeStrokeShaderSource(peak: EdgePeak): String = buildEdgeStrokeShader(peak)
+// Source assembly interpolates large AGSL fragments; build each peak once instead of per draw.
+private val edgeStrokeShaders: Map<EdgePeak, Lazy<EdgeStrokeShader>> = EdgePeak.entries.associateWith { peak ->
+    lazy { EdgeStrokeShader("MiuixEdgeStroke" + peak.name, buildEdgeStrokeShader(peak)) }
+}
+
+/** Cached key and source for [peak]. */
+internal fun edgeStrokeShader(peak: EdgePeak): EdgeStrokeShader = edgeStrokeShaders.getValue(peak).value
 
 /** Bevel normal along the edge stroke, as AGSL source. */
 internal fun edgeStrokeNormalSource(): String = """

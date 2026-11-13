@@ -16,11 +16,8 @@ import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.invalidatePlacement
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -93,6 +90,12 @@ class MiuixOverscrollEffect : OverscrollEffect {
     private val springEngineY = SpringEngine()
     private var animationJobX: Job? = null
     private var animationJobY: Job? = null
+
+    internal val isVerticallyRebounding: Boolean
+        get() = animationJobY?.isActive == true
+
+    internal val isHorizontallyRebounding: Boolean
+        get() = animationJobX?.isActive == true
 
     // Injected by MiuixOverscrollEffectNode when attached
     internal var launchAnimation: ((suspend CoroutineScope.() -> Unit) -> Job)? = null
@@ -361,7 +364,14 @@ private class MiuixOverscrollEffectNode(
     val effect: MiuixOverscrollEffect,
 ) : Modifier.Node(),
     CompositionLocalConsumerModifierNode,
+    OverscrollMotionNode,
     LayoutModifierNode {
+
+    override val isVerticallyRebounding: Boolean
+        get() = effect.isVerticallyRebounding
+
+    override val isHorizontallyRebounding: Boolean
+        get() = effect.isHorizontallyRebounding
 
     override fun onAttach() {
         super.onAttach()
@@ -381,19 +391,10 @@ private class MiuixOverscrollEffectNode(
         effect.resetAll()
     }
 
-    private var cachedDensity: Density? = null
-    private var cachedWindowInfo: WindowInfo? = null
-
     private fun updateScrollRange() {
-        val density = currentValueOf(LocalDensity)
-        val windowInfo = currentValueOf(LocalWindowInfo)
-        if (density == cachedDensity && windowInfo == cachedWindowInfo) return
-        cachedDensity = density
-        cachedWindowInfo = windowInfo
-        with(density) {
-            effect.scrollRangeV = windowInfo.containerDpSize.height.toPx()
-            effect.scrollRangeH = windowInfo.containerDpSize.width.toPx()
-        }
+        val size = currentValueOf(LocalWindowInfo).containerSize
+        effect.scrollRangeV = size.height.toFloat()
+        effect.scrollRangeH = size.width.toFloat()
     }
 
     override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {

@@ -2,6 +2,10 @@
 
 `GlassTopAppBar` is a glass top bar with collapsing titles and action slots. Use [GlassIconButton](./glassiconbutton) for matching navigation and action buttons.
 
+With a scroll behavior or `visualContentOffset`, gradient-band opacity follows the live scroll distance during drawing, without a separate fade delay. Without either scroll source, the explicit overlap state retains its fade animation. `backgroundAlpha` still multiplies either mode.
+
+The default band follows the measured title, subtitle and `bottomContent` height. A smooth fade starts 12.dp inside the bottom edge and ends at `bandOverhang` (48.dp by default) below it. This keeps the lower subtitle area covered while providing a long fading tail without an opaque extension below the bar. The full fade fits inside the background layer even at partial opacity, so it does not suddenly appear when scrolling reaches full opacity. This does not increase foreground layout height. Custom brushes retain their existing stretched-band behavior.
+
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -63,8 +67,10 @@ Only the list is recorded into `backdrop`. The glass controls use the bar's back
 
 ### Content at the Top or Scrolled
 
-- Pass `scrollBehavior` to derive the material state from scrolling. Without it, the material stays visible.
-- Pass `isContentScrolled` for explicit control. For lazy lists, use `listState.canScrollBackward` so returning to the top clears the material independently of title collapse.
+- `isContentScrolled` controls the button material's floating transition; use `listState.canScrollBackward`. Without it, state is inferred from the behavior's `contentOffset`, then `visualContentOffset`, or defaults to visible.
+- Band opacity and shadow progress follow `visualContentOffset`, then the behavior's `visualContentOffset`. With neither source, band opacity follows the boolean state.
+- Elastic overscroll can also raise button material progress. Bind `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)`; see [Overscroll](/guide/utils#vertical-overscroll).
+- For programmatic scrolling, provide both the list's boolean state and its signed visual offset, including elastic displacement when needed.
 
 ## Properties
 
@@ -81,6 +87,7 @@ These parameters are shared by both overloads:
 | largeTitle | String | Expanded title | title | No |
 | subtitle | String | Subtitle | "" | No |
 | scrollBehavior | ScrollBehavior? | Title collapse and shadow behavior | null | No |
+| visualContentOffset | (() -> Float)? | Live signed content position in pixels, overriding the behavior's offset for visual effects | null | No |
 | bandBrush | Brush | Background band gradient | GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) | No |
 | bandOverhang | Dp | Band extension below the bar | GlassTopAppBarDefaults.BandOverhang | No |
 | largeTitleBlurRadius | Dp | Blur radius as the large title fades out | GlassTopAppBarDefaults.LargeTitleBlurRadius | No |
@@ -101,7 +108,7 @@ The explicit-overlap overload adds one required parameter:
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | Whether page content has left its resting position | - | Yes |
+| isContentScrolled | Boolean | Explicit button material floating state; also controls band opacity when no offset source is supplied | - | Yes |
 
 ### GlassTopAppBarDefaults Object {#glasstopappbardefaults}
 
@@ -115,13 +122,13 @@ The explicit-overlap overload adds one required parameter:
 | LargeTitleBlurRadius | Dp | Large-title blur radius | 12.dp |
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
-| BandOverhang | Dp | Band extension below the bar | 28.dp |
+| BandOverhang | Dp | Band extension below the bar | 48.dp |
 
 #### Methods
 
 | Method Name | Return Type | Description |
 | --- | --- | --- |
-| collapseRamp(scrollBehavior: ScrollBehavior?) | State\<Float> | Shadow progress from 0 to 1 over RampDistance after RampStart; null behavior returns 1f |
+| collapseRamp(scrollBehavior: ScrollBehavior?, visualContentOffset: (() -> Float)? = null) | State\<Float> | Shadow progress from the supplied position or behavior; returns 1f when neither is provided |
 | buttonFill() | Color | White in light mode; `#FF2C2C2C` in dark mode |
 | buttonMaterial() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
 | buttonStroke() | EdgeStroke | `GlassEdgeStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
@@ -133,6 +140,8 @@ The explicit-overlap overload adds one required parameter:
 ### Adding Tabs
 
 Place [GlassTabRow or GlassSegmentedTabRow](./glasstabrow#inside-glasstopappbar) in `bottomContent`. They inherit the backdrop and blur; set `surfaceAlpha` from page scroll state.
+
+With `progressiveBlur = true`, non-empty `bottomContent` is included automatically in the progressive band's coverage. The band follows the measured slot height and title collapse without changing layout height. With no bottom content, it keeps the compact-toolbar coverage. Tabs in `bottomContent` use the bar's backdrop context while retaining their own glass material and styling.
 
 ### Transforming the Foreground
 

@@ -16,6 +16,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /**
  * Applies a glass surface and shadow over [backdrop].
@@ -30,8 +31,7 @@ import top.yukonga.miuix.kmp.material.drawEdgeStroke
  * @param stroke Optional bloom stroke along the silhouette.
  * @param shadow Shadow configuration. `null` disables the shadow.
  * @param shading Whether to refract and shade the backdrop. Use `false` for bars and menus.
- * @param fallback Surface modifier used without a backdrop. The default clips to [shape] and
- *   leaves subsequent caller content as the body.
+ * @param fallback Surface used without a backdrop; `null` clips to [shape].
  */
 fun Modifier.glassPanel(
     backdrop: Backdrop?,
@@ -42,12 +42,12 @@ fun Modifier.glassPanel(
     stroke: EdgeStroke? = null,
     shadow: GlassShadow? = GlassShadows.Regular,
     shading: Boolean = true,
-    fallback: Modifier = Modifier.clip(shape),
-): Modifier = if (backdrop == null) {
+    fallback: Modifier? = null,
+): Modifier = if (backdrop == null || !isRuntimeShaderSupported()) {
     this
         .graphicsLayer { this.alpha = alpha }
         .glassShadow(shape, shadow)
-        .then(fallback)
+        .then(fallback ?: Modifier.clip(shape))
         .drawWithContent {
             drawContent()
             stroke?.let { drawEdgeStroke(shape, it, 1f) }

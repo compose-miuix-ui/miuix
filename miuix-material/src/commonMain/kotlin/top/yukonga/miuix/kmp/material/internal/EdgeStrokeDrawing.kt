@@ -42,10 +42,8 @@ internal fun DrawScope.drawEdgeStrokeShape(
     val heightPx = size.height
     if (widthPx <= 0f || heightPx <= 0f) return
 
-    val shader = sharedShaderCache.obtainRuntimeShader(
-        edgeStrokeShaderKey(stroke.peak),
-        edgeStrokeShaderSource(stroke.peak),
-    )
+    val source = edgeStrokeShader(stroke.peak)
+    val shader = sharedShaderCache.obtainRuntimeShader(source.key, source.source)
     shader.setSilhouetteUniforms(shape, layoutDirection, size, this, smoothing)
     shader.setEdgeStrokeUniforms(
         widthPx = widthPx,

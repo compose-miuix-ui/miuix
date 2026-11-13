@@ -46,8 +46,16 @@ half4 main(float2 coord) {
 
 internal const val GLASS_EDGE_SHADER_KEY = "MiuixGlassEdge"
 
-/** Cache key of the fused edge pass for [peak]. */
-internal fun glassEdgeShaderKey(peak: EdgePeak): String = GLASS_EDGE_SHADER_KEY + peak.name
+/** Compiled-shader key and AGSL source of the fused edge pass for one [EdgePeak]. */
+internal class GlassEdgeShader(val key: String, val source: String)
+
+// Source assembly interpolates large AGSL fragments; build each peak once instead of per draw.
+private val glassEdgeShaders: Map<EdgePeak, Lazy<GlassEdgeShader>> = EdgePeak.entries.associateWith { peak ->
+    lazy { GlassEdgeShader(GLASS_EDGE_SHADER_KEY + peak.name, buildGlassEdgeShader(peak)) }
+}
+
+/** Cached key and source for [peak]. */
+internal fun glassEdgeShader(peak: EdgePeak): GlassEdgeShader = glassEdgeShaders.getValue(peak).value
 
 /**
  * Rim light and edge stroke in one pass, as AGSL source.
@@ -58,7 +66,7 @@ internal fun glassEdgeShaderKey(peak: EdgePeak): String = GLASS_EDGE_SHADER_KEY 
  * The mask still runs after this pass, so the rim picks up its coverage here instead of after: a
  * sub-pixel difference confined to the anti-aliased ring.
  */
-internal fun glassEdgeShaderSource(peak: EdgePeak): String {
+private fun buildGlassEdgeShader(peak: EdgePeak): String {
     val axisUniforms = if (peak == EdgePeak.Axial) {
         """
 uniform float2 axis1;

@@ -145,7 +145,6 @@ fun BreadcrumbBar(
             .padding(insideMargin)
             .nestedScroll(nestedScrollConnection)
             .overScrollHorizontal(
-                nestedScrollToParent = false,
                 isEnabled = { hasScrollRange },
             ),
     ) {

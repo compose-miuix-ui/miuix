@@ -130,7 +130,8 @@ fun OverscrollLoadMorePage(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 8.dp),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(16.dp),
                         colors = CardDefaults.defaultColors(

@@ -153,8 +153,9 @@ private fun GlassButtonSurface(
     }
     val keepMaterial = sharedKeepMaterial ?: ownKeepMaterial
     val opacity = surfaceAlpha.coerceIn(0f, 1f)
-    val anchorSurface = remember(backdrop, style, material, underlayMaterial, stroke, fill) {
-        GlassAnchorSurface(backdrop, style, material, underlayMaterial, stroke, fill)
+    val effectiveBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
+    val anchorSurface = remember(effectiveBackdrop, style, material, underlayMaterial, stroke, fill) {
+        GlassAnchorSurface(effectiveBackdrop, style, material, underlayMaterial, stroke, fill)
     }
     SideEffect {
         val anchor = popupAnchor ?: return@SideEffect
@@ -189,10 +190,10 @@ private fun GlassButtonSurface(
                 .matchParentSize()
                 .graphicsLayer { alpha = progress.value }
                 .then(
-                    if (backdrop != null) {
+                    if (effectiveBackdrop != null) {
                         if (underlayMaterial != null) {
                             Modifier.glassOnActionBar(
-                                backdrop = backdrop,
+                                backdrop = effectiveBackdrop,
                                 shape = shape,
                                 style = style,
                                 alpha = opacity,
@@ -203,7 +204,7 @@ private fun GlassButtonSurface(
                             )
                         } else {
                             Modifier.glass(
-                                backdrop = backdrop,
+                                backdrop = effectiveBackdrop,
                                 shape = shape,
                                 style = style,
                                 alpha = opacity,

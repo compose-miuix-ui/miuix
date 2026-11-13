@@ -557,6 +557,8 @@ class PullToRefreshState(
         }
     }
 
+    internal fun canPullDown(availableY: Float, source: NestedScrollSource): Boolean = source == NestedScrollSource.UserInput && isGestureActive && availableY > 0f
+
     /** Creates a [NestedScrollConnection] for the pull-to-refresh logic itself. */
     internal fun getOrCreateNestedScrollConnection(
         overScrollState: OverScrollState,
@@ -611,7 +613,7 @@ class PullToRefreshState(
                     }
 
                     // When pulling down after the content is at its top, consume the scroll to show the indicator.
-                    if (source == NestedScrollSource.UserInput && isGestureActive && available.y > 0f) {
+                    if (canPullDown(available.y, source)) {
                         isTouching = true
                         animationJob?.cancel()
                         applyDrag(available.y)

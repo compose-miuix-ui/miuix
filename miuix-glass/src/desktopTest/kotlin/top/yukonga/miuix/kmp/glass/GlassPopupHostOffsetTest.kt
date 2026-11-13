@@ -18,6 +18,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,8 +61,10 @@ class GlassPopupHostOffsetTest {
     }
 
     @Test
-    fun popupAlignsToItsAnchorInsideAnOffsetHost() = runComposeUiTest {
-        val anchor = anchorRect(density)
+    fun popupAlignsToItsAnchorInsideAnOffsetHost() = assertPopupAnchor(120.dp)
+
+    private fun assertPopupAnchor(top: Dp) = runComposeUiTest {
+        val anchor = with(density) { Rect(300.dp.toPx(), top.toPx(), 400.dp.toPx(), (top + 40.dp).toPx()) }
         setContent {
             DialogTestHost {
                 Box(Modifier.fillMaxSize()) {
@@ -84,6 +87,7 @@ class GlassPopupHostOffsetTest {
 
         val row = onNodeWithTag("row").fetchSemanticsNode().boundsInRoot
         assertEquals(anchor.right, row.right, 1f)
+        assertEquals(anchor.top, row.top, 1f)
     }
 
     @Test

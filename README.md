@@ -54,7 +54,7 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // Optional: Add miuix-glass for the glass surfaces and components (requires minSdk 33 on Android)
+            // Optional: Add miuix-glass for the glass surfaces and components
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")

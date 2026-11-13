@@ -2,8 +2,10 @@
 
 `miuix-glass` 为 Compose Multiplatform 提供玻璃表面与组件：在[材质定义](/zh_CN/guide/material)之上实现 `glassPanel`、`glass`、`glassShadow`、`glassSurface`，支持背景模糊、颜色混合与光照效果。
 
-::: warning 注意
-Android 端需要 `minSdk` 33（Android 13）或更高。
+::: tip 说明
+`miuix-glass` 的 Android 端 `minSdk` 为 24。玻璃效果依赖 `RuntimeShader`（Android 13 及以上）；低于该版本时表面退化为不透明的 `containerColor`，见[运行时能力检测](/zh_CN/guide/material#运行时能力检测)。
+
+注意 `miuix-glass` 依赖 `miuix-blur`，后者自身仍声明 `minSdk` 33：低于 API 33 的应用需要在清单中加入 `tools:overrideLibrary="top.yukonga.miuix.kmp.blur"`，并且不要期望模糊层生效。
 :::
 
 ## 配置
@@ -104,7 +106,7 @@ Box(modifier = Modifier.fillMaxSize()) {
 | stroke | EdgeStroke? | 边缘描边（`width`/`bevel` 为 `Dp`） | null | 否 |
 | shadow | GlassShadow? | 投影 | GlassShadows.Regular | 否 |
 | shading | Boolean | 是否应用折射与光照 | true | 否 |
-| fallback | Modifier | backdrop 为空时使用的表面 | Modifier.clip(shape) | 否 |
+| fallback | Modifier? | backdrop 为空时使用的表面；`null` 表示仅裁剪为形状 | null | 否 |
 
 平面玻璃栏和菜单可使用 `shading = false`，独立的 `stroke` 仍有效。默认 `fallback` 仅裁剪，不添加填色。
 

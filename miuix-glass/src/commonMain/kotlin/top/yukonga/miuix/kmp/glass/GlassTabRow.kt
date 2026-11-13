@@ -57,6 +57,7 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.drawGlassRim
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
@@ -229,7 +230,7 @@ fun GlassTabRow(
     val shape = GlassTabRowDefaults.shape(height)
     val ramp = surfaceAlpha.coerceIn(0f, 1f)
     val topBarContext = LocalGlassTopAppBarContext.current
-    val resolvedBackdrop = topBarContext?.backdrop ?: backdrop
+    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop)?.takeIf { isRuntimeShaderSupported() }
     val underlayMaterial = topBarContext?.underlayMaterial
     val resolvedMaterial = material?.withUnderlayBlur(underlayMaterial)
 
@@ -265,9 +266,13 @@ fun GlassTabRow(
 
                 fun containerColor(): Color {
                     val settled = target.value
-                    return if (selected) settled else lerp(colors.restingContainerColor, settled, ramp)
+                    return if (selected) settled else lerp(colors.restingContainerColor, settled, if (resolvedBackdrop != null) ramp else 0f)
                 }
-                val materialSurface = if (resolvedBackdrop != null && underlayMaterial != null) {
+                val materialSurface = if (resolvedBackdrop == null) {
+                    Modifier
+                        .glassShadow(shape, shadow, alpha)
+                        .clip(shape)
+                } else if (underlayMaterial != null) {
                     Modifier
                         .glassShadow(shape, shadow, alpha * ramp)
                         .glassOnActionBar(
@@ -443,9 +448,10 @@ fun GlassSegmentedTabRow(
 ) {
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
-    val ramp = surfaceAlpha.coerceIn(0f, 1f)
+    val runtimeShaderSupported = isRuntimeShaderSupported()
+    val ramp = if (runtimeShaderSupported) surfaceAlpha.coerceIn(0f, 1f) else 0f
     val topBarContext = LocalGlassTopAppBarContext.current
-    val resolvedBackdrop = topBarContext?.backdrop ?: backdrop
+    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop).takeIf { runtimeShaderSupported }
     val underlayMaterial = topBarContext?.underlayMaterial
     val resolvedMaterial = material?.withUnderlayBlur(underlayMaterial)
     val trackShape = GlassSegmentedTabRowDefaults.shape(height)
@@ -471,7 +477,9 @@ fun GlassSegmentedTabRow(
         launch { span.animateTo(slot, GlassMotion.default()) }
     }
 
-    val materialSurface = if (underlayMaterial != null) {
+    val materialSurface = if (resolvedBackdrop == null) {
+        Modifier
+    } else if (underlayMaterial != null) {
         Modifier.glassOnActionBar(
             backdrop = resolvedBackdrop,
             shape = trackShape,
@@ -498,7 +506,11 @@ fun GlassSegmentedTabRow(
     Box(
         modifier = modifier
             .height(height)
-            .glassShadow(trackShape, shadow, alpha * ramp)
+            .glassShadow(
+                trackShape,
+                shadow,
+                alpha * if (runtimeShaderSupported) ramp else 1f,
+            )
             .clip(trackShape)
             .then(materialSurface)
             .background(trackColor.copy(alpha = trackColor.alpha * (1f - ramp)))

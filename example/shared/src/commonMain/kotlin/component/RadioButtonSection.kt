@@ -18,7 +18,7 @@ import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 fun LazyListScope.radioButtonSection() {
     item(key = "radioButton") {
-        SmallTitle(text = "RadioButton")
+        SmallTitle(text = "RadioButtonPreference")
         RadioButtonCardsDemo()
         Card(
             modifier = Modifier

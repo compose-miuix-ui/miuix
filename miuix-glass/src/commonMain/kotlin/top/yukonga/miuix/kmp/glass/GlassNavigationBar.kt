@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
@@ -55,6 +56,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
@@ -184,7 +186,7 @@ object GlassNavigationBarDefaults {
  *
  * @param items The destinations, in order.
  * @param selectedIndex The index of the current destination.
- * @param onSelect Called with the index under the finger, on press and while dragging.
+ * @param onSelect Called once with the final index on pointer release, or on keyboard/accessibility activation. Cancelled gestures do not select.
  * @param backdrop The [Backdrop] supplying the content behind the glass. `null` disables sampling
  *   and fills the capsule with the theme's surfaceContainer color.
  * @param modifier The modifier applied to the bar.
@@ -244,6 +246,7 @@ fun GlassNavigationBar(
     var barWidth by remember { mutableIntStateOf(0) }
     var pressedIndex by remember { mutableIntStateOf(-1) }
     val dragging = remember { mutableStateOf(false) }
+    var settleGeneration by remember { mutableIntStateOf(0) }
 
     val showScale = remember { Animatable(if (visible) 1f else GlassMotion.NAV_HIDE_SCALE) }
     var interactionEnabled by remember { mutableStateOf(visible) }
@@ -267,9 +270,8 @@ fun GlassNavigationBar(
         leftSpring: SpringSpec<Float> = GlassMotion.edgeSpring(newLeft <= left.value),
         rightSpring: SpringSpec<Float> = GlassMotion.edgeSpring(newLeft > left.value),
     ) {
-        // All motion owns the same two Animatables. Retarget through animateTo so their current
-        // positions and velocities survive drag, reversal, selection and release interruptions.
-        // These jobs belong to the composition, not to a restarting selection effect.
+        if (left.targetValue == newLeft && right.targetValue == newRight) return
+        // Shared springs preserve velocity when the target changes.
         scope.launch { left.animateTo(newLeft, leftSpring) }
         scope.launch { right.animateTo(newRight, rightSpring) }
     }
@@ -278,18 +280,17 @@ fun GlassNavigationBar(
     val chipWidth = slot + overhang * 2f
     val targetLeft = contentInset - overhang + index * slot
     val targetRight = targetLeft + chipWidth
-
-    LaunchedEffect(targetLeft, targetRight, dragging.value) {
-        if (slot <= 0f) return@LaunchedEffect
+    // Settle after composition commits the selection returned by onSelect.
+    LaunchedEffect(index, settleGeneration, targetLeft, targetRight) {
         if (dragging.value) return@LaunchedEffect
+        if (slot <= 0f) return@LaunchedEffect
         if (right.value <= left.value) {
             left.snapTo(targetLeft)
             right.snapTo(targetRight)
-            return@LaunchedEffect
+        } else {
+            animateIndicator(targetLeft, targetRight)
         }
-        animateIndicator(targetLeft, targetRight)
     }
-
     val chipHeldPx = with(density) {
         (height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2).toPx()
     }
@@ -373,7 +374,9 @@ fun GlassNavigationBar(
                     stroke = stroke,
                     shadow = shadow,
                     shading = false,
-                    fallback = Modifier.clip(shape).background(MiuixTheme.colorScheme.surfaceContainer),
+                    fallback = Modifier
+                        .clip(shape)
+                        .background(MiuixTheme.colorScheme.surfaceContainer),
                 )
                 .onSizeChanged { barWidth = it.width }
                 .then(
@@ -383,32 +386,35 @@ fun GlassNavigationBar(
                                 val down = awaitFirstDown(requireUnconsumed = false)
                                 val selectionWidth = size.width.toFloat()
                                 if (selectionWidth <= contentInset * 2f) return@awaitEachGesture
-                                // Freeze hit regions for this gesture: changing a destination can
-                                // resize the capsule, which must not select another destination.
+                                // Freeze hit regions until release; only the indicator previews selection.
+                                val selectionSlot = (selectionWidth - contentInset * 2f) / items.size
                                 fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) size.width - x else x
-                                fun indexAt(x: Float): Int {
-                                    val span = (selectionWidth - contentInset * 2f) / items.size
-                                    return if (span <= 0f) {
-                                        0
-                                    } else {
-                                        ((x - contentInset) / span).toInt().coerceIn(0, items.lastIndex)
-                                    }
-                                }
+                                fun indexAt(x: Float): Int = ((x - contentInset) / selectionSlot).toInt().coerceIn(0, items.lastIndex)
 
                                 val minLeft = contentInset - overhang
                                 val downX = logicalX(down.position.x)
                                 var selectionX = downX
                                 var current = indexAt(downX)
                                 pressedIndex = current
-                                onSelectState(current)
+                                dragging.value = true
+                                val pressedLeft = minLeft + current * selectionSlot
+                                animateIndicator(pressedLeft, pressedLeft + selectionSlot + overhang * 2f)
                                 var grabOffset = Float.NaN
                                 try {
                                     while (true) {
                                         val event = awaitPointerEvent()
                                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                        if (!change.pressed || change.isConsumed) break
-                                        // A destination can add or remove the trailing action while
-                                        // this gesture is still active. Read its current geometry.
+                                        if (change.isConsumed) break
+                                        if (!change.pressed) {
+                                            if (change.changedToUp()) {
+                                                val releaseDelta = change.position.x - change.previousPosition.x
+                                                selectionX += if (layoutDirection == LayoutDirection.Rtl) -releaseDelta else releaseDelta
+                                                onSelectState(indexAt(selectionX))
+                                                change.consume()
+                                            }
+                                            break
+                                        }
+                                        // The layout can still resize externally while a pointer is held.
                                         val width = size.width.toFloat()
                                         val chipW = (width - contentInset * 2f) / items.size + overhang * 2f
                                         val maxLeft = (width - chipW).coerceAtLeast(0f)
@@ -423,26 +429,21 @@ fun GlassNavigationBar(
                                                 pressedIndex = indexAt(selectionX)
                                                 continue
                                             }
-                                            val bounds = navigationIndicatorBounds(left.value, right.value, width, minLeft)
-                                            grabOffset = x - bounds.x
-                                            dragging.value = true
+                                            // Preserve the press anchor, not the unfinished animation's lag.
+                                            grabOffset = downX - pressedLeft
                                         }
                                         val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
                                         val next = indexAt(selectionX)
                                         val target = navigationDragTarget(chipLeft, chipW, width, delta, next != current)
                                         animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
-                                        if (next != current) {
-                                            current = next
-                                            onSelectState(next)
-                                        }
+                                        current = next
                                         pressedIndex = next
                                         change.consume()
                                     }
                                 } finally {
                                     pressedIndex = -1
                                     dragging.value = false
-                                    // Releasing restarts the selection effect using the latest size.
-                                    // Do not settle against geometry captured at pointer down.
+                                    settleGeneration++
                                 }
                             }
                         }

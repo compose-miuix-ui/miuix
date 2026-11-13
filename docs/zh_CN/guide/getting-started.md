@@ -40,7 +40,7 @@ Miuix 由多个可独立使用的模块组成：
 | `miuix-nav` | 自包含导航库，可独立使用 |
 | `miuix-window` | 桌面端窗口与自绘标题栏样式库（仅支持 Desktop JVM） |
 
-`miuix-blur` 与 `miuix-glass` 的 Android 端需要 `minSdk` 33。
+`miuix-blur` 的 Android 端需要 `minSdk` 33；`miuix-glass` 为 24，低于 API 33 时退化为不透明表面。
 
 - 在 Compose Multiplatform 项目目录的 build.gradle.kts 中：
 
@@ -61,7 +61,7 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // 可选：添加 miuix-squircle 以获取平滑圆角形状
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
-            // 可选：添加 miuix-glass 以获取玻璃表面与组件（Android 端需要 minSdk 33）
+            // 可选：添加 miuix-glass 以获取玻璃表面与组件
             implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // 可选：添加 miuix-nav 以获取导航支持
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
@@ -91,7 +91,7 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")
     // 可选：添加 miuix-squircle 以获取平滑圆角形状
     implementation("top.yukonga.miuix.kmp:miuix-squircle-android:<version>")
-    // 可选：添加 miuix-glass 以获取玻璃表面与组件（需要 minSdk 33）
+    // 可选：添加 miuix-glass 以获取玻璃表面与组件
     implementation("top.yukonga.miuix.kmp:miuix-glass-android:<version>")
     // 可选：添加 miuix-nav 以获取导航支持
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:<version>")

@@ -3,10 +3,7 @@
 `miuix-blur` is a standalone blur effect library for Compose Multiplatform. It provides backdrop blur, color blending, and texture effects via Modifier extensions. The library supports Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
 
 ::: warning
-On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. Blur,
-blend and noise effects rely on `RuntimeShader`, which is available
-from API 33. Runtime capability checks do not lower the Android artifact's
-minimum SDK requirement.
+On Android, `miuix-blur` requires `minSdk` 33 (Android 13) or higher. Blur, blend and noise effects rely on `RuntimeShader`, which is available from API 33.
 :::
 
 ## Setup

@@ -2,6 +2,10 @@
 
 `GlassTopAppBar` 是支持折叠标题和操作插槽的玻璃顶栏。使用 [GlassIconButton](./glassiconbutton) 为导航和操作按钮提供一致的样式。
 
+提供滚动行为或 `visualContentOffset` 时，颜色渐变背景带在绘制阶段直接跟随实际滚动距离，不再等待独立淡入动画。没有滚动来源时，显式内容重叠状态仍使用淡入淡出动画。两种模式均保留 `backgroundAlpha` 的透明度乘数。
+
+默认背景带跟随实测的标题、副标题与 `bottomContent` 高度。渐隐从底边内侧 12.dp 开始，平滑过渡到顶栏下方的 `bandOverhang`（默认 48.dp）处，保留副标题下方的遮挡，同时提供更长的渐隐尾部，不向外延伸实色段。半透明时完整渐变也位于背景层范围内，不会在滚动至完全不透明时突然多出一块。不增加前景布局高度；自定义画刷保留原有拉伸背景带行为。
+
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -63,8 +67,10 @@ Scaffold(
 
 ### 内容位于顶部或已滚动
 
-- 传入 `scrollBehavior`，根据滚动状态控制材质；未传入时材质保持显示。
-- 传入 `isContentScrolled` 可显式控制材质状态。Lazy 列表建议使用 `listState.canScrollBackward`，使返回顶部时清除材质，不受标题折叠状态影响。
+- `isContentScrolled` 控制按钮材质的悬浮过渡，建议传入 `listState.canScrollBackward`。省略时依次从滚动行为的 `contentOffset`、`visualContentOffset` 推导，两者均无则默认显示。
+- 背景带透明度与阴影进度优先跟随 `visualContentOffset`，其次为滚动行为的 `visualContentOffset`。两者均无时，背景带透明度跟随布尔状态。
+- 弹性越界也可提高按钮材质进度。在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。
+- 程序化滚动时，同时提供列表的布尔状态与有符号视觉位移；需要时叠加弹性位移。
 
 ## 属性
 
@@ -81,6 +87,7 @@ Scaffold(
 | largeTitle | String | 展开时的大标题 | title | 否 |
 | subtitle | String | 副标题 | "" | 否 |
 | scrollBehavior | ScrollBehavior? | 标题折叠与阴影行为 | null | 否 |
+| visualContentOffset | (() -> Float)? | 实时有符号内容位置（像素），覆盖滚动行为中用于视觉效果的位移 | null | 否 |
 | bandBrush | Brush | 背景带渐变 | GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) | 否 |
 | bandOverhang | Dp | 背景带向顶栏下方延伸的距离 | GlassTopAppBarDefaults.BandOverhang | 否 |
 | largeTitleBlurRadius | Dp | 大标题淡出时的模糊半径 | GlassTopAppBarDefaults.LargeTitleBlurRadius | 否 |
@@ -101,7 +108,7 @@ Scaffold(
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | 页面内容是否离开初始位置 | - | 是 |
+| isContentScrolled | Boolean | 显式按钮材质悬浮状态；无位移来源时也控制背景带透明度 | - | 是 |
 
 ### GlassTopAppBarDefaults 对象 {#glasstopappbardefaults}
 
@@ -115,13 +122,13 @@ Scaffold(
 | LargeTitleBlurRadius | Dp | 大标题模糊半径 | 12.dp |
 | ButtonSize | Dp | 按钮直径 | 44.dp |
 | PressedContentAlpha | Float | 按下时的内容透明度 | 0.6f |
-| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 28.dp |
+| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 48.dp |
 
 #### 方法
 
 | 方法名 | 返回类型 | 说明 |
 | --- | --- | --- |
-| collapseRamp(scrollBehavior: ScrollBehavior?) | State\<Float> | 从 RampStart 开始，在 RampDistance 内生成 0 到 1 的阴影进度；行为为 null 时返回 1f |
+| collapseRamp(scrollBehavior: ScrollBehavior?, visualContentOffset: (() -> Float)? = null) | State\<Float> | 根据传入的位置或滚动行为计算阴影进度；两者均未提供时返回 1f |
 | buttonFill() | Color | 浅色模式为白色，深色模式为 `#FF2C2C2C` |
 | buttonMaterial() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
 | buttonStroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.SmallLight`，深色模式为 `SmallDark` |
@@ -133,6 +140,8 @@ Scaffold(
 ### 添加标签栏
 
 将 [GlassTabRow 或 GlassSegmentedTabRow](./glasstabrow#inside-glasstopappbar) 放入 `bottomContent`。它们继承背景采样源和模糊，请根据页面滚动状态设置 `surfaceAlpha`。
+
+启用 `progressiveBlur = true` 时，非空的 `bottomContent` 会自动纳入渐进模糊带的覆盖范围。渐变会跟随插槽的实际高度和标题折叠变化，但不会改变布局高度。没有底部内容时，保持紧凑顶栏的覆盖范围。`bottomContent` 中的标签栏使用顶栏的背景上下文，同时保留自身的 Glass 材质和样式。
 
 ### 变换前景内容
 

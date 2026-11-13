@@ -29,27 +29,14 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.round
 
-fun LazyListScope.colorPickerSection() {
-    item(key = "colorPicker-HSV") {
-        SmallTitle(text = "ColorPicker (HSV)")
-        ColorPickerCard(colorSpace = ColorSpace.HSV)
+fun LazyListScope.colorPickerSection(colorSpace: ColorSpace) {
+    item(key = "colorPicker-$colorSpace") {
+        SmallTitle(text = "ColorPicker ($colorSpace)")
+        ColorPickerCard(colorSpace = colorSpace)
     }
+}
 
-    item(key = "colorPicker-OKHSV") {
-        SmallTitle(text = "ColorPicker (OKHSV)")
-        ColorPickerCard(colorSpace = ColorSpace.OKHSV)
-    }
-
-    item(key = "colorPicker-OKLAB") {
-        SmallTitle(text = "ColorPicker (OKLAB)")
-        ColorPickerCard(colorSpace = ColorSpace.OKLAB)
-    }
-
-    item(key = "colorPicker-OKLCH") {
-        SmallTitle(text = "ColorPicker (OKLCH)")
-        ColorPickerCard(colorSpace = ColorSpace.OKLCH)
-    }
-
+fun LazyListScope.colorPaletteSection() {
     item(key = "colorPalette") {
         SmallTitle(text = "ColorPalette")
         val miuixColor = MiuixTheme.colorScheme.primary

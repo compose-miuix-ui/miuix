@@ -29,8 +29,9 @@ kotlin {
                     minorApiLevel = BuildConfig.COMPILE_SDK_MINOR
                 }
         }
-        minSdk = 33
+        minSdk = BuildConfig.MIN_SDK
         namespace = "${BuildConfig.LIBRARY_ID}.glass"
+        withHostTest {}
     }
 
     jvm("desktop")
@@ -61,7 +62,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        val desktopTest by getting {
+        named("desktopTest") {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)

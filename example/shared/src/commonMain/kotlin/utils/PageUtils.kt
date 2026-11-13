@@ -44,15 +44,22 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
 
+@Composable
 fun Modifier.pageScrollModifiers(
     enableScrollEndHaptic: Boolean,
     showTopAppBar: Boolean,
     topAppBarScrollBehavior: ScrollBehavior,
-): Modifier = this
-    .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
-    .overScrollVertical()
-    .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
-    .fillMaxHeight()
+): Modifier {
+    val state = topAppBarScrollBehavior.state
+    val onOffsetChanged: (Float) -> Unit = remember(state) {
+        { state.overscrollOffset = it }
+    }
+    return this
+        .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
+        .overScrollVertical(onOffsetChanged = if (showTopAppBar) onOffsetChanged else null)
+        .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
+        .fillMaxHeight()
+}
 
 @Composable
 fun pageContentPadding(
@@ -88,12 +95,15 @@ fun AdaptiveTopAppBar(
     showTopAppBar: Boolean,
     isWideScreen: Boolean,
     scrollBehavior: ScrollBehavior,
+    contentModifier: Modifier = Modifier,
     subtitle: String = "",
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
     defaultWindowInsetsPadding: Boolean = !isWideScreen,
     isContentScrolled: Boolean? = null,
+    visualContentOffset: (() -> Float)? = null,
     titleAlpha: () -> Float = { titleColor.alpha },
+    backgroundAlpha: () -> Float = { 1f },
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
@@ -103,21 +113,29 @@ fun AdaptiveTopAppBar(
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val backgroundBlur = LocalTopAppBarBackgroundBlur.current
+        val shaderSupported = isRuntimeShaderSupported()
+        val useBandBrush = !shaderSupported || (backdrop != null && backgroundBlur)
+        val surfaceColor = MiuixTheme.colorScheme.surface
+        val bandBrush = remember(useBandBrush, surfaceColor, color) {
+            if (useBandBrush) GlassTopAppBarDefaults.bandBrush(surfaceColor) else SolidColor(color)
+        }
         val contentScrolled by remember(scrollBehavior, isContentScrolled) {
             derivedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < 0f) }
         }
         GlassTopAppBar(
             title = title,
             isContentScrolled = contentScrolled,
+            contentModifier = contentModifier,
             subtitle = subtitle,
             backdrop = backdrop,
             progressiveBlur = appState.glassTopBarProgressiveBlur && appState.enableBlur,
             scrollBehavior = scrollBehavior,
+            visualContentOffset = visualContentOffset,
             titleAlpha = titleAlpha,
-            backgroundAlpha = { if (backgroundBlur) 1f else 0f },
+            backgroundAlpha = { if (backgroundBlur || !shaderSupported) backgroundAlpha() else 0f },
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            bandBrush = if (backdrop != null && backgroundBlur) GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) else SolidColor(color),
-            bandOverhang = if (appState.enableBlur) GlassTopAppBarDefaults.BandOverhang else 0.dp,
+            bandBrush = bandBrush,
+            bandOverhang = if (appState.enableBlur || !shaderSupported) GlassTopAppBarDefaults.BandOverhang else 0.dp,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,
@@ -125,6 +143,7 @@ fun AdaptiveTopAppBar(
     } else if (isWideScreen) {
         SmallTopAppBar(
             title = title,
+            modifier = contentModifier,
             subtitle = subtitle,
             color = color,
             titleColor = titleColor,
@@ -137,6 +156,7 @@ fun AdaptiveTopAppBar(
     } else {
         TopAppBar(
             title = title,
+            modifier = contentModifier,
             subtitle = subtitle,
             color = color,
             titleColor = titleColor,

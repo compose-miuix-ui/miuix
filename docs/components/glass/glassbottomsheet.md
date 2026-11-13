@@ -73,7 +73,7 @@ Scaffold { padding ->
 
 When closing, keep the component call in composition until the exit animation finishes. Do not wrap the call in `if (show)`.
 
-Include any page bars that the overlay can cover in `backdrop`, but exclude the popup host and scrim. A null backdrop or unavailable runtime shaders uses `containerColor`; provide an opaque fallback color.
+Include any page bars that the overlay can cover in `backdrop`, but exclude the popup host and scrim. A null backdrop uses `containerColor`; provide an opaque fill color.
 
 The caller supplies scrolling and extra body spacing. Place navigation-bar padding inside scrollable content when that spacing should scroll with it.
 

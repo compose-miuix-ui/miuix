@@ -152,11 +152,9 @@ private class PagerNonTouchScrollNode(
         nestedScrollDispatcher = nestedScrollDispatcher,
     )
 
-    private var createdMouseWheelScrollingLogic = false
-    private var createdTrackpadScrollingLogic = false
-
     private var mouseWheelScrollingLogic: PagerMouseWheelScrollingLogic? = null
     private var trackpadScrollingLogic: PagerTrackpadScrollingLogic? = null
+    private var flingJob: Job? = null
 
     init {
         delegate(nestedScrollModifierNode(PagerNestedScrollConnection, nestedScrollDispatcher))
@@ -166,6 +164,10 @@ private class PagerNonTouchScrollNode(
         updateScrollDirection()
         mouseWheelScrollingLogic?.updateDensity(requireDensity())
         trackpadScrollingLogic?.updateDensity(requireDensity())
+    }
+
+    override fun onDetach() {
+        resetInput()
     }
 
     override fun onDensityChange() {
@@ -201,7 +203,24 @@ private class PagerNonTouchScrollNode(
     override fun onCancelPointerInput() = Unit
 
     fun update(state: PagerState, flingBehavior: FlingBehavior) {
+        if (scrollLogic.pagerState !== state) resetInput()
         scrollLogic.update(state, flingBehavior)
+    }
+
+    private fun resetInput() {
+        mouseWheelScrollingLogic?.dispose()
+        trackpadScrollingLogic?.dispose()
+        mouseWheelScrollingLogic = null
+        trackpadScrollingLogic = null
+        flingJob?.cancel()
+        flingJob = null
+    }
+
+    private fun launchFling(velocity: Velocity) {
+        flingJob?.cancel()
+        flingJob = coroutineScope.launch {
+            scrollLogic.flingWithVelocity(velocity)
+        }
     }
 
     /**
@@ -217,35 +236,25 @@ private class PagerNonTouchScrollNode(
     }
 
     private fun initializeMouseWheelScrollingLogic() {
-        if (!createdMouseWheelScrollingLogic) {
+        if (mouseWheelScrollingLogic == null) {
             mouseWheelScrollingLogic = PagerMouseWheelScrollingLogic(
                 scrollingLogic = scrollLogic,
                 mouseWheelScrollConfig = pagerScrollConfig(),
-                onScrollStopped = { velocity ->
-                    nestedScrollDispatcher.coroutineScope.launch {
-                        scrollLogic.flingWithVelocity(velocity)
-                    }
-                },
+                onScrollStopped = ::launchFling,
                 density = requireDensity(),
             )
-            createdMouseWheelScrollingLogic = true
         }
 
         mouseWheelScrollingLogic?.startReceivingEvents(coroutineScope)
     }
 
     private fun initializeTrackpadScrollingLogic() {
-        if (!createdTrackpadScrollingLogic) {
+        if (trackpadScrollingLogic == null) {
             trackpadScrollingLogic = PagerTrackpadScrollingLogic(
                 scrollingLogic = scrollLogic,
-                onScrollStopped = { velocity ->
-                    nestedScrollDispatcher.coroutineScope.launch {
-                        scrollLogic.flingWithVelocity(velocity)
-                    }
-                },
+                onScrollStopped = ::launchFling,
                 density = requireDensity(),
             )
-            createdTrackpadScrollingLogic = true
         }
 
         trackpadScrollingLogic?.startReceivingEvents(coroutineScope)
@@ -502,9 +511,11 @@ private abstract class PagerNonTouchScrollingLogic(
 
     internal suspend fun userScroll(block: suspend PagerNestedScrollScope.() -> Unit) {
         isScrolling = true
-        // Run it in supervisorScope to ignore cancellations from scrolls with higher MutatePriority
-        supervisorScope { scrollingLogic.scroll(MutatePriority.UserInput, block) }
-        isScrolling = false
+        try {
+            supervisorScope { scrollingLogic.scroll(MutatePriority.UserInput, block) }
+        } finally {
+            isScrolling = false
+        }
     }
 
     val velocityTracker = PagerDifferentialVelocityTracker()
@@ -557,6 +568,11 @@ private class PagerMouseWheelScrollingLogic(
     private val channel = Channel<PagerMouseWheelScrollDelta>(capacity = Channel.UNLIMITED)
 
     private var receivingMouseWheelEventsJob: Job? = null
+
+    fun dispose() {
+        receivingMouseWheelEventsJob?.cancel()
+        channel.cancel()
+    }
 
     override fun startReceivingEvents(coroutineScope: CoroutineScope) {
         if (receivingMouseWheelEventsJob == null) {
@@ -795,6 +811,11 @@ private class PagerTrackpadScrollingLogic(
     private val channel = Channel<PagerTrackpadScrollDelta>(capacity = Channel.UNLIMITED)
 
     private var receivingPanEventsJob: Job? = null
+
+    fun dispose() {
+        receivingPanEventsJob?.cancel()
+        channel.cancel()
+    }
 
     override fun startReceivingEvents(coroutineScope: CoroutineScope) {
         if (receivingPanEventsJob == null) {

@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.VerticalDivider
@@ -51,7 +50,6 @@ fun LazyListScope.dialogSection() {
         var showCenteredDialog by rememberSaveable { mutableStateOf(false) }
         var centeredDialogHoldDown by rememberSaveable { mutableStateOf(false) }
 
-        SmallTitle(text = "Dialog")
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
