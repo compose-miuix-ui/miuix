@@ -16,13 +16,13 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
@@ -111,14 +113,11 @@ object GlassTopAppBarDefaults {
         val density = LocalDensity.current
         val startPx = with(density) { RampStart.toPx() }
         val rampPx = with(density) { RampDistance.toPx() }
-        return remember(scrollBehavior, visualContentOffset, startPx, rampPx) {
-            if (scrollBehavior == null && visualContentOffset == null) {
-                mutableFloatStateOf(1f)
-            } else {
-                derivedStateOf {
-                    val offset = visualContentOffset?.invoke() ?: scrollBehavior!!.state.visualContentOffset
-                    ((-offset - startPx) / rampPx).coerceIn(0f, 1f)
-                }
+        val currentOffset by rememberUpdatedState(visualContentOffset)
+        return remember(scrollBehavior, startPx, rampPx) {
+            derivedStateOf {
+                val offset = currentOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
+                if (offset == null) 1f else ((-offset - startPx) / rampPx).coerceIn(0f, 1f)
             }
         }
     }
@@ -206,7 +205,7 @@ internal data class GlassTopAppBarContext(
 internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBarContext?> { null }
 
 /**
- * Top app bar whose material visibility follows [ScrollBehavior].
+ * Top app bar whose material visibility follows actual content scrolling in [ScrollBehavior].
  * Use the overload with [isContentScrolled] when the page can report its exact overlap state.
  *
  * @param title Compact title, centered when the bar collapses.
@@ -215,10 +214,11 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param largeTitle Large title shown before content scrolls. Defaults to [title].
  * @param subtitle Optional subtitle below the title.
  * @param largeTitleBlurRadius Blur applied as the large title collapses.
- * @param scrollBehavior Behavior driving collapse. Without one, the bar remains at full strength.
+ * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
  * @param visualContentOffset Optional live content position in pixels, negative for upward scroll.
  *   Use a position source when scrolling can be programmatic; include elastic displacement if needed.
- *   Drives material, shadows, and progressive blur without writing the title's scroll behavior.
+ *   Drives band opacity and shadows without writing the title's scroll behavior. For programmatic
+ *   scrolling, use the explicit [isContentScrolled] overload to control material visibility.
  * @param bandBrush Gradient that dims content passing beneath the bar.
  * @param bandOverhang Distance the gradient extends beyond the bar.
  * @param style Glass style forwarded to the renderer.
@@ -268,9 +268,10 @@ fun GlassTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val isContentScrolled by remember(scrollBehavior, visualContentOffset) {
+    val currentOffset by rememberUpdatedState(visualContentOffset)
+    val isContentScrolled by remember(scrollBehavior) {
         derivedStateOf {
-            val offset = visualContentOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
+            val offset = scrollBehavior?.state?.contentOffset ?: currentOffset?.invoke()
             offset?.let { it < 0f } ?: true
         }
     }
@@ -348,10 +349,16 @@ fun GlassTopAppBar(
         transitionSpec = { GlassMotion.topBarMask() },
         label = "glassTopBarMask",
     ) { if (it) 1f else 0f }
-    val materialProgress = transition.animateFloat(
+    val scrolledMaterialProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
     ) { if (it) 1f else 0f }
+    val materialProgress = remember(scrolledMaterialProgress, scrollBehavior, ramp) {
+        derivedStateOf {
+            val elasticProgress = if (scrollBehavior != null && scrollBehavior.state.overscrollOffset != 0f) ramp.value else 0f
+            maxOf(scrolledMaterialProgress.value, elasticProgress)
+        }
+    }
     val keepMaterial by remember(isContentScrolled, materialProgress) {
         derivedStateOf { isContentScrolled || materialProgress.value > 0f }
     }
@@ -402,6 +409,10 @@ fun GlassTopAppBar(
             )
         } else {
             val overhangPx = with(LocalDensity.current) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
+            val fadeHeight = overhangPx + with(LocalDensity.current) { 12.dp.toPx() }
+            val fadeBrush = remember(bandBrush, fadeHeight) {
+                if (bandBrush is TopAppBarBandBrush) ShaderBrush(bandBrush.createShader(0f, fadeHeight)) else null
+            }
             Box(
                 modifier = Modifier
                     .graphicsLayer {
@@ -411,11 +422,15 @@ fun GlassTopAppBar(
                         scaleY = if (bandBrush !is TopAppBarBandBrush && size.height > 0f) (size.height + overhangPx) / size.height else 1f
                     }
                     .then(
-                        if (bandBrush is TopAppBarBandBrush) {
-                            Modifier.drawWithCache {
-                                val fadeStart = (size.height - overhangPx - 12.dp.toPx()).coerceAtLeast(0f)
-                                val brush = ShaderBrush(bandBrush.createShader(fadeStart, size.height - fadeStart))
-                                onDrawBehind { drawRect(brush) }
+                        if (bandBrush is TopAppBarBandBrush && fadeBrush != null) {
+                            Modifier.drawBehind {
+                                val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
+                                drawRect(bandBrush.color, size = Size(size.width, fadeStart))
+                                translate(top = fadeStart) {
+                                    scale(scaleX = 1f, scaleY = (size.height - fadeStart) / fadeHeight, pivot = Offset.Zero) {
+                                        drawRect(fadeBrush, size = Size(size.width, fadeHeight))
+                                    }
+                                }
                             }
                         } else {
                             Modifier.background(bandBrush)
@@ -492,14 +507,9 @@ private fun GlassTopAppBarLayout(
         val width = constraints.constrainWidth(foreground.width)
         val height = constraints.constrainHeight(foreground.height)
         val bandHeight = if (progressiveBlur) {
-            val coveredHeight = if (measurements.bottomContentHeight > 0) {
-                foreground.height.toFloat()
-            } else {
-                topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx()
-            }
+            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight
             ((coveredHeight + 20.dp.toPx()) * 1.2f).roundToInt()
         } else {
-            // Keep the entire fade in the alpha layer at every scroll position.
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
         }
         val background = measurables[0].measure(Constraints.fixed(width, bandHeight))

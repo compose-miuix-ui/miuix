@@ -85,10 +85,10 @@ fun Modifier.overScrollHorizontal(
  * @param nestedScrollToParent Whether to dispatch nested scroll events to parent. Pass-through
  * deltas (non-gesture sources such as mouse wheel, and while pull-to-refresh is active) are
  * forwarded to ancestors regardless of this flag.
- * @param onOffsetChanged Receives the damped displacement in pixels along the scroll axis,
- * including every spring frame and zero when the effect resets or detaches. This is a visual
- * displacement, not consumed scroll distance; keep it separate from persistent content offsets.
- * @param isEnabled Whether the overscroll effect is enabled.
+ * @param onOffsetChanged Receives the latest damped displacement when its rounded pixel changes,
+ * including spring frames. It receives exact zero when the effect resets or detaches. This is a
+ * visual displacement, not consumed scroll distance; keep it separate from persistent content
+ * offsets.
  */
 @Stable
 fun Modifier.overScrollOutOfBound(
@@ -191,19 +191,32 @@ private class OverscrollNode(
     }
 
     private var lastPlacedOffset = 0f
+    private var lastNotifiedOffset = 0f
+    private var lastNotifiedRoundedOffset = 0f
     var offset = 0f
         private set(value) {
-            if (field != value) {
-                field = value
+            if (field == value) return
+            field = value
+            val rounded = round(value)
+            if (rounded != lastNotifiedRoundedOffset) {
+                lastNotifiedRoundedOffset = rounded
+                lastNotifiedOffset = value
                 onOffsetChanged?.invoke(value)
-                // Placement rounds to pixels, so invalidate only when the rounded offset changes.
-                val rounded = round(value)
-                if (rounded != lastPlacedOffset) {
-                    lastPlacedOffset = rounded
-                    if (isAttached) invalidatePlacement()
-                }
+            }
+            // Placement rounds to pixels, so invalidate only when the rounded offset changes.
+            if (rounded != lastPlacedOffset) {
+                lastPlacedOffset = rounded
+                if (isAttached) invalidatePlacement()
             }
         }
+
+    private fun notifyResetOffset() {
+        if (lastNotifiedOffset != 0f) {
+            lastNotifiedRoundedOffset = 0f
+            lastNotifiedOffset = 0f
+            onOffsetChanged?.invoke(0f)
+        }
+    }
 
     private var rawTouchAccumulation = 0f
     private var scrollRange: Float = 0f
@@ -235,9 +248,8 @@ private class OverscrollNode(
         this.isVertical = isVertical
         this.nestedScrollToParent = nestedScrollToParent
         if (this.onOffsetChanged !== onOffsetChanged) {
-            this.onOffsetChanged?.invoke(0f)
             this.onOffsetChanged = onOffsetChanged
-            onOffsetChanged?.invoke(offset)
+            onOffsetChanged?.invoke(lastNotifiedOffset)
         }
 
         if (rangeChanged && isAttached) {
@@ -262,6 +274,7 @@ private class OverscrollNode(
 
     private fun resetState() {
         offset = 0f
+        notifyResetOffset()
         rawTouchAccumulation = 0f
         if (isAttached) {
             overScrollState.isOverScrollActive = false

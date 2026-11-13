@@ -67,10 +67,10 @@ Scaffold(
 
 ### 内容位于顶部或已滚动
 
-- 传入 `scrollBehavior`，根据滚动状态控制材质；未传入时材质保持显示。
+- 提供 `scrollBehavior` 时，材质悬浮状态跟随实际 `contentOffset`，不计越界位移；未提供时跟随 `visualContentOffset`，两者均未提供则保持显示。
 - 传入 `isContentScrolled` 可显式控制材质状态。Lazy 列表建议使用 `listState.canScrollBackward`，使返回顶部时清除材质，不受标题折叠状态影响。
-- 如需效果跟随越界回弹，在 `.nestedScroll(...)` 前通过 `overScrollVertical(onOffsetChanged = ...)` 绑定已缓存的回调，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。省略 `isContentScrolled`，或通过 `state.visualContentOffset < 0f` 计算它。
-- 程序化定位不一定派发 nested-scroll 位移。使用 `scrollToItem` / `animateScrollToItem` 时，可通过 `visualContentOffset` 提供滚动容器的位置（向上滚动为负像素）。渐进模糊、按钮材质及阴影直接读取该位置，不修改标题的 `ScrollBehavior`。如需跟随弹性回弹，在回调中加上越界位移。对于 Lazy 列表，可以将现有的 `rememberScrollBarAdapter(listState).scrollOffset` 布局位置估计值取负后传入。
+- 在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，使背景带、阴影及按钮模糊和描边跟随弹性位移，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。短页面的按钮材质随弹性进度变化，不切换由滚动行为推导的悬浮状态。
+- 程序化定位时，传入 `isContentScrolled = listState.canScrollBackward`，并通过 `visualContentOffset` 提供视觉效果所需的位置；需要时叠加越界位移。
 
 ## 属性
 

@@ -42,6 +42,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +64,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
+import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
@@ -123,8 +125,32 @@ fun IconsPage(
 
     val lazyListState = rememberLazyListState()
     val scrollBarAdapter = rememberScrollBarAdapter(lazyListState)
-    val visualContentOffset: () -> Float = remember(scrollBarAdapter, topAppBarScrollBehavior) {
-        { -scrollBarAdapter.scrollOffset.toFloat() + topAppBarScrollBehavior.state.overscrollOffset }
+    val headerHeight = remember { mutableIntStateOf(0) }
+    val saturatedScrollDistance = with(density) {
+        maxOf(
+            GlassTopAppBarDefaults.RampStart + GlassTopAppBarDefaults.RampDistance,
+            GlassTopAppBarDefaults.ProgressiveBlurRampDistance,
+        ).toPx()
+    }
+    val visualContentOffset: () -> Float = remember(lazyListState, headerHeight, topAppBarScrollBehavior, saturatedScrollDistance) {
+        {
+            // Keep progress continuous through the first icon row, then saturate.
+            when (lazyListState.firstVisibleItemIndex) {
+                0 -> -lazyListState.firstVisibleItemScrollOffset.toFloat() + topAppBarScrollBehavior.state.overscrollOffset
+
+                1 -> {
+                    val measuredHeaderHeight = headerHeight.intValue
+                    if (measuredHeaderHeight > 0) {
+                        -(measuredHeaderHeight + lazyListState.firstVisibleItemScrollOffset.toFloat()) + topAppBarScrollBehavior.state.overscrollOffset
+                    } else {
+                        // Restored lists may skip measuring the header.
+                        -saturatedScrollDistance
+                    }
+                }
+
+                else -> -saturatedScrollDistance
+            }
+        }
     }
     val coroutineScope = rememberCoroutineScope()
 
@@ -171,6 +197,7 @@ fun IconsPage(
                         showTopAppBar = appState.showTopAppBar,
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
+                        isContentScrolled = lazyListState.canScrollBackward,
                         visualContentOffset = visualContentOffset,
                         contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded) { 1f } else Modifier,
                         color = barColor,
@@ -253,6 +280,7 @@ fun IconsPage(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .onSizeChanged { headerHeight.intValue = it.height }
                                 .padding(horizontal = 12.dp)
                                 .squircleClip(
                                     topStart = 16.dp,

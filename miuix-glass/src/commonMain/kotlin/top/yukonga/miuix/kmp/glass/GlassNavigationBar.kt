@@ -40,12 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
@@ -107,6 +110,10 @@ data class GlassNavigationItem(
     val icon: ImageVector,
     val label: String? = null,
     val contentDescription: String? = null,
+)
+private data class IndicatorSettleRequest(
+    val bounds: Offset,
+    val generation: Int,
 )
 
 /** Default values for [GlassNavigationBar]. */
@@ -245,6 +252,7 @@ fun GlassNavigationBar(
     var barWidth by remember { mutableIntStateOf(0) }
     var pressedIndex by remember { mutableIntStateOf(-1) }
     val dragging = remember { mutableStateOf(false) }
+    var settleGeneration by remember { mutableIntStateOf(0) }
 
     val showScale = remember { Animatable(if (visible) 1f else GlassMotion.NAV_HIDE_SCALE) }
     var interactionEnabled by remember { mutableStateOf(visible) }
@@ -268,9 +276,8 @@ fun GlassNavigationBar(
         leftSpring: SpringSpec<Float> = GlassMotion.edgeSpring(newLeft <= left.value),
         rightSpring: SpringSpec<Float> = GlassMotion.edgeSpring(newLeft > left.value),
     ) {
-        // All motion owns the same two Animatables. Retarget through animateTo so their current
-        // positions and velocities survive drag, reversal, selection and release interruptions.
-        // These jobs belong to the composition, not to a restarting selection effect.
+        if (left.targetValue == newLeft && right.targetValue == newRight) return
+        // Shared springs preserve velocity when the target changes.
         scope.launch { left.animateTo(newLeft, leftSpring) }
         scope.launch { right.animateTo(newRight, rightSpring) }
     }
@@ -279,16 +286,28 @@ fun GlassNavigationBar(
     val chipWidth = slot + overhang * 2f
     val targetLeft = contentInset - overhang + index * slot
     val targetRight = targetLeft + chipWidth
+    val latestIndicatorTarget = rememberUpdatedState(
+        if (slot > 0f) Offset(targetLeft, targetRight) else Offset.Unspecified,
+    )
 
-    LaunchedEffect(targetLeft, targetRight, dragging.value) {
-        if (slot <= 0f) return@LaunchedEffect
-        if (dragging.value) return@LaunchedEffect
-        if (right.value <= left.value) {
-            left.snapTo(targetLeft)
-            right.snapTo(targetRight)
-            return@LaunchedEffect
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            if (dragging.value) {
+                null
+            } else {
+                IndicatorSettleRequest(latestIndicatorTarget.value, settleGeneration)
+            }
+        }.collect { request ->
+            request ?: return@collect
+            val target = request.bounds
+            if (!target.isSpecified) return@collect
+            if (right.value <= left.value) {
+                left.snapTo(target.x)
+                right.snapTo(target.y)
+                return@collect
+            }
+            animateIndicator(target.x, target.y)
         }
-        animateIndicator(targetLeft, targetRight)
     }
 
     val chipHeldPx = with(density) {
@@ -443,7 +462,7 @@ fun GlassNavigationBar(
                                 } finally {
                                     pressedIndex = -1
                                     dragging.value = false
-                                    // Settle through the selection effect, which reads the latest size.
+                                    settleGeneration++
                                 }
                             }
                         }

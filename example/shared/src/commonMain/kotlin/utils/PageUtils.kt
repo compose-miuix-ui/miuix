@@ -119,8 +119,8 @@ fun AdaptiveTopAppBar(
         val bandBrush = remember(useBandBrush, surfaceColor, color) {
             if (useBandBrush) GlassTopAppBarDefaults.bandBrush(surfaceColor) else SolidColor(color)
         }
-        val contentScrolled by remember(scrollBehavior, isContentScrolled, visualContentOffset) {
-            derivedStateOf { isContentScrolled ?: ((visualContentOffset?.invoke() ?: scrollBehavior.state.visualContentOffset) < 0f) }
+        val contentScrolled by remember(scrollBehavior, isContentScrolled) {
+            derivedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < 0f) }
         }
         GlassTopAppBar(
             title = title,

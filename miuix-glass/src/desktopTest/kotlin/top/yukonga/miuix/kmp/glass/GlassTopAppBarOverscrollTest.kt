@@ -23,6 +23,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarState
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.math.abs
+import kotlin.math.round
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -36,12 +37,92 @@ class GlassTopAppBarOverscrollTest {
     fun scrollableContentRetainsRealScrollAfterRebound() = assertRebound(itemCount = 4)
 
     @Test
+    fun replacingCallbackDoesNotReplayResetToOldConsumer() = runComposeUiTest {
+        var firstCount = 0
+        val replace = mutableStateOf(false)
+        val first = mutableListOf<Float>()
+        val second = mutableListOf<Float>()
+        setContent {
+            val onOffsetChanged: (Float) -> Unit = if (replace.value) {
+                { value -> second += value }
+            } else {
+                { value -> first += value }
+            }
+            LazyColumn(
+                modifier = Modifier.size(300.dp, 400.dp).testTag("list")
+                    .overScrollVertical(onOffsetChanged = onOffsetChanged),
+                overscrollEffect = null,
+            ) {
+                item { Box(Modifier.height(150.dp)) }
+            }
+        }
+        onNodeWithTag("list").performTouchInput {
+            down(Offset(centerX, height - 20f))
+            moveBy(Offset(0f, -200f), delayMillis = 120)
+        }
+        runOnIdle {
+            assertTrue(first.isNotEmpty())
+            assertTrue(first.last() < 0f)
+            firstCount = first.size
+            replace.value = true
+        }
+        waitForIdle()
+        runOnIdle {
+            assertEquals(firstCount, first.size, "The old callback must not receive a zero replay")
+            assertEquals(first.last(), second.first(), "The replacement must receive the last notified offset")
+        }
+        onNodeWithTag("list").performTouchInput { up() }
+    }
+
+    @Test
+    fun callbackCoalescesSubpixelUpdatesAndReportsExactSettle() = runComposeUiTest {
+        val reports = mutableListOf<Float>()
+        setContent {
+            LazyColumn(
+                modifier = Modifier.size(300.dp, 400.dp).testTag("list")
+                    .overScrollVertical(onOffsetChanged = { reports += it }),
+                overscrollEffect = null,
+            ) {
+                item { Box(Modifier.height(150.dp)) }
+            }
+        }
+        mainClock.autoAdvance = false
+        onNodeWithTag("list").performTouchInput {
+            down(Offset(centerX, height - 20f))
+            moveBy(Offset(0f, -100f), delayMillis = 120)
+        }
+        runOnIdle { reports.clear() }
+        onNodeWithTag("list").performTouchInput {
+            repeat(12) { moveBy(Offset(0f, -0.75f), delayMillis = 16) }
+        }
+        runOnIdle {
+            assertTrue(reports.isNotEmpty())
+            assertTrue(reports.size < 12, "Subpixel motion must be pixel-coalesced")
+            assertTrue(reports.any { it != round(it) }, "Callbacks must retain the latest raw Float")
+            assertTrue(
+                reports.zipWithNext().all { (previous, current) -> round(previous) != round(current) },
+                "Each callback must cross a rounded pixel boundary",
+            )
+        }
+        onNodeWithTag("list").performTouchInput { up() }
+        mainClock.advanceTimeBy(2000)
+        waitForIdle()
+        assertEquals(0f, reports.last(), "Settling must report exact zero")
+    }
+
+    @Test
     fun removingOverscrollClearsItsVisualDisplacement() = runComposeUiTest {
         val state = TopAppBarState(0f, 0f, 0f)
         val enabled = mutableStateOf(true)
+        val reports = mutableListOf<Float>()
         setContent {
             val behavior = MiuixScrollBehavior(state)
-            val reportOffset: (Float) -> Unit = remember { { state.overscrollOffset = it } }
+            val reportOffset: (Float) -> Unit = remember {
+                { value ->
+                    reports += value
+                    state.overscrollOffset = value
+                }
+            }
             LazyColumn(
                 modifier = Modifier.size(300.dp, 400.dp).testTag("list")
                     .overScrollVertical(onOffsetChanged = reportOffset, isEnabled = { enabled.value })
@@ -63,6 +144,8 @@ class GlassTopAppBarOverscrollTest {
         runOnIdle {
             assertEquals(0f, state.overscrollOffset)
             assertEquals(0f, state.contentOffset)
+            assertEquals(0f, reports.last(), "Reset must report exact zero")
+            assertEquals(1, reports.count { it == 0f }, "Reset must not write a repeated zero tail")
         }
         onNodeWithTag("list").performTouchInput { up() }
     }
