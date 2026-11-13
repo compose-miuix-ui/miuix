@@ -123,8 +123,10 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-- `onOffsetChanged`: Optional `(Float) -> Unit` callback for the damped displacement in pixels along the scroll axis. It is pixel-coalesced (the latest Float is delivered when its rounded pixel changes), includes drag and spring updates, and receives exact zero on reset or detach. Default: `null`. Applies to vertical, horizontal, and generic overscroll modifiers.
+- `onOffsetChanged`: Optional `(Float) -> Unit` callback for damped displacement in pixels, coalesced by rounded pixel. Includes drag and spring updates. Reset, detach, and callback replacement clear the old receiver to zero; a new callback receives the current displacement. Default: `null`. Applies to all overscroll modifiers.
 - `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
+
+Explicit vertical overscroll yields to active pull-to-refresh and eligible BottomSheet dismissal gestures. Keep `enableNestedScroll` and `allowDismiss` enabled for sheet dismissal from content.
 
 ### Via OverscrollFactory (Theme-Level Integration)
 
@@ -262,7 +264,7 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 
 ## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
 
-Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists. Horizontal swipes can switch pages during inertial scrolling and after the list reaches either edge and rebounds; vertical swipes continue scrolling the list.
+Use `pagerGestureOverride` for horizontal paging during a child list's fling or Miuix overscroll rebound; vertical swipes stay with the list. Rebound takeover supports Miuix overscroll modifiers and `MiuixOverscrollFactory`. Other overscroll implementations use ordinary gesture arbitration after their fling completes.
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(

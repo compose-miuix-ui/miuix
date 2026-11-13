@@ -67,10 +67,10 @@ Only the list is recorded into `backdrop`. The glass controls use the bar's back
 
 ### Content at the Top or Scrolled
 
-- With `scrollBehavior`, material floating state follows actual `contentOffset`, excluding overscroll. Without a behavior, it follows `visualContentOffset`, or remains visible when neither is provided.
-- Pass `isContentScrolled` for explicit control. For lazy lists, use `listState.canScrollBackward` so returning to the top clears the material independently of title collapse.
-- Bind `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)` for elastic band, shadow, and button blur/stroke effects; see [Overscroll](/guide/utils#vertical-overscroll). On short pages, button material follows the elastic ramp without toggling the behavior-derived floating state.
-- For programmatic list jumps, pass `isContentScrolled = listState.canScrollBackward` and provide `visualContentOffset` for visual effects. Include elastic displacement when needed.
+- `isContentScrolled` controls the button material's floating transition; use `listState.canScrollBackward`. Without it, state is inferred from the behavior's `contentOffset`, then `visualContentOffset`, or defaults to visible.
+- Band opacity and shadow progress follow `visualContentOffset`, then the behavior's `visualContentOffset`. With neither source, band opacity follows the boolean state.
+- Elastic overscroll can also raise button material progress. Bind `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)`; see [Overscroll](/guide/utils#vertical-overscroll).
+- For programmatic scrolling, provide both the list's boolean state and its signed visual offset, including elastic displacement when needed.
 
 ## Properties
 
@@ -108,7 +108,7 @@ The explicit-overlap overload adds one required parameter:
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | Whether page content has left its resting position | - | Yes |
+| isContentScrolled | Boolean | Explicit button material floating state; also controls band opacity when no offset source is supplied | - | Yes |
 
 ### GlassTopAppBarDefaults Object {#glasstopappbardefaults}
 

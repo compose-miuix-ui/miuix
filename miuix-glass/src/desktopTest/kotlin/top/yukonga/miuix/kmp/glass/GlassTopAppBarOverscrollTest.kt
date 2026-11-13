@@ -37,44 +37,6 @@ class GlassTopAppBarOverscrollTest {
     fun scrollableContentRetainsRealScrollAfterRebound() = assertRebound(itemCount = 4)
 
     @Test
-    fun replacingCallbackDoesNotReplayResetToOldConsumer() = runComposeUiTest {
-        var firstCount = 0
-        val replace = mutableStateOf(false)
-        val first = mutableListOf<Float>()
-        val second = mutableListOf<Float>()
-        setContent {
-            val onOffsetChanged: (Float) -> Unit = if (replace.value) {
-                { value -> second += value }
-            } else {
-                { value -> first += value }
-            }
-            LazyColumn(
-                modifier = Modifier.size(300.dp, 400.dp).testTag("list")
-                    .overScrollVertical(onOffsetChanged = onOffsetChanged),
-                overscrollEffect = null,
-            ) {
-                item { Box(Modifier.height(150.dp)) }
-            }
-        }
-        onNodeWithTag("list").performTouchInput {
-            down(Offset(centerX, height - 20f))
-            moveBy(Offset(0f, -200f), delayMillis = 120)
-        }
-        runOnIdle {
-            assertTrue(first.isNotEmpty())
-            assertTrue(first.last() < 0f)
-            firstCount = first.size
-            replace.value = true
-        }
-        waitForIdle()
-        runOnIdle {
-            assertEquals(firstCount, first.size, "The old callback must not receive a zero replay")
-            assertEquals(first.last(), second.first(), "The replacement must receive the last notified offset")
-        }
-        onNodeWithTag("list").performTouchInput { up() }
-    }
-
-    @Test
     fun callbackCoalescesSubpixelUpdatesAndReportsExactSettle() = runComposeUiTest {
         val reports = mutableListOf<Float>()
         setContent {

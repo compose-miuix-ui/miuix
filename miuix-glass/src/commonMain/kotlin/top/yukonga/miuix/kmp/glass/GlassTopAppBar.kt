@@ -98,12 +98,8 @@ object GlassTopAppBarDefaults {
     val PressedContentAlpha: Float = 0.6f
 
     /**
-     * How far a bar has collapsed, in `[0, 1]`.
-     *
-     * @param scrollBehavior The behavior driving the bar. With neither scroll source provided,
-     * the bar remains at full strength.
-     * @param visualContentOffset Optional live content position in pixels (negative when scrolled
-     * upward), including any elastic displacement. Overrides the behavior's visual offset.
+     * Visual scroll progress in `[0, 1]`, including elastic displacement.
+     * [visualContentOffset] overrides the behavior's visual offset; no source means full strength.
      */
     @Composable
     fun collapseRamp(
@@ -215,10 +211,8 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param subtitle Optional subtitle below the title.
  * @param largeTitleBlurRadius Blur applied as the large title collapses.
  * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
- * @param visualContentOffset Optional live content position in pixels, negative for upward scroll.
- *   Use a position source when scrolling can be programmatic; include elastic displacement if needed.
- *   Drives band opacity and shadows without writing the title's scroll behavior. For programmatic
- *   scrolling, use the explicit [isContentScrolled] overload to control material visibility.
+ * @param visualContentOffset Content position in pixels, negative upward, including elastic displacement.
+ *   Overrides band/shadow progress; pair with [isContentScrolled] for programmatic scrolling.
  * @param bandBrush Gradient that dims content passing beneath the bar.
  * @param bandOverhang Distance the gradient extends beyond the bar.
  * @param style Glass style forwarded to the renderer.
@@ -310,8 +304,10 @@ fun GlassTopAppBar(
  * A glass top bar with an explicit page-overlap state.
  *
  * @param title Compact title.
- * @param isContentScrolled Whether page content has left its resting position. For a lazy list,
- *   pass `listState.canScrollBackward`.
+ * @param isContentScrolled Button floating state; use `listState.canScrollBackward`.
+ *   Elastic overscroll can also raise material progress.
+ * @param visualContentOffset Overrides the behavior's visual offset for band opacity and shadows.
+ *   With neither offset source, band opacity follows [isContentScrolled].
  */
 @Composable
 fun GlassTopAppBar(

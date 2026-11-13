@@ -150,6 +150,8 @@ object PagerGestureNestedScrollConnection : NestedScrollConnection {
  * With `userScrollEnabled = false` the pager keeps no touch recognizer of its own. This modifier
  * then restores the input that is not touch: wheel, Shift+wheel and trackpad events, driven with
  * the pager's own [flingBehavior] so the snapping matches a native pager.
+ * Rebound takeover supports Miuix overscroll modifiers and [MiuixOverscrollFactory]; other
+ * overscroll implementations use ordinary gesture arbitration after their fling completes.
  *
  * @param pagerState the pager being configured.
  * @param flingBehavior the same [FlingBehavior] passed to [HorizontalPager].

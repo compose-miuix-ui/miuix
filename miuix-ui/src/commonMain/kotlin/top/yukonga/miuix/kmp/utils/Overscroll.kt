@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.LocalPullToRefreshState
 import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.RefreshState
+import top.yukonga.miuix.kmp.layout.LocalBottomSheetNestedScrollConnection
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.round
@@ -69,15 +70,11 @@ fun Modifier.overScrollHorizontal(
 /**
  * Overscroll effect when scrolling to the boundary.
  *
- * The effect engages only during a press or pan gesture session (touch drag; trackpad pan on
- * Android). Mouse wheel and keyboard scrolling pass through untouched, as does desktop/macOS
- * trackpad scrolling (delivered as wheel events).
+ * Responds to press/pan gestures, not wheel or keyboard input. Desktop/macOS trackpads send wheel events.
  *
  * @param isVertical Whether the overscroll effect is vertical or horizontal.
- * @param onOffsetChanged Receives the latest damped displacement when its rounded pixel changes,
- * including spring frames. It receives exact zero when the effect resets or detaches. This is a
- * visual displacement, not consumed scroll distance; keep it separate from persistent content
- * offsets.
+ * @param onOffsetChanged Pixel-coalesced damped offset, including spring frames; not consumed scroll.
+ * Reset, detach, and replacement clear the old receiver to zero; new callbacks receive the current offset.
  */
 @Stable
 fun Modifier.overScrollOutOfBound(
@@ -228,6 +225,7 @@ private class OverscrollNode(
             if (isAttached) updateScrollRange()
         }
         if (this.onOffsetChanged !== onOffsetChanged) {
+            if (lastNotifiedOffset != 0f) this.onOffsetChanged?.invoke(0f)
             this.onOffsetChanged = onOffsetChanged
             onOffsetChanged?.invoke(lastNotifiedOffset)
         }
@@ -347,10 +345,13 @@ private class OverscrollNode(
             overScrollState.isOverScrollActive = isActive
         }
 
-        // Post-scroll reaches us before ancestors: let a downward edge delta reach pull-to-refresh.
-        val canStartRefresh = isVertical && available.y > 0f && pullToRefreshState != null
-        if (canStartRefresh || shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput || !gestureActive) {
-            // A running spring settles to zero on its own; only reclaim when it was interrupted.
+        // Yield before consuming a delta the ancestor can handle.
+        val handOff = isVertical && (
+            pullToRefreshState?.canPullDown(available.y, source) == true ||
+                currentValueOf(LocalBottomSheetNestedScrollConnection)?.canConsumePostScroll(consumed, available, source) == true
+            )
+        if (handOff || shouldBypassForPullToRefresh() || source != NestedScrollSource.UserInput || !gestureActive) {
+            // Leave active springs to settle themselves.
             if (animationJob?.isActive != true) {
                 unwindStaleOffset(if (isVertical) consumed.y else consumed.x)
             }

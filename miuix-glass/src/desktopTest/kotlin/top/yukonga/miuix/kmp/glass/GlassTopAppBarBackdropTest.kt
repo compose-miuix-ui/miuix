@@ -110,7 +110,8 @@ class GlassTopAppBarBackdropTest {
                 Box(Modifier.size(400.dp, 200.dp).background(Color.Blue)) {
                     GlassTopAppBar(
                         title = "",
-                        isContentScrolled = offset.floatValue < 0f,
+                        // Deliberately disagree: band opacity belongs to the visual offset.
+                        isContentScrolled = offset.floatValue >= 0f,
                         scrollBehavior = MiuixScrollBehavior(state),
                         visualContentOffset = if (useVisualOffset) ({ offset.floatValue }) else null,
                         bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),

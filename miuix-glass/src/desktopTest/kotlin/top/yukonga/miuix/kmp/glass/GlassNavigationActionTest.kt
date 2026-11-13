@@ -416,15 +416,29 @@ class GlassNavigationActionTest {
     @Test
     fun cancelledDragDoesNotNavigate() = runComposeUiTest {
         val selections = mutableListOf<Int>()
+        val cancelGesture = mutableStateOf(false)
         setContent {
             DialogTestHost {
-                Box(Modifier.size(400.dp, 100.dp)) {
+                Box(
+                    Modifier.size(400.dp, 100.dp).pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (cancelGesture.value) event.changes.forEach { it.consume() }
+                            }
+                        }
+                    },
+                ) {
                     GlassNavigationBar(
                         items = listOf("Home", "Files", "Profile").map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
                         selectedIndex = 0,
                         onSelect = { selections.add(it) },
                         backdrop = null,
                         defaultWindowInsetsPadding = false,
+                        indicatorColor = Color.Magenta,
+                        indicatorPressedColor = Color.Magenta,
+                        stroke = null,
+                        shadow = null,
                     )
                 }
             }
@@ -436,9 +450,23 @@ class GlassNavigationActionTest {
             moveTo(end)
         }
         assertTrue(selections.isEmpty())
-        onRoot().performTouchInput { cancel() }
+        runOnIdle { cancelGesture.value = true }
+        onRoot().performTouchInput {
+            moveBy(Offset(1f, 0f))
+            up()
+        }
+        waitForIdle()
         assertTrue(selections.isEmpty(), "Cancelling must not commit the previewed destination")
         onNodeWithContentDescription("Home").assertIsSelected()
+        val home = onNodeWithContentDescription("Home").fetchSemanticsNode().boundsInRoot
+        val pixels = onRoot().captureToImage().toPixelMap()
+        val row = home.center.y.roundToInt()
+        val indicatorPixels = (0 until pixels.width).filter {
+            val color = pixels[it, row]
+            color.red > 0.9f && color.blue > 0.9f && color.green < 0.1f
+        }
+        assertTrue(indicatorPixels.isNotEmpty(), "The cancelled indicator must remain visible")
+        assertEquals(home.center.x, (indicatorPixels.first() + indicatorPixels.last()) / 2f, 2f)
     }
 
     @Test
@@ -482,6 +510,59 @@ class GlassNavigationActionTest {
         }
         assertTrue(indicatorPixels.isNotEmpty(), "The released indicator must remain visible")
         assertEquals(home.center.x, (indicatorPixels.first() + indicatorPixels.last()) / 2f, 2f)
+    }
+
+    @Test
+    fun releaseSettlesToSelectionCommittedByCallback() = runComposeUiTest {
+        val selected = mutableIntStateOf(0)
+        val selections = mutableListOf<Int>()
+        val labels = listOf("Home", "Files", "Profile")
+        setContent {
+            DialogTestHost {
+                Box(Modifier.size(400.dp, 100.dp)) {
+                    GlassNavigationBar(
+                        items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                        selectedIndex = selected.intValue,
+                        onSelect = {
+                            selected.intValue = it
+                            selections.add(it)
+                        },
+                        backdrop = null,
+                        defaultWindowInsetsPadding = false,
+                        indicatorColor = Color.Magenta,
+                        indicatorPressedColor = Color.Magenta,
+                        stroke = null,
+                        shadow = null,
+                    )
+                }
+            }
+        }
+        waitForIdle()
+        val home = onNodeWithContentDescription(labels[0]).fetchSemanticsNode().boundsInRoot
+        val profile = onNodeWithContentDescription(labels[2]).fetchSemanticsNode().boundsInRoot
+        onRoot().performTouchInput {
+            down(home.center)
+            moveTo(profile.center)
+        }
+        waitForIdle()
+        mainClock.autoAdvance = false
+        onRoot().performTouchInput { up() }
+
+        assertEquals(listOf(2), selections, "Release must invoke the callback exactly once")
+        repeat(8) {
+            mainClock.advanceTimeByFrame()
+            onNodeWithContentDescription(labels[2]).assertIsSelected()
+            val destination = onNodeWithContentDescription(labels[2]).fetchSemanticsNode().boundsInRoot
+            val pixels = onRoot().captureToImage().toPixelMap()
+            val row = destination.center.y.roundToInt()
+            val indicatorPixels = (0 until pixels.width).filter {
+                val color = pixels[it, row]
+                color.red > 0.9f && color.blue > 0.9f && color.green < 0.1f
+            }
+            assertTrue(indicatorPixels.isNotEmpty(), "The released indicator must remain visible")
+            assertEquals(destination.center.x, (indicatorPixels.first() + indicatorPixels.last()) / 2f, 2f, "Release must not pull the indicator toward the old selection")
+        }
+        saveImage("navigation-release", onRoot().captureToImage())
     }
 
     @Test

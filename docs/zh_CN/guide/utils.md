@@ -123,8 +123,10 @@ LazyColumn(
 
 **参数说明:**
 
-- `onOffsetChanged`：可选的 `(Float) -> Unit` 回调，报告滚动轴上的阻尼位移（像素）。回调按像素合并（舍入后的像素变化时才报告最新 Float），包含拖动和弹簧回弹帧，并在重置或移除修饰符时报告精确的零值。默认：`null`。适用于垂直、水平和通用越界修饰符。
+- `onOffsetChanged`：可选的 `(Float) -> Unit` 回调，按舍入后的像素合并报告拖动和弹簧回弹的阻尼位移。重置、移除修饰符或替换回调时向旧接收方归零，新回调立即收到当前位移。默认：`null`，适用于所有越界修饰符。
 - `isEnabled`：Lambda，是否启用越界回弹。默认：全平台启用。
+
+显式垂直越界修饰符会让路给可处理当前手势的下拉刷新和 BottomSheet。内容区下拉关闭需同时启用 `enableNestedScroll` 和 `allowDismiss`。
 
 ### 通过 OverscrollFactory（主题级集成）
 
@@ -262,7 +264,7 @@ Box(
 
 ## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
 
-`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在惯性滚动及撞到顶部或底部后的回弹期间横滑切页，竖滑仍由列表处理。
+`pagerGestureOverride` 支持在子列表惯性滚动或 Miuix 越界回弹期间横滑切页，竖滑仍由列表处理。回弹接管支持 Miuix 越界修饰符和 `MiuixOverscrollFactory`；其他越界实现结束 fling 后使用常规手势判定。
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(

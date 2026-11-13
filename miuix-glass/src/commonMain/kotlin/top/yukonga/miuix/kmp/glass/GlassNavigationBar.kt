@@ -40,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -48,7 +47,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
@@ -110,10 +108,6 @@ data class GlassNavigationItem(
     val icon: ImageVector,
     val label: String? = null,
     val contentDescription: String? = null,
-)
-private data class IndicatorSettleRequest(
-    val bounds: Offset,
-    val generation: Int,
 )
 
 /** Default values for [GlassNavigationBar]. */
@@ -286,30 +280,17 @@ fun GlassNavigationBar(
     val chipWidth = slot + overhang * 2f
     val targetLeft = contentInset - overhang + index * slot
     val targetRight = targetLeft + chipWidth
-    val latestIndicatorTarget = rememberUpdatedState(
-        if (slot > 0f) Offset(targetLeft, targetRight) else Offset.Unspecified,
-    )
-
-    LaunchedEffect(Unit) {
-        snapshotFlow {
-            if (dragging.value) {
-                null
-            } else {
-                IndicatorSettleRequest(latestIndicatorTarget.value, settleGeneration)
-            }
-        }.collect { request ->
-            request ?: return@collect
-            val target = request.bounds
-            if (!target.isSpecified) return@collect
-            if (right.value <= left.value) {
-                left.snapTo(target.x)
-                right.snapTo(target.y)
-                return@collect
-            }
-            animateIndicator(target.x, target.y)
+    // Settle after composition commits the selection returned by onSelect.
+    LaunchedEffect(index, settleGeneration, targetLeft, targetRight) {
+        if (dragging.value) return@LaunchedEffect
+        if (slot <= 0f) return@LaunchedEffect
+        if (right.value <= left.value) {
+            left.snapTo(targetLeft)
+            right.snapTo(targetRight)
+        } else {
+            animateIndicator(targetLeft, targetRight)
         }
     }
-
     val chipHeldPx = with(density) {
         (height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2).toPx()
     }

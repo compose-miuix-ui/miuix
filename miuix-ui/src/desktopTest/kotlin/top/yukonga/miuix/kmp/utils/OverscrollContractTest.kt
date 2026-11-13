@@ -3,6 +3,9 @@
 
 package top.yukonga.miuix.kmp.utils
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -16,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -165,6 +169,92 @@ class OverscrollContractTest {
             assertEquals(0, refreshRequests)
         }
         onNodeWithTag("refresh-list").performTouchInput { up() }
+    }
+
+    @Test
+    fun callbackReplacementAndRemovalClearThePreviousOwner() = runComposeUiTest {
+        var firstOffset = 0f
+        var secondOffset = 0f
+        val first: (Float) -> Unit = { firstOffset = it }
+        val second: (Float) -> Unit = { secondOffset = it }
+        var callback by mutableStateOf<((Float) -> Unit)?>(first)
+        setContent {
+            LazyColumn(
+                modifier = Modifier.size(300.dp).testTag("callback-list")
+                    .overScrollVertical(onOffsetChanged = callback),
+                overscrollEffect = null,
+            ) {
+                item { Box(Modifier.size(40.dp)) }
+            }
+        }
+        onNodeWithTag("callback-list").performTouchInput {
+            down(center)
+            repeat(3) { moveBy(Offset(0f, 30f), delayMillis = 16) }
+        }
+        var displacement = 0f
+        runOnIdle {
+            assertTrue(firstOffset > 1f)
+            displacement = firstOffset
+            callback = second
+        }
+        runOnIdle {
+            assertEquals(0f, firstOffset)
+            assertEquals(displacement, secondOffset)
+            callback = null
+        }
+        runOnIdle {
+            assertEquals(0f, secondOffset)
+            callback = first
+        }
+        runOnIdle { assertEquals(displacement, firstOffset) }
+        onNodeWithTag("callback-list").performTouchInput { up() }
+        waitForIdle()
+        assertEquals(0f, firstOffset)
+    }
+
+    @Test
+    fun mouseDragOverscrollsWhenPullToRefreshCannotHandleIt() = runComposeUiTest {
+        lateinit var refresh: PullToRefreshState
+        var offset = 0f
+        var refreshRequests = 0
+        setContent {
+            MiuixTheme {
+                refresh = rememberPullToRefreshState()
+                val dispatcher = remember { NestedScrollDispatcher() }
+                val connection = remember { object : NestedScrollConnection {} }
+                PullToRefresh(
+                    isRefreshing = false,
+                    onRefresh = { refreshRequests++ },
+                    pullToRefreshState = refresh,
+                ) {
+                    Box(
+                        Modifier.size(300.dp).testTag("mouse-drag")
+                            .overScrollVertical(onOffsetChanged = { offset = it })
+                            .nestedScroll(connection, dispatcher)
+                            .draggable(
+                                state = rememberDraggableState { delta ->
+                                    dispatcher.dispatchPostScroll(Offset.Zero, Offset(0f, delta), NestedScrollSource.UserInput)
+                                },
+                                orientation = Orientation.Vertical,
+                            ),
+                    )
+                }
+            }
+        }
+        onNodeWithTag("mouse-drag").performMouseInput {
+            moveTo(center)
+            press()
+            repeat(3) { moveBy(Offset(0f, 30f), delayMillis = 16) }
+        }
+        runOnIdle {
+            assertTrue(offset > 1f, "A custom mouse drag must stretch when refresh declines it")
+            assertEquals(0f, refresh.dragOffset)
+            assertEquals(RefreshState.Idle, refresh.refreshState)
+            assertEquals(0, refreshRequests)
+        }
+        onNodeWithTag("mouse-drag").performMouseInput { release() }
+        waitForIdle()
+        assertEquals(0f, offset)
     }
 
     @Test

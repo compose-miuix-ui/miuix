@@ -67,10 +67,10 @@ Scaffold(
 
 ### 内容位于顶部或已滚动
 
-- 提供 `scrollBehavior` 时，材质悬浮状态跟随实际 `contentOffset`，不计越界位移；未提供时跟随 `visualContentOffset`，两者均未提供则保持显示。
-- 传入 `isContentScrolled` 可显式控制材质状态。Lazy 列表建议使用 `listState.canScrollBackward`，使返回顶部时清除材质，不受标题折叠状态影响。
-- 在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，使背景带、阴影及按钮模糊和描边跟随弹性位移，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。短页面的按钮材质随弹性进度变化，不切换由滚动行为推导的悬浮状态。
-- 程序化定位时，传入 `isContentScrolled = listState.canScrollBackward`，并通过 `visualContentOffset` 提供视觉效果所需的位置；需要时叠加越界位移。
+- `isContentScrolled` 控制按钮材质的悬浮过渡，建议传入 `listState.canScrollBackward`。省略时依次从滚动行为的 `contentOffset`、`visualContentOffset` 推导，两者均无则默认显示。
+- 背景带透明度与阴影进度优先跟随 `visualContentOffset`，其次为滚动行为的 `visualContentOffset`。两者均无时，背景带透明度跟随布尔状态。
+- 弹性越界也可提高按钮材质进度。在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。
+- 程序化滚动时，同时提供列表的布尔状态与有符号视觉位移；需要时叠加弹性位移。
 
 ## 属性
 
@@ -108,7 +108,7 @@ Scaffold(
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | 页面内容是否离开初始位置 | - | 是 |
+| isContentScrolled | Boolean | 显式按钮材质悬浮状态；无位移来源时也控制背景带透明度 | - | 是 |
 
 ### GlassTopAppBarDefaults 对象 {#glasstopappbardefaults}
 
