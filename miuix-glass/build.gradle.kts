@@ -31,6 +31,7 @@ kotlin {
         }
         minSdk = 33
         namespace = "${BuildConfig.LIBRARY_ID}.glass"
+        withHostTest {}
     }
 
     jvm("desktop")
