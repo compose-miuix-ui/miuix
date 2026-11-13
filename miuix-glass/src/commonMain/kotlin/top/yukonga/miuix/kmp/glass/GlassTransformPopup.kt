@@ -99,8 +99,8 @@ class GlassPopupAnchor {
     /** Hides the whole transform anchor, or only the dropdown value, while the popup is open. */
     internal var contentHidden: Boolean by mutableStateOf(false)
 
-    /** Dropdown value opacity. */
-    internal var valueAlpha: Float by mutableFloatStateOf(1f)
+    /** Dropdown value opacity; a [State] so the fade only invalidates draw. */
+    internal var valueAlphaState: State<Float>? by mutableStateOf(null)
 
     /** Value opacity during predictive-back collapse. */
     internal val dropdownValueAlpha: Float
@@ -130,8 +130,9 @@ fun rememberGlassPopupAnchor(): GlassPopupAnchor {
         targetValue = if (anchor.contentHidden) 0f else 1f,
         animationSpec = GlassMotion.default(),
         label = "glassPopupAnchorValue",
-    ).value
-    SideEffect { anchor.valueAlpha = alpha }
+    )
+    // Publishing the State itself keeps the caller out of the fade's recomposition scope.
+    SideEffect { anchor.valueAlphaState = alpha }
     return anchor
 }
 
@@ -190,7 +191,7 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
 fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
     .onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
     .graphicsLayer {
-        alpha = maxOf(anchor.valueAlpha, anchor.dropdownValueAlpha)
+        alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
     }
 
 /**

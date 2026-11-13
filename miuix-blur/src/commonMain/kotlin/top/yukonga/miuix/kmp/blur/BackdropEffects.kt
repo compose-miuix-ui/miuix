@@ -176,6 +176,9 @@ fun BackdropEffectScope.progressiveBlur(
         scope.cachedProgRadiusY == radiusY &&
         scope.cachedProgSizeW == paddedW &&
         scope.cachedProgSizeH == paddedH &&
+        scope.cachedProgPad == padding &&
+        scope.cachedProgCompW == compW &&
+        scope.cachedProgCompH == compH &&
         scope.cachedProgExp == exp &&
         scope.cachedProgAngle == gradient.angle &&
         scope.cachedProgStart == gradient.startFraction &&
@@ -204,6 +207,9 @@ fun BackdropEffectScope.progressiveBlur(
             scope.cachedProgRadiusY = radiusY
             scope.cachedProgSizeW = paddedW
             scope.cachedProgSizeH = paddedH
+            scope.cachedProgPad = padding
+            scope.cachedProgCompW = compW
+            scope.cachedProgCompH = compH
             scope.cachedProgExp = exp
             scope.cachedProgAngle = gradient.angle
             scope.cachedProgStart = gradient.startFraction

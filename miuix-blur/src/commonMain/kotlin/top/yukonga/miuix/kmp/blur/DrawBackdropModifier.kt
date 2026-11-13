@@ -509,6 +509,9 @@ private class DrawBackdropNode(
     private var sharpLayer: GraphicsLayer? = null
     private var compositeAttempted = false
     private var compositeSupported = false
+
+    // Set once updateEffects() has run with a measured size, i.e. the effect observer is live.
+    private var effectsSized = false
     private var sharpOverlayActive = false
 
     // Level-stack effect cached on its inputs: chains by identity, the recorded blend by value.
@@ -517,6 +520,9 @@ private class DrawBackdropNode(
     private var cachedStackRadiusY = Float.NaN
     private var cachedStackW = Float.NaN
     private var cachedStackH = Float.NaN
+    private var cachedStackPad = Float.NaN
+    private var cachedStackCompW = Float.NaN
+    private var cachedStackCompH = Float.NaN
     private var cachedStackGradient: ProgressiveBlur? = null
     private var cachedStackPre: RenderEffect? = null
     private var cachedStackPost: RenderEffect? = null
@@ -552,6 +558,7 @@ private class DrawBackdropNode(
     private var sharpOverlayGradient: ProgressiveBlur? = null
     private var sharpOverlayW = Float.NaN
     private var sharpOverlayH = Float.NaN
+    private var sharpOverlayPad = Float.NaN
     private var sharpRadiusX = Float.NaN
     private var sharpRadiusY = Float.NaN
     private var sharpExp = -1
@@ -596,7 +603,8 @@ private class DrawBackdropNode(
             return
         }
         if (effectScope.update(this)) {
-            updateEffects()
+            // Attach skipped construction for lack of a size; re-observe with real geometry.
+            if (effectsSized) updateEffects() else observeEffects()
         }
         onDrawBehind?.invoke(this)
 
@@ -643,7 +651,12 @@ private class DrawBackdropNode(
     }
 
     private fun observeEffects() {
-        observeReads { updateEffects() }
+        observeReads {
+            // No size at attach time: building here would create an effect from NaN dimensions.
+            if (effectScope.size.width.isNaN() || effectScope.size.height.isNaN()) return@observeReads
+            updateEffects()
+            effectsSized = true
+        }
     }
 
     private fun updateEffects() {
@@ -713,6 +726,9 @@ private class DrawBackdropNode(
             cachedStackRadiusY == rY &&
             cachedStackW == paddedW &&
             cachedStackH == paddedH &&
+            cachedStackPad == scope.padding &&
+            cachedStackCompW == scope.size.width &&
+            cachedStackCompH == scope.size.height &&
             cachedStackGradient == gradient &&
             cachedStackPre === pre &&
             cachedStackPost === post &&
@@ -744,6 +760,9 @@ private class DrawBackdropNode(
                 cachedStackRadiusY = rY
                 cachedStackW = paddedW
                 cachedStackH = paddedH
+                cachedStackPad = scope.padding
+                cachedStackCompW = scope.size.width
+                cachedStackCompH = scope.size.height
                 cachedStackGradient = gradient
                 cachedStackPre = pre
                 cachedStackPost = post
@@ -775,6 +794,7 @@ private class DrawBackdropNode(
             return
         }
         if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
+            sharpOverlayPad != scope.padding ||
             sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
         ) {
             // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
@@ -824,6 +844,7 @@ private class DrawBackdropNode(
             sharpOverlayGradient = gradient
             sharpOverlayW = sw
             sharpOverlayH = sh
+            sharpOverlayPad = scope.padding
             sharpRadiusX = rX
             sharpRadiusY = rY
             sharpExp = exp
@@ -972,6 +993,9 @@ private class DrawBackdropNode(
         cachedStackRadiusY = Float.NaN
         cachedStackW = Float.NaN
         cachedStackH = Float.NaN
+        cachedStackPad = Float.NaN
+        cachedStackCompW = Float.NaN
+        cachedStackCompH = Float.NaN
         cachedStackGradient = null
         cachedStackPre = null
         cachedStackPost = null
@@ -1000,5 +1024,6 @@ private class DrawBackdropNode(
     override fun onDetach() {
         releaseGraphicsLayers()
         layoutCoordinates = null
+        effectsSized = false
     }
 }

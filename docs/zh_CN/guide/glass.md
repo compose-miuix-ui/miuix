@@ -106,7 +106,7 @@ Box(modifier = Modifier.fillMaxSize()) {
 | stroke | EdgeStroke? | 边缘描边（`width`/`bevel` 为 `Dp`） | null | 否 |
 | shadow | GlassShadow? | 投影 | GlassShadows.Regular | 否 |
 | shading | Boolean | 是否应用折射与光照 | true | 否 |
-| fallback | Modifier | backdrop 为空时使用的表面 | Modifier.clip(shape) | 否 |
+| fallback | Modifier? | backdrop 为空时使用的表面；`null` 表示仅裁剪为形状 | null | 否 |
 
 平面玻璃栏和菜单可使用 `shading = false`，独立的 `stroke` 仍有效。默认 `fallback` 仅裁剪，不添加填色。
 

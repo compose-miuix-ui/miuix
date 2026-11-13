@@ -31,8 +31,7 @@ import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
  * @param stroke Optional bloom stroke along the silhouette.
  * @param shadow Shadow configuration. `null` disables the shadow.
  * @param shading Whether to refract and shade the backdrop. Use `false` for bars and menus.
- * @param fallback Surface modifier used without a backdrop. The default clips to [shape] and
- *   leaves subsequent caller content as the body.
+ * @param fallback Surface used without a backdrop; `null` clips to [shape].
  */
 fun Modifier.glassPanel(
     backdrop: Backdrop?,
@@ -43,12 +42,12 @@ fun Modifier.glassPanel(
     stroke: EdgeStroke? = null,
     shadow: GlassShadow? = GlassShadows.Regular,
     shading: Boolean = true,
-    fallback: Modifier = Modifier.clip(shape),
+    fallback: Modifier? = null,
 ): Modifier = if (backdrop == null || !isRuntimeShaderSupported()) {
     this
         .graphicsLayer { this.alpha = alpha }
         .glassShadow(shape, shadow)
-        .then(fallback)
+        .then(fallback ?: Modifier.clip(shape))
         .drawWithContent {
             drawContent()
             stroke?.let { drawEdgeStroke(shape, it, 1f) }

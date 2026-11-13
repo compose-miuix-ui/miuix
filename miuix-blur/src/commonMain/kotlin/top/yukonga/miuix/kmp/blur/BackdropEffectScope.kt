@@ -185,6 +185,12 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgRadiusY: Float = Float.NaN
     internal var cachedProgSizeW: Float = Float.NaN
     internal var cachedProgSizeH: Float = Float.NaN
+
+    // Builders also read raw padding and component size; padded dimensions alone cannot tell them
+    // apart when a custom effects block changes padding independently of the radius.
+    internal var cachedProgPad: Float = Float.NaN
+    internal var cachedProgCompW: Float = Float.NaN
+    internal var cachedProgCompH: Float = Float.NaN
     internal var cachedProgExp: Int = -1
     internal var cachedProgAngle: Float = Float.NaN
     internal var cachedProgStart: Float = Float.NaN
@@ -308,6 +314,9 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgRadiusY = Float.NaN
         cachedProgSizeW = Float.NaN
         cachedProgSizeH = Float.NaN
+        cachedProgPad = Float.NaN
+        cachedProgCompW = Float.NaN
+        cachedProgCompH = Float.NaN
         cachedProgExp = -1
         cachedProgAngle = Float.NaN
         cachedProgStart = Float.NaN

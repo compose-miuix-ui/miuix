@@ -106,7 +106,7 @@ For dialogs and bottom sheets, also exclude their scrims; the surface helpers ap
 | stroke | EdgeStroke? | Rim stroke (`width`/`bevel` in `Dp`) | null | No |
 | shadow | GlassShadow? | Drop shadow | GlassShadows.Regular | No |
 | shading | Boolean | Whether to apply refraction and shading | true | No |
-| fallback | Modifier | Surface used when backdrop is null | Modifier.clip(shape) | No |
+| fallback | Modifier? | Surface used when backdrop is null; `null` clips to the shape | null | No |
 
 Use `shading = false` for flat glass bars and menus; independent `stroke` remains available. The default `fallback` clips without adding a fill.
 

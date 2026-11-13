@@ -9,8 +9,11 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.isSpecified
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
@@ -105,6 +108,116 @@ internal fun Modifier.glassOnActionBar(
     shading = false,
 )
 
+/** Shape provider with value equality: `drawBackdrop` compares callback identity. */
+private class GlassShapeCallback(private val value: GlassShape) : () -> Shape {
+    override fun invoke(): Shape = value
+
+    override fun equals(other: Any?): Boolean = other is GlassShapeCallback && other.value == value
+
+    override fun hashCode(): Int = value.hashCode()
+}
+
+/** Effect pipeline with value equality; see [GlassShapeCallback]. */
+private class GlassEffectsCallback(
+    private val glassShape: GlassShape,
+    private val style: GlassStyle,
+    private val alpha: Float,
+    private val tint: Color,
+    private val material: GlassMaterial?,
+    private val underlayMaterial: GlassMaterial?,
+    private val noiseCoefficient: Float,
+    private val shading: Boolean,
+) : Function1<BackdropEffectScope, Unit> {
+    override fun invoke(p1: BackdropEffectScope) {
+        with(p1) {
+            noiseDither(noiseCoefficient)
+            val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
+            blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
+            if (underlayMaterial != null) {
+                colorBlendEffect(underlayMaterial, 1f, "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar")
+            }
+            if (material != null) colorBlendEffect(material, alpha)
+            if (shading) glassEffect(style, glassShape, alpha, tint)
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is GlassEffectsCallback &&
+        other.glassShape == glassShape &&
+        other.style == style &&
+        other.alpha == alpha &&
+        other.tint == tint &&
+        other.material == material &&
+        other.underlayMaterial == underlayMaterial &&
+        other.noiseCoefficient == noiseCoefficient &&
+        other.shading == shading
+
+    override fun hashCode(): Int {
+        var result = glassShape.hashCode()
+        result = 31 * result + style.hashCode()
+        result = 31 * result + alpha.hashCode()
+        result = 31 * result + tint.hashCode()
+        result = 31 * result + (material?.hashCode() ?: 0)
+        result = 31 * result + (underlayMaterial?.hashCode() ?: 0)
+        result = 31 * result + noiseCoefficient.hashCode()
+        result = 31 * result + shading.hashCode()
+        return result
+    }
+}
+
+/** Foreground stroke, mask and rim pass with value equality; see [GlassShapeCallback]. */
+private class GlassFrontCallback(
+    private val glassShape: GlassShape,
+    private val stroke: EdgeStroke?,
+    private val style: GlassStyle,
+    private val tint: Color,
+    private val alpha: Float,
+    private val shading: Boolean,
+) : Function1<DrawScope, Unit> {
+    override fun invoke(p1: DrawScope) {
+        with(p1) {
+            // Stroke and rim share one silhouette pass; the mask trims it afterwards.
+            val current = stroke
+            val fuse = current != null && shading &&
+                current.width.value > 0f &&
+                current.blendMode == BlendMode.Plus
+            if (current != null && fuse) {
+                drawGlassEdge(
+                    shape = glassShape,
+                    stroke = current,
+                    style = style,
+                    surface = if (tint.isSpecified) tint else style.inner.tint,
+                    alpha = alpha,
+                )
+                drawGlassMask(glassShape)
+            } else {
+                if (current != null) drawEdgeStroke(glassShape, current, alpha)
+                drawGlassMask(glassShape)
+                if (shading) {
+                    drawGlassRim(glassShape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+                }
+            }
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is GlassFrontCallback &&
+        other.glassShape == glassShape &&
+        other.stroke == stroke &&
+        other.style == style &&
+        other.tint == tint &&
+        other.alpha == alpha &&
+        other.shading == shading
+
+    override fun hashCode(): Int {
+        var result = glassShape.hashCode()
+        result = 31 * result + (stroke?.hashCode() ?: 0)
+        result = 31 * result + style.hashCode()
+        result = 31 * result + tint.hashCode()
+        result = 31 * result + alpha.hashCode()
+        result = 31 * result + shading.hashCode()
+        return result
+    }
+}
+
 private fun Modifier.glassImpl(
     backdrop: Backdrop,
     shape: GlassShape,
@@ -120,40 +233,25 @@ private fun Modifier.glassImpl(
     shading: Boolean,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
-    shape = { shape },
-    effects = {
-        noiseDither(noiseCoefficient)
-        val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
-        blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
-        if (underlayMaterial != null) {
-            colorBlendEffect(underlayMaterial, 1f, "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar")
-        }
-        if (material != null) colorBlendEffect(material, alpha)
-        if (shading) glassEffect(style, shape, alpha, tint)
-    },
-    onDrawFront = {
-        // Stroke and rim are additive light along the same silhouette: one pass draws both, then the
-        // mask trims. A stroke that draws nothing or composites differently keeps its own pass.
-        val fuse = stroke != null && shading &&
-            stroke.width.value > 0f &&
-            stroke.blendMode == BlendMode.Plus
-        if (fuse) {
-            drawGlassEdge(
-                shape = shape,
-                stroke = stroke,
-                style = style,
-                surface = if (tint.isSpecified) tint else style.inner.tint,
-                alpha = alpha,
-            )
-            drawGlassMask(shape)
-        } else {
-            if (stroke != null) drawEdgeStroke(shape, stroke, alpha)
-            drawGlassMask(shape)
-            if (shading) {
-                drawGlassRim(shape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
-            }
-        }
-    },
+    shape = GlassShapeCallback(shape),
+    effects = GlassEffectsCallback(
+        glassShape = shape,
+        style = style,
+        alpha = alpha,
+        tint = tint,
+        material = material,
+        underlayMaterial = underlayMaterial,
+        noiseCoefficient = noiseCoefficient,
+        shading = shading,
+    ),
+    onDrawFront = GlassFrontCallback(
+        glassShape = shape,
+        stroke = stroke,
+        style = style,
+        tint = tint,
+        alpha = alpha,
+        shading = shading,
+    ),
     contentBlendMode = contentBlendMode,
     enabled = enabled,
 )
